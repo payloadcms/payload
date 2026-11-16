@@ -58,3 +58,15 @@ it('should remain in place when only hidden side targets exist', () => {
 
   expect(droppableJumpKeyboardCoordinateGetter(event, args)).toEqual(args.currentCoordinates)
 })
+
+it('should enter the dashboard targets from a drawer card on the first arrow key', () => {
+  const args = getArgs()
+
+  args.active = 'dashboard-picker:count:source'
+  expect(
+    droppableJumpKeyboardCoordinateGetter(
+      new KeyboardEvent('keydown', { cancelable: true, code: 'ArrowLeft' }),
+      args,
+    ),
+  ).toEqual({ x: 0, y: 324 })
+})

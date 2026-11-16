@@ -13,6 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { ThumbnailCard } from '../ThumbnailCard/index.js'
 import './index.css'
+import { DraggableWidgetCard } from './DraggableWidgetCard/index.js'
 import { ItemSearch } from './ItemSearch/index.js'
 
 export type DrawerItem = ClientBlock | ClientWidget
@@ -20,6 +21,7 @@ export type DrawerItem = ClientBlock | ClientWidget
 export type ItemsDrawerProps = {
   readonly addRowIndex?: number
   readonly drawerSlug: string
+  readonly isDraggable?: boolean
   readonly items: (DrawerItem | string)[]
   readonly labels?: Labels
   readonly onItemClick: (item: DrawerItem, index?: number) => Promise<void> | void
@@ -104,6 +106,7 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
   const {
     addRowIndex,
     drawerSlug,
+    isDraggable = false,
     items,
     labels,
     onItemClick,
@@ -241,9 +244,12 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
                         ? getTranslation(item.description, i18n)
                         : undefined
 
+                    const Card = isWidgetPicker && isDraggable ? DraggableWidgetCard : ThumbnailCard
+                    const dragProps = { drawerSlug, widget: item as ClientWidget }
                     return (
                       <li className={`${baseClass}__item`} key={item.slug}>
-                        <ThumbnailCard
+                        <Card
+                          {...dragProps}
                           alignLabel={isWidgetPicker ? 'left' : 'center'}
                           description={description}
                           label={displayLabel}

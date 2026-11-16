@@ -13,6 +13,7 @@ type ResizeSession = {
   containerWidth: number
   currentWidth: WidgetWidth
   direction: number
+  edge: 'end' | 'start'
   element: HTMLDivElement
   pointerID: number
   startWidth: WidgetWidth
@@ -23,12 +24,16 @@ export function WidgetResizeHandles({
   maxWidth,
   minWidth,
   onResize,
+  onResizeEnd,
+  onResizeStart,
   widgetLabel,
   width,
 }: {
   maxWidth: WidgetWidth
   minWidth: WidgetWidth
-  onResize: (args: { width: WidgetWidth }) => void
+  onResize: (args: { edge: 'end' | 'start'; width: WidgetWidth }) => void
+  onResizeEnd?: (args: { shouldCancel: boolean }) => void
+  onResizeStart?: () => void
   widgetLabel: string
   width: WidgetWidth
 }) {
@@ -59,8 +64,9 @@ export function WidgetResizeHandles({
     sessionRef.current = null
     document.body.classList.remove('is-resizing-widgets')
     if (shouldCancel) {
-      onResize({ width: session.startWidth })
+      onResize({ edge: session.edge, width: session.startWidth })
     }
+    onResizeEnd?.({ shouldCancel })
     if (session.element.hasPointerCapture(session.pointerID)) {
       session.element.releasePointerCapture(session.pointerID)
     }
@@ -83,7 +89,7 @@ export function WidgetResizeHandles({
 
     if (nextWidth !== session.currentWidth) {
       session.currentWidth = nextWidth
-      onResize({ width: nextWidth })
+      onResize({ edge: session.edge, width: nextWidth })
     }
   }
 
@@ -131,7 +137,7 @@ export function WidgetResizeHandles({
               event.preventDefault()
               event.stopPropagation()
               if (nextWidth) {
-                onResize({ width: nextWidth })
+                onResize({ edge, width: nextWidth })
               }
             }
           }}
@@ -156,10 +162,12 @@ export function WidgetResizeHandles({
             event.currentTarget.focus({ preventScroll: true })
             const isRTL = getComputedStyle(event.currentTarget).direction === 'rtl'
 
+            onResizeStart?.()
             sessionRef.current = {
               containerWidth,
               currentWidth: width,
               direction: (edge === 'end' ? 1 : -1) * (isRTL ? -1 : 1),
+              edge,
               element: event.currentTarget,
               pointerID: event.pointerId,
               startWidth: width,

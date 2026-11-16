@@ -67,6 +67,11 @@
     user-select: none;
   }
 
+  .dashboard-widget-drag-preview {
+    width: calc(var(--spacer-4) * 7);
+    pointer-events: none;
+  }
+
   .modular-dashboard__empty {
     display: flex;
     align-items: center;
@@ -78,7 +83,8 @@
 
   body.is-dragging,
   body.is-dragging *,
-  body.is-dragging .modular-dashboard.editing * {
+  body.is-dragging .modular-dashboard.editing *,
+  body.is-dragging .items-drawer--widgets .thumbnail-card--draggable {
     cursor: grabbing;
   }
 

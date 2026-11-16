@@ -1,27 +1,38 @@
 'use client'
 
-import type { Announcements, Modifier, UniqueIdentifier } from '@dnd-kit/core'
+import type { Announcements, CollisionDetection, Modifier, UniqueIdentifier } from '@dnd-kit/core'
 import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { getTranslation } from '@payloadcms/translations'
 import { toWords } from 'payload/shared'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import type { DrawerWidgetDragData } from './utils/getDrawerWidgetDrop.js'
 
 import { Button } from '../../../../elements/Button/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { Popup } from '../../../../elements/Popup/index.js'
 import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
+import { ThumbnailCard } from '../../../../elements/ThumbnailCard/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { TrashIcon } from '../../../../icons/Trash/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { DashboardStepNav } from './DashboardStepNav.js'
+import { EmptyDropTarget } from './EmptyDropTarget/index.js'
 import { RowDropTargets } from './RowDropTargets/index.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 import { closestInXAxis } from './utils/collisionDetection.js'
 import {
+  getDrawerWidgetDragData,
+  getDrawerWidgetDragID,
+  getDrawerWidgetDrop,
+  getDrawerWidgetItem,
+} from './utils/getDrawerWidgetDrop.js'
+import {
   getValidSideDropTargets,
+  getWidgetDropSizing,
   isValidWidgetDropTarget,
 } from './utils/getValidSideDropTargets.js'
 import { getWidgetIDFromDropTarget, getWidgetMoveIndexes } from './utils/getWidgetMoveIndexes.js'
@@ -76,7 +87,7 @@ export function ModularDashboardClient({
   widgets: ClientWidget[]
 }) {
   const { i18n, t } = useTranslation()
-  const { modalState } = useModal()
+  const { closeModal, modalState, openModal } = useModal()
   const hasOpenModal = Object.values(modalState).some(({ isOpen }) => isOpen)
   const {
     addWidget,
@@ -84,6 +95,7 @@ export function ModularDashboardClient({
     cancelModal,
     currentLayout,
     deleteWidget,
+    finishWidgetResize,
     isEditing,
     moveWidget,
     replaceWidget,
@@ -91,10 +103,12 @@ export function ModularDashboardClient({
     resizeWidget,
     saveLayout,
     setIsEditing,
+    startWidgetResize,
     updateWidgetData,
   } = useDashboardLayout(initialLayout)
 
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
+  const [drawerDrag, setDrawerDrag] = useState<DrawerWidgetDragData | null>(null)
   const [selectedWidgetID, setSelectedWidgetID] = useState<null | string>(null)
   const widgetInteractionEventRef = useRef<Event | null>(null)
   const dashboardRef = useRef<HTMLDivElement>(null)
@@ -105,9 +119,50 @@ export function ModularDashboardClient({
         ? null
         : getValidSideDropTargets({
             activeID: activeDragId,
+            activeWidget: drawerDrag
+              ? getDrawerWidgetItem({ widget: drawerDrag.widget })
+              : undefined,
             layout: currentLayout.map(({ item }) => item),
           }),
-    [activeDragId, currentLayout],
+    [activeDragId, currentLayout, drawerDrag],
+  )
+
+  const collisionDetection = useCallback<CollisionDetection>(
+    (args) => {
+      if (
+        (drawerDrag || getDrawerWidgetDragData({ data: args.active.data.current })) &&
+        args.pointerCoordinates
+      ) {
+        const rect = dashboardRef.current?.getBoundingClientRect()
+        const { x, y } = args.pointerCoordinates
+
+        if (!rect || x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+          return []
+        }
+      }
+      return closestInXAxis(args)
+    },
+    [drawerDrag],
+  )
+
+  useEffect(() => {
+    if (!drawerDrag) {
+      return
+    }
+    // Let dnd-kit measure the source before the drawer unmounts it.
+    const frame = requestAnimationFrame(() => closeModal(drawerDrag.drawerSlug))
+
+    return () => cancelAnimationFrame(frame)
+  }, [closeModal, drawerDrag])
+
+  const restoreDrawer = useCallback(
+    (source: DrawerWidgetDragData) => {
+      openModal(source.drawerSlug)
+      requestAnimationFrame(() =>
+        document.getElementById(getDrawerWidgetDragID({ slug: source.widget.slug }))?.focus(),
+      )
+    },
+    [openModal],
   )
 
   useEffect(() => {
@@ -122,18 +177,52 @@ export function ModularDashboardClient({
   const announcements = useMemo<Announcements>(() => {
     const describeWidget = ({ id, index }: { id: UniqueIdentifier; index?: number }) => {
       const widgetID = getWidgetIDFromDropTarget({ id })
-      const slug = widgetID.slice(0, widgetID.lastIndexOf('-'))
+      const source = widgets.find(({ slug }) => getDrawerWidgetDragID({ slug }) === widgetID)
+      const slug = source?.slug ?? widgetID.slice(0, widgetID.lastIndexOf('-'))
       const label = getTranslation(
         widgets.find((widget) => widget.slug === slug)?.label ?? toWords(slug),
         i18n,
       )
       const position = index ?? currentLayout.findIndex((widget) => widget.item.id === widgetID)
 
-      return `${label}, ${t('general:order')}: ${position + 1}`
+      return source ? label : `${label}, ${t('general:order')}: ${position + 1}`
+    }
+    const describeTargetResize = (target?: { widgetID: string; width: WidgetWidth }) => {
+      if (!target) {
+        return ''
+      }
+      const slug = target.widgetID.slice(0, target.widgetID.lastIndexOf('-'))
+      const label = getTranslation(
+        widgets.find((widget) => widget.slug === slug)?.label ?? toWords(slug),
+        i18n,
+      )
+
+      return `. ${label}: ${t('upload:width')}: ${WIDTH_TO_PERCENTAGE[target.width].toFixed(0)}%`
     }
     const announceCancel: Announcements['onDragCancel'] = ({ active }) =>
       `${t('general:cancel')}: ${describeWidget({ id: active.id })}`
     const announceMove: NonNullable<Announcements['onDragOver']> = ({ active, over }) => {
+      const sourceWidget =
+        getDrawerWidgetDragData({ data: active.data.current })?.widget ??
+        drawerDrag?.widget ??
+        widgets.find(({ slug }) => getDrawerWidgetDragID({ slug }) === active.id)
+
+      if (sourceWidget) {
+        const drop = over
+          ? getDrawerWidgetDrop({
+              widget: sourceWidget,
+              layout: currentLayout.map(({ item }) => item),
+              overID: String(over.id),
+            })
+          : null
+
+        return drop
+          ? `${t('hierarchy:itemsMovedTo', {
+              title: describeWidget({ id: active.id }),
+              destination: `${t('general:dashboard')}, ${t('general:order')}: ${drop.index + 1}`,
+            })}. ${t('upload:width')}: ${WIDTH_TO_PERCENTAGE[drop.width].toFixed(0)}%${describeTargetResize(drop.resizeTarget)}`
+          : undefined
+      }
       if (
         !over ||
         !isValidWidgetDropTarget({
@@ -150,15 +239,31 @@ export function ModularDashboardClient({
         overID: over.id,
       })
 
-      return t('hierarchy:itemsMovedTo', {
+      const sizing = getWidgetDropSizing({
+        activeID: String(active.id),
+        layout: currentLayout.map(({ item }) => item),
+        overID: String(over.id),
+      })
+      const message = t('hierarchy:itemsMovedTo', {
         title: describeWidget({ id: active.id }),
         destination: describeWidget({ id: over.id, index: moveToIndex }),
       })
+      const currentWidth = currentLayout.find(({ item }) => item.id === active.id)?.item.width
+
+      const resizedMessage =
+        sizing && sizing.width !== currentWidth
+          ? `${message}. ${t('upload:width')}: ${WIDTH_TO_PERCENTAGE[sizing.width].toFixed(0)}%`
+          : message
+
+      return `${resizedMessage}${describeTargetResize(sizing?.resizeTarget)}`
     }
 
     return {
       onDragCancel: announceCancel,
       onDragEnd: (event) => {
+        if (String(event.active.id).startsWith('dashboard-picker:')) {
+          return announceMove(event) ?? announceCancel(event)
+        }
         if (
           event.over &&
           isValidWidgetDropTarget({
@@ -173,7 +278,17 @@ export function ModularDashboardClient({
             overID: event.over.id,
           })
 
-          if (moveFromIndex !== moveToIndex) {
+          const sizing = getWidgetDropSizing({
+            activeID: String(event.active.id),
+            layout: currentLayout.map(({ item }) => item),
+            overID: String(event.over.id),
+          })
+
+          if (
+            moveFromIndex !== moveToIndex ||
+            sizing?.width !== currentLayout[moveFromIndex]?.item.width ||
+            sizing?.resizeTarget
+          ) {
             return announceMove(event)
           }
         }
@@ -188,7 +303,7 @@ export function ModularDashboardClient({
       onDragStart: ({ active }) =>
         `${t('general:dragToReorder')}: ${describeWidget({ id: active.id })}`,
     }
-  }, [currentLayout, i18n, t, widgets])
+  }, [currentLayout, drawerDrag, i18n, t, widgets])
 
   useEffect(() => {
     if (!isEditing) {
@@ -225,14 +340,37 @@ export function ModularDashboardClient({
             y: 0.2, // Allow vertical scroll at 20% from edge
           },
         }}
-        collisionDetection={closestInXAxis}
+        collisionDetection={collisionDetection}
         // https://github.com/clauderic/dnd-kit/issues/926#issuecomment-1640115665
         id="dashboard-dnd-context"
         onDragCancel={() => {
           setActiveDragId(null)
+          if (drawerDrag) {
+            restoreDrawer(drawerDrag)
+            setDrawerDrag(null)
+          }
         }}
         onDragEnd={(event) => {
           setActiveDragId(null)
+          const source = getDrawerWidgetDragData({ data: event.active.data.current }) ?? drawerDrag
+
+          if (source) {
+            const drop = event.over
+              ? getDrawerWidgetDrop({
+                  widget: source.widget,
+                  layout: currentLayout.map(({ item }) => item),
+                  overID: String(event.over.id),
+                })
+              : null
+
+            setDrawerDrag(null)
+            if (drop) {
+              addWidget({ ...drop, widgetSlug: source.widget.slug })
+            } else {
+              restoreDrawer(source)
+            }
+            return
+          }
 
           if (
             !event.over ||
@@ -250,13 +388,26 @@ export function ModularDashboardClient({
             overID: event.over.id,
           })
 
-          if (indexes.moveFromIndex !== indexes.moveToIndex) {
-            moveWidget(indexes)
+          const sizing = getWidgetDropSizing({
+            activeID: String(event.active.id),
+            layout: currentLayout.map(({ item }) => item),
+            overID: String(event.over.id),
+          })
+
+          if (sizing !== null) {
+            moveWidget({ ...indexes, ...sizing })
           }
         }}
         onDragStart={(event) => {
-          setActiveDragId(event.active.id as string)
-          setSelectedWidgetID(event.active.id as string)
+          const source = getDrawerWidgetDragData({ data: event.active.data.current })
+
+          setActiveDragId(String(event.active.id))
+          if (source) {
+            setSelectedWidgetID(null)
+            setDrawerDrag(source)
+          } else {
+            setSelectedWidgetID(String(event.active.id))
+          }
         }}
         sensors={sensors}
       >
@@ -270,11 +421,14 @@ export function ModularDashboardClient({
             // to make sure all rows have the same width always.
           }}
         >
-          {currentLayout?.length === 0 && (
-            <div className="modular-dashboard__empty">
-              <p>{t('dashboard:noItems')}</p>
-            </div>
-          )}
+          {currentLayout?.length === 0 &&
+            (drawerDrag ? (
+              <EmptyDropTarget />
+            ) : (
+              <div className="modular-dashboard__empty">
+                <p>{t('dashboard:noItems')}</p>
+              </div>
+            ))}
           {currentLayout?.map((widget, index) => {
             const slug = widget.item.id.slice(0, widget.item.id.lastIndexOf('-'))
             const widgetConfig = widgets.find((widgetConfig) => widgetConfig.slug === slug)
@@ -337,7 +491,7 @@ export function ModularDashboardClient({
                               setSelectedWidgetID(widget.item.id)
                             }
                           }}
-                          onResize={(width) => resizeWidget(widget.item.id, width)}
+                          onResize={(width) => resizeWidget({ widgetID: widget.item.id, width })}
                           widgetLabel={label}
                         />
                         {widgetConfig?.controls?.map((control) => (
@@ -394,7 +548,11 @@ export function ModularDashboardClient({
                         <WidgetResizeHandles
                           maxWidth={widget.item.maxWidth}
                           minWidth={widget.item.minWidth}
-                          onResize={({ width }) => resizeWidget(widget.item.id, width)}
+                          onResize={({ edge, width }) =>
+                            resizeWidget({ edge, widgetID: widget.item.id, width })
+                          }
+                          onResizeEnd={finishWidgetResize}
+                          onResizeStart={() => startWidgetResize(widget.item.id)}
                           widgetLabel={label}
                           width={widget.item.width}
                         />
@@ -415,40 +573,57 @@ export function ModularDashboardClient({
             // Uses custom modifier that only applies for pointer, not keyboard navigation.
             modifiers={[snapCenterToCursorOnlyForPointer]}
           >
-            {activeDragId
-              ? (() => {
-                  const draggedWidget = currentLayout?.find(
-                    (widget) => widget.item.id === activeDragId,
-                  )
-                  return draggedWidget ? (
-                    <div
-                      aria-hidden="true"
-                      inert
-                      style={{
-                        transform: 'scale(0.25)',
-                      }}
-                    >
-                      <div
-                        className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}
-                      >
-                        <div className="widget-content">{draggedWidget.component}</div>
-                      </div>
+            {drawerDrag ? (
+              <div
+                aria-hidden="true"
+                className="items-drawer--widgets dashboard-widget-drag-preview"
+                inert
+              >
+                <ThumbnailCard
+                  description={
+                    drawerDrag.widget.description
+                      ? getTranslation(drawerDrag.widget.description, i18n)
+                      : undefined
+                  }
+                  label={getTranslation(
+                    drawerDrag.widget.label ?? toWords(drawerDrag.widget.slug),
+                    i18n,
+                  )}
+                  thumbnail={null}
+                />
+              </div>
+            ) : activeDragId ? (
+              (() => {
+                const draggedWidget = currentLayout?.find(
+                  (widget) => widget.item.id === activeDragId,
+                )
+                return draggedWidget ? (
+                  <div
+                    aria-hidden="true"
+                    inert
+                    style={{
+                      transform: 'scale(0.25)',
+                    }}
+                  >
+                    <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                      <div className="widget-content">{draggedWidget.component}</div>
                     </div>
-                  ) : null
-                })()
-              : null}
+                  </div>
+                ) : null
+              })()
+            ) : null}
           </DragOverlay>
         </div>
+        <DashboardStepNav
+          addWidget={addWidget}
+          cancel={cancel}
+          isEditing={isEditing}
+          resetLayout={resetLayout}
+          saveLayout={saveLayout}
+          setIsEditing={setIsEditing}
+          widgets={widgets}
+        />
       </DndContext>
-      <DashboardStepNav
-        addWidget={addWidget}
-        cancel={cancel}
-        isEditing={isEditing}
-        resetLayout={resetLayout}
-        saveLayout={saveLayout}
-        setIsEditing={setIsEditing}
-        widgets={widgets}
-      />
       {cancelModal}
     </div>
   )

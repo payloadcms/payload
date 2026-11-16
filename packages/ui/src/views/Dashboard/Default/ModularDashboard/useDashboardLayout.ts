@@ -2,12 +2,13 @@ import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getWidgetControlData, PREFERENCE_KEYS } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuid } from 'uuid'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefaultLayoutServerFn.js'
+import type { WidgetDropSizing } from './utils/getValidSideDropTargets.js'
 
 import { ConfirmationModal } from '../../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
@@ -17,6 +18,7 @@ import { usePreferences } from '../../../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { RenderWidget } from './renderWidget/RenderWidget.js'
+import { resizeWidgetLayout } from './utils/resizeWidgetLayout.js'
 
 const WIDGET_WIDTHS: WidgetWidth[] = ['x-small', 'small', 'medium', 'large', 'x-large', 'full']
 
@@ -31,6 +33,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   )
   const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
+  const resizeSessionRef = useRef<{ layout: WidgetInstanceClient[]; widgetID: string } | null>(null)
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
   const { serverFunction } = useServerFunctions()
@@ -107,20 +110,55 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   }, [currentLayout, initialLayout, openModal, cancelModalSlug, performCancel])
 
   const moveWidget = useCallback(
-    ({ moveFromIndex, moveToIndex }: { moveFromIndex: number; moveToIndex: number }) => {
-      if (moveFromIndex === moveToIndex || moveFromIndex < 0 || moveToIndex < 0) {
+    ({
+      moveFromIndex,
+      moveToIndex,
+      resizeTarget,
+      width,
+    }: {
+      moveFromIndex: number
+      moveToIndex: number
+      width?: WidgetWidth
+    } & Pick<WidgetDropSizing, 'resizeTarget'>) => {
+      if (
+        (moveFromIndex === moveToIndex && !width && !resizeTarget) ||
+        moveFromIndex < 0 ||
+        moveToIndex < 0
+      ) {
         return
       }
 
       setCurrentLayout((prev) => {
-        return arrayMove(prev, moveFromIndex, moveToIndex)
+        if (moveFromIndex >= prev.length || moveToIndex >= prev.length) {
+          return prev
+        }
+        const moved = arrayMove(prev, moveFromIndex, moveToIndex)
+
+        return moved.map((widget, index) => {
+          const newWidth =
+            index === moveToIndex
+              ? width
+              : resizeTarget?.widgetID === widget.item.id
+                ? resizeTarget.width
+                : undefined
+
+          return newWidth ? { ...widget, item: { ...widget.item, width: newWidth } } : widget
+        })
       })
     },
     [],
   )
 
   const addWidget = useCallback(
-    (widgetSlug: string) => {
+    ({
+      index,
+      resizeTarget,
+      widgetSlug,
+      width,
+    }: { index?: number; widgetSlug: string; width?: WidgetWidth } & Pick<
+      WidgetDropSizing,
+      'resizeTarget'
+    >) => {
       if (!isEditing) {
         return
       }
@@ -128,7 +166,16 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       const widgetId = `${widgetSlug}-${uuid().replaceAll('-', '')}`
       const widget = widgets.find((widget) => widget.slug === widgetSlug)
 
-      const data = getWidgetControlData({ controls: widget?.controls })
+      if (!widget) {
+        return
+      }
+      const data = getWidgetControlData({ controls: widget.controls })
+      const minWidth = widget.minWidth ?? 'x-small'
+      const maxWidth = widget.maxWidth ?? 'full'
+      const widthIndex = Math.max(
+        WIDGET_WIDTHS.indexOf(minWidth),
+        Math.min(WIDGET_WIDTHS.indexOf(maxWidth), WIDGET_WIDTHS.indexOf(width ?? minWidth)),
+      )
 
       // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
@@ -139,13 +186,22 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         item: {
           id: widgetId,
           data,
-          maxWidth: widget?.maxWidth ?? 'full',
-          minWidth: widget?.minWidth ?? 'x-small',
-          width: widget?.minWidth ?? 'x-small',
+          maxWidth,
+          minWidth,
+          width: WIDGET_WIDTHS[widthIndex],
         },
       }
 
-      setCurrentLayout((prev) => [...prev, newWidgetInstance])
+      setCurrentLayout((prev) => {
+        const next = prev.map((widget) =>
+          widget.item.id === resizeTarget?.widgetID
+            ? { ...widget, item: { ...widget.item, width: resizeTarget.width } }
+            : widget,
+        )
+
+        next.splice(Math.max(0, Math.min(index ?? prev.length, prev.length)), 0, newWidgetInstance)
+        return next
+      })
 
       // Scroll to the newly added widget after it's rendered and highlight it
       setTimeout(() => {
@@ -225,24 +281,47 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     [isEditing],
   )
 
+  const startWidgetResize = useCallback(
+    (widgetID: string) => {
+      if (isEditing) {
+        resizeSessionRef.current = { layout: currentLayout, widgetID }
+      }
+    },
+    [currentLayout, isEditing],
+  )
+
+  const finishWidgetResize = useCallback(({ shouldCancel }: { shouldCancel: boolean }) => {
+    const session = resizeSessionRef.current
+
+    resizeSessionRef.current = null
+    if (shouldCancel && session) {
+      setCurrentLayout(session.layout)
+    }
+  }, [])
+
   const resizeWidget = useCallback(
-    (widgetId: string, newWidth: WidgetWidth) => {
+    ({
+      edge,
+      widgetID,
+      width,
+    }: {
+      edge?: 'end' | 'start'
+      widgetID: string
+      width: WidgetWidth
+    }) => {
       if (!isEditing) {
         return
       }
-      setCurrentLayout((prev) =>
-        prev.map((item) =>
-          item.item.id === widgetId
-            ? {
-                ...item,
-                item: {
-                  ...item.item,
-                  width: newWidth,
-                } satisfies WidgetItem,
-              }
-            : item,
-        ),
-      )
+      const session = resizeSessionRef.current
+
+      setCurrentLayout((prev) => {
+        return resizeWidgetLayout({
+          edge,
+          layout: session?.widgetID === widgetID ? session.layout : prev,
+          widgetID,
+          width,
+        })
+      })
     },
     [isEditing],
   )
@@ -287,6 +366,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     cancelModal,
     currentLayout,
     deleteWidget,
+    finishWidgetResize,
     isEditing,
     moveWidget,
     replaceWidget,
@@ -294,6 +374,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     resizeWidget,
     saveLayout,
     setIsEditing,
+    startWidgetResize,
     updateWidgetData,
   }
 }

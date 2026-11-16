@@ -1292,6 +1292,99 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
   })
 
+  test('should show widget descriptions in the Add Widget drawer and preserve keyboard selection', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    await dashboard.openAddWidgetDrawer()
+    const drawer = page.locator('.items-drawer--widgets.drawer--is-open')
+    const card = drawer.getByRole('button', { name: 'Count Widget', exact: true })
+
+    await expect(card).toHaveAccessibleDescription(
+      'Display the total number of documents in a collection.',
+    )
+    await expect(card.locator('.thumbnail-card__description')).toBeVisible()
+    await drawer.getByRole('textbox').fill('Count Widget')
+    await expect(drawer.locator('.thumbnail-card')).toHaveCount(1)
+    await card.focus()
+    await page.keyboard.press('Enter')
+    await expect(drawer).toBeHidden()
+    await expect(dashboard.widgetByPos(TOTAL_WIDGETS + 1)).toHaveAttribute('data-slug', /^count-/)
+    await dashboard.cancelEditing()
+  })
+
+  test('should drag a widget from the drawer into a row gap without adding a duplicate', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    await dashboard.resizeWidget(8, 'large')
+    const targetID = await dashboard.widgetByPos(8).getAttribute('data-slug')
+    const initialCount = await dashboard.widgets.count()
+
+    await dashboard.openAddWidgetDrawer()
+    const drawer = page.locator('.items-drawer--widgets.drawer--is-open')
+    const card = drawer.getByRole('button', { name: 'Count Widget', exact: true })
+
+    await card.scrollIntoViewIfNeeded()
+    const source = await card.boundingBox()
+
+    if (!source) {
+      throw new Error('Expected a visible widget card')
+    }
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(source.x + source.width / 2 - 10, source.y + source.height / 2)
+    await expect(drawer).toBeHidden()
+    await expect(page.locator('.dashboard-widget-drag-preview')).toBeVisible()
+    const target = page.getByTestId(`${targetID}-after`)
+
+    await target.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+    const destination = await target.boundingBox()
+
+    if (!destination) {
+      throw new Error('Expected a fitting dashboard drop target')
+    }
+    await page.mouse.move(
+      destination.x + destination.width / 2,
+      destination.y + destination.height / 2,
+      { steps: 10 },
+    )
+    await page.mouse.up()
+    await expect(dashboard.widgets).toHaveCount(initialCount + 1)
+    await expect(dashboard.widgetByPos(9)).toHaveAttribute('data-slug', /^count-/)
+    await expect(dashboard.widgetByPos(9)).toHaveAttribute('data-width', 'small')
+    await expect(page.locator('.dashboard-widget-drag-preview')).toHaveCount(0)
+    await dashboard.cancelEditing()
+    await expect(dashboard.widgets).toHaveCount(initialCount)
+  })
+
+  test('should reopen the drawer and return focus when a drawer drag is canceled', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    const count = await dashboard.widgets.count()
+
+    await dashboard.openAddWidgetDrawer()
+    const drawer = page.locator('.items-drawer--widgets.drawer--is-open')
+    const card = drawer.getByRole('button', { name: 'Count Widget', exact: true })
+
+    await card.focus()
+    await page.keyboard.press('Space')
+    await expect(drawer).toBeHidden()
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeVisible()
+    await expect(card).toBeFocused()
+    await expect(dashboard.widgets).toHaveCount(count)
+    await drawer.getByRole('button', { name: 'Close', exact: true }).click()
+    await dashboard.cancelEditing()
+  })
+
   test('add widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
@@ -1610,12 +1703,32 @@ describe('Dashboard', () => {
     await expect(control).toHaveText('Events')
   })
 
-  test('should offer only row targets when dragging a full-width widget', async ({ page }) => {
+  test('should resize a flexible full-width widget when inserting before it', async ({ page }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    const targetID = await dashboard.widgetByPos(2).getAttribute('data-slug')
+    const sourceID = await dashboard.widgetByPos(4).getAttribute('data-slug')
+
+    await dashboard.moveWidget(4, 2, 'before')
+    await expect(dashboard.widgetByPos(2)).toHaveAttribute('data-slug', sourceID!)
+    await expect(dashboard.widgetByPos(2)).toHaveAttribute('data-width', 'x-small')
+    await expect(dashboard.widgetByPos(3)).toHaveAttribute('data-slug', targetID!)
+    await expect(dashboard.widgetByPos(3)).toHaveAttribute('data-width', 'x-large')
+    await dashboard.cancelEditing()
+    await expect(dashboard.widgetByPos(2)).toHaveAttribute('data-width', 'full')
+  })
+
+  test('should fit a full-width widget into the remaining space of a row', async ({ page }) => {
     const dashboard = new DashboardHelper(page)
 
     await dashboard.setEditing()
     await dashboard.resizeWidget(8, 'large')
-    const source = dashboard.widgetByPos(1).locator('.widget-wrapper__drag-btn')
+    const sourceWidget = dashboard.widgetByPos(2)
+    const sourceID = await sourceWidget.getAttribute('data-slug')
+    const targetID = await dashboard.widgetByPos(8).getAttribute('data-slug')
+    const fullRowID = await dashboard.widgetByPos(3).getAttribute('data-slug')
+    const source = sourceWidget.locator('.widget-wrapper__drag-btn')
 
     await source.scrollIntoViewIfNeeded()
     const bounds = await source.boundingBox()
@@ -1631,11 +1744,30 @@ describe('Dashboard', () => {
     await page.mouse.down()
     await page.mouse.move(x + 10, y)
     await expect(page.locator('body')).toHaveClass(/\bis-dragging\b/)
-    await expect(page.locator('.droppable-widget:not([hidden])')).toHaveCount(0)
-    await expect(page.locator('.dashboard-row-drop-targets')).toBeVisible()
-    await page.keyboard.press('Escape')
+    await expect(page.getByTestId(`${fullRowID}-after`)).toBeHidden()
+    const target = page.getByTestId(`${targetID}-after`)
+
+    await expect(target).toBeVisible()
+    await target.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+    const targetBounds = await target.boundingBox()
+
+    if (!targetBounds || !sourceID) {
+      throw new Error('Expected a valid side drop target')
+    }
+
+    await page.mouse.move(
+      targetBounds.x + targetBounds.width / 2,
+      targetBounds.y + targetBounds.height / 2,
+      { steps: 10 },
+    )
     await page.mouse.up()
+    const movedWidget = page.locator(`.widget[data-slug="${sourceID}"]`)
+
+    await expect(movedWidget).toHaveAttribute('data-width', 'small')
+    await expect(dashboard.widgetByPos(8)).toHaveAttribute('data-slug', sourceID)
     await dashboard.cancelEditing()
+    await expect(dashboard.widgetByPos(2)).toHaveAttribute('data-slug', sourceID)
+    await expect(dashboard.widgetByPos(2)).toHaveAttribute('data-width', 'full')
   })
 
   test('should show a horizontal indicator and insert after a row when dropping below it', async ({
@@ -1715,6 +1847,49 @@ describe('Dashboard', () => {
     await expect(widget).toHaveAttribute('data-width', 'x-small')
   })
 
+  test('should keep a keyboard-resized widget in its row and wrap its siblings below', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    const widget = dashboard.widgetByPos(5)
+    const widgetID = await widget.getAttribute('data-slug')
+    const initialLayout = await dashboard.getSnapshot()
+
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    const handle = widget.locator('.widget-resize-handle--end')
+
+    await handle.focus()
+    await page.keyboard.press('End')
+    const resized = page.locator(`.widget[data-slug="${widgetID}"]`)
+
+    await expect(resized).toHaveAttribute('data-width', 'medium')
+    await expect(dashboard.widgetByPos(5)).toHaveAttribute('data-slug', widgetID!)
+    await expect(resized.locator('.widget-resize-handle--end')).toBeFocused()
+    await expect(resized.locator('.widget-resize-handle--end')).toHaveAttribute(
+      'aria-valuenow',
+      '50',
+    )
+    await expect(async () => {
+      const resizedTop = await resized.evaluate((element) => element.getBoundingClientRect().top)
+      const siblingTop = await dashboard
+        .widgetByPos(7)
+        .evaluate((element) => element.getBoundingClientRect().top)
+
+      expect(siblingTop).toBeGreaterThan(resizedTop)
+    }).toPass()
+    const startHandle = resized.locator('.widget-resize-handle--start')
+
+    await startHandle.focus()
+    await page.keyboard.press('Home')
+    await expect(resized).toHaveAttribute('data-width', 'x-small')
+    await expect(dashboard.widgetByPos(4)).toHaveAttribute('data-width', 'medium')
+    await expect(startHandle).toBeFocused()
+    await dashboard.cancelEditing()
+    await expect.poll(() => dashboard.getSnapshot()).toEqual(initialLayout)
+  })
+
   test('should deselect a widget when clicking outside it', async ({ page }) => {
     const d = new DashboardHelper(page)
 
@@ -1791,6 +1966,13 @@ describe('Dashboard', () => {
     const picker = page.locator('.drawer__content:visible')
 
     await expect(picker.getByRole('heading', { name: /^Replace / })).toBeVisible()
+    await expect(page.locator('.items-drawer--widgets.drawer--is-open')).toBeVisible()
+    const countCard = picker.getByRole('button', { name: 'Count Widget', exact: true })
+
+    await expect(countCard).toHaveAccessibleDescription(
+      'Display the total number of documents in a collection.',
+    )
+    await expect(countCard).not.toHaveClass(/thumbnail-card--draggable/)
     await picker.getByRole('button', { name: 'Upload files', exact: true }).click()
     await expect(picker).toBeHidden()
     await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)

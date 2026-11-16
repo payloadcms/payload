@@ -131,6 +131,10 @@
       text-align: start;
     }
 
+    .thumbnail-card--draggable {
+      cursor: grab;
+    }
+
     .thumbnail-card__thumbnail {
       border-radius: var(--radius-large);
     }

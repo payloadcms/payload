@@ -76,8 +76,8 @@ it('should distinguish widgets added in the same millisecond when moving and del
     act(() => root.render(React.createElement(Harness)))
     act(() => dashboard.setIsEditing(true))
     act(() => {
-      dashboard.addWidget('collection-query')
-      dashboard.addWidget('collection-query')
+      dashboard.addWidget({ widgetSlug: 'collection-query' })
+      dashboard.addWidget({ widgetSlug: 'collection-query' })
     })
     const ids = dashboard.currentLayout.map(({ item }) => item.id)
 
@@ -191,6 +191,209 @@ it('should ignore replacement outside edit mode or with an unknown widget', () =
       dashboard.replaceWidget({ widgetID: 'missing', widgetSlug: 'replacement' })
     })
     expect(dashboard.currentLayout).toEqual(initialLayout)
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it('should move and resize together, including when the insertion index is unchanged', () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    {
+      component: null,
+      item: { id: 'active', width: 'full', minWidth: 'x-small', maxWidth: 'full' },
+    },
+    {
+      component: null,
+      item: { id: 'target', width: 'large', minWidth: 'x-small', maxWidth: 'full' },
+    },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.moveWidget({ moveFromIndex: 0, moveToIndex: 0, width: 'small' }))
+    expect(dashboard.currentLayout[0].item.width).toBe('small')
+    act(() => dashboard.moveWidget({ moveFromIndex: 0, moveToIndex: 1, width: 'medium' }))
+    expect(dashboard.currentLayout.map(({ item }) => [item.id, item.width])).toEqual([
+      ['target', 'large'],
+      ['active', 'medium'],
+    ])
+    expect(initialLayout[0].item.width).toBe('full')
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it('should preview resizing from the original row and restore all siblings on cancel', () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    {
+      component: null,
+      item: { id: 'sibling', width: 'medium', minWidth: 'x-small', maxWidth: 'full' },
+    },
+    {
+      component: null,
+      item: { id: 'active', width: 'medium', minWidth: 'x-small', maxWidth: 'full' },
+    },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.startWidgetResize('active'))
+    act(() => dashboard.resizeWidget({ widgetID: 'active', width: 'full' }))
+    expect(dashboard.currentLayout.map(({ item }) => item.id)).toEqual(['active', 'sibling'])
+    act(() => dashboard.resizeWidget({ widgetID: 'active', width: 'large' }))
+    expect(dashboard.currentLayout.map(({ item }) => [item.id, item.width])).toEqual([
+      ['sibling', 'small'],
+      ['active', 'large'],
+    ])
+    act(() => dashboard.resizeWidget({ widgetID: 'active', width: 'medium' }))
+    expect(dashboard.currentLayout).toEqual(initialLayout)
+    act(() => dashboard.resizeWidget({ widgetID: 'active', width: 'x-large' }))
+    act(() => dashboard.finishWidgetResize({ shouldCancel: true }))
+    expect(dashboard.currentLayout).toEqual(initialLayout)
+
+    act(() => dashboard.startWidgetResize('active'))
+    act(() => {
+      dashboard.resizeWidget({ widgetID: 'active', width: 'large' })
+      dashboard.finishWidgetResize({ shouldCancel: false })
+    })
+    expect(dashboard.currentLayout.map(({ item }) => item.width)).toEqual(['small', 'large'])
+    act(() => dashboard.startWidgetResize('active'))
+    act(() => dashboard.resizeWidget({ edge: 'start', widgetID: 'active', width: 'medium' }))
+    expect(dashboard.currentLayout.map(({ item }) => item.width)).toEqual(['medium', 'medium'])
+    act(() => dashboard.finishWidgetResize({ shouldCancel: true }))
+    expect(dashboard.currentLayout.map(({ item }) => item.width)).toEqual(['small', 'large'])
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it('should insert a dropped widget at its target index with defaults and bounded width', () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  vi.useFakeTimers()
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    {
+      component: null,
+      item: { id: 'first', width: 'full', minWidth: 'x-small', maxWidth: 'full' },
+    },
+    { component: null, item: { id: 'last', width: 'full', minWidth: 'x-small', maxWidth: 'full' } },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.addWidget({ widgetSlug: 'replacement', index: 1, width: 'full' }))
+    expect(dashboard.currentLayout[0]).toBe(initialLayout[0])
+    expect(dashboard.currentLayout[2]).toBe(initialLayout[1])
+    expect(dashboard.currentLayout[1].item).toMatchObject({
+      data: { timeframe: 'monthly' },
+      width: 'large',
+      minWidth: 'small',
+      maxWidth: 'large',
+    })
+    act(() => dashboard.addWidget({ widgetSlug: 'missing', index: 0 }))
+    expect(dashboard.currentLayout).toHaveLength(3)
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it.each([0, 1])(
+  'should move into index %s and resize a full-width target in the same update',
+  (moveToIndex) => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+    const root = createRoot(document.createElement('div'))
+    const initialLayout: WidgetInstanceClient[] = [
+      {
+        component: null,
+        item: { id: 'target', width: 'full', minWidth: 'x-small', maxWidth: 'full' },
+      },
+      {
+        component: null,
+        item: { id: 'active', width: 'x-small', minWidth: 'x-small', maxWidth: 'full' },
+      },
+    ]
+    let dashboard!: ReturnType<typeof useDashboardLayout>
+    const Harness = () => {
+      dashboard = useDashboardLayout(initialLayout)
+      return null
+    }
+
+    try {
+      act(() => root.render(React.createElement(Harness)))
+      act(() => dashboard.setIsEditing(true))
+      act(() =>
+        dashboard.moveWidget({
+          moveFromIndex: 1,
+          moveToIndex,
+          width: 'x-small',
+          resizeTarget: { widgetID: 'target', width: 'x-large' },
+        }),
+      )
+      expect(dashboard.currentLayout[moveToIndex].item).toMatchObject({
+        id: 'active',
+        width: 'x-small',
+      })
+      expect(dashboard.currentLayout.find(({ item }) => item.id === 'target')?.item.width).toBe(
+        'x-large',
+      )
+      expect(initialLayout[0].item.width).toBe('full')
+    } finally {
+      act(() => root.unmount())
+    }
+  },
+)
+
+it('should resize a full-width target when inserting a drawer widget beside it', () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  vi.useFakeTimers()
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    {
+      component: null,
+      item: { id: 'target', width: 'full', minWidth: 'x-small', maxWidth: 'full' },
+    },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() =>
+      dashboard.addWidget({
+        widgetSlug: 'collection-query',
+        index: 1,
+        width: 'x-small',
+        resizeTarget: { widgetID: 'target', width: 'x-large' },
+      }),
+    )
+    expect(dashboard.currentLayout.map(({ item }) => item.width)).toEqual(['x-large', 'x-small'])
+    expect(initialLayout[0].item.width).toBe('full')
   } finally {
     act(() => root.unmount())
   }

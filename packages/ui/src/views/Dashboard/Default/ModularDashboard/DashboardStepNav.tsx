@@ -22,7 +22,7 @@ export function DashboardStepNav({
   setIsEditing,
   widgets,
 }: {
-  addWidget: (slug: string) => void
+  addWidget: (args: { widgetSlug: string }) => void
   cancel: () => void
   isEditing: boolean
   resetLayout: () => Promise<void>
@@ -70,8 +70,9 @@ export function DashboardStepNav({
       {!isEmbedded && isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}
+          isDraggable
           items={widgets}
-          onItemClick={(widget) => addWidget(widget.slug)}
+          onItemClick={(widget) => addWidget({ widgetSlug: widget.slug })}
           searchPlaceholder={t('dashboard:searchWidgets')}
           title={t('dashboard:addWidget')}
           variant="widgets"

@@ -17,8 +17,10 @@ afterEach(() => {
 })
 
 function withHandles({
+  onResize,
   run,
 }: {
+  onResize?: (args: { edge: 'end' | 'start'; width: WidgetWidth }) => void
   run: (args: { end: HTMLDivElement; start: HTMLDivElement }) => void
 }) {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
@@ -34,7 +36,10 @@ function withHandles({
     return React.createElement(WidgetResizeHandles, {
       maxWidth: 'large',
       minWidth: 'small',
-      onResize: ({ width }) => setWidth(width),
+      onResize: (args) => {
+        onResize?.(args)
+        setWidth(args.width)
+      },
       widgetLabel: 'Test',
       width,
     })
@@ -177,6 +182,24 @@ it('should retain the final width when pointer updates are batched before a rend
         pointer({ element: end, type: 'pointerup', x: 600 })
       })
       expect(end.getAttribute('aria-valuetext')).toBe('medium')
+    },
+  })
+})
+
+it('should report the start edge for pointer and keyboard resizing', () => {
+  const onResize = vi.fn()
+
+  withHandles({
+    onResize,
+    run: ({ start }) => {
+      pointer({ element: start, type: 'pointerdown', x: 600 })
+      pointer({ element: start, type: 'pointermove', x: 800 })
+      expect(onResize).toHaveBeenLastCalledWith({ edge: 'start', width: 'small' })
+      pointer({ element: start, type: 'pointerup', x: 800 })
+      act(() =>
+        start.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' })),
+      )
+      expect(onResize).toHaveBeenLastCalledWith({ edge: 'start', width: 'medium' })
     },
   })
 })

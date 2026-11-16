@@ -14,7 +14,7 @@ type DroppablePosition = {
 function getDroppablePositions(): DroppablePosition[] {
   return Array.from(
     document.querySelectorAll<HTMLElement>(
-      '.droppable-widget:not([hidden]), .dashboard-row-drop-target',
+      '.droppable-widget:not([hidden]), .dashboard-row-drop-target, .dashboard-empty-drop',
     ),
   ).flatMap((element) => {
     const rect = element.getBoundingClientRect()
@@ -58,14 +58,21 @@ export const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
   const activeIndex = Number(activeNode?.closest<HTMLElement>('.widget')?.dataset.widgetIndex ?? 0)
   const currentIndex =
     droppables.find(({ id }) => id === String(context.over?.id))?.index ?? activeIndex
-  const target = getKeyboardDropTarget({
-    currentIndex,
-    direction: code,
-    isRTL: activeNode ? getComputedStyle(activeNode).direction === 'rtl' : false,
-    targets: droppables,
-    x: currentCenterX,
-    y: currentCenterY,
-  })
+  const target =
+    String(active).startsWith('dashboard-picker:') && !context.over
+      ? [...droppables].sort(
+          (a, b) =>
+            Math.hypot(a.x - currentCenterX, a.y - currentCenterY) -
+            Math.hypot(b.x - currentCenterX, b.y - currentCenterY),
+        )[0]
+      : getKeyboardDropTarget({
+          currentIndex,
+          direction: code,
+          isRTL: getComputedStyle(activeNode ?? document.documentElement).direction === 'rtl',
+          targets: droppables,
+          x: currentCenterX,
+          y: currentCenterY,
+        })
 
   if (!target) {
     return currentCoordinates
