@@ -25,6 +25,7 @@ type RootThemeProviderProps = {
 
 /**
  * Theme providers can be nested, but only this root provider reads and writes cookies, detects system preferences, and updates theme and contrast attributes on `<html>`.
+ * `setTheme` writes the resolved theme to `data-theme` on the document's `<html>` element.
  *
  * The Admin mounts it explicitly to manage its theme preferences.
  * `useTheme` reads and updates these preferences until a local ThemeProvider is introduced.

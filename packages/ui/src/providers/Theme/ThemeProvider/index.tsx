@@ -11,6 +11,10 @@ import { Context, useTheme } from '../context.js'
  * Theme providers can be nested to override the theme for part of the UI.
  * This provider manages local values; `RootThemeProvider` owns document preferences, cookies, and system detection.
  *
+ * This provider also works without `RootThemeProvider`, e.g. for external UIs that should not access site-wide preferences or cookies.
+ * `setTheme` updates local context and `data-theme` on the element referenced by `targetRef`.
+ * It throws if `targetRef` is missing or its element is not mounted.
+ *
  * `useTheme` reads and updates the local scope; use `useRootTheme` for root preferences.
  * Props override inherited values. Local setters require a mounted `targetRef` and throw without one.
  * Wrap the referenced element with this provider; no DOM element is added.
