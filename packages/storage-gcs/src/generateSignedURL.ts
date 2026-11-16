@@ -74,7 +74,7 @@ export const getGenerateSignedURLHandler = ({
       .getSignedUrl({
         action: 'write',
         contentType: mimeType,
-        expires: Date.now() + 60 * 60 * 5,
+        expires: Date.now() + 60 * 60 * 5 * 1000,
         extensionHeaders: { 'x-goog-if-generation-match': '0' },
         version: 'v4',
       })

@@ -22,6 +22,7 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { takeJobClaim } from '../../queues/utilities/jobClaim.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -88,6 +89,10 @@ export const updateOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+  const claimedJobIDs =
+    incomingArgs.collection.config.slug === 'payload-jobs'
+      ? takeJobClaim(incomingArgs.data)
+      : undefined
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
@@ -233,6 +238,11 @@ export const updateOperation = async <
 
     let fullWhere = combineQueries(where, accessResult!)
 
+    // Operation hooks may narrow a claim, but cannot include jobs owned by other runners.
+    if (claimedJobIDs) {
+      fullWhere = combineQueries(fullWhere, { id: { in: [...claimedJobIDs] } })
+    }
+
     const isTrashAttempt =
       collectionConfig.trash &&
       typeof bulkUpdateData === 'object' &&
@@ -326,6 +336,13 @@ export const updateOperation = async <
 
     const processDocument = async (docWithLocales: (typeof docs)[number]) => {
       const { id } = docWithLocales
+
+      // The claim is already persisted. Only this operation's document hooks should
+      // observe the pending -> processing transition; normal reads retain the real state.
+      if (claimedJobIDs?.has(id)) {
+        const pendingDoc = { ...docWithLocales, processing: false }
+        docWithLocales = pendingDoc
+      }
       let documentTempFilePath: string | undefined
 
       try {
@@ -373,10 +390,11 @@ export const updateOperation = async <
             throwOnMissingFile: false,
           }))
 
+        // Internal claims need full job state, regardless of a hook's response projection.
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
-          select: incomingSelect,
+          select: claimedJobIDs?.has(id) ? undefined : incomingSelect,
         })
 
         // ///////////////////////////////////////////////
@@ -398,6 +416,7 @@ export const updateOperation = async <
           draftArg,
           fallbackLocale: fallbackLocale!,
           filesToUpload: generatedFileData.files,
+          jobClaim: claimedJobIDs?.has(id),
           locale: locale!,
           overrideAccess: overrideAccess!,
           overrideLock: overrideLock!,
