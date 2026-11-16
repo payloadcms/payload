@@ -1032,7 +1032,7 @@ Returns methods to set and get user preferences. More info can be found [here](h
 
 ## useTheme
 
-Returns the effective `theme` (`'light'` or `'dark'`), `autoMode`, `highContrastMode`, and preference setters from the nearest `ThemeProvider`.
+Returns the effective `theme` (`'light'` or `'dark'`), `autoMode`, and `highContrastMode` from the nearest `ThemeProvider`, together with the root preference callbacks.
 
 Nested providers expose their overrides. For example, inside a dark `Popup` on a light page, `theme` is `'dark'`. An explicit nested `theme` prop sets `autoMode` to `false`. Omitted theme or contrast props inherit from the nearest parent.
 
@@ -1049,7 +1049,7 @@ const MyComponent: React.FC = () => {
 
 `ThemeProvider` only supplies context. Outside the Admin, pass the frontend's current `theme` and `highContrastMode` values as props. It does not read cookies, inspect the document's theme, detect system preferences, or change document attributes. Omitted values inherit from the nearest provider or use the hook defaults.
 
-The Admin explicitly supplies a root preference provider. Its `setTheme` and `setHighContrastMode` functions update root state, document attributes, and cookies, and are shared through both hooks. Outside an explicit root preference provider, the setters are no-ops. Change the `ThemeProvider` props to update a standalone or local override.
+The Admin explicitly supplies a root preference provider. Both hooks return the same `setTheme` and `setHighContrastMode` functions, which update root state, document attributes, and cookies even when called inside a local override. They do not change explicit local overrides. Outside an explicit root preference provider, both callbacks do nothing. Change the `ThemeProvider` props to update a standalone or local override.
 
 For local theme styling, apply `data-theme` to the surrounding element. `ThemeProvider` does not add a DOM element or write local attributes. Nested `highContrastMode` overrides affect context only; built-in enhanced contrast styling follows the document or shadow host setting. Local visual contrast overrides require custom styling.
 
