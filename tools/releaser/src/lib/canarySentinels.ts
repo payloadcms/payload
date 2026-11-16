@@ -22,8 +22,10 @@ export const getCanarySentinelShortNames = ({
 }
 
 /**
- * True only when every sentinel's `canary` dist-tag was built from `head`. Missing data
- * or a registry error returns false: an extra canary costs less than a missed one.
+ * True only when every sentinel's `canary` dist-tag is the same version, built from
+ * `head`. Equal versions catch a partial re-run of the same commit on a later day.
+ * Missing data or a registry error returns false: an extra canary costs less than a
+ * missed one.
  */
 export const isCanaryAtHead = async ({
   head,
@@ -36,25 +38,40 @@ export const isCanaryAtHead = async ({
   registry: Pick<CanaryRegistry, 'getDistTag' | 'getProvenanceCommit'>
   sentinelNames: string[]
 }): Promise<boolean> => {
-  const mismatches = await Promise.all(
-    sentinelNames.map(async (name) => {
+  const checks = await Promise.all(
+    sentinelNames.map(async (name): Promise<{ canaryVersion?: string; reason?: string }> => {
       try {
         const canaryVersion = await registry.getDistTag({ name, tag: 'canary' })
         if (!canaryVersion) {
-          return `${name} has no canary dist-tag`
+          return { reason: `${name} has no canary dist-tag` }
         }
         const commit = await registry.getProvenanceCommit({ name, version: canaryVersion })
         if (commit !== head) {
-          return `${name}@${canaryVersion} was built from ${commit ?? 'an unknown commit'}`
+          return {
+            canaryVersion,
+            reason: `${name}@${canaryVersion} was built from ${commit ?? 'an unknown commit'}`,
+          }
         }
-        return undefined
+        return { canaryVersion }
       } catch (err: unknown) {
-        return `${name} registry check failed: ${err instanceof Error ? err.message : String(err)}`
+        return {
+          reason: `${name} registry check failed: ${err instanceof Error ? err.message : String(err)}`,
+        }
       }
     }),
   )
 
-  const reasons = mismatches.filter((reason): reason is string => reason !== undefined)
+  const reasons = checks
+    .map((check) => check.reason)
+    .filter((reason): reason is string => reason !== undefined)
+  const canaryVersions = new Set(
+    checks
+      .map((check) => check.canaryVersion)
+      .filter((canaryVersion): canaryVersion is string => canaryVersion !== undefined),
+  )
+  if (canaryVersions.size > 1) {
+    reasons.push(`sentinel canary versions differ: ${[...canaryVersions].join(', ')}`)
+  }
   for (const reason of reasons) {
     log(`Canary is not at ${head}: ${reason}`)
   }

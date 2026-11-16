@@ -70,6 +70,17 @@ describe('isCanaryAtHead', () => {
     expect(log).toHaveBeenCalledWith(expect.stringContaining('@payloadcms/codemod'))
   })
 
+  it('should return false when sentinels from HEAD have different canary versions', async () => {
+    const registry = fakeRegistry({
+      canaryByName: { ...allNames(version), '@payloadcms/codemod': '4.0.0-canary.20261111' },
+      commitByName: allNames(head),
+    })
+    const log = vi.fn()
+
+    expect(await isCanaryAtHead({ head, log, registry, sentinelNames })).toBe(false)
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('4.0.0-canary.20261111'))
+  })
+
   it('should return false when a sentinel has no canary dist-tag', async () => {
     const registry = fakeRegistry({
       canaryByName: { ...allNames(version), '@payloadcms/codemod': undefined },
