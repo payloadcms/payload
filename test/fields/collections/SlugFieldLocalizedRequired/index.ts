@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import {
-  slugLocalizedRequiredGroupSlug,
   slugLocalizedRequiredNestedGroupSlug,
   slugLocalizedRequiredNestedTabSlug,
   slugLocalizedRequiredSiblingSlug,
@@ -27,19 +26,6 @@ export const SlugFieldLocalizedRequiredSiblings: CollectionConfig[] = [
       { name: 'sharedSlug', type: 'slug', localized: true, useAsSlug: 'title' },
       { name: 'optionalSlug', type: 'slug', localized: true, useAsSlug: 'optionalTitle' },
       { name: 'fallbackSlug', type: 'slug', localized: true },
-    ],
-    versions: false,
-  },
-  {
-    slug: slugLocalizedRequiredGroupSlug,
-    fields: [
-      { name: 'title', type: 'text', required: true },
-      {
-        name: 'content',
-        type: 'group',
-        fields: [{ name: 'body', type: 'text', required: true, localized: true }],
-      },
-      { name: 'slug', type: 'slug', localized: true, useAsSlug: 'title' },
     ],
     versions: false,
   },

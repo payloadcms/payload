@@ -110,7 +110,6 @@ export type LexicalNodes_FD47D92F =
       | 'slug-autosave'
       | 'slug-localized-required'
       | 'slug-localized-required-siblings'
-      | 'slug-localized-required-group'
       | 'slug-localized-required-nested-group'
       | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
@@ -170,7 +169,6 @@ export type LexicalNodes_DA189A21 =
       | 'slug-autosave'
       | 'slug-localized-required'
       | 'slug-localized-required-siblings'
-      | 'slug-localized-required-group'
       | 'slug-localized-required-nested-group'
       | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
@@ -233,7 +231,6 @@ export interface Config {
     'slug-autosave': SlugAutosave;
     'slug-localized-required': SlugLocalizedRequired;
     'slug-localized-required-siblings': SlugLocalizedRequiredSibling;
-    'slug-localized-required-group': SlugLocalizedRequiredGroup;
     'slug-localized-required-nested-group': SlugLocalizedRequiredNestedGroup;
     'slug-localized-required-nested-tab': SlugLocalizedRequiredNestedTab;
     'tabs-fields-2': TabsFields2;
@@ -284,7 +281,6 @@ export interface Config {
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
     'slug-localized-required': SlugLocalizedRequiredSelect<false> | SlugLocalizedRequiredSelect<true>;
     'slug-localized-required-siblings': SlugLocalizedRequiredSiblingsSelect<false> | SlugLocalizedRequiredSiblingsSelect<true>;
-    'slug-localized-required-group': SlugLocalizedRequiredGroupSelect<false> | SlugLocalizedRequiredGroupSelect<true>;
     'slug-localized-required-nested-group': SlugLocalizedRequiredNestedGroupSelect<false> | SlugLocalizedRequiredNestedGroupSelect<true>;
     'slug-localized-required-nested-tab': SlugLocalizedRequiredNestedTabSelect<false> | SlugLocalizedRequiredNestedTabSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
@@ -2131,28 +2127,6 @@ export interface SlugLocalizedRequiredSibling {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "slug-localized-required-group".
- */
-export interface SlugLocalizedRequiredGroup {
-  id: string;
-  title: string;
-  content: {
-    body: string;
-  };
-  slug: string;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "slug-localized-required-nested-group".
  */
 export interface SlugLocalizedRequiredNestedGroup {
@@ -2727,10 +2701,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'slug-localized-required-siblings';
         value: string | SlugLocalizedRequiredSibling;
-      } | null)
-    | ({
-        relationTo: 'slug-localized-required-group';
-        value: string | SlugLocalizedRequiredGroup;
       } | null)
     | ({
         relationTo: 'slug-localized-required-nested-group';
@@ -4264,23 +4234,6 @@ export interface SlugLocalizedRequiredSiblingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "slug-localized-required-group_select".
- */
-export interface SlugLocalizedRequiredGroupSelect<T extends boolean = true> {
-  title?: T;
-  content?:
-    | T
-    | {
-        body?: T;
-      };
-  slug?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "slug-localized-required-nested-group_select".
  */
 export interface SlugLocalizedRequiredNestedGroupSelect<T extends boolean = true> {
@@ -4757,7 +4710,6 @@ export interface CollectionQueryWidget {
       | 'slug-autosave'
       | 'slug-localized-required'
       | 'slug-localized-required-siblings'
-      | 'slug-localized-required-group'
       | 'slug-localized-required-nested-group'
       | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
@@ -4824,7 +4776,6 @@ export interface ActivityWidget {
           | 'slug-autosave'
           | 'slug-localized-required'
           | 'slug-localized-required-siblings'
-          | 'slug-localized-required-group'
           | 'slug-localized-required-nested-group'
           | 'slug-localized-required-nested-tab'
           | 'tabs-fields-2'
