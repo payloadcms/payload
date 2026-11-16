@@ -37,21 +37,6 @@ type RootThemeProviderProps = {
  *   return <button type="button" onClick={() => setTheme('dark')}>Use dark theme</button>
  * }
  * ```
- *
- * @example Inside a nested provider, explicitly target the root preferences.
- * ```tsx
- * function RootThemeButton() {
- *   const { setTheme } = useRootTheme()
- *   return <button type="button" onClick={() => setTheme('auto')}>Use system theme</button>
- * }
- *
- * <ThemeProvider theme="dark">
- *   <div data-theme="dark">
- *     <RootThemeButton />
- *   </div>
- * </ThemeProvider>
- * // The root follows the system preference; the nested scope stays dark.
- * ```
  */
 export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   children,

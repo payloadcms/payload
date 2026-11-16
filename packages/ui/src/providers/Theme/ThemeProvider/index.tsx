@@ -14,6 +14,29 @@ import { Context, useTheme } from '../context.js'
  * `useTheme` reads and updates the local scope; use `useRootTheme` for root preferences.
  * Props override inherited values. Local setters require a mounted `targetRef` and throw without one.
  * Wrap the referenced element with this provider; no DOM element is added.
+ *
+ * @example Inside a nested provider, `useTheme` reads that local scope; `useRootTheme` reads root preferences.
+ * ```tsx
+ * function ThemeValues() {
+ *   const { theme } = useTheme()
+ *   const { theme: rootTheme } = useRootTheme()
+ *
+ *   return (
+ *     <>
+ *       <p>Local theme: {theme}</p>
+ *       <p>Root theme: {rootTheme}</p>
+ *     </>
+ *   )
+ * }
+ *
+ * <RootThemeProvider theme="light">
+ *   <ThemeProvider theme="dark">
+ *     <div data-theme="dark">
+ *       <ThemeValues />
+ *     </div>
+ *   </ThemeProvider>
+ * </RootThemeProvider>
+ * ```
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
