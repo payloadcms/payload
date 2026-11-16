@@ -537,6 +537,7 @@ export const thTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'แสดงเอกสารที่ตรงกันเป็นรายการแบบเรียบ ล้างการค้นหา ตัวกรอง และการจัดกลุ่มเพื่อกลับไปยังแผนผังต้นไม้',
     true: 'จริง',
+    unassigned: 'ยังไม่ได้กำหนด',
     unauthorized: 'ไม่ได้รับอนุญาต',
     unchecked: 'ยังไม่ได้เลือก',
     unlock: 'ปลดล็อค',

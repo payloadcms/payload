@@ -566,6 +566,7 @@ export const esTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Los documentos coincidentes se muestran en una lista plana. Borra la búsqueda, los filtros y la agrupación para volver al árbol.',
     true: 'Verdadero',
+    unassigned: 'Sin asignar',
     unauthorized: 'No autorizado',
     unchecked: 'No seleccionado',
     unlock: 'Desbloquear',

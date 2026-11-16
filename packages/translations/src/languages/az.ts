@@ -561,6 +561,7 @@ export const azTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Uyğun sənədlər düz siyahıda göstərilir. Ağaca qayıtmaq üçün axtarışı, filtrləri və qruplaşdırmanı təmizləyin.',
     true: 'Doğru',
+    unassigned: 'Təyin edilməyib',
     unauthorized: 'İcazəsiz',
     unchecked: 'Seçilməmiş',
     unlock: 'Açın',

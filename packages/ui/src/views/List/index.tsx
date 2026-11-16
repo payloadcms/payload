@@ -409,6 +409,13 @@ export const renderListView = async (
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
   const isHierarchyView = viewType === 'hierarchy'
+  const hasHierarchyContentsTreeLayout = Boolean(
+    isHierarchyCollection &&
+    isHierarchyView &&
+    !drawerSlug &&
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false,
+  )
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
@@ -591,6 +598,7 @@ export const renderListView = async (
 
   // Resolve hierarchy data for the hierarchy list view.
   let HierarchyIcon: React.ReactNode | undefined
+  let HierarchySmallIcon: React.ReactNode | undefined
 
   if (isHierarchyCollection && isHierarchyView) {
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
@@ -608,6 +616,10 @@ export const renderListView = async (
       permissions,
       req,
       search: typeof query?.search === 'string' ? query.search : undefined,
+      shouldLoadHierarchyContents:
+        collectionPreferences?.documentLayout === 'tree' &&
+        hasHierarchyContentsTreeLayout &&
+        !query?.search,
       typeFilter,
       user,
     })
@@ -622,6 +634,12 @@ export const renderListView = async (
       Component: hierarchyConfig?.admin?.components?.Icon,
       importMap: payload.importMap,
       key: `hierarchy-icon-${collectionSlug}`,
+    })
+    HierarchySmallIcon = RenderServerComponent({
+      clientProps: { size: 16 },
+      Component: hierarchyConfig?.admin?.components?.SmallIcon,
+      importMap: payload.importMap,
+      key: `hierarchy-small-icon-${collectionSlug}`,
     })
   }
 
@@ -722,7 +740,9 @@ export const renderListView = async (
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
       documentLayout:
-        collectionPreferences?.documentLayout === 'tree' && !hasTreeLayout
+        collectionPreferences?.documentLayout === 'tree' &&
+        !hasTreeLayout &&
+        !hasHierarchyContentsTreeLayout
           ? 'table'
           : collectionPreferences?.documentLayout,
       documentURLs,
@@ -734,6 +754,7 @@ export const renderListView = async (
       hasTreeLayout,
       hierarchyData,
       HierarchyIcon,
+      HierarchySmallIcon,
       listPreferences: collectionPreferences,
       nestedDocExpanded: shouldLoadNestedDocsTree
         ? (Array.isArray(query?.treeExpanded) ? query.treeExpanded : [query?.treeExpanded]).filter(

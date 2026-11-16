@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getAncestors } from 'payload'
+import { getAncestors, getHierarchyContents } from 'payload'
 import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 
 /**
@@ -24,6 +24,7 @@ export const handleHierarchy = async ({
   permissions,
   req,
   search,
+  shouldLoadHierarchyContents,
   typeFilter,
   user,
 }: {
@@ -34,6 +35,7 @@ export const handleHierarchy = async ({
   permissions?: SanitizedPermissions
   req: PayloadRequest
   search?: string
+  shouldLoadHierarchyContents?: boolean
   /** Filter hierarchy items by their collectionSpecific type field */
   typeFilter?: string[]
   user: PayloadRequest['user']
@@ -50,6 +52,54 @@ export const handleHierarchy = async ({
   const parentFieldName = hierarchyConfig.parentFieldName
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
+
+  if (shouldLoadHierarchyContents) {
+    const contents = await getHierarchyContents({ collectionSlug, parentID: parentId, req })
+    const [selectedParent, breadcrumbs] =
+      parentId === null
+        ? [null, []]
+        : await Promise.all([
+            req.payload.findByID({
+              id: parentId,
+              collection: collectionSlug,
+              depth: 0,
+              draft: true,
+              joins: false,
+              overrideAccess: false,
+              req,
+              user,
+            }),
+            getAncestors({ id: parentId, collectionSlug, req }),
+          ])
+    const ownSource = contents.sources.find((source) => source.collectionSlug === collectionSlug)
+    const allowedCollections = contents.allowedCollections?.flatMap((slug) => {
+      const config = req.payload.collections[slug]?.config
+
+      return config ? [{ slug, label: getTranslation(config.labels.plural, req.i18n) }] : []
+    })
+
+    return {
+      allowedCollections,
+      breadcrumbs,
+      childrenData: {
+        docs: ownSource?.docs ?? [],
+        hasNextPage: ownSource?.hasNextPage ?? false,
+        hasPrevPage: false,
+        limit: 10,
+        nextPage: ownSource?.hasNextPage ? 2 : null,
+        page: 1,
+        pagingCounter: 1,
+        prevPage: null,
+        totalDocs: ownSource?.totalDocs ?? 0,
+        totalPages: ownSource?.totalPages ?? 1,
+      },
+      contents,
+      parent: selectedParent,
+      parentFieldName,
+      parentId,
+      relatedDocumentsByCollection: {},
+    }
+  }
 
   // Fetch the parent item and breadcrumbs (skip for root level)
   let parent: null | (Record<string, unknown> & TypeWithID) = null

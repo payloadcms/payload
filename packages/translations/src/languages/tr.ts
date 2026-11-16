@@ -563,6 +563,7 @@ export const trTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Eşleşen belgeler düz liste olarak gösteriliyor. Ağaca dönmek için aramayı, filtreleri ve gruplandırmayı temizleyin.',
     true: 'Doğru',
+    unassigned: 'Atanmamış',
     unauthorized: 'Yetkisiz',
     unchecked: 'Seçilmemiş',
     unlock: 'Kilidi Aç',

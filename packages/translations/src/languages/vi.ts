@@ -558,6 +558,7 @@ export const viTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Các tài liệu phù hợp được hiển thị dưới dạng danh sách phẳng. Xóa tìm kiếm, bộ lọc và nhóm để quay lại cây.',
     true: 'Đúng',
+    unassigned: 'Chưa được chỉ định',
     unauthorized: 'Không có quyền truy cập.',
     unchecked: 'Chưa được chọn',
     unlock: 'Mở khóa',

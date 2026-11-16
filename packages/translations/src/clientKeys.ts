@@ -493,6 +493,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:unsavedChanges',
   'general:unsavedChangesDuplicate',
   'general:untitled',
+  'general:unassigned',
   'general:updatedAt',
   'general:updatedBy',
   'general:updatedAgo',

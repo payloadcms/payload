@@ -566,6 +566,7 @@ export const huTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Az egyező dokumentumok lapos listában jelennek meg. A fához való visszatéréshez törölje a keresést, a szűrőket és a csoportosítást.',
     true: 'Igaz',
+    unassigned: 'Nincs hozzárendelve',
     unauthorized: 'Jogosulatlan',
     unchecked: 'Nincs bejelölve',
     unlock: 'Feloldás',

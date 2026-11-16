@@ -554,6 +554,7 @@ export const koTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       '일치하는 문서를 일반 목록으로 표시합니다. 트리로 돌아가려면 검색, 필터 및 그룹화를 해제하세요.',
     true: '참',
+    unassigned: '미할당',
     unauthorized: '권한 없음',
     unchecked: '선택되지 않음',
     unlock: '잠금 해제',

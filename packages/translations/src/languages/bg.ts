@@ -558,6 +558,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Съвпадащите документи са показани като плосък списък. Изчистете търсенето, филтрите и групирането, за да се върнете към дървото.',
     true: 'Вярно',
+    unassigned: 'Неразпределени',
     unauthorized: 'Неоторизиран',
     unchecked: 'Непроверен',
     unlock: 'Отключете',

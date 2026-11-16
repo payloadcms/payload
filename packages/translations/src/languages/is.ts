@@ -554,6 +554,7 @@ export const isTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Samsvarandi skjöl eru sýnd sem flatur listi. Hreinsaðu leit, síur og flokkun til að fara aftur í tréð.',
     true: 'Satt',
+    unassigned: 'Óúthlutað',
     unauthorized: 'Óheimilt',
     unchecked: 'Óhakið',
     unlock: 'Opnaðu',

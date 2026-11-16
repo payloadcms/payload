@@ -27,6 +27,7 @@ import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getHierarchyListURL } from './getHierarchyListURL.js'
+import { HierarchyContentsTree } from './HierarchyContentsTree/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
@@ -78,6 +79,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       ? collectionConfig.hierarchy
       : undefined
   const parentFieldName = hierarchyConfig?.parentFieldName
+  const hasTreeLayout = hierarchyConfig?.allowHasMany === false && !collectionConfig.nestedDocs
 
   const { i18n, t } = useTranslation()
   const collectionLabel = getTranslation(labels?.plural, i18n)
@@ -395,29 +397,44 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
-              {!isInDrawer && <LayoutToggle layout={layout} onChange={handleLayoutChange} />}
+              {!isInDrawer && (
+                <LayoutToggle
+                  hasTreeLayout={hasTreeLayout}
+                  layout={layout}
+                  onChange={handleLayoutChange}
+                />
+              )}
             </ListControlsBar>
 
-            <HierarchyTable
-              baseFilter={baseFilter}
-              childrenData={filteredChildrenData}
-              collections={collections}
-              collectionSlug={collectionSlug}
-              hasCreatePermission={hasCreatePermission}
-              HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
-              hierarchyLabel={collectionLabel}
-              key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
-                hierarchyData?.relatedDocumentsByCollection || {},
-              )
-                .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
-                .join(',')}`}
-              layout={layout}
-              parentFieldName={parentFieldName}
-              parentId={parentId}
-              relatedGroups={filteredRelatedGroups}
-              search={searchFromURL}
-              useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-            />
+            {layout === 'tree' && hasTreeLayout && !searchFromURL && hierarchyData?.contents ? (
+              <HierarchyContentsTree
+                collectionSlug={collectionSlug}
+                initialContents={hierarchyData.contents}
+                selectedTypes={selectedTypes}
+                SmallIcon={HierarchySmallIcon}
+              />
+            ) : (
+              <HierarchyTable
+                baseFilter={baseFilter}
+                childrenData={filteredChildrenData}
+                collections={collections}
+                collectionSlug={collectionSlug}
+                hasCreatePermission={hasCreatePermission}
+                HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
+                hierarchyLabel={collectionLabel}
+                key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
+                  hierarchyData?.relatedDocumentsByCollection || {},
+                )
+                  .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
+                  .join(',')}`}
+                layout={layout === 'tree' ? 'table' : layout}
+                parentFieldName={parentFieldName}
+                parentId={parentId}
+                relatedGroups={filteredRelatedGroups}
+                search={searchFromURL}
+                useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+              />
+            )}
           </div>
         </DocumentSelectionProvider>
         {AfterList}

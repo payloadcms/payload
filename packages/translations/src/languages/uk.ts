@@ -553,6 +553,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Знайдені документи показано пласким списком. Очистьте пошук, фільтри й групування, щоб повернутися до дерева.',
     true: 'Так',
+    unassigned: 'Не призначено',
     unauthorized: 'Немає доступу',
     unchecked: 'Необрано',
     unlock: 'Розблокувати',

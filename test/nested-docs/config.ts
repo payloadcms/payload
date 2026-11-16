@@ -14,8 +14,10 @@ export default buildConfigWithDefaults({
       { slug: 'users', auth: true, fields: [] },
       {
         slug: articlesSlug,
+        labels: { singular: 'Article', plural: 'Articles' },
+        admin: { useAsTitle: 'title' },
         access: { create: () => true, delete: () => true, read: () => true, update: () => true },
-        fields: [{ name: 'title', type: 'text' }],
+        fields: [{ name: 'title', type: 'text' }, createFolderField({ relationTo: foldersSlug })],
         nestedDocs: { parentFieldName: 'ancestor' },
         trash: true,
       },
@@ -28,6 +30,7 @@ export default buildConfigWithDefaults({
       },
       {
         slug: pagesSlug,
+        labels: { singular: 'Page', plural: 'Pages' },
         access: {
           create: () => true,
           delete: () => true,

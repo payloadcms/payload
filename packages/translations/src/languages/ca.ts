@@ -562,6 +562,7 @@ export const caTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Els documents coincidents es mostren en una llista plana. Esborreu la cerca, els filtres i l’agrupació per tornar a l’arbre.',
     true: 'Veritat',
+    unassigned: 'Sense assignar',
     unauthorized: 'No autoritzat',
     unchecked: 'Desmarcat',
     unlock: 'Desbloqueja',

@@ -545,6 +545,7 @@ export const arTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'تُعرض المستندات المطابقة في قائمة مسطحة. امسح البحث وعوامل التصفية والتجميع للعودة إلى الشجرة.',
     true: 'صحيح',
+    unassigned: 'غير مُعيّن',
     unauthorized: 'غير مصرح به',
     unchecked: 'غير محدد',
     unlock: 'افتح',
