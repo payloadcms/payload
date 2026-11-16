@@ -557,6 +557,7 @@ export const daTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Matchende dokumenter vises som en flad liste. Ryd søgning, filtre og gruppering for at vende tilbage til træet.',
     true: 'Sandt',
+    unassigned: 'Ikke tildelt',
     unauthorized: 'Uautoriseret',
     unchecked: 'Ikke markeret',
     unlock: 'Oplås',

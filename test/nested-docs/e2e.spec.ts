@@ -223,7 +223,7 @@ test.describe('Nested document tree', () => {
     try {
       await page.getByRole('radio', { name: 'Table', exact: true }).check()
       await expect.poll(() => hasSavedPreference).toBe(true)
-      await page.getByRole('link', { name: 'Nested Articles', exact: true }).click()
+      await page.getByRole('link', { name: 'Articles', exact: true }).click()
       await expect
         .poll(() => new URL(page.url()).pathname)
         .toBe(`/admin/collections/${articlesSlug}`)
@@ -606,7 +606,7 @@ test.describe('Nested document tree', () => {
       await page.goto(`${serverURL}/admin/collections/${pagesSlug}?sort=-title&limit=10`)
       await expect(page.getByRole('button', { name: 'Next table page' })).toHaveCount(0)
       await page
-        .getByRole('button', { name: 'Load more: Nested Pages', exact: true })
+        .getByRole('button', { name: 'Load more: Pages', exact: true })
         .scrollIntoViewIfNeeded()
       await expect(page.getByRole('link', { name: 'About us', exact: true })).toBeVisible()
       await expect(page.getByRole('link', { name: /^Scroll root/ })).toHaveCount(12)

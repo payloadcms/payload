@@ -562,6 +562,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Os documentos correspondentes são apresentados numa lista simples. Limpe a pesquisa, os filtros e o agrupamento para voltar à árvore.',
     true: 'Verdadeiro',
+    unassigned: 'Não atribuídos',
     unauthorized: 'Não autorizado',
     unchecked: 'Desmarcado',
     unlock: 'Desbloquear',

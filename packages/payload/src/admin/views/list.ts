@@ -6,6 +6,7 @@ import type {
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
+import type { HierarchyContents } from '../../hierarchy/getHierarchyContents.js'
 import type { NestedDocRow } from '../../hierarchy/getNestedDocsTreeMetadata.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
@@ -36,6 +37,7 @@ export type HierarchyViewData = {
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
   childrenData: PaginatedDocs
+  contents?: HierarchyContents
   /** The current parent document data (for display and collectionSpecific field access) */
   parent: null | (Record<string, unknown> & TypeWithID)
   /** The parent field name for building queries */

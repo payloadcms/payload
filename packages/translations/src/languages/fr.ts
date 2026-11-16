@@ -570,6 +570,7 @@ export const frTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Les documents correspondants sont affichés dans une liste à plat. Effacez la recherche, les filtres et le regroupement pour revenir à l’arbre.',
     true: 'Vrai',
+    unassigned: 'Non attribués',
     unauthorized: 'Non autorisé',
     unchecked: 'Non coché',
     unlock: 'Déverrouiller',

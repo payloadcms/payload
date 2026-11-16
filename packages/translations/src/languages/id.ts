@@ -560,6 +560,7 @@ export const idTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Dokumen yang cocok ditampilkan sebagai daftar datar. Hapus pencarian, filter, dan pengelompokan untuk kembali ke pohon.',
     true: 'Benar',
+    unassigned: 'Belum ditetapkan',
     unauthorized: 'Tidak Sah',
     unchecked: 'Belum dicentang',
     unlock: 'Buka Kunci',

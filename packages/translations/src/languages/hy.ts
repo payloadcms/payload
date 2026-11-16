@@ -560,6 +560,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Համապատասխան փաստաթղթերը ցուցադրվում են հարթ ցանկով։ Ծառին վերադառնալու համար մաքրեք որոնումը, զտիչները և խմբավորումը։',
     true: 'Ճիշտ',
+    unassigned: 'Չնշանակված',
     unauthorized: 'Չթույլատրված',
     unchecked: 'Չնշված',
     unlock: 'Բացարձակել',

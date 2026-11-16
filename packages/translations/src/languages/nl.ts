@@ -566,6 +566,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Overeenkomende documenten worden als een platte lijst getoond. Wis zoeken, filters en groepering om terug te keren naar de boom.',
     true: 'Waar',
+    unassigned: 'Niet toegewezen',
     unauthorized: 'Onbevoegd',
     unchecked: 'Niet geselecteerd',
     unlock: 'Ontgrendelen',

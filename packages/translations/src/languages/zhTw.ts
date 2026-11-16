@@ -529,6 +529,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     treeLayout: '樹狀',
     treeSearchResults: '符合條件的文件以平面清單顯示。清除搜尋、篩選及分組以返回樹狀檢視。',
     true: '是',
+    unassigned: '未指派',
     unauthorized: '未經授權',
     unchecked: '未勾選',
     unlock: '解鎖',

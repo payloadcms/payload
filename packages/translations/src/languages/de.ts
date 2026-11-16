@@ -571,6 +571,7 @@ export const deTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Passende Dokumente werden als flache Liste angezeigt. Entferne Suche, Filter und Gruppierung, um zum Baum zurückzukehren.',
     true: 'Wahr',
+    unassigned: 'Nicht zugeordnet',
     unauthorized: 'Nicht autorisiert',
     unchecked: 'Nicht ausgewählt',
     unlock: 'Entsperren',

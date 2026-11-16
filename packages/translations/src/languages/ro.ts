@@ -564,6 +564,7 @@ export const roTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Documentele corespunzătoare sunt afișate ca listă plată. Ștergeți căutarea, filtrele și gruparea pentru a reveni la arbore.',
     true: 'Adevărat',
+    unassigned: 'Neatribuite',
     unauthorized: 'neautorizat(ă)',
     unchecked: 'Necompletat',
     unlock: 'Deblocare',

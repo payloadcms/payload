@@ -554,6 +554,7 @@ export const csTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Odpovídající dokumenty jsou zobrazeny jako plochý seznam. Pro návrat ke stromu zrušte hledání, filtry a seskupení.',
     true: 'Pravda',
+    unassigned: 'Nepřiřazeno',
     unauthorized: 'Neoprávněný',
     unchecked: 'Nezaškrtnuto',
     unlock: 'Odemknout',

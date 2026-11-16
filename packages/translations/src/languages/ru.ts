@@ -561,6 +561,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Найденные документы показаны плоским списком. Сбросьте поиск, фильтры и группировку, чтобы вернуться к дереву.',
     true: 'Правда',
+    unassigned: 'Не назначено',
     unauthorized: 'Нет доступа',
     unchecked: 'Не отмечено',
     unlock: 'Разблокировать',

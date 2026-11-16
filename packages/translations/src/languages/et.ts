@@ -553,6 +553,7 @@ export const etTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Sobivad dokumendid kuvatakse lameda loendina. Puusse naasmiseks tühjendage otsing, filtrid ja rühmitamine.',
     true: 'Tõene',
+    unassigned: 'Määramata',
     unauthorized: 'Volitamata',
     unchecked: 'Märkimata',
     unlock: 'Avage lukk',

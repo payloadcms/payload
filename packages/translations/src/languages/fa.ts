@@ -549,6 +549,7 @@ export const faTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'سندهای منطبق به صورت فهرست مسطح نمایش داده می‌شوند. برای بازگشت به درخت، جستجو، فیلترها و گروه‌بندی را پاک کنید.',
     true: 'بله',
+    unassigned: 'تخصیص‌نیافته',
     unauthorized: 'غیرمجاز',
     unchecked: 'لغو انتخاب',
     unlock: 'باز کردن',

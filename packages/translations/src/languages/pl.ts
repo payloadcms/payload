@@ -557,6 +557,7 @@ export const plTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Pasujące dokumenty są wyświetlane jako płaska lista. Wyczyść wyszukiwanie, filtry i grupowanie, aby wrócić do drzewa.',
     true: 'Prawda',
+    unassigned: 'Nieprzypisane',
     unauthorized: 'Brak autoryzacji',
     unchecked: 'Niezaznaczone',
     unlock: 'Odblokuj',

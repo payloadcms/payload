@@ -556,6 +556,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Atbilstošie dokumenti tiek rādīti plakanā sarakstā. Lai atgrieztos kokā, notīriet meklēšanu, filtrus un grupēšanu.',
     true: 'Patiesi',
+    unassigned: 'Nav piešķirts',
     unauthorized: 'Neautorizēts',
     unchecked: 'Neatzīmēts',
     unlock: 'Atslēgt',
