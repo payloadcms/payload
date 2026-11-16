@@ -144,6 +144,8 @@ export const renderListView = async (
 
   const query: ListQuery = queryFromArgs || queryFromReq
 
+  const sortFromQuery = query?.sort
+
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   query.queryByGroup =
@@ -207,9 +209,10 @@ export const renderListView = async (
 
   query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
-  query.sort =
-    collectionPreferences?.sort ||
-    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+  const defaultSort =
+    typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined
+
+  query.sort = collectionPreferences?.sort || defaultSort
 
   const baseFilterConstraint = await (
     collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
@@ -379,7 +382,7 @@ export const renderListView = async (
   // Hierarchy data for client-side rendering
   let hierarchyData: HierarchyViewData | undefined
 
-  try {
+  const fetchListData = async () => {
     if (query.groupBy) {
       ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
@@ -459,6 +462,30 @@ export const renderListView = async (
         useAsTitle: collectionConfig.admin.useAsTitle,
         viewType,
       }))
+    }
+  }
+
+  try {
+    try {
+      await fetchListData()
+    } catch (err) {
+      // A sort saved in the user's preferences can outlive its field, e.g. after the field becomes virtual.
+      // Fall back to the default sort instead of showing an empty list.
+      if (
+        err.name === 'QueryError' &&
+        !sortFromQuery &&
+        collectionPreferences?.sort &&
+        query.sort !== defaultSort
+      ) {
+        req.payload.logger.warn({
+          err,
+          msg: `Ignoring the saved sort "${query.sort}" for collection ${collectionSlug}, as it cannot be queried`,
+        })
+        query.sort = defaultSort
+        await fetchListData()
+      } else {
+        throw err
+      }
     }
   } catch (err) {
     if (err.name !== 'QueryError') {

@@ -15,6 +15,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { defaultSortSlug } from './collections/DefaultSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
@@ -62,6 +63,29 @@ describe('Sort functionality', () => {
         { timeout: TEST_TIMEOUT_LONG },
       )
       .toBe(200)
+  })
+
+  test('should fall back to the default sort when the saved sort cannot be queried', async () => {
+    const created = await page.request.post(`${serverURL}/api/${defaultSortSlug}`, {
+      data: { number: 1, text: 'Stale sort doc' },
+    })
+    await expect(created).toBeOK()
+
+    // A sort saved while `virtualText` was still a stored field
+    const preferenceURL = `${serverURL}/api/payload-preferences/collection-${defaultSortSlug}`
+    const saved = await page.request.post(preferenceURL, {
+      data: { value: { sort: '-virtualText' } },
+    })
+    await expect(saved).toBeOK()
+
+    try {
+      await page.goto(new AdminUrlUtil(serverURL, defaultSortSlug).list)
+
+      await expect(page.locator('tbody tr').first()).toBeVisible()
+      await expect(page.locator('tbody')).toContainText('Stale sort doc')
+    } finally {
+      await page.request.delete(preferenceURL)
+    }
   })
 
   // eslint-disable-next-line playwright/expect-expect
