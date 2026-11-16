@@ -29,6 +29,12 @@ export type SelectionMetadata = {
   allowedCollections?: string[]
 }
 
+export type SelectionDocument = {
+  collectionSlug: string
+  document: SelectableDocument
+  metadata?: SelectionMetadata
+}
+
 /**
  * Selection state for a single collection.
  */
@@ -94,6 +100,8 @@ export type DocumentSelectionContextValue = {
   /** Check if a specific document is selected */
   isSelected: (args: { collectionSlug: string; id: number | string }) => boolean
 
+  registerVisibleDocuments?: (args: { documents: SelectionDocument[] }) => void
+
   /** Raw selection state for direct access if needed */
   selections: SelectionState
 
@@ -125,4 +133,5 @@ export type DocumentSelectionProviderProps<TDoc extends SelectableDocument = Sel
   readonly collectionData: CollectionData<TDoc>
   /** Current user ID for determining document lock status */
   readonly currentUserId?: string
+  readonly selectionScopeKey?: string
 }
