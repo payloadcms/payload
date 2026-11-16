@@ -47,7 +47,7 @@ import { useFormSubmission } from './useFormSubmission.js'
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { collectionSlug, docConfig } = useDocumentInfo()
+  const { id, collectionSlug, docConfig } = useDocumentInfo()
 
   const {
     action,
@@ -171,6 +171,7 @@ export const Form: React.FC<FormProps> = (props) => {
             await handler({
               docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
               file,
+              targetID: id,
             }),
           )
         }
@@ -201,7 +202,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return formData
     },
-    [collectionSlug, docConfig, getUploadHandler],
+    [collectionSlug, docConfig, getUploadHandler, id],
   )
 
   const replaceState = useCallback(
