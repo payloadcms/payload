@@ -81,6 +81,18 @@ describe('runPublishCanary', () => {
     expect(deps.workspace.publish).not.toHaveBeenCalled()
   })
 
+  it('should warn and continue when the same-day guard throws in a dry run', async () => {
+    const deps = makeDeps()
+    deps.assertCanaryVersionFromHead.mockRejectedValueOnce(new Error('one canary per UTC day'))
+
+    const result = await runPublishCanary({ deps, dryRun: true, shouldSkipIfUnchanged: false })
+
+    expect(result).toBe('published')
+    expect(deps.log).toHaveBeenCalledWith(expect.stringContaining('a real run would fail'))
+    expect(deps.workspace.build).toHaveBeenCalledOnce()
+    expect(deps.workspace.publish).toHaveBeenCalledWith({ dryRun: true, tag: 'canary' })
+  })
+
   it('should pass dryRun to publish', async () => {
     const deps = makeDeps()
 

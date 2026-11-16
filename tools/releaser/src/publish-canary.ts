@@ -53,7 +53,14 @@ export const runPublishCanary = async ({
 
   const version = await deps.workspace.bumpVersion('canary')
   // Before the build, so a same-day conflict fails in seconds, not after a full build.
-  await deps.assertCanaryVersionFromHead({ head, version })
+  try {
+    await deps.assertCanaryVersionFromHead({ head, version })
+  } catch (err: unknown) {
+    if (!dryRun) {
+      throw err
+    }
+    deps.log(`Dry run: a real run would fail: ${err instanceof Error ? err.message : String(err)}`)
+  }
   await deps.workspace.build()
   await deps.workspace.publish({ dryRun, tag: 'canary' })
   return 'published'

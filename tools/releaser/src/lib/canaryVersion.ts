@@ -16,11 +16,6 @@ export const getCanaryVersion = ({
     throw new Error(`Could not determine minor candidate version from ${monorepoVersion}`)
   }
 
-  return `${baseVersion}-canary.${formatUtcDate(date)}`
-}
-
-const formatUtcDate = (date: Date): string => {
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(date.getUTCDate()).padStart(2, '0')
-  return `${date.getUTCFullYear()}${month}${day}`
+  const utcDate = date.toISOString().slice(0, 10).replaceAll('-', '')
+  return `${baseVersion}-canary.${utcDate}`
 }

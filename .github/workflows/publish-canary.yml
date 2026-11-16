@@ -23,6 +23,7 @@ jobs:
     name: publish-canary
     if: github.repository == 'payloadcms/payload'
     runs-on: ubuntu-26.04
+    timeout-minutes: 45
     # npm trusts only this file + this env; the env's branch policy limits it to main.
     environment: canary
     permissions:
