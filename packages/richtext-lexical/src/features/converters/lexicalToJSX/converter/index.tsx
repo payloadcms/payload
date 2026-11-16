@@ -14,6 +14,7 @@ import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../..
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
+import { getExplicitDirection } from '../../utilities/getExplicitDirection.js'
 
 /**
  * Creates a JSX converter from a NodeMapValue
@@ -148,6 +149,10 @@ export type ConvertLexicalToJSXArgs<TNodes extends SerializedNodeBase = Serializ
    */
   data: SerializedEditorState
   /**
+   * If true, disables the `dir` attribute globally. If an array, disables for specific node `type` values.
+   */
+  disableDirection?: boolean | string[]
+  /**
    * If true, disables indentation globally. If an array, disables for specific node `type` values.
    */
   disableIndent?: boolean | string[]
@@ -165,6 +170,7 @@ export type ConvertLexicalToJSXArgs<TNodes extends SerializedNodeBase = Serializ
 export function convertLexicalToJSX<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   converters,
   data,
+  disableDirection,
   disableIndent,
   disableTextAlign,
   nodeMap,
@@ -184,6 +190,7 @@ export function convertLexicalToJSX<TNodes extends SerializedNodeBase = Serializ
 
     return convertLexicalNodesToJSX({
       converters: mergedConverters,
+      disableDirection,
       disableIndent,
       disableTextAlign,
       nodes: data.root.children,
@@ -195,12 +202,14 @@ export function convertLexicalToJSX<TNodes extends SerializedNodeBase = Serializ
 
 export function convertLexicalNodesToJSX({
   converters,
+  disableDirection,
   disableIndent,
   disableTextAlign,
   nodes,
   parent,
 }: {
   converters: JSXConverters
+  disableDirection?: boolean | string[]
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   nodes: SerializedLexicalNode[]
@@ -245,6 +254,7 @@ export function convertLexicalNodesToJSX({
                 nodesToJSX: (args) => {
                   return convertLexicalNodesToJSX({
                     converters: args.converters ?? converters,
+                    disableDirection: args.disableDirection ?? disableDirection,
                     disableIndent: args.disableIndent ?? disableIndent,
                     disableTextAlign: args.disableTextAlign ?? disableTextAlign,
                     nodes: args.nodes,
@@ -307,25 +317,28 @@ export function convertLexicalNodesToJSX({
         }
       }
 
-      if (React.isValidElement(reactNode)) {
-        // Inject style into reactNode
-        if (style.textAlign || style.paddingInlineStart) {
-          const newStyle = {
-            ...style,
-            // @ts-expect-error type better later
-            ...(reactNode?.props?.style ?? {}),
-            // reactNode style comes after, thus a textAlign specified in the converter has priority over the one we inject here
-          }
+      const isDirectionDisabled = Array.isArray(disableDirection)
+        ? disableDirection.includes(node.type)
+        : disableDirection
+      const dir = isDirectionDisabled ? undefined : getExplicitDirection({ node })
 
-          return React.cloneElement(reactNode, {
-            key: i,
-            // @ts-expect-error type better later
-            style: newStyle,
-          })
-        }
-        return React.cloneElement(reactNode, {
+      if (React.isValidElement<{ dir?: string; style?: React.CSSProperties }>(reactNode)) {
+        const injectedProps: { dir?: string; key: number; style?: React.CSSProperties } = {
           key: i,
-        })
+        }
+
+        // A dir or style specified in the converter has priority over the one we inject here
+        if (dir && reactNode.props.dir === undefined) {
+          injectedProps.dir = dir
+        }
+        if (style.textAlign || style.paddingInlineStart) {
+          injectedProps.style = {
+            ...style,
+            ...(reactNode.props.style ?? {}),
+          }
+        }
+
+        return React.cloneElement(reactNode, injectedProps)
       }
 
       return reactNode

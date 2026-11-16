@@ -16,6 +16,7 @@ export type HTMLConverter<
       node: T
       nodesToHTML: (args: {
         converters?: HTMLConverters
+        disableDirection?: boolean | string[]
         disableIndent?: boolean | string[]
         disableTextAlign?: boolean | string[]
         nodes: SerializedLexicalNode[]
@@ -23,6 +24,10 @@ export type HTMLConverter<
       }) => string[]
       parent: SerializedLexicalNodeWithParent
       providedCSSString: string
+      /**
+       * ` dir="ltr"` or ` dir="rtl"` when the node has an explicit direction, otherwise an empty string.
+       */
+      providedDirAttribute: string
       providedStyleTag: string
     }) => string)
   | string

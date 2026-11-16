@@ -21,6 +21,10 @@ export type ConvertLexicalToHTMLArgs = {
    */
   disableContainer?: boolean
   /**
+   * If true, disables the `dir` attribute globally. If an array, disables for specific node `type` values.
+   */
+  disableDirection?: boolean | string[]
+  /**
    * If true, disables indentation globally. If an array, disables for specific node `type` values.
    */
   disableIndent?: boolean | string[]
@@ -35,6 +39,7 @@ export function convertLexicalToHTML({
   converters,
   data,
   disableContainer,
+  disableDirection,
   disableIndent,
   disableTextAlign,
 }: ConvertLexicalToHTMLArgs): string {
@@ -52,6 +57,7 @@ export function convertLexicalToHTML({
 
     const html = convertLexicalNodesToHTML({
       converters: finalConverters,
+      disableDirection,
       disableIndent,
       disableTextAlign,
       nodes: data?.root?.children,
@@ -73,12 +79,14 @@ export function convertLexicalToHTML({
 
 export function convertLexicalNodesToHTML({
   converters,
+  disableDirection,
   disableIndent,
   disableTextAlign,
   nodes,
   parent,
 }: {
   converters: HTMLConverters
+  disableDirection?: boolean | string[]
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   nodes: SerializedLexicalNode[]
@@ -91,13 +99,15 @@ export function convertLexicalNodesToHTML({
   let i = -1
   for (const node of nodes) {
     i++
-    const { converterForNode, providedCSSString, providedStyleTag } = findConverterForNode({
-      converters,
-      disableIndent,
-      disableTextAlign,
-      node,
-      unknownConverter,
-    })
+    const { converterForNode, providedCSSString, providedDirAttribute, providedStyleTag } =
+      findConverterForNode({
+        converters,
+        disableDirection,
+        disableIndent,
+        disableTextAlign,
+        node,
+        unknownConverter,
+      })
 
     try {
       let nodeHTML: string
@@ -112,6 +122,7 @@ export function convertLexicalNodesToHTML({
                 nodesToHTML: (args) => {
                   return convertLexicalNodesToHTML({
                     converters: args.converters ?? converters,
+                    disableDirection: args.disableDirection ?? disableDirection,
                     disableIndent: args.disableIndent ?? disableIndent,
                     disableTextAlign: args.disableTextAlign ?? disableTextAlign,
                     nodes: args.nodes,
@@ -123,6 +134,7 @@ export function convertLexicalNodesToHTML({
                 },
                 parent,
                 providedCSSString,
+                providedDirAttribute,
                 providedStyleTag,
               })
             : converterForNode

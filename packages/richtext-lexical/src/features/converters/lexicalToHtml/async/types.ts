@@ -26,6 +26,7 @@ export type HTMLConverterAsync<
       node: T
       nodesToHTML: (args: {
         converters?: HTMLConvertersAsync
+        disableDirection?: boolean | string[]
         disableIndent?: boolean | string[]
         disableTextAlign?: boolean | string[]
         nodes: SerializedLexicalNode[]
@@ -34,6 +35,10 @@ export type HTMLConverterAsync<
       parent: SerializedLexicalNodeWithParent
       populate?: HTMLPopulateFn
       providedCSSString: string
+      /**
+       * ` dir="ltr"` or ` dir="rtl"` when the node has an explicit direction, otherwise an empty string.
+       */
+      providedDirAttribute: string
       providedStyleTag: string
     }) => Promise<string> | string)
   | string

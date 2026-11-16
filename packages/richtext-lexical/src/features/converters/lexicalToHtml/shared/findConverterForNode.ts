@@ -6,17 +6,21 @@ import type { HTMLConverterAsync, HTMLConvertersAsync } from '../async/types.js'
 import type { HTMLConverter, HTMLConverters } from '../sync/types.js'
 import type { ProvidedCSS } from './types.js'
 
+import { getExplicitDirection } from '../../utilities/getExplicitDirection.js'
+
 export function findConverterForNode<
   TConverters extends HTMLConverters | HTMLConvertersAsync,
   TConverter extends HTMLConverter | HTMLConverterAsync,
 >({
   converters,
+  disableDirection,
   disableIndent,
   disableTextAlign,
   node,
   unknownConverter,
 }: {
   converters: TConverters
+  disableDirection?: boolean | string[]
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   node: SerializedLexicalNode
@@ -24,6 +28,7 @@ export function findConverterForNode<
 }): {
   converterForNode: TConverter | undefined
   providedCSSString: string
+  providedDirAttribute: string
   providedStyleTag: string
 } {
   let converterForNode: TConverter | undefined
@@ -97,9 +102,22 @@ export function findConverterForNode<
   }
   const providedStyleTag = providedCSSString?.length ? ` style="${providedCSSString}"` : ''
 
+  const isDirectionDisabled = Array.isArray(disableDirection)
+    ? disableDirection.includes(node.type)
+    : disableDirection
+
+  let providedDirAttribute = ''
+  if (!isDirectionDisabled) {
+    const direction = getExplicitDirection({ node })
+    if (direction) {
+      providedDirAttribute = ` dir="${direction}"`
+    }
+  }
+
   return {
     converterForNode: converterForNode ?? unknownConverter,
     providedCSSString,
+    providedDirAttribute,
     providedStyleTag,
   }
 }
