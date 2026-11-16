@@ -328,9 +328,13 @@ export type MCPBuiltinOAuthConfig = {
    * Payload's auth strategies don't accept the access token.
    *
    * @default a Payload login token for that user that only works for MCP, with a refresh token when
-   * the collection uses sessions
+   * the collection uses sessions. Its session is labelled with the client's name.
    */
-  issueToken?: (args: { req: PayloadRequest }) => MaybePromise<MCPOAuthTokens>
+  issueToken?: (args: {
+    /** The MCP client the user allowed, with the address it returns to. */
+    client: { name: string; redirectURI: string }
+    req: PayloadRequest
+  }) => MaybePromise<MCPOAuthTokens>
   /**
    * Trades a refresh token from `issueToken`, or from an earlier refresh, for new tokens. Return
    * `null` when it's no longer valid, and the client sends the user through sign-in again. `req`

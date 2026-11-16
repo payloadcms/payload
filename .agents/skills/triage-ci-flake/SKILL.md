@@ -2,6 +2,7 @@
 name: triage-ci-flake
 description: Use when CI tests fail on main branch after PR merge, when investigating flaky test failures, or when user provides a PR URL/number to aggregate all failing tests
 allowed-tools: Write, Bash(date:*), Bash(mkdir -p *)
+disable-model-invocation: true
 ---
 
 # Triage CI Failure
