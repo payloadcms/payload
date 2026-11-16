@@ -8,21 +8,12 @@ import { useControllableState } from '../../../hooks/useControllableState.js'
 import { Context, useTheme } from '../context.js'
 
 /**
- * Provides a local theme scope. Providers can be nested and do not add a DOM element.
- * The props supply local values; omitted values inherit from the parent.
+ * Theme providers can be nested to override the theme for part of the UI.
+ * This provider manages local values; `RootThemeProvider` owns document preferences, cookies, and system detection.
  *
- * To use the setters, wrap the themed element with this provider and pass its ref as `targetRef`.
- * Setters update local React state and only that element's attributes.
- * Both throw if no ref is supplied or its element is not mounted.
- * Without a ref, update the provider props to change the context.
- *
- * Local choices last until the corresponding prop changes.
- * Keep the element's attributes in sync when changing props; this provider does not read or observe DOM attributes.
- * `setTheme('auto')` removes the local attribute and follows the parent context, without detecting system preferences.
- * Local contrast flags need custom styling; built-in enhanced contrast follows the document or shadow host.
- *
- * Only the Admin's RootThemeProvider manages cookies, system preferences, and `<html>` attributes.
- * Use `useRootTheme` to read or change those preferences from within a local scope.
+ * `useTheme` reads and updates the local scope; use `useRootTheme` for root preferences.
+ * Props override inherited values. Local setters require a mounted `targetRef` and throw without one.
+ * Wrap the referenced element with this provider; no DOM element is added.
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
