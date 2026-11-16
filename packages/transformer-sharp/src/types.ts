@@ -1,11 +1,4 @@
-import type {
-  FocalPoint,
-  ImageSize,
-  PayloadRequest,
-  ProbedImageSize,
-  UploadCollectionSlug,
-  UploadEdits,
-} from 'payload'
+import type { ImageSize, PayloadRequest, ProbedImageSize, UploadCollectionSlug } from 'payload'
 import type { FitEnum, ResizeOptions, Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 /**
@@ -164,24 +157,31 @@ export type SharpTransformerOptions = {
 
 /**
  * `options` for the one-file-in/one-file-out `transformFile` primitive, computed
- * by `prepareLegacyUpload` for each task it hands to the injected `transform`
- * callback: the main file (optionally a crop), or one named legacy image size.
+ * by `createTransformUpload` for each task it hands to the injected `transform`
+ * callback: the main file, or one named legacy image size. The crop and focal point
+ * are not options: `transformFile` reads them from `doc._transforms`.
  */
 export type SharpUploadTaskOptions =
   | {
+      /**
+       * Whether this size may be cut around a focal point: the focal point is enabled, and the
+       * size's `fit` allows a cut. `transformFile` cuts around it only when one is saved, and
+       * otherwise resizes with the size's own config.
+       */
+      canUseFocalPoint?: boolean
       collectionUpload: SharpCollectionConfig
-      crop?: {
-        cropData: NonNullable<UploadEdits['crop']>
-        heightInPixels: number
-        originalDimensions: ProbedImageSize
-        widthInPixels: number
-      }
-      kind: 'main'
-    }
-  | {
-      collectionUpload: SharpCollectionConfig
-      focalPoint?: FocalPoint
       imageResizeConfig: ImageSize
       kind: 'size'
       originalDimensions: ProbedImageSize
+    }
+  | {
+      collectionUpload: SharpCollectionConfig
+      /**
+       * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
+       * `heightInPixels`). It replaces the saved crop's size for this upload only.
+       */
+      cropSize?: { height: number; width: number }
+      kind: 'main'
+      /** The original's size. Without it, the saved crop cannot be applied. */
+      originalDimensions?: ProbedImageSize
     }

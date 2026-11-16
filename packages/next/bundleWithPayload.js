@@ -17,7 +17,7 @@ await esbuild.build({
   tsconfig: path.resolve(import.meta.dirname, 'tsconfig.json'),
   sourcemap: true,
   minify: false,
-  // 24.22.1 is the lowest version of node supported by Payload
-  target: 'node24.22.1',
+  // 24.22.3 is the lowest version of node supported by Payload
+  target: 'node24.22.3',
 })
 console.log('withPayload cjs bundle created successfully')

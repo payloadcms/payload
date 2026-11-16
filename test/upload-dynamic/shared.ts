@@ -7,3 +7,6 @@ export const dynamicMediaDir = path.resolve(
   'dynamic-media',
 )
 export const publicCloudMediaSlug = 'public-cloud-dynamic-media'
+export const versionedDynamicMediaSlug = 'versioned-dynamic-media'
+export const versionedDynamicMediaDir = path.resolve(dynamicMediaDir, '../versioned-dynamic-media')
+export const versionedCloudMediaSlug = 'versioned-cloud-dynamic-media'

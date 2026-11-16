@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveTempFileHandling } from './generateFileData.js'
+import { resolveTempFileHandling } from './resolveTempFileHandling.js'
 
 describe('resolveTempFileHandling', () => {
   it.each([
