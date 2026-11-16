@@ -33,9 +33,8 @@ import { getPluginCollections } from './utilities/getPluginCollections.js'
  *
  * @see https://payloadcms.com/docs/plugins/import-export
  */
-export const importExportPlugin =
-  (pluginConfig: ImportExportPluginConfig) =>
-  async (config: Config): Promise<Config> => {
+export const importExportPlugin = (pluginConfig: ImportExportPluginConfig) => {
+  const plugin = async (config: Config): Promise<Config> => {
     // Get all export/import collections and the mappings from target collections to custom collections
     const { customExportSlugMap, customImportSlugMap, exportCollections, importCollections } =
       await getPluginCollections({
@@ -228,6 +227,9 @@ export const importExportPlugin =
 
     return config
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-import-export' })
+}
 
 declare module 'payload' {
   export interface FieldCustom {

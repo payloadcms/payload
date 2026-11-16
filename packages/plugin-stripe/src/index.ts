@@ -12,9 +12,8 @@ import { sanitizeStripeRESTConfig } from './utilities/sanitizeStripeRESTConfig.j
 
 export { stripeProxy } from './utilities/stripeProxy.js'
 
-export const stripePlugin =
-  (incomingStripeConfig: StripePluginConfig) =>
-  (config: Config): Config => {
+export const stripePlugin = (incomingStripeConfig: StripePluginConfig) => {
+  const plugin = (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
@@ -112,3 +111,6 @@ export const stripePlugin =
 
     return config
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-stripe' })
+}
