@@ -37,6 +37,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const [localHighContrastMode, setLocalHighContrastMode] =
     useControllableState(highContrastModeOverride)
 
+  /**
+   * Lets descendants change this scope independently of root preferences and cookies.
+   * Updates context and the target's `data-theme` together so hook consumers and DOM styling stay aligned.
+   * Requires a mounted `targetRef`; `'auto'` removes the local attribute and follows the parent context.
+   */
   const setTheme = useCallback(
     (themeToSet: 'auto' | Theme) => {
       const target = getThemeTarget({ method: 'setTheme', targetRef })
@@ -52,6 +57,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     [setLocalTheme, targetRef],
   )
 
+  /**
+   * Gives this scope its own contrast setter, leaving root preferences and cookies unchanged.
+   * Updates context and the target's `data-enhanced-contrast` flag together so consumers share the local choice.
+   * Requires a mounted `targetRef`; removing the flag does not disable inherited document or shadow-host styling.
+   */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
       getThemeTarget({ method: 'setHighContrastMode', targetRef }).toggleAttribute(
