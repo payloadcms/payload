@@ -48,7 +48,7 @@ export async function getGlobalViewRedirect({
     collectionSlug: tenantsCollectionSlug,
     payload,
   })
-  const selectedTenant = getTenantFromCookie(headers, idType)
+  const selectedTenant = getTenantFromCookie(headers, idType, { useTenantFilter: true })
   let redirectRoute: `/${string}` | void = undefined
 
   if (!user) {
@@ -64,6 +64,23 @@ export async function getGlobalViewRedirect({
     user,
     userHasAccessToAllTenants,
   })
+
+  if (
+    tenantOptions.length > 0 &&
+    selectedTenant === null &&
+    docID === undefined &&
+    (tenantOptions.length > 1 || userHasAccessToAllTenants(user))
+  ) {
+    // Browsing all tenants must not choose one just to open a global.
+    return view === 'document'
+      ? formatAdminURL({
+          adminRoute: payload.config.routes.admin,
+          path: `/collections/${collectionSlug}`,
+          serverURL: payload.config.serverURL,
+        })
+      : undefined
+  }
+
   const tenant =
     tenantOptions.find(({ value }) => String(value) === String(selectedTenant))?.value ??
     tenantOptions[0]?.value ??
@@ -71,6 +88,28 @@ export async function getGlobalViewRedirect({
 
   if (tenant) {
     try {
+      if (view === 'document' && docID !== undefined) {
+        const requestedDocument = await payload.find({
+          collection: collectionSlug,
+          depth: 0,
+          limit: 1,
+          overrideAccess: false,
+          pagination: false,
+          select: { id: true },
+          user,
+          where: {
+            and: [
+              { id: { equals: docID } },
+              { [tenantFieldName]: { in: tenantOptions.map(({ value }) => value) } },
+            ],
+          },
+        })
+
+        if (requestedDocument.docs.length > 0) {
+          return undefined
+        }
+      }
+
       const globalTenantDocQuery = await payload.find({
         collection: collectionSlug,
         depth: 0,

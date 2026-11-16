@@ -3,14 +3,24 @@ import type { ReactSelectOption } from '@payloadcms/ui'
 import type { ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { ConfirmationModal, SelectInput, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  ConfirmationModal,
+  SelectInput,
+  useConfig,
+  useModal,
+  useParams,
+  useRouter,
+  useSearchParams,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type {
   PluginMultiTenantTranslationKeys,
   PluginMultiTenantTranslations,
 } from '../../translations/index.js'
-import type { MultiTenantPluginConfig } from '../../types.js'
+import type { MultiTenantPluginConfig, TenantValue } from '../../types.js'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import './index.css'
@@ -21,14 +31,30 @@ const baseClass = 'tenant-selector'
 
 export const TenantSelectorClient = ({
   disabled: disabledFromProps,
+  documentContext,
   label,
   viewType,
 }: {
   disabled?: boolean
+  documentContext?: { tenantValue?: TenantValue }
   label?: MultiTenantPluginConfig['tenantSelectorLabel']
   viewType?: ViewTypes
 }) => {
-  const { entityType, modified, options, selectedTenantID, setTenant } = useTenantSelection()
+  const {
+    browsingTenantID,
+    clearDocumentContext,
+    entityType,
+    modified,
+    options,
+    selectedTenantID,
+    setDocumentContext,
+    setTenant,
+  } = useTenantSelection()
+  const documentContextKey = React.useId()
+  const { config } = useConfig()
+  const { segments } = useParams()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { closeModal, openModal } = useModal()
   const { i18n, t } = useTranslation<
     PluginMultiTenantTranslations,
@@ -38,20 +64,66 @@ export const TenantSelectorClient = ({
     ReactSelectOption | ReactSelectOption[]
   >()
 
+  React.useEffect(() => {
+    if (!documentContext) {
+      return
+    }
+
+    const value = documentContext.tenantValue
+    setDocumentContext({
+      entityType: 'document',
+      key: documentContextKey,
+      tenantID: Array.isArray(value)
+        ? (value.find((id) => id === browsingTenantID) ?? value[0])
+        : (value ?? undefined),
+    })
+
+    return () => clearDocumentContext({ key: documentContextKey })
+  }, [
+    browsingTenantID,
+    clearDocumentContext,
+    documentContext,
+    documentContextKey,
+    setDocumentContext,
+  ])
+
   const switchTenant = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[] | undefined) => {
-      if (option && 'value' in option) {
-        setTenant({ id: option.value as string, refresh: true })
-      } else {
-        setTenant({ id: undefined, refresh: true })
+      const isGlobal = entityType === 'global'
+
+      setTenant({
+        id: option && 'value' in option ? (option.value as number | string) : undefined,
+        refresh: !isGlobal,
+      })
+
+      if (isGlobal && segments?.[0] === 'collections' && segments[1]) {
+        const url = new URL(
+          formatAdminURL({
+            adminRoute: config.routes.admin,
+            path: `/collections/${segments[1]}`,
+          }),
+          window.location.origin,
+        )
+        const locale = searchParams.get('locale')
+
+        if (locale) {
+          url.searchParams.set('locale', locale)
+        }
+
+        router.push(`${url.pathname}${url.search}`)
       }
     },
-    [setTenant],
+    [config.routes.admin, entityType, router, searchParams, segments, setTenant],
   )
 
   const onChange = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[]) => {
-      if (option && 'value' in option && option.value === selectedTenantID) {
+      if (
+        option &&
+        'value' in option &&
+        option.value === selectedTenantID &&
+        option.value === browsingTenantID
+      ) {
         // If the selected option is the same as the current tenant, do nothing
         return
       }
@@ -65,7 +137,7 @@ export const TenantSelectorClient = ({
         switchTenant(option)
       }
     },
-    [selectedTenantID, entityType, modified, switchTenant, openModal],
+    [browsingTenantID, selectedTenantID, entityType, modified, switchTenant, openModal],
   )
 
   if (options.length <= 1) {

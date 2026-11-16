@@ -333,6 +333,16 @@ const config = buildConfig({
 export default config
 ```
 
+## Tenant selection
+
+The tenant selector remembers your browsing filter separately from the document you open. On document views, it shows the document's tenant. Returning to a list restores your browsing selection, including an empty selection for all tenants.
+
+Opening a tenant global with no tenant selected shows its collection list. Opening a row preserves your browsing filter. Explicitly selecting a tenant in the global's navigation selector changes the browsing filter and opens that tenant's global.
+
+The `payload-tenant` cookie continues to represent the active tenant for document operations. The `payload-tenant-filter` cookie stores the browsing selection. Custom code can read the browsing selection with `getTenantFromCookie(headers, idType, { useTenantFilter: true })`.
+
+Opening a document updates the active tenant without changing the browsing filter. Returning to a list changes the displayed filter but leaves the active tenant unchanged. Explicitly selecting or clearing the navigation filter updates both cookies. A custom server component that summarizes a list should use the browsing filter; one that follows the active tenant can continue using `payload-tenant`.
+
 ## Tenant write enforcement
 
 Every create and update to a tenant-enabled collection is checked. If the request assigns a tenant that the user is not a member of, the write is rejected with a validation error on the tenant field.
@@ -444,22 +454,19 @@ The hook returns the following context:
 ```ts
 type ContextType = {
   /**
+   * The persistent tenant filter used on lists and dashboards
+   */
+  browsingTenantID: number | string | undefined
+  /**
    * Array of options to select from
    */
   options: OptionObject[]
   /**
-   * The currently selected tenant ID
+   * The document's tenant while editing, or the browsing tenant elsewhere
    */
   selectedTenantID: number | string | undefined
   /**
-   * Prevents a refresh when the tenant is changed
-   *
-   * If not switching tenants while viewing a "global",
-   * set to true
-   */
-  setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
-  /**
-   * Sets the selected tenant ID
+   * Sets the persistent browsing tenant without reassigning the open document
    *
    * @param args.id - The ID of the tenant to select
    * @param args.refresh - Whether to refresh the page

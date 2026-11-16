@@ -398,6 +398,8 @@ export type TagsConfig = {
 } & FoldersConfig
 
 export type BaseFilter = (args: {
+  /** Whether the filter is being used for browsing or a document relationship. */
+  context?: 'list' | 'relationship'
   limit: number
   locale?: TypedLocale
   page: number

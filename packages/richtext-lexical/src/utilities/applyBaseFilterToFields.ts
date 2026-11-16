@@ -45,6 +45,7 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
         // Apply baseFilter (with backwards compatibility for baseListFilter)
         const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
         const baseFilterResult = await baseFilter?.({
+          context: 'relationship',
           limit: 0,
           page: 1,
           req,
