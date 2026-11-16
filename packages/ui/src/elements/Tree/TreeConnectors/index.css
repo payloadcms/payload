@@ -1,0 +1,50 @@
+@layer payload-default {
+  .tree-connectors {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: var(--tree-gutter, 0) 0;
+    pointer-events: none;
+
+    > span {
+      position: absolute;
+      inset-inline-start: calc(var(--tree-indent-level) * var(--tree-indent));
+      border-inline-start: var(--stroke-width-small) solid var(--color-border);
+    }
+
+    .tree-connectors__ancestor {
+      inset-block: 0;
+      inset-inline-start: calc(var(--tree-ancestor-level) * var(--tree-indent));
+      border-inline-start-style: dashed;
+      opacity: var(--tree-ghost-line-opacity, 1);
+
+      &[data-terminated] {
+        inset-block-end: 50%;
+      }
+    }
+
+    .tree-connectors__incoming {
+      inset-block: 0 50%;
+    }
+
+    .tree-connectors__outgoing {
+      inset-block: 50% 0;
+
+      &[data-style='ghost'] {
+        border-inline-start-style: dashed;
+        opacity: var(--tree-ghost-line-opacity, 1);
+      }
+    }
+
+    .tree-connectors__arm {
+      inset-block-start: 50%;
+      inline-size: var(--tree-arm-length);
+      border-inline-start: 0;
+      border-block-start: var(--stroke-width-small) solid var(--color-border);
+    }
+
+    .tree-connectors__stem {
+      inset-block: calc(50% + var(--spacer-3)) 0;
+      inset-inline-start: calc((var(--tree-indent-level) + 1) * var(--tree-indent));
+    }
+  }
+}
