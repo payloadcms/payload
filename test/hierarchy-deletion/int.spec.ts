@@ -6,11 +6,11 @@ import {
   contentSlug,
   folderFieldName,
   foldersSlug,
-  tagFieldName,
-  tagsSlug,
   hierarchyPresets,
   localizedPagesSlug,
   pagesSlug,
+  tagFieldName,
+  tagsSlug,
 } from './shared.js'
 
 test.suite('Hierarchy child reparenting', { config: './config.ts' }, () => {
@@ -588,6 +588,36 @@ test.suite('Hierarchy child reparenting', { config: './config.ts' }, () => {
       data: { title: 'Pending draft title' },
     })
 
+    const updateVersion = payload.db.updateVersion.bind(payload.db)
+    const versionUpdate = vi.spyOn(payload.db, 'updateVersion').mockImplementation(async (args) => {
+      const isMarkerCleanup = args.versionData.latest === false && !args.versionData.version
+
+      if (!isMarkerCleanup) {
+        return updateVersion(args)
+      }
+
+      const before = await payload.db.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        req: args.req,
+        where: { id: { equals: args.id } },
+      })
+      const result = await updateVersion(args)
+      const after = await payload.db.findVersions({
+        collection: pagesSlug,
+        pagination: false,
+        req: args.req,
+        where: { id: { equals: args.id } },
+      })
+
+      expect(after.docs[0]).toMatchObject({
+        createdAt: before.docs[0].createdAt,
+        updatedAt: before.docs[0].updatedAt,
+        version: before.docs[0].version,
+      })
+      return result
+    })
+
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date(Date.now() + 1000))
     try {
@@ -607,6 +637,7 @@ test.suite('Hierarchy child reparenting', { config: './config.ts' }, () => {
         (await payload.findByID({ collection: pagesSlug, id: child.id, draft: true })).title,
       ).toBe('Pending draft title')
     } finally {
+      versionUpdate.mockRestore()
       vi.useRealTimers()
     }
   })
