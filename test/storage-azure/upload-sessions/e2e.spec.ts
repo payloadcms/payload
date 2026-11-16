@@ -165,8 +165,13 @@ test.describe('storage-azure upload sessions E2E', () => {
     await pickFile(page)
     await page.getByLabel('Title').fill(title)
     await expect.poll(() => log.blockPuts).toBeGreaterThan(0)
+
+    const intentStored = page.waitForResponse(
+      (response) => new URL(response.url()).pathname.endsWith('/intent') && response.ok(),
+    )
+
     await page.locator('#action-save').click()
-    await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
+    await intentStored
     await page.reload()
 
     const [chooser] = await Promise.all([

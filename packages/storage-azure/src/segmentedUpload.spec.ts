@@ -173,6 +173,63 @@ describe('Azure segmented uploads', () => {
     expect(stagingDelete).toHaveBeenCalled()
   })
 
+  it('should keep staging and report no size when a retry finds the copy still pending', async () => {
+    const beginCopyFromURL = vi.fn()
+    const stagingDelete = vi.fn()
+    const capability = createCapability({
+      final: {
+        beginCopyFromURL,
+        getProperties: vi.fn().mockResolvedValue({ contentLength: 0, copyStatus: 'pending' }),
+      },
+      staging: { deleteIfExists: stagingDelete },
+    })
+
+    await expect(
+      capability.complete({
+        object,
+        providerState: { contentType: 'video/mp4' },
+        req,
+        segments: [{ number: 1, size: 10 }],
+      }),
+    ).rejects.toThrow('still copying')
+    expect(beginCopyFromURL).not.toHaveBeenCalled()
+    expect(stagingDelete).not.toHaveBeenCalled()
+  })
+
+  it('should replace a failed copy destination and copy again on retry', async () => {
+    const finalDelete = vi.fn().mockResolvedValue({})
+    const stagingDelete = vi.fn().mockResolvedValue({})
+    const beginCopyFromURL = vi
+      .fn()
+      .mockResolvedValue({ pollUntilDone: () => Promise.resolve({ copyStatus: 'success' }) })
+    const getProperties = vi
+      .fn()
+      .mockResolvedValueOnce({ contentLength: 0, copyStatus: 'failed' })
+      .mockResolvedValue({ contentLength: 10, copyStatus: 'success' })
+
+    const capability = createCapability({
+      final: { beginCopyFromURL, deleteIfExists: finalDelete, getProperties },
+      staging: {
+        commitBlockList: vi.fn().mockRejectedValue(restError(409)),
+        deleteIfExists: stagingDelete,
+      },
+    })
+
+    const result = await capability.complete({
+      object,
+      providerState: { contentType: 'video/mp4' },
+      req,
+      segments: [{ number: 1, size: 10 }],
+    })
+
+    expect(result).toEqual({ size: 10 })
+    expect(finalDelete).toHaveBeenCalled()
+    expect(finalDelete.mock.invocationCallOrder[0]).toBeLessThan(
+      beginCopyFromURL.mock.invocationCallOrder[0]!,
+    )
+    expect(stagingDelete).toHaveBeenCalled()
+  })
+
   it('should discard staged blocks and delete an orphaned final blob when aborting', async () => {
     const stagingDelete = vi.fn().mockResolvedValue({})
     const finalDelete = vi.fn().mockResolvedValue({})

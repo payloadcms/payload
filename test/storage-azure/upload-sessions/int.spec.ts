@@ -9,12 +9,12 @@ import { expect } from 'vitest'
 
 import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
+import { UPLOAD_STAGING_PREFIX } from '../../../packages/storage-azure/src/segmentedUpload.js'
 /* eslint-disable payload/no-relative-monorepo-imports -- Exercise the real browser uploader, which is not exported. */
 import {
   resumeUploadSession,
   uploadWithSession,
 } from '../../../packages/ui/src/utilities/uploadWithSession.js'
-import { UPLOAD_STAGING_PREFIX } from '../../../packages/storage-azure/src/segmentedUpload.js'
 /* eslint-enable payload/no-relative-monorepo-imports */
 import { test } from '../../__helpers/int/vitest.js'
 import { videosMissingContainerSlug, videosSlug } from '../shared.js'
@@ -114,11 +114,19 @@ test.suite('@payloadcms/storage-azure upload sessions', { config: './config.ts' 
     const { doc } = await complete({ data: { title: 'Kept' }, restClient, session })
 
     // A write SAS allows Put Blob on the blob it names, but that is only the staging blob.
-    await fetch(requests[0]!.url, {
+    // Drop the block parameters so the request is a Put Blob, which commits immediately.
+    const putBlobURL = new URL(requests[0]!.url)
+
+    putBlobURL.searchParams.delete('comp')
+    putBlobURL.searchParams.delete('blockid')
+
+    const response = await fetch(putBlobURL, {
       body: Buffer.from('replaced'),
       headers: { 'x-ms-blob-type': 'BlockBlob' },
       method: 'PUT',
     })
+
+    expect(response.status).toBe(201)
 
     const download = await restClient.GET(`/${videosSlug}/file/${doc.filename}`)
 

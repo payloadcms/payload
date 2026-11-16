@@ -1,6 +1,7 @@
 import type {
   BlockBlobClient,
   ContainerClient,
+  CopyStatusType,
   StorageSharedKeyCredential,
 } from '@azure/storage-blob'
 import type {
@@ -103,13 +104,24 @@ export const createSegmentedUpload = ({
       const finalBlob = getFinalBlob({ object })
       const stagingBlob = getStagingBlob({ object })
 
-      // A retry after a lost response: the copy already happened.
-      const existing = await getSize({ blob: finalBlob })
+      const existing = await getProperties({ blob: finalBlob })
 
-      if (existing !== null) {
-        await stagingBlob.deleteIfExists()
+      // Azure creates the destination as soon as it accepts a copy, so its existence alone does
+      // not mean the copy finished. Only a successful copy lets staging go.
+      if (existing) {
+        if (existing.copyStatus === 'pending') {
+          throw new Error('Azure is still copying the uploaded blob.')
+        }
 
-        return { size: existing }
+        if (existing.copyStatus === 'aborted' || existing.copyStatus === 'failed') {
+          // The destination holds nothing usable; remove it so the copy below can run again.
+          await finalBlob.deleteIfExists()
+        } else {
+          // A retry after a lost response: the copy already happened.
+          await stagingBlob.deleteIfExists()
+
+          return { size: existing.contentLength ?? -1 }
+        }
       }
 
       const { contentType } = providerState as AzureProviderState
@@ -145,7 +157,7 @@ export const createSegmentedUpload = ({
 
       await stagingBlob.deleteIfExists()
 
-      return { size: (await getSize({ blob: finalBlob })) ?? -1 }
+      return { size: (await getProperties({ blob: finalBlob }))?.contentLength ?? -1 }
     },
 
     getSegmentRequests: ({ expiresIn, object, segments }) => {
@@ -247,9 +259,13 @@ const getBlocks = async ({
   }
 }
 
-const getSize = async ({ blob }: { blob: BlockBlobClient }): Promise<null | number> => {
+const getProperties = async ({
+  blob,
+}: {
+  blob: BlockBlobClient
+}): Promise<{ contentLength?: number; copyStatus?: CopyStatusType } | null> => {
   try {
-    return (await blob.getProperties()).contentLength ?? -1
+    return await blob.getProperties()
   } catch (err) {
     if (getStatusCode({ err }) === 404) {
       return null
