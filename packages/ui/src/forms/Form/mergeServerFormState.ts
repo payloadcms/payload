@@ -10,8 +10,8 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 export type AcceptValues =
   | {
       /**
-       * Set to `false` to accept server field values while preserving the locally modified field, local array row order, and guarding against mismatched row IDs.
-       * Callers must reject stale responses before merging; this option does not detect local edits made while a request was pending.
+       * Set to `false` to accept server field values while preserving local row membership and order, and guarding against mismatched row IDs.
+       * Callers must reject stale responses before merging.
        * When `true` or omitted, existing local field values are preserved unless the field was added by the server.
        * @default undefined
        */
@@ -69,16 +69,11 @@ function parseArrayFieldPath(path: string): {
 }
 
 /**
- * This function receives form state from the server and intelligently merges it into the client state.
- * The server contains extra properties that the client may not have, e.g. custom components and error states.
- * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
- * Doing this would cause the client to lose any local changes to those fields.
- *
- * Note: Local state is the source of truth, not the new server state that is getting merged in. This is critical for array row
- * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
- *
- * This function applies some defaults, as well as cleans up the server response in preparation for the client.
- * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
+ * Merges a current server response into client form state.
+ * Callers must reject responses invalidated by newer edits before invoking this function.
+ * Existing values are preserved unless `acceptValues` requests server values.
+ * Authoritative merges accept server row membership and order; other merges retain local row structure and match values by row ID.
+ * Client-only field and row metadata is preserved when the server has not replaced it.
  */
 export const mergeServerFormState = ({
   acceptValues,
@@ -152,10 +147,11 @@ export const mergeServerFormState = ({
     }
   }
 
-  const isAutosaveResponse =
-    typeof acceptValues === 'object' &&
-    acceptValues !== null &&
-    acceptValues.overrideLocalChanges === false
+  const shouldAcceptValues =
+    acceptValues === true ||
+    (typeof acceptValues === 'object' &&
+      acceptValues !== null &&
+      acceptValues.overrideLocalChanges === false)
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in previousState) && !incomingField.addedByServer) {
@@ -164,17 +160,10 @@ export const mergeServerFormState = ({
 
     // Server-added fields need their values even when existing local values are being preserved.
     // Callers must reject stale responses before merging so accepted server values cannot overwrite newer local edits.
-    let shouldAcceptValue =
-      incomingField.addedByServer ||
-      acceptValues === true ||
-      (isAutosaveResponse && !currentState[path]?.isModified)
+    let shouldAcceptValue = incomingField.addedByServer || shouldAcceptValues
 
-    // For array row fields, verify the row IDs match at the given index before accepting server values.
-    // If rows were reordered or deleted while the request was in-flight,
-    // the same index may refer to different rows, and accepting the server value would overwrite the wrong row's data.
-    //
-    // This guard only applies during autosave.
-    // On explicit save (acceptValues === true), the server response is authoritative and this check is bypassed.
+    // Row-preserving merges must not apply values from a different row at the same index.
+    // Authoritative merges have already reconciled incoming row membership above.
     if (shouldAcceptValue && !incomingField.addedByServer && acceptValues !== true) {
       const parsed = parseArrayFieldPath(path)
       if (parsed) {
@@ -210,11 +199,7 @@ export const mergeServerFormState = ({
       newState[path].errorPaths = []
     }
 
-    // Deeply merge the rows array to preserve local changes made while the request was pending.
-    // For example, the server response could contain a row that was deleted locally.
-    // Merge server properties into matching local rows.
     // Read `currentState`, since incoming rows have already been assigned to `newState`.
-    //
     // Authoritative responses determine row membership and order.
     // Other responses preserve local row membership.
     if (Array.isArray(incomingField.rows) && path in currentState) {
@@ -227,7 +212,7 @@ export const mergeServerFormState = ({
           ...serverRow,
         }))
       } else {
-        // Autosave: client is source of truth, use ID-based matching
+        // Non-authoritative merges retain local membership and order.
         newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
         incomingField.rows.forEach((row) => {
@@ -241,17 +226,14 @@ export const mergeServerFormState = ({
               ...row,
             }
           } else if (row.addedByServer) {
-            // Computed array and block rows are appended to the end of the local array.
-            // Local rows may have been reordered while the request was pending,
-            // so the server's insertion index may be stale and cannot safely determine the local position.
+            // Appending server-added rows preserves the existing local order.
             const newRow = { ...row }
             delete newRow.addedByServer
             newState[path].rows.push(newRow)
           }
         })
 
-        // Sync the value field to match the actual row count after merging.
-        // Client is source of truth for row count when rows were added/removed during the request.
+        // Keep the serialized row count aligned with the retained local membership.
         if ('value' in incomingField) {
           const rowCount = newState[path].rows.length
 

@@ -968,6 +968,36 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
   })
 
+  test('should accept current server-computed values after editing multiple fields', () => {
+    const initialState: FormState = {
+      title: { initialValue: 'Before', value: 'Before' },
+      content: { initialValue: 'Before', value: 'Before' },
+    }
+    const titleState = fieldReducer(initialState, {
+      type: 'UPDATE',
+      path: 'title',
+      value: ' client title ',
+    })
+    const currentState = fieldReducer(titleState, {
+      type: 'UPDATE',
+      path: 'content',
+      value: ' client content ',
+    })
+    const state = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState,
+      incomingState: {
+        title: { initialValue: 'CLIENT TITLE', value: 'CLIENT TITLE' },
+        content: { initialValue: 'CLIENT CONTENT', value: 'CLIENT CONTENT' },
+      },
+    })
+
+    expect(getDataFromFormState(state, true)).toEqual({
+      title: 'CLIENT TITLE',
+      content: 'CLIENT CONTENT',
+    })
+  })
+
   test('should remove descendants when the server clears an array', () => {
     const state = mergeServerFormState({
       acceptValues: true,
@@ -1622,7 +1652,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         {
           items: {
             initialValue: null,
-            isModified: true,
             rows: [],
             value: 0,
           },
@@ -1643,7 +1672,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
             value: 0,
           },
           title: {
-            isModified: true,
             value: 'After',
           },
         },
@@ -1770,7 +1798,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     )
 
     test.for(rowFieldCases)(
-      'should retain a null-to-empty $path change after a sibling edit and stale response',
+      'should retain a null-to-empty $path change and sibling edits during a metadata refresh',
       async ({ path }, { payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const data = { [path]: null, title: 'Before' }
@@ -1786,7 +1814,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
           value: 'After',
         })
         const state = mergeServerFormState({
-          acceptValues: { overrideLocalChanges: false },
           currentState,
           incomingState,
         })
