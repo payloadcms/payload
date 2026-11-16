@@ -2003,6 +2003,11 @@ export { createFolderField } from './hierarchy/createFolderField.js'
 export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
 export { createTagField } from './hierarchy/createTagField.js'
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
+export { getHierarchyContents } from './hierarchy/getHierarchyContents.js'
+export type {
+  HierarchyContents,
+  HierarchyContentsSource,
+} from './hierarchy/getHierarchyContents.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export { getNestedDocsBranch } from './hierarchy/getNestedDocsBranch.js'
 export { canReadNestedDocsTree } from './hierarchy/canReadNestedDocsTree.js'

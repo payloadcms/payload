@@ -10,6 +10,7 @@ import { getActivityWidgetDocsHandler } from '../widgets/Activity/utils/getActiv
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
+import { getHierarchyContentsHandler } from './getHierarchyContents.js'
 import {
   getUpcomingScheduledPublishHandler,
   schedulePublishHandler,
@@ -33,6 +34,7 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'get-activity-widget-docs': getActivityWidgetDocsHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
+  'hierarchy-contents': getHierarchyContentsHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
