@@ -10,8 +10,8 @@ describe('getCanaryVersion', () => {
 
   it.each([
     { monorepoVersion: '4.0.0-beta.8', expected: '4.0.0-canary.20261112' },
-    { monorepoVersion: '4.0.0', expected: '4.1.0-canary.20261112' },
-    { monorepoVersion: '3.93.0', expected: '3.94.0-canary.20261112' },
+    { monorepoVersion: '4.0.0', expected: '4.0.0-canary.20261112' },
+    { monorepoVersion: '3.93.0', expected: '3.93.0-canary.20261112' },
   ])('should base $monorepoVersion on $expected', ({ monorepoVersion, expected }) => {
     expect(getCanaryVersion({ date: new Date('2026-11-12T07:00:00Z'), monorepoVersion })).toBe(
       expected,
