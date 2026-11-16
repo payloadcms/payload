@@ -11,6 +11,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
+  suite: 'form-state',
   config: {
     admin: {
       components: {
@@ -53,5 +54,4 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
-  suite: 'form-state',
 })

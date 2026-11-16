@@ -127,6 +127,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const operation = useOperation()
 
   const blockType = formData.blockType
+
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
