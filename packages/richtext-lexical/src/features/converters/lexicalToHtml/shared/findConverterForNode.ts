@@ -6,6 +6,8 @@ import type { HTMLConverterAsync, HTMLConvertersAsync } from '../async/types.js'
 import type { HTMLConverter, HTMLConverters } from '../sync/types.js'
 import type { ProvidedCSS } from './types.js'
 
+import { getExplicitDirection } from '../../utilities/getExplicitDirection.js'
+
 export function findConverterForNode<
   TConverters extends HTMLConverters | HTMLConvertersAsync,
   TConverter extends HTMLConverter | HTMLConverterAsync,
@@ -24,6 +26,7 @@ export function findConverterForNode<
 }): {
   converterForNode: TConverter | undefined
   providedCSSString: string
+  providedDirAttribute: string
   providedStyleTag: string
 } {
   let converterForNode: TConverter | undefined
@@ -97,9 +100,13 @@ export function findConverterForNode<
   }
   const providedStyleTag = providedCSSString?.length ? ` style="${providedCSSString}"` : ''
 
+  const direction = getExplicitDirection({ node })
+  const providedDirAttribute = direction ? ` dir="${direction}"` : ''
+
   return {
     converterForNode: converterForNode ?? unknownConverter,
     providedCSSString,
+    providedDirAttribute,
     providedStyleTag,
   }
 }

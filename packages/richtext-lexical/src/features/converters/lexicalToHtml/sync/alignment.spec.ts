@@ -98,7 +98,7 @@ describe('convertLexicalToHTML - paragraph alignment', () => {
     // For RTL content, `start` must NOT be resolved to `left` - it must stay logical
     // (or resolve to `right`, its physical RTL equivalent), otherwise the paragraph
     // renders visually misaligned against the text's own reading direction.
-    expect(html).not.toBe('<p style="text-align: left;">مرحبا</p>')
-    expect(html).toBe('<p style="text-align: start;">مرحبا</p>')
+    expect(html).not.toBe('<p dir="rtl" style="text-align: left;">مرحبا</p>')
+    expect(html).toBe('<p dir="rtl" style="text-align: start;">مرحبا</p>')
   })
 })

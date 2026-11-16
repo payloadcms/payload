@@ -1283,6 +1283,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
   const converterBaseArgs = {
     parent: {} as any,
     providedCSSString: '',
+    providedDirAttribute: '',
     providedStyleTag: '',
     submissionData: undefined,
     textContent: '',
