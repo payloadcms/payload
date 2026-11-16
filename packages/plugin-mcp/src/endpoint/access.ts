@@ -1,6 +1,6 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { executeAuthStrategies, getAccessResults, UnauthorizedError } from 'payload'
+import { executeAuthStrategies, Forbidden, getAccessResults, UnauthorizedError } from 'payload'
 import { extractBearerToken } from 'payload/shared'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
@@ -19,8 +19,8 @@ export type GetAuthorizedMCPArgs = {
 }
 
 /**
- * Authenticates an MCP request and removes items the user cannot access.
- * `overrideAccess` skips Payload and MCP item access checks.
+ * Authenticates an MCP request, rejects users the plugin's `access` denies, and removes items the
+ * user cannot access. `overrideAccess` skips Payload and MCP access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
   isHTTP = false,
@@ -83,23 +83,54 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     return { items: [], overrideAccess }
   }
 
+  // Computed once for the plugin's `access` and every item's
+  const permissions = overrideAccess ? undefined : await getAccessResults({ req })
+
+  if (!overrideAccess && !(await canUseMCP({ permissions, req }))) {
+    throw new Forbidden(req.t)
+  }
+
   return {
     items: await filterMCPItems({
       items: pluginConfig.items,
       overrideAccess,
+      permissions,
       req,
     }),
     overrideAccess,
   }
 }
 
+/**
+ * Runs the plugin's top-level `access`, which decides whether the user can use MCP at all. Doesn't
+ * check `overrideAccess`, so callers skip it themselves.
+ */
+export const canUseMCP = async ({
+  permissions,
+  req,
+}: {
+  /** Computed when missing and `access` is set. */
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+}): Promise<boolean> => {
+  const { access } = getPluginConfig({ config: req.payload.config })
+
+  return (
+    !access ||
+    (await access({ permissions: permissions ?? (await getAccessResults({ req })), req }))
+  )
+}
+
 export const filterMCPItems = async ({
   items,
   overrideAccess,
+  permissions: providedPermissions,
   req,
 }: {
   items: MCPItem[]
   overrideAccess: boolean
+  /** Computed when missing. */
+  permissions?: SanitizedPermissions
   req: PayloadRequest
 }): Promise<MCPItem[]> => {
   // Match Payload core: overrideAccess bypasses access evaluation
@@ -109,7 +140,7 @@ export const filterMCPItems = async ({
 
   const authorizedItems: MCPItem[] = []
 
-  const permissions = await getAccessResults({ req })
+  const permissions = providedPermissions ?? (await getAccessResults({ req }))
 
   for (const item of items) {
     if (!(await checkItemAccess({ item, permissions, req }))) {
