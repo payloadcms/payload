@@ -190,6 +190,33 @@ describe('Queues - Payload', () => {
       expect(response.status).toBe(200)
     })
 
+    it('will accept cookie auth on jobs runner from a same-origin request', async () => {
+      const response = await restClient.GET('/payload-jobs/run?silent=true', {
+        headers: {
+          Cookie: `payload-token=${token}`,
+          'Sec-Fetch-Site': 'same-origin',
+        },
+      })
+
+      expect(response.status).toBe(200)
+    })
+
+    it.each(['/payload-jobs/run?silent=true', '/payload-jobs/handle-schedules'])(
+      'will reject cookie auth on %s from a cross-site navigation',
+      async (path) => {
+        const response = await restClient.GET(path, {
+          headers: {
+            Cookie: `payload-token=${token}`,
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+          },
+        })
+
+        expect(response.status).toBe(401)
+      },
+    )
+
     it('will fail access control on local api .queue when passing overrideAccess: false', async () => {
       await expect(
         payload.jobs.queue({
