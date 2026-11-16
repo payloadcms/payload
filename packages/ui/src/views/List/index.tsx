@@ -13,6 +13,7 @@ import type {
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
+  Where,
 } from 'payload'
 
 import { docAccessOperation } from 'payload'
@@ -214,33 +215,41 @@ export const renderListView = async (
 
   query.sort = collectionPreferences?.sort || defaultSort
 
-  const baseFilterConstraint = await (
-    collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
-  )?.({
-    limit: query.limit,
-    page: query.page,
-    req,
-    sort: query.sort,
-  })
+  let baseFilterConstraint: undefined | Where
+  let whereWithMergedSearch: Where
 
-  let whereWithMergedSearch = mergeListSearchAndWhere({
-    collectionConfig,
-    search: typeof query?.search === 'string' ? query.search : undefined,
-    where: combineWhereConstraints([query?.where, baseFilterConstraint]),
-  })
+  // The base filter receives the sort, so this runs again if the sort changes below
+  const resolveWhere = async (sort: string | undefined) => {
+    baseFilterConstraint = await (
+      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+    )?.({
+      limit: query.limit,
+      page: query.page,
+      req,
+      sort,
+    })
 
-  if (trash === true) {
-    whereWithMergedSearch = {
-      and: [
-        whereWithMergedSearch,
-        {
-          deletedAt: {
-            exists: true,
+    whereWithMergedSearch = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: combineWhereConstraints([query?.where, baseFilterConstraint]),
+    })
+
+    if (trash === true) {
+      whereWithMergedSearch = {
+        and: [
+          whereWithMergedSearch,
+          {
+            deletedAt: {
+              exists: true,
+            },
           },
-        },
-      ],
+        ],
+      }
     }
   }
+
+  await resolveWhere(query.sort)
 
   let Table: React.ReactNode | React.ReactNode[] = null
   let groupedData: ListViewGroup[] | undefined
@@ -482,6 +491,7 @@ export const renderListView = async (
           msg: `Ignoring the saved sort "${query.sort}" for collection ${collectionSlug}, as it cannot be queried`,
         })
         query.sort = defaultSort
+        await resolveWhere(defaultSort)
         await fetchListData()
       } else {
         throw err
