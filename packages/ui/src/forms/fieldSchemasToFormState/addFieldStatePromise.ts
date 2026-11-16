@@ -266,6 +266,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           // @ts-expect-error-next-line
           jsonError,
           operation,
+          path: path.split('.'),
           preferences,
           previousValue: previousFormState?.[path]?.initialValue,
           req,
