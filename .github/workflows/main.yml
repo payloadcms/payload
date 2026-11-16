@@ -640,7 +640,7 @@ jobs:
           restore-build: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
           aws-region: us-west-2
@@ -674,7 +674,7 @@ jobs:
       # figma/figma image skip the ~55s ECR pull.
       - name: Cache Content API image
         id: cache-content-api-image
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: /tmp/content-api-image.tar
           key: content-api-image-${{ steps.resolve-image.outputs.tag }}
@@ -763,6 +763,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
+          node-version: 24.22.3
           restore-build: true
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
@@ -772,6 +773,6 @@ jobs:
       - name: Analyze esbuild bundle size
         # Temporarily disable this for community PRs until this can be implemented in a separate workflow
         if: github.event.pull_request.head.repo.fork == false
-        uses: exoego/esbuild-bundle-analyzer@v1
+        uses: exoego/esbuild-bundle-analyzer@7a1880abea0c4034922134617078f75cf1bf1a28 # v2.1.0
         with:
           metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
