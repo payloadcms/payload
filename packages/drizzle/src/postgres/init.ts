@@ -2,7 +2,10 @@ import type { Init } from 'payload'
 
 import type { BasePostgresAdapter } from './types.js'
 
-import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
+import {
+  addMissingTablesToRelations,
+  buildDrizzleRelations,
+} from '../schema/buildDrizzleRelations.js'
 import { buildRawSchema } from '../schema/buildRawSchema.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
 import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
@@ -39,6 +42,8 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
   })
 
   await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
+
+  addMissingTablesToRelations({ adapter: this })
 
   this.schema = {
     pgSchema: this.pgSchema,

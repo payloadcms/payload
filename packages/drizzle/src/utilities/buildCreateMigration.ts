@@ -5,9 +5,16 @@ import path from 'path'
 import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter, DrizzleSnapshotJSON } from '../types.js'
+import type { DrizzleAdapter, DrizzleMigrationHint, DrizzleSnapshotJSON } from '../types.js'
 
 import { getMigrationTemplate } from './getMigrationTemplate.js'
+import {
+  getDroppedSnapshotEntities,
+  invertMigrationHints,
+  promptDataLoss,
+  promptRenameSource,
+  resolveMigrationHints,
+} from './resolveMigrationHints.js'
 
 export const buildCreateMigration = ({
   executeMethod,
@@ -92,10 +99,36 @@ export const buildCreateMigration = ({
       }
 
       payload.logger.info('Starting migration: generating UP statements...')
-      const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+      let upHints: DrizzleMigrationHint[] = []
+
+      const sqlStatementsUp = await resolveMigrationHints({
+        chooseRenameSource: forceAcceptWarning
+          ? () => Promise.resolve(null)
+          : shouldPrompt
+            ? promptRenameSource
+            : undefined,
+        confirmDataLoss: forceAcceptWarning
+          ? () => Promise.resolve(true)
+          : shouldPrompt
+            ? promptDataLoss
+            : undefined,
+        getDroppedEntities: () =>
+          getDroppedSnapshotEntities({ after: drizzleJsonAfter, before: drizzleJsonBefore }),
+        run: (hints) => {
+          upHints = hints
+          return generateMigration(drizzleJsonBefore, drizzleJsonAfter, { hints })
+        },
+      })
 
       payload.logger.info('Migration UP complete. Generating DOWN statements...')
-      const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+      // DOWN reverses the renames chosen for UP; everything else it re-creates or drops.
+      const sqlStatementsDown = await resolveMigrationHints({
+        chooseRenameSource: () => Promise.resolve(null),
+        confirmDataLoss: () => Promise.resolve(true),
+        getDroppedEntities: () => [],
+        initialHints: invertMigrationHints({ hints: upHints }),
+        run: (hints) => generateMigration(drizzleJsonAfter, drizzleJsonBefore, { hints }),
+      })
 
       payload.logger.info('Migration DOWN statements generation complete.')
 

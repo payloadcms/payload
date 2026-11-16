@@ -29,7 +29,7 @@ export const createRequireDrizzleKit =
       // drizzle-kit v1's SQLite push takes a raw `SQLiteClient` ({ query, run, batch }) rather
       // than the drizzle instance (and has no entities filter). We adapt the drizzle instance
       // into that shape via its driver-agnostic raw-SQL methods so this works for libsql and D1.
-      pushSchema: (schema, drizzle, _entitiesConfig, migrationsConfig) => {
+      pushSchema: (schema, drizzle, _entitiesConfig, migrationsConfig, options) => {
         const db = drizzle as unknown as {
           all: <T>(query: SQL) => Promise<T[]>
           run: (query: SQL) => Promise<unknown>
@@ -47,7 +47,12 @@ export const createRequireDrizzleKit =
           },
         }
 
-        return pushSchema(schema, client, migrationsConfig)
+        return pushSchema(
+          schema,
+          client,
+          migrationsConfig,
+          options as Parameters<typeof pushSchema>[3],
+        )
       },
       upSnapshot: (snapshot) => up(snapshot as Parameters<typeof up>[0]),
     }

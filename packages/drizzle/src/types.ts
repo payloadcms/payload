@@ -160,6 +160,7 @@ export type RequireDrizzleKit = () => Promise<{
     drizzle: DrizzleAdapter['drizzle'],
     entitiesConfig?: EntitiesFilterConfig,
     migrationsConfig?: { schema?: string; table?: string },
+    options?: { hints?: DrizzleMigrationHint[] },
   ) => Promise<{
     apply: () => Promise<void>
     hints: { hint: string; statement?: string }[]

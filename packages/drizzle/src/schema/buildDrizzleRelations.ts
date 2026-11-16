@@ -1,8 +1,10 @@
 import type { AnyRelationsBuilderConfig, RelationsRecord } from 'drizzle-orm'
 
-import { defineRelations } from 'drizzle-orm'
+import { defineRelations, defineRelationsPart } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
+
+type AdapterRelations = DrizzleAdapter['relations']
 
 /**
  * Builds the drizzle v1 (RQB v2) relational config from Payload's abstract `rawRelations`.
@@ -18,7 +20,11 @@ import type { DrizzleAdapter } from '../types.js'
  * `one` counterpart purely through the shared alias.
  */
 export const buildDrizzleRelations = ({ adapter }: { adapter: DrizzleAdapter }) => {
-  adapter.relations = defineRelations(adapter.tables, (r) => {
+  // Relations already present were added by `beforeSchemaInit` hooks (`destroy` clears them
+  // before a re-init), so keep them on top of the ones Payload builds.
+  const hookRelations = adapter.relations
+
+  const payloadRelations = defineRelations(adapter.tables, (r) => {
     const config: AnyRelationsBuilderConfig = {}
 
     const getTableConfig = (tableName: string): RelationsRecord => {
@@ -73,5 +79,50 @@ export const buildDrizzleRelations = ({ adapter }: { adapter: DrizzleAdapter }) 
     }
 
     return config
-  }) as DrizzleAdapter['relations']
+  }) as AdapterRelations
+
+  adapter.relations = mergeDrizzleRelations({ base: payloadRelations, extra: hookRelations })
+}
+
+/**
+ * Merges two relational configs table by table, so relations defined separately (e.g. with
+ * `defineRelationsPart` in a schema hook) extend a table's relations instead of replacing them.
+ */
+export const mergeDrizzleRelations = ({
+  base,
+  extra,
+}: {
+  base: AdapterRelations
+  extra: AdapterRelations | undefined
+}): AdapterRelations => {
+  const merged: AdapterRelations = { ...base }
+
+  for (const tableName in extra) {
+    const baseTable = base[tableName]
+    const extraTable = extra[tableName]
+
+    merged[tableName] =
+      baseTable && extraTable && baseTable !== extraTable
+        ? { ...baseTable, relations: { ...baseTable.relations, ...extraTable.relations } }
+        : extraTable
+  }
+
+  return merged
+}
+
+/**
+ * Tables added by `afterSchemaInit` hooks are created after relations are built. Register them
+ * without relations so they are still available on `db.query`.
+ */
+export const addMissingTablesToRelations = ({ adapter }: { adapter: DrizzleAdapter }) => {
+  const missingTables = Object.fromEntries(
+    Object.entries(adapter.tables).filter(([tableName]) => !adapter.relations[tableName]),
+  )
+
+  if (Object.keys(missingTables).length) {
+    adapter.relations = {
+      ...adapter.relations,
+      ...(defineRelationsPart(missingTables) as AdapterRelations),
+    }
+  }
 }

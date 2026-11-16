@@ -2,7 +2,14 @@ import { dequal } from 'dequal'
 import prompts from 'prompts'
 
 import type { BasePostgresAdapter } from '../postgres/types.js'
-import type { DrizzleAdapter, PostgresDB, RawTable } from '../types.js'
+import type { DrizzleAdapter, DrizzleMigrationHint, PostgresDB, RawTable } from '../types.js'
+
+import {
+  getDroppedEntitiesFromError,
+  promptDataLoss,
+  promptRenameSource,
+  resolveMigrationHints,
+} from './resolveMigrationHints.js'
 
 const previousSchema: {
   localeCodes: null | string[]
@@ -44,13 +51,40 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
 
   const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
 
-  // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { apply, hints } = await pushSchema(adapter.schema, adapter.drizzle, {
-    // Drizzle extensionsFilter supports only postgis for now
-    // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
-    extensions: extensions.postgis ? ['postgis'] : undefined,
-    schemas: [adapter.schemaName || 'public'],
-    tables: tablesFilter,
+  const push = (hints: DrizzleMigrationHint[]) =>
+    pushSchema(
+      adapter.schema,
+      adapter.drizzle,
+      {
+        // Drizzle extensionsFilter supports only postgis for now
+        // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
+        extensions: extensions.postgis ? ['postgis'] : undefined,
+        schemas: [adapter.schemaName || 'public'],
+        tables: tablesFilter,
+      },
+      undefined,
+      { hints },
+    )
+
+  // Prompts when Drizzle can't tell a rename from a create, or when the push loses data.
+  const { apply, hints } = await resolveMigrationHints({
+    chooseRenameSource: promptRenameSource,
+    confirmDataLoss: promptDataLoss,
+    // Push diffs against the live database, so there is no previous snapshot to list dropped
+    // entities from. Creating every ambiguous entity makes drizzle-kit report the entities it
+    // would drop (those holding data) as data-loss confirmations; those are the rename candidates.
+    getDroppedEntities: async ({ hints: currentHints, pending }) => {
+      try {
+        await push([
+          ...currentHints,
+          ...pending.map(({ entity, kind }) => ({ type: 'create' as const, entity, kind })),
+        ])
+        return []
+      } catch (error) {
+        return getDroppedEntitiesFromError({ error })
+      }
+    },
+    run: push,
   })
 
   const warnings = hints.map(({ hint }) => hint)
