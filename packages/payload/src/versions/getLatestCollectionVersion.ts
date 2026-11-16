@@ -11,7 +11,6 @@ type Args = {
   config: SanitizedCollectionConfig
   id: number | string
   payload: Payload
-  published?: boolean
   query: FindOneArgs
   req?: PayloadRequest
 }
@@ -20,15 +19,14 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   config,
   payload,
-  published,
   query,
   req,
 }: Args): Promise<T | undefined> => {
   let latestVersion!: TypeWithVersion<T>
 
-  const whereQuery = published
-    ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
-    : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
+  const whereQuery: Where = {
+    and: [{ parent: { equals: id } }, { latest: { equals: true } }],
+  }
 
   if (hasDraftsEnabled(config)) {
     const { docs } = await payload.db.findVersions<T>({
@@ -38,19 +36,15 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery as unknown as Where),
+      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery),
     })
     latestVersion = docs[0]!
   }
 
   if (!latestVersion) {
-    if (!published) {
-      const doc = await payload.db.findOne<T>({ ...query, req })
+    const doc = await payload.db.findOne<T>({ ...query, req })
 
-      return doc ?? undefined
-    }
-
-    return undefined
+    return doc ?? undefined
   }
 
   latestVersion.version.id = id

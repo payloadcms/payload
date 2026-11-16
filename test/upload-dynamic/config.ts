@@ -7,7 +7,9 @@ import { devUser } from '../credentials.js'
 import { publicVersionedCloudAdapter } from '../plugin-cloud-storage/versionedCloudStorage.js'
 import { DynamicMedia } from './collections/DynamicMedia.js'
 import { PublicCloudMedia } from './collections/PublicCloudMedia.js'
-import { publicCloudMediaSlug } from './shared.js'
+import { VersionedCloudMedia } from './collections/VersionedCloudMedia.js'
+import { VersionedDynamicMedia } from './collections/VersionedDynamicMedia.js'
+import { publicCloudMediaSlug, versionedCloudMediaSlug } from './shared.js'
 import {
   requestCropTransformer,
   uploadBridgeTransformer,
@@ -24,11 +26,16 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [DynamicMedia, PublicCloudMedia],
+    collections: [DynamicMedia, PublicCloudMedia, VersionedDynamicMedia, VersionedCloudMedia],
+    localization: { defaultLocale: 'en', locales: ['en', 'es'] },
     plugins: [
       cloudStoragePlugin({
         collections: {
           [publicCloudMediaSlug]: {
+            adapter: publicVersionedCloudAdapter,
+            disablePayloadAccessControl: true,
+          },
+          [versionedCloudMediaSlug]: {
             adapter: publicVersionedCloudAdapter,
             disablePayloadAccessControl: true,
           },

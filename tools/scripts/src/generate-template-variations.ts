@@ -15,6 +15,7 @@ import { PROJECT_ROOT, TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
+import { ensurePnpmBuildApprovals } from 'create-payload-app/lib/configure-pnpm-builds.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
 import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
@@ -326,11 +327,11 @@ async function main() {
      * Non-workspace variants must install in isolation from the monorepo. `--ignore-workspace`
      * can't do this under pnpm v11 (it reads the flag as "skip pnpm-workspace.yaml entirely",
      * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a transient standalone
-     * workspace root; it's removed before commit so the generated template ships unchanged.
+     * workspace root; it's removed before commit (vercel variants then get their shipped approvals).
      * dangerouslyAllowAllBuilds runs every dependency's build script: this is throwaway generation
      * tooling, not a shipped config, so there's no allowlist to drift out of sync with the templates'
      * deps (e.g. the d1 variant's `workerd`). The install always runs under v11 here — the vercel
-     * variants' pnpm@10 packageManager pin is added after install — so package.json#pnpm is ignored
+     * variants' packageManager pin is added after install — so package.json#pnpm is ignored
      * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
      * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
      */
@@ -411,6 +412,12 @@ async function main() {
       await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
     }
 
+    // Vercel variants pin pnpm >= 11, which reads build approvals only from pnpm-workspace.yaml.
+    // They deploy from the repo without create-payload-app, so they must ship the approvals.
+    if (targetDeployment === 'vercel') {
+      await ensurePnpmBuildApprovals({ packageManager: 'pnpm', projectDir: destDir })
+    }
+
     // TODO: Email?
 
     // TODO: Sharp?
@@ -476,7 +483,7 @@ async function handleDeploymentTarget({
       delete packageJson.engines.pnpm
     }
 
-    const pnpmVersion = await getLatestPackageVersion({ packageName: 'pnpm' })
+    const pnpmVersion = await getRepoPnpmVersion()
 
     packageJson.packageManager = `pnpm@${pnpmVersion}`
 
@@ -627,41 +634,14 @@ async function bumpPluginTemplate(payloadVersion: string) {
 }
 
 /**
- * Fetches the latest version of a package from the NPM registry.
- *
- * Used in determining the latest version of Payload to use in the generated templates.
+ * Reads the pnpm version the monorepo and CI use, so shipped templates only pin a version whose
+ * build-approval behavior CI has exercised.
  */
-async function getLatestPackageVersion({
-  packageName = 'payload',
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-}) {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
-    const data = await response.json()
-
-    // Monster chaining for type safety just checking for data.latest
-    const latestVersion =
-      data &&
-      typeof data === 'object' &&
-      'latest' in data &&
-      data.latest &&
-      typeof data.latest === 'string'
-        ? data.latest
-        : null
-
-    log(`Found latest version of ${packageName}: ${latestVersion}`)
-
-    return latestVersion
-  } catch (error) {
-    console.error('Error fetching Payload version:', error)
-    throw error
+async function getRepoPnpmVersion(): Promise<string> {
+  const toolVersions = await fs.readFile(path.resolve(PROJECT_ROOT, '.tool-versions'), 'utf8')
+  const version = /^pnpm\s+(\S+)\s*$/m.exec(toolVersions)?.[1]
+  if (!version) {
+    throw new Error('No pnpm version found in .tool-versions')
   }
+  return version
 }

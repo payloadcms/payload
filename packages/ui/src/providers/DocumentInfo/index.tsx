@@ -286,7 +286,9 @@ const DocumentInfo: React.FC<
   })
 
   const getDocPreferences = useCallback(() => {
-    return getPreference<DocumentPreferences>(preferencesKey)
+    return preferencesKey
+      ? getPreference<DocumentPreferences>(preferencesKey)
+      : Promise.resolve({ fields: {} })
   }, [getPreference, preferencesKey])
 
   const setDocFieldPreferences = useCallback<DocumentInfoContext['setDocFieldPreferences']>(

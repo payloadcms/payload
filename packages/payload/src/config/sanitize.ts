@@ -303,6 +303,17 @@ const addDefaultDashboardWidgets = ({
 
 export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+
+  // RFC 6265 cookie names use HTTP token characters.
+  if (
+    typeof configWithDefaults.cookiePrefix !== 'string' ||
+    /[^\w!#$%&'*+.^`|~-]/.test(configWithDefaults.cookiePrefix)
+  ) {
+    throw new InvalidConfiguration(
+      '`cookiePrefix` must contain only valid cookie-name characters; whitespace is not allowed.',
+    )
+  }
+
   const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
     throw new InvalidConfiguration(
