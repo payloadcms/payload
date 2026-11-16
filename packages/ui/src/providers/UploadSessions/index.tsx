@@ -141,6 +141,8 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   const adoptionsRef = useRef(new Map<string, Promise<File | null>>())
   /** Sessions this tab is resuming after a reload, reported to other tabs as held. */
   const recoveringSessionIDsRef = useRef(new Set<string>())
+  /** Goes up when the user changes, so a lookup started for the previous user is discarded. */
+  const ownerGenerationRef = useRef(0)
   /** Upload toasts that belong to the signed-in user and are dismissed when the user changes. */
   const toastIDsRef = useRef(new Set<string>())
 
@@ -599,9 +601,14 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
   const adoptSession = useCallback(
     async ({ sessionID }: { sessionID: string }): Promise<File | null> => {
+      const ownerGeneration = ownerGenerationRef.current
       const session = await getUploadSession({ id: sessionID, ...requestArgs }).catch(() => null)
 
-      if (!session?.isStorageComplete || session.status === 'completed') {
+      if (
+        ownerGeneration !== ownerGenerationRef.current ||
+        !session?.isStorageComplete ||
+        session.status === 'completed'
+      ) {
         return null
       }
 
@@ -681,6 +688,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     }
 
     previousUserIDRef.current = userID
+    ownerGenerationRef.current += 1
 
     for (const entry of entriesRef.current.values()) {
       entry.controller.abort()

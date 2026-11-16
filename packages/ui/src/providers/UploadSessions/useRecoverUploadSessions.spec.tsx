@@ -294,4 +294,14 @@ describe('useRecoverUploadSessions', () => {
     expect(toast.error).not.toHaveBeenCalled()
     expect(props.finishInBackground).not.toHaveBeenCalled()
   })
+
+  test('should offer recovery again when the same user signs in after signing out', async () => {
+    const { hook, props } = await renderRecovery()
+
+    await hook.rerender({ ...props, userID: undefined })
+    await hook.rerender({ ...props, userID: 'user-a' })
+
+    await expect.poll(() => vi.mocked(listUploadSessions).mock.calls.length).toBe(2)
+    await expect.poll(() => vi.mocked(toast.warning).mock.calls.length).toBe(2)
+  })
 })

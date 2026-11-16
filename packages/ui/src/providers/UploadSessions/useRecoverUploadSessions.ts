@@ -40,7 +40,7 @@ export const useRecoverUploadSessions = ({
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { t } = useTranslation()
-  /** The user whose sessions were last offered, so each user is checked once. */
+  /** The user whose sessions were offered during this sign-in, so each sign-in checks once. */
   const checkedUserIDRef = useRef<number | string | undefined>(undefined)
   /** Recovery uploads in progress, stopped when the user changes. */
   const recoveryControllersRef = useRef(new Map<string, AbortController>())
@@ -186,7 +186,13 @@ export const useRecoverUploadSessions = ({
   )
 
   useEffect(() => {
-    if (!hasSegmentedCollections || userID === undefined || checkedUserIDRef.current === userID) {
+    // Signing out ends the sign-in, so the same user signing in again is checked again.
+    if (userID === undefined) {
+      checkedUserIDRef.current = undefined
+      return
+    }
+
+    if (!hasSegmentedCollections || checkedUserIDRef.current === userID) {
       return
     }
 
