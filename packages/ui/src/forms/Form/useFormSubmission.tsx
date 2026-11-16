@@ -27,9 +27,16 @@ import type { UseFormStateResult } from './useFormState.js'
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useFormErrorHandler } from '../../providers/FormErrorHandler/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import {
+  UploadContinuesInBackgroundError,
+  useOptionalUploadSessions,
+} from '../../providers/UploadSessions/index.js'
 import { requests } from '../../utilities/api.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
@@ -84,7 +91,12 @@ export const useFormSubmission = ({
     waitForAutocomplete,
   } = props
 
-  const { docConfig } = useDocumentInfo()
+  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
+    useDocumentInfo()
+  const locale = useLocale()?.code
+  const operation = useOperation()
+  const { getFormState } = useServerFunctions()
+  const uploadSessions = useOptionalUploadSessions()
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
   const { i18n, t } = useTranslation()
@@ -117,6 +129,57 @@ export const useFormSubmission = ({
    * we need to ensure that after the submit completes, the `isModified` state remains true.
    */
   const isModifiedWhileProcessing = useRef(false)
+
+  /**
+   * Validates the document on the server without saving it. The `file` field is skipped because
+   * its bytes are being uploaded separately and are never part of the form state sent here.
+   * When the server cannot validate, `unavailableMessage` is returned instead of errors, so the
+   * save stops rather than storing data that was never validated.
+   */
+  const getServerValidationErrors = useCallback(
+    async ({
+      formState,
+    }: {
+      formState: FormState
+    }): Promise<{ errors: ValidationFieldError[] } | { unavailableMessage: string }> => {
+      const result = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        formState,
+        globalSlug,
+        locale,
+        operation,
+        schemaPath: collectionSlug ? collectionSlug : globalSlug,
+        skipValidation: false,
+      })
+
+      if (!result?.state) {
+        return {
+          unavailableMessage:
+            result && 'message' in result && result.message ? result.message : t('error:unknown'),
+        }
+      }
+
+      return {
+        errors: Object.entries(result.state)
+          .filter(([path, field]) => path !== 'file' && field.valid === false)
+          .map(([path, field]) => ({ message: field.errorMessage ?? t('error:unknown'), path })),
+      }
+    },
+    [
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      getFormState,
+      globalSlug,
+      id,
+      locale,
+      operation,
+      t,
+    ],
+  )
 
   const submitFocus = useRef<HTMLElement | null>(null)
   const isDisabledFromPropsRef = useRef(isDisabledFromProps)
@@ -288,6 +351,7 @@ export const useFormSubmission = ({
         let didRefreshFormState = false
         let res
         let rejectedFields: FormState | undefined
+        let serverValidationErrors: ValidationFieldError[] = []
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let json: Record<string, any> = {}
 
@@ -362,6 +426,44 @@ export const useFormSubmission = ({
             overrides = overridesFromArgs
           }
 
+          // Document forms leave validation to the server, which would only answer after a large
+          // upload finishes. Ask it now so field errors show immediately while the upload continues.
+          const isWaitingOnUpload =
+            data?.file instanceof File &&
+            Boolean(
+              uploadSessions?.willSaveWaitForUpload({
+                docPrefix: typeof data.prefix === 'string' ? data.prefix : undefined,
+                file: data.file,
+              }),
+            )
+
+          if (isWaitingOnUpload && !skipValidation) {
+            const serverValidation = await getServerValidationErrors({
+              // Validates what the save submits, such as the `_status` that Publish adds.
+              formState: applyOverridesToFormState({ formState: serializableFormState, overrides }),
+            })
+
+            if (!requestContext.isCurrent()) {
+              return
+            }
+
+            // The save stops so the user can retry; the upload keeps going meanwhile.
+            if ('unavailableMessage' in serverValidation) {
+              errorToast(serverValidation.unavailableMessage)
+              setIsSubmitted(true)
+              return
+            }
+
+            if (serverValidation.errors.length) {
+              // Applied after the refresh below, so the refresh cannot erase them.
+              serverValidationErrors = serverValidation.errors
+              setIsValid(false)
+              errorToast(t('error:correctInvalidFields'))
+              setIsSubmitted(true)
+              return
+            }
+          }
+
           // If submit handler comes through via props, run that
           if (onSubmit) {
             for (const [key, value] of Object.entries(overrides)) {
@@ -377,6 +479,7 @@ export const useFormSubmission = ({
           }
 
           const formData = await contextRef.current.createFormData(overrides, {
+            action: typeof actionArg === 'string' ? actionArg : undefined,
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
           })
@@ -466,6 +569,10 @@ export const useFormSubmission = ({
                   : []
               }),
             })
+          }
+
+          if (requestContext.isCurrent()) {
+            applyFieldErrors({ errors: serverValidationErrors })
           }
         }
 
@@ -579,6 +686,13 @@ export const useFormSubmission = ({
 
         return { formState: contextRef.current.fields, res }
       } catch (err) {
+        // The form unmounted during a large upload; the upload coordinator finishes the save.
+        if (err instanceof UploadContinuesInBackgroundError) {
+          preservePromiseToast = true
+          successToast(t('upload:savingInBackground'))
+          return
+        }
+
         const isCurrentRequest = requestContext.isCurrent()
 
         if (!preservePromiseToast && !isCurrentRequest) {
@@ -623,6 +737,8 @@ export const useFormSubmission = ({
       redirect,
       refreshFormState,
       validateForm,
+      getServerValidationErrors,
+      uploadSessions,
       router,
       t,
       i18n,
@@ -697,4 +813,20 @@ export const useFormSubmission = ({
     submitted: isSubmitted,
     successfulSubmitCount,
   }
+}
+
+const applyOverridesToFormState = ({
+  formState,
+  overrides,
+}: {
+  formState: FormState
+  overrides: object
+}): FormState => {
+  const formStateWithOverrides = { ...formState }
+
+  for (const [path, value] of Object.entries(overrides)) {
+    formStateWithOverrides[path] = { ...formState[path], value }
+  }
+
+  return formStateWithOverrides
 }
