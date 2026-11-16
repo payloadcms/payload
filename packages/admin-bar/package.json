@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/admin-bar",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.9",
   "description": "An admin bar for React apps using Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",

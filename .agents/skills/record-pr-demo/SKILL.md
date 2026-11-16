@@ -27,7 +27,7 @@ Use `await click(chrome.back)` and `await click(chrome.forward)` for browser-his
 
 ## Required presentation chrome
 
-Every scenario must export `presentation` with a change kind, title, and description. For a known sequence of steps, declare `annotationSteps` and `annotationLayout: 'left'`, then call `showAnnotation` to advance through that sequence. Use `hideAnnotation` when the explanation should no longer accompany the action. See [window-chrome.md](references/window-chrome.md) for the API contract and examples. Scripts supply content and intent; the shared renderer owns presentation. Do not inject markup, styles, badges, or layout rules into the application or recording chrome.
+Every scenario must export `presentation` with a change kind, title, and description. For a known sequence of steps, declare `annotationSteps`, then call `showAnnotation` to advance through that sequence. Use `hideAnnotation` when the explanation should no longer accompany the action. See [window-chrome.md](references/window-chrome.md) for the API contract and examples. Scripts supply content and intent; the shared renderer owns presentation. Do not inject markup, styles, badges, or layout rules into the application or recording chrome.
 
 Keep the default canvas and desktop viewport for ordinary demos. Use a smaller `--viewport` or `resizeWindow` only when demonstrating responsive reflow or breakpoints, or when the user explicitly requests different dimensions. Keep the canvas fixed while resizing the application. Do not shrink the viewport or canvas merely to crop surrounding content or emphasize a visual change.
 

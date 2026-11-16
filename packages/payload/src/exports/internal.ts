@@ -51,8 +51,8 @@ export {
   uploadTransformerInternal,
 } from '../uploads/transformers/uploadTransformerBridge.js'
 export type {
-  PreparedUploadTransformation,
   TransformerWithInternalBridge,
+  UploadTransformation,
   UploadTransformerInternal,
   UploadTransformTask,
 } from '../uploads/transformers/uploadTransformerBridge.js'

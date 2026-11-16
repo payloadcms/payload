@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.9",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -71,7 +71,7 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
-    "mongoose": "9.9.2",
+    "mongoose": "9.11.4",
     "mongoose-paginate-v2": "1.9.5",
     "prompts": "2.4.2",
     "uuid": "14.0.0"
@@ -79,7 +79,7 @@
   "devDependencies": {
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "@types/prompts": "^2.4.5",
-    "mongodb": "7.5.0",
+    "mongodb": "7.7.0",
     "mongodb-memory-server": "10.1.4",
     "payload": "workspace:*"
   },

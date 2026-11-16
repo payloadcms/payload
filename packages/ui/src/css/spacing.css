@@ -1,5 +1,6 @@
 @layer payload-default {
-  :root {
+  :root,
+  :host {
     --spacer-0: 0;
     --spacer-1: 0.25rem; /** 4px */
     --spacer-1-5: 0.375rem; /** 6px */
@@ -15,6 +16,11 @@
     --spacing-field: var(--spacer-4);
     --spacing-view-bottom: var(--gutter-h);
 
+    /* Sidebar widths */
+    --nav-width: 275px;
+    --doc-sidebar-width: 325px;
+    --edit-upload-sidebar-width: 240px;
+
     /* Breakpoints */
     --breakpoint-xs-width: 400px;
     --breakpoint-s-width: 768px;
@@ -24,21 +30,25 @@
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
-    :root {
+    :root,
+    :host {
       --gutter-h: var(--spacer-4);
     }
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
-    :root {
+    :root,
+    :host {
       --gutter-h: var(--spacer-3);
     }
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
-    :root {
+    :root,
+    :host {
+      --nav-width: 100vw;
       --spacing-field: var(--spacer-2-5);
       --spacing-view-bottom: var(--spacer-6);
     }

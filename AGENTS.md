@@ -317,11 +317,15 @@ Examples:
 - Subsequent commits should use `chore` without scope unless specific package is being modified
 - All commits in a PR are squashed on merge using PR title as commit message
 
+### Breaking Changes
+
+Mark breaking PRs with `!` in the title and add a `## Breaking Changes` section to the body. The releaser copies that section, alone, into the GitHub release notes. It must state who is affected and what to do, with a `diff` block when user code changes. Without the section, the release notes show the first paragraph of the body.
+
 ## Additional Resources
 
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
-- Node version: >=24.22.1
+- Node version: ^24.22.3 || >=26.13.1
 - pnpm version: ^11.28.6
 
 ## Admin Panel
@@ -384,6 +388,13 @@ const docs = await payload.find({
 ```
 
 ### Writing CSS
+
+**Support document and Shadow DOM contexts when writing or reviewing shared CSS:**
+
+- Define shared token defaults on both `:root` and `:host`, including defaults inside media queries.
+- Include equivalent shadow-host selectors for theme and enhanced-contrast rules, e.g. `html[data-enhanced-contrast] .control` and `:host([data-enhanced-contrast]) .control`. Apply this to component-specific adjustments as well as shared palettes.
+- Preserve existing document selector specificity. Adding `:host` to a parent selector list can raise the specificity of nested rules. Flatten those nested rules when necessary to preserve application overrides.
+- Keep document-only resets and Admin Panel layout styles scoped to the document. For shared token or theme changes, verify the affected states in both contexts, loading the stylesheet inside the shadow root for that case.
 
 Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
 

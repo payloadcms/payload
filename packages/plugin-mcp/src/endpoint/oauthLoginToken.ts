@@ -1,0 +1,100 @@
+import type { PayloadRequest } from 'payload'
+
+import { APIError, createAuthToken, executeAuthStrategies, redeemRefreshToken } from 'payload'
+
+import type { MCPOAuthTokens } from '../types.js'
+
+import { seal, unseal } from '../utils/seal.js'
+
+/**
+ * The default `issueToken`: a Payload login token, sealed so it only works for MCP, where
+ * `authenticateLoginToken` unseals it. Otherwise an MCP client could use it as the user's admin
+ * panel login. When the collection uses sessions, the client also gets a refresh token.
+ */
+export const issueLoginToken = async ({
+  client,
+  req,
+}: {
+  client: { name: string; redirectURI: string }
+  req: PayloadRequest
+}): Promise<MCPOAuthTokens> => {
+  const collectionConfig = req.payload.collections[req.user!.collection]!.config
+
+  if (collectionConfig.auth.disableLocalStrategy) {
+    throw new APIError(
+      `MCP clients can't get Payload login tokens for the "${collectionConfig.slug}" collection because its local strategy is disabled. Pass oauth.issueToken to the MCP plugin.`,
+    )
+  }
+
+  // The full document, like the one a password login starts its session on
+  const user = (await req.payload.db.findOne<NonNullable<PayloadRequest['user']>>({
+    collection: collectionConfig.slug,
+    req,
+    where: { id: { equals: req.user!.id } },
+  }))!
+
+  const { refreshToken, token } = await createAuthToken({
+    type: 'mcp',
+    collectionConfig,
+    // App schemes like `com.example.app:/callback` have no host
+    email: user.email!,
+    label: client.name,
+    metadata: { redirectHost: new URL(client.redirectURI).host || client.redirectURI },
+    req,
+    shouldCreateRefreshToken: true,
+    user,
+  })
+
+  return {
+    accessToken: sealLoginToken({ req, token }),
+    expiresIn: collectionConfig.auth.tokenExpiration,
+    refreshToken,
+  }
+}
+
+/** The default `refreshToken`. Payload logs out the session when a refresh token is reused. */
+export const refreshLoginToken = async ({
+  refreshToken,
+  req,
+  reuseInterval,
+}: {
+  refreshToken: string
+  req: PayloadRequest
+  /** See `redeemRefreshToken`. */
+  reuseInterval?: number
+}): Promise<MCPOAuthTokens | null> => {
+  const refreshed = await redeemRefreshToken({ refreshToken, req, reuseInterval })
+
+  return (
+    refreshed && {
+      accessToken: sealLoginToken({ req, token: refreshed.token }),
+      expiresIn: refreshed.collectionConfig.auth.tokenExpiration,
+      refreshToken: refreshed.refreshToken,
+    }
+  )
+}
+
+/** Finds the user of an MCP request's access token from `issueLoginToken`. */
+export const authenticateLoginToken = async ({
+  req,
+  token,
+}: {
+  req: PayloadRequest
+  token: string
+}): Promise<PayloadRequest['user']> => {
+  const loginToken = unseal<{ token: string }>({ type: 'access', req, value: token })
+
+  if (!loginToken) {
+    return null
+  }
+
+  const headers = new Headers({
+    Authorization: `JWT ${loginToken.token}`,
+    DisableAutologin: 'true',
+  })
+
+  return (await executeAuthStrategies({ headers, payload: req.payload, req })).user
+}
+
+const sealLoginToken = ({ req, token }: { req: PayloadRequest; token: string }): string =>
+  seal({ type: 'access', data: { token }, req })
