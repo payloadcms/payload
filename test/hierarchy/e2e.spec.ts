@@ -1103,6 +1103,7 @@ test.describe('Hierarchy Sidebar', () => {
       await page.getByRole('radio', { name: 'Tree', exact: true }).check()
       const contents = page.locator('.hierarchy-contents-tree')
 
+      await expect(contents.locator('.tree-item').first()).toHaveCSS('padding-inline-start', '16px')
       for (const name of ['Orgs Only', 'Products Only']) {
         await contents
           .getByRole('row')
