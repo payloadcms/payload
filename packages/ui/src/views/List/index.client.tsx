@@ -4,7 +4,7 @@ import type { CollectionPreferences, ListQuery, ListViewClientProps } from 'payl
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
@@ -29,7 +29,7 @@ import { getSearchWithListQuery } from '../../providers/ListQuery/getSearchWithL
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { NestedDocsSelectionProvider } from '../../providers/NestedDocsSelection/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useRouter } from '../../providers/RouterAdapter/index.js'
+import { usePathname, useRouter } from '../../providers/RouterAdapter/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -94,6 +94,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
+  const pathname = usePathname()
   const router = useRouter()
 
   const hasCreatePermission =
@@ -146,6 +147,14 @@ export function DefaultListView(props: ListViewClientProps) {
   const collectionConfig = getEntityConfig({ collectionSlug })
   const isNestedDocsTreeLayout = Boolean(hasTreeLayout && layout === 'tree')
 
+  const layoutNavigationOrigin = useRef({})
+  useLayoutEffect(() => {
+    layoutNavigationOrigin.current = {}
+    return () => {
+      layoutNavigationOrigin.current = {}
+    }
+  }, [pathname])
+
   const pendingLayout = useRef<DocumentLayout | null>(null)
   useEffect(() => {
     const destination = pendingLayout.current
@@ -158,6 +167,10 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [documentLayout, query.listLayout])
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+    const origin = layoutNavigationOrigin.current
+    const sourcePathname = window.location.pathname
+    const isCurrentLayoutNavigation = () =>
+      layoutNavigationOrigin.current === origin && window.location.pathname === sourcePathname
     const preferencesKey = `collection-${collectionSlug}`
 
     if (!hasTreeLayout) {
@@ -166,7 +179,9 @@ export function DefaultListView(props: ListViewClientProps) {
         ...(preferences ?? {}),
         documentLayout: nextLayout,
       }))
-      router.refresh()
+      if (isCurrentLayoutNavigation()) {
+        router.refresh()
+      }
       return
     }
 
@@ -212,6 +227,10 @@ export function DefaultListView(props: ListViewClientProps) {
         return { ...preferences, documentLayout: nextLayout, layoutQueries }
       })
 
+      if (!isCurrentLayoutNavigation()) {
+        return
+      }
+
       const search = getSearchWithListQuery({
         currentSearch: window.location.search,
         query: nextQuery!,
@@ -223,8 +242,10 @@ export function DefaultListView(props: ListViewClientProps) {
         await router.replace(search)
       }
     } catch (err) {
-      pendingLayout.current = null
-      setLayout(documentLayout ?? 'table')
+      if (isCurrentLayoutNavigation()) {
+        pendingLayout.current = null
+        setLayout(documentLayout ?? 'table')
+      }
       throw err
     }
   }
