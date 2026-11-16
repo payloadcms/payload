@@ -14,7 +14,6 @@ export type JSXConverterArgs<
   node: TNode
   nodesToJSX: (args: {
     converters?: JSXConverters
-    disableDirection?: boolean | string[]
     disableIndent?: boolean | string[]
     disableTextAlign?: boolean | string[]
     nodes: SerializedLexicalNode[]

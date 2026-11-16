@@ -26,10 +26,6 @@ export type ConvertLexicalToHTMLAsyncArgs = {
    */
   disableContainer?: boolean
   /**
-   * If true, disables the `dir` attribute globally. If an array, disables for specific node `type` values.
-   */
-  disableDirection?: boolean | string[]
-  /**
    * If true, disables indentation globally. If an array, disables for specific node `type` values.
    */
   disableIndent?: boolean | string[]
@@ -45,7 +41,6 @@ export async function convertLexicalToHTMLAsync({
   converters,
   data,
   disableContainer,
-  disableDirection,
   disableIndent,
   disableTextAlign,
   populate,
@@ -65,7 +60,6 @@ export async function convertLexicalToHTMLAsync({
     const html = (
       await convertLexicalNodesToHTMLAsync({
         converters: finalConverters,
-        disableDirection,
         disableIndent,
         disableTextAlign,
         nodes: data?.root?.children,
@@ -89,7 +83,6 @@ export async function convertLexicalToHTMLAsync({
 
 export async function convertLexicalNodesToHTMLAsync({
   converters,
-  disableDirection,
   disableIndent,
   disableTextAlign,
   nodes,
@@ -97,7 +90,6 @@ export async function convertLexicalNodesToHTMLAsync({
   populate,
 }: {
   converters: HTMLConvertersAsync
-  disableDirection?: boolean | string[]
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   nodes: SerializedLexicalNode[]
@@ -114,7 +106,6 @@ export async function convertLexicalNodesToHTMLAsync({
     const { converterForNode, providedCSSString, providedDirAttribute, providedStyleTag } =
       findConverterForNode({
         converters,
-        disableDirection,
         disableIndent,
         disableTextAlign,
         node,
@@ -136,7 +127,6 @@ export async function convertLexicalNodesToHTMLAsync({
                 nodesToHTML: async (args) => {
                   return await convertLexicalNodesToHTMLAsync({
                     converters: args.converters ?? converters,
-                    disableDirection: args.disableDirection ?? disableDirection,
                     disableIndent: args.disableIndent ?? disableIndent,
                     disableTextAlign: args.disableTextAlign ?? disableTextAlign,
                     nodes: args.nodes,

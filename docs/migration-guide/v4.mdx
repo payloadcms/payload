@@ -1118,6 +1118,43 @@ export const MyFeature = createServerFeature({
 
 If an affected adapter or feature performs asynchronous work, move that work to an asynchronous plugin before config sanitization or to a runtime hook. Projects that only use `buildConfig(...)` and `lexicalEditor(...)` normally are not affected; `buildConfig` remains asynchronous.
 
+### Lexical converters render the saved text direction
+
+The Lexical HTML converters and the `RichText` JSX component now render a `dir` attribute on elements with an explicit `direction` (`'ltr'` or `'rtl'`), matching the editor. Elements with `direction: null` render no `dir` and inherit the page direction, as before.
+
+```diff
+- <p>مرحبا</p>
++ <p dir="rtl">مرحبا</p>
+```
+
+Content saved with Lexical versions before 0.35, or created with `buildEditorState` before Payload 4.0, can contain a `direction: 'ltr'` that nobody chose. That content now renders as `dir="ltr"`. If text displays in the wrong direction, set `direction` to `null` on its element nodes, for example in a migration:
+
+```ts
+type ElementNode = {
+  children?: ElementNode[]
+  direction?: 'ltr' | 'rtl' | null
+}
+
+function clearDirection<T extends ElementNode>({ node }: { node: T }): T {
+  if (!node.children) {
+    return node
+  }
+
+  return {
+    ...node,
+    children: node.children.map((child) => clearDirection({ node: child })),
+    direction: null,
+  }
+}
+
+const content = {
+  ...doc.content,
+  root: clearDirection({ node: doc.content.root }),
+}
+```
+
+Custom HTML converters receive the attribute as `providedDirAttribute`. Add it to the opening tag, next to `providedStyleTag`, to render it too.
+
 ### Transaction requests now use a single identifier property
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.

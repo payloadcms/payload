@@ -32,17 +32,13 @@ type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
    * If true, removes the container div wrapper.
    */
   disableContainer?: boolean
-} & Pick<
-  ConvertLexicalToJSXArgs<TNodes>,
-  'data' | 'disableDirection' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'
->
+} & Pick<ConvertLexicalToJSXArgs<TNodes>, 'data' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'>
 
 export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   className,
   converters,
   data: editorState,
   disableContainer,
-  disableDirection,
   disableIndent,
   disableTextAlign,
   nodeMap,
@@ -72,7 +68,6 @@ export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>
     convertLexicalToJSX({
       converters: finalConverters,
       data: editorState,
-      disableDirection,
       disableIndent,
       disableTextAlign,
       nodeMap,

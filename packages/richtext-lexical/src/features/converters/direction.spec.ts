@@ -16,7 +16,6 @@ import { RichText } from './lexicalToJSX/Component/index.js'
 
 type ConvertArgs = {
   data: DefaultTypedEditorState
-  disableDirection?: boolean | string[]
 }
 
 const converters: { convert: (args: ConvertArgs) => Promise<string>; name: string }[] = [
@@ -52,21 +51,11 @@ describe.each(converters)('$name - text direction', ({ convert }) => {
     expect(html).toBe('<p>مرحبا</p>')
   })
 
-  it('should not render dir when disableDirection is true', async () => {
-    const html = await convert({
-      data: editorState({ children: [paragraphNode({ direction: 'rtl' })] }),
-      disableDirection: true,
-    })
-
-    expect(html).toBe('<p>مرحبا</p>')
-  })
-
-  it('should not render dir for node types listed in disableDirection', async () => {
+  it('should render dir only on the nodes that have an explicit direction', async () => {
     const html = await convert({
       data: editorState({
-        children: [paragraphNode({ direction: 'rtl' }), headingNode({ direction: 'rtl' })],
+        children: [paragraphNode({ direction: null }), headingNode({ direction: 'rtl' })],
       }),
-      disableDirection: ['paragraph'],
     })
 
     expect(html).toBe('<p>مرحبا</p><h2 dir="rtl">مرحبا</h2>')

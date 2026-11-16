@@ -26,7 +26,6 @@ export type HTMLConverterAsync<
       node: T
       nodesToHTML: (args: {
         converters?: HTMLConvertersAsync
-        disableDirection?: boolean | string[]
         disableIndent?: boolean | string[]
         disableTextAlign?: boolean | string[]
         nodes: SerializedLexicalNode[]

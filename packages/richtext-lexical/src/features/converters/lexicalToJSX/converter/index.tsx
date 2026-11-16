@@ -149,10 +149,6 @@ export type ConvertLexicalToJSXArgs<TNodes extends SerializedNodeBase = Serializ
    */
   data: SerializedEditorState
   /**
-   * If true, disables the `dir` attribute globally. If an array, disables for specific node `type` values.
-   */
-  disableDirection?: boolean | string[]
-  /**
    * If true, disables indentation globally. If an array, disables for specific node `type` values.
    */
   disableIndent?: boolean | string[]
@@ -170,7 +166,6 @@ export type ConvertLexicalToJSXArgs<TNodes extends SerializedNodeBase = Serializ
 export function convertLexicalToJSX<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   converters,
   data,
-  disableDirection,
   disableIndent,
   disableTextAlign,
   nodeMap,
@@ -190,7 +185,6 @@ export function convertLexicalToJSX<TNodes extends SerializedNodeBase = Serializ
 
     return convertLexicalNodesToJSX({
       converters: mergedConverters,
-      disableDirection,
       disableIndent,
       disableTextAlign,
       nodes: data.root.children,
@@ -202,14 +196,12 @@ export function convertLexicalToJSX<TNodes extends SerializedNodeBase = Serializ
 
 export function convertLexicalNodesToJSX({
   converters,
-  disableDirection,
   disableIndent,
   disableTextAlign,
   nodes,
   parent,
 }: {
   converters: JSXConverters
-  disableDirection?: boolean | string[]
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   nodes: SerializedLexicalNode[]
@@ -254,7 +246,6 @@ export function convertLexicalNodesToJSX({
                 nodesToJSX: (args) => {
                   return convertLexicalNodesToJSX({
                     converters: args.converters ?? converters,
-                    disableDirection: args.disableDirection ?? disableDirection,
                     disableIndent: args.disableIndent ?? disableIndent,
                     disableTextAlign: args.disableTextAlign ?? disableTextAlign,
                     nodes: args.nodes,
@@ -317,10 +308,7 @@ export function convertLexicalNodesToJSX({
         }
       }
 
-      const isDirectionDisabled = Array.isArray(disableDirection)
-        ? disableDirection.includes(node.type)
-        : disableDirection
-      const dir = isDirectionDisabled ? undefined : getExplicitDirection({ node })
+      const dir = getExplicitDirection({ node })
 
       if (React.isValidElement<{ dir?: string; style?: React.CSSProperties }>(reactNode)) {
         const injectedProps: { dir?: string; key: number; style?: React.CSSProperties } = {

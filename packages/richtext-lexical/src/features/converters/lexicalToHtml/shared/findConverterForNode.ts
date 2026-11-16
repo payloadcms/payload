@@ -13,14 +13,12 @@ export function findConverterForNode<
   TConverter extends HTMLConverter | HTMLConverterAsync,
 >({
   converters,
-  disableDirection,
   disableIndent,
   disableTextAlign,
   node,
   unknownConverter,
 }: {
   converters: TConverters
-  disableDirection?: boolean | string[]
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   node: SerializedLexicalNode
@@ -102,17 +100,8 @@ export function findConverterForNode<
   }
   const providedStyleTag = providedCSSString?.length ? ` style="${providedCSSString}"` : ''
 
-  const isDirectionDisabled = Array.isArray(disableDirection)
-    ? disableDirection.includes(node.type)
-    : disableDirection
-
-  let providedDirAttribute = ''
-  if (!isDirectionDisabled) {
-    const direction = getExplicitDirection({ node })
-    if (direction) {
-      providedDirAttribute = ` dir="${direction}"`
-    }
-  }
+  const direction = getExplicitDirection({ node })
+  const providedDirAttribute = direction ? ` dir="${direction}"` : ''
 
   return {
     converterForNode: converterForNode ?? unknownConverter,
