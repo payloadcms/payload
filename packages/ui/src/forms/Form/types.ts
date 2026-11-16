@@ -197,6 +197,13 @@ export type ADD_ROW = {
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
   prevStateRef?: React.RefObject<FormState>
+  /**
+   * The local form state that was sent to the server to produce `serverState`.
+   * When provided, `prevStateRef` is only updated if local state has not changed since the request was made.
+   * This ensures that changes made while the request was in-flight still trigger a new onChange request,
+   * instead of being treated as already processed by a stale server response.
+   */
+  requestFormState?: FormState
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
 }

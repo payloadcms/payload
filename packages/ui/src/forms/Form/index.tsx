@@ -841,12 +841,13 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
+        const requestFormState = formState
         let serverState: FormState
 
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
+            formState: deepCopyObjectSimpleWithoutReactComponents(requestFormState, {
               excludeFiles: true,
             }),
             submitted,
@@ -856,6 +857,7 @@ export const Form: React.FC<FormProps> = (props) => {
         dispatchFields({
           type: 'MERGE_SERVER_STATE',
           prevStateRef: prevFormState,
+          requestFormState,
           serverState,
         })
       }

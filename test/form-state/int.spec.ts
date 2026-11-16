@@ -15,6 +15,8 @@ import { postsSlug } from './collections/Posts/index.js'
 import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
 import { test } from '../__helpers/int/vitest.js'
 
 let user: User
@@ -836,6 +838,57 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
 
     expect(newState === currentState).toBe(true)
+  })
+
+  test('should not mark local changes made while an onChange request was in-flight as processed', () => {
+    const requestFormState: FormState = {
+      enableExtras: { initialValue: false, passesCondition: true, valid: true, value: false },
+      extra: { passesCondition: false, valid: true },
+    }
+
+    const stateWithToggle = fieldReducer(requestFormState, {
+      type: 'UPDATE',
+      path: 'enableExtras',
+      value: true,
+    })
+
+    // The debounced onChange effect has not yet run for the toggle, so it last saw the request state
+    const prevStateRef = { current: requestFormState }
+
+    const mergedState = fieldReducer(stateWithToggle, {
+      type: 'MERGE_SERVER_STATE',
+      prevStateRef,
+      requestFormState,
+      serverState: {
+        enableExtras: { initialValue: false, passesCondition: true, valid: true, value: false },
+        extra: { passesCondition: false, valid: true },
+      },
+    })
+
+    expect(mergedState.enableExtras.value).toBe(true)
+    expect(prevStateRef.current).toBe(requestFormState)
+  })
+
+  test('should mark merged server state as processed when local state is unchanged since the request', () => {
+    const requestFormState: FormState = {
+      enableExtras: { initialValue: false, passesCondition: true, valid: true, value: true },
+      extra: { passesCondition: false, valid: true },
+    }
+
+    const prevStateRef = { current: requestFormState }
+
+    const mergedState = fieldReducer(requestFormState, {
+      type: 'MERGE_SERVER_STATE',
+      prevStateRef,
+      requestFormState,
+      serverState: {
+        enableExtras: { initialValue: false, passesCondition: true, valid: true, value: true },
+        extra: { passesCondition: true, valid: true },
+      },
+    })
+
+    expect(mergedState.extra.passesCondition).toBe(true)
+    expect(prevStateRef.current).toBe(mergedState)
   })
 
   test('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
