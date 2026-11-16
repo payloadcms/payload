@@ -6,21 +6,25 @@ import type { Theme } from '../shared.js'
 
 import { useControllableState } from '../../../hooks/useControllableState.js'
 import { Context, useTheme } from '../context.js'
+import { getThemeTarget } from '../utilities.js'
 
 /**
- * Theme providers can be nested to override the theme for part of the UI.
- * This provider manages local values; `RootThemeProvider` owns document preferences, cookies, and system detection.
- *
- * This provider also works without `RootThemeProvider`, e.g. for external UIs that should not access site-wide preferences or cookies.
- * `setTheme` updates local context and `data-theme` on the element referenced by `targetRef`.
- * It throws if `targetRef` is missing or its element is not mounted.
- *
- * `useTheme` reads and updates the local scope; use `useRootTheme` for root preferences.
- * Props override inherited values. Local setters require a mounted `targetRef` and throw without one.
- * Wrap the referenced element with this provider; no DOM element is added.
+ * `ThemeProvider` can be nested as needed to override the theme for part of the UI.
+ * Unlike the `RootThemeProvider`, within each nesting, site-wide cookies and system preferences are never read or written, and the HTML attributes are managed only on the provided `targetRef`.
  *
  * @example
- * Inside a nested provider, `useTheme` reads that local scope; `useRootTheme` reads root preferences.
+ * ```tsx
+ * <div data-theme="dark" data-enhanced-contrast="true">
+ *   {
+ *     // ...
+ *   }
+ * </div>
+ * ```
+ *
+ * Within the admin panel, when using a `ThemeProvider`, call `useRootTheme` to step outside any nested providers to read and update the `RootThemeProvider`.
+ *
+ * @example
+ * Inside a nested provider, `useTheme` reads that local scope, whereas `useRootTheme` reads root preferences.
  * ```tsx
  * function ThemeValues() {
  *   const { theme } = useTheme()
@@ -42,6 +46,8 @@ import { Context, useTheme } from '../context.js'
  *   </ThemeProvider>
  * </RootThemeProvider>
  * ```
+ *
+ * @see `RootThemeProvider` for managing site-wide theme preferences.
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
@@ -53,6 +59,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const [localTheme, setLocalTheme] = useControllableState(themeOverride)
   const [localHighContrastMode, setLocalHighContrastMode] =
     useControllableState(highContrastModeOverride)
+
+  const themePreference = targetRef ? localTheme : themeOverride
+  const contrastPreference = targetRef ? localHighContrastMode : highContrastModeOverride
+
+  const autoMode = themePreference === undefined ? parentContext.autoMode : false
+
+  const theme = themePreference ?? parentContext.theme
+
+  const highContrastMode = contrastPreference ?? parentContext.highContrastMode
 
   /**
    * Sets the local theme and target's `data-theme`, leaving root preferences alone.
@@ -84,16 +99,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         'data-enhanced-contrast',
         isHighContrast,
       )
+
       setLocalHighContrastMode(isHighContrast)
     },
     [setLocalHighContrastMode, targetRef],
   )
-
-  const themePreference = targetRef ? localTheme : themeOverride
-  const contrastPreference = targetRef ? localHighContrastMode : highContrastModeOverride
-  const autoMode = themePreference === undefined ? parentContext.autoMode : false
-  const theme = themePreference ?? parentContext.theme
-  const highContrastMode = contrastPreference ?? parentContext.highContrastMode
 
   const value = useMemo(
     () => ({ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }),
@@ -101,33 +111,4 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   )
 
   return <Context value={value}>{children}</Context>
-}
-
-/** Rejects missing local targets rather than falling through to the document root. @internal */
-const getThemeTarget = ({
-  method,
-  targetRef,
-}: {
-  method: 'setHighContrastMode' | 'setTheme'
-  targetRef: ThemeProviderProps['targetRef']
-}): HTMLElement => {
-  if (!targetRef) {
-    throw new Error(
-      `${method} requires targetRef on ThemeProvider. Wrap the target element with ThemeProvider, update its controlled props instead, or use useRootTheme to change root preferences.`,
-    )
-  }
-
-  const target = targetRef.current
-
-  if (!target?.isConnected) {
-    throw new Error(
-      `${method} could not find a mounted target element. Render the element with targetRef inside ThemeProvider before calling its setters.`,
-    )
-  }
-
-  if (target === target.ownerDocument.documentElement) {
-    throw new Error(`${method} cannot target the document root. Use useRootTheme instead.`)
-  }
-
-  return target
 }

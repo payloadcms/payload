@@ -24,21 +24,38 @@ type RootThemeProviderProps = {
 }
 
 /**
- * Theme providers can be nested, but only this root provider reads and writes cookies, detects system preferences, and updates theme and contrast attributes on `<html>`.
- * `setTheme` writes the resolved theme to `data-theme` on the document's `<html>` element.
- *
- * The Admin mounts it explicitly to manage its theme preferences.
- * `useTheme` reads and updates these preferences until a local ThemeProvider is introduced.
- * Inside a local scope, use `useRootTheme` to read or change the root preferences.
+ * Use one `RootThemeProvider` per document, with nested `ThemeProvider`s as needed.
+ * The root scope reads and writes cookies, detects system preferences, and writes HTML attributes directly to the document's `<html>` element.
  *
  * @example
- * In the Admin, `useTheme` controls root preferences outside nested providers.
  * ```tsx
- * function ThemeButton() {
+ * <html data-theme="light" data-enhanced-contrast="true">
+ *   {
+ *     // ...
+ *   }
+ * </html>
+ * ```
+ *
+ * The admin panel mounts the `RootThemeProvider` at the top-level to manage its site-wide theme preferences.
+ * - Use `useTheme` to read and update the nearest theme scope, which may be the `RootThemeProvider` or the nearest nested `ThemeProvider`.
+ * - Within a nested `ThemeProvider`, use `useRootTheme` to step outside the nested context to read and update the root theme.
+ *
+ * @example
+ * Inside the `RootThemeProvider` scope, `useTheme` controls the root preferences until a nested provider is introduced.
+ * It interacts with the system preference and cookies to determine the effective theme.
+ *
+ * ```tsx
+ * function MyComponent() {
  *   const { setTheme } = useTheme()
  *   return <button type="button" onClick={() => setTheme('dark')}>Use dark theme</button>
  * }
+ *
+ * <RootThemeProvider theme="light">
+ *   <MyComponent />
+ * </RootThemeProvider>
  * ```
+ *
+ * @see `ThemeProvider` for managing nested theme scopes within the root provider.
  */
 export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   children,
@@ -52,9 +69,11 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
 
   const themeParam = useSearchParams().get('theme')?.toLowerCase()
 
-  const [theme, setThemeState] = useState<Theme>(themeOverride ?? defaultTheme)
+  const [theme, _setTheme] = useState<Theme>(themeOverride ?? defaultTheme)
+
   const [autoMode, setAutoMode] = useState<boolean>(true)
-  const [highContrastMode, setHighContrastModeState] = useState<boolean>(
+
+  const [highContrastMode, _setHighContrastMode] = useState<boolean>(
     initialHighContrastMode ?? false,
   )
 
@@ -66,8 +85,9 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
     (themeToSet: 'auto' | Theme) => {
       const resolvedTheme = themeToSet === 'auto' ? getThemeFromSystem() : themeToSet
 
-      setThemeState(resolvedTheme)
+      _setTheme(resolvedTheme)
       setAutoMode(themeToSet === 'auto')
+
       document.cookie = generateCookie<false>({
         name: themeCookieKey,
         maxAge: themeToSet === 'auto' ? -1 : 60 * 60 * 24 * 365,
@@ -75,6 +95,7 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
         returnCookieAsObject: false,
         value: themeToSet,
       })
+
       document.documentElement.setAttribute('data-theme', resolvedTheme)
     },
     [themeCookieKey],
@@ -85,7 +106,7 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
    */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
-      setHighContrastModeState(isHighContrast)
+      _setHighContrastMode(isHighContrast)
       document.cookie = generateCookie<false>({
         name: contrastCookieKey,
         maxAge: 60 * 60 * 24 * 365,
@@ -111,7 +132,8 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
     const { isAutoMode, theme: detectedTheme } = detectTheme({ cookieKey: themeCookieKey })
 
     document.documentElement.setAttribute('data-theme', detectedTheme)
-    setThemeState(detectedTheme)
+
+    _setTheme(detectedTheme)
     setAutoMode(isAutoMode)
   }, [preselectedTheme, themeCookieKey, themeParam, setTheme])
 
@@ -119,17 +141,18 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
     const isHighContrast = detectHighContrastMode({ cookieKey: contrastCookieKey })
 
     document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
-    setHighContrastModeState(isHighContrast)
+
+    _setHighContrastMode(isHighContrast)
   }, [contrastCookieKey])
 
-  const value = useMemo(
+  const context = useMemo(
     () => ({ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }),
     [autoMode, highContrastMode, setHighContrastMode, setTheme, theme],
   )
 
   return (
-    <RootContext value={value}>
-      <Context value={value}>{children}</Context>
+    <RootContext value={context}>
+      <Context value={context}>{children}</Context>
     </RootContext>
   )
 }

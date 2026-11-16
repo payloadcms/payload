@@ -1,3 +1,4 @@
+import type { ThemeProviderProps } from './context.js'
 import type { Theme } from './shared.js'
 
 import { defaultTheme } from './shared.js'
@@ -49,3 +50,35 @@ export const getThemeFromSystem = (): Theme =>
 /** Checks a lowercased query value for an explicit theme or automatic mode. @internal */
 export const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
   value === 'auto' || value === 'light' || value === 'dark'
+
+/**
+ * Discovers the target element to apply HTML theme attributes to, defined by the `targetRef` of the `ThemeProvider`.
+ * @internal
+ */
+export const getThemeTarget = ({
+  method,
+  targetRef,
+}: {
+  method: 'setHighContrastMode' | 'setTheme'
+  targetRef: ThemeProviderProps['targetRef']
+}): HTMLElement => {
+  if (!targetRef) {
+    throw new Error(
+      `${method} requires targetRef on ThemeProvider. Wrap the target element with ThemeProvider, update its controlled props instead, or use useRootTheme to change root preferences.`,
+    )
+  }
+
+  const target = targetRef.current
+
+  if (!target?.isConnected) {
+    throw new Error(
+      `${method} could not find a mounted target element. Render the element with targetRef inside ThemeProvider before calling its setters.`,
+    )
+  }
+
+  if (target === target.ownerDocument.documentElement) {
+    throw new Error(`${method} cannot target the document root. Use useRootTheme instead.`)
+  }
+
+  return target
+}
