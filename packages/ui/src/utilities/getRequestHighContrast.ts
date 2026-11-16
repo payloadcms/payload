@@ -1,5 +1,7 @@
 import type { SanitizedConfig } from 'payload'
 
+import { highContrastModeCookieSuffix } from '../providers/Theme/shared.js'
+
 type GetRequestHighContrastArgs = {
   config: SanitizedConfig
   cookies: Map<string, string>
@@ -11,7 +13,7 @@ export const getRequestHighContrast = ({
   cookies,
   headers,
 }: GetRequestHighContrastArgs): boolean => {
-  const cookieKey = `${config.cookiePrefix}-high-contrast-mode`
+  const cookieKey = `${config.cookiePrefix}${highContrastModeCookieSuffix}`
   const modeFromCookie = cookies.get(cookieKey)
 
   if (modeFromCookie === 'true') {

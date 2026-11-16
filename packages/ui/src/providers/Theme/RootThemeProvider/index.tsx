@@ -6,7 +6,7 @@ import type { Theme } from '../shared.js'
 import { useConfig } from '../../Config/index.js'
 import { useSearchParams } from '../../RouterAdapter/index.js'
 import { Context, RootContext } from '../context.js'
-import { defaultTheme } from '../shared.js'
+import { defaultTheme, highContrastModeCookieSuffix, themeCookieSuffix } from '../shared.js'
 import {
   detectHighContrastMode,
   detectTheme,
@@ -46,8 +46,8 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
 }) => {
   const { config } = useConfig()
   const preselectedTheme = config.admin.theme
-  const themeCookieKey = `${config.cookiePrefix}-theme`
-  const contrastCookieKey = `${config.cookiePrefix}-high-contrast-mode`
+  const themeCookieKey = `${config.cookiePrefix}${themeCookieSuffix}`
+  const contrastCookieKey = `${config.cookiePrefix}${highContrastModeCookieSuffix}`
 
   const themeParam = useSearchParams().get('theme')?.toLowerCase()
 
