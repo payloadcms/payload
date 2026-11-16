@@ -857,63 +857,6 @@ test.describe('Form State', () => {
         .toBe('Updated programmatically')
       expect(requestCount).toBe(2)
     })
-
-    test('should retain save errors after a queued form-state refresh (#18425)', async () => {
-      const doc = await payload.create({
-        collection: postsSlug,
-        data: { title: 'initial' },
-      })
-      createdDocs.push({ collection: postsSlug, id: doc.id })
-
-      await page.goto(postsUrl.edit(doc.id))
-      await waitForFormReady(page)
-
-      let hasSaveStarted = false
-      const releaseSave = Promise.withResolvers<void>()
-
-      await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
-        if (route.request().method() !== 'PATCH') {
-          await route.continue()
-          return
-        }
-
-        hasSaveStarted = true
-        await releaseSave.promise
-        await route.fulfill({
-          json: {
-            errors: [
-              {
-                data: { errors: [{ message: 'Title must be unique', path: 'title' }] },
-                message: 'The following field is invalid: title',
-              },
-            ],
-          },
-          status: 400,
-        })
-      })
-
-      try {
-        await page.locator('#field-title').fill('duplicate')
-        await addArrayRowAsync(page, 'array')
-        await page.click('#action-save')
-        await expect.poll(() => hasSaveStarted).toBe(true)
-
-        // Allow the debounced refresh to queue behind the in-flight save.
-        await page.waitForTimeout(500)
-        releaseSave.resolve()
-
-        await expect(page.locator('#field-array__0__customTextField')).toHaveValue(
-          'This is a default value',
-        )
-        await expect(
-          page
-            .locator('.field-type.text', { has: page.locator('#field-title') })
-            .locator('.field-error'),
-        ).toHaveText('Title must be unique')
-      } finally {
-        releaseSave.resolve()
-      }
-    })
   })
 
   test('should persist programmatic updates made during the post-save refresh', async () => {
@@ -1569,8 +1512,17 @@ test.describe('Shared form request queue', () => {
 
     await field.fill('abc')
 
-    // A stale response immediately schedules recovery for the latest edit.
+    const secondResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${autosavePostsSlug}/${doc.id}`) &&
+        readSubmittedData({ body: response.request().postData() ?? '' }).restrictedValue === 'ab',
+    )
+
     saves[1].released.resolve()
+    await secondResponse
+    await page.clock.runFor(1000)
+    await expect.poll(readDraftValue).toBe('abc')
     await saves[2].captured.promise
     await expect(field).toHaveValue('abc')
     await expect(savingIndicator).toBeVisible()
@@ -1746,6 +1698,70 @@ test.describe('Shared form request queue', () => {
     await expect(title).toBeEnabled()
     await expect(title).toBeFocused()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should retain save errors when saving during an older form-state request (#18425)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial value' },
+      overrideAccess: true,
+    })
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let saveCount = 0
+
+    createdDocs.push({ collection: postsSlug, id: doc.id })
+    await page.goto(editURL)
+    await waitForFormReady(page)
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    const refresh = await holdResponse({
+      matches: (request) => (request.postData() ?? '').includes('form-state'),
+      method: 'POST',
+      page,
+      url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+    })
+
+    await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      saveCount += 1
+      await route.fulfill({
+        status: 400,
+        json: {
+          errors: [
+            {
+              data: { errors: [{ message: 'Title must be unique', path: 'title' }] },
+              message: 'The following field is invalid: title',
+            },
+          ],
+        },
+      })
+    })
+
+    try {
+      await page.locator('#field-title').fill('duplicate')
+      await page.clock.runFor(500)
+      await refresh.captured
+      await page.locator('#action-save').click()
+      await page.clock.runFor(500)
+      await expect.poll(() => saveCount).toBe(0)
+      refresh.release()
+
+      const error = page
+        .locator('.field-type.text', { has: page.locator('#field-title') })
+        .locator('.field-error')
+
+      await expect(error).toHaveText('Title must be unique')
+      await page.clock.runFor(1000)
+      await expect(error).toHaveText('Title must be unique')
+      await expect(page.locator('#action-save')).toBeEnabled()
+    } finally {
+      await refresh.cleanup()
+    }
   })
 
   test('should wait for a form-state refresh before starting an explicit save', async ({
@@ -2458,6 +2474,9 @@ test.describe('Document submission outcomes', () => {
     await expect(page.locator('.field-error', { hasText: 'Title is required' })).toBeVisible()
 
     const saveDraft = page.locator('#action-save-draft')
+
+    await expect(saveDraft).toBeEnabled()
+
     const saved = page.waitForResponse(
       (response) =>
         response.request().method() === 'PATCH' &&
@@ -2465,7 +2484,6 @@ test.describe('Document submission outcomes', () => {
         response.ok(),
     )
 
-    await expect(saveDraft).toBeEnabled()
     await saveDraft.click()
     await saved
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
