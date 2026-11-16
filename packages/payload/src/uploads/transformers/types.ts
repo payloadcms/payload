@@ -1,4 +1,4 @@
-import type { JSONSchema4 } from 'json-schema'
+import type { core } from 'zod'
 
 import type { Config } from '../../config/types.js'
 import type { Document, JsonObject, PayloadRequest } from '../../types/index.js'
@@ -151,6 +151,13 @@ export type TransformValidate<TValue = unknown> = (
 ) => Promise<string | true> | string | true
 
 /**
+ * The JSON Schema of a declared `_transforms` value, in the draft that Payload checks values with
+ * (draft 2020-12). Older rules that this draft does not have, such as draft 4's `required: true`,
+ * are not checked, so this type does not allow them.
+ */
+export type TransformValueSchema = core.JSONSchema.JSONSchema
+
+/**
  * A custom `_transforms` key and the shape of its value. Payload adds it to the `_transforms`
  * schema and to the generated `UploadTransforms` type. A definition does not decide which stage
  * applies the key: a stage claims it with `handledTransformKeys`.
@@ -159,7 +166,7 @@ export type TransformDefinition<TValue = unknown> = {
   /** The `_transforms` key. It cannot be a built-in key, and only one transformer can define it. */
   key: string
   /** The JSON Schema of the value. Its `description` becomes the JSDoc of the generated type. */
-  schema: JSONSchema4
+  schema: TransformValueSchema
   /** Runs after the schema check, on every supplied value and on a value that a stage changes. */
   validate?: TransformValidate<TValue>
 }

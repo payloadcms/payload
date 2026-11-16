@@ -89,9 +89,11 @@ export function getTransformStateObjectSchema({
 }: {
   transformers: readonly UploadTransformer[]
 }): JSONSchema4 {
-  const declaredProperties = Object.fromEntries(
+  // Definition schemas use the draft that zod checks values with. This tree also goes to the type
+  // generator, which reads draft 4. The rules that both drafts have mean the same in each.
+  const declaredProperties: Record<string, JSONSchema4> = Object.fromEntries(
     transformers.flatMap(({ transformDefinitions }) =>
-      (transformDefinitions ?? []).map(({ key, schema }) => [key, schema]),
+      (transformDefinitions ?? []).map(({ key, schema }) => [key, schema as JSONSchema4]),
     ),
   )
 
