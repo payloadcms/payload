@@ -22,7 +22,8 @@ export { defaultTheme, type Theme } from './shared.js'
  *
  * The Admin explicitly mounts `RootThemeProvider` to manage preferences, cookies, system detection, and document attributes.
  * Its `setTheme` and `setHighContrastMode` functions are shared with descendants, so calls update the root preference.
- * Without an explicit root provider, both setters are no-ops.
+ * Calling either setter without an explicit root provider throws.
+ * Update the provider props to change a standalone or local override.
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,

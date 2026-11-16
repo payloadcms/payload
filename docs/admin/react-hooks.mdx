@@ -1049,7 +1049,7 @@ const MyComponent: React.FC = () => {
 
 `ThemeProvider` only supplies context. Outside the Admin, pass the frontend's current `theme` and `highContrastMode` values as props. It does not read cookies, inspect the document's theme, detect system preferences, or change document attributes. Omitted values inherit from the nearest provider or use the hook defaults.
 
-The Admin explicitly supplies a root preference provider. Both hooks return the same `setTheme` and `setHighContrastMode` functions, which update root state, document attributes, and cookies even when called inside a local override. They do not change explicit local overrides. Outside an explicit root preference provider, both callbacks do nothing. Change the `ThemeProvider` props to update a standalone or local override.
+The Admin explicitly supplies a root preference provider. Both hooks return the same `setTheme` and `setHighContrastMode` functions, which update root state, document attributes, and cookies even when called inside a local override. They do not change explicit local overrides. Reading either hook outside an explicit root preference provider is supported, but calling either callback throws an error explaining which provider is missing and which controlled prop to update. Change the `ThemeProvider` props to update a standalone or local override.
 
 For local theme styling, apply `data-theme` to the surrounding element. `ThemeProvider` does not add a DOM element or write local attributes. Nested `highContrastMode` overrides affect context only; built-in enhanced contrast styling follows the document or shadow host setting. Local visual contrast overrides require custom styling.
 
@@ -1059,7 +1059,7 @@ Use [`useRootTheme`](#useroottheme) for controls that read or change the root pr
 
 Returns the explicitly supplied root preferences: `theme`, `autoMode`, `highContrastMode`, `setTheme`, and `setHighContrastMode`, regardless of surrounding theme overrides. For example, inside a dark `Popup` on a light page, `theme` is `'light'`. Theme and contrast preference controls should use this hook so they reflect the root selection.
 
-Without a root preference provider, this hook returns the defaults (`theme: 'light'`, `autoMode: true`, `highContrastMode: false`) and no-op setters. A standalone `ThemeProvider` does not create a root preference provider.
+Without a root preference provider, reading this hook returns the defaults (`theme: 'light'`, `autoMode: true`, `highContrastMode: false`), but invoking either setter throws. A standalone `ThemeProvider` does not create a root preference provider.
 
 Within the Admin, `setTheme` accepts `'light'`, `'dark'`, or `'auto'`. Automatic mode follows the system preference and removes the explicit theme cookie. `setHighContrastMode` accepts a boolean and persists the choice. Both setters update the root state and document attributes; neither changes an explicit nested override.
 

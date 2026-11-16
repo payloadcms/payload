@@ -41,7 +41,7 @@ Outside the Admin, supply the frontend's current values and update those props w
 </ThemeProvider>
 ```
 
-Without an explicit root preference provider, the hooks expose no-op setters. `useTheme` returns supplied or inherited values, and `useRootTheme` keeps its default fallback. Host applications remain responsible for reading and persisting their own preferences and applying their DOM styles.
+Without an explicit root preference provider, both hooks remain readable: `useTheme` returns supplied or inherited values, and `useRootTheme` keeps its default fallback. Calling `setTheme` or `setHighContrastMode` now throws an error instead of silently doing nothing. Update the controlled provider props to change a standalone theme or contrast value. Host applications remain responsible for reading and persisting their own preferences and applying their DOM styles.
 
 The `useTheme` hook now returns the nearest `ThemeProvider` overrides. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit nested `theme` prop sets `autoMode` to `false`; omitted theme and contrast props inherit from the nearest parent. Nested overrides are controlled by their props and do not create preference state or write cookies or document attributes.
 
