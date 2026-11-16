@@ -168,7 +168,21 @@ async function reparentSnapshot({
   parentID: unknown
   req: PayloadRequest
 }) {
-  return updateDocument({
+  const previousLatestVersions = await req.payload.db.findVersions({
+    collection: collection.slug,
+    limit: 0,
+    pagination: false,
+    req,
+    select: { id: true },
+    where: {
+      and: [
+        { parent: { equals: doc.id } },
+        { latest: { equals: true } },
+        { updatedAt: { less_than_equal: new Date().toISOString() } },
+      ],
+    },
+  })
+  const result = await updateDocument({
     id: doc.id,
     autosave: false,
     collectionConfig: collection,
@@ -189,4 +203,16 @@ async function reparentSnapshot({
     shouldManageLocalFiles: false,
     showHiddenFields: true,
   })
+
+  for (const version of previousLatestVersions.docs) {
+    await req.payload.db.updateVersion({
+      id: version.id,
+      collection: collection.slug,
+      req,
+      returning: false,
+      versionData: { latest: false, updatedAt: null },
+    })
+  }
+
+  return result
 }
