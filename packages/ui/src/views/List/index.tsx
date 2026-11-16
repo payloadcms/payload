@@ -43,8 +43,13 @@ import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
+import {
+  getListLayoutQuery,
+  getSavedListLayoutQuery,
+  resolveListLayoutQuery,
+} from '../../utilities/listLayoutPreferences.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
-import { upsertPreferences } from '../../utilities/upsertPreferences.js'
+import { getPreferences, upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
@@ -143,7 +148,9 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query: ListQuery = { ...(queryFromArgs || queryFromReq) }
+  const hasTreeLayout =
+    canReadNestedDocsTree({ collectionConfig }) && viewType === 'list' && !drawerSlug
+  let query: ListQuery = { ...(queryFromArgs || queryFromReq) }
 
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
@@ -152,26 +159,72 @@ export const renderListView = async (
       ? JSON.parse(query.queryByGroup)
       : query?.queryByGroup
 
-  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
-    key: `collection-${collectionSlug}`,
-    req,
-    value: {
-      columns: columnsFromQuery,
-      groupBy: query?.groupBy,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: query?.preset,
-      sort: query?.sort as string,
-    },
-  })
+  let collectionPreferences = hasTreeLayout
+    ? ((
+        await getPreferences<CollectionPreferences>(
+          `collection-${collectionSlug}`,
+          payload,
+          user.id,
+          user.collection,
+        )
+      )?.value ?? {})
+    : await upsertPreferences<CollectionPreferences>({
+        key: `collection-${collectionSlug}`,
+        req,
+        value: {
+          columns: columnsFromQuery,
+          groupBy: query?.groupBy,
+          limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+          preset: query?.preset,
+          sort: query?.sort as string,
+        },
+      })
+
+  const layoutScope = hasTreeLayout
+    ? query.listLayout === 'tree' || query.listLayout === 'table'
+      ? query.listLayout
+      : collectionPreferences.documentLayout === 'tree'
+        ? 'tree'
+        : 'table'
+    : undefined
+  const savedLayoutQuery = layoutScope
+    ? getSavedListLayoutQuery({ layout: layoutScope, preferences: collectionPreferences })
+    : undefined
+
+  if (layoutScope) {
+    query = resolveListLayoutQuery({
+      defaultLimit: collectionConfig.admin.pagination.defaultLimit,
+      defaultSort: collectionConfig.defaultSort,
+      layout: layoutScope,
+      preferences: collectionPreferences,
+      query,
+    })
+    collectionPreferences = {
+      ...collectionPreferences,
+      documentLayout:
+        layoutScope === 'tree'
+          ? 'tree'
+          : collectionPreferences.documentLayout === 'grid'
+            ? 'grid'
+            : 'table',
+    }
+  }
+
+  const shouldApplyPresetDefaults =
+    !layoutScope ||
+    String(query.preset ?? '') !== String(savedLayoutQuery?.preset ?? '') ||
+    !collectionPreferences.layoutQueries?.[layoutScope]
 
   let queryPreset: QueryPreset | undefined
   let queryPresetPermissions: SanitizedCollectionPermission | undefined =
     permissions?.collections?.['payload-query-presets']
 
-  if (collectionPreferences?.preset) {
+  const presetID = layoutScope ? query.preset : collectionPreferences?.preset
+
+  if (presetID !== undefined && presetID !== null) {
     try {
       queryPreset = (await payload.findByID({
-        id: collectionPreferences?.preset,
+        id: presetID,
         collection: 'payload-query-presets',
         depth: 0,
         overrideAccess: false,
@@ -194,21 +247,43 @@ export const renderListView = async (
   }
 
   query.preset = queryPreset?.id
-  if (queryPreset?.where && !query.where) {
+  if (shouldApplyPresetDefaults && queryPreset?.where && !query.where) {
     query.where = queryPreset.where
   }
-  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+  query.groupBy = layoutScope
+    ? (query.groupBy ?? (shouldApplyPresetDefaults ? queryPreset?.groupBy : undefined))
+    : (query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy)
 
   const columnPreference = query.columns
     ? transformColumnsToPreferences(query.columns)
-    : (queryPreset?.columns ?? collectionPreferences?.columns)
+    : layoutScope
+      ? (collectionPreferences?.columns ?? queryPreset?.columns)
+      : (queryPreset?.columns ?? collectionPreferences?.columns)
   query.columns = transformColumnsToSearchParams(columnPreference)
 
-  query.page = isNumber(query?.page) ? Number(query.page) : 0
-
-  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-  query.sort = collectionPreferences?.sort || collectionConfig.defaultSort
+  if (!layoutScope) {
+    query.page = isNumber(query?.page) ? Number(query.page) : 0
+    query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    query.sort = collectionPreferences?.sort || collectionConfig.defaultSort
+  } else {
+    collectionPreferences = await upsertPreferences<CollectionPreferences>({
+      customMerge: (existing, incoming, defaultMerge) => ({
+        ...defaultMerge(existing, incoming),
+        layoutQueries: {
+          ...existing?.layoutQueries,
+          table: getSavedListLayoutQuery({ layout: 'table', preferences: existing }),
+          ...incoming.layoutQueries,
+        },
+      }),
+      key: `collection-${collectionSlug}`,
+      req,
+      value: {
+        columns: columnPreference,
+        documentLayout: collectionPreferences.documentLayout,
+        layoutQueries: { [layoutScope]: getListLayoutQuery({ query }) },
+      },
+    })
+  }
 
   const baseFilterConstraint = await (
     collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
@@ -321,8 +396,6 @@ export const renderListView = async (
   }
 
   // Check for hierarchy parent param
-  const hasTreeLayout =
-    canReadNestedDocsTree({ collectionConfig }) && viewType === 'list' && !drawerSlug
   const shouldLoadNestedDocsTree = Boolean(
     hasTreeLayout &&
     collectionPreferences?.documentLayout === 'tree' &&

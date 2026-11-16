@@ -1032,3 +1032,5 @@ Tree queries respect collection read access and the collection's base filter. Cu
 Nested document collections offer Table, Grid, and Tree layouts. Tree keeps the list's columns and document selection while loading children when their parent is expanded. More roots or children load as their continuation row comes into view; a **Load more** button is also available. Expanding a branch updates the URL so the same branches can be reopened after a refresh.
 
 Searching, filtering, or grouping shows matching documents as a flat list while Tree remains selected. Clear those conditions to return to the tree. Collections whose custom parent field has a read access rule retain Table and Grid layouts.
+
+Table and Tree remember their own search, filters, grouping, sort, page, page size and selected query preset. Table and Grid share the flat query scope. Column selections are shared across layouts. Clearing a Tree search or filter restores the saved expanded branches. Existing flat preferences migrate to Table; Tree starts with collection defaults.
