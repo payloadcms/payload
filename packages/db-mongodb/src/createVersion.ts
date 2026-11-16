@@ -84,7 +84,7 @@ export const createVersion: CreateVersion = async function createVersion(
         },
         {
           updatedAt: {
-            $lte: new Date(doc.updatedAt),
+            $lt: new Date(doc.updatedAt),
           },
         },
       ],
