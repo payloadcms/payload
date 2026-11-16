@@ -164,6 +164,7 @@ export const thTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'ประเภทของไฟล์ไม่ถูกต้อง: {{value}}',
     invalidRequestArgs: 'มีการส่งอาร์กิวเมนต์ที่ไม่ถูกต้องในคำขอ: {{args}}',
     loadingDocument: 'เกิดปัญหาระหว่างการโหลดเอกสารที่มี ID {{id}}',
+    loadingItems: 'ไม่สามารถโหลดรายการได้',
     localesNotSaved_one: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
     localesNotSaved_other: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
     logoutFailed: 'การออกจากระบบล้มเหลว.',
@@ -532,6 +533,9 @@ export const thTranslations: DefaultTranslationsObject = {
     toggle: 'สลับ',
     trash: 'ถังขยะ',
     trashedCountSuccessfully: '{{count}} {{label}} ถูกย้ายไปยังถังขยะ',
+    treeLayout: 'แผนผังต้นไม้',
+    treeSearchResults:
+      'แสดงเอกสารที่ตรงกันเป็นรายการแบบเรียบ ล้างการค้นหา ตัวกรอง และการจัดกลุ่มเพื่อกลับไปยังแผนผังต้นไม้',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',
     unchecked: 'ยังไม่ได้เลือก',

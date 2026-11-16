@@ -172,6 +172,7 @@ export const etTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Vale failitüüp: {{value}}',
     invalidRequestArgs: 'Päringule edastati vigased argumendid: {{args}}',
     loadingDocument: 'Dokumendi ID-ga {{id}} laadimisel tekkis probleem.',
+    loadingItems: 'Üksuste laadimine ebaõnnestus.',
     localesNotSaved_one: 'Järgmist keelt ei saanud salvestada:',
     localesNotSaved_other: 'Järgmisi keeli ei saanud salvestada:',
     logoutFailed: 'Väljalogimine ebaõnnestus.',
@@ -548,6 +549,9 @@ export const etTranslations: DefaultTranslationsObject = {
     toggle: 'Lüliti',
     trash: 'Prügi',
     trashedCountSuccessfully: '{{count}} {{label}} kanti prügikasti.',
+    treeLayout: 'Puu',
+    treeSearchResults:
+      'Sobivad dokumendid kuvatakse lameda loendina. Puusse naasmiseks tühjendage otsing, filtrid ja rühmitamine.',
     true: 'Tõene',
     unauthorized: 'Volitamata',
     unchecked: 'Märkimata',

@@ -41,11 +41,6 @@ export function ListSearchFilter({
       onSearchInputChange?.(searchQueryParam || '')
       previousSearch.current = searchQueryParam
     }
-
-    return () => {
-      shouldUpdateState.current = true
-      previousSearch.current = undefined
-    }
   }, [onSearchInputChange, searchQueryParam])
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 'use client'
-import type { Column, NestedDocRow, PaginatedDocs, Sort } from 'payload'
+import type { CollectionPreferences, Column, NestedDocRow, PaginatedDocs, Sort } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, {
@@ -16,6 +16,7 @@ import React, {
 import type { NestedDocsTreeCache, ParentID } from './state.js'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { usePreferences } from '../Preferences/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useServerFunctions } from '../ServerFunctions/index.js'
 import { appendTreePage, branchKey, createTreeCache, flattenTreeCache } from './state.js'
@@ -51,6 +52,7 @@ export function NestedDocsTreeProvider({
   rows?: Record<string, NestedDocRow>
   sort?: Sort
 }) {
+  const { setPreference } = usePreferences()
   const { getTableState } = useServerFunctions()
   const router = useRouter()
   const pageSize = Math.min(100, Math.max(1, Number(data.limit) || 10))
@@ -86,10 +88,17 @@ export function NestedDocsTreeProvider({
     ({ cache: next }: { cache: NestedDocsTreeCache }) => {
       const params = parseSearchParams(new URLSearchParams(window.location.search))
       params.treeExpanded = next.expanded.size > 0 ? [...next.expanded] : ''
+      void setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+        ...preferences,
+        layoutQueries: {
+          ...preferences?.layoutQueries,
+          tree: { ...preferences?.layoutQueries?.tree, treeExpanded: [...next.expanded] },
+        },
+      }))
       const search = qs.stringify(params, { addQueryPrefix: true })
       router.replaceState(search)
     },
-    [router],
+    [collectionSlug, router, setPreference],
   )
   const update = useCallback(
     ({ transform }: { transform: (previous: NestedDocsTreeCache) => NestedDocsTreeCache }) => {
