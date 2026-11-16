@@ -17,7 +17,7 @@ import {
   planRequestTimeBuild,
 } from '../transformState/planUpload.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
-import { collectStoredFiles, hasStoredOriginal } from './storedFiles.js'
+import { getUploadFileEntries, getUploadFileValues, hasStoredOriginal } from './storedFiles.js'
 
 /**
  * Restores a version that has a file built at request time, from its retained original. A restore
@@ -41,8 +41,8 @@ export async function runRequestTimeFileRestore<T>({
   runStoredRestore: (args: FileRestoreArgs<T>) => Promise<T>
 } & FileRestoreArgs<T>): Promise<T> {
   const original = selected.original as OriginalFileData | undefined
-  const storedFiles = collectStoredFiles({ collection, doc: selected, req })
-  if (!original?.filename || !original.mimeType || !hasStoredOriginal({ storedFiles })) {
+  const entries = getUploadFileEntries({ collection, doc: selected, req })
+  if (!original?.filename || !original.mimeType || !hasStoredOriginal({ entries })) {
     throw new APIError('Restoring request-time files requires a retained original.', 400)
   }
 
@@ -80,18 +80,22 @@ export async function runRequestTimeFileRestore<T>({
     req,
   }
 
-  const isMainBuiltAtRequest = isRequestTimeFile({ entry: selected })
+  const isMainBuiltAtRequest = entries.some(
+    ({ role, status }) => status === 'requestTime' && role.type === 'default',
+  )
   const storedVariantNames = new Set(
-    storedFiles.flatMap(({ roles }) =>
-      roles.flatMap((role) => (role.type === 'size' ? [role.sizeKey] : [])),
+    entries.flatMap(({ role, status }) =>
+      status === 'stored' && role.type === 'size' ? [role.sizeKey] : [],
     ),
   )
   const unstoredVariantNames = (collection.upload.variants ?? [])
     .map(({ name }) => name)
     .filter((name) => !storedVariantNames.has(name))
-  const selectedVariants = (selected.variants ?? {}) as Record<string, JsonObject | null>
-  const hasRequestTimeVariant = unstoredVariantNames.some((name) =>
-    isRequestTimeFile({ entry: selectedVariants[name] }),
+  const hasRequestTimeVariant = entries.some(
+    ({ role, status }) =>
+      status === 'requestTime' &&
+      role.type === 'size' &&
+      unstoredVariantNames.includes(role.sizeKey),
   )
 
   // The checks below use one plan, so the stages are planned at most once.
@@ -171,25 +175,17 @@ function setFileEndpointURLs({
   req,
   restored,
 }: { restored: JsonObject } & Pick<FileRestoreArgs<unknown>, 'collection' | 'req'>): JsonObject {
-  const entries = [
-    { entry: restored, isOriginal: false },
-    {
-      entry: restored.original as JsonObject,
-      isOriginal: shouldRequestOriginal({ doc: restored }),
-    },
-    ...Object.values(restored.variants ?? {}).map((entry) => ({
-      entry: entry as JsonObject,
-      isOriginal: false,
-    })),
-  ]
+  const isOriginalRequested = shouldRequestOriginal({ doc: restored })
 
-  for (const { entry, isOriginal } of entries) {
-    if (entry?.filename && (!collection.upload.fileOperations || isRequestTimeFile({ entry }))) {
-      entry.url = generateFilePathOrURL({
+  for (const { role, value } of getUploadFileValues({ doc: restored })) {
+    const filename = typeof value.filename === 'string' ? value.filename : undefined
+
+    if (filename && (!collection.upload.fileOperations || isRequestTimeFile({ entry: value }))) {
+      value.url = generateFilePathOrURL({
         collectionSlug: collection.slug,
         config: req.payload.config,
-        filename: entry.filename,
-        isOriginal,
+        filename,
+        isOriginal: role.type === 'original' && isOriginalRequested,
         relative: true,
         urlOrPath: undefined,
       })
