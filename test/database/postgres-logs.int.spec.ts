@@ -75,6 +75,25 @@ test.suite(
       consoleCount.mockRestore()
     })
 
+    test('should delete a simple document with one read and one delete query', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'simple',
+        data: { text: 'delete-query-budget' },
+        overrideAccess: true,
+      })
+      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
+
+      const result = await payload.db.deleteOne({
+        collection: 'simple',
+        where: { id: { equals: doc.id } },
+      })
+
+      expect(result).toMatchObject({ id: doc.id, text: 'delete-query-budget' })
+      expect(consoleCount).toHaveBeenCalledTimes(2)
+    })
+
     test('ensure deleteMany is done in single db query - no where query', async ({ payload }) => {
       await payload.create({
         collection: 'posts',

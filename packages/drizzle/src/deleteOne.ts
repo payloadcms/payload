@@ -1,6 +1,6 @@
 import type { DeleteOne } from 'payload'
 
-import { eq } from 'drizzle-orm'
+import { eq, getColumnTable } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -20,8 +20,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
-
-  let docToDelete: Record<string, unknown>
 
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
@@ -43,24 +41,36 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where,
   })
 
-  if (selectDistinctResult?.[0]?.id) {
-    docToDelete = await db.query[tableName].findFirst({
-      where: eq(this.tables[tableName].id, selectDistinctResult[0].id),
-    })
-  } else {
-    const findManyArgs = buildFindManyArgs({
-      adapter: this,
-      depth: 0,
-      fields: collection.flattenedFields,
-      joinQuery: false,
-      select,
-      tableName,
-    })
-
-    findManyArgs.where = where
-
-    docToDelete = await db.query[tableName].findFirst(findManyArgs)
+  if (selectDistinctResult && selectDistinctResult.length === 0) {
+    return null
   }
+
+  const findManyArgs = buildFindManyArgs({
+    adapter: this,
+    depth: 0,
+    fields: collection.flattenedFields,
+    joinQuery: false,
+    select,
+    tableName,
+  })
+
+  if (selectDistinctResult) {
+    findManyArgs.where = { RAW: (table) => eq(table.id, selectDistinctResult[0].id) }
+  } else if (where) {
+    findManyArgs.where = {
+      RAW: (table) =>
+        buildQuery({
+          adapter: this,
+          aliasTable: getColumnTable(table.id),
+          fields: collection.flattenedFields,
+          locale: req?.locale,
+          tableName,
+          where: whereArg,
+        }).where,
+    }
+  }
+
+  const docToDelete: Record<string, unknown> = await db.query[tableName].findFirst(findManyArgs)
 
   if (!docToDelete) {
     return null
