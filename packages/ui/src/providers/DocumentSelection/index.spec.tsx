@@ -1,4 +1,4 @@
-import { act, useLayoutEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 
@@ -162,13 +162,12 @@ test('should ignore callbacks captured before navigating to another selection sc
 
   await screen.rerender(<Fixture documents={secondOnly} onSelection={capture} scope="pages:B" />)
   await screen.getByRole('button', { name: 'Toggle visible' }).click()
-  await act(() => {
-    stale.registerVisibleDocuments?.({ documents: visible })
-    stale.toggleSelection({ id: 1, collectionSlug: 'pages' })
-    stale.toggleAllInCollection({ collectionSlug: 'pages' })
-    stale.clearCollection({ collectionSlug: 'pages' })
-    stale.clearAll()
-  })
+  stale.registerVisibleDocuments?.({ documents: visible })
+  stale.toggleSelection({ id: 1, collectionSlug: 'pages' })
+  stale.toggleAllInCollection({ collectionSlug: 'pages' })
+  stale.clearCollection({ collectionSlug: 'pages' })
+  stale.clearAll()
+  await screen.rerender(<Fixture documents={secondOnly} onSelection={capture} scope="pages:B" />)
 
   await expect.element(screen.getByRole('status', { name: 'Count' })).toHaveTextContent('1')
   await expect
@@ -214,9 +213,15 @@ test('should reject old editor callbacks after authenticated user identity chang
       scope="pages:A"
     />,
   )
-  await act(() => {
-    stale.toggleSelection({ id: 1, collectionSlug: 'pages' })
-  })
+  stale.toggleSelection({ id: 1, collectionSlug: 'pages' })
+  await screen.rerender(
+    <Fixture
+      currentUserId="editor-B"
+      documents={documents}
+      onSelection={capture}
+      scope="pages:A"
+    />,
+  )
 
   await expect.element(screen.getByRole('status', { name: 'Count' })).toHaveTextContent('0')
   expect(capture.mock.calls.at(-1)![0].isLocked({ id: 1, collectionSlug: 'pages' })).toBe(true)
