@@ -8,6 +8,13 @@ import { useConfig } from '../../Config/index.js'
 import { useSearchParams } from '../../RouterAdapter/index.js'
 import { Context, RootContext } from '../context.js'
 import { defaultTheme } from '../shared.js'
+import {
+  detectHighContrastMode,
+  detectTheme,
+  getThemeFromSystem,
+  isValidThemeParam,
+  setCookie,
+} from '../utilities.js'
 
 /**
  * Theme providers can be nested, but only this root provider reads and writes cookies, detects system preferences, and updates theme and contrast attributes on `<html>`.
@@ -40,16 +47,15 @@ export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
    */
   const setTheme = useCallback(
     (themeToSet: 'auto' | Theme) => {
-      const resolvedTheme: Theme =
-        themeToSet === 'auto'
-          ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light'
-          : themeToSet
+      const resolvedTheme = themeToSet === 'auto' ? getThemeFromSystem() : themeToSet
 
       setThemeState(resolvedTheme)
       setAutoMode(themeToSet === 'auto')
-      setCookie(themeCookieKey, themeToSet, themeToSet === 'auto' ? -1 : 365)
+      setCookie({
+        cookieKey: themeCookieKey,
+        days: themeToSet === 'auto' ? -1 : 365,
+        value: themeToSet,
+      })
       document.documentElement.setAttribute('data-theme', resolvedTheme)
     },
     [themeCookieKey],
@@ -62,7 +68,7 @@ export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
       setHighContrastModeState(isHighContrast)
-      setCookie(contrastCookieKey, String(isHighContrast), 365)
+      setCookie({ cookieKey: contrastCookieKey, days: 365, value: String(isHighContrast) })
       document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
     },
     [contrastCookieKey],
@@ -78,14 +84,18 @@ export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
       return
     }
 
-    const { isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
+    const { isAutoMode, theme: detectedTheme } = detectTheme({ cookieKey: themeCookieKey })
 
+    document.documentElement.setAttribute('data-theme', detectedTheme)
     setThemeState(detectedTheme)
     setAutoMode(isAutoMode)
   }, [preselectedTheme, themeCookieKey, themeParam, setTheme])
 
   useEffect(() => {
-    setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
+    const isHighContrast = detectHighContrastMode({ cookieKey: contrastCookieKey })
+
+    document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
+    setHighContrastModeState(isHighContrast)
   }, [contrastCookieKey])
 
   const value = { autoMode, highContrastMode, setHighContrastMode, setTheme, theme }
@@ -96,50 +106,3 @@ export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
     </RootContext>
   )
 }
-
-function setCookie(cname: string, cvalue: string, exdays: number) {
-  const d = new Date()
-  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
-  const expires = 'expires=' + d.toUTCString()
-  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
-}
-
-const detectTheme = (cookieKey: string): { isAutoMode: boolean; theme: Theme } => {
-  const fromCookie = window.document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${cookieKey}=`))
-    ?.split('=')[1]
-
-  const theme: Theme =
-    fromCookie === 'light' || fromCookie === 'dark'
-      ? fromCookie
-      : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-
-  document.documentElement.setAttribute('data-theme', theme)
-
-  return { isAutoMode: fromCookie !== 'light' && fromCookie !== 'dark', theme }
-}
-
-const detectHighContrastMode = (cookieKey: string): boolean => {
-  const fromCookie =
-    window.document.cookie
-      .split('; ')
-      .find((row) => row.startsWith(`${cookieKey}=`))
-      ?.split('=')[1] ?? null
-
-  const isHighContrast =
-    fromCookie === 'true'
-      ? true
-      : fromCookie === 'false'
-        ? false
-        : !!(window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches)
-
-  document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
-
-  return isHighContrast
-}
-
-const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
-  value === 'auto' || value === 'light' || value === 'dark'
