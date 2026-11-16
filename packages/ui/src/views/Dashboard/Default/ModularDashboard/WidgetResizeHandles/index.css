@@ -1,7 +1,7 @@
 @layer payload-default {
   .widget-wrapper__resize-handles {
     position: absolute;
-    inset: 0;
+    inset: calc(var(--spacer-2) * -1);
     z-index: 6;
     pointer-events: none;
   }
@@ -22,11 +22,11 @@
       position: absolute;
       inset: 0;
       margin: auto;
-      width: var(--spacer-2);
-      height: var(--spacer-4);
+      width: calc(var(--spacer-1) * 1.25 + var(--stroke-width-medium) * 2);
+      height: calc(var(--spacer-3) + var(--stroke-width-medium) * 2);
       box-sizing: border-box;
-      border: var(--stroke-width-small) solid var(--color-border-selected-strong);
-      border-radius: var(--radius-full);
+      border: var(--stroke-width-medium) solid var(--color-border-brand-strong);
+      border-radius: calc(var(--radius-small) + var(--stroke-width-medium));
       background: var(--color-bg);
       pointer-events: none;
     }

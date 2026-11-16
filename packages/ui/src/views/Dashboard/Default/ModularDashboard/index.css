@@ -123,10 +123,6 @@
     width: 100%;
   }
 
-  .widget-wrapper--editing .widget-wrapper__controls {
-    transition: opacity 0.2s ease;
-  }
-
   .widget-wrapper--controls-active .widget-wrapper__controls {
     opacity: 1;
     visibility: visible;
@@ -134,23 +130,23 @@
 
   .widget-wrapper__edit-overlay {
     position: absolute;
-    inset: 0;
+    inset: calc(var(--spacer-2) * -1);
     z-index: 5;
-    border: 0;
+    border: var(--stroke-width-medium) solid transparent;
     padding: 0;
-    width: 100%;
-    height: 100%;
+    width: calc(100% + var(--spacer-2) * 2);
+    height: calc(100% + var(--spacer-2) * 2);
     background: transparent;
     outline: none;
     border-radius: var(--radius-medium);
     box-sizing: border-box;
     opacity: 0;
-    transition: opacity 0.2s ease;
   }
 
   .widget-wrapper--editing:not(.widget-wrapper--controls-active):hover
     .widget-wrapper__edit-overlay {
-    background: color-mix(in srgb, var(--color-bg-selected) 50%, transparent);
+    background: color-mix(in srgb, var(--color-bg-brand-tertiary-hover) 50%, transparent);
+    border-color: var(--color-border-brand);
     opacity: 1;
   }
 
@@ -158,16 +154,12 @@
     .widget-wrapper--editing:not(.widget-wrapper--controls-active):hover
     .widget-wrapper__edit-overlay {
     background: transparent;
+    border-color: transparent;
     opacity: 0;
   }
 
-  .widget-wrapper--controls-active {
-    outline: var(--stroke-width-medium) solid var(--color-border-selected-strong);
-    outline-offset: var(--accessibility-outline-offset);
-    border-radius: var(--radius-medium);
-  }
-
   .widget-wrapper--controls-active .widget-wrapper__edit-overlay {
+    border-color: var(--color-border-brand-strong);
     opacity: 1;
   }
 
@@ -178,7 +170,7 @@
 
   .widget-wrapper__controls {
     position: absolute;
-    inset-block-end: calc(100% + var(--spacer-2));
+    inset-block-end: calc(100% + var(--spacer-2) * 2);
     inset-inline-start: 50%;
     translate: -50% 0;
     z-index: 10;
@@ -251,15 +243,16 @@
     }
   }
 
-  .step-nav .dashboard-breadcrumb-dropdown__actions {
-    display: flex;
-    gap: var(--spacer-2);
-  }
-
   .step-nav .dashboard-breadcrumb-dropdown__label {
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
+  }
+
+  .step-nav .dashboard-breadcrumb-dropdown__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
   }
 
   .step-nav .drawer-toggler--unstyled {

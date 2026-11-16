@@ -194,9 +194,9 @@ export class DashboardHelper {
     if (shouldBe) {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
       await expect(this.stepNavButtons).toHaveCount(3)
-      await expect(this.stepNavButtons.nth(0)).toHaveText('Add +')
-      await expect(this.stepNavButtons.nth(1)).toHaveText('Save changes')
-      await expect(this.stepNavButtons.nth(2)).toHaveText('Cancel')
+      await expect(this.stepNavButtons.nth(0)).toHaveAccessibleName('Add Widget')
+      await expect(this.stepNavButtons.nth(1)).toHaveAccessibleName('Save changes')
+      await expect(this.stepNavButtons.nth(2)).toHaveAccessibleName('Cancel')
     } else {
       await expect(this.stepNavButtons).toHaveCount(1)
       await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()

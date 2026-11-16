@@ -94,12 +94,18 @@ export function DashboardBreadcrumbDropdown(props: {
     props
   const { t } = useTranslation()
 
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const addButtonRef = useRef<HTMLButtonElement>(null)
+  const wasEditing = useRef(isEditing)
 
   useEffect(() => {
     if (isEditing) {
       addButtonRef.current?.focus()
     }
+    if (wasEditing.current && !isEditing) {
+      triggerRef.current?.focus()
+    }
+    wasEditing.current = isEditing
   }, [isEditing])
 
   if (isEditing) {
@@ -108,17 +114,17 @@ export function DashboardBreadcrumbDropdown(props: {
         <span>{t('dashboard:editingDashboard')}</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler
-            aria-label={`${t('dashboard:addButton')}: ${t('dashboard:addWidget')}`}
+            aria-label={t('dashboard:addWidget')}
             buttonStyle="primary"
             extraButtonProps={{ ref: addButtonRef }}
             slug={widgetsDrawerSlug}
           >
             {t('dashboard:addButton')}
           </DrawerToggler>
-          <Button buttonStyle="pill" onClick={onSaveChanges} size="medium">
+          <Button buttonStyle="secondary" onClick={onSaveChanges} size="medium">
             {t('fields:saveChanges')}
           </Button>
-          <Button buttonStyle="pill" onClick={onCancel} size="medium">
+          <Button buttonStyle="secondary" onClick={onCancel} size="medium">
             {t('general:cancel')}
           </Button>
         </div>
@@ -155,7 +161,7 @@ export function DashboardBreadcrumbDropdown(props: {
         <Button
           aria-label={t('general:dashboard')}
           buttonStyle="ghost"
-          extraButtonProps={{ onKeyDown }}
+          extraButtonProps={{ onKeyDown, ref: triggerRef }}
           onClick={onClick}
           selected={active}
           {...ariaProps}

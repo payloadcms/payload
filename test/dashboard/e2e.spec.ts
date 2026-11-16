@@ -49,6 +49,29 @@ describe('Dashboard', () => {
     await waitForDashboardHydration({ page })
   })
 
+  test('should keep global edit actions beside the breadcrumb with keyboard focus', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    await dashboard.assertIsEditing(true)
+    const add = dashboard.stepNavLast.getByRole('button', { name: 'Add Widget', exact: true })
+    const save = dashboard.stepNavLast.getByRole('button', { name: 'Save changes', exact: true })
+    const cancel = dashboard.stepNavLast.getByRole('button', { name: 'Cancel', exact: true })
+
+    await expect(add).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(save).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(cancel).toBeFocused()
+    await page.keyboard.press('Enter')
+    await dashboard.assertIsEditing(false)
+    await expect(
+      dashboard.stepNavLast.getByRole('button', { name: 'Dashboard', exact: true }),
+    ).toBeFocused()
+  })
+
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
     const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=14`)).json())
