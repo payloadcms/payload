@@ -49,20 +49,3 @@ export const getThemeFromSystem = (): Theme =>
 /** Checks a lowercased query value for an explicit theme or automatic mode. @internal */
 export const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
   value === 'auto' || value === 'light' || value === 'dark'
-
-/** Writes a preference cookie for the given number of days. @internal */
-export const setCookie = ({
-  cookieKey,
-  days,
-  value,
-}: {
-  cookieKey: string
-  /** Days from now until expiry. Negative values expire the cookie. */
-  days: number
-  value: string
-}) => {
-  const expiresAt = new Date()
-  expiresAt.setTime(expiresAt.getTime() + days * 24 * 60 * 60 * 1000)
-  const expires = 'expires=' + expiresAt.toUTCString()
-  document.cookie = cookieKey + '=' + value + ';' + expires + ';path=/'
-}

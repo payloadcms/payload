@@ -1,4 +1,5 @@
 'use client'
+import { generateCookie } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Theme } from '../shared.js'
@@ -12,7 +13,6 @@ import {
   detectTheme,
   getThemeFromSystem,
   isValidThemeParam,
-  setCookie,
 } from '../utilities.js'
 
 type RootThemeProviderProps = {
@@ -67,9 +67,11 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
 
       setThemeState(resolvedTheme)
       setAutoMode(themeToSet === 'auto')
-      setCookie({
-        cookieKey: themeCookieKey,
-        days: themeToSet === 'auto' ? -1 : 365,
+      document.cookie = generateCookie<false>({
+        name: themeCookieKey,
+        maxAge: themeToSet === 'auto' ? -1 : 60 * 60 * 24 * 365,
+        path: '/',
+        returnCookieAsObject: false,
         value: themeToSet,
       })
       document.documentElement.setAttribute('data-theme', resolvedTheme)
@@ -84,7 +86,13 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
       setHighContrastModeState(isHighContrast)
-      setCookie({ cookieKey: contrastCookieKey, days: 365, value: String(isHighContrast) })
+      document.cookie = generateCookie<false>({
+        name: contrastCookieKey,
+        maxAge: 60 * 60 * 24 * 365,
+        path: '/',
+        returnCookieAsObject: false,
+        value: String(isHighContrast),
+      })
       document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
     },
     [contrastCookieKey],
