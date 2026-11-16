@@ -35,19 +35,12 @@ export function NestedDocRow({
   const tree = useNestedDocsTree()
   const { t } = useTranslation()
   const rowID = typeof row.id === 'string' || typeof row.id === 'number' ? row.id : rowIndex
-  const titleValue = useAsTitle ? row[useAsTitle] : undefined
-  const title =
-    typeof titleValue === 'string' || typeof titleValue === 'number'
-      ? String(titleValue)
-      : String(rowID)
+  const title = getRowTitle({ fallback: String(rowID), row, useAsTitle })
   const parentID = rows[String(rowID)]?.parentID
   const parent =
     parentID === null || parentID === undefined ? undefined : documentsByID?.get(parentID)
-  const parentValue = useAsTitle ? parent?.[useAsTitle] : undefined
   const parentTitle = parent
-    ? typeof parentValue === 'string' || typeof parentValue === 'number'
-      ? String(parentValue)
-      : String(parentID)
+    ? getRowTitle({ fallback: String(parentID), row: parent, useAsTitle })
     : undefined
   const titleColumn =
     columns.find((column) => column.isLinkedColumn) ??
@@ -59,27 +52,33 @@ export function NestedDocRow({
         columns={columns}
         hasRowSelection={hasRowSelection}
         isGrid={isGrid}
-        renderCell={({ column }) =>
-          tree && column.accessor === '_select' ? (
-            <SelectRow
-              rowData={{ ...row, id: rowID }}
-              rowIndex={rowIndex}
-              selectRowLabel={t('general:selectLabel', { label: title })}
-            />
-          ) : rows[String(rowID)] && column === titleColumn ? (
-            <NestedDocCell
-              id={String(rowID)}
-              isLastRendered={isLastDocument && !tree?.continuationsByRowID.has(String(rowID))}
-              parentTitle={parentTitle}
-              row={rows[String(rowID)]}
-              title={title}
-            >
-              {column.renderedCells[rowIndex]}
-            </NestedDocCell>
-          ) : (
-            column.renderedCells[rowIndex]
-          )
-        }
+        renderCell={({ column }) => {
+          if (tree && column.accessor === '_select') {
+            return (
+              <SelectRow
+                rowData={{ ...row, id: rowID }}
+                rowIndex={rowIndex}
+                selectRowLabel={t('general:selectLabel', { label: title })}
+              />
+            )
+          }
+
+          if (rows[String(rowID)] && column === titleColumn) {
+            return (
+              <NestedDocCell
+                id={String(rowID)}
+                isLastRendered={isLastDocument && !tree?.continuationsByRowID.has(String(rowID))}
+                parentTitle={parentTitle}
+                row={rows[String(rowID)]}
+                title={title}
+              >
+                {column.renderedCells[rowIndex]}
+              </NestedDocCell>
+            )
+          }
+
+          return column.renderedCells[rowIndex]
+        }}
         row={row}
         rowIndex={rowIndex}
       />
@@ -88,13 +87,8 @@ export function NestedDocRow({
           parentID === null
             ? undefined
             : tree?.docs.find((doc) => String(doc.id) === String(parentID))
-        const value = useAsTitle ? parent?.[useAsTitle] : undefined
-        const parentLabel =
-          typeof value === 'string' || typeof value === 'number'
-            ? String(value)
-            : parentID === null
-              ? (label ?? t('general:treeLayout'))
-              : String(parentID)
+        const fallback = parentID === null ? (label ?? t('general:treeLayout')) : String(parentID)
+        const parentLabel = getRowTitle({ fallback, row: parent, useAsTitle })
 
         return (
           <NestedDocsContinuationRow
@@ -109,4 +103,22 @@ export function NestedDocRow({
       })}
     </>
   )
+}
+
+function getRowTitle({
+  fallback,
+  row,
+  useAsTitle,
+}: {
+  fallback: string
+  row?: Record<string, unknown>
+  useAsTitle?: string
+}): string {
+  const value = useAsTitle ? row?.[useAsTitle] : undefined
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return String(value)
+  }
+
+  return fallback
 }
