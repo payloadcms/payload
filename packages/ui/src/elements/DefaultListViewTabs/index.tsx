@@ -36,7 +36,13 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const { setPreference } = usePreferences()
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
-  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
+  const isFolderBrowser =
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false &&
+    !collectionConfig.nestedDocs
+  const isHierarchyEnabled =
+    Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs && !isFolderBrowser
+  const isListActive = viewType === 'list' || (isFolderBrowser && viewType === 'hierarchy')
 
   if (!isTrashEnabled && !isHierarchyEnabled) {
     return null
@@ -79,22 +85,24 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   }
 
   const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)
-  const allButtonLabel = `${t('general:all')} ${collectionLabel}`
+  const allButtonLabel = isFolderBrowser
+    ? collectionLabel
+    : `${t('general:all')} ${collectionLabel}`
   const allButtonId = allButtonLabel.toLowerCase().replace(/\s+/g, '-')
 
   return (
     <div className={baseClass}>
       <Button
-        buttonStyle={viewType === 'list' ? 'pill' : 'ghost'}
-        className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
+        buttonStyle={isListActive ? 'pill' : 'ghost'}
+        className={[`${baseClass}__button`, isListActive && `${baseClass}__button--active`]
           .filter(Boolean)
           .join(' ')}
-        disabled={viewType === 'list'}
+        disabled={isListActive}
         el="button"
         id={allButtonId}
         onClick={() => handleViewChange('list')}
       >
-        {`${t('general:all')} ${collectionLabel}`}
+        {allButtonLabel}
       </Button>
 
       {isHierarchyEnabled && (

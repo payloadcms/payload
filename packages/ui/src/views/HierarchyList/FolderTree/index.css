@@ -1,17 +1,101 @@
 @layer payload-default {
   .folder-tree {
+    /* 0 hides ancestor guides; 1 shows them. Use a fraction for subtler lines. */
+    --folder-tree-ghost-line-opacity: 1;
+
+    .folder-tree__section {
+      > h2 {
+        margin-block: var(--spacer-3) var(--spacer-2);
+        margin-inline: var(--spacer-4);
+        font-size: var(--text-body-large-font-size);
+        line-height: var(--text-body-large-line-height);
+        font-weight: var(--text-body-large-bold-font-weight);
+      }
+
+      + .folder-tree__section {
+        margin-block-start: var(--spacer-5);
+      }
+    }
+
     td:first-child {
       position: relative;
     }
 
     .nested-doc-cell {
+      --folder-tree-connector-length: var(--spacer-2-5);
+
       padding-inline-start: calc(
         var(--nested-doc-depth) * var(--nested-doc-indent) + var(--spacer-4) + var(--spacer-3)
       );
+
+      .nested-doc-cell__root-spine,
+      .nested-doc-cell__guide,
+      .nested-doc-cell__guide--elbow.nested-doc-cell__guide--last,
+      .nested-doc-cell__root-spine.nested-doc-cell__guide--last:not(
+          .nested-doc-cell__root-spine--ancestor
+        ) {
+        border-block-end-width: 0;
+      }
+
+      .nested-doc-cell__guide--elbow::after,
+      .nested-doc-cell__guide--root::after {
+        content: none;
+      }
+
+      .nested-doc-cell__root-spine--ancestor,
+      .nested-doc-cell__guide--ancestor {
+        opacity: var(--folder-tree-ghost-line-opacity);
+      }
+    }
+
+    .folder-tree__type .nested-doc-cell {
+      min-block-size: calc(var(--spacer-4) * 2);
+
+      .nested-doc-cell__toggle {
+        position: relative;
+        z-index: 1;
+        margin-inline-start: calc(var(--spacer-1) / 2 - var(--nested-doc-indent));
+      }
+
+      .nested-doc-cell__guides::after {
+        content: none;
+      }
+
+      .nested-doc-cell__guide--stem {
+        display: none;
+      }
+    }
+
+    tr:not(.folder-tree__type)
+      .nested-doc-cell:has(> .nested-doc-cell__toggle[aria-expanded='true']) {
+      .nested-doc-cell__guide--elbow,
+      .nested-doc-cell__root-spine:not(.nested-doc-cell__root-spine--ancestor) {
+        inset-block-end: 50%;
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset-block-start: 100%;
+          inset-inline-start: calc(-1 * var(--stroke-width-small));
+          block-size: 100%;
+          border-inline-start: var(--stroke-width-small) dashed var(--color-border);
+          opacity: var(--folder-tree-ghost-line-opacity);
+        }
+      }
     }
 
     .nested-doc-cell__guides {
       inset-inline-start: var(--spacer-4);
+
+      /* Keep the horizontal arm independent of the vertical guide's open/closed height. */
+      &::after {
+        content: '';
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-start: calc(var(--nested-doc-depth) * var(--nested-doc-indent));
+        inline-size: var(--folder-tree-connector-length);
+        border-block-start: var(--stroke-width-small) solid var(--color-border);
+      }
     }
 
     .folder-tree__link {
@@ -22,12 +106,47 @@
       }
     }
 
-    .folder-tree__group-label {
+    .folder-tree__type-label {
       display: flex;
       align-items: center;
-      min-block-size: var(--spacer-5);
-      color: var(--color-text-secondary);
+      gap: var(--spacer-1);
       font-weight: var(--text-body-medium-bold-font-weight);
+
+      > span {
+        display: flex;
+      }
+    }
+
+    tr[data-root-continues='false'] {
+      .nested-doc-cell__root-spine--ancestor {
+        display: none;
+      }
+
+      .nested-doc-cell:has(> .nested-doc-cell__toggle[aria-expanded='true'])
+        .nested-doc-cell__root-spine:not(.nested-doc-cell__root-spine--ancestor)::before {
+        content: none;
+      }
+    }
+
+    .folder-tree__action:not(.folder-tree__summary) .nested-doc-cell__guides {
+      opacity: 0;
+    }
+
+    .folder-tree__summary {
+      .nested-doc-cell {
+        --folder-tree-connector-length: calc(var(--spacer-2-5) * 2);
+
+        padding-inline-start: calc(
+          var(--nested-doc-depth) * var(--nested-doc-indent) + var(--spacer-4) + var(--spacer-3) +
+            var(--spacer-2-5)
+        );
+      }
+    }
+
+    .folder-tree__summary-count {
+      display: flex;
+      align-items: center;
+      gap: var(--spacer-2);
     }
 
     .folder-tree__action-content {

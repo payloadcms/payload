@@ -14,7 +14,7 @@ export const getHierarchyListURL = ({
 }): string => {
   const query = qs.stringify(
     {
-      ...(parentID !== undefined ? { [parentFieldName]: parentID } : {}),
+      ...(parentID !== undefined && parentID !== '' ? { [parentFieldName]: parentID } : {}),
       view: 'hierarchy',
     },
     { addQueryPrefix: true },

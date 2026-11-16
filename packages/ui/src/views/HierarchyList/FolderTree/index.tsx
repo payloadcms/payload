@@ -8,6 +8,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Link } from '../../../elements/Link/index.js'
+import { Pill } from '../../../elements/Pill/index.js'
 import { NestedDocCell } from '../../../elements/Table/NestedDocCell/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
@@ -34,10 +35,12 @@ export function FolderTree({
   collectionSlug,
   initialSources,
   parentID,
+  selectedTypes,
 }: {
   collectionSlug: string
   initialSources: HierarchyContents['sources']
   parentID: ParentID
+  selectedTypes: string[]
 }) {
   const { i18n, t } = useTranslation()
   const {
@@ -51,6 +54,7 @@ export function FolderTree({
     [branchKey({ id: parentID })]: { errors: [], pending: [], sources: initialSources },
   }))
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
+  const [groupExpansion, setGroupExpansion] = useState<Record<string, boolean>>({})
   const requests = useRef(new Map<string, AbortController>())
   const epoch = useRef(0)
   const container = useRef<HTMLDivElement>(null)
@@ -180,6 +184,7 @@ export function FolderTree({
       [branchKey({ id: parentID })]: { errors: [], pending: [], sources: initialSources },
     })
     setExpanded(new Set())
+    setGroupExpansion({})
     const activeRequests = requests.current
     return () => {
       for (const controller of activeRequests.values()) {
@@ -238,55 +243,90 @@ export function FolderTree({
     ancestorContinues = [],
     ancestorIDs = [],
     depth,
+    hasRootContinuation = true,
     isLastBranch = true,
     parentTitle,
+    rootSection,
   }: {
     ancestorContinues?: boolean[]
     ancestorIDs?: string[]
     depth: number
+    hasRootContinuation?: boolean
     id: ParentID
     isLastBranch?: boolean
     parentTitle?: string
+    rootSection?: 'folders' | 'unassigned'
   }): React.ReactNode => {
     const branch = branches[branchKey({ id })]
     const row = metadata({ id, ancestorContinues, depth })
-    const renderAction = ({ page = 1, source }: { page?: number; source?: string }) => {
+    const renderAction = ({
+      hasFollowingSource = false,
+      isSummary = false,
+      page = 1,
+      row: actionRow = row,
+      source,
+    }: {
+      hasFollowingSource?: boolean
+      isSummary?: boolean
+      page?: number
+      row?: NestedDocRow
+      source?: string
+    }) => {
       const key = source ?? initialSource
       const isPending = !branch || branch.pending.includes(key)
       const hasError = branch?.errors.includes(key)
-      const label = source ? labelFor({ slug: source }) : labelFor({ slug: collectionSlug })
+      const sourceData = branch?.sources.find((value) => value.collectionSlug === source)
+      const label = labelFor({ slug: source ?? collectionSlug })
+      const hasAction = !isSummary || sourceData?.hasNextPage || isPending || hasError
+      const action = t(
+        isPending ? 'general:loading' : hasError ? 'general:retry' : 'general:loadMore',
+      )
+      const actionContent = (
+        <div className="folder-tree__action-content">
+          {isSummary && sourceData && (
+            <div className="folder-tree__summary-count" role="status">
+              <span>
+                {sourceData.docs.length} {t('general:of')} {sourceData.totalDocs} {label}
+              </span>
+            </div>
+          )}
+          {isPending && (
+            <span className="sr-only" role="status">{`${t('general:loading')}: ${label}`}</span>
+          )}
+          {hasError && <span role="alert">{t('error:loadingItems')}</span>}
+          {hasAction && (
+            <>
+              {isSummary && <span aria-hidden="true">—</span>}
+              <button
+                aria-disabled={isPending || undefined}
+                aria-label={`${action}: ${label}${parentTitle ? ` (${parentTitle})` : ''}`}
+                onClick={() => {
+                  if (!isPending) {
+                    void load({ id, page, source })
+                  }
+                }}
+                type="button"
+              >
+                {action}
+              </button>
+            </>
+          )}
+        </div>
+      )
       return (
-        <tr className="folder-tree__action" key={`action-${key}`}>
+        <tr
+          className={`folder-tree__action${isSummary ? ' folder-tree__summary' : ''}`}
+          data-root-continues={hasRootContinuation}
+          key={`action-${key}`}
+        >
           <td className="cell--linked">
             <NestedDocCell
               id={`action-${branchKey({ id })}-${key}`}
-              isLastRendered={false}
-              row={row}
+              isLastRendered={isSummary && !hasFollowingSource && isLastBranch}
+              row={{ ...actionRow, isLastSibling: isSummary && !hasFollowingSource }}
               title=""
             >
-              <span className="folder-tree__action-content">
-                {isPending && (
-                  <span
-                    className="sr-only"
-                    role="status"
-                  >{`${t('general:loading')}: ${label}`}</span>
-                )}
-                {hasError && <span role="alert">{t('error:loadingItems')}</span>}
-                <button
-                  aria-disabled={isPending || undefined}
-                  aria-label={`${t(isPending ? 'general:loading' : hasError ? 'general:retry' : 'general:loadMore')}: ${label}${parentTitle ? ` (${parentTitle})` : ''}`}
-                  onClick={() => {
-                    if (!isPending) {
-                      void load({ id, page, source })
-                    }
-                  }}
-                  type="button"
-                >
-                  {t(
-                    isPending ? 'general:loading' : hasError ? 'general:retry' : 'general:loadMore',
-                  )}
-                </button>
-              </span>
+              {actionContent}
             </NestedDocCell>
           </td>
           <td />
@@ -301,13 +341,25 @@ export function FolderTree({
     ) {
       return renderAction({})
     }
-    const sources = [...branch.sources].sort(
-      (a, b) =>
-        Number(b.collectionSlug === collectionSlug) - Number(a.collectionSlug === collectionSlug),
-    )
+    const sources = branch.sources
+      .filter(
+        (source) =>
+          source.collectionSlug === collectionSlug || selectedTypes.includes(source.collectionSlug),
+      )
+      .filter((source) =>
+        rootSection === 'folders'
+          ? source.collectionSlug === collectionSlug
+          : rootSection === 'unassigned'
+            ? source.collectionSlug !== collectionSlug
+            : true,
+      )
+      .sort(
+        (a, b) =>
+          Number(b.collectionSlug === collectionSlug) - Number(a.collectionSlug === collectionSlug),
+      )
     if (!sources.some((source) => source.docs.length > 0 || source.hasNextPage)) {
       return (
-        <tr>
+        <tr data-root-continues={hasRootContinuation}>
           <td className="cell--linked">
             <NestedDocCell
               id={`empty-${branchKey({ id })}`}
@@ -325,115 +377,160 @@ export function FolderTree({
     }
     return sources
       .filter((source) => source.docs.length > 0 || source.hasNextPage)
-      .map((source, sourceIndex, renderedSources) => (
-        <React.Fragment key={source.collectionSlug}>
-          {source.collectionSlug !== collectionSlug && source.docs.length > 0 && (
-            <tr className="folder-tree__group">
-              <td className="cell--linked" colSpan={3}>
-                <NestedDocCell
-                  id={`group-${source.collectionSlug}`}
-                  isLastRendered={false}
-                  row={row}
-                  title=""
-                >
-                  <strong className="folder-tree__group-label">
-                    {labelFor({ slug: source.collectionSlug })}
-                  </strong>
-                </NestedDocCell>
-              </td>
-            </tr>
-          )}
-          {source.docs.map((doc, index) => {
-            const isFolder = source.collectionSlug === collectionSlug
-            const config = getEntityConfig({ collectionSlug: source.collectionSlug })
-            const rawTitle = doc[config.admin.useAsTitle || 'id']
-            const title =
-              typeof rawTitle === 'string' || typeof rawTitle === 'number'
-                ? String(rawTitle)
-                : String(doc.id)
-            const key = JSON.stringify([source.collectionSlug, doc.id])
-            const canExpand = isFolder && !ancestorIDs.includes(String(doc.id))
-            const isExpanded = canExpand && expanded.has(branchKey({ id: doc.id }))
-            const isLastSibling = index === source.docs.length - 1 && !source.hasNextPage
-            const isLastInBranch = sourceIndex === renderedSources.length - 1 && isLastSibling
-            const href = isFolder
-              ? getHierarchyListURL({
-                  adminRoute,
-                  collectionSlug,
-                  parentFieldName:
-                    typeof config.hierarchy === 'object'
-                      ? config.hierarchy.parentFieldName
-                      : undefined,
-                  parentID: doc.id,
-                })
-              : formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${source.collectionSlug}/${doc.id}`,
-                })
-            return (
-              <React.Fragment key={key}>
-                <tr data-id={key}>
-                  <td className="cell--linked">
-                    <NestedDocCell
-                      id={key}
-                      isLastRendered={isLastBranch && isLastInBranch && !isExpanded}
-                      isPending={
-                        isFolder &&
-                        branches[branchKey({ id: doc.id })]?.pending.includes(initialSource)
-                      }
-                      onToggle={canExpand ? () => toggle({ id: doc.id }) : undefined}
-                      parentTitle={parentTitle}
-                      row={metadata({
-                        id,
-                        ancestorContinues,
-                        depth,
-                        hasChildren: canExpand,
-                        isExpanded,
-                        isLastSibling,
-                      })}
-                      title={title}
-                    >
-                      <Link className="folder-tree__link cell-link" href={href}>
+      .map((source, sourceIndex, renderedSources) => {
+        const isDocumentGroup = source.collectionSlug !== collectionSlug
+        const isLastSource = sourceIndex === renderedSources.length - 1
+        const groupKey = JSON.stringify([id, source.collectionSlug])
+        const isGroupExpanded = groupExpansion[groupKey] ?? id === null
+        const groupLabel = labelFor({ slug: source.collectionSlug })
+        return (
+          <React.Fragment key={source.collectionSlug}>
+            {isDocumentGroup && (
+              <tr
+                className="folder-tree__type"
+                data-parent-id={id ?? 'root'}
+                data-root-continues={hasRootContinuation}
+              >
+                <td className="cell--linked">
+                  <NestedDocCell
+                    id={`type-${groupKey}`}
+                    isLastRendered={isLastBranch && isLastSource && !isGroupExpanded}
+                    onToggle={() =>
+                      setGroupExpansion((previous) => ({
+                        ...previous,
+                        [groupKey]: !isGroupExpanded,
+                      }))
+                    }
+                    row={metadata({
+                      id,
+                      ancestorContinues,
+                      depth,
+                      hasChildren: true,
+                      isExpanded: isGroupExpanded,
+                      isLastSibling: isLastSource && !isGroupExpanded,
+                    })}
+                    title={groupLabel}
+                  >
+                    <Pill pillStyle="success" size="small">
+                      <span className="folder-tree__type-label">
                         <span aria-hidden="true">
-                          {isFolder ? <FolderIcon size={16} /> : <DocumentIcon size={16} />}
+                          <DocumentIcon size={16} />
                         </span>
-                        {title}
-                      </Link>
-                    </NestedDocCell>
-                  </td>
-                  <td>{labelFor({ slug: source.collectionSlug })}</td>
-                  <td>
-                    {typeof doc.updatedAt === 'string' ? (
-                      <time dateTime={doc.updatedAt}>
-                        {new Date(doc.updatedAt).toLocaleDateString(i18n.language)}
-                      </time>
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                </tr>
-                {isExpanded &&
-                  renderBranch({
-                    id: doc.id,
-                    ancestorContinues: depth > 0 ? [...ancestorContinues, !isLastSibling] : [],
-                    ancestorIDs: [...ancestorIDs, String(doc.id)],
-                    depth: depth + 1,
-                    isLastBranch: isLastBranch && isLastInBranch,
-                    parentTitle: title,
-                  })}
-              </React.Fragment>
-            )
-          })}
-          {(source.hasNextPage ||
-            branch.pending.includes(source.collectionSlug) ||
-            branch.errors.includes(source.collectionSlug)) &&
-            renderAction({ page: source.page + 1, source: source.collectionSlug })}
-        </React.Fragment>
-      ))
+                        {groupLabel}
+                      </span>
+                    </Pill>
+                  </NestedDocCell>
+                </td>
+                <td />
+                <td />
+              </tr>
+            )}
+            {(!isDocumentGroup || isGroupExpanded) &&
+              source.docs.map((doc, index) => {
+                const isFolder = source.collectionSlug === collectionSlug
+                const config = getEntityConfig({ collectionSlug: source.collectionSlug })
+                const rawTitle = doc[config.admin.useAsTitle || 'id']
+                const title =
+                  typeof rawTitle === 'string' || typeof rawTitle === 'number'
+                    ? String(rawTitle)
+                    : String(doc.id)
+                const key = JSON.stringify([source.collectionSlug, doc.id])
+                const canExpand = isFolder && !ancestorIDs.includes(String(doc.id))
+                const isExpanded = canExpand && expanded.has(branchKey({ id: doc.id }))
+                const isLastSibling = index === source.docs.length - 1 && !source.hasNextPage
+                const isLastInBranch = sourceIndex === renderedSources.length - 1 && isLastSibling
+                const href = isFolder
+                  ? getHierarchyListURL({
+                      adminRoute,
+                      collectionSlug,
+                      parentFieldName:
+                        typeof config.hierarchy === 'object'
+                          ? config.hierarchy.parentFieldName
+                          : undefined,
+                      parentID: doc.id,
+                    })
+                  : formatAdminURL({
+                      adminRoute,
+                      path: `/collections/${source.collectionSlug}/${doc.id}`,
+                    })
+                return (
+                  <React.Fragment key={key}>
+                    <tr
+                      data-id={key}
+                      data-root-continues={depth === 0 ? !isLastInBranch : hasRootContinuation}
+                    >
+                      <td className="cell--linked">
+                        <NestedDocCell
+                          id={key}
+                          isLastRendered={isLastBranch && isLastInBranch && !isExpanded && isFolder}
+                          isPending={
+                            isFolder &&
+                            branches[branchKey({ id: doc.id })]?.pending.includes(initialSource)
+                          }
+                          onToggle={canExpand ? () => toggle({ id: doc.id }) : undefined}
+                          parentTitle={parentTitle}
+                          row={metadata({
+                            id,
+                            ancestorContinues,
+                            depth,
+                            hasChildren: canExpand,
+                            isExpanded,
+                            isLastSibling: isLastInBranch && isFolder,
+                          })}
+                          title={title}
+                        >
+                          <Link className="folder-tree__link cell-link" href={href}>
+                            <span aria-hidden="true">
+                              {isFolder ? <FolderIcon size={16} /> : <DocumentIcon size={16} />}
+                            </span>
+                            {title}
+                          </Link>
+                        </NestedDocCell>
+                      </td>
+                      <td>{labelFor({ slug: source.collectionSlug })}</td>
+                      <td>
+                        {typeof doc.updatedAt === 'string' ? (
+                          <time dateTime={doc.updatedAt}>
+                            {new Date(doc.updatedAt).toLocaleDateString(i18n.language)}
+                          </time>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                    </tr>
+                    {isExpanded &&
+                      renderBranch({
+                        id: doc.id,
+                        ancestorContinues: depth > 0 ? [...ancestorContinues, !isLastInBranch] : [],
+                        ancestorIDs: [...ancestorIDs, String(doc.id)],
+                        depth: depth + 1,
+                        hasRootContinuation: depth === 0 ? !isLastInBranch : hasRootContinuation,
+                        isLastBranch: isLastBranch && isLastInBranch,
+                        parentTitle: title,
+                      })}
+                  </React.Fragment>
+                )
+              })}
+            {(!isDocumentGroup || isGroupExpanded) &&
+              (isDocumentGroup ||
+                source.hasNextPage ||
+                branch.pending.includes(source.collectionSlug) ||
+                branch.errors.includes(source.collectionSlug)) &&
+              renderAction({
+                hasFollowingSource: sourceIndex < renderedSources.length - 1,
+                isSummary: isDocumentGroup,
+                page: source.page + 1,
+                source: source.collectionSlug,
+              })}
+          </React.Fragment>
+        )
+      })
   }
 
-  return (
-    <div className="table table--nested-docs folder-tree" ref={container}>
+  const renderTable = ({ rootSection }: { rootSection?: 'folders' | 'unassigned' } = {}) => (
+    <div
+      className={`table table--nested-docs${rootSection === 'unassigned' ? ' folder-tree__unassigned' : ''}`}
+    >
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
@@ -447,9 +544,32 @@ export function FolderTree({
             id: parentID,
             ancestorIDs: parentID === null ? [] : [String(parentID)],
             depth: 0,
+            rootSection,
           })}
         </tbody>
       </table>
+    </div>
+  )
+
+  return (
+    <div className="folder-tree" ref={container}>
+      {parentID === null ? (
+        <>
+          <section aria-labelledby="folder-tree-folders-heading" className="folder-tree__section">
+            <h2 id="folder-tree-folders-heading">{labelFor({ slug: collectionSlug })}</h2>
+            {renderTable({ rootSection: 'folders' })}
+          </section>
+          <section
+            aria-labelledby="folder-tree-unassigned-heading"
+            className="folder-tree__section"
+          >
+            <h2 id="folder-tree-unassigned-heading">Unassigned</h2>
+            {renderTable({ rootSection: 'unassigned' })}
+          </section>
+        </>
+      ) : (
+        renderTable()
+      )}
     </div>
   )
 }

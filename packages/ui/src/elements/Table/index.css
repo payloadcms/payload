@@ -76,6 +76,7 @@
     }
 
     td.cell--linked > :is(a, button),
+    td.cell--linked > .nested-doc-cell > a:not(:has(.id-label)),
     .cell-link {
       font-weight: var(--text-body-medium-bold-font-weight);
       text-decoration-line: underline;

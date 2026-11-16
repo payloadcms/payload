@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
+import { campaignArticleTitle, editorialArticleTitles } from './seedData.js'
 import { articlesSlug, foldersSlug, pagesSlug } from './shared.js'
 
 export async function seed(payload: Payload) {
@@ -11,18 +12,18 @@ export async function seed(payload: Payload) {
     data: { title: 'Campaigns', '_h_page-folders': folder.id },
   })
   await payload.create({ collection: foldersSlug, data: { title: 'Empty folder' } })
-  for (let i = 1; i <= 12; i++) {
+  for (const title of editorialArticleTitles) {
     await payload.create({
       collection: articlesSlug,
       data: {
-        title: `Editorial article ${String(i).padStart(2, '0')}`,
+        title,
         '_h_page-folders': folder.id,
       },
     })
   }
   await payload.create({
     collection: articlesSlug,
-    data: { title: 'Campaign announcement', '_h_page-folders': campaigns.id },
+    data: { title: campaignArticleTitle, '_h_page-folders': campaigns.id },
   })
   const about = await payload.create({
     collection: pagesSlug,

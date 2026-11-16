@@ -53,6 +53,28 @@ test.describe('Nested document tree', () => {
     await page.getByRole('radio', { name: 'Tree', exact: true }).check()
   })
 
+  test('should match document link styling between Tree and Table layouts', async ({ page }) => {
+    const treeLink = page.locator('.table').getByRole('link', { name: 'Contact', exact: true })
+    await expect(treeLink).toHaveCSS('text-decoration-line', 'underline')
+    const readStyles = (element: HTMLElement) => {
+      const style = getComputedStyle(element)
+      return {
+        color: style.textDecorationColor,
+        decoration: style.textDecorationLine,
+        offset: style.textUnderlineOffset,
+        position: style.textUnderlinePosition,
+        weight: style.fontWeight,
+      }
+    }
+    const treeStyles = await treeLink.evaluate(readStyles)
+    await page.goto(
+      `${serverURL}/admin/collections/${pagesSlug}?listLayout=table&search=Contact&limit=10`,
+    )
+    const tableLink = page.locator('.table').getByRole('link', { name: 'Contact', exact: true })
+    await expect(tableLink).toBeVisible()
+    expect(await tableLink.evaluate(readStyles)).toEqual(treeStyles)
+  })
+
   test('should keep Table and Tree working states independent across switches and reloads', async ({
     page,
   }) => {
@@ -409,7 +431,7 @@ test.describe('Nested document tree', () => {
       )
       await expect(page.getByRole('button', { name: 'Next table page' })).toHaveCount(0)
       await page
-        .getByRole('button', { name: 'Load more: Nested Pages', exact: true })
+        .getByRole('button', { name: 'Load more: Pages', exact: true })
         .scrollIntoViewIfNeeded()
       await expect(page.getByRole('link', { name: 'About us', exact: true })).toBeVisible()
       await expect(page.getByRole('link', { name: /^Scroll root/ })).toHaveCount(12)
@@ -502,20 +524,83 @@ test.describe('Nested document tree', () => {
     ).toBeVisible()
   })
 
-  test('should find descendants while searching and restore the expanded tree when cleared', async ({
+  test('should retain search focus and caret while switching between tree and search results', async ({
     page,
   }) => {
+    await page.goto(`${serverURL}/admin/collections/${pagesSlug}?listLayout=tree&limit=10&page=1`)
+    await page.getByRole('button', { name: 'Expand: Account services', exact: true }).click()
+    await page.getByRole('button', { name: 'Expand: Membership', exact: true }).click()
+    const search = page.getByRole('textbox', { name: 'Search', exact: true })
+    await expect(search).toHaveValue('')
+    const originalInput = await search.elementHandle()
+    await search.focus()
+    await page.keyboard.type('Academy', { delay: 500 })
+    await expect(page).toHaveURL(/search=Academy/)
+    await expect(page.getByRole('link', { name: 'Academy', exact: true })).toBeVisible()
+    await expect(search).toHaveValue('Academy')
+    await expect(search).toBeFocused()
+    expect(await originalInput.evaluate((element) => element.isConnected)).toBe(true)
+    await search.press('Home')
+    await search.press('Delete')
+    await expect(page).toHaveURL(/search=cademy/)
+    await expect(search).toBeFocused()
+    await expect(search).toHaveJSProperty('selectionStart', 0)
+    await search.fill('')
+    await expect(page.locator('.collection-list__tree-search-banner')).toHaveCount(0)
+    await expect(search).toBeFocused()
+  })
+
+  test('should preserve ongoing typing while a previous tree search response is delayed', async ({
+    page,
+  }) => {
+    let release = () => {}
+    const pending = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    let held = false
+    await page.route('**/admin/collections/nested-pages**', async (route) => {
+      if (new URL(route.request().url()).searchParams.get('search') === 'C') {
+        const response = await route.fetch()
+        held = true
+        await pending
+        await route.fulfill({ response })
+      } else await route.continue()
+    })
+    try {
+      const search = page.getByRole('textbox', { name: 'Search', exact: true })
+      await search.fill('C')
+      await expect.poll(() => held).toBe(true)
+      await search.pressSequentially('areers', { delay: 50 })
+      await search.press('Home')
+      await search.press('ArrowRight')
+      release()
+      await expect(page).toHaveURL(/search=Careers/)
+      await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+      await expect(search).toBeFocused()
+      await expect(search).toHaveValue('Careers')
+      await expect(search).toHaveJSProperty('selectionStart', 1)
+    } finally {
+      release()
+    }
+  })
+
+  test('should find descendants while searching and restore the expanded tree when cleared', async ({
+    page,
+  }, testInfo) => {
     await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
     await page.getByRole('textbox', { name: 'Search', exact: true }).fill('Careers')
     await expect(
       page.getByRole('status').filter({ hasText: 'Showing matching documents' }),
     ).toBeVisible()
     await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+    await expect(page.locator('.collection-list__tree-search-banner .banner')).toBeVisible()
+    await page.screenshot({ path: testInfo.outputPath('tree-search-banner.png') })
     await expect(page.getByRole('button', { name: 'Collapse: About us', exact: true })).toHaveCount(
       0,
     )
 
     await page.getByRole('textbox', { name: 'Search', exact: true }).fill('')
+    await expect(page.locator('.collection-list__tree-search-banner')).toHaveCount(0)
     await expect(
       page.getByRole('button', { name: 'Collapse: About us', exact: true }),
     ).toBeVisible()

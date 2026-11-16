@@ -182,6 +182,16 @@ export const renderListView = async (
         },
       })
 
+  const isFolderBrowser =
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false &&
+    !collectionConfig.nestedDocs &&
+    viewType === 'hierarchy' &&
+    !drawerSlug
+  if (isFolderBrowser && !collectionPreferences.documentLayout) {
+    collectionPreferences = { ...collectionPreferences, documentLayout: 'tree' }
+  }
+
   const layoutScope = hasLayoutPreferences
     ? query.listLayout === 'tree' || query.listLayout === 'table'
       ? query.listLayout
@@ -419,7 +429,7 @@ export const renderListView = async (
 
   if (isHierarchyCollection) {
     const parentParam = searchParams?.[hierarchyParentFieldName]
-    if (parentParam === 'null' || parentParam === undefined) {
+    if (parentParam === '' || parentParam === 'null' || parentParam === undefined) {
       hierarchyParentId = null
     } else if (typeof parentParam === 'string') {
       hierarchyParentId =

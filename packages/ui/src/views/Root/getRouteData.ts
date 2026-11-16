@@ -202,10 +202,16 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
+        const isFolderBrowser =
+          typeof collectionConfig.hierarchy === 'object' &&
+          collectionConfig.hierarchy.allowHasMany === false &&
+          !collectionConfig.nestedDocs
+
         if (
-          collectionConfig.hierarchy &&
-          (searchParams.view === 'hierarchy' ||
-            (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy'))
+          isFolderBrowser ||
+          (collectionConfig.hierarchy &&
+            (searchParams.view === 'hierarchy' ||
+              (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy')))
         ) {
           ViewToRender = {
             Component: HierarchyView,

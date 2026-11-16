@@ -2,8 +2,6 @@
 
 import type { SidebarTabClientProps } from 'payload'
 
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { HierarchyInitialData } from './types.js'
@@ -13,6 +11,7 @@ import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useSidebarTabs } from '../../../providers/SidebarTabs/index.js'
+import { getHierarchyListURL } from '../../../views/HierarchyList/getHierarchyListURL.js'
 import { HydrateHierarchyProvider } from '../HydrateProvider/index.js'
 import { HierarchySearch } from '../Search/index.js'
 import { HierarchyTree } from './index.js'
@@ -111,13 +110,12 @@ export const HierarchySidebarTab: React.FC<
   )
 
   const handleNavigateToParent = useCallback(
-    ({ id }: { id: number | string }) => {
-      const url = formatAdminURL({
+    ({ id }: { id: null | number | string }) => {
+      const url = getHierarchyListURL({
         adminRoute,
-        path: `/collections/${hierarchyCollectionSlug}${qs.stringify(
-          { [resolvedParentFieldName]: id, view: 'hierarchy' },
-          { addQueryPrefix: true },
-        )}`,
+        collectionSlug: hierarchyCollectionSlug,
+        parentFieldName: resolvedParentFieldName,
+        parentID: id ?? undefined,
       })
       void startRouteTransition(() => {
         router.push(url)

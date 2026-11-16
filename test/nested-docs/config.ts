@@ -16,6 +16,7 @@ export default buildConfigWithDefaults({
       RestrictedDocuments,
       {
         slug: articlesSlug,
+        labels: { plural: 'Articles', singular: 'Article' },
         access: {
           create: () => true,
           delete: () => true,
@@ -62,6 +63,7 @@ export default buildConfigWithDefaults({
       },
       {
         slug: pagesSlug,
+        labels: { plural: 'Pages', singular: 'Page' },
         access: {
           create: () => true,
           delete: () => true,

@@ -8,6 +8,7 @@ import React, { useEffect, useId, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
+import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
@@ -485,7 +486,9 @@ export function DefaultListView(props: ListViewClientProps) {
               </div>
               {BeforeListTable}
               {isNestedDocsTree && (resolvedSearch || hasActiveFilters || isGroupingBy) && (
-                <p role="status">{i18n.t('general:treeSearchResults')}</p>
+                <div className={`${baseClass}__tree-search-banner`} role="status">
+                  <Banner>{i18n.t('general:treeSearchResults')}</Banner>
+                </div>
               )}
               {hierarchyData ? (
                 <DocumentSelectionProvider
