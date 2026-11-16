@@ -39,7 +39,7 @@ import {
   runFileCreationPlan,
   stageLocalUploadFiles,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
-import { generateFileData } from '../../uploads/generateFileData.js'
+import { generateFileData } from '../../uploads/generateFileData/index.js'
 import {
   getExternalUploadSource,
   getUploadDestination,

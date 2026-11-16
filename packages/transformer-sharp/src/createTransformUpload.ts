@@ -1,7 +1,5 @@
-import type { FocalPoint, ProbedImageSize } from 'payload'
-import type { PreparedUploadTransformation, UploadTransformerInternal } from 'payload/internal'
-
-import { isNumber } from 'payload/shared'
+import type { ProbedImageSize } from 'payload'
+import type { UploadTransformation, UploadTransformerInternal } from 'payload/internal'
 
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
@@ -26,28 +24,23 @@ async function tryProbe(file: File, sharpDependency: SharpDependency) {
 }
 
 /**
- * Computes the legacy upload tasks (the main file, optionally cropped, and every
- * configured legacy image size) and hands each to the injected `transform` callback
- * exactly once. Reads the Sharp-owned config from `sharpTransformer({ collections })`
- * at factory-construction time — not from the sanitized collection, which only gets
- * the narrowed projection `init()` writes back.
+ * Creates the Sharp bridge's `transformUpload`. When core calls it, it plans the upload tasks (the
+ * main file, optionally cropped, and every configured image size), runs each one through the
+ * injected `transform` callback exactly once, and reads the size of each result. Reads the
+ * Sharp-owned config from `sharpTransformer({ collections })` at factory-construction time — not
+ * from the sanitized collection, which only gets the narrowed projection `init()` writes back.
  */
-export function createPrepareLegacyUpload({
+export function createTransformUpload({
   collections,
   sharpDependency,
 }: {
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
-}): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
+}): NonNullable<UploadTransformerInternal['transformUpload']> {
+  return async function transformUpload({ collectionSlug, cropSize, file, req, transform }) {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)
-
-    const cropData =
-      uploadEdits && typeof uploadEdits === 'object' && 'crop' in uploadEdits
-        ? uploadEdits.crop
-        : undefined
 
     let originalDimensions: ProbedImageSize | undefined
 
@@ -61,19 +54,15 @@ export function createPrepareLegacyUpload({
     // Unreadable dimensions can't be cropped/resized — treat as non-resizable rather than failing the upload.
     const canProcessAsImage = fileSupportsResize && originalDimensions !== undefined
 
-    const crop =
-      cropData && originalDimensions
-        ? {
-            cropData,
-            heightInPixels: uploadEdits.heightInPixels!,
-            originalDimensions,
-            widthInPixels: uploadEdits.widthInPixels!,
-          }
-        : undefined
-
+    // `transformFile` reads the crop from `doc._transforms`. It needs the original's size for it.
     const mainResultFile = await transform({
       fieldPath: 'filename',
-      options: { collectionUpload, crop, kind: 'main' } satisfies SharpUploadTaskOptions,
+      options: {
+        collectionUpload,
+        cropSize,
+        kind: 'main',
+        originalDimensions,
+      } satisfies SharpUploadTaskOptions,
     })
 
     const mainResult = await describeResult({
@@ -83,7 +72,7 @@ export function createPrepareLegacyUpload({
       sharpDependency,
     })
 
-    const results: PreparedUploadTransformation[] = [mainResult]
+    const results: UploadTransformation[] = [mainResult]
 
     // Same precedence `init()` applies: Sharp's setting, else the collection's own `focalPoint`.
     const effectiveFocalPoint =
@@ -93,33 +82,26 @@ export function createPrepareLegacyUpload({
     const variants = collectionUpload.variants
 
     if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
-      const focalPoint: FocalPoint | undefined =
-        focalPointEnabled && uploadEdits?.focalPoint
-          ? {
-              x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
-              y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
-            }
-          : undefined
-
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
           dimensions: originalDimensions,
-          hasFocalPoint: Boolean(focalPoint),
+          // Whether a size may use a focal point. `transformFile` uses one only when it is saved.
+          hasFocalPoint: focalPointEnabled,
           imageResizeConfig,
         })
 
         if (resizeAction === 'omit') {
-          return { fieldPath } satisfies PreparedUploadTransformation
+          return { fieldPath } satisfies UploadTransformation
         }
 
         const sizeResultFile = await transform({
           fieldPath,
           options: {
+            canUseFocalPoint: resizeAction === 'resizeWithFocalPoint',
             collectionUpload,
-            focalPoint: resizeAction === 'resizeWithFocalPoint' ? focalPoint : undefined,
             imageResizeConfig,
             kind: 'size',
             originalDimensions,
@@ -147,11 +129,11 @@ async function describeResult({
   resultFile,
   sharpDependency,
 }: {
-  fieldPath: PreparedUploadTransformation['fieldPath']
+  fieldPath: UploadTransformation['fieldPath']
   fileSupportsResize: boolean
   resultFile: File
   sharpDependency: SharpDependency
-}): Promise<PreparedUploadTransformation> {
+}): Promise<UploadTransformation> {
   if (!fileSupportsResize) {
     return { fieldPath, file: resultFile, mimeType: resultFile.type }
   }
