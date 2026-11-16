@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react'
 
+import { useEffect } from 'react'
+
 import { expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
@@ -476,9 +478,15 @@ test('should position a nested menu beside its parent and offset its top by its 
 
 test('should update only the popup theme and preserve its draft when the theme prop changes', async () => {
   const originalTheme = document.documentElement.getAttribute('data-theme')
+  const themeContexts: ReturnType<typeof useTheme>[] = []
 
   function ThemeControls() {
-    const { setTheme, theme } = useTheme()
+    const context = useTheme()
+    const { setTheme, theme } = context
+
+    useEffect(() => {
+      themeContexts.push(context)
+    }, [context])
 
     return (
       <div data-popup-prevent-close>
@@ -498,6 +506,7 @@ test('should update only the popup theme and preserve its draft when the theme p
   )
 
   await screen.getByRole('button', { name: 'Open theme scope' }).click()
+  expect(themeContexts).toHaveLength(1)
   await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('dark')
   await screen.getByRole('button', { name: 'Set popup light' }).click()
   await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('light')

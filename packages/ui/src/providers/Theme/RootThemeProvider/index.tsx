@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Theme } from '../shared.js'
 
@@ -105,7 +105,10 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
     setHighContrastModeState(isHighContrast)
   }, [contrastCookieKey])
 
-  const value = { autoMode, highContrastMode, setHighContrastMode, setTheme, theme }
+  const value = useMemo(
+    () => ({ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }),
+    [autoMode, highContrastMode, setHighContrastMode, setTheme, theme],
+  )
 
   return (
     <RootContext value={value}>

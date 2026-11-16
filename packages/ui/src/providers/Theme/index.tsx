@@ -30,9 +30,9 @@ export { defaultTheme, type Theme } from './shared.js'
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
-  highContrastMode,
+  highContrastMode: highContrastModeOverride,
   targetRef,
-  theme,
+  theme: themeOverride,
 }) => {
   const parentContext = useTheme()
   const targetStore = useMemo(() => createThemeTargetStore({ targetRef }), [targetRef])
@@ -73,16 +73,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     [targetRef, targetStore],
   )
 
-  const value = {
-    autoMode: targetState?.autoMode ?? (theme === undefined ? parentContext.autoMode : false),
-    highContrastMode:
-      targetState?.highContrastMode ?? highContrastMode ?? parentContext.highContrastMode,
-    setHighContrastMode,
-    setTheme,
-    theme: targetState
-      ? (targetState.theme ?? parentContext.theme)
-      : (theme ?? parentContext.theme),
-  }
+  const autoMode =
+    targetState?.autoMode ?? (themeOverride === undefined ? parentContext.autoMode : false)
+  const highContrastMode =
+    targetState?.highContrastMode ?? highContrastModeOverride ?? parentContext.highContrastMode
+  const theme = targetState
+    ? (targetState.theme ?? parentContext.theme)
+    : (themeOverride ?? parentContext.theme)
+
+  const value = useMemo(
+    () => ({ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }),
+    [autoMode, highContrastMode, setHighContrastMode, setTheme, theme],
+  )
 
   // Keep the provider mounted as overrides change so descendants retain state and focus.
   return <Context value={value}>{children}</Context>
