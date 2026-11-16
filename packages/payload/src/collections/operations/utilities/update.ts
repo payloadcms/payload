@@ -169,7 +169,29 @@ export const updateDocument = async <
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
-  if (allLocalesPublicationStatus || isSavingDraft) {
+  // Implicit trash/restore only sends `deletedAt`. Locale `all` still defaults to publish-all and
+  // may already have written a generated `_status` upstream — drop it so we keep the main
+  // document's per-locale statuses instead of publishing every locale.
+  const isImplicitTrashOrRestore =
+    collectionConfig.trash &&
+    typeof data === 'object' &&
+    data !== null &&
+    'deletedAt' in data &&
+    typeof hasRequestedStatus === 'boolean' &&
+    !hasRequestedStatus &&
+    publishAllLocalesArg !== true &&
+    !unpublishAllLocales &&
+    !draftArg
+
+  if (isImplicitTrashOrRestore) {
+    if (
+      allLocalesPublicationStatus &&
+      Object.prototype.hasOwnProperty.call(data, '_status') &&
+      data._status === allLocalesPublicationStatus
+    ) {
+      delete data._status
+    }
+  } else if (allLocalesPublicationStatus || isSavingDraft) {
     data._status = allLocalesPublicationStatus ?? 'draft'
   }
 

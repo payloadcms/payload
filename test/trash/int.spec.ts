@@ -1566,6 +1566,107 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(latestDraftWhileTrashed._status).toBe('draft')
     })
 
+    test('should keep draft locale status when trashing with locale all without explicit publish', async ({
+      payload,
+    }) => {
+      // locale `all` defaults to publish-all and can generate data._status = 'published'.
+      // An implicit trash that only sets deletedAt must not publish locales that were still draft.
+      const published = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          localizedField: 'en-published',
+          title: 'published-en',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          _status: 'draft',
+          localizedField: 'es-draft',
+        },
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          localizedField: 'en-draft',
+          title: 'draft-v2',
+        },
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const beforeTrash = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(beforeTrash._status).toMatchObject({ en: 'published', es: 'draft' })
+      expect(beforeTrash.title).toBe('published-en')
+      expect(beforeTrash.localizedField).toMatchObject({
+        en: 'en-published',
+        es: 'es-draft',
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const trashedMain = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        locale: 'all',
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(trashedMain.deletedAt).toBeTruthy()
+      expect(trashedMain.title).toBe('published-en')
+      expect(trashedMain.localizedField).toMatchObject({
+        en: 'en-published',
+        es: 'es-draft',
+      })
+      expect(trashedMain._status).toMatchObject({ en: 'published', es: 'draft' })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: null,
+        },
+        locale: 'all',
+        overrideAccess: true,
+        trash: true,
+      })
+
+      const restoredMain = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(restoredMain.deletedAt).toBeNull()
+      expect(restoredMain._status).toMatchObject({ en: 'published', es: 'draft' })
+    })
+
     test('should keep published locale content when trashing a document with a pending locale draft', async ({
       payload,
     }) => {
