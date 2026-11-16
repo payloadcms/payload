@@ -38,10 +38,10 @@ describe('nested documents', () => {
 
     expect(collection.hierarchy).toMatchObject({
       admin: { injectSidebarTab: false, useHeaderButton: false },
-      parentFieldName: '_h_parent',
+      parentFieldName: '_h_parent_document',
     })
     expect(
-      collection.fields.find((field) => 'name' in field && field.name === '_h_parent'),
+      collection.fields.find((field) => 'name' in field && field.name === '_h_parent_document'),
     ).toMatchObject({ type: 'relationship', admin: { position: 'sidebar' }, relationTo: 'pages' })
     expect(collection.admin?.group).toBeUndefined()
   })
@@ -63,7 +63,7 @@ describe('nested documents', () => {
       collection.fields.find((field) => 'name' in field && field.name === 'parent'),
     ).toMatchObject({ type: 'text' })
     expect(
-      collection.fields.find((field) => 'name' in field && field.name === '_h_parent'),
+      collection.fields.find((field) => 'name' in field && field.name === '_h_parent_document'),
     ).toMatchObject({ type: 'relationship', relationTo: 'pages' })
   })
 
@@ -77,7 +77,9 @@ describe('nested documents', () => {
 
     sanitizeHierarchyCollection(collection, {} as Config)
 
-    const parent = collection.fields.find((field) => 'name' in field && field.name === '_h_parent')
+    const parent = collection.fields.find(
+      (field) => 'name' in field && field.name === '_h_parent_document',
+    )
 
     expect(parent).toBeDefined()
     expect(

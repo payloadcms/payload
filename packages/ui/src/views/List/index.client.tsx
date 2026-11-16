@@ -155,16 +155,15 @@ export function DefaultListView(props: ListViewClientProps) {
     }
   }, [pathname])
 
-  const pendingLayout = useRef<DocumentLayout | null>(null)
-  useEffect(() => {
-    const destination = pendingLayout.current
-    if (
-      destination === documentLayout &&
-      query.listLayout === (destination === 'tree' ? 'tree' : 'table')
-    ) {
-      pendingLayout.current = null
-    }
-  }, [documentLayout, query.listLayout])
+  const [pendingLayout, setPendingLayout] = useState<DocumentLayout | null>(null)
+
+  if (
+    pendingLayout !== null &&
+    pendingLayout === documentLayout &&
+    query.listLayout === (pendingLayout === 'tree' ? 'tree' : 'table')
+  ) {
+    setPendingLayout(null)
+  }
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
     const origin = layoutNavigationOrigin.current
@@ -185,10 +184,10 @@ export function DefaultListView(props: ListViewClientProps) {
       return
     }
 
-    if (pendingLayout.current) {
+    if (pendingLayout) {
       return
     }
-    pendingLayout.current = nextLayout
+    setPendingLayout(nextLayout)
     setLayout(nextLayout)
 
     try {
@@ -243,7 +242,7 @@ export function DefaultListView(props: ListViewClientProps) {
       }
     } catch (err) {
       if (isCurrentLayoutNavigation()) {
-        pendingLayout.current = null
+        setPendingLayout(null)
         setLayout(documentLayout ?? 'table')
       }
       throw err
