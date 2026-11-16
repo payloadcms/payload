@@ -1066,18 +1066,6 @@ jobs:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
         run: exit 1
 
-  publish-canary:
-    name: Publish Canary
-    runs-on: ubuntu-26.04
-    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
-    needs:
-      - all-green
-
-    steps:
-      # debug github.ref output
-      - run: |
-          echo github.ref: ${{ github.ref }}
-          echo isV3: ${{ github.ref == 'refs/heads/main' }}
   analyze:
     runs-on: ubuntu-26.04
     needs: [changes, build]

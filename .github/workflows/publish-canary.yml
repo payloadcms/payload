@@ -1,0 +1,44 @@
+name: publish-canary
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: build and run pnpm publish --dry-run (nothing published to npm)'
+        type: boolean
+        default: false
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+concurrency:
+  group: publish-canary
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish-canary
+    if: github.repository == 'payloadcms/payload'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    # npm trusts only this file + this env; the env's branch policy limits it to main.
+    environment: canary
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Publish
+        run: pnpm publish-canary ${SKIP_FLAG:-} ${DRY_RUN_FLAG:-}
+        env:
+          SKIP_FLAG: ${{ github.event_name == 'schedule' && '--skip-if-unchanged' || '' }}
+          DRY_RUN_FLAG: ${{ inputs.dry_run && '--dry-run' || '' }}
+          NPM_CONFIG_PROVENANCE: true
