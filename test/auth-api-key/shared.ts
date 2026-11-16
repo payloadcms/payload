@@ -1,0 +1,5 @@
+export const apiKeysSlug = 'api-keys'
+export const revealableKeysSlug = 'revealableKeys'
+export const restrictedRevealableKeysSlug = 'restrictedRevealableKeys'
+export const tenantRevealableKeysSlug = 'tenantRevealableKeys'
+export const usersSlug = 'users'

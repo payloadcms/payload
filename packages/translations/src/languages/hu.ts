@@ -58,6 +58,7 @@ export const huTranslations: DefaultTranslationsObject = {
     newPassword: 'Új jelszó',
     passed: 'Hitelesítés sikeres',
     passwordResetSuccessfully: 'A jelszó sikeresen vissza lett állítva.',
+    resend: 'Újraküldés',
     resetPassword: 'Jelszó visszaállítása',
     resetPasswordExpiration: 'Jelszóvisszaállítás lejárata',
     resetPasswordToken: 'Jelszóvisszaállító token',

@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
 import React from 'react'
 
@@ -12,7 +12,8 @@ export const GroupByHeader: React.FC<{
   groupByFieldPath: string
   groupByValue: string
   heading: string
-}> = ({ collectionConfig, groupByFieldPath, groupByValue, heading }) => {
+  viewType?: ViewTypes
+}> = ({ collectionConfig, groupByFieldPath, groupByValue, heading, viewType }) => {
   return (
     <header className={baseClass}>
       <h4 className={`${baseClass}__heading`} data-group-id={groupByValue}>
@@ -22,6 +23,7 @@ export const GroupByHeader: React.FC<{
         collectionConfig={collectionConfig}
         label={heading}
         modalPrefix={groupByValue}
+        viewType={viewType}
         where={{
           [groupByFieldPath]: {
             equals: groupByValue,

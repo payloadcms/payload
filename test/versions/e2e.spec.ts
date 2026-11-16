@@ -64,6 +64,7 @@ import {
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
   autosaveWithDraftValidateSlug,
+  autosaveWithVirtualSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -96,6 +97,13 @@ let context: BrowserContext
 
 const londonTimezone = 'Europe/London'
 
+async function waitForVersionViewToLoad(page: Page): Promise<void> {
+  const versionView = page.locator('.view-version')
+
+  await expect(versionView).not.toContainText('Loading...')
+  await expect(versionView.locator('.render-field-diffs').first()).toBeVisible()
+}
+
 describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -103,6 +111,7 @@ describe('Versions', () => {
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithDraftValidateURL: AdminUrlUtil
+  let autosaveWithVirtualURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let draftWithChangeHookURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -151,6 +160,7 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
+      autosaveWithVirtualURL = new AdminUrlUtil(serverURL, autosaveWithVirtualSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -297,7 +307,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -320,7 +330,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version .popup__trigger-wrap button').click()
       await page.getByRole('button', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
@@ -533,6 +543,116 @@ describe('Versions', () => {
       await expect(page.locator('#custom-field-label')).toHaveText(
         `Value in DocumentInfoContext: ${postID}`,
       )
+    })
+
+    describe('virtual field autosave', () => {
+      const createdDocIDs: string[] = []
+
+      test.afterEach(async () => {
+        for (const id of createdDocIDs) {
+          await payload.delete({ collection: autosaveWithVirtualSlug, id })
+        }
+
+        createdDocIDs.length = 0
+      })
+
+      test('should not re-autosave when virtual fields change in the response', async () => {
+        const { id: docID } = await payload.create({
+          collection: autosaveWithVirtualSlug,
+          data: {
+            array: [{ title: 'array title' }],
+            title: 'title',
+          },
+        })
+
+        createdDocIDs.push(docID)
+
+        await page.goto(autosaveWithVirtualURL.edit(docID))
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:title')
+
+        const autosaveRequestURL = formatAdminURL({
+          apiRoute: '/api',
+          path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          serverURL,
+        })
+
+        // A second edit exercises the modification flag left behind by the first autosave.
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await page.locator('#field-title').fill('first change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:first change')
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await page.locator('#field-title').fill('second change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:second change')
+      })
+
+      test('should not re-autosave when nested virtual fields change in the response', async () => {
+        const { id: docID } = await payload.create({
+          collection: autosaveWithVirtualSlug,
+          data: {
+            array: [{ title: 'array title' }],
+            title: 'title',
+          },
+        })
+
+        createdDocIDs.push(docID)
+
+        await page.goto(autosaveWithVirtualURL.edit(docID))
+
+        const nestedTitle = page.locator('#field-array__0__title')
+        await expect(nestedTitle).toHaveValue('array title')
+
+        const autosaveRequestURL = formatAdminURL({
+          apiRoute: '/api',
+          path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          serverURL,
+        })
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await nestedTitle.fill('first change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await nestedTitle.fill('second change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-array__0__titleDerived')).toHaveValue(
+          'derived:second change',
+        )
+      })
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -1230,7 +1350,9 @@ describe('Versions', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
       await waitForFormReady(page)
@@ -2210,7 +2332,7 @@ describe('Versions', () => {
         serverURL,
       })
       await page.goto(versionURL)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
     }
 
     async function navigateToDiffVersionView(versionID?: string) {
@@ -2643,6 +2765,21 @@ describe('Versions', () => {
 
       expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
       expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
+    })
+
+    test('should respect relationship read access in rich text diffs', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtextWithConstrainedRelationship"]')
+      const oldRelationshipLink = richtext.locator(
+        '.html-diff__diff-old .lexical-relationship-diff__link',
+      )
+      const newRelationshipLink = richtext.locator(
+        '.html-diff__diff-new .lexical-relationship-diff__link',
+      )
+
+      await expect(oldRelationshipLink).toHaveCount(0)
+      await expect(newRelationshipLink).toHaveText('Document 2')
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {

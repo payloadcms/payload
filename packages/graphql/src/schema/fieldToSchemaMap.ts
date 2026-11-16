@@ -425,7 +425,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { req } = context
 
         const draft = Boolean(args.draft ?? context.req.query?.draft)
-        const select = resolveSelect(info, context.select)
+        const select = resolveSelect(info, context.select, context)
 
         const targetField = (field as FlattenedJoinField).targetField
 
@@ -669,7 +669,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const draft = Boolean(args.draft ?? context.req.query?.draft)
-        const select = resolveSelect(info, context.select)
+        const select = resolveSelect(info, context.select, context)
 
         if (hasManyValues) {
           const results = []
@@ -1088,7 +1088,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const draft = Boolean(args.draft ?? context.req.query?.draft)
-        const select = resolveSelect(info, context.select)
+        const select = resolveSelect(info, context.select, context)
 
         if (hasManyValues) {
           const results = []

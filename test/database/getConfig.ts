@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { WriteInput } from './collections/WriteInput/index.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
@@ -36,6 +37,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   },
   collections: [
+    WriteInput,
     {
       slug: 'noTimeStamps',
       timestamps: false,
@@ -106,6 +108,29 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'number',
         },
       ],
+    },
+    {
+      slug: 'draft-with-array',
+      fields: [
+        {
+          name: 'items',
+          type: 'array',
+          fields: Array.from({ length: 8 }, (_, i) => ({
+            name: `text${i + 1}`,
+            type: 'text' as const,
+          })),
+        },
+        {
+          name: 'itemsWithDefaults',
+          type: 'array',
+          fields: Array.from({ length: 8 }, (_, i) => ({
+            name: `text${i + 1}`,
+            type: 'text' as const,
+            defaultValue: `default${i + 1}`,
+          })),
+        },
+      ],
+      versions: { drafts: true },
     },
     {
       slug: 'simple-localized',

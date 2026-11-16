@@ -54,7 +54,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   tableName,
   upsertTarget,
   where,
-}: Args): Promise<T> => {
+}: Args): Promise<null | T> => {
   if (operation === 'create' && !data.createdAt) {
     data.createdAt = new Date().toISOString()
   }
@@ -75,6 +75,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const { arraysToPush } = transformedForWrite
 
       const drizzle = db as LibSQLDatabase
+      const updateWhere = where
+        ? and(eq(adapter.tables[tableName].id, id), where)
+        : eq(adapter.tables[tableName].id, id)
 
       // First, handle $push arrays
 
@@ -101,10 +104,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         if (hasDataToUpdate) {
           // Only update row if there is something to update.
           // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
-          await drizzle
-            .update(adapter.tables[tableName])
-            .set(row)
-            .where(eq(adapter.tables[tableName].id, id))
+          await drizzle.update(adapter.tables[tableName]).set(row).where(updateWhere)
         }
         return ignoreResult === 'idOnly' ? ({ id } as T) : null
       }
@@ -123,9 +123,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
-        findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+        findManyArgs.where = updateWhere
 
         const doc = await db.query[tableName].findFirst(findManyArgs)
+
+        if (!doc) {
+          return null
+        }
 
         return transform<T>({
           adapter,
@@ -153,8 +157,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         const docs = await drizzle
           .update(adapter.tables[tableName])
           .set(row)
-          .where(eq(adapter.tables[tableName].id, id))
+          .where(updateWhere)
           .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+
+        if (!docs[0]) {
+          return null
+        }
 
         return transform<T>({
           adapter,
@@ -168,10 +176,19 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
 
-      await drizzle
+      const docs = await drizzle
         .update(adapter.tables[tableName])
         .set(row)
-        .where(eq(adapter.tables[tableName].id, id))
+        .where(updateWhere)
+        .returning({
+          id: adapter.tables[tableName].id,
+        })
+
+      if (!docs[0]) {
+        return null
+      }
+
+      insertedRow = docs[0]
 
       findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
@@ -220,7 +237,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           rowToInsert.row.id = id
           ;[insertedRow] = await adapter.insert({
             db,
-            onConflictDoUpdate: { set: rowToInsert.row, target },
+            onConflictDoUpdate: where
+              ? { set: rowToInsert.row, target, where }
+              : { set: rowToInsert.row, target },
             tableName,
             values: rowToInsert.row,
           })
@@ -231,6 +250,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             tableName,
             values: rowToInsert.row,
           })
+        }
+
+        if (!insertedRow) {
+          return null
         }
       } else {
         // No main row data to update, just use the existing ID

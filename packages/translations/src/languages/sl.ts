@@ -56,6 +56,7 @@ export const slTranslations: DefaultTranslationsObject = {
     newPassword: 'Novo geslo',
     passed: 'Avtentikacija uspešna',
     passwordResetSuccessfully: 'Geslo uspešno ponastavljeno.',
+    resend: 'Pošlji znova',
     resetPassword: 'Ponastavi geslo',
     resetPasswordExpiration: 'Potek ponastavitve gesla',
     resetPasswordToken: 'Žeton za ponastavitev gesla',

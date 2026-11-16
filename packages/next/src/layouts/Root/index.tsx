@@ -72,6 +72,7 @@ const RootLayoutContent = async ({
     req: {
       payload: { config },
     },
+    user: userWithReadAccess,
   } = await initReq({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
@@ -114,7 +115,7 @@ const RootLayoutContent = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user,
+    user: userWithReadAccess,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -139,12 +140,12 @@ const RootLayoutContent = async ({
           languageCode={languageCode}
           languageOptions={languageOptions}
           locale={req.locale}
-          permissions={req.user ? permissions : null}
+          permissions={userWithReadAccess ? permissions : null}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
           translations={req.i18n.translations}
-          user={req.user}
+          user={userWithReadAccess}
         >
           <ProgressBar />
           {Array.isArray(config.admin?.components?.providers) &&
@@ -156,7 +157,7 @@ const RootLayoutContent = async ({
                 i18n: req.i18n,
                 payload: req.payload,
                 permissions,
-                user: req.user,
+                user: userWithReadAccess,
               }}
             >
               {children}

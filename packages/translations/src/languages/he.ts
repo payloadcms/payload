@@ -56,6 +56,7 @@ export const heTranslations: DefaultTranslationsObject = {
     newPassword: 'סיסמה חדשה',
     passed: 'אימות הצליח',
     passwordResetSuccessfully: 'איפוס הסיסמה הצליח.',
+    resend: 'שלח שוב',
     resetPassword: 'איפוס סיסמה',
     resetPasswordExpiration: 'אפס את תוקף תפוגת הסיסמה',
     resetPasswordToken: 'אפס את טוקן הסיסמה',

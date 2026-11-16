@@ -1,12 +1,13 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { ApiError } from '@google-cloud/storage'
+import { getStorageFilePath } from '@payloadcms/plugin-cloud-storage/utilities'
 import {
-  getFilePrefix as getDocPrefix,
-  getFileKey,
-} from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+  getRangeRequestInfo,
+  isXmlMimeType,
+  UPLOAD_CONTENT_SECURITY_POLICY,
+} from 'payload/internal'
 
 interface GetFileArgs {
   bucket: string
@@ -14,9 +15,9 @@ interface GetFileArgs {
   clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   useCompositePrefixes?: boolean
 }
@@ -27,29 +28,24 @@ export async function getFile({
   clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
-    const docPrefix = await getDocPrefix({
+    const filePath = await getStorageFilePath({
       clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const { fileKey } = getFileKey({
       collectionPrefix,
-      docPrefix,
+      doc,
       filename,
+      req,
       useCompositePrefixes,
     })
 
-    const file = client.bucket(bucket).file(fileKey)
+    const file = client.bucket(bucket).file(filePath)
 
     const [metadata] = await file.getMetadata()
 
@@ -78,9 +74,9 @@ export async function getFile({
     headers.append('Content-Type', String(metadata.contentType))
     headers.append('ETag', String(metadata.etag))
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (metadata.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Add Content-Security-Policy header for XML-family files
+    if (isXmlMimeType(metadata.contentType)) {
+      headers.append('Content-Security-Policy', UPLOAD_CONTENT_SECURITY_POLICY)
     }
 
     if (

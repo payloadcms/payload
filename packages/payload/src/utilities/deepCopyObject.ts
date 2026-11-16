@@ -44,15 +44,15 @@ function cloneArray<T extends object>(a: T, fn: (o: any) => any): T {
     const k = keys[i] as keyof typeof a
     const cur = a[k] as any
     if (typeof cur !== 'object' || cur === null) {
-      a2[k] = cur
+      setClonedValue({ key: k, target: a2, value: cur })
     } else if (cur instanceof RegExp) {
-      a2[k] = new RegExp(cur.source, cur.flags) as any
+      setClonedValue({ key: k, target: a2, value: new RegExp(cur.source, cur.flags) })
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
-      a2[k] = handler(cur, fn)
+      setClonedValue({ key: k, target: a2, value: handler(cur, fn) })
     } else if (ArrayBuffer.isView(cur)) {
-      a2[k] = copyBuffer(cur)
+      setClonedValue({ key: k, target: a2, value: copyBuffer(cur) })
     } else {
-      a2[k] = fn(cur)
+      setClonedValue({ key: k, target: a2, value: fn(cur) })
     }
   }
   return a2
@@ -79,15 +79,31 @@ export const deepCopyObject = <T>(o: T): T => {
     }
     const cur = o[k]
     if (typeof cur !== 'object' || cur === null) {
-      o2[k] = cur
+      setClonedValue({ key: k, target: o2 as Record<PropertyKey, any>, value: cur })
     } else if (cur instanceof RegExp) {
-      o2[k] = new RegExp(cur.source, cur.flags) as any
+      setClonedValue({
+        key: k,
+        target: o2 as Record<PropertyKey, any>,
+        value: new RegExp(cur.source, cur.flags),
+      })
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
-      o2[k] = handler(cur, deepCopyObject)
+      setClonedValue({
+        key: k,
+        target: o2 as Record<PropertyKey, any>,
+        value: handler(cur, deepCopyObject),
+      })
     } else if (ArrayBuffer.isView(cur)) {
-      o2[k] = copyBuffer(cur)
+      setClonedValue({
+        key: k,
+        target: o2 as Record<PropertyKey, any>,
+        value: copyBuffer(cur),
+      })
     } else {
-      o2[k] = deepCopyObject(cur)
+      setClonedValue({
+        key: k,
+        target: o2 as Record<PropertyKey, any>,
+        value: deepCopyObject(cur),
+      })
     }
   }
   return o2
@@ -113,23 +129,44 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
   if (typeof value !== 'object' || value === null) {
     return value
   } else if (Array.isArray(value)) {
-    return value.map((e) =>
-      typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e, filterUndefined),
-    ) as T
+    const clone = new Array(value.length)
+
+    for (let index = 0; index < value.length; index++) {
+      if (!Object.hasOwn(value, index)) {
+        continue
+      }
+
+      const element = value[index]
+      setClonedValue({
+        key: index,
+        target: clone,
+        value:
+          typeof element !== 'object' || element === null
+            ? element
+            : deepCopyObjectSimple(element, filterUndefined),
+      })
+    }
+
+    return clone as T
   } else {
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
     const ret: { [key: string]: T } = {}
-    for (const k in value) {
-      const v = value[k]
+    const objectValue = value as Record<string, T>
+    for (const k of Object.keys(objectValue)) {
+      const v = objectValue[k]
       if (filterUndefined && v === undefined) {
         continue
       }
-      ret[k] =
-        typeof v !== 'object' || v === null
-          ? v
-          : (deepCopyObjectSimple(v as T, filterUndefined) as any)
+      setClonedValue({
+        key: k,
+        target: ret,
+        value:
+          typeof v !== 'object' || v === null
+            ? v
+            : (deepCopyObjectSimple(v as T, filterUndefined) as any),
+      })
     }
     return ret as unknown as T
   }
@@ -151,9 +188,25 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
   } else if (typeof value !== 'object' || value === null) {
     return value
   } else if (Array.isArray(value)) {
-    return value.map((e) =>
-      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e, opts),
-    ) as T
+    const clone = new Array(value.length)
+
+    for (let index = 0; index < value.length; index++) {
+      if (!Object.hasOwn(value, index)) {
+        continue
+      }
+
+      const element = value[index]
+      setClonedValue({
+        key: index,
+        target: clone,
+        value:
+          typeof element !== 'object' || element === null
+            ? element
+            : deepCopyObjectSimpleWithoutReactComponents(element, opts),
+      })
+    }
+
+    return clone as T
   } else {
     // Handle File objects by returning them as-is (don't serialize to plain object) or exclude if excludeFiles is provided
     if (value instanceof File) {
@@ -167,12 +220,17 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
       return new Date(value) as unknown as T
     }
     const ret: { [key: string]: T } = {}
-    for (const k in value) {
-      const v = value[k]
-      ret[k] =
-        typeof v !== 'object' || v === null
-          ? v
-          : (deepCopyObjectSimpleWithoutReactComponents(v as T, opts) as any)
+    const objectValue = value as Record<string, T>
+    for (const k of Object.keys(objectValue)) {
+      const v = objectValue[k]
+      setClonedValue({
+        key: k,
+        target: ret,
+        value:
+          typeof v !== 'object' || v === null
+            ? v
+            : (deepCopyObjectSimpleWithoutReactComponents(v as T, opts) as any),
+      })
     }
     return ret as unknown as T
   }
@@ -242,7 +300,11 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
         Object.prototype.hasOwnProperty.call(object, key) ||
         Object.getOwnPropertySymbols(object).includes(key as any)
       ) {
-        clonedObject[key] = deepCopyObjectComplex(object[key], cache)
+        setClonedValue({
+          key,
+          target: clonedObject,
+          value: deepCopyObjectComplex(object[key], cache),
+        })
       }
     }
 
@@ -251,4 +313,27 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
 
   // Handle all other cases
   return object
+}
+
+function setClonedValue<TTarget extends Record<PropertyKey, any>>({
+  key,
+  target,
+  value,
+}: {
+  key: PropertyKey
+  target: TTarget
+  value: any
+}): TTarget {
+  if (key === '__proto__' || (!Object.hasOwn(target, key) && key in target)) {
+    Object.defineProperty(target, key, {
+      configurable: true,
+      enumerable: true,
+      value,
+      writable: true,
+    })
+  } else if (!Reflect.set(target, key, value)) {
+    throw new TypeError(`Cannot assign to property ${String(key)}`)
+  }
+
+  return target
 }

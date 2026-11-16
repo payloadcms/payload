@@ -9,6 +9,9 @@ import { SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
+import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
+import { prefixWherePaths } from '../prefixWherePaths.js'
+import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -25,6 +28,7 @@ type Args = {
   policies: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
+  showHiddenFields?: boolean
   val: unknown
   versionFields?: FlattenedField[]
 }
@@ -45,6 +49,7 @@ export async function validateSearchParam({
   policies,
   polymorphicJoin,
   req,
+  showHiddenFields,
   val,
   versionFields,
 }: Args): Promise<void> {
@@ -81,9 +86,67 @@ export async function validateSearchParam({
       overrideAccess,
       parentIsLocalized,
       payload: req.payload,
+      showHiddenFields,
     })
   }
   const promises: Promise<void>[] = []
+
+  const relationshipField = paths.length === 1 ? paths[0]?.field : undefined
+  const hasNestedWhere = isNestedRelationshipQuery(val)
+  const relatedCollectionSlug =
+    relationshipField &&
+    (relationshipField.type === 'relationship' || relationshipField.type === 'upload') &&
+    relationshipField.hasMany &&
+    typeof relationshipField.relationTo === 'string'
+      ? relationshipField.relationTo
+      : undefined
+  // 3.x supports only the `contains` operator for nested relationship queries.
+  const isNestedHasManyQuery =
+    operator === 'contains' && hasNestedWhere && Boolean(relatedCollectionSlug)
+
+  const isJoinContainsQuery =
+    operator === 'contains' &&
+    relationshipField?.type === 'join' &&
+    typeof relationshipField.collection === 'string' &&
+    hasNestedWhere
+
+  const nestedCollectionSlug = isNestedHasManyQuery
+    ? relatedCollectionSlug
+    : isJoinContainsQuery &&
+        relationshipField?.type === 'join' &&
+        typeof relationshipField.collection === 'string'
+      ? relationshipField.collection
+      : undefined
+
+  // Plain-object values would be merged as raw query fragments.
+  if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
+    const isValidNestedContains =
+      operator === 'contains' && (isNestedHasManyQuery || isJoinContainsQuery)
+
+    const containsPlainObject =
+      isNestedRelationshipQuery(val) ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry)))
+
+    if (containsPlainObject && !isValidNestedContains) {
+      errors.push({ path: incomingPath })
+      return
+    }
+  }
+
+  if ((isNestedHasManyQuery || isJoinContainsQuery) && nestedCollectionSlug) {
+    // Validate the nested query against the related collection.
+    promises.push(
+      validateQueryPaths({
+        collectionConfig: req.payload.collections[nestedCollectionSlug]!.config,
+        errors,
+        overrideAccess,
+        policies,
+        req,
+        showHiddenFields,
+        where: val,
+      }),
+    )
+  }
 
   // Sanitize relation.otherRelation.id to relation.otherRelation
   if (paths.at(-1)?.path === 'id') {
@@ -100,7 +163,10 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        if (!polymorphicJoin || !SAFE_FIELD_PATH_REGEX.test(incomingPath)) {
+        const isUnknownPolymorphicJoinField =
+          polymorphicJoin && !field && SAFE_FIELD_PATH_REGEX.test(incomingPath)
+
+        if (!isUnknownPolymorphicJoinField) {
           errors.push({ path })
         }
 
@@ -143,59 +209,114 @@ export async function validateSearchParam({
           ) {
             errors.push({ path: incomingPath })
           }
-        }
-        let fieldPath = path
-        // remove locale from end of path
-        if (path.endsWith(`.${req.locale}`)) {
-          fieldPath = path.slice(0, -(req.locale!.length + 1))
-        }
-        // remove ".value" from ends of polymorphic relationship paths
-        if (
-          (field.type === 'relationship' || field.type === 'upload') &&
-          Array.isArray(field.relationTo)
-        ) {
-          fieldPath = fieldPath.replace('.value', '')
-        }
 
-        const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
-        const entitySlug = collectionSlug || globalConfig!.slug
-        const segments = fieldPath.split('.')
-
-        let fieldAccess: any
-
-        if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
+          const relatedCollectionReadPermission = policies.collections![collectionSlug].read
+          const previousSegment = paths[i - 1]
+          const traversedField = previousSegment?.field
+          const isRelationshipHop =
+            Boolean(traversedField) &&
+            (traversedField!.type === 'relationship' ||
+              traversedField!.type === 'upload' ||
+              traversedField!.type === 'join')
 
           if (
-            segments[0] === 'parent' ||
-            segments[0] === 'version' ||
-            segments[0] === 'snapshot' ||
-            segments[0] === 'latest'
+            isRelationshipHop &&
+            relatedCollectionReadPermission &&
+            typeof relatedCollectionReadPermission === 'object' &&
+            relatedCollectionReadPermission.where
           ) {
-            segments.shift()
+            const relationshipPath = paths
+              .slice(0, i)
+              .map(({ path: pathToRelationship }) => pathToRelationship)
+              .join('.')
+
+            const mutableWhere = constraint as Record<string, unknown>
+            const existingAnd = Array.isArray(mutableWhere.and) ? mutableWhere.and : []
+
+            // Has-many relationships and joins can point to many related documents, so the user's
+            // filter and the access constraint must be satisfied by the SAME related document.
+            // Scoping both into a single `contains` prevents a different, readable document from
+            // masking one the user cannot read (a related-document oracle).
+            const isHasManyRelationship =
+              (traversedField!.type === 'relationship' || traversedField!.type === 'upload') &&
+              traversedField!.hasMany
+            const isJoin = traversedField!.type === 'join'
+
+            if (isHasManyRelationship || isJoin) {
+              const relatedFieldPath = paths.at(-1)?.path
+
+              if (relatedFieldPath) {
+                mutableWhere.and = [
+                  ...existingAnd,
+                  {
+                    [relationshipPath]: {
+                      contains: {
+                        and: [
+                          {
+                            [relatedFieldPath]: {
+                              [operator]: val,
+                            },
+                          },
+                          relatedCollectionReadPermission.where,
+                        ],
+                      },
+                    },
+                  },
+                ]
+
+                // The scoped `contains` above fully replaces the user's original filter;
+                // so we can remove it from the top-level where clause
+                delete mutableWhere[incomingPath]
+              }
+            } else {
+              const accessWhere = prefixWherePaths({
+                prefix: relationshipPath,
+                where: relatedCollectionReadPermission.where,
+              })
+
+              mutableWhere.and = [...existingAnd, accessWhere]
+            }
           }
-        } else {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
+        }
+        const entityType = collectionSlug ? 'collections' : 'globals'
+        const entitySlug = collectionSlug || globalConfig!.slug
+        const entity = collectionSlug
+          ? req.payload.collections[collectionSlug]!.config
+          : globalConfig!
+        let fieldPath = path
+
+        if (
+          versionFields &&
+          !i &&
+          ['latest', 'parent', 'snapshot', 'version'].includes(fieldPath)
+        ) {
+          return
         }
 
-        if (segments.length) {
-          segments.forEach((segment) => {
-            if (fieldAccess[segment]) {
-              if ('fields' in fieldAccess[segment]) {
-                fieldAccess = fieldAccess[segment].fields
-              } else {
-                fieldAccess = fieldAccess[segment]
-              }
-            }
-          })
+        if (versionFields && !i) {
+          fieldPath = fieldPath.replace(/^(?:parent|version|snapshot|latest)\./, '')
+        }
 
-          if (!fieldAccess?.read?.permission) {
-            errors.push({ path: fieldPath })
-          }
+        if (
+          !hasReadAccessToQueryPath({
+            fields: entity.flattenedFields,
+            isParentLocalized: parentIsLocalized,
+            isRelatedToMany:
+              field.type === 'join' ||
+              ((field.type === 'relationship' || field.type === 'upload') &&
+                Boolean(field.hasMany)),
+            path: fieldPath.split('.'),
+            permissions: policies[entityType]![entitySlug]!.fields,
+            relatedCollectionSlug: paths[i + 1]?.collectionSlug || nestedCollectionSlug,
+            req,
+            shouldShowHiddenFields: showHiddenFields,
+          })
+        ) {
+          errors.push({ path: fieldPath })
         }
       }
 
-      if (i > 1) {
+      if (!isNestedHasManyQuery && i > 1) {
         // Remove top collection and reverse array
         // to work backwards from top
         const pathsToQuery = paths.slice(1).reverse()
@@ -213,6 +334,7 @@ export async function validateSearchParam({
                   overrideAccess,
                   policies,
                   req,
+                  showHiddenFields,
                   where: {
                     [subPath]: {
                       [operator]: val,

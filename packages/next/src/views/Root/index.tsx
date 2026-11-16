@@ -10,12 +10,12 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { PageConfigProvider } from '@payloadcms/ui'
+import { PageConfigProvider, PageLocaleProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
+import { applyLocaleFiltering, formatAdminURL, stripTrailingSlash } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -60,13 +60,17 @@ export const RootPage = async ({
     },
     routes: { admin: adminRoute },
   } = config
+  const adminRouteURL = formatAdminURL({ adminRoute })
 
   const params = await paramsPromise
 
-  const currentRoute = formatAdminURL({
+  // route with possible trailing slash
+  const currentRouteURL = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
+  // route without possible trailing slash
+  const currentRouteToCompare = stripTrailingSlash(currentRouteURL)
 
   const segments = Array.isArray(params.segments) ? params.segments : []
   const isCollectionRoute = segments[0] === 'collections'
@@ -86,7 +90,7 @@ export const RootPage = async ({
 
       // Only redirect if there's NO custom view configured for /collections
       if (!viewKey) {
-        redirect(adminRoute)
+        redirect(adminRouteURL)
       }
     }
 
@@ -105,7 +109,7 @@ export const RootPage = async ({
 
       // Only redirect if there's NO custom view configured for /globals
       if (!viewKey) {
-        redirect(adminRoute)
+        redirect(adminRouteURL)
       }
     }
 
@@ -126,6 +130,7 @@ export const RootPage = async ({
     permissions,
     req,
     req: { payload },
+    user: userWithReadAccess,
   } = await initReq({
     configPromise: config,
     importMap,
@@ -139,21 +144,21 @@ export const RootPage = async ({
         }),
       },
       // intentionally omit `serverURL` to keep URL relative
-      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+      urlSuffix: `${currentRouteURL}${searchParams ? queryString : ''}`,
     },
   })
 
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoute }) &&
-    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoute })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRouteToCompare }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRouteToCompare })
   ) {
     redirect(
       handleAuthRedirect({
         config: payload.config,
-        route: currentRoute,
+        route: currentRouteToCompare,
         searchParams,
-        user: req.user,
+        user: userWithReadAccess,
       }),
     )
   }
@@ -188,7 +193,7 @@ export const RootPage = async ({
     adminRoute,
     collectionConfig,
     collectionPreferences,
-    currentRoute,
+    currentRoute: currentRouteToCompare,
     globalConfig,
     payload,
     searchParams,
@@ -216,39 +221,40 @@ export const RootPage = async ({
     }
 
     if (dbHasUser) {
-      redirect(adminRoute)
+      redirect(adminRouteURL)
     }
   }
 
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
 
-  const createFirstUserRoute = formatAdminURL({
+  const rawCreateFirstUserRoute = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
   })
+  const createFirstUserRoute = stripTrailingSlash(rawCreateFirstUserRoute)
 
-  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
-    redirect(adminRoute)
+  if (disableLocalStrategy && currentRouteToCompare === createFirstUserRoute) {
+    redirect(adminRouteURL)
   }
 
-  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
-    redirect(createFirstUserRoute)
+  if (!dbHasUser && currentRouteToCompare !== createFirstUserRoute && !disableLocalStrategy) {
+    redirect(rawCreateFirstUserRoute)
   }
 
-  if (dbHasUser && currentRoute === createFirstUserRoute) {
-    redirect(adminRoute)
+  if (dbHasUser && currentRouteToCompare === createFirstUserRoute) {
+    redirect(adminRouteURL)
   }
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
-    redirect(adminRoute)
+    redirect(adminRouteURL)
   }
 
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
-    user: viewType === 'createFirstUser' ? true : req.user,
+    user: viewType === 'createFirstUser' ? true : userWithReadAccess,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -260,7 +266,7 @@ export const RootPage = async ({
     !clientConfig.localization.localeCodes.includes(req.locale)
   ) {
     redirect(
-      `${currentRoute}${qs.stringify(
+      `${currentRouteURL}${qs.stringify(
         {
           ...searchParams,
           locale: clientConfig.localization.localeCodes.includes(
@@ -327,42 +333,45 @@ export const RootPage = async ({
       params,
       payload: req.payload,
       searchParams,
+      user: userWithReadAccess,
       viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
 
   return (
     <PageConfigProvider config={clientConfig}>
-      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={collectionConfig?.slug}
-          docID={routeParams.id}
-          documentSubViewType={documentSubViewType}
-          globalSlug={globalConfig?.slug}
-          i18n={req.i18n}
-          locale={locale}
-          params={params}
-          payload={req.payload}
-          permissions={permissions}
-          req={req}
-          searchParams={searchParams}
-          user={req.user}
-          viewActions={viewActions}
-          viewType={viewType}
-          visibleEntities={{
-            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-            // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: visibleEntities?.collections,
-            globals: visibleEntities?.globals,
-          }}
-        >
-          {RenderedView}
-        </DefaultTemplate>
-      )}
+      <PageLocaleProvider locale={locale?.code}>
+        {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
+        {templateType === 'minimal' && (
+          <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+        )}
+        {templateType === 'default' && (
+          <DefaultTemplate
+            collectionSlug={collectionConfig?.slug}
+            docID={routeParams.id}
+            documentSubViewType={documentSubViewType}
+            globalSlug={globalConfig?.slug}
+            i18n={req.i18n}
+            locale={locale}
+            params={params}
+            payload={req.payload}
+            permissions={permissions}
+            req={req}
+            searchParams={searchParams}
+            user={userWithReadAccess}
+            viewActions={viewActions}
+            viewType={viewType}
+            visibleEntities={{
+              // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+              // which this caused as soon as initPageResult.visibleEntities is passed in
+              collections: visibleEntities?.collections,
+              globals: visibleEntities?.globals,
+            }}
+          >
+            {RenderedView}
+          </DefaultTemplate>
+        )}
+      </PageLocaleProvider>
     </PageConfigProvider>
   )
 }

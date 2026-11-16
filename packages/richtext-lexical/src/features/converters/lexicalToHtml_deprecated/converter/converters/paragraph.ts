@@ -1,6 +1,7 @@
 import type { SerializedParagraphNode } from '../../../../../nodeTypes.js'
 import type { HTMLConverter } from '../types.js'
 
+import { ALLOWED_TEXT_ALIGN } from '../constants.js'
 import { convertLexicalNodesToHTML } from '../index.js'
 
 export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
@@ -30,7 +31,7 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
       showHiddenFields,
     })
     const style = [
-      node.format ? `text-align: ${node.format};` : '',
+      node.format && ALLOWED_TEXT_ALIGN.has(node.format) ? `text-align: ${node.format};` : '',
       // the unit should be px. Do not change it to rem, em, or something else.
       // The quantity should be 40px. Do not change it either.
       // See rationale in

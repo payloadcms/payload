@@ -21,7 +21,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v5
@@ -40,7 +40,7 @@ jobs:
             🚀 This is included in version {release_link}
 
   dispatch-to-website:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Dispatch release event to website
@@ -51,7 +51,7 @@ jobs:
           event-type: payload-release-event
 
   github-releases-to-discord:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout

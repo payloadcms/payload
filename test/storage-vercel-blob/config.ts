@@ -10,6 +10,7 @@ import { MediaWithAlwaysInsertFields } from './collections/MediaWithAlwaysInsert
 import { MediaWithDirectAccess } from './collections/MediaWithDirectAccess.js'
 import { MediaWithDynamicPrefix } from './collections/MediaWithDynamicPrefix.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { MediaWithRandomSuffix } from './collections/MediaWithRandomSuffix.js'
 import { Users } from './collections/Users.js'
 import {
   mediaSlug,
@@ -17,6 +18,7 @@ import {
   mediaWithDirectAccessSlug,
   mediaWithDynamicPrefixSlug,
   mediaWithPrefixSlug,
+  mediaWithRandomSuffixSlug,
   prefix,
 } from './shared.js'
 
@@ -44,6 +46,7 @@ export default buildConfigWithDefaults({
     MediaWithDirectAccess,
     MediaWithDynamicPrefix,
     MediaWithPrefix,
+    MediaWithRandomSuffix,
     Users,
   ],
   onInit: async (payload) => {
@@ -66,6 +69,13 @@ export default buildConfigWithDefaults({
         [mediaWithPrefixSlug]: {
           prefix,
         },
+      },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    }),
+    vercelBlobStorage({
+      addRandomSuffix: true,
+      collections: {
+        [mediaWithRandomSuffixSlug]: true,
       },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),

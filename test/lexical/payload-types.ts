@@ -110,6 +110,7 @@ export interface Config {
     'lexical-relationship-fields': LexicalRelationshipField;
     collision: Collision;
     'lexical-nested-blocks': LexicalNestedBlock;
+    'lexical-copy-paste': LexicalCopyPaste;
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
     uploads: Upload;
@@ -150,6 +151,7 @@ export interface Config {
     'lexical-relationship-fields': LexicalRelationshipFieldsSelect<false> | LexicalRelationshipFieldsSelect<true>;
     collision: CollisionSelect<false> | CollisionSelect<true>;
     'lexical-nested-blocks': LexicalNestedBlocksSelect<false> | LexicalNestedBlocksSelect<true>;
+    'lexical-copy-paste': LexicalCopyPasteSelect<false> | LexicalCopyPasteSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -1046,6 +1048,60 @@ export interface LexicalNestedBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-copy-paste".
+ */
+export interface LexicalCopyPaste {
+  id: number;
+  sourceBlock?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  sourceReference?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  target?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
@@ -1538,6 +1594,10 @@ export interface PayloadLockedDocument {
         value: number | LexicalNestedBlock;
       } | null)
     | ({
+        relationTo: 'lexical-copy-paste';
+        value: number | LexicalCopyPaste;
+      } | null)
+    | ({
         relationTo: 'rich-text-fields';
         value: number | RichTextField;
       } | null)
@@ -1891,6 +1951,17 @@ export interface CollisionSelect<T extends boolean = true> {
 export interface LexicalNestedBlocksSelect<T extends boolean = true> {
   title?: T;
   richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-copy-paste_select".
+ */
+export interface LexicalCopyPasteSelect<T extends boolean = true> {
+  sourceBlock?: T;
+  sourceReference?: T;
+  target?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -3,6 +3,7 @@ import type { BlocksField, CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
+import { blockFieldHookCalls } from './hookCalls.js'
 import { getBlocksFieldSeedData } from './shared.js'
 
 export const getBlocksField = (prefix?: string): BlocksField => ({
@@ -407,6 +408,40 @@ export const BlockFields: CollectionConfig = {
       ],
     },
     {
+      name: 'blocksWithCustomValidation',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'customContent',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+      ],
+      validate: () => true,
+    },
+    {
+      name: 'inlineCollisionBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'ConfigBlockTest',
+          fields: [
+            {
+              name: 'inlineText',
+              type: 'text',
+              hooks: {
+                afterRead: [
+                  ({ value }) => {
+                    blockFieldHookCalls.push('inlineAfterRead')
+                    return value
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'blockWithLabels',
       type: 'blocks',
       labels: {
@@ -440,6 +475,63 @@ export const BlockFields: CollectionConfig = {
       type: 'blocks',
       blockReferences: ['ConfigBlockTest'],
       blocks: [],
+    },
+    {
+      name: 'configuration',
+      type: 'blocks',
+      blockReferences: ['conditionalReference'],
+      blocks: [],
+      defaultValue: [{ blockType: 'conditionalReference' }],
+    },
+    {
+      name: 'showConditionalFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'conditionalConfiguration',
+          type: 'blocks',
+          admin: {
+            condition: (data) => Boolean(data.showConditionalFields),
+          },
+          blockReferences: ['conditionalReference'],
+          blocks: [],
+          defaultValue: [{ blockType: 'conditionalReference' }],
+        },
+      ],
+    },
+    {
+      name: 'showInlineBlocks',
+      type: 'checkbox',
+    },
+    {
+      name: 'testBlocks',
+      type: 'blocks',
+      admin: {
+        condition: (data) => Boolean(data.showInlineBlocks),
+      },
+      blocks: [
+        {
+          slug: 'testBlock',
+          fields: [
+            {
+              name: 'testField',
+              type: 'text',
+            },
+          ],
+          labels: {
+            plural: 'Test Blocks',
+            singular: 'Test Block',
+          },
+        },
+      ],
+      defaultValue: [{ blockType: 'testBlock' }],
+      maxRows: 1,
+      minRows: 1,
+      required: true,
     },
     {
       name: 'localizedReferencesLocalizedBlock',

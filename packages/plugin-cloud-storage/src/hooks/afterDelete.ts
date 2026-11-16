@@ -2,17 +2,30 @@ import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID 
 
 import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 
+import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
+import { buildStoragePathData } from '../utilities/buildStoragePathData.js'
+
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
+  collectionPrefix?: string
+  useCompositePrefixes?: boolean
 }
 
 export const getAfterDeleteHook = ({
   adapter,
   collection,
+  collectionPrefix,
+  useCompositePrefixes,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
   return async ({ doc, req }) => {
     try {
+      // Fold `_objectKey` so deletes target the real object folder.
+      const docPrefix = buildPrefixWithObjectKey({
+        objectKey: (doc as { _objectKey?: string })._objectKey,
+        prefix: doc.prefix,
+      })
+
       const filesToDelete: string[] = [
         doc.filename,
         ...Object.values(doc?.sizes || []).map(
@@ -22,7 +35,13 @@ export const getAfterDeleteHook = ({
 
       const promises = filesToDelete.map(async (filename) => {
         if (filename) {
-          await adapter.handleDelete({ collection, doc, filename, req })
+          const { storageFilePath } = buildStoragePathData({
+            collectionPrefix,
+            docPrefix,
+            filename,
+            useCompositePrefixes,
+          })
+          await adapter.handleDelete({ collection, doc, filename, req, storageFilePath })
         }
       })
 
@@ -30,7 +49,7 @@ export const getAfterDeleteHook = ({
     } catch (err: unknown) {
       req.payload.logger.error({
         err,
-        msg: `There was an error while deleting files corresponding to the ${collection.labels?.singular} with ID ${doc.id}.`,
+        msg: `There was an error while deleting files corresponding to the ${typeof collection.labels?.singular === 'string' ? collection.labels.singular : collection.slug} with ID ${doc.id}.`,
       })
     }
     return doc

@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { JSHandle, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
@@ -41,7 +41,7 @@ import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index
 import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
@@ -59,9 +59,9 @@ import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextP
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { closeListDrawer, openListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -208,12 +208,13 @@ describe('List View', () => {
 
       const drawerButton = page.locator('button', { hasText: 'Select Posts' })
       await expect(drawerButton).toBeVisible()
-      await drawerButton.click()
 
-      const drawer = page.locator('.drawer__content')
-      await expect(drawer).toBeVisible()
+      const drawer = await openListDrawer({
+        openDrawer: () => drawerButton.click(),
+        page,
+      })
 
-      const createButton = page.locator('button', { hasText: 'Create New' })
+      const createButton = drawer.locator('button', { hasText: 'Create New' })
       await expect(createButton).toBeHidden()
     })
   })
@@ -551,6 +552,141 @@ describe('List View', () => {
 
       await page.waitForURL(new RegExp(encodedQueryString))
       expect(true).toBe(true)
+    })
+
+    describe('relationship filter option loading', () => {
+      const selectionHistories: JSHandle<{ observer: MutationObserver; values: string[] }>[] = []
+
+      test.afterEach(async () => {
+        for (const history of selectionHistories) {
+          await history.evaluate(({ observer }) => observer.disconnect())
+          await history.dispose()
+        }
+        selectionHistories.length = 0
+        await page.goto(
+          `${postsUrl.list}${qs.stringify({ locale: 'en' }, { addQueryPrefix: true })}`,
+        )
+        await expect(page.locator('.localizer')).toContainText('English')
+      })
+
+      test('should retain the selected relationship filter label throughout the filtered load', async () => {
+        const targetTitle = 'post1'
+        const { docs } = await payload.find({
+          collection: postsCollectionSlug,
+          where: { title: { equals: targetTitle } },
+        })
+        const target = docs[0]
+
+        await payload.update({
+          collection: postsCollectionSlug,
+          data: { relationship: target.id },
+          where: { title: { equals: 'post2' } },
+        })
+        await page.reload()
+
+        const { condition } = await addListFilter({
+          fieldLabel: 'Relationship',
+          operatorLabel: 'equals',
+          page,
+        })
+
+        await condition.locator('.condition-value-relationship').getByRole('combobox').click()
+        const option = condition.locator('.rs__menu').getByRole('option', {
+          exact: true,
+          name: targetTitle,
+        })
+
+        await expect(option).toBeVisible()
+        // Observe the document, including replacement of the filter itself. Polling only the
+        // final label would miss the selected → placeholder → selected transition.
+        const selectionHistory = await page.evaluateHandle(
+          ({ targetTitle }) => {
+            const values: string[] = []
+            const observer = new MutationObserver(() => {
+              const value =
+                document.querySelector('.condition-value-relationship .react-select--single-value')
+                  ?.textContent ?? ''
+
+              if (values.length === 0 && value !== targetTitle) {
+                return
+              }
+
+              if (values.at(-1) !== value) {
+                values.push(value)
+              }
+            })
+
+            observer.observe(document.body, { childList: true, characterData: true, subtree: true })
+
+            return { observer, values }
+          },
+          { targetTitle },
+        )
+
+        selectionHistories.push(selectionHistory)
+
+        await option.click()
+        await page.waitForURL(
+          (url) =>
+            url.searchParams.get('where[or][0][and][0][relationship][equals]') ===
+            String(target.id),
+        )
+        await expect(page.locator('tbody tr')).toHaveCount(1)
+        await expect(page.locator('tbody tr .cell-title')).toHaveText('post2')
+        // eslint-disable-next-line playwright/no-networkidle -- Observe through debounced navigation and relationship option reloads.
+        await page.waitForLoadState('networkidle')
+
+        // eslint-disable-next-line payload/no-flaky-assertions -- Assert the complete recorded history without retrying away a transient reset.
+        expect(await selectionHistory.evaluate(({ values }) => values)).toEqual([targetTitle])
+      })
+
+      test('should reload relationship filter options when the content locale changes', async () => {
+        await page.goto(
+          `${postsUrl.list}${qs.stringify({ locale: 'en' }, { addQueryPrefix: true })}`,
+        )
+        const { condition } = await addListFilter({
+          fieldLabel: 'Relationship',
+          operatorLabel: 'equals',
+          page,
+        })
+        const valueInput = condition.locator('.condition-value-relationship').getByRole('combobox')
+        const postsAPI = formatAdminURL({
+          apiRoute: adminRoutes.routes.api,
+          path: `/${postsCollectionSlug}`,
+          serverURL,
+        })
+
+        await valueInput.click()
+        await expect(
+          condition.locator('.rs__menu').getByRole('option', { exact: true, name: 'post1' }),
+        ).toBeVisible()
+        await valueInput.press('Escape')
+        await page.locator('.localizer button.popup-button').click()
+        const localizedOptionsResponse = page.waitForResponse(
+          (response) => {
+            const url = new URL(response.url())
+
+            return (
+              response.ok() &&
+              url.pathname === new URL(postsAPI).pathname &&
+              url.searchParams.get('locale') === 'es' &&
+              url.searchParams.get('select[title]') === 'true'
+            )
+          },
+          { timeout: EXPECT_TIMEOUT },
+        )
+
+        await page
+          .locator('.popup__content .popup-button-list__button')
+          .filter({ has: page.locator('[data-locale="es"]') })
+          .click()
+        await localizedOptionsResponse
+        await expect(page).toHaveURL(/locale=es/)
+        await valueInput.click()
+        await expect(
+          condition.locator('.rs__menu').getByRole('option', { exact: true, name: 'post1' }),
+        ).toBeVisible()
+      })
     })
 
     test('should refresh relationship values when a different field is selected', async () => {
@@ -1668,13 +1804,10 @@ describe('List View', () => {
       const selectButton = page.locator('button:has-text("Select posts")')
       await selectButton.waitFor({ state: 'visible' })
 
-      await selectButton.click()
-
-      await wait(1000)
-
-      const listDrawer = page.locator('.list-drawer.drawer--is-open')
-      await listDrawer.waitFor({ state: 'visible' })
-      await expect(listDrawer).toBeVisible()
+      const listDrawer = await openListDrawer({
+        openDrawer: () => selectButton.click(),
+        page,
+      })
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
@@ -1691,9 +1824,11 @@ describe('List View', () => {
 
       // Reopen the drawer
       await selectButton.waitFor({ state: 'visible' })
-      await selectButton.click()
-      await listDrawer.waitFor({ state: 'visible' })
-      await expect(listDrawer).toBeVisible()
+      await openListDrawer({
+        drawer: listDrawer,
+        openDrawer: () => selectButton.click(),
+        page,
+      })
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
@@ -2052,9 +2187,10 @@ describe('List View', () => {
 
     await page.goto(url.edit(id))
 
-    await page.locator('#open-custom-list-drawer').click()
-    const drawer = page.locator('[id^=list-drawer_1_]')
-    await expect(drawer).toBeVisible()
+    const drawer = await openListDrawer({
+      openDrawer: () => page.locator('#open-custom-list-drawer').click(),
+      page,
+    })
 
     await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(1)
 
@@ -2226,11 +2362,11 @@ describe('List View', () => {
 
       const selectButton = page.locator('button:has-text("Select format doc")')
       await selectButton.waitFor({ state: 'visible' })
-      await selectButton.click()
 
-      const listDrawer = page.locator('.list-drawer.drawer--is-open')
-      await listDrawer.waitFor({ state: 'visible' })
-      await expect(listDrawer).toBeVisible()
+      const listDrawer = await openListDrawer({
+        openDrawer: () => selectButton.click(),
+        page,
+      })
 
       await expect(listDrawer.locator('table tbody tr')).toHaveCount(2)
 

@@ -30,7 +30,9 @@ export const generateOGImage: PayloadHandler = async (req) => {
     const title = hasTitle ? searchParams.get('title')?.slice(0, 100) : ''
     const hasLeader = searchParams.has('leader')
     const leader = hasLeader ? searchParams.get('leader')?.slice(0, 100).replace('-', ' ') : ''
-    const description = searchParams.has('description') ? searchParams.get('description') : ''
+    const description = searchParams.has('description')
+      ? searchParams.get('description')?.slice(0, 200)
+      : ''
 
     let fontData
 

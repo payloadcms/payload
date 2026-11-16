@@ -57,6 +57,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     newPassword: 'Naujas slaptažodis',
     passed: 'Autentifikacija sėkminga',
     passwordResetSuccessfully: 'Slaptažodis sėkmingai atnaujintas.',
+    resend: 'Siųsti dar kartą',
     resetPassword: 'Atstatyti slaptažodį',
     resetPasswordExpiration: 'Atstatyti slaptažodžio galiojimo laiką',
     resetPasswordToken: 'Slaptažodžio atkūrimo žetonas',

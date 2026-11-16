@@ -1,7 +1,10 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { ClientUploadData } from '../uploads/getFileFromClientUpload.js'
 
 import { APIError } from '../errors/APIError.js'
+import { verifyClientUploadReceipt } from '../uploads/clientUploadReceipt.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileFromClientUpload } from '../uploads/getFileFromClientUpload.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -58,64 +61,55 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let clientUploadFile: ClientUploadData
+
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          clientUploadFile = JSON.parse(fields.file) as ClientUploadData
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
-        if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
+        // The collection must come from the route, never from the request body: the body
+        // is client-controlled and would select another collection's upload handlers.
+        const collectionSlug =
+          typeof req.routeParams?.collection === 'string' ? req.routeParams.collection : undefined
+        const uploadConfig = collectionSlug
+          ? req.payload.collections[collectionSlug]?.config.upload
+          : undefined
+
+        if (!collectionSlug || !uploadConfig) {
+          throw new APIError('Invalid upload collection.', 400)
         }
 
-        let response: null | Response = null
-        let error: unknown
+        if (uploadConfig.requiresClientUploadReceipt) {
+          const clientUploadContext = clientUploadFile.clientUploadContext
 
-        for (const handler of uploadConfig.handlers) {
-          try {
-            const result = await handler(req, {
-              doc: null!,
-              params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
-                collection: collectionSlug,
-                filename,
-              },
-            })
-            if (result) {
-              response = result
-            }
-            // If we couldn't get the file from that handler, save the error and try other.
-          } catch (err) {
-            error = err
-          }
-        }
-
-        if (!response) {
-          if (error) {
-            payload.logger.error(error)
+          if (
+            !clientUploadContext ||
+            typeof clientUploadContext !== 'object' ||
+            typeof (clientUploadContext as { signedReceipt?: unknown }).signedReceipt !== 'string'
+          ) {
+            throw new APIError('A verified client upload reference is required.', 400)
           }
 
-          throw new APIError('Expected response from the upload handler.')
-        }
+          const receipt = verifyClientUploadReceipt({
+            collectionSlug,
+            req,
+            signedReceipt: (clientUploadContext as { signedReceipt: string }).signedReceipt,
+          })
 
-        if (response.status >= 300 && response.status < 400) {
-          const redirectUrl = response.headers.get('Location')
-          if (redirectUrl) {
-            response = await fetch(redirectUrl)
+          if (receipt.filename !== clientUploadFile.filename) {
+            throw new APIError('Client upload reference does not match this request.', 400)
           }
+
+          clientUploadFile.clientUploadContext = receipt.context
         }
 
-        req.file = {
-          name: filename,
-          clientUploadContext,
-          data: Buffer.from(await response.arrayBuffer()),
-          mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
-        }
+        // Pass the route-derived collection to the upload helper, never the body value.
+        req.file = await getFileFromClientUpload({
+          file: { ...clientUploadFile, collectionSlug },
+          req,
+        })
       }
     }
   }

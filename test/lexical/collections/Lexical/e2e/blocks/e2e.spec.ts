@@ -32,7 +32,11 @@ import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reI
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
+import {
+  lexicalCopyPasteSlug,
+  lexicalFieldsSlug,
+  lexicalNestedBlocksSlug,
+} from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -175,6 +179,65 @@ describe('lexicalBlocks', () => {
 
     await expect(newBlock.locator('#blockName')).toHaveCount(0)
   })
+
+  for (const { blockType, description, sourceField } of [
+    { blockType: 'copyPasteBlock', description: 'directly defined', sourceField: 'sourceBlock' },
+    { blockType: 'nestedBlock', description: 'referenced', sourceField: 'sourceReference' },
+  ]) {
+    test(`should preserve the editor when pasting an unsupported ${description} block`, async ({
+      page,
+      context,
+    }) => {
+      initPageConsoleErrorCatch(page)
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+
+      const url = new AdminUrlUtil(serverURL, lexicalCopyPasteSlug)
+
+      await page.goto(url.create)
+
+      const source = page.locator(`[data-field-path="${sourceField}"] .ContentEditable__root`)
+      const target = page.locator('[data-field-path="target"] .ContentEditable__root')
+      const unsupportedBlock = target.locator('.LexicalEditorTheme__block-not-found')
+
+      await expect(source.locator('input[name="text"]')).toHaveValue('Copied block content')
+      await source.locator('p').first().click()
+      await page.keyboard.press('ControlOrMeta+A')
+      await page.keyboard.press('ControlOrMeta+C')
+      await expect
+        .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+        .toContain('After block')
+
+      await target.click()
+      await assertNetworkRequests(
+        page,
+        `/admin/collections/${lexicalCopyPasteSlug}`,
+        async () => {
+          await page.keyboard.press('ControlOrMeta+V')
+
+          await expect(unsupportedBlock).toContainText(`Block '${blockType}' not found`)
+          await expect(target).toBeEditable()
+          await expect(target.locator('p')).toHaveText(['Before block', 'After block'])
+        },
+        {
+          allowedNumberOfRequests: 0,
+          requestFilter: (request) =>
+            request.method() === 'POST' &&
+            request
+              .postData()
+              ?.includes(
+                `"schemaPath":"${lexicalCopyPasteSlug}.target.lexical_internal_feature.blocks.`,
+              ) === true,
+        },
+      )
+
+      await target.locator('.LexicalEditorTheme__block__removeButton').click()
+      await expect(unsupportedBlock).toHaveCount(0)
+      await target.locator('p').last().click()
+      await page.keyboard.press('End')
+      await page.keyboard.type(' still editable')
+      await expect(target.locator('p').last()).toHaveText('After block still editable')
+    })
+  }
 
   describe('block filterOptions', () => {
     async function setupFilterOptionsTests() {

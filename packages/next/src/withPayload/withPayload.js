@@ -103,10 +103,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'drizzle-kit/api',
       ],
     },
-    outputFileTracingIncludes: {
-      ...(nextConfig.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
-    },
     turbopack: {
       ...(nextConfig.turbopack || {}),
     },
@@ -269,6 +265,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     process.env.NEXT_BASE_PATH = nextConfig.basePath
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
+
+  const trailingSlash = nextConfig.trailingSlash === true ? 'true' : 'false'
+  process.env.NEXT_TRAILING_SLASH = trailingSlash
+  baseConfig.env.NEXT_TRAILING_SLASH = trailingSlash
 
   if (!supportsTurbopackBuild) {
     return withPayloadLegacy(baseConfig)

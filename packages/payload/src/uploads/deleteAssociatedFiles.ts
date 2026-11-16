@@ -1,4 +1,5 @@
 import fs from 'fs/promises'
+import path from 'path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -17,6 +18,43 @@ type Args = {
   req: PayloadRequest
 }
 
+const isPathWithin = (parentPath: string, targetPath: string): boolean => {
+  const relativePath = path.relative(parentPath, targetPath)
+
+  return (
+    relativePath === '' ||
+    (!path.isAbsolute(relativePath) &&
+      relativePath !== '..' &&
+      !relativePath.startsWith(`..${path.sep}`))
+  )
+}
+
+const deleteFile = async ({ filename, staticPath }: { filename?: string; staticPath?: string }) => {
+  if (!filename || !staticPath) {
+    return
+  }
+
+  const resolvedStaticPath = path.resolve(staticPath)
+  const filePath = path.resolve(resolvedStaticPath, filename)
+
+  if (!isPathWithin(resolvedStaticPath, filePath)) {
+    throw new Error('Invalid filename')
+  }
+
+  if (await fileExists(filePath)) {
+    const [canonicalParentPath, canonicalStaticPath] = await Promise.all([
+      fs.realpath(path.dirname(filePath)),
+      fs.realpath(resolvedStaticPath),
+    ])
+
+    if (!isPathWithin(canonicalStaticPath, canonicalParentPath)) {
+      throw new Error('Invalid filename')
+    }
+
+    await fs.unlink(filePath)
+  }
+}
+
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
   doc,
@@ -30,12 +68,8 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   if (overrideDelete || files.length > 0) {
     const { staticDir: staticPath } = collectionConfig.upload
 
-    const fileToDelete = `${staticPath}/${doc.filename as string}`
-
     try {
-      if (await fileExists(fileToDelete)) {
-        await fs.unlink(fileToDelete)
-      }
+      await deleteFile({ filename: doc.filename as string | undefined, staticPath })
     } catch (ignore) {
       throw new ErrorDeletingFile(req.t)
     }
@@ -47,11 +81,8 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
       // To avoid this it is recommended to use "sync" instead
 
       for (const size of sizes) {
-        const sizeToDelete = `${staticPath}/${size.filename}`
         try {
-          if (await fileExists(sizeToDelete)) {
-            await fs.unlink(sizeToDelete)
-          }
+          await deleteFile({ filename: size.filename, staticPath })
         } catch (ignore) {
           throw new ErrorDeletingFile(req.t)
         }

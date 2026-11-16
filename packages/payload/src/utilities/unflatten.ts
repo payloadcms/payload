@@ -16,6 +16,8 @@
  * Reference: https://www.npmjs.com/package/is-buffer
  * All rights reserved.
  */
+import { hasUnsupportedFieldPathSegment, setOwnProperty } from './fieldPath.js'
+
 function isBuffer(obj: any) {
   return (
     obj != null &&
@@ -56,25 +58,31 @@ export const unflatten = (target: any, opts?: Opts) => {
 
   sortedKeys.forEach((key) => {
     const split = key.split(delimiter)
+
+    if (hasUnsupportedFieldPathSegment({ segments: split })) {
+      return
+    }
+
     let key1 = getkey(split.shift())
     let key2 = getkey(split[0])
     let recipient = result as Record<string, any>
 
     while (key2 !== undefined) {
-      if (key1 === '__proto__') {
-        return
-      }
-
-      const type = Object.prototype.toString.call(recipient[key1])
+      const currentValue = Object.hasOwn(recipient, key1) ? recipient[key1] : undefined
+      const type = Object.prototype.toString.call(currentValue)
       const isobject = type === '[object Object]' || type === '[object Array]'
 
       // do not write over falsey, non-undefined values if overwrite is false
-      if (!overwrite && !isobject && typeof recipient[key1] !== 'undefined') {
+      if (!overwrite && !isobject && typeof currentValue !== 'undefined') {
         return
       }
 
-      if ((overwrite && !isobject) || (!overwrite && recipient[key1] == null)) {
-        recipient[key1] = typeof key2 === 'number' && !opts.object ? [] : {}
+      if ((overwrite && !isobject) || (!overwrite && currentValue == null)) {
+        setOwnProperty({
+          key: key1,
+          target: recipient,
+          value: typeof key2 === 'number' && !opts.object ? [] : {},
+        })
       }
 
       recipient = recipient[key1]
@@ -86,7 +94,11 @@ export const unflatten = (target: any, opts?: Opts) => {
     }
 
     // unflatten again for 'messy objects'
-    recipient[key1] = recursive ? unflatten(target[key], opts) : target[key]
+    setOwnProperty({
+      key: key1,
+      target: recipient,
+      value: recursive ? unflatten(target[key], opts) : target[key],
+    })
   })
 
   return result
