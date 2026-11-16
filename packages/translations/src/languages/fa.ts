@@ -171,6 +171,7 @@ export const faTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'نوع فایل نامعتبر: {{value}}',
     invalidRequestArgs: 'آرگومان‌های نامعتبری در درخواست ارسال شد: {{args}}',
     loadingDocument: 'در بارگذاری صفحه با شناسه {{id}} مشکلی پیش آمد.',
+    loadingItems: 'بارگذاری موارد ممکن نشد.',
     localesNotSaved_one: 'امکان ذخیره زبان زیر وجود ندارد:',
     localesNotSaved_other: 'امکان ذخیره زبان‌های زیر وجود ندارد:',
     logoutFailed: 'خروج از حساب کاربری ناموفق بود.',
@@ -544,6 +545,9 @@ export const faTranslations: DefaultTranslationsObject = {
     toggle: 'تغییر وضعیت',
     trash: 'سطل زباله',
     trashedCountSuccessfully: '{{count}} {{label}} به سطل زباله منتقل شد.',
+    treeLayout: 'درخت',
+    treeSearchResults:
+      'سندهای منطبق به صورت فهرست مسطح نمایش داده می‌شوند. برای بازگشت به درخت، جستجو، فیلترها و گروه‌بندی را پاک کنید.',
     true: 'بله',
     unauthorized: 'غیرمجاز',
     unchecked: 'لغو انتخاب',

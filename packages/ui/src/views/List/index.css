@@ -15,6 +15,11 @@
     padding-top: var(--spacer-2-5);
   }
 
+  .collection-list__tree-search-banner {
+    margin-block: var(--spacer-2-5);
+    margin-inline: var(--gutter-h);
+  }
+
   .collection-list .table table {
     width: 100%;
     overflow: auto;

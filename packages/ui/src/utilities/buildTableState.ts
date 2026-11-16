@@ -129,11 +129,13 @@ const buildTableState: ServerFunction<
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: preferencesKey,
     req,
-    value: {
-      columns: columnsFromArgs,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      sort: query?.sort as string,
-    },
+    value: nestedDocs
+      ? {}
+      : {
+          columns: columnsFromArgs,
+          limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+          sort: query?.sort as string,
+        },
   })
 
   let data: PaginatedDocs = dataFromArgs
