@@ -51,13 +51,13 @@ Without `targetRef`, `ThemeProvider` props control the local context, and both s
 </ThemeProvider>
 ```
 
-Setters update local React state and only the target element's attributes. Later changes to the corresponding prop replace a local choice. Keep the target's attributes in sync when changing props; direct DOM changes are not read or observed. Local `setTheme('auto')` removes its `data-theme` override and follows the parent context. Local providers do not persist preferences or detect system settings. Host applications remain responsible for their preference persistence. Built-in enhanced contrast styling still follows the document or shadow host.
+Setters update local React state and only the target element's attributes. Later changes to the corresponding prop replace a local choice. Keep the target's attributes in sync when changing props; direct DOM changes are not read or observed. Local `setTheme` accepts only `'light'` or `'dark'` and rejects `'auto'`. Use `useRootTheme().setTheme('auto')` for the root system preference. Local providers do not persist preferences or detect system settings. Host applications remain responsible for their preference persistence. Built-in enhanced contrast styling still follows the document or shadow host.
 
-The `useTheme` hook now returns the nearest provider's values. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit local theme sets `autoMode` to `false`. Omitted values inherit from the parent; local `setTheme('auto')` sets `autoMode` to `true` and follows the parent theme.
+The `useTheme` hook now returns the nearest provider's values. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit local theme sets `autoMode` to `false`. Without a local theme override, the theme and `autoMode` inherit from the parent.
 
 Both hooks remain readable without a root preference provider; `useRootTheme` returns its defaults, and its setters throw when called without a root owner.
 
-Use the new `useRootTheme` hook for preference controls that need the root selection, even inside an override:
+Use the new `useRootTheme` hook for preference controls that need the root selection, even inside an override. All calls to `setTheme('auto')` now use this hook, including at the Admin root:
 
 ```diff
 -import { useTheme } from '@payloadcms/ui'
@@ -67,7 +67,7 @@ Use the new `useRootTheme` hook for preference controls that need the root selec
 +const { autoMode, setTheme, theme } = useRootTheme()
 ```
 
-Within the Admin, `useTheme` exposes root setters only outside a local `ThemeProvider`. `useRootTheme` always exposes root setters, which update root preferences, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
+Within the Admin, `useTheme` exposes root light/dark setters only outside a local `ThemeProvider`. `useRootTheme` always exposes root setters, which update root preferences, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
 
 ```diff
 -setTheme('dark', { scoped: true })

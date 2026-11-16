@@ -6,7 +6,7 @@ import { createContext, use } from 'react'
 import type { Theme } from './shared.js'
 
 export type ThemeContext = {
-  /** Whether the theme is automatic: system preference at the root, inherited theme in a local target. */
+  /** Whether the root uses automatic mode. Local scopes inherit this unless they set an explicit theme. */
   autoMode: boolean
   highContrastMode: boolean
   /**
@@ -16,15 +16,18 @@ export type ThemeContext = {
    */
   setHighContrastMode: (isHighContrast: boolean) => void
   /**
-   * Sets the nearest provider's theme.
-   * Local providers require a mounted `targetRef`; `'auto'` removes its `data-theme` override and follows the parent context.
-   * At the Admin root, updates the document and saved preference; `'auto'` uses the system preference.
-   * Use `useRootTheme` to change root preferences from within a local provider.
+   * Sets light or dark on the nearest scope. Local providers require a mounted `targetRef`.
+   * Use `useRootTheme` to change root preferences, including automatic mode.
    */
-  setTheme: (theme: 'auto' | Theme) => void
+  setTheme: (theme: Theme) => void
   /** The resolved light or dark theme, including the nearest provider's override. */
   theme: Theme
 }
+
+export type RootThemeContext = {
+  /** Sets the root theme and saved preference. `'auto'` uses the system theme and clears the cookie. */
+  setTheme: (theme: 'auto' | Theme) => void
+} & Omit<ThemeContext, 'setTheme'>
 
 export type ThemeProviderProps = {
   children?: ReactNode
@@ -41,7 +44,7 @@ export type ThemeProviderProps = {
   theme?: Theme
 }
 
-const initialContext: ThemeContext = {
+const initialContext: RootThemeContext = {
   autoMode: true,
   highContrastMode: false,
   setHighContrastMode: () => {
@@ -59,12 +62,13 @@ const initialContext: ThemeContext = {
 
 export const Context = createContext<ThemeContext | undefined>(undefined)
 
-export const RootContext = createContext<ThemeContext | undefined>(undefined)
+export const RootContext = createContext<RootThemeContext | undefined>(undefined)
 
 /**
  * Reads the nearest theme and contrast values, including local overrides.
  * Inside ThemeProvider, setters affect only its `targetRef` and throw if no mounted target is supplied.
  * Without a local provider, the Admin root supplies setters that update document attributes and cookies.
+ * Its theme setter accepts light or dark; use `useRootTheme` for automatic mode.
  * Reading without either provider returns defaults; calling those fallback setters throws.
  */
 export const useTheme = (): ThemeContext => use(Context) ?? initialContext
@@ -74,4 +78,4 @@ export const useTheme = (): ThemeContext => use(Context) ?? initialContext
  * Its setters always update root preferences, document attributes, and cookies, including from inside a local provider.
  * Without RootThemeProvider, returns the hook defaults; calling either callback throws.
  */
-export const useRootTheme = (): ThemeContext => use(RootContext) ?? initialContext
+export const useRootTheme = (): RootThemeContext => use(RootContext) ?? initialContext

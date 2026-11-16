@@ -1032,7 +1032,7 @@ Returns methods to set and get user preferences. More info can be found [here](h
 
 ## useTheme
 
-Returns the effective `theme` (`'light'` or `'dark'`), `autoMode`, `highContrastMode`, and setters from the nearest provider.
+Returns the effective `theme` (`'light'` or `'dark'`), `autoMode`, `highContrastMode`, and setters from the nearest provider. `setTheme` accepts `'light'` or `'dark'`; automatic mode is a root preference managed through `useRootTheme`.
 
 Nested providers expose their overrides. For example, inside a dark `Popup` on a light page, `theme` is `'dark'`. Without `targetRef`, an explicit `theme` prop sets `autoMode` to `false`, and omitted theme or contrast props inherit from the nearest parent.
 
@@ -1071,9 +1071,9 @@ const LocalTheme: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 With `targetRef`, setters update local React state and only that element's attributes. Local choices last until the corresponding provider prop changes. Keep the element's attributes in sync when changing props; the provider does not read or observe DOM attributes.
 
-`setTheme('light' | 'dark')` sets the local theme and the target's `data-theme`. `setTheme('auto')` removes the attribute and follows the parent context; it does not detect the system preference. `setHighContrastMode` sets the local contrast value and toggles the target's `data-enhanced-contrast` flag. Removing that flag does not disable inherited styling. Built-in enhanced contrast styling follows the document or shadow host, so local contrast flags require custom styling.
+`setTheme('light' | 'dark')` sets the local theme and the target's `data-theme`. Local setters reject `'auto'`; use `useRootTheme().setTheme('auto')` to select the root system preference. Scopes without a local theme override inherit their parent. `setHighContrastMode` sets the local contrast value and toggles the target's `data-enhanced-contrast` flag. Removing that flag does not disable inherited styling. Built-in enhanced contrast styling follows the document or shadow host, so local contrast flags require custom styling.
 
-Local providers never read or write cookies or change the document root. The Admin explicitly mounts `RootThemeProvider` for preference persistence, system detection, and document attributes. Outside a local scope, `useTheme` exposes these root values and setters. Inside a local scope, use [`useRootTheme`](#useroottheme) to read or change root preferences. Without any provider, reading the hook returns defaults, but either setter throws.
+Local providers never read or write cookies or change the document root. The Admin explicitly mounts `RootThemeProvider` for preference persistence, system detection, and document attributes. Outside a local scope, `useTheme` exposes these root values and light/dark setters. Inside a local scope, use [`useRootTheme`](#useroottheme) to read or change root preferences. Without any provider, reading the hook returns defaults, but either setter throws.
 
 ## useRootTheme
 
@@ -1081,7 +1081,7 @@ Returns the explicitly supplied root preferences: `theme`, `autoMode`, `highCont
 
 Without a root preference provider, reading this hook returns the defaults (`theme: 'light'`, `autoMode: true`, `highContrastMode: false`), but invoking either setter throws. A standalone `ThemeProvider` does not create a root preference provider.
 
-Within the Admin, `setTheme` accepts `'light'`, `'dark'`, or `'auto'`. Automatic mode follows the system preference and removes the explicit theme cookie. `setHighContrastMode` accepts a boolean and persists the choice. Both setters update the root state and document attributes; neither changes an explicit nested override.
+Within the Admin, this hook's `setTheme` accepts `'light'`, `'dark'`, or `'auto'`. Use this hook to select automatic mode even outside a local provider. Automatic mode follows the system preference and removes the explicit theme cookie. `setHighContrastMode` accepts a boolean and persists the choice. Both setters update the root state and document attributes; neither changes an explicit nested override.
 
 ```tsx
 'use client'

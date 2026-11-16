@@ -50,26 +50,25 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   theme: themeOverride,
 }) => {
   const parentContext = useTheme()
-  const [localTheme, setLocalTheme] = useControllableState<'auto' | Theme | undefined>(
-    themeOverride,
-  )
+  const [localTheme, setLocalTheme] = useControllableState(themeOverride)
   const [localHighContrastMode, setLocalHighContrastMode] =
     useControllableState(highContrastModeOverride)
 
   /**
    * Sets the local theme and target's `data-theme`, leaving root preferences alone.
-   * Requires a mounted `targetRef`; `'auto'` removes the override and uses the parent theme.
+   * Requires a mounted `targetRef`; automatic mode belongs to `useRootTheme`.
    */
   const setTheme = useCallback(
-    (themeToSet: 'auto' | Theme) => {
+    (themeToSet: Theme) => {
       const target = getThemeTarget({ method: 'setTheme', targetRef })
 
-      if (themeToSet === 'auto') {
-        target.removeAttribute('data-theme')
-      } else {
-        target.setAttribute('data-theme', themeToSet)
+      if (themeToSet !== 'light' && themeToSet !== 'dark') {
+        throw new Error(
+          'ThemeProvider.setTheme accepts only light or dark. Use useRootTheme().setTheme("auto") for automatic mode.',
+        )
       }
 
+      target.setAttribute('data-theme', themeToSet)
       setLocalTheme(themeToSet)
     },
     [setLocalTheme, targetRef],
@@ -92,10 +91,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   const themePreference = targetRef ? localTheme : themeOverride
   const contrastPreference = targetRef ? localHighContrastMode : highContrastModeOverride
-  const autoMode =
-    themePreference === 'auto' || (themePreference === undefined ? parentContext.autoMode : false)
-  const theme =
-    themePreference === 'auto' ? parentContext.theme : (themePreference ?? parentContext.theme)
+  const autoMode = themePreference === undefined ? parentContext.autoMode : false
+  const theme = themePreference ?? parentContext.theme
   const highContrastMode = contrastPreference ?? parentContext.highContrastMode
 
   const value = useMemo(

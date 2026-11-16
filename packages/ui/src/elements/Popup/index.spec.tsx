@@ -508,6 +508,11 @@ test('should update only the popup theme and preserve its draft when the theme p
   await screen.getByRole('button', { name: 'Open theme scope' }).click()
   expect(themeContexts).toHaveLength(1)
   await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('dark')
+  expect(() => {
+    // @ts-expect-error Automatic mode is a root preference.
+    themeContexts[0]!.setTheme('auto')
+  }).toThrow(/useRootTheme/)
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('dark')
   await screen.getByRole('button', { name: 'Set popup light' }).click()
   await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('light')
   expect(document.documentElement.getAttribute('data-theme')).toBe(originalTheme)
