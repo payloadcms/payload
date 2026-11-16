@@ -72,7 +72,7 @@ export const migrateRelationships = async ({
       payload.logger.info(statement)
     }
 
-    const result = await db.execute(sql.raw(`${statement}`))
+    const result = await db.execute<Record<string, unknown>>(sql.raw(`${statement}`))
 
     const docsToResave: DocsToResave = {}
 

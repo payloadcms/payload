@@ -3,7 +3,7 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, FlattenedJoinField, Where } from 'payload'
 
 import { createClient } from '@libsql/client'
-import { getTableName, like, notLike } from 'drizzle-orm'
+import { aliasedTable, getTableName, like, notLike } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { flattenAllFields } from 'payload'
@@ -44,9 +44,7 @@ const tableWithoutParent = sqliteTable('join_without_parent', {
 })
 
 const client: Client = createClient({ url: 'file::memory:' })
-const db = drizzle(client, {
-  schema: { articlesTable, notesTable, parentsTable, tableWithoutID, tableWithoutParent },
-})
+const db = drizzle({ client })
 
 type CollectionFixture = {
   fields: Field[]
@@ -167,6 +165,27 @@ const renderQuery = (query: ReturnType<typeof buildPolymorphicJoinQuery>) => {
 afterAll(() => client.close())
 
 describe('buildPolymorphicJoinQuery', () => {
+  it('should correlate document and count projections with the aliased parent table', () => {
+    const parentTable = aliasedTable(parentsTable, 'aliased_parent')
+    const result = buildPolymorphicJoinQuery({
+      adapter,
+      currentTableName: getTableName(parentsTable),
+      field: joinField,
+      limit: 2,
+      parentTable,
+      path: '',
+      shouldCount: true,
+    })
+    const query = db
+      .select({ documents: result.documents, count: result.count })
+      .from(parentTable)
+      .toSQL()
+
+    expect(query.sql).toContain('"aliased_parent"."id" = "children_subquery"."parent"')
+    expect(query.sql).toContain('"children_sorted"."parent" = "aliased_parent"."id"')
+    expect(query.sql).not.toContain('"join_parents"."id"')
+  })
+
   it('combines every target into one fixed polymorphic document projection', () => {
     const result = buildQuery({ path: 'content.' })
     const query = renderQuery(result)

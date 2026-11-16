@@ -1,13 +1,16 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { asc, desc, inArray, max, min } from 'drizzle-orm'
+import { asc, desc, getColumnTable, inArray, max, min, sql } from 'drizzle-orm'
 
-import type { DrizzleAdapter } from '../types.js'
+import type { DrizzleAdapter, GenericColumn } from '../types.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
-import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
+import {
+  getNameFromDrizzleTable,
+  getTableNameFromColumn,
+} from '../utilities/getNameFromDrizzleTable.js'
 import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
@@ -86,7 +89,7 @@ export const findMany = async function find({
         !orderBy.some(
           (col) =>
             col.column.name === column.name &&
-            getNameFromDrizzleTable(col.column.table) === getNameFromDrizzleTable(column.table),
+            getTableNameFromColumn(col.column) === getTableNameFromColumn(column),
         )
       ) {
         delete selectFields[key]
@@ -102,9 +105,7 @@ export const findMany = async function find({
 
   const hasSortOnOneToMany =
     oneToManyJoinedTableNames.size > 0 &&
-    orderBy?.some(({ column }) =>
-      oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table)),
-    )
+    orderBy?.some(({ column }) => oneToManyJoinedTableNames.has(getTableNameFromColumn(column)))
 
   let selectDistinctResult: { id: number | string }[] | undefined
 
@@ -125,7 +126,7 @@ export const findMany = async function find({
 
     groupQuery = groupQuery.orderBy(() =>
       orderBy.map(({ column, order }) => {
-        if (oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table))) {
+        if (oneToManyJoinedTableNames.has(getTableNameFromColumn(column))) {
           return order === asc ? asc(min(column)) : desc(max(column))
         }
         return order(column)
@@ -170,15 +171,38 @@ export const findMany = async function find({
         orderedIDMap[id] = i
       })
       orderedIDs = Object.keys(orderedIDMap)
-      findManyArgs.where = inArray(adapter.tables[tableName].id, orderedIDs)
+
+      if (adapter.limitedBoundParameters) {
+        // Inline the IDs (matching parseParams) so drizzle doesn't emit one bound parameter per
+        // ID, which would exceed the driver's bound-parameter limit for large result sets.
+        const inlinedIDs = selectDistinctResult
+          .map(({ id }) => (typeof id === 'number' ? id : `'${id}'`))
+          .join(',')
+        findManyArgs.where = { RAW: (table) => sql`${table.id} in (${sql.raw(inlinedIDs)})` }
+      } else {
+        findManyArgs.where = { RAW: (table) => inArray(table.id, orderedIDs) }
+      }
     }
   } else {
     findManyArgs.limit = limit
-    findManyArgs.offset = offset
-    findManyArgs.orderBy = () => orderBy.map(({ column, order }) => order(column))
+    findManyArgs.offset = typeof limit === 'number' ? offset : undefined
+    // Build against RQB's parent alias so simple reads do not need a separate ID query.
+    const buildAliasedQuery = (table: Record<string, GenericColumn>) =>
+      buildQuery({
+        adapter,
+        aliasTable: getColumnTable(table.id),
+        fields,
+        locale,
+        sort,
+        tableName,
+        where: whereArg,
+      })
+
+    findManyArgs.orderBy = (table) =>
+      buildAliasedQuery(table).orderBy.map(({ column, order }) => order(column))
 
     if (where) {
-      findManyArgs.where = where
+      findManyArgs.where = { RAW: (table) => buildAliasedQuery(table).where }
     }
   }
 

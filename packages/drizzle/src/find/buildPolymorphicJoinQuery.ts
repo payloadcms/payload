@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
+import type { SQLiteSelect, SQLiteTable } from 'drizzle-orm/sqlite-core'
 
 import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
 import { type FlattenedJoinField, type Where } from 'payload'
@@ -21,6 +21,7 @@ type BuildPolymorphicJoinQueryArgs = {
   locale?: string
   page?: number
   pageSize?: number
+  parentTable?: GenericTable
   path: string
   shouldCount: boolean
   sort?: string | string[]
@@ -56,6 +57,7 @@ export const buildPolymorphicJoinQuery = ({
   locale,
   page,
   pageSize = limit,
+  parentTable,
   path,
   shouldCount,
   sort,
@@ -105,7 +107,7 @@ export const buildPolymorphicJoinQuery = ({
   const wherePlan: PolymorphicJoinWherePlan = where
     ? createPolymorphicJoinWherePlan({ adapter, collections, where })
     : new Map()
-  let unionQuery: null | SQLiteSelect = null
+  let unionQuery: null | SQLiteSelect<any, any, any, any, any> = null
 
   for (const { collection, table } of collectionTables) {
     const sortColumn = table[sortPath]
@@ -135,7 +137,7 @@ export const buildPolymorphicJoinQuery = ({
     let collectionQuery = (
       shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
     )
-      .from(table)
+      .from(table as SQLiteTable)
       .$dynamic()
 
     if (hasLocalizedWhere) {
@@ -163,7 +165,7 @@ export const buildPolymorphicJoinQuery = ({
 
   const subQueryAlias = `${columnName}_subquery`
   const parentConstraint = eq(
-    sql.raw(`"${currentTableName}"."id"`),
+    sql`${parentTable?.id ?? sql.raw(`"${currentTableName}"."id"`)}`,
     sql.raw(`"${subQueryAlias}"."${onPath}"`),
   )
   const countExpression = shouldCount
@@ -190,7 +192,10 @@ export const buildPolymorphicJoinQuery = ({
     }
   }
 
-  const parentWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
+  const parentWhere = eq(
+    sql.raw(`"${sortedUnionAlias}"."${onPath}"`),
+    sql`${parentTable?.id ?? sql.raw(`"${currentTableName}"."id"`)}`,
+  )
   const documents = sql`(
     SELECT ${jsonAggBuildObject(adapter, {
       id: sql.raw(`"${subQueryAlias}"."id"`),
