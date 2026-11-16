@@ -299,19 +299,64 @@ This feature is only available for image file types.
 
 Setting `crop: false` and `focalPoint: false` on `sharpTransformer({ collections })` for this collection will disable the respective selector in the [Admin Panel](../admin/overview).
 
-Cropping changes the main image. Configured image sizes are generated from the retained original, so cropping the main image does not also crop those sizes. The focal point controls how configured sizes are framed.
+With `sharpTransformer`, cropping changes the main image. Configured image sizes are generated from the retained original, so cropping the main image does not also crop those sizes. The focal point controls how configured sizes are framed. Custom request-time transformers decide how saved edits apply to their output; see [Request phases](./transformers#request-phases).
 
 The focal point selector is only displayed when the collection has image sizes (`variants`) or image adjustments (`resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, or `withMetadata`), or when `focalPoint` is explicitly `true`.
 
+### Saved crop and focal point
+
+Every upload document has a `_transforms` field that saves the crop and focal point. Each edit starts again from the retained original, so you can change or remove a crop later without losing image quality.
+
+```ts
+await payload.update({
+  collection: 'media',
+  id,
+  data: {
+    _transforms: {
+      // Integer pixels on the original file
+      crop: { x: 100, y: 200, width: 800, height: 600 },
+      // Percentages of the original, from 0 to 100
+      focalPoint: { x: 50, y: 40 },
+    },
+  },
+})
+```
+
+- Omit `_transforms` (or pass `undefined` in the Local API) to keep the saved value. Send `null` to remove all edits. An object replaces the whole value, so a key that you leave out is removed.
+- The Sharp transformer (`@payloadcms/transformer-sharp`) applies saved crops and focal points at upload time. A custom transformer can apply them at request time while Payload retains the original; see [Applying saved `_transforms` keys](/docs/upload/transformers#applying-saved-_transforms-keys).
+- When Payload processes the file, every saved built-in key must be applied by a transformer, and no key can be applied by two. Otherwise the operation fails with a validation error for `_transforms.<key>`, for example for a crop with no transformer that applies it. A focal point or custom key that no transformer applies is saved without processing the file.
+- Uploading a new file clears `_transforms` and sets the focal point to the center, unless the same request sends new values. A `focalX` or `focalY` equal to the replaced file's value is not a new value.
+- `focalX` and `focalY` stay available and match `_transforms.focalPoint` when it is set. Writing either one updates both. When the two disagree in one request, `_transforms` is used. For a document saved before `_transforms` existed, the first write that saves `_transforms` copies its focal point into `_transforms.focalPoint`, unless it is the center.
+- The crop must fit inside the original. Invalid values return a validation error for `_transforms`.
+- Keys other than the built-in ones are saved as they are, for use by your own transformers. The built-in keys `clip`, `encoding`, `flip`, `metadataPolicy`, `pageRange`, `posterFrame`, `resize` and `rotate` keep their built-in shapes; Sharp does not apply them yet, so a configured transformer must claim them.
+
 ## File Versioning
 
-Payload retains the source of each new upload as `original`, even when the main image is processed. With versions enabled, saved versions also retain the stored files they reference until those versions are removed. Keeping originals and file history uses additional storage, especially when an image has several generated sizes.
+Payload retains the source of each new upload as `original`, even when the main image is processed. The document's `original` field records where that file is stored; its filename is not changed to mark it.
+
+When the main image is processed, the original is stored as a separate file. With a storage adapter, it keeps the uploaded filename in its own storage folder. With local storage, all files share one folder, so the original gets a counter (for example `photo-1.png`) if the main file already uses the name. When the original and the main file share a filename, `original.url` includes `?original=true`. Without it, the file endpoint serves the main file. Custom storage adapters must handle `isOriginal` to serve the original; see [Custom Storage Adapters](./storage-adapters#custom-storage-adapters). Uploads saved before this change keep their `-original` filenames and are still served.
+
+With versions enabled, saved versions also retain the stored files they reference until those versions are removed. Keeping originals and file history uses additional storage, especially when an image has several generated sizes.
 
 Existing uploads are upgraded as they are edited; no bulk file migration is required. For an older image whose untouched source was already deleted, the existing stored file is the best available original. The upgrade cannot recover source bytes or historical files that were deleted before file versioning was enabled.
 
 SQL projects need a schema migration; see the [v4 migration guide](../migration-guide/v4).
 
-To read a stored historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, stored variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current published files and the latest draft, subject to collection read access; filenames found only in history return 404. Historical requests serve the saved bytes without rerunning transformations. Public URLs supplied directly by a storage provider remain direct.
+### Historical file URLs
+
+To read a historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current published files and the latest draft, subject to collection read access; filenames found only in history return 404.
+
+Stored historical files and originals serve their saved bytes without rerunning transformations, including when the URL contains resize parameters. A file built at request time instead goes through the same transformer pipeline as the current file. It uses that version's retained original and saved `_transforms`, not the current document's source or edits. Request parameters such as `?width=` apply to it as they do to the current file, and they need transform access in addition to read access. Without request parameters, a historical request is an ordinary read. Reading a historical file never saves new files or changes the version.
+
+A request-time historical file needs a compatible transformer. A request-time size also needs its name registered in the current configuration. If either is unavailable, the request fails instead of serving the current file or an untransformed original. Stored historical sizes remain readable even if their names are no longer configured. Public URLs supplied directly by a storage provider remain direct.
+
+### Restoring files
+
+Restoring a version preserves its saved content and file bytes, and saves the restored state as a new version. Storage references and URLs can change when Payload archives an outgoing file. Stored-only versions reuse their saved output bytes.
+
+A restore never builds new stored files. When the selected version includes a file built at request time, Payload handles each file on its own. A stored file keeps its saved bytes. A file built at request time stays request-time, built from the version's retained original and saved `_transforms`. Current size configuration determines the restored variants. Output bytes can differ when transformer code or configuration has changed.
+
+If the current configuration cannot build a request-time file, the restore fails with a 400 error before any file changes. If saving fails, Payload cleans up staged files through the existing file-operation lifecycle. Without database transactions, a failure after the document is written can leave the restored document saved; cleanup keeps files that it still references. Pass `draft: true` when restoring to create a draft without replacing the published document.
 
 ## Disabling Local Upload Storage
 

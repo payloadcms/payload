@@ -1,3 +1,5 @@
+import type { TelemetryWidgetType } from '../widgetType.js'
+
 export type RichTextFeature = 'blocks' | 'relationship' | 'table' | 'upload'
 
 type CompleteFeatureInfo = {
@@ -5,6 +7,8 @@ type CompleteFeatureInfo = {
     customAdminComponentCount: number
     customAdminViewCount: number
     customDashboardWidgetCount: number
+    /** Registered widget categories; does not describe individual saved dashboard layouts. */
+    widgetTypes: TelemetryWidgetType[]
   }
   authentication: {
     apiKeyCollectionCount: number
@@ -21,7 +25,6 @@ type CompleteFeatureInfo = {
   }
   hierarchyCollectionCount: number
   i18n: {
-    hasCustomAdminTranslations: boolean
     supportedAdminLanguageCount: number
   }
   jobsAndQueues: {
@@ -41,6 +44,7 @@ type CompleteFeatureInfo = {
   }
   queryPresetCollectionCount: number
   richTextFeatures: RichTextFeature[]
+  richTextFieldCount: number
   trashCollectionCount: number
   uploadAndMedia: {
     cropDisabledCollectionCount: number

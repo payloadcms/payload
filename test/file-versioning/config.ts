@@ -12,7 +12,12 @@ import { Media } from './collections/Media/index.js'
 import { PlainMedia } from './collections/PlainMedia/index.js'
 import { TransformedMedia } from './collections/TransformedMedia/index.js'
 import { TrashMedia } from './collections/TrashMedia/index.js'
-import { convertedMediaSlug, transformedMediaSlug } from './shared.js'
+import {
+  convertedMediaSlug,
+  flipStagePlannedMimeTypes,
+  flipStageRuns,
+  transformedMediaSlug,
+} from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const migrationDir = process.env.FILE_VERSIONING_MIGRATION_DIR
@@ -64,6 +69,30 @@ export default buildConfigWithDefaults({
                 },
               },
             }),
+            // Claims `flip` on transformed and converted media and records what it sees. It keeps
+            // the file.
+            {
+              slug: 'flip-stage',
+              canTransform: ({ collectionSlug, doc, operation }) => {
+                if (
+                  collectionSlug !== transformedMediaSlug &&
+                  collectionSlug !== convertedMediaSlug
+                ) {
+                  return false
+                }
+
+                if (operation === 'upload') {
+                  flipStagePlannedMimeTypes.push(doc.mimeType)
+                }
+
+                return { canTransform: true, handledTransformKeys: ['flip'] }
+              },
+              mimeTypes: ['image/*'],
+              transformFile: ({ doc, originalDoc }) => {
+                flipStageRuns.push(doc._transforms?.flip, originalDoc._transforms?.flip)
+                return Promise.resolve({ status: 'continue' })
+              },
+            },
           ],
     },
     ...(migrationDb ? { db: migrationDb } : {}),

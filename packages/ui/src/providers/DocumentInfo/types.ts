@@ -72,6 +72,8 @@ export type DocumentInfoContext = {
   hasScheduledPublish: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
+  /** `true` once a form-state request finds the document was changed by someone else since it loaded. */
+  isStale: boolean
   preferencesKey?: string
   setCurrentEditor?: React.Dispatch<React.SetStateAction<User>>
   setData: (data: Data) => void
@@ -82,6 +84,7 @@ export type DocumentInfoContext = {
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
   setHasScheduledPublish: React.Dispatch<React.SetStateAction<boolean>>
+  setIsStale: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>

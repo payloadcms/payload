@@ -167,9 +167,19 @@ export async function seed(payload: Payload): Promise<void> {
     overrideAccess: true,
   })
 
-  await payload.create({
+  const organizationsFolder = await payload.create({
     collection: foldersSlug,
     data: { allowedTypes: [organizationsSlug], name: 'Orgs Only' },
+    overrideAccess: true,
+  })
+
+  await payload.create({
+    collection: foldersSlug,
+    data: {
+      allowedTypes: [organizationsSlug],
+      name: 'Restricted child',
+      parentFolder: organizationsFolder.id,
+    },
     overrideAccess: true,
   })
 

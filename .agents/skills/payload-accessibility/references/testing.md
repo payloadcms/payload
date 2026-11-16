@@ -13,6 +13,12 @@
 
 The tool used by an original auditor does not determine the test layer. If Playwright can directly observe the reported name, role, state, relationship, focus, or keyboard behavior, keep the regression in the browser suite. Use Guidepup only when spoken output or screen-reader cursor behavior is itself the expected result.
 
+## Payload enhanced contrast setup
+
+To measure Admin enhanced-mode contrast, use the Account enhanced-contrast toggle (`#field-highContrastMode`) or the existing fixture's theme setup, then assert that `html` has `data-enhanced-contrast`. Reuse the mode-switching coverage in `test/a11y/WCAG.audit.spec.ts`; revisit shared setting behavior when the change affects it.
+
+Measure computed foreground/background colors in that mode for the actual enabled, hover, focus or other applicable state, recording theme, mode and state with the result. Check that custom feature inputs and controls inherit the enhanced tokens. If ordinary-mode measurements are also collected, label them separately rather than substituting feature-local colors. Preserve the user's preference after an interactive check; do not leave their account settings changed as a testing side effect.
+
 ## Canonical suites
 
 - `test/a11y/WCAG.audit.spec.ts` preserves the original audit evidence and runs only with the explicit audit command.
@@ -22,7 +28,7 @@ The tool used by an original auditor does not determine the test layer. If Playw
 
 In the audit, use ordered `test.describe` groups named with the WCAG criterion and level. A test belongs under its primary criterion; note secondary affected criteria in the handoff rather than duplicating the scenario. Consolidate tests only when one arrangement, interaction, and assertion genuinely exercises every covered case.
 
-Use the existing a11y Payload config and real UI components. Keep scenario-specific setup in its spec; reusable helpers live in `test/a11y/helpers.ts`.
+Prefer the existing a11y Payload config and real UI components. If it cannot render the feature, assess with an existing feature fixture and report which config was used. Keep regression placement consistent with the canonical suites; extend their setup only when needed. Scenario-specific setup stays in its spec; reusable helpers live in `test/a11y/helpers.ts`.
 
 ## Regression quality
 
@@ -64,4 +70,4 @@ pnpm test:a11y:audit --workers=1
 pnpm test:a11y:screen-reader
 ```
 
-Run affected tests while developing. Before handoff, run the complete relevant suite and report any check that could not run in the current environment.
+Run affected tests during development. Before handoff, verify changed behavior and affected shared consumers with a sufficient focused set or suite. Report scope and unavailable checks; repeat unrelated suites only with a reason.

@@ -4,8 +4,10 @@ import type { Payload, UploadInstructions } from 'payload'
 
 import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFileSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'path'
+import * as qs from 'qs-esm'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
@@ -323,7 +325,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     const { doc: seedDoc }: { doc: { filename: string; id: number | string } } =
       await seedRes.json()
 
-    expect(seedDoc.filename).toBe('duplicate-target-original.png')
+    expect(seedDoc.filename).toBe('duplicate-target.png')
 
     const signedURLRes = await restClient.POST('/upload-instructions', {
       body: JSON.stringify({
@@ -360,7 +362,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
     )
 
-    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1-original\.png$/)
+    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1\.png$/)
 
     await new BlockBlobClient(signedURL).uploadData(fileBuffer, {
       blobHTTPHeaders: { blobContentType: 'image/png' },
@@ -372,7 +374,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       await secondResponse.json()
 
     expect(secondResponse.status).toBe(201)
-    expect(secondDoc.filename).toBe('duplicate-target-1-original.png')
+    expect(secondDoc.filename).toBe('duplicate-target-1.png')
     expect(await containerClient.getBlobClient(blobKey).exists()).toBe(true)
 
     await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
@@ -481,8 +483,11 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         const { doc } = await createRes.json()
         createdIds.push(doc.id)
 
-        expect(downloadSpy).toHaveBeenCalledTimes(1)
-        expect(downloadSpy.mock.calls[0]![1]).toBeUndefined()
+        // A one-byte read verifies the upload before the document exists. The whole file is
+        // downloaded only after `canTransform` accepts it with that document.
+        expect(downloadSpy).toHaveBeenCalledTimes(2)
+        expect(downloadSpy.mock.calls[0]!.slice(0, 2)).toEqual([0, 1])
+        expect(downloadSpy.mock.calls[1]![1]).toBeUndefined()
       } finally {
         downloadSpy.mockRestore()
       }
@@ -490,6 +495,74 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       const stored = await restClient.GET(`/${mediaHeaderOnlySlug}/file/note.txt`)
 
       expect(await stored.text()).toBe('CLIENT TEXT')
+    })
+
+    test('keeps req.file in sync with the checked file after the full download', async ({
+      restClient,
+    }) => {
+      // Claims text/plain but holds a PNG, so its type is found only after the full download, and
+      // the `replace-png` transformer is planned only then.
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: readFileSync(path.resolve(dirname, '../../uploads/image.png')),
+        filename: 'disguised.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+
+      const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+      const { doc } = await createRes.json()
+
+      expect(createRes.status).toBe(201)
+      createdIds.push(doc.id)
+      expect(doc.mimeType).toBe('image/png')
+      expect(doc.filesize).toBe(
+        readFileSync(path.resolve(dirname, '../../uploads/small.png')).length,
+      )
+    })
+
+    test('downloads a client upload once for a bulk update and removes its temp files', async ({
+      payload,
+      restClient,
+    }) => {
+      const listClientUploadTempFiles = async () =>
+        (await readdir(tmpdir())).filter((name) => name.startsWith('payload-client-upload-'))
+      const ids = await Promise.all(
+        ['first.txt', 'second.txt'].map(async (name) => {
+          const { id } = await payload.create({
+            collection: mediaHeaderOnlySlug,
+            data: {},
+            file: { name, data: Buffer.from('old'), mimetype: 'text/plain', size: 3 },
+            overrideAccess: true,
+          })
+
+          return id
+        }),
+      )
+      createdIds.push(...ids)
+
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: Buffer.from('replacement'),
+        filename: 'replacement.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+      const before = await listClientUploadTempFiles()
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+      const where = qs.stringify({ where: { id: { in: ids } } }, { addQueryPrefix: true })
+
+      try {
+        const updateRes = await restClient.PATCH(`/${mediaHeaderOnlySlug}${where}`, { body: form })
+
+        expect((await updateRes.json()).docs).toHaveLength(2)
+        // A whole-file download has no byte count. Both documents accept the upload but share it.
+        expect(downloadSpy.mock.calls.filter((call) => call[1] === undefined)).toHaveLength(1)
+      } finally {
+        downloadSpy.mockRestore()
+      }
+
+      expect(await listClientUploadTempFiles()).toEqual(before)
     })
 
     test('creates a document from a client-uploaded image via the real Azure handler', async ({
@@ -531,6 +604,29 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         getPropertiesSpy.mockRestore()
         downloadSpy.mockRestore()
       }
+    })
+
+    test('should fetch the whole client-uploaded image when Sharp applies a saved crop', async ({
+      restClient,
+    }) => {
+      const crop = { height: 100, width: 100, x: 0, y: 0 }
+      const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
+
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file,
+        filename: 'cropped.jpg',
+        mimeType: 'image/jpeg',
+        restClient,
+      })
+      form.append('_payload', JSON.stringify({ _transforms: { crop } }))
+
+      const { doc } = await (
+        await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+      ).json()
+      createdIds.push(doc.id)
+
+      expect(doc).toMatchObject({ _transforms: { crop }, height: 100, width: 100 })
     })
   })
 

@@ -187,11 +187,13 @@
     border-radius: var(--radius-small);
   }
 
-  html[data-enhanced-contrast] .cmd-palette__input {
+  html[data-enhanced-contrast] .cmd-palette__input,
+  :host([data-enhanced-contrast]) .cmd-palette__input {
     border-bottom-color: var(--color-border-control);
   }
 
-  html[data-enhanced-contrast] .cmd-palette__hint + .cmd-palette__hint::before {
+  html[data-enhanced-contrast] .cmd-palette__hint + .cmd-palette__hint::before,
+  :host([data-enhanced-contrast]) .cmd-palette__hint + .cmd-palette__hint::before {
     color: var(--color-border-control);
   }
 }

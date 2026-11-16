@@ -1,6 +1,6 @@
 import type { AdvisoryHit } from '../types'
 
-import { parseAuditReport, toHits } from './auditReport'
+import { assertAuditCompleted, parseAuditReport, toHits } from './auditReport'
 import { runPnpm, type RunPnpm } from './runPnpm'
 
 /**
@@ -16,9 +16,13 @@ export const runMonorepoAudit = async ({
   run?: RunPnpm
 }): Promise<AdvisoryHit[]> => {
   const result = await run({
-    args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+    args: ['audit', '--prod', '--json'],
     cwd,
   })
-  const report = parseAuditReport(result.stdout)
+  const report = assertAuditCompleted({
+    report: parseAuditReport(result.stdout),
+    result,
+    target: 'the workspace',
+  })
   return toHits({ originPackage: null, report })
 }

@@ -6,7 +6,10 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
+import {
+  authenticateRequest,
+  createPayloadRequestFromWebRequest,
+} from './createPayloadRequestFromWebRequest.js'
 import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { httpStatus } from './httpStatus.js'
@@ -140,6 +143,8 @@ export const handleEndpoints = async ({
       config: incomingConfig,
       payloadInstanceCacheKey,
       request,
+      // Once the endpoint is known, so endpoints can opt out with `disableAuth`
+      shouldAuthenticate: false,
     })
 
     const { payload } = req
@@ -264,6 +269,10 @@ export const handleEndpoints = async ({
       }
 
       return notFoundResponse(req, pathname)
+    }
+
+    if (!endpoint?.disableAuth) {
+      await authenticateRequest({ canSetHeaders: true, req })
     }
 
     const response = await handler(req)

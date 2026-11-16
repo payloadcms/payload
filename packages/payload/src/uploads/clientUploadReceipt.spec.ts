@@ -22,7 +22,7 @@ const receiptArgs = {
   filename: 'photo.jpg',
   filePrefix: 'media',
   req,
-  storageFilePath: 'media/upload-1/photo-original.jpg',
+  storageFilePath: 'media/upload-1/photo.jpg',
 }
 
 // Signs data the same way createClientUploadReceipt does, so a test can sign data it would refuse to build.
@@ -56,7 +56,7 @@ describe('clientUploadReceipt', () => {
       expiresAt: Date.now() + 60_000,
       filename: 'photo.jpg',
       filePrefix: 'media',
-      storageFilePath: 'media/upload-1/photo-original.jpg',
+      storageFilePath: 'media/upload-1/photo.jpg',
       userCollection: 'users',
       userID: 'user-1',
     })

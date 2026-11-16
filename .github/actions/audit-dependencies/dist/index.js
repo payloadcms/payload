@@ -11409,6 +11409,23 @@ const compareBumps = (a, b) => a.dependency.localeCompare(b.dependency) ||
     (a.currentSpec ?? '').localeCompare(b.currentSpec ?? '');
 const buildBump = async ({ chainPackages, client, group, module, patchedRange, }) => {
     const { dependency, spec, workspacePackages } = group;
+    if (!(0,semver.validRange)(patchedRange)) {
+        return {
+            currentSpec: spec,
+            dependency,
+            fix: { reason: 'no-patched-range', status: 'unknown' },
+            workspacePackages,
+        };
+    }
+    // Aliases, dist-tags, and file/git specs carry no semver floor to bump from.
+    if (spec && !(0,semver.validRange)(spec)) {
+        return {
+            currentSpec: spec,
+            dependency,
+            fix: { reason: 'unsupported-spec', status: 'unknown' },
+            workspacePackages,
+        };
+    }
     const min = spec ? (0,semver.minVersion)(spec) : null;
     const fix = await findMinimalFix({
         chainPackages,
@@ -11464,12 +11481,38 @@ const findMinimalFix = async ({ chainPackages, client, currentMajor, currentSpec
     return { status: 'none' };
 };
 /**
- * Walks the dependency graph of `rootName@rootVersion`, restricted to the packages
- * that appeared on the introducing chains, resolving each hop to its highest
- * satisfying version. Returns whether every reachable version of the vulnerable
- * module lands in the patched range.
+ * Walks the dependency graph of `rootName@rootVersion`, resolving each dependency to its highest
+ * satisfying version, and returns whether every reachable copy of the vulnerable module is in
+ * the patched range.
+ *
+ * The first walk follows only the packages on the introducing chains (the dependency paths that
+ * the audit found to the module), which limits registry requests for each candidate. If that
+ * walk finds no copy, a chain package may have been renamed or replaced, so the whole graph is
+ * walked before the result is `clear`. A `clear` from the first walk can miss a new copy off the
+ * chain. The audit that runs again after the bump finds such a copy.
  */
 const traceModule = async ({ chainPackages, client, module, patchedRange, rootName, rootVersion, }) => {
+    // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
+    if (rootName === module && !(0,semver.satisfies)(rootVersion, patchedRange)) {
+        return 'vulnerable';
+    }
+    const root = { client, module, rootName, rootVersion };
+    const onChain = await collectModuleVersions({
+        ...root,
+        shouldFollow: (name) => chainPackages.has(name),
+    });
+    const moduleVersions = Array.isArray(onChain) && onChain.length === 0
+        ? await collectModuleVersions({ ...root, shouldFollow: () => true })
+        : onChain;
+    if (moduleVersions === 'unknown') {
+        return 'unknown';
+    }
+    return moduleVersions.every((version) => (0,semver.satisfies)(version, patchedRange))
+        ? 'clear'
+        : 'vulnerable';
+};
+/** Lists the versions of `module` reachable through packages that `shouldFollow` accepts. */
+const collectModuleVersions = async ({ client, module, rootName, rootVersion, shouldFollow, }) => {
     const moduleVersions = [];
     const visited = new Set([`${rootName}@${rootVersion}`]);
     const queue = [{ name: rootName, version: rootVersion }];
@@ -11488,7 +11531,7 @@ const traceModule = async ({ chainPackages, client, module, patchedRange, rootNa
         }
         for (const [depName, range] of Object.entries(dependencies)) {
             const isModule = depName === module;
-            if (!isModule && !chainPackages.has(depName)) {
+            if (!isModule && !shouldFollow(depName)) {
                 continue;
             }
             const depPackument = await client.fetchPackument(depName);
@@ -11510,13 +11553,7 @@ const traceModule = async ({ chainPackages, client, module, patchedRange, rootNa
             }
         }
     }
-    if (moduleVersions.length === 0) {
-        // The bumped dependency no longer pulls the module through the known chain.
-        return 'clear';
-    }
-    return moduleVersions.every((version) => (0,semver.satisfies)(version, patchedRange))
-        ? 'clear'
-        : 'vulnerable';
+    return moduleVersions;
 };
 
 // EXTERNAL MODULE: ../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/index.js
@@ -11631,9 +11668,8 @@ const readFlags = (argv) => {
 const external_node_os_namespaceObject = require("node:os");
 ;// CONCATENATED MODULE: ./src/lib/auditReport.ts
 /**
- * Parses `pnpm audit --json` stdout. Tolerant by design: registry errors (run
- * with `--ignore-registry-errors`) or empty output yield an empty report rather
- * than throwing, so a transient registry hiccup never fails the gate.
+ * Parses `pnpm audit --json` stdout. Output that is not a report yields an empty
+ * report; `assertAuditCompleted` decides whether that empty report is a failure.
  */
 const parseAuditReport = (stdout) => {
     let data;
@@ -11654,6 +11690,18 @@ const parseAuditReport = (stdout) => {
         }
     }
     return { advisories };
+};
+/**
+ * Throws when `pnpm audit` exits non-zero without reporting advisories. That exit is
+ * a tool or registry failure, and its empty report would otherwise read as a clean audit.
+ */
+const assertAuditCompleted = ({ report, result, target, }) => {
+    if (result.code === 0 || Object.keys(report.advisories).length > 0) {
+        return report;
+    }
+    const output = result.stderr.trim() || result.stdout.trim();
+    throw new Error(`pnpm audit failed for ${target} with exit code ${result.code}` +
+        (output ? `:\n${output}` : ''));
 };
 /** Turns an audit report into hits tagged with the originating package. */
 const toHits = ({ report, originPackage, }) => Object.values(report.advisories).map((advisory) => ({
@@ -11721,7 +11769,7 @@ const extractDirectDeps = ({ advisory, originPackage, }) => {
         for (const raw of finding.paths ?? []) {
             const direct = directDependencyFromPath({ originPackage, raw });
             if (direct) {
-                byKey.set(`${direct.workspacePackage ?? ''} ${direct.dependency}`, direct);
+                byKey.set(`${direct.workspacePackage ?? ''}\0${direct.dependency}`, direct);
             }
         }
     }
@@ -11753,9 +11801,9 @@ const directDependencyFromPath = ({ originPackage, raw, }) => {
 const compareDirectDeps = (a, b) => a.dependency.localeCompare(b.dependency) ||
     (a.workspacePackage ?? '').localeCompare(b.workspacePackage ?? '');
 const unionDirectDeps = (target, additions) => {
-    const keys = new Set(target.map((dep) => `${dep.workspacePackage ?? ''} ${dep.dependency}`));
+    const keys = new Set(target.map((dep) => `${dep.workspacePackage ?? ''}\0${dep.dependency}`));
     for (const addition of additions) {
-        const key = `${addition.workspacePackage ?? ''} ${addition.dependency}`;
+        const key = `${addition.workspacePackage ?? ''}\0${addition.dependency}`;
         if (!keys.has(key)) {
             keys.add(key);
             target.push(addition);
@@ -11793,7 +11841,7 @@ const toAdvisory = (value) => {
         typeof value.github_advisory_id !== 'string' ||
         typeof value.module_name !== 'string' ||
         typeof value.severity !== 'string' ||
-        typeof value.patched_versions !== 'string' ||
+        (typeof value.patched_versions !== 'string' && value.patched_versions != null) ||
         typeof value.vulnerable_versions !== 'string') {
         return null;
     }
@@ -11802,12 +11850,23 @@ const toAdvisory = (value) => {
         github_advisory_id: value.github_advisory_id,
         id: typeof value.id === 'number' ? value.id : 0,
         module_name: value.module_name,
-        patched_versions: value.patched_versions,
+        patched_versions: toPatchedVersions(value.patched_versions),
         severity: value.severity,
         title: typeof value.title === 'string' ? value.title : '',
         url: typeof value.url === 'string' ? value.url : '',
         vulnerable_versions: value.vulnerable_versions,
     };
+};
+/**
+ * pnpm reports `null` when no patched version is published (unfixable), and omits the
+ * field when it cannot infer a patched range. An omitted range may still have a fix,
+ * so it stays fixable as `unknown` and surfaces for review instead of being hidden.
+ */
+const toPatchedVersions = (value) => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    return value === null ? '<0.0.0' : 'unknown';
 };
 const auditReport_isRecord = (value) => typeof value === 'object' && value !== null;
 
@@ -11891,16 +11950,19 @@ const auditPackage = async ({ pkg, run, }) => {
             cwd: dir,
         });
         if (install.code !== 0) {
-            // A failed resolve would otherwise yield an empty (falsely clean) audit.
-            console.warn(`Warning: could not resolve dependencies for ${pkg.name}; its audit was skipped.` +
-                (install.stderr ? `\n${install.stderr.trim()}` : ''));
-            return [];
+            // A package without an audit makes the whole result incomplete, not clean.
+            throw new Error(`could not resolve dependencies for ${pkg.name}` +
+                (install.stderr ? `:\n${install.stderr.trim()}` : ''));
         }
         const result = await run({
-            args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+            args: ['audit', '--prod', '--json'],
             cwd: dir,
         });
-        const report = parseAuditReport(result.stdout);
+        const report = assertAuditCompleted({
+            report: parseAuditReport(result.stdout),
+            result,
+            target: pkg.name,
+        });
         return toHits({ originPackage: pkg.shortName, report });
     }
     finally {
@@ -11932,10 +11994,14 @@ const mapWithConcurrency = async (items, limit, task) => {
  */
 const runMonorepoAudit = async ({ cwd, run = runPnpm, }) => {
     const result = await run({
-        args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+        args: ['audit', '--prod', '--json'],
         cwd,
     });
-    const report = parseAuditReport(result.stdout);
+    const report = assertAuditCompleted({
+        report: parseAuditReport(result.stdout),
+        result,
+        target: 'the workspace',
+    });
     return toHits({ originPackage: null, report });
 };
 
@@ -12122,9 +12188,13 @@ const manualReason = (fix) => {
     if (fix.status === 'none') {
         return 'no published version clears the vulnerability; allowlist or escalate';
     }
-    return fix.reason === 'registry'
-        ? 'registry unreachable; retry before deciding'
-        : 'current version undeclared in scanned workspaces; determine the owner manually';
+    return MANUAL_REASONS[fix.reason];
+};
+const MANUAL_REASONS = {
+    'no-current-version': 'current version undeclared in scanned workspaces; determine the owner manually',
+    'no-patched-range': 'advisory has no patched range; check the advisory before deciding',
+    registry: 'registry unreachable; retry before deciding',
+    'unsupported-spec': 'declared spec is not a semver range (alias, tag, file, or git); determine the current version manually',
 };
 const verifyCommand = (scope) => scope === 'monorepo' ? 'pnpm script:audit:deps:monorepo' : 'pnpm script:audit:deps:consumer';
 
@@ -12132,6 +12202,8 @@ const verifyCommand = (scope) => scope === 'monorepo' ? 'pnpm script:audit:deps:
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org';
 // Abbreviated packument: smaller payload that still carries per-version dependencies.
 const ABBREVIATED = 'application/vnd.npm.install-v1+json';
+// A stalled request rejects after this, so the trace reports "unknown" instead of hanging the job.
+const REQUEST_TIMEOUT_MS = 30_000;
 /**
  * Builds a packument fetcher that caches per package name (as an in-flight promise,
  * so concurrent callers share one request). Never throws: any failure resolves to
@@ -12153,7 +12225,10 @@ const createRegistryClient = ({ fetchImpl = (url, init) => fetch(url, init), reg
 const load = async ({ fetchImpl, name, registryUrl, }) => {
     // Scoped names must keep their `@` but encode the slash for the registry path.
     const path = name.replace('/', '%2F');
-    const response = await fetchImpl(`${registryUrl}/${path}`, { headers: { accept: ABBREVIATED } });
+    const response = await fetchImpl(`${registryUrl}/${path}`, {
+        headers: { accept: ABBREVIATED },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
     if (!response.ok) {
         return null;
     }
@@ -12267,6 +12342,13 @@ const printReport = ({ findings, jsonPath, packagesAudited, scope, severity, }) 
 /** True when a resolution (relock or bump) is now available for this dependency. */
 const isResolvableBump = ({ fix }) => fix.status === 'fix' || fix.status === 'relock';
 /**
+ * Lists each `<advisory> through <dependency>` whose fix is unknown because the registry did
+ * not answer. Such a finding could have a fix, so the plan built from it is incomplete.
+ */
+const listRegistryFailures = (findings) => findings.flatMap((finding) => finding.bumps
+    .filter(({ fix }) => fix.status === 'unknown' && fix.reason === 'registry')
+    .map(({ dependency }) => `${finding.advisory} through ${dependency}`));
+/**
  * Reviews allowlisted advisories that still appear: reports any whose vulnerability
  * a bump or relock can now clear, so the exception can be removed and the fix applied.
  */
@@ -12284,14 +12366,17 @@ const printAllowlistReview = (findings) => {
         }
     }
 };
+const UNKNOWN_FIX_CAUSES = {
+    'no-current-version': 'current version unknown, declared outside packages/',
+    'no-patched-range': 'advisory has no patched range',
+    registry: 'registry unreachable',
+    'unsupported-spec': 'declared spec is not a semver range',
+};
 /** Prints the remediation for one direct dependency: the minimal bump, relock, or why none applies. */
 const printBump = ({ bump: { currentSpec, dependency, fix, workspacePackages }, module, }) => {
     const where = workspacePackages.length > 0 ? ` (in ${workspacePackages.join(', ')})` : '';
     if (fix.status === 'unknown') {
-        const cause = fix.reason === 'registry'
-            ? 'registry unreachable'
-            : 'current version unknown, declared outside packages/';
-        console.log(`  ${dependency}: fix availability unknown — ${cause}${where}`);
+        console.log(`  ${dependency}: fix availability unknown — ${UNKNOWN_FIX_CAUSES[fix.reason]}${where}`);
         return;
     }
     if (fix.status === 'none') {
@@ -12381,7 +12466,14 @@ const main = async () => {
         .map(toFinding);
     const reviewed = await annotateFindings({ client, findings: allowlistFindings, index });
     printAllowlistReview(reviewed);
-    return reported.length > 0 ? 1 : 0;
+    // Exit 0 means the audit is complete, with or without findings. Exit 1 means the result may
+    // be incomplete, so no step may act on it.
+    const registryFailures = listRegistryFailures(reported);
+    if (registryFailures.length > 0) {
+        console.error(`Error: the registry did not answer, so the fix is unknown for ${registryFailures.join(', ')}`);
+        return 1;
+    }
+    return 0;
 };
 const audit = async ({ catalogs, manifests, repoRoot, scope, }) => {
     if (scope === 'monorepo') {

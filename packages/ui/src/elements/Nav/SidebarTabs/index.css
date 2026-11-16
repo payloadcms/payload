@@ -66,6 +66,34 @@
     border-width: 0;
   }
 
+  .sidebar-tabs__tooltip {
+    pointer-events: auto;
+
+    &.sidebar-tabs__tooltip--focused {
+      display: block;
+    }
+
+    .tooltip__caret-stroke {
+      stroke: none;
+    }
+
+    /* Keep pointer travel across the tooltip's positioning gap inside its hover area. */
+    &::before {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      block-size: var(--spacer-2-5);
+    }
+
+    &.tooltip--position-bottom::before {
+      inset-block-end: 100%;
+    }
+
+    &.tooltip--position-top::before {
+      inset-block-start: 100%;
+    }
+  }
+
   .sidebar-tabs__content {
     width: 100%;
     flex-grow: 1;

@@ -1,4 +1,14 @@
-import { gte, major, maxSatisfying, minVersion, prerelease, satisfies, sort, valid } from 'semver'
+import {
+  gte,
+  major,
+  maxSatisfying,
+  minVersion,
+  prerelease,
+  satisfies,
+  sort,
+  valid,
+  validRange,
+} from 'semver'
 
 type DependencyGroup = {
   dependency: string
@@ -91,6 +101,24 @@ const buildBump = async ({
   patchedRange: string
 }): Promise<Bump> => {
   const { dependency, spec, workspacePackages } = group
+  if (!validRange(patchedRange)) {
+    return {
+      currentSpec: spec,
+      dependency,
+      fix: { reason: 'no-patched-range', status: 'unknown' },
+      workspacePackages,
+    }
+  }
+  // Aliases, dist-tags, and file/git specs carry no semver floor to bump from.
+  if (spec && !validRange(spec)) {
+    return {
+      currentSpec: spec,
+      dependency,
+      fix: { reason: 'unsupported-spec', status: 'unknown' },
+      workspacePackages,
+    }
+  }
+
   const min = spec ? minVersion(spec) : null
   const fix = await findMinimalFix({
     chainPackages,
@@ -177,10 +205,15 @@ const findMinimalFix = async ({
 type TraceOutcome = 'clear' | 'unknown' | 'vulnerable'
 
 /**
- * Walks the dependency graph of `rootName@rootVersion`, restricted to the packages
- * that appeared on the introducing chains, resolving each hop to its highest
- * satisfying version. Returns whether every reachable version of the vulnerable
- * module lands in the patched range.
+ * Walks the dependency graph of `rootName@rootVersion`, resolving each dependency to its highest
+ * satisfying version, and returns whether every reachable copy of the vulnerable module is in
+ * the patched range.
+ *
+ * The first walk follows only the packages on the introducing chains (the dependency paths that
+ * the audit found to the module), which limits registry requests for each candidate. If that
+ * walk finds no copy, a chain package may have been renamed or replaced, so the whole graph is
+ * walked before the result is `clear`. A `clear` from the first walk can miss a new copy off the
+ * chain. The audit that runs again after the bump finds such a copy.
  */
 const traceModule = async ({
   chainPackages,
@@ -197,6 +230,43 @@ const traceModule = async ({
   rootName: string
   rootVersion: string
 }): Promise<TraceOutcome> => {
+  // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
+  if (rootName === module && !satisfies(rootVersion, patchedRange)) {
+    return 'vulnerable'
+  }
+
+  const root = { client, module, rootName, rootVersion }
+  const onChain = await collectModuleVersions({
+    ...root,
+    shouldFollow: (name) => chainPackages.has(name),
+  })
+  const moduleVersions =
+    Array.isArray(onChain) && onChain.length === 0
+      ? await collectModuleVersions({ ...root, shouldFollow: () => true })
+      : onChain
+  if (moduleVersions === 'unknown') {
+    return 'unknown'
+  }
+
+  return moduleVersions.every((version) => satisfies(version, patchedRange))
+    ? 'clear'
+    : 'vulnerable'
+}
+
+/** Lists the versions of `module` reachable through packages that `shouldFollow` accepts. */
+const collectModuleVersions = async ({
+  client,
+  module,
+  rootName,
+  rootVersion,
+  shouldFollow,
+}: {
+  client: RegistryClient
+  module: string
+  rootName: string
+  rootVersion: string
+  shouldFollow: (name: string) => boolean
+}): Promise<'unknown' | string[]> => {
   const moduleVersions: string[] = []
   const visited = new Set<string>([`${rootName}@${rootVersion}`])
   const queue: Array<{ name: string; version: string }> = [{ name: rootName, version: rootVersion }]
@@ -218,7 +288,7 @@ const traceModule = async ({
 
     for (const [depName, range] of Object.entries(dependencies)) {
       const isModule = depName === module
-      if (!isModule && !chainPackages.has(depName)) {
+      if (!isModule && !shouldFollow(depName)) {
         continue
       }
 
@@ -242,11 +312,5 @@ const traceModule = async ({
     }
   }
 
-  if (moduleVersions.length === 0) {
-    // The bumped dependency no longer pulls the module through the known chain.
-    return 'clear'
-  }
-  return moduleVersions.every((version) => satisfies(version, patchedRange))
-    ? 'clear'
-    : 'vulnerable'
+  return moduleVersions
 }

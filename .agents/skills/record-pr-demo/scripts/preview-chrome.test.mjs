@@ -1,18 +1,18 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { chromium } from '@playwright/test'
+import { chromium, expect } from '@playwright/test'
 import { startChromePreview } from './preview-chrome.mjs'
 
 // This tests the same component and controls shipped to the user, not a mock preview.
-test('should scrub real responsive content without changing the title or footer geometry', async () => {
+test('should scrub real responsive content without changing the sidebar geometry', async () => {
   const { server, url } = await startChromePreview({ port: 0 })
   const browser = await chromium.launch({ headless: true })
   try {
     const page = await browser.newPage({ viewport: { width: 1120, height: 1000 } })
     await page.goto(url)
     await page.frameLocator('iframe').getByRole('heading', { name: 'Posts', exact: true }).waitFor()
-    const footer = page.locator('#chrome [data-footer]')
-    const initial = await footer.boundingBox()
+    const sidebar = page.locator('#chrome .sidebar-shell')
+    const initial = await sidebar.boundingBox()
     const slider = page.getByRole('slider')
     for (const milliseconds of [1600, 2000, 2800]) {
       await slider.evaluate((element, value) => {
@@ -26,8 +26,8 @@ test('should scrub real responsive content without changing the title or footer 
           .evaluate(() => innerWidth),
         768,
       )
-      assert.deepEqual(await footer.boundingBox(), initial)
-      assert.equal(await page.locator('[data-step-count]').textContent(), 'Step 2 of 3')
+      assert.deepEqual(await sidebar.boundingBox(), initial)
+      assert.equal(await page.locator('.sidebar-step').nth(1).getAttribute('aria-current'), 'step')
     }
     for (const [milliseconds, step] of [
       [1300, 1],
@@ -38,11 +38,17 @@ test('should scrub real responsive content without changing the title or footer 
         element.value = String(value)
         element.dispatchEvent(new Event('input', { bubbles: true }))
       }, milliseconds)
-      assert.equal(await page.locator('[data-step-count]').textContent(), `Step ${step} of 3`)
+      assert.equal(
+        await page
+          .locator('.sidebar-step')
+          .nth(step - 1)
+          .getAttribute('aria-current'),
+        'step',
+      )
     }
     await slider.focus()
     await page.keyboard.press('End')
-    assert.equal(await page.locator('#chrome [data-pagination]').textContent(), 'Step 3 of 3')
+    assert.equal(await page.locator('.sidebar-step').nth(2).getAttribute('aria-current'), 'step')
     assert.equal(
       await page
         .frameLocator('iframe')
@@ -50,14 +56,45 @@ test('should scrub real responsive content without changing the title or footer 
         .evaluate(() => innerWidth),
       390,
     )
-    assert.deepEqual(await footer.boundingBox(), initial)
+    assert.deepEqual(await sidebar.boundingBox(), initial)
     await page.getByLabel('Annotation', { exact: true }).uncheck()
-    assert.equal(await page.locator('#chrome [data-title]').isVisible(), true)
-    assert.equal(await page.locator('#chrome [data-note]').isVisible(), false)
+    assert.equal(await page.locator('#chrome .sidebar-intro').isVisible(), true)
+    assert.equal(await page.locator('#chrome .sidebar-steps').isVisible(), false)
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.getByRole('button', { name: 'Desktop', exact: true }).click()
     await page.getByRole('button', { name: 'Play resize', exact: true }).click()
     assert.equal(await page.locator('#chrome [data-size]').textContent(), '390 × 720')
+    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    assert.equal(
+      await page.getByRole('button', { name: 'Dark', exact: true }).getAttribute('aria-pressed'),
+      'true',
+    )
+    assert.equal(
+      await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(25, 25, 25)',
+    )
+    assert.equal(
+      await page
+        .frameLocator('iframe')
+        .locator('body')
+        .evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(25, 25, 25)',
+    )
+    assert.equal(await page.locator('[data-size]').textContent(), '390 × 720')
+    assert.equal(await page.locator('#timeline').inputValue(), '5200')
+    assert.equal(new URL(page.url()).searchParams.get('theme'), 'dark')
+    await page.getByRole('button', { name: 'Light', exact: true }).click()
+    assert.equal(
+      await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(255, 255, 255)',
+    )
+    assert.equal(
+      await page
+        .frameLocator('iframe')
+        .locator('body')
+        .evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(255, 255, 255)',
+    )
     await page.setViewportSize({ width: 320, height: 900 })
     assert.equal(
       await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
@@ -70,7 +107,7 @@ test('should scrub real responsive content without changing the title or footer 
   }
 })
 
-test('should preview a real frame refresh beside dimensions with keyboard controls', async () => {
+test('should refresh the real frame from the persistent toolbar button with keyboard controls', async () => {
   const { server, url } = await startChromePreview({ port: 0 })
   const browser = await chromium.launch({ headless: true })
   try {
@@ -79,6 +116,10 @@ test('should preview a real frame refresh beside dimensions with keyboard contro
     let loads = 0
     page.on('request', (request) => {
       if (request.url().endsWith('/preview/application.html')) loads++
+    })
+    await page.route('**/preview/application.html', async (route) => {
+      if (loads > 1) await new Promise((resolve) => setTimeout(resolve, 200))
+      await route.continue()
     })
     await page.goto(url)
     await page.frameLocator('iframe').getByRole('heading', { name: 'Posts', exact: true }).waitFor()
@@ -90,12 +131,23 @@ test('should preview a real frame refresh beside dimensions with keyboard contro
     await expect(page.locator('[data-size]')).toHaveText('390 × 720')
     await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
     assert.equal(loads, 2)
-    assert.equal(await button.evaluate((e) => e === document.activeElement), true)
+    assert.equal(await button.evaluate((e) => e === e.getRootNode().activeElement), true)
     await expect(page.locator('#chrome').getByRole('status')).toBeHidden()
-    await page.getByLabel('Dimensions', { exact: true }).uncheck()
     await button.click()
     await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshing…')
-    await expect(page.locator('[data-size]')).toBeHidden()
+    await expect(page.locator('[data-size]')).toBeVisible()
+    await expect(page.locator('[data-size]')).toHaveText('390 × 720')
+    await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
+    await expect(page.getByRole('button', { name: 'Simulate refresh', exact: true })).toHaveCount(0)
+    await button.click()
+    await expect(page.locator('[data-refresh-button]')).toHaveAttribute('data-state', 'refreshing')
+    await expect(page.locator('[data-refresh-icon]')).toHaveCSS('animation-name', 'refresh-spin')
+    await expect.poll(() => loads).toBe(4)
+    await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
+    await expect(page.locator('[data-refresh-button]')).toBeVisible()
+    await page.keyboard.press('Tab')
+    await page.mouse.move(0, 0)
+    await expect(page.locator('[data-refresh-button]')).toHaveCSS('opacity', '0.35')
   } finally {
     await browser.close()
     await new Promise((resolve) => server.close(resolve))
@@ -110,6 +162,10 @@ test('should preview accessibility observations from real keyboard interactions'
     const page = await browser.newPage({ viewport: { width: 1600, height: 1200 } })
     await page.goto(`${url}/?accessibility&announcements&kind=fix`)
     const app = page.frameLocator('iframe')
+    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    await expect(app.locator('html')).toHaveCSS('background-color', 'rgb(25, 25, 25)')
+    await page.getByRole('button', { name: 'Light', exact: true }).click()
+    await expect(app.locator('html')).toHaveCSS('background-color', 'rgb(250, 249, 246)')
     const clickIntroduction = async () => {
       const box = await app.getByRole('button', { name: 'Move Introduction down' }).boundingBox()
       await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
@@ -128,6 +184,89 @@ test('should preview accessibility observations from real keyboard interactions'
     await clickIntroduction()
     await expect(page.locator('[data-announcement]')).toHaveText(
       'Introduction moved to position 2 of 3.',
+    )
+  } finally {
+    await browser.close()
+    await new Promise((resolve) => server.close(resolve))
+  }
+})
+
+test('should keep the sidebar fixed while resizing and reveal current steps in long lists', async () => {
+  const { server, url } = await startChromePreview({ port: 0 })
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage({ viewport: { width: 1120, height: 1000 } })
+    await page.goto(`${url}/?manySteps&kind=bug`)
+    const panel = page.locator('.annotation-sidebar')
+    const list = page.locator('.sidebar-steps')
+    await expect(panel).toBeVisible()
+    await expect(panel.locator('.sidebar-step')).toHaveCount(12)
+    await expect(panel.locator('.sidebar-step [data-kind=Bug]')).toHaveCount(2)
+    const initial = await panel.boundingBox()
+    const header = await panel.locator('.sidebar-intro').boundingBox()
+    const marker = panel.locator('[aria-current=step] .sidebar-dot')
+    await expect(marker).toHaveCSS('background-color', 'rgb(13, 153, 255)')
+    const markerBounds = await marker.boundingBox()
+    const textBounds = await panel.locator('[aria-current=step] p').boundingBox()
+    const cardBounds = await panel.locator('[aria-current=step]').boundingBox()
+    const introBounds = await panel.locator('.sidebar-intro').boundingBox()
+    assert.ok(markerBounds.x > cardBounds.x + cardBounds.width * 0.8)
+    assert.ok(markerBounds.y >= cardBounds.y)
+    assert.ok(markerBounds.y + markerBounds.height < textBounds.y + textBounds.height)
+    assert.ok(Math.abs(introBounds.x - cardBounds.x) < 0.1)
+
+    const window = await page.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(initial.y - window.y) < 0.1)
+    assert.ok(Math.abs(initial.height - window.height) < 0.1)
+    assert.ok(Math.abs(initial.x + initial.width - window.x) < 0.1)
+    await expect(panel).toHaveCSS('border-top-right-radius', '0px')
+    await expect(page.locator('[data-window]')).toHaveCSS('border-top-left-radius', '0px')
+    await expect(page.locator('[data-window]')).toHaveCSS('border-top-width', '0px')
+    await expect(page.locator('.sidebar-shell')).toHaveCSS('background-color', 'rgb(221, 221, 221)')
+    await expect(panel.locator('.sidebar-step').first()).toHaveCSS(
+      'background-color',
+      'rgb(255, 255, 255)',
+    )
+    await expect(panel.locator('.sidebar-intro p')).toHaveCSS('color', 'rgb(37, 36, 34)')
+    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    await expect(page.locator('.sidebar-shell')).toHaveCSS('background-color', 'rgb(35, 35, 35)')
+    await expect(panel.locator('.sidebar-step').first()).toHaveCSS(
+      'background-color',
+      'rgb(25, 25, 25)',
+    )
+    await expect(panel.locator('.sidebar-intro p')).toHaveCSS('color', 'rgb(237, 237, 235)')
+    await expect(panel.locator('.sidebar-step [data-kind=Bug]').first()).toHaveCSS(
+      'background-color',
+      'rgb(96, 51, 42)',
+    )
+    assert.deepEqual(await panel.boundingBox(), initial)
+    await page.getByRole('button', { name: 'Light', exact: true }).click()
+
+    await page.getByRole('button', { name: 'Mobile', exact: true }).click()
+    assert.deepEqual(await panel.boundingBox(), initial)
+    const resizedWindow = await page.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(initial.x + initial.width - resizedWindow.x) < 0.1)
+    await page.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await expect.poll(() => list.evaluate((e) => e.scrollTop)).toBeGreaterThan(0)
+    await expect
+      .poll(async () => {
+        const current = await panel.locator('[aria-current=step]').boundingBox()
+        const bounds = await list.boundingBox()
+        return current.y >= bounds.y && current.y + current.height <= bounds.y + bounds.height + 1
+      })
+      .toBe(true)
+    assert.deepEqual(await panel.locator('.sidebar-intro').boundingBox(), header)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.getByRole('slider').focus()
+    await page.keyboard.press('Home')
+    await expect.poll(() => list.evaluate((e) => e.scrollTop)).toBeLessThan(2)
+    await panel.locator('.sidebar-step').nth(1).focus()
+    await page.keyboard.press('Enter')
+    await expect(panel.locator('[aria-current=step]')).toContainText('Update dates hide')
+    await expect(panel.locator('[aria-current=step] [data-kind=Bug]')).toHaveCSS(
+      'background-color',
+      'rgb(255, 226, 224)',
     )
   } finally {
     await browser.close()
