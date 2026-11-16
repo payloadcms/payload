@@ -225,7 +225,7 @@ export function HierarchyContentsTree({
                     })
                   : formatAdminURL({
                       adminRoute,
-                      path: `/collections/${source.collectionSlug}/${doc.id}`,
+                      path: `/collections/${source.collectionSlug}/${encodeURIComponent(String(doc.id))}`,
                     })
                 return (
                   <React.Fragment key={key}>

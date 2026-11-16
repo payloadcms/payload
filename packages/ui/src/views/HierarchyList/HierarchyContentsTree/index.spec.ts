@@ -148,3 +148,33 @@ test('should identify the failed source and preserve its authorized counts', () 
   expect(html).toContain('1 general:of 12 Articles')
   expect(html).toContain('/admin/collections/articles/2')
 })
+
+test('should encode custom document IDs while retaining numeric zero links', () => {
+  controls.hasExpandedGroups = true
+  const id = 'section/intro?lang=en#overview'
+  const html = renderToStaticMarkup(
+    createElement(HierarchyContentsTree, {
+      collectionSlug: 'containers',
+      initialContents: {
+        parentID: 3,
+        sources: [
+          {
+            collectionSlug: 'articles',
+            docs: [
+              { id, title: 'Custom ID' },
+              { id: 0, title: 'Zero ID' },
+            ],
+            hasNextPage: false,
+            page: 1,
+            totalDocs: 2,
+            totalPages: 1,
+          },
+        ],
+      },
+      selectedTypes: ['articles'],
+    }),
+  )
+
+  expect(html).toContain(`href="/admin/collections/articles/${encodeURIComponent(id)}"`)
+  expect(html).toContain('href="/admin/collections/articles/0"')
+})
