@@ -171,6 +171,9 @@ export const PostsCollection: CollectionConfig = {
         fields: [
           { name: 'title', type: 'text' },
           { name: 'order', type: 'number' },
+          slug === 'one'
+            ? { name: 'content', type: 'group', fields: [{ name: 'text', type: 'text' }] }
+            : { name: 'content', type: 'text' },
         ],
       })),
       hooks: {

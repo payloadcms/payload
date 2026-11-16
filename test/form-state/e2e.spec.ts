@@ -416,6 +416,49 @@ test.describe('Form State', () => {
     ).toHaveValue('This is a computed value.')
   })
 
+  test('should preserve content after sorting blocks with different field shapes', async () => {
+    const doc = await createPost({
+      sortedBlocks: [
+        { blockType: 'one', title: 'One', order: 2, content: { text: 'One nested content' } },
+        { blockType: 'two', title: 'Two', order: 1, content: 'Two scalar content' },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__1__order').fill('3')
+      await saveDocAndAssert(page)
+
+      await expect(
+        page.locator('#field-sortedBlocks .blocks-field__block-pill').first(),
+      ).toHaveText('Two')
+      await expect(page.locator('#field-sortedBlocks__0__content')).toHaveValue(
+        'Two scalar content',
+      )
+
+      await page.locator('#field-title').fill('After sorting the blocks')
+      await saveDocAndAssert(page)
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.sortedBlocks?.map(({ blockType, content }) => ({ blockType, content }))
+        })
+        .toEqual([
+          { blockType: 'two', content: 'Two scalar content' },
+          { blockType: 'one', content: { text: 'One nested content' } },
+        ])
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
   test('should keep block fields and collapsed state with their IDs after a beforeChange reorder', async () => {
     const doc = await createPost()
 

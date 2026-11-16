@@ -203,6 +203,9 @@ export interface Number {
 export interface One {
   title?: string | null;
   order?: number | null;
+  content?: {
+    text?: string | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'one';
@@ -214,6 +217,7 @@ export interface One {
 export interface Two {
   title?: string | null;
   order?: number | null;
+  content?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'two';
@@ -225,6 +229,7 @@ export interface Two {
 export interface Three {
   title?: string | null;
   order?: number | null;
+  content?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'three';
@@ -472,6 +477,11 @@ export interface PostsSelect<T extends boolean = true> {
           | {
               title?: T;
               order?: T;
+              content?:
+                | T
+                | {
+                    text?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -480,6 +490,7 @@ export interface PostsSelect<T extends boolean = true> {
           | {
               title?: T;
               order?: T;
+              content?: T;
               id?: T;
               blockName?: T;
             };
@@ -488,6 +499,7 @@ export interface PostsSelect<T extends boolean = true> {
           | {
               title?: T;
               order?: T;
+              content?: T;
               id?: T;
               blockName?: T;
             };
