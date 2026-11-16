@@ -275,6 +275,7 @@ pnpm add @payloadcms/storage-azure
 - Configure the `collections` object to specify which collections should use the Azure Blob adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to Azure.
+- With `clientUploads` enabled, files of 64MB or more use resumable upload sessions: Payload signs each block, and an interrupted upload continues from the blocks Azure already has. After a page reload, it continues once the same file is selected again. The same CORS rule covers these uploads. Blocks are uploaded to a temporary blob under `payload-upload-sessions/` and copied to the final path when the upload completes. Payload removes these temporary blobs itself; add a lifecycle management rule that deletes blobs under that prefix after 8 days as a safety net.
 
 <Banner type="warning">
   **`clientUploads` and CORS:** Client uploads use the Azure Blob SDK, which
