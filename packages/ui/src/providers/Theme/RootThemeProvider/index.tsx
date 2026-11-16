@@ -11,9 +11,9 @@ import { defaultTheme } from '../shared.js'
 
 /**
  * Theme providers can be nested, but only this root provider reads and writes cookies, detects system preferences, and updates theme and contrast attributes on `<html>`.
- * It owns the preference state and the setters shared by every provider.
+ * It owns the preference state and the setters shared by providers beneath it.
  *
- * `ThemeProvider` creates it when there isn't already a theme context.
+ * The Admin mounts it explicitly to manage its theme preferences.
  * Nested providers can override the values their children read, but their setters still update the root preference.
  */
 export const RootThemeProvider: React.FC<ThemeProviderProps> = ({

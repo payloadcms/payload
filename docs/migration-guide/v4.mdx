@@ -28,6 +28,21 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ### Theme context distinguishes local overrides from root preferences
 
+`ThemeProvider` now only supplies context, including when rendered without a parent provider. It no longer initializes cookie persistence, system detection, query preferences, or document effects. The Admin installs its root preference provider explicitly, so its preference controls keep their existing behavior.
+
+Outside the Admin, supply the frontend's current values and update those props when the host theme changes:
+
+```tsx
+<ThemeProvider
+  theme={frontendTheme}
+  highContrastMode={frontendHighContrastMode}
+>
+  {children}
+</ThemeProvider>
+```
+
+Without an explicit root preference provider, the hooks expose no-op setters. `useTheme` returns supplied or inherited values, and `useRootTheme` keeps its default fallback. Host applications remain responsible for reading and persisting their own preferences and applying their DOM styles.
+
 The `useTheme` hook now returns the nearest `ThemeProvider` overrides. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit nested `theme` prop sets `autoMode` to `false`; omitted theme and contrast props inherit from the nearest parent. Nested overrides are controlled by their props and do not create preference state or write cookies or document attributes.
 
 Use the new `useRootTheme` hook for preference controls that need the root selection, even inside an override:
@@ -40,7 +55,7 @@ Use the new `useRootTheme` hook for preference controls that need the root selec
 +const { autoMode, setTheme, theme } = useRootTheme()
 ```
 
-Both hooks expose the same setters, which always update the root preference, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
+Within the Admin, both hooks expose the same root setters, which update root preferences, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
 
 ```diff
 -setTheme('dark', { scoped: true })
