@@ -148,7 +148,7 @@ const buildTableState: ServerFunction<
   })
 
   if (nestedDocs) {
-    if (!collectionConfig?.nestedDocs || !collectionConfig.hierarchy) {
+    if (!collectionConfig?.nestedDocs) {
       throw new APIError('Collection does not support nested documents', 400)
     }
 
@@ -166,14 +166,15 @@ const buildTableState: ServerFunction<
     }
     appendDateTimezoneSelectFields({ fields: collectionConfig.flattenedFields, select })
 
-    ;({ data, rows: nestedDocRows } = await getNestedDocsBranch({
+    const branch = await getNestedDocsBranch({
       collectionConfig,
       parentID: nestedDocs.parentID,
       query,
       req,
       select,
-    }))
-    data = await enrichDocsWithVersionStatus({ collectionConfig, data, req })
+    })
+    nestedDocRows = branch.rows
+    data = await enrichDocsWithVersionStatus({ collectionConfig, data: branch.data, req })
   }
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
