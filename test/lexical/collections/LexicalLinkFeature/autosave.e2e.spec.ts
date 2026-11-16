@@ -11,7 +11,7 @@ import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationI
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalLinkFeatureAutosaveSlug, lexicalLinkFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
-import { openNestedUploadDrawer } from './utils.js'
+import { openNestedUploadDrawer, openUploadListDrawer } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.resolve(path.dirname(filename), '../../')
@@ -51,6 +51,70 @@ test.describe('Lexical Link Feature Autosave', () => {
     await waitForFormReady(page)
     await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
+  })
+
+  test('should preserve the media picker search and focus through parent autosave (#17676)', async ({
+    page,
+  }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+
+    const collectionURL = formatAdminURL({
+      apiRoute: '/api',
+      path: `/${lexicalLinkFeatureAutosaveSlug}`,
+      serverURL,
+    })
+    const response = await page.request.post(collectionURL, { data: { _status: 'published' } })
+
+    await expect(response).toBeOK()
+
+    const {
+      doc: { id },
+    } = await response.json()
+    let releaseAutosave: () => void = () => {}
+    const autosaveReady = new Promise<void>((resolve) => {
+      releaseAutosave = resolve
+    })
+
+    createdAutosaveDocIDs.push(id)
+
+    await page.route(`${collectionURL}/${id}?**`, async (route) => {
+      if (new URL(route.request().url()).searchParams.get('autosave') === 'true') {
+        await autosaveReady
+      }
+
+      await route.continue()
+    })
+
+    try {
+      await page.goto(new AdminUrlUtil(serverURL, lexicalLinkFeatureAutosaveSlug).edit(id))
+      await waitForFormReady(page)
+
+      const { uploadListDrawer } = await openUploadListDrawer({
+        finalizedURL: 'https://example.com/media-picker',
+        page,
+      })
+      const search = uploadListDrawer.getByRole('textbox', { name: 'Search', exact: true })
+
+      await search.fill('payload')
+      await expect(uploadListDrawer.getByText('payload.jpg', { exact: true })).toBeVisible()
+      await search.focus()
+
+      const originalSearch = await search.elementHandle()
+
+      releaseAutosave()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(uploadListDrawer).toBeVisible()
+      await expect.poll(() => originalSearch!.evaluate((element) => element.isConnected)).toBe(true)
+      await expect(search).toHaveValue('payload')
+      await expect(search).toBeFocused()
+      await uploadListDrawer.getByText('payload.jpg', { exact: true }).click()
+      await expect(uploadListDrawer).toBeHidden()
+      await expect(page.locator('.upload-relationship-details__filename')).toHaveText('payload.jpg')
+    } finally {
+      releaseAutosave()
+      await page.unrouteAll({ behavior: 'wait' })
+    }
   })
 
   test('should preserve unsaved link fields and the nested upload drawer through parent autosave', async ({
