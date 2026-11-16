@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/kv-redis",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.9",
   "description": "Redis KV adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -59,6 +59,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.22.1"
+    "node": "^24.22.3 || >=26.13.1"
   }
 }

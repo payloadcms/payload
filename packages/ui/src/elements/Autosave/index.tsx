@@ -5,8 +5,8 @@ import { dequal } from 'dequal/lite'
 import {
   formatAdminURL,
   getAutosaveInterval,
+  getDataFromFormState,
   hasDraftValidationEnabled,
-  reduceFieldsToValues,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
@@ -21,6 +21,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.css'
 
@@ -49,7 +50,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
   } = useDocumentInfo()
 
-  const { getFields, isValid, submit } = useForm()
+  const { getFields, isValid, submit, submitted } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
@@ -73,9 +74,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const autosaveSequenceRef = useRef(0)
   const retryAutosaveRef = useRef<(() => Promise<void>) | null>(null)
   const savingStartTimestampRef = useRef(0)
+  const wasSkippedWhileInvalidRef = useRef(false)
 
   const didMount = useRef(false)
-  const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
+  const previousDebouncedData = useRef(getDataFromFormState(debouncedFormState))
   const previousUploadEdits = useRef(uploadEdits)
 
   const stopAutoSaveIndicator = useEffectEvent(() => {
@@ -87,7 +89,15 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   const handleAutosave = useEffectEvent(async () => {
+    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
+
+    wasSkippedWhileInvalidRef.current = false
     if (!modified) {
+      return
+    }
+
+    if (submitted && !valid && validateOnDraft) {
+      wasSkippedWhileInvalidRef.current = true
       return
     }
 
@@ -152,7 +162,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         method,
         onStaleRequest: () => {
           if (autosaveSequence === autosaveSequenceRef.current) {
-            previousDebouncedData.current = reduceFieldsToValues(getFields())
+            previousDebouncedData.current = getDataFromFormState(getFields())
             previousUploadEdits.current = uploadEdits
             void retryAutosaveRef.current?.()
           }
@@ -215,9 +225,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
      * Remove `updatedAt` from comparison as it changes on every autosave interval.
      */
-    const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
+    const { updatedAt: _, ...formData } = getDataFromFormState(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
-    const { updatedAt: ___, ...currentFormData } = reduceFieldsToValues(getFields())
+    const { updatedAt: ___, ...currentFormData } = getDataFromFormState(getFields())
 
     // Recovery can already be saving a newer revision than the debounced snapshot.
     if (!dequal(formData, currentFormData)) {
@@ -225,6 +235,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
+      // Validity arrives with the form-state response after the values settle, so retry an autosave skipped while invalid.
+      if (wasSkippedWhileInvalidRef.current) {
+        void handleAutosave()
+      }
+
       return
     }
 

@@ -274,6 +274,45 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       fs.rmSync(staticDir, { force: true, recursive: true })
     })
 
+    test('should mark a size as stored when a new file stores it, after an earlier owner built it at request time', async ({
+      payload,
+    }) => {
+      const getImage = async (name: string) => {
+        const file = await getFileByPath(path.resolve(dirname, './image.png'))
+        file!.name = `${name}-${randomUUID()}.png`
+        return file
+      }
+      const data = { prefix: 'public', visibility: 'public' }
+      const doc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data,
+        file: await getImage('owner-change'),
+        overrideAccess: true,
+      })
+      createdIDs.push(doc.id)
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: fileAccessMediaSlug,
+        data: { variants: { thumbnail: { _stored: false } } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data,
+        file: await getImage('replacement'),
+        overrideAccess: true,
+      })
+
+      const saved = await payload.db.findOne<{
+        variants?: { thumbnail?: { _stored?: boolean | null } }
+      }>({
+        collection: fileAccessMediaSlug,
+        where: { id: { equals: doc.id } },
+      })
+      expect(saved?.variants?.thumbnail?._stored).not.toBe(false)
+    })
+
     test('should keep generated file data bound to its upload document', async ({
       payload,
       restClient,

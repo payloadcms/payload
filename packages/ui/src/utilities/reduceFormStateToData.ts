@@ -1,6 +1,6 @@
 import type { Data, FormState } from 'payload'
 
-import { reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 
 /** Reduces row-based form state without leaking array row counts into document data. */
 export const reduceFormStateToData = ({
@@ -38,7 +38,7 @@ export const reduceFormStateToData = ({
   )
 
   return normalizeData({
-    data: reduceFieldsToValues(formStateWithoutRowCounts, true),
+    data: getDataFromFormState(formStateWithoutRowCounts, true),
     rowFieldPaths: new Set(),
   })
 }

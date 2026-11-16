@@ -241,6 +241,17 @@ export interface User {
         expiresAt: string;
         refreshCount?: number | null;
         refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
       }[]
     | null;
   password?: string | null;
@@ -287,6 +298,7 @@ export interface Condition {
   conditionalCustomField?: string | null;
   conditionalRowField?: string | null;
   conditionalCollapsibleField?: string | null;
+  clientValidatedValue?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -315,6 +327,8 @@ export interface DraftPost {
   content?: string | null;
   blocks?: Text[] | null;
   restrictedValue?: string | null;
+  showConditionalField?: boolean | null;
+  conditionalField?: string | null;
   slug?: string | null;
   createdBy?: {
     relationTo: 'users';
@@ -532,6 +546,7 @@ export interface ConditionsSelect<T extends boolean = true> {
   conditionalCustomField?: T;
   conditionalRowField?: T;
   conditionalCollapsibleField?: T;
+  clientValidatedValue?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -560,6 +575,8 @@ export interface DraftPostsSelect<T extends boolean = true> {
             };
       };
   restrictedValue?: T;
+  showConditionalField?: T;
+  conditionalField?: T;
   slug?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -600,6 +617,9 @@ export interface UsersSelect<T extends boolean = true> {
         expiresAt?: T;
         refreshCount?: T;
         refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**

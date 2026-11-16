@@ -53,6 +53,11 @@ export type FieldState = {
     Field?: React.ReactNode
     Label?: React.ReactNode
   }
+  /**
+   * Excludes this field's own value when form state is converted to document data, so the value is not submitted with the form.
+   * The value remains available in form state.
+   * Descendant fields are serialized independently.
+   */
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
@@ -63,6 +68,13 @@ export type FieldState = {
   fieldSchema?: Field | TabAsField
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
+  /**
+   * Every time a field is changed locally, this flag is set to true. Prevents form state from server from overwriting local changes.
+   * After merging server form state, this flag is reset.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
+   */
+  isModified?: boolean
   /**
    * The path of the field when its custom components were last rendered.
    * This is used to denote if a field has been rendered, and if so,

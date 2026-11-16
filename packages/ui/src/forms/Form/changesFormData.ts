@@ -1,7 +1,7 @@
 import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
@@ -32,15 +32,15 @@ export const changesFormData = ({
 
   if (action.type === 'REPLACE_STATE') {
     return !dequal(
-      reduceFieldsToValues(action.state, true),
-      reduceFieldsToValues(currentState, true),
+      getDataFromFormState(action.state, true),
+      getDataFromFormState(currentState, true),
     )
   }
 
   if (action.type === 'UPDATE_MANY') {
     return !dequal(
-      reduceFieldsToValues({ ...currentState, ...action.formState }, true),
-      reduceFieldsToValues(currentState, true),
+      getDataFromFormState({ ...currentState, ...action.formState }, true),
+      getDataFromFormState(currentState, true),
     )
   }
 

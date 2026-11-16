@@ -26,7 +26,7 @@ import {
   completeFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
-import { generateFileData } from '../../uploads/generateFileData.js'
+import { generateFileData } from '../../uploads/generateFileData/index.js'
 import {
   getLocalizedUploadProperties,
   getUploadDestination,

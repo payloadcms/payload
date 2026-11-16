@@ -6,10 +6,10 @@ import type { Dispatch, RefObject } from 'react'
 import { dequal } from 'dequal/lite'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
+  getDataFromFormState,
   hasAutosaveEnabled,
-  reduceFieldsToValues,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState.js'
@@ -20,12 +20,11 @@ import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
+import { LivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
-import { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
 import { changesFormData } from './changesFormData.js'
 import { useDocumentForm } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
@@ -55,6 +54,8 @@ type ValidateArgs = {
 type FormValidationResult = {
   /** Values derived from the validated fields, ready for the submission handler. */
   data: Data
+  /** Whether server validation already rebuilt field state for this submission. */
+  didRefreshFormState: boolean
   /** The fields already applied to the form, including errors and server-rendered components. */
   fields: FormState
   /** False when server or enabled client validation rejects a field. */
@@ -64,13 +65,11 @@ type FormValidationResult = {
 export type UseFormStateResult = {
   /** Applies local field updates through the form reducer. */
   dispatchFields: Dispatch<FieldAction>
-  /** Applies server state without invalidating the request that produced it. */
   dispatchFieldsWithoutIncrementingFormSequence: Dispatch<FieldAction>
   /** Current fields, including their values, validation errors, and rendered components. */
   formState: FormState
-  /** Reads the current local-edit revision without subscribing to field changes. */
   getFormSequence: () => number
-  /** True while rebuilding the selected schema. */
+  /** True while the caller initializes the form or the selected schema is being rebuilt. */
   isInitializing: boolean
   /** Whether the form has unsaved field changes. */
   isModified: boolean
@@ -78,9 +77,9 @@ export type UseFormStateResult = {
   isValid: boolean
   /** Baseline used to distinguish local edits from applied server state. */
   prevFormStateRef: RefObject<FormState>
-  queueTask: UseQueueResult['queueTask']
   /** Queues a server refresh after field edits or changes to the selected fields. */
   queueFormStateRefresh: (args?: { force?: boolean }) => void
+  queueTask: UseQueueResult['queueTask']
   /** Rebuilds field state within the active request using the current fields or a saved document. */
   refreshFormState: (action: FormStateAction) => Promise<FormState | undefined>
   /** Rebuilds field state from new data and clears the modified flag. */
@@ -123,6 +122,7 @@ type Args = {
     | 'disableValidationOnSubmit'
     | 'initialState'
     | 'isDocumentForm'
+    | 'isInitializing'
     | 'readOnly'
     | 'schemaPath'
     | 'select'
@@ -149,8 +149,11 @@ export const useFormState = ({
   props,
   resetSequenceRef,
 }: Args): UseFormStateResult => {
+  const { isDocumentForm } = props
+
   const [formState, setFormState] = useState<FormState>(() => props.initialState || {})
   const formStateRef = useRef(formState)
+
   const formSequenceRef = useRef(0)
   const getFormSequence = useCallback(() => formSequenceRef.current, [])
   const requestQueueOptions = useMemo(() => ({ getSequence: getFormSequence }), [getFormSequence])
@@ -202,8 +205,7 @@ export const useFormState = ({
   const { config } = useConfig()
   const document = useDocumentInfo()
   const operation = useOperation()
-  const livePreview = useLivePreviewContext()
-  const preview = usePreviewURL()
+  const livePreview = isDocumentForm ? use(LivePreviewContext) : null
   const { t } = useTranslation()
   const { getFormState } = useServerFunctions()
   const parentDocumentForm = useDocumentForm()
@@ -220,22 +222,15 @@ export const useFormState = ({
 
   const [isInitializing, setIsInitializing] = useState(false)
 
-  const initialData = useMemo(
-    () => reduceFormStateToData({ formState: props.initialState }),
-    [props.initialState],
-  )
-
   const latest = {
     config,
     document,
     getFormState,
-    initialData,
     livePreview,
     onApplied,
     onReset,
     operation,
     parentDocumentForm,
-    preview,
     props,
     t,
     user,
@@ -275,7 +270,7 @@ export const useFormState = ({
           ? action.acceptValues
           : undefined
 
-      const { document, props } = current
+      const { document, livePreview, props } = current
 
       const {
         isDocumentForm,
@@ -314,7 +309,7 @@ export const useFormState = ({
       const data = isReset
         ? (action.data as Data)
         : isNested
-          ? reduceFormStateToData({ formState, initialData: current.initialData })
+          ? getDataFromFormState(formState, true)
           : savedDocument
 
       const args: FormStateRequestArgs = {
@@ -342,14 +337,13 @@ export const useFormState = ({
 
       if (isDocumentForm && !isReset) {
         const session = documentSessionRef.current
-        const { livePreview, preview } = current
 
         if (savedDocument) {
           session.originalUpdatedAt = savedDocument.updatedAt
           session.hasCheckedForStaleData = false
           args.returnLivePreviewURL =
-            livePreview.isLivePreviewEnabled && livePreview.typeofLivePreviewURL === 'function'
-          args.returnPreviewURL = preview.isPreviewEnabled
+            livePreview?.isLivePreviewEnabled && livePreview.typeofLivePreviewURL === 'function'
+          args.returnPreviewURL = livePreview?.isPreviewEnabled
         } else {
           // A router refresh can supply a newer baseline for stale-data detection.
           if (
@@ -451,7 +445,6 @@ export const useFormState = ({
           current.onReset()
 
           const fields = successResponse.state
-          contextRef.current.fields = fields
           contextRef.current.setModified(false)
           prevFormStateRef.current = fields
           dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state: fields })
@@ -459,7 +452,6 @@ export const useFormState = ({
         }
 
         if (isDocumentForm) {
-          const { livePreview, preview } = current
           const { livePreviewURL, lockedState, previewURL, staleDataState, state } = successResponse
 
           if (savedDocument) {
@@ -468,14 +460,14 @@ export const useFormState = ({
             }
 
             if (
-              livePreview.isLivePreviewEnabled &&
+              livePreview?.isLivePreviewEnabled &&
               livePreview.typeofLivePreviewURL === 'function'
             ) {
               livePreview.setURL(livePreviewURL)
             }
 
-            if (preview.isPreviewEnabled) {
-              preview.setPreviewURL(previewURL)
+            if (livePreview?.isPreviewEnabled) {
+              livePreview.setPreviewURL(previewURL)
             }
           } else {
             if (document.docConfig?.lockDocuments !== false) {
@@ -535,10 +527,6 @@ export const useFormState = ({
           incomingState: successResponse.state,
         })
 
-        if (isValidation) {
-          contextRef.current.fields = appliedState
-        }
-
         const merge = () => {
           if (isValidation) {
             prevFormStateRef.current = appliedState
@@ -592,13 +580,7 @@ export const useFormState = ({
         }
       }
     },
-    [
-      contextRef,
-      dispatchFieldsWithoutIncrementingFormSequence,
-      formSequenceRef,
-      resetSequenceRef,
-      prevFormStateRef,
-    ],
+    [contextRef, dispatchFieldsWithoutIncrementingFormSequence, resetSequenceRef, prevFormStateRef],
   )
 
   const queueFormStateRefresh = useCallback<UseFormStateResult['queueFormStateRefresh']>(
@@ -689,7 +671,6 @@ export const useFormState = ({
       }
 
       if (!dequal(contextRef.current.fields, validatedFieldState)) {
-        contextRef.current.fields = validatedFieldState
         dispatchFieldsWithoutIncrementingFormSequence({
           type: 'REPLACE_STATE',
           state: validatedFieldState,
@@ -705,12 +686,13 @@ export const useFormState = ({
 
   const validateForm = useCallback<UseFormStateResult['validateForm']>(
     async ({ isCurrent = () => true, isLocalSubmission = false, skipValidation = false } = {}) => {
-      let isServerValidated = false
+      let didRefreshFormState = false
       let isValid = true
 
       if (!skipValidation && isLocalSubmission) {
         const fields = await refreshFormState({ type: 'validate', isCurrent })
-        isServerValidated = fields !== undefined
+
+        didRefreshFormState = Boolean(fields)
         isValid = !fields || Object.values(fields).every((field) => field.valid !== false)
       }
 
@@ -719,15 +701,13 @@ export const useFormState = ({
       }
 
       const fields = contextRef.current.fields ?? {}
-      const data = isServerValidated
-        ? reduceFormStateToData({ formState: fields })
-        : reduceFieldsToValues(fields, true)
+      const data = getDataFromFormState(fields, true)
 
       if (isCurrent()) {
         setIsValid(isValid)
       }
 
-      return { data, fields, isValid }
+      return { data, didRefreshFormState, fields, isValid }
     },
     [contextRef, refreshFormState, validateFields],
   )
@@ -762,12 +742,12 @@ export const useFormState = ({
       dispatchFieldsWithoutIncrementingFormSequence,
       formState,
       getFormSequence,
-      isInitializing,
+      isInitializing: props.isInitializing || isInitializing,
       isModified,
       isValid,
       prevFormStateRef,
-      queueTask,
       queueFormStateRefresh,
+      queueTask,
       refreshFormState,
       resetFormState,
       resetQueue,
@@ -780,21 +760,22 @@ export const useFormState = ({
     [
       dispatchFields,
       dispatchFieldsWithoutIncrementingFormSequence,
-      formState,
       getFormSequence,
-      prevFormStateRef,
       queueTask,
+      resetQueue,
+      setModifiedWithoutTracking,
+      submissionErrorsRef,
+      formState,
+      prevFormStateRef,
       refreshFormState,
       isInitializing,
+      props.isInitializing,
       isValid,
       isModified,
       queueFormStateRefresh,
       resetFormState,
-      resetQueue,
       setIsValid,
       setModified,
-      setModifiedWithoutTracking,
-      submissionErrorsRef,
       validateForm,
     ],
   )

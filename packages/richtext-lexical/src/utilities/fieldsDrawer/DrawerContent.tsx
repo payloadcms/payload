@@ -9,6 +9,7 @@ import {
   useDocumentForm,
   useDocumentInfo,
   useEffectEvent,
+  useOperation,
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
@@ -38,6 +39,7 @@ export const DrawerContent: React.FC<
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
   const [formUUID] = useState(() => uuid())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
@@ -72,7 +74,7 @@ export const DrawerContent: React.FC<
         documentFormState: getParentDocumentFields(),
         globalSlug,
         initialBlockData: data,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -98,6 +100,7 @@ export const DrawerContent: React.FC<
     isEditable,
     globalSlug,
     getDocPreferences,
+    operation,
   ])
 
   if (initialState === false) {

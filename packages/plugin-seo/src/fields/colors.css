@@ -1,5 +1,6 @@
 @layer payload-default {
   :root,
+  :host,
   [data-theme] {
     --seo-description-color: #9a9a9a;
     --seo-danger-bg: red;
@@ -13,7 +14,9 @@
   }
 
   html[data-enhanced-contrast],
-  html[data-enhanced-contrast] [data-theme] {
+  html[data-enhanced-contrast] [data-theme],
+  :host([data-enhanced-contrast]),
+  :host([data-enhanced-contrast]) [data-theme] {
     --seo-description-color: var(--color-text-secondary);
     --seo-danger-bg: var(--color-bg-danger);
     --seo-short-bg: var(--color-bg-danger);

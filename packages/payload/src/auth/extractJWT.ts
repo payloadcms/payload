@@ -5,17 +5,15 @@ import { parseCookies } from '../utilities/parseCookies.js'
 
 type ExtractionMethod = (args: { headers: Headers; payload: BasePayload }) => null | string
 
+/**
+ * Reads the token from an `Authorization: Bearer <token>` header (RFC 6750). The scheme is
+ * case-insensitive and may be followed by more than one space.
+ */
+export const extractBearerToken = ({ headers }: { headers: Headers }): null | string =>
+  headers.get('Authorization')?.match(/^Bearer +(\S+)$/i)?.[1] ?? null
+
 const extractionMethods: Record<string, ExtractionMethod> = {
-  Bearer: ({ headers }) => {
-    const jwtFromHeader = headers.get('Authorization')
-
-    // RFC6750 OAuth 2.0 Bearer token
-    if (jwtFromHeader?.startsWith('Bearer ')) {
-      return jwtFromHeader.replace('Bearer ', '')
-    }
-
-    return null
-  },
+  Bearer: extractBearerToken,
   cookie: ({ headers, payload }) => {
     const cookies = parseCookies(headers)
     const tokenCookieName = `${payload.config.cookiePrefix}-token`

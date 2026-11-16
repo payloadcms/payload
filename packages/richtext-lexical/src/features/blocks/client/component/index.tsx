@@ -25,6 +25,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
+  useOperation,
   useServerFunctions,
   useTranslation,
   XIcon,
@@ -123,9 +124,11 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
 
   const blockType = formData.blockType
   const formDataRef = useRef(formData)
+
   formDataRef.current = formData
 
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
@@ -262,7 +265,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -328,6 +331,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    operation,
     parentDocumentFields,
     blockType,
     clientBlock,

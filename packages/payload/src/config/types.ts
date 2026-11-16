@@ -72,6 +72,10 @@ import type {
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { MaybePromise, PayloadRequest, Where } from '../types/index.js'
+import type {
+  UploadSessionsConfig,
+  UploadSessionTransferConfig,
+} from '../uploads/sessions/types.js'
 import type { UploadTransformer } from '../uploads/transformers/types.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -496,6 +500,11 @@ export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Respon
 export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Skip Payload's authentication before the handler runs, so `req.user` is `null`. Use this when
+   * the handler authenticates the request itself, e.g. with `req.payload.auth()`.
+   */
+  disableAuth?: boolean
 
   /**
    * Middleware that will be called when the path/method matches
@@ -511,13 +520,6 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-  /**
-   * Please add "root" routes under the /api folder in the Payload Project.
-   * https://nextjs.org/docs/app/api-reference/file-conventions/route
-   *
-   * @deprecated in 3.0
-   */
-  root?: never
 }
 
 /**
@@ -874,6 +876,16 @@ export type FetchAPIFileUploadOptions = {
 } & Partial<BusboyConfig>
 
 export type GlobalUploadConfig = {
+  /**
+   * Lifetime and quota policies for durable browser upload sessions.
+   * @experimental
+   */
+  sessions?: UploadSessionsConfig
+  /**
+   * Transfer preferences for segmented browser uploads. Storage provider limits always win.
+   * @experimental
+   */
+  transfer?: UploadSessionTransferConfig
   /**
    * Ordered list of file transformers. Every eligible transformer joins the pipeline
    * for a given upload or dynamic request in declaration order. Slugs must be unique.
@@ -1490,6 +1502,8 @@ export type Config = {
   collections?: CollectionConfig[]
   /**
    * Prefix a string to all cookies that Payload sets.
+   * Must contain only valid cookie-name characters; whitespace is not allowed.
+   * Empty strings use the default prefix.
    *
    * @default "payload"
    */

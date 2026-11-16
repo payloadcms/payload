@@ -200,6 +200,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (!permissions) {
         return
       }
+
       const task = async () => {
         const lastFullyLoadedRelationToUse =
           typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1

@@ -19,6 +19,7 @@ import {
   useDocumentForm,
   useDocumentInfo,
   useEditDepth,
+  useOperation,
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
@@ -81,6 +82,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
   const { i18n, t } = useTranslation<object, string>()
   const {
     createdInlineBlock,
@@ -95,6 +97,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   const firstTimeDrawer = useRef(false)
   const blockType = formData.blockType
   const formDataRef = useRef(formData)
+
   formDataRef.current = formData
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}.fields`
 
@@ -246,7 +249,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -305,6 +308,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    operation,
     parentDocumentFields,
     clientBlock,
   ])

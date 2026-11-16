@@ -28,6 +28,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug, draftPostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { afterEach, beforeEach, describe } = test
@@ -63,25 +64,31 @@ test.describe('Form State', () => {
     // })
   })
 
-  test(
-    'should disable fields during initialization',
-    { framework: 'next' },
-    async ({ browser }) => {
-      const initializingContext = await browser.newContext({
-        javaScriptEnabled: false,
-        storageState: await page.context().storageState(),
-      })
+  // Next.js renders the create view then runs an initial client-side form-state
+  // fetch during which fields are disabled. TanStack Start serves the form
+  // already-initialized in the RSC payload, so there is no disabled phase — the
+  // tanstack-start variant below asserts the form is immediately editable instead.
+  test('should disable fields during initialization', { framework: 'next' }, async () => {
+    const hydration = Promise.withResolvers<void>()
+    const scriptURL = '**/_next/static/**/*.js*'
+    const holdHydration = async (route: Route) => {
+      await hydration.promise
+      await route.fallback()
+    }
 
-      try {
-        const initializingPage = await initializingContext.newPage()
+    // Keep hydration from finishing before the disabled state can be observed.
+    await page.route(scriptURL, holdHydration)
 
-        await initializingPage.goto(postsUrl.create)
-        await expect(initializingPage.locator('#field-title')).toBeDisabled()
-      } finally {
-        await initializingContext.close()
-      }
-    },
-  )
+    try {
+      await page.goto(postsUrl.create, { waitUntil: 'commit' })
+      await expect(page.locator('#field-title')).toBeDisabled()
+    } finally {
+      hydration.resolve()
+      await page.unroute(scriptURL, holdHydration)
+    }
+
+    await expect(page.locator('#field-title')).toBeEnabled()
+  })
 
   test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
     await page.goto(postsUrl.create)
@@ -422,6 +429,92 @@ test.describe('Form State', () => {
     await expect(
       page.locator('#field-computedArray #computedArray-row-0 #field-computedArray__0__text'),
     ).toHaveValue('This is a computed value.')
+  })
+
+  test('should finish post-save rebuilding before a pending edit refresh', async () => {
+    const doc = await createPost({ title: 'Before save' })
+    const { page: savePage } = await initPage({ context, serverURL })
+    const editURL = postsUrl.edit(doc.id)
+    const backgroundStarted = Promise.withResolvers<void>()
+    const releaseBackground = Promise.withResolvers<void>()
+    const backgroundReleased = Promise.withResolvers<void>()
+    const permissionsStarted = Promise.withResolvers<void>()
+    const releasePermissions = Promise.withResolvers<void>()
+    let hasHeldBackground = false
+    let hasHeldPermissions = false
+
+    try {
+      await savePage.clock.install()
+      await savePage.goto(editURL)
+      await waitForFormReady(savePage)
+      await savePage.clock.pauseAt(await savePage.evaluate(() => Date.now() + 1000))
+
+      await savePage.route(
+        (url) =>
+          url.href === editURL ||
+          (currentFramework === 'tanstack-start' && url.pathname.startsWith('/_serverFn/')),
+        async (route) => {
+          const request = route.request()
+
+          if (request.method() !== 'POST' || hasHeldBackground) {
+            return route.fallback()
+          }
+
+          const call = (
+            currentFramework === 'tanstack-start'
+              ? fromJSON(request.postDataJSON()).data
+              : request.postDataJSON()[0]
+          ) as { name?: string }
+
+          if (call?.name !== 'form-state') {
+            return route.fallback()
+          }
+
+          hasHeldBackground = true
+          const response = await route.fetch()
+
+          backgroundStarted.resolve()
+          await releaseBackground.promise
+          await route.fulfill({ response })
+          backgroundReleased.resolve()
+        },
+      )
+      await savePage.route(`**/api/posts/access/${doc.id}*`, async (route) => {
+        if (hasHeldPermissions || route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        hasHeldPermissions = true
+        const response = await route.fetch()
+
+        permissionsStarted.resolve()
+        await releasePermissions.promise
+        await route.fulfill({ response })
+      })
+
+      const titleField = savePage.locator('#field-title')
+
+      await titleField.fill('Intermediate title')
+      await savePage.clock.runFor(300)
+      await backgroundStarted.promise
+      await titleField.fill('After save')
+      await savePage.clock.runFor(300)
+      await savePage.locator('#action-save').click()
+      releaseBackground.resolve()
+      await backgroundReleased.promise
+      await permissionsStarted.promise
+      await savePage.clock.runFor(300)
+      releasePermissions.resolve()
+      await savePage.clock.resume()
+
+      await expect(savePage.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(savePage.locator('#field-computedTitle')).toHaveValue('After save')
+    } finally {
+      releaseBackground.resolve()
+      releasePermissions.resolve()
+      await savePage.unrouteAll({ behavior: 'wait' })
+      await savePage.close()
+    }
   })
 
   test('should fetch new doc permissions after save', async () => {
@@ -1151,7 +1244,7 @@ test.describe('Shared form request queue', () => {
   let serverURL: string
 
   const createdDocs: {
-    collection: 'autosave-posts' | 'draft-posts' | 'posts'
+    collection: 'autosave-posts' | 'conditions' | 'draft-posts' | 'posts'
     id: Post['id']
   }[] = []
 
@@ -1178,6 +1271,210 @@ test.describe('Shared form request queue', () => {
 
     createdDocs.length = 0
   })
+
+  for (const failure of ['HTTP error', 'network error'] as const) {
+    test(`should refresh conditional fields after an explicit save ${failure}`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: conditionsSlug,
+        data: { showField: true, conditionalRowField: 'Initial value' },
+        overrideAccess: true,
+      })
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const failed = Promise.withResolvers<void>()
+      const editURL = new AdminUrlUtil(serverURL, conditionsSlug).edit(doc.id)
+      let didHoldRefresh = false
+
+      createdDocs.push({ collection: conditionsSlug, id: doc.id })
+      releases.add(released.resolve)
+
+      await page.goto(editURL)
+      await waitForFormReady(page)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      const checkbox = page.locator('#field-showField')
+      const conditionalField = page.locator('#field-conditionalRowField')
+      const save = page.locator('#action-save')
+      const prepared = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          response.url().includes(`/api/${conditionsSlug}/${doc.id}`) &&
+          response.ok(),
+      )
+
+      await conditionalField.fill('Prepared value')
+      await save.click()
+      await prepared
+      await waitForFormReady(page)
+
+      await page.route(
+        (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+        async (route) => {
+          if (
+            didHoldRefresh ||
+            route.request().method() !== 'POST' ||
+            !route.request().postData()?.includes('form-state')
+          ) {
+            return route.continue()
+          }
+
+          didHoldRefresh = true
+          const response = await route.fetch()
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        },
+      )
+      await page.route(`**/api/${conditionsSlug}/${doc.id}**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        if (failure === 'network error') {
+          await route.abort('failed')
+        } else {
+          await route.fulfill({ status: 500, json: { message: 'Save failed' } })
+        }
+
+        failed.resolve()
+      })
+
+      await checkbox.uncheck()
+      await page.clock.runFor(300)
+      await captured.promise
+      await checkbox.check()
+      await page.clock.runFor(300)
+      await save.click()
+
+      released.resolve()
+
+      await failed.promise
+      await expect(save).toBeEnabled()
+      await page.clock.runFor(1000)
+      await expect(checkbox).toBeChecked()
+      await expect(conditionalField).toBeVisible()
+    })
+  }
+
+  for (const submissionType of ['submit', 'autosave'] as const) {
+    test(`should retain client validation errors after a rejected ${submissionType}`, async ({
+      page,
+    }) => {
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const viewURL = formatAdminURL({
+        adminRoute: '/admin',
+        path: '/client-validation',
+        serverURL,
+      })
+      let didHoldRefresh = false
+      let saveCount = 0
+
+      releases.add(released.resolve)
+
+      await page.goto(viewURL)
+
+      const form = page.locator(`.client-validation-form--${submissionType}`)
+      const field = form.getByRole('textbox', { name: 'Client validated value', exact: true })
+      const error = form
+        .getByRole('alert')
+        .filter({ hasText: 'This value is rejected by client validation.' })
+      const submit = form.getByRole('button', { name: 'Submit', exact: true })
+
+      await expect(form).toHaveAttribute('data-form-ready', 'true')
+      await expect(field).toBeVisible()
+      await page.clock.runFor(200)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      await page.route(
+        (url) => url.href === viewURL || url.pathname.startsWith('/_serverFn/'),
+        async (route) => {
+          if (
+            didHoldRefresh ||
+            route.request().method() !== 'POST' ||
+            !route.request().postData()?.includes('form-state')
+          ) {
+            return route.continue()
+          }
+
+          didHoldRefresh = true
+          const response = await route.fetch()
+
+          expect(await response.text()).toContain('clientValidatedValue')
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        },
+      )
+      await page.route(
+        (url) => url.pathname === `/api/${conditionsSlug}`,
+        async (route) => {
+          if (route.request().method() !== 'POST') {
+            return route.continue()
+          }
+
+          saveCount += 1
+
+          const response = await route.fetch()
+          const json = await response.json()
+
+          if (response.ok() && json.doc?.id) {
+            createdDocs.push({ collection: conditionsSlug, id: json.doc.id })
+          }
+
+          await route.fulfill({ response })
+        },
+      )
+
+      await submit.click()
+      await captured.promise
+      await expect(submit).toBeDisabled()
+
+      // Exercise the onChange debounce before the submission refresh can finish.
+      await page.clock.runFor(300)
+      await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
+
+      released.resolve()
+
+      await expect(submit).toBeEnabled()
+      await expect.poll(() => saveCount).toBe(0)
+      await expect(field).toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toContainText('This value is rejected by client validation.')
+      await expect(error).toBeVisible()
+
+      const saved = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'POST' &&
+          new URL(response.url()).pathname === `/api/${conditionsSlug}` &&
+          response.status() === 201,
+      )
+
+      await field.fill('Allowed value')
+      await submit.click()
+
+      const response = await saved
+      const { doc } = await response.json()
+
+      await expect(submit).toBeEnabled()
+      await expect(field).not.toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toBeHidden()
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: conditionsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.clientValidatedValue
+        })
+        .toBe('Allowed value')
+    })
+  }
 
   test('should preserve edits made during a queued autosave', async ({ page }) => {
     const doc = await payload.create({
@@ -1251,21 +1548,19 @@ test.describe('Shared form request queue', () => {
 
     await field.fill('abc')
 
-    await expect(field).toHaveValue('abc')
-    await expect.poll(() => submittedValues).toEqual(['a', 'ab'])
-    await expect.poll(readDraftValue).toBe('ab')
-
-    // The stale response retries the latest revision before its debounce fires.
+    // A stale response immediately schedules recovery for the latest edit.
     saves[1].released.resolve()
     await saves[2].captured.promise
-    await expect(savingIndicator).toBeVisible()
     await expect(field).toHaveValue('abc')
+    await expect(savingIndicator).toBeVisible()
     await expect.poll(() => submittedValues).toEqual(['a', 'ab', 'abc'])
+    await expect.poll(readDraftValue).toBe('abc')
+
     await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
     saves[2].released.resolve()
     await expect(savingIndicator).toBeHidden()
+    await page.clock.runFor(1000)
     await expect.poll(() => submittedValues).toEqual(['a', 'ab', 'abc'])
-    await expect.poll(readDraftValue).toBe('abc')
 
     await page.reload()
     await waitForFormReady(page)
@@ -2262,9 +2557,17 @@ test.describe('Superseded autosaves', () => {
     await autosave.captured
     autosave.release()
     await autosave.finished
-    await state.captured
+    await expect(page.locator('#field-computedTitle')).toHaveValue(
+      'ok Saved before the pending edit',
+    )
     await page.clock.runFor(1000)
     await expect(page.locator('.autosave')).toBeHidden()
+
+    // Reverting a sibling edit queues a refresh without changing the autosave snapshot.
+    await page.locator('label[for="field-type-custom"]').click()
+    await page.locator('label[for="field-type-internal"]').click()
+    await page.clock.runFor(1000)
+    await state.captured
 
     return state
   }

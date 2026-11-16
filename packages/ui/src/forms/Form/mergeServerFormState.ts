@@ -10,7 +10,7 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 export type AcceptValues =
   | {
       /**
-       * Set to `false` to accept server field values while preserving local array row order and guarding against mismatched row IDs.
+       * Set to `false` to accept server field values while preserving the locally modified field, local array row order, and guarding against mismatched row IDs.
        * Callers must reject stale responses before merging; this option does not detect local edits made while a request was pending.
        * When `true` or omitted, existing local field values are preserved unless the field was added by the server.
        * @default undefined
@@ -165,7 +165,9 @@ export const mergeServerFormState = ({
     // Server-added fields need their values even when existing local values are being preserved.
     // Callers must reject stale responses before merging so accepted server values cannot overwrite newer local edits.
     let shouldAcceptValue =
-      incomingField.addedByServer || acceptValues === true || isAutosaveResponse
+      incomingField.addedByServer ||
+      acceptValues === true ||
+      (isAutosaveResponse && !currentState[path]?.isModified)
 
     // For array row fields, verify the row IDs match at the given index before accepting server values.
     // If rows were reordered or deleted while the request was in-flight,
@@ -217,9 +219,6 @@ export const mergeServerFormState = ({
     // Other responses preserve local row membership.
     if (Array.isArray(incomingField.rows) && path in currentState) {
       if (acceptValues === true) {
-        if (incomingField.disableFormData === undefined) {
-          delete newState[path].disableFormData
-        }
         const currentRowsByID = new Map(currentState[path].rows?.map((row) => [row.id, row]))
 
         // Keep metadata attached to row IDs when the server removes or reorders rows.
@@ -253,8 +252,11 @@ export const mergeServerFormState = ({
 
         // Sync the value field to match the actual row count after merging.
         // Client is source of truth for row count when rows were added/removed during the request.
-        if ('value' in incomingField && newState[path].rows.length !== incomingField.value) {
-          newState[path].value = newState[path].rows.length
+        if ('value' in incomingField) {
+          const rowCount = newState[path].rows.length
+
+          newState[path].value =
+            rowCount === 0 && currentState[path]?.value === null ? null : rowCount
         }
       }
     }

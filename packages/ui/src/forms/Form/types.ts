@@ -33,12 +33,12 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * Local field value changes, resetting or replacing the form, and unmounting invalidate the submission.
      * Recheck after awaiting work before applying response-driven state changes.
      */
-    isCurrent: () => boolean
+    isCurrent?: () => boolean
     /**
      * Returns `true` after the form's request queue is reset, including form replacement or unmounting.
      * Field value changes alone leave this `false`.
      */
-    isQueueReset: () => boolean
+    isQueueReset?: () => boolean
     /** Identifies background autosaves; omitted values represent explicit submissions. */
     submissionType?: SubmitOptions['submissionType']
   },
@@ -82,9 +82,9 @@ export type FormProps = {
   log?: boolean
   /**
    * Called with the updated form state after edits or validation for a local submission.
-   * Its return value is ignored.
+   * Its return value is ignored, and callbacks are not awaited.
    */
-  onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
+  onChange?: ((args: { formState: FormState; submitted: boolean }) => void)[]
   onSubmit?: (fields: FormState, data: Data) => void
   /**
    * Handles successful submissions, including stale explicit document saves that still need metadata updates.

@@ -13,6 +13,14 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   config: {
     admin: {
+      components: {
+        views: {
+          ClientValidation: {
+            Component: './components/ClientValidationView/index.js#ClientValidationView',
+            path: '/client-validation',
+          },
+        },
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
