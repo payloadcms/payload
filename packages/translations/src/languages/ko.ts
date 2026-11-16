@@ -468,6 +468,7 @@ export const koTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '기존 필드 데이터 덮어쓰기',
     pageNotFound: '페이지를 찾을 수 없음',
     pageNumberRange: '1부터 {{totalPages}}까지의 페이지 번호를 입력하세요.',
+    parentDocument: '상위 문서',
     password: '비밀번호',
     pasteBelow: '아래에 붙여넣기',
     pasteField: '필드 붙여넣기',

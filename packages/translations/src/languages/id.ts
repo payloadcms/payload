@@ -474,6 +474,7 @@ export const idTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Timpa data isian yang ada',
     pageNotFound: 'Halaman tidak ditemukan',
     pageNumberRange: 'Masukkan nomor halaman dari 1 hingga {{totalPages}}.',
+    parentDocument: 'Dokumen induk',
     password: 'Kata Sandi',
     pasteBelow: 'Tempelkan di bawah',
     pasteField: 'Tempel Isian',

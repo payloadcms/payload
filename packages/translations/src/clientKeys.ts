@@ -401,6 +401,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:original',
   'general:overwriteExistingData',
   'general:pageNotFound',
+  'general:parentDocument',
   'general:password',
   'general:pasteBelow',
   'general:pasteField',
