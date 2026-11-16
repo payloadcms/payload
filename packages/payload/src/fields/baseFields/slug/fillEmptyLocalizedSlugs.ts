@@ -45,7 +45,7 @@ export const fillEmptyLocalizedSlugs = async ({
   const draftsEnabled = hasDraftsEnabled(collection)
   const incompleteLocales = new Set(
     localization.localeCodes.filter((locale) =>
-      hasMissingRequiredLocalizedField({ data, fields: collection.flattenedFields, locale }),
+      isMissingRequiredLocalizedFields({ data, fields: collection.flattenedFields, locale }),
     ),
   )
 
@@ -107,7 +107,7 @@ export const fillEmptyLocalizedSlugs = async ({
   return data
 }
 
-const hasMissingRequiredLocalizedField = ({
+const isMissingRequiredLocalizedFields = ({
   data,
   fields,
   isTopLevel = true,
@@ -133,7 +133,7 @@ const hasMissingRequiredLocalizedField = ({
         : data?.[field.name]
 
     if (field.type === 'group' || field.type === 'tab') {
-      return hasMissingRequiredLocalizedField({
+      return isMissingRequiredLocalizedFields({
         data: value as JsonObject | undefined,
         fields: field.flattenedFields,
         isTopLevel: false,
