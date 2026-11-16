@@ -10,7 +10,7 @@ import type {
 } from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
-import { MissingEditorProp } from '../../../errors/index.js'
+import { MissingEditorProp, ValidationError } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
@@ -437,11 +437,32 @@ export const promise = async <T>({
           const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
           const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
 
+          const fieldBlock = field.blocks.find((fieldBlock) =>
+            typeof fieldBlock === 'string'
+              ? fieldBlock === blockTypeToMatch
+              : fieldBlock.slug === blockTypeToMatch,
+          )
+
+          if (!fieldBlock) {
+            throw new ValidationError(
+              {
+                id,
+                collection: collection?.slug,
+                errors: [
+                  {
+                    message: req.t('validation:invalidBlock', { block: blockTypeToMatch }),
+                    path: `${path}.${rowIndex}.blockType`,
+                  },
+                ],
+                global: global?.slug,
+                req,
+              },
+              req.t,
+            )
+          }
+
           const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+            typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
           if (block) {
             row.blockType = blockTypeToMatch

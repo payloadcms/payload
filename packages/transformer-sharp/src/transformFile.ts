@@ -1,47 +1,57 @@
-import type { PayloadRequest, TransformFileArgs, TransformFileResult } from 'payload'
+import type {
+  Crop,
+  Document,
+  PayloadRequest,
+  TransformFileArgs,
+  TransformFileResult,
+} from 'payload'
 import type { ResizeOptions, SharpOptions } from 'sharp'
 
 import type { SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { createSharpFromFile } from './createSharpFromFile.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { getSavedCrop, getSavedFocalPoint } from './readSavedTransforms.js'
 
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
-const percentToPixel = (value: number, dimension: number) => Math.floor((value / 100) * dimension)
-
 /**
  * The Sharp package's public one-file-in/one-file-out upload primitive.
- * `options.kind` selects which legacy task to run: the main file (optionally
- * cropped, with `resizeOptions` re-applied to the crop output), or one named
- * legacy image size. Never writes to storage.
+ * `options.kind` selects which legacy task to run: the main file (cropped by the
+ * crop saved in `doc._transforms`, with `resizeOptions` re-applied to the crop
+ * output), or one named legacy image size. Never writes to storage.
  */
 export function createTransformFile({ sharpDependency }: { sharpDependency: SharpDependency }) {
   return async function transformFile({
+    doc,
     file,
     options,
     req,
   }: TransformFileArgs<SharpUploadTaskOptions>): Promise<TransformFileResult> {
     if (options.kind === 'main') {
-      return transformMain({ file, options, req, sharpDependency })
+      return transformMain({ doc, file, options, req, sharpDependency })
     }
 
-    return transformSize({ file, options, req, sharpDependency })
+    return transformSize({ doc, file, options, req, sharpDependency })
   }
 }
 
 async function transformMain({
+  doc,
   file,
   options,
   req,
   sharpDependency,
 }: {
+  doc: Document
   file: File
   options: Extract<SharpUploadTaskOptions, { kind: 'main' }>
   req: PayloadRequest
   sharpDependency: SharpDependency
 }): Promise<TransformFileResult> {
-  const { collectionUpload, crop } = options
+  const { collectionUpload, cropSize, originalDimensions } = options
+  // A full-image selection saves no crop, but a request crop size still extracts from the corner.
+  const crop = getSavedCrop({ doc }) ?? (cropSize ? { ...cropSize, x: 0, y: 0 } : undefined)
   const { constructorOptions, formatOptions, resizeOptions, trimOptions, withMetadata } =
     collectionUpload
 
@@ -50,11 +60,13 @@ async function transformMain({
     resizeOptions || formatOptions || trimOptions || constructorOptions,
   )
 
-  if (crop) {
+  if (crop && originalDimensions) {
     return transformCrop({
       crop,
+      cropSize,
       file,
       fileIsAnimatedType,
+      originalDimensions,
       req,
       resizeOptions,
       sharpDependency,
@@ -98,27 +110,29 @@ async function transformMain({
 
 async function transformCrop({
   crop,
+  cropSize,
   file,
   fileIsAnimatedType,
+  originalDimensions,
   req,
   resizeOptions,
   sharpDependency,
   withMetadata,
 }: {
-  crop: NonNullable<Extract<SharpUploadTaskOptions, { kind: 'main' }>['crop']>
+  crop: Omit<Crop, 'unit'>
+  cropSize: Extract<SharpUploadTaskOptions, { kind: 'main' }>['cropSize']
   file: File
   fileIsAnimatedType: boolean
+  originalDimensions: { height: number; width: number }
   req: PayloadRequest
   resizeOptions: ResizeOptions | undefined
   sharpDependency: SharpDependency
   withMetadata: SharpUploadTaskOptions['collectionUpload']['withMetadata']
 }): Promise<TransformFileResult> {
-  const { cropData, heightInPixels, originalDimensions, widthInPixels } = crop
-
   const sharpOptions: SharpOptions = fileIsAnimatedType ? { animated: true } : {}
 
-  const newWidth = Number(widthInPixels)
-  const newHeight = Number(heightInPixels)
+  const newWidth = Number(cropSize?.width ?? crop.width)
+  const newHeight = Number(cropSize?.height ?? crop.height)
   const dimensionsChanged =
     originalDimensions.width !== newWidth || originalDimensions.height !== newHeight
 
@@ -127,8 +141,9 @@ async function transformCrop({
   if (dimensionsChanged) {
     const formattedCropData = {
       height: newHeight,
-      left: percentToPixel(cropData.x, originalDimensions.width),
-      top: percentToPixel(cropData.y, originalDimensions.height),
+      // A request crop size larger than the saved crop could pass the far edge.
+      left: Math.min(crop.x, originalDimensions.width - newWidth),
+      top: Math.min(crop.y, originalDimensions.height - newHeight),
       width: newWidth,
     }
 
@@ -164,17 +179,20 @@ async function transformCrop({
 }
 
 async function transformSize({
+  doc,
   file,
   options,
   req,
   sharpDependency,
 }: {
+  doc: Document
   file: File
   options: Extract<SharpUploadTaskOptions, { kind: 'size' }>
   req: PayloadRequest
   sharpDependency: SharpDependency
 }): Promise<TransformFileResult> {
-  const { collectionUpload, focalPoint, imageResizeConfig, originalDimensions } = options
+  const { canUseFocalPoint, collectionUpload, imageResizeConfig, originalDimensions } = options
+  const focalPoint = canUseFocalPoint ? getSavedFocalPoint({ doc }) : undefined
   const { withMetadata } = collectionUpload
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)

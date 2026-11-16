@@ -1,0 +1,166 @@
+name: audit-dependencies-branch
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Branch to audit and fix
+        type: string
+        required: true
+      scope:
+        description: Which surface to audit (consumer-facing or monorepo)
+        type: string
+        required: true
+      severity:
+        description: Minimum severity to report (low, moderate, high, critical)
+        type: string
+        required: true
+      is-default-inputs:
+        description: Only runs from main with default inputs may create, update, or close PRs
+        type: boolean
+        required: true
+    secrets:
+      AUDIT_DEPS_APP_CLIENT_ID:
+        required: false
+      AUDIT_DEPS_APP_PRIVATE_KEY:
+        required: false
+
+permissions: {}
+
+# All steps run in one job. A real run is one with `is-default-inputs`; any other run is a dry run.
+# Only the Publish PRs step gets a write token (the App token, in real runs). Every other step gets
+# at most the read-only github.token.
+# No step runs code from the dependencies. Bumps use
+# `pnpm install --lockfile-only --ignore-scripts`, and the CI of each PR builds and tests the
+# result. The App token is created after Prepare PRs, so it does not exist while pnpm and the
+# re-audit read registry data.
+# The workflow stores no state of its own and reads the state of its open and closed PRs. An
+# unchanged PR is skipped, commits from a person block updates, and a change that a person closed
+# is not opened again.
+jobs:
+  audit:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    # Dry runs use no environment. They can come from any branch, which the branch policy of the
+    # `audit-deps` environment would reject.
+    environment: ${{ inputs.is-default-inputs && 'audit-deps' || '' }}
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      # The scripts and the audit action come from the commit that started the run, in a folder
+      # outside the workspace. This audits every ref with the same code. The audited ref gives only
+      # its dependency tree and its allowlist.
+      - name: Checkout tooling
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.github/actions/audit-dependencies/dist/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
+      # The job holds the App token later, so it restores no cache: another workflow could have
+      # written it.
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+
+      # Runs the audit bundle from the tooling folder the same way its action.yml does, with inputs
+      # in `INPUT_*` variables. The audit reads the checked-out ref in the workspace.
+      # The audit exits 0 when it is complete, with or without findings. It exits 1 when its result
+      # may be incomplete. The job then stops here, so no PR is opened, updated or closed from it.
+      - name: Run dependency audit
+        env:
+          INPUT_JSON: ${{ runner.temp }}/audit_output.json
+          INPUT_SCOPE: ${{ inputs.scope }}
+          INPUT_SEVERITY: ${{ inputs.severity }}
+        run: node "$RUNNER_TEMP/audit-deps-tooling/.github/actions/audit-dependencies/dist/index.js"
+
+      - name: Plan bumps and PRs
+        env:
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" plan
+          --report="$RUNNER_TEMP/audit_output.json"
+          --scope="$SCOPE"
+          --ref="$REF"
+          --out="$RUNNER_TEMP/audit-plan/plan.json"
+
+      - name: Decide PR steps
+        id: decide
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
+          PLAN_FILE: ${{ runner.temp }}/audit-plan/plan.json
+          REF: ${{ inputs.ref }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { runDecidePrSteps } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/commands/github.mjs`
+            )
+            await runDecidePrSteps({ context, core, env: process.env, github })
+
+      # Each PR is one bot commit on top of the audited commit. A failed PR is recorded, and the
+      # other PRs continue.
+      - name: Prepare PRs
+        id: prepare
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_STEPS: ${{ steps.decide.outputs.pr_steps }}
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+          SEVERITY: ${{ inputs.severity }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" prepare-prs
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --pr-steps-json="$PR_STEPS"
+          --ref="$REF"
+          --scope="$SCOPE"
+          --severity="$SEVERITY"
+          --run-url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          --cwd="$GITHUB_WORKSPACE"
+          --out-dir="$RUNNER_TEMP/prepared"
+
+      - name: Mint App token
+        id: app-token
+        if: inputs.is-default-inputs
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # Real runs push with a lease on the branch head that Decide PR steps saw, so a push from a
+      # person is not overwritten. Dry runs only write the summary.
+      # Publish needs the output of Prepare PRs. It runs when Mint App token fails, so the summary
+      # can report the missing token.
+      - name: Publish PRs
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
+          PREPARED_FILE: ${{ runner.temp }}/prepared/prepared.json
+          REF: ${{ inputs.ref }}
+          STALE_PRS: ${{ steps.decide.outputs.stale_prs }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token || github.token }}
+          script: |
+            const { runPublish } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/commands/publish.mjs`
+            )
+            await runPublish({ context, core, env: process.env, github })

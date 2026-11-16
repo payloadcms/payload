@@ -1,11 +1,8 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 956:
+/***/ 775:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
 
 const ANY = Symbol('SemVer ANY')
 // hoisted class for cyclic dependency
@@ -142,20 +139,18 @@ class Comparator {
 
 module.exports = Comparator
 
-const parseOptions = __nccwpck_require__(9194)
-const { safeRe: re, t } = __nccwpck_require__(4436)
-const cmp = __nccwpck_require__(2118)
-const debug = __nccwpck_require__(2771)
-const SemVer = __nccwpck_require__(1608)
-const Range = __nccwpck_require__(9333)
+const parseOptions = __nccwpck_require__(4074)
+const { safeRe: re, t } = __nccwpck_require__(6632)
+const cmp = __nccwpck_require__(7548)
+const debug = __nccwpck_require__(8775)
+const SemVer = __nccwpck_require__(6997)
+const Range = __nccwpck_require__(9001)
 
 
 /***/ }),
 
-/***/ 9333:
+/***/ 9001:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
 
 const SPACE_CHARACTERS = /\s+/g
 
@@ -255,9 +250,6 @@ class Range {
   }
 
   parseRange (range) {
-    // strip build metadata so it can't bleed into the version
-    range = range.replace(BUILDSTRIPRE, '')
-
     // memoize range parsing for performance.
     // this is a very hot path, and fully deterministic.
     const memoOpts =
@@ -374,25 +366,21 @@ class Range {
 
 module.exports = Range
 
-const LRU = __nccwpck_require__(8472)
+const LRU = __nccwpck_require__(3795)
 const cache = new LRU()
 
-const parseOptions = __nccwpck_require__(9194)
-const Comparator = __nccwpck_require__(956)
-const debug = __nccwpck_require__(2771)
-const SemVer = __nccwpck_require__(1608)
+const parseOptions = __nccwpck_require__(4074)
+const Comparator = __nccwpck_require__(775)
+const debug = __nccwpck_require__(8775)
+const SemVer = __nccwpck_require__(6997)
 const {
   safeRe: re,
-  src,
   t,
   comparatorTrimReplace,
   tildeTrimReplace,
   caretTrimReplace,
-} = __nccwpck_require__(4436)
-const { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = __nccwpck_require__(1421)
-
-// unbounded global build-metadata stripper used by parseRange
-const BUILDSTRIPRE = new RegExp(src[t.BUILD], 'g')
+} = __nccwpck_require__(6632)
+const { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = __nccwpck_require__(7425)
 
 const isNullSet = c => c.value === '<0.0.0-0'
 const isAny = c => c.value === ''
@@ -419,7 +407,6 @@ const isSatisfiable = (comparators, options) => {
 // already replaced the hyphen ranges
 // turn into a set of JUST comparators.
 const parseComparator = (comp, options) => {
-  comp = comp.replace(re[t.BUILD], '')
   debug('comp', comp, options)
   comp = replaceCarets(comp, options)
   debug('caret', comp)
@@ -433,11 +420,6 @@ const parseComparator = (comp, options) => {
 }
 
 const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
-
-const invalidXRangeOrder = (M, m, p) => (
-  (isX(M) && !isX(m)) ||
-  (isX(m) && p && !isX(p))
-)
 
 // ~, ~> --> * (any, kinda silly)
 // ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0-0
@@ -456,10 +438,6 @@ const replaceTildes = (comp, options) => {
 
 const replaceTilde = (comp, options) => {
   const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE]
-  // if we're including prereleases in the match, then the lower bound is
-  // -0, the lowest possible prerelease value, just like x-ranges and carets.
-  // this keeps `~1.2` equivalent to the `1.2.x` x-range it's documented as.
-  const z = options.includePrerelease ? '-0' : ''
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('tilde', comp, _, M, m, p, pr)
     let ret
@@ -467,10 +445,10 @@ const replaceTilde = (comp, options) => {
     if (isX(M)) {
       ret = ''
     } else if (isX(m)) {
-      ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`
+      ret = `>=${M}.0.0 <${+M + 1}.0.0-0`
     } else if (isX(p)) {
       // ~1.2 == >=1.2.0 <1.3.0-0
-      ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`
+      ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`
     } else if (pr) {
       debug('replaceTilde pr', pr)
       ret = `>=${M}.${m}.${p}-${pr
@@ -539,10 +517,10 @@ const replaceCaret = (comp, options) => {
       if (M === '0') {
         if (m === '0') {
           ret = `>=${M}.${m}.${p
-          } <${M}.${m}.${+p + 1}-0`
+          }${z} <${M}.${m}.${+p + 1}-0`
         } else {
           ret = `>=${M}.${m}.${p
-          } <${M}.${+m + 1}.0-0`
+          }${z} <${M}.${+m + 1}.0-0`
         }
       } else {
         ret = `>=${M}.${m}.${p
@@ -568,10 +546,6 @@ const replaceXRange = (comp, options) => {
   const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE]
   return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
     debug('xRange', comp, ret, gtlt, M, m, p, pr)
-    if (invalidXRangeOrder(M, m, p)) {
-      return comp
-    }
-
     const xM = isX(M)
     const xm = xM || isX(m)
     const xp = xm || isX(p)
@@ -736,40 +710,22 @@ const testSet = (set, version, options) => {
 
 /***/ }),
 
-/***/ 1608:
+/***/ 6997:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const debug = __nccwpck_require__(8775)
+const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(7425)
+const { safeRe: re, t } = __nccwpck_require__(6632)
 
-
-const debug = __nccwpck_require__(2771)
-const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(1421)
-const { safeRe: re, t } = __nccwpck_require__(4436)
-
-const parseOptions = __nccwpck_require__(9194)
-const { compareIdentifiers } = __nccwpck_require__(5680)
-
-const isPrereleaseIdentifier = (prerelease, identifier) => {
-  const identifiers = identifier.split('.')
-  if (identifiers.length > prerelease.length) {
-    return false
-  }
-
-  for (let i = 0; i < identifiers.length; i++) {
-    if (compareIdentifiers(prerelease[i], identifiers[i]) !== 0) {
-      return false
-    }
-  }
-
-  return true
-}
-
+const parseOptions = __nccwpck_require__(4074)
+const { compareIdentifiers } = __nccwpck_require__(2683)
 class SemVer {
   constructor (version, options) {
     options = parseOptions(options)
 
     if (version instanceof SemVer) {
       if (version.loose === !!options.loose &&
-        version.includePrerelease === !!options.includePrerelease) {
+          version.includePrerelease === !!options.includePrerelease) {
         return version
       } else {
         version = version.version
@@ -868,25 +824,11 @@ class SemVer {
       other = new SemVer(other, this.options)
     }
 
-    if (this.major < other.major) {
-      return -1
-    }
-    if (this.major > other.major) {
-      return 1
-    }
-    if (this.minor < other.minor) {
-      return -1
-    }
-    if (this.minor > other.minor) {
-      return 1
-    }
-    if (this.patch < other.patch) {
-      return -1
-    }
-    if (this.patch > other.patch) {
-      return 1
-    }
-    return 0
+    return (
+      compareIdentifiers(this.major, other.major) ||
+      compareIdentifiers(this.minor, other.minor) ||
+      compareIdentifiers(this.patch, other.patch)
+    )
   }
 
   comparePre (other) {
@@ -949,19 +891,6 @@ class SemVer {
   // preminor will bump the version up to the next minor release, and immediately
   // down to pre-release. premajor and prepatch work the same way.
   inc (release, identifier, identifierBase) {
-    if (release.startsWith('pre')) {
-      if (!identifier && identifierBase === false) {
-        throw new Error('invalid increment argument: identifier is empty')
-      }
-      // Avoid an invalid semver results
-      if (identifier) {
-        const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE])
-        if (!match || match[1] !== identifier) {
-          throw new Error(`invalid identifier: ${identifier}`)
-        }
-      }
-    }
-
     switch (release) {
       case 'premajor':
         this.prerelease.length = 0
@@ -991,12 +920,6 @@ class SemVer {
           this.inc('patch', identifier, identifierBase)
         }
         this.inc('pre', identifier, identifierBase)
-        break
-      case 'release':
-        if (this.prerelease.length === 0) {
-          throw new Error(`version ${this.raw} is not a prerelease`)
-        }
-        this.prerelease.length = 0
         break
 
       case 'major':
@@ -1041,6 +964,10 @@ class SemVer {
       case 'pre': {
         const base = Number(identifierBase) ? 1 : 0
 
+        if (!identifier && identifierBase === false) {
+          throw new Error('invalid increment argument: identifier is empty')
+        }
+
         if (this.prerelease.length === 0) {
           this.prerelease = [base]
         } else {
@@ -1066,9 +993,8 @@ class SemVer {
           if (identifierBase === false) {
             prerelease = [identifier]
           }
-          if (isPrereleaseIdentifier(this.prerelease, identifier)) {
-            const prereleaseBase = this.prerelease[identifier.split('.').length]
-            if (isNaN(prereleaseBase)) {
+          if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
+            if (isNaN(this.prerelease[1])) {
               this.prerelease = prerelease
             }
           } else {
@@ -1093,12 +1019,10 @@ module.exports = SemVer
 
 /***/ }),
 
-/***/ 3227:
+/***/ 2875:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const parse = __nccwpck_require__(8989)
+const parse = __nccwpck_require__(8523)
 const clean = (version, options) => {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
   return s ? s.version : null
@@ -1108,17 +1032,15 @@ module.exports = clean
 
 /***/ }),
 
-/***/ 2118:
+/***/ 7548:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const eq = __nccwpck_require__(5331)
-const neq = __nccwpck_require__(7916)
-const gt = __nccwpck_require__(5343)
-const gte = __nccwpck_require__(5923)
-const lt = __nccwpck_require__(1759)
-const lte = __nccwpck_require__(7002)
+const eq = __nccwpck_require__(7995)
+const neq = __nccwpck_require__(2354)
+const gt = __nccwpck_require__(5106)
+const gte = __nccwpck_require__(195)
+const lt = __nccwpck_require__(7344)
+const lte = __nccwpck_require__(211)
 
 const cmp = (a, op, b, loose) => {
   switch (op) {
@@ -1169,14 +1091,12 @@ module.exports = cmp
 
 /***/ }),
 
-/***/ 4327:
+/***/ 9632:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
-const parse = __nccwpck_require__(8989)
-const { safeRe: re, t } = __nccwpck_require__(4436)
+const SemVer = __nccwpck_require__(6997)
+const parse = __nccwpck_require__(8523)
+const { safeRe: re, t } = __nccwpck_require__(6632)
 
 const coerce = (version, options) => {
   if (version instanceof SemVer) {
@@ -1238,12 +1158,10 @@ module.exports = coerce
 
 /***/ }),
 
-/***/ 9578:
+/***/ 7313:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 const compareBuild = (a, b, loose) => {
   const versionA = new SemVer(a, loose)
   const versionB = new SemVer(b, loose)
@@ -1254,24 +1172,20 @@ module.exports = compareBuild
 
 /***/ }),
 
-/***/ 9390:
+/***/ 4924:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const compareLoose = (a, b) => compare(a, b, true)
 module.exports = compareLoose
 
 
 /***/ }),
 
-/***/ 3659:
+/***/ 3786:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 const compare = (a, b, loose) =>
   new SemVer(a, loose).compare(new SemVer(b, loose))
 
@@ -1280,12 +1194,10 @@ module.exports = compare
 
 /***/ }),
 
-/***/ 3005:
+/***/ 9443:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const parse = __nccwpck_require__(8989)
+const parse = __nccwpck_require__(8523)
 
 const diff = (version1, version2) => {
   const v1 = parse(version1, null, true)
@@ -1314,13 +1226,20 @@ const diff = (version1, version2) => {
       return 'major'
     }
 
-    // If the main part has no difference
-    if (lowVersion.compareMain(highVersion) === 0) {
-      if (lowVersion.minor && !lowVersion.patch) {
-        return 'minor'
-      }
+    // Otherwise it can be determined by checking the high version
+
+    if (highVersion.patch) {
+      // anything higher than a patch bump would result in the wrong version
       return 'patch'
     }
+
+    if (highVersion.minor) {
+      // anything higher than a minor bump would result in the wrong version
+      return 'minor'
+    }
+
+    // bumping major/minor/patch all have same result
+    return 'major'
   }
 
   // add the `pre` prefix if we are going to a prerelease version
@@ -1338,7 +1257,7 @@ const diff = (version1, version2) => {
     return prefix + 'patch'
   }
 
-  // high and low are prereleases
+  // high and low are preleases
   return 'prerelease'
 }
 
@@ -1347,48 +1266,40 @@ module.exports = diff
 
 /***/ }),
 
-/***/ 5331:
+/***/ 7995:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const eq = (a, b, loose) => compare(a, b, loose) === 0
 module.exports = eq
 
 
 /***/ }),
 
-/***/ 5343:
+/***/ 5106:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const gt = (a, b, loose) => compare(a, b, loose) > 0
 module.exports = gt
 
 
 /***/ }),
 
-/***/ 5923:
+/***/ 195:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const gte = (a, b, loose) => compare(a, b, loose) >= 0
 module.exports = gte
 
 
 /***/ }),
 
-/***/ 3772:
+/***/ 6183:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 
 const inc = (version, release, options, identifier, identifierBase) => {
   if (typeof (options) === 'string') {
@@ -1411,72 +1322,60 @@ module.exports = inc
 
 /***/ }),
 
-/***/ 1759:
+/***/ 7344:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const lt = (a, b, loose) => compare(a, b, loose) < 0
 module.exports = lt
 
 
 /***/ }),
 
-/***/ 7002:
+/***/ 211:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const lte = (a, b, loose) => compare(a, b, loose) <= 0
 module.exports = lte
 
 
 /***/ }),
 
-/***/ 4047:
+/***/ 5763:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 const major = (a, loose) => new SemVer(a, loose).major
 module.exports = major
 
 
 /***/ }),
 
-/***/ 5012:
+/***/ 5387:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 const minor = (a, loose) => new SemVer(a, loose).minor
 module.exports = minor
 
 
 /***/ }),
 
-/***/ 7916:
+/***/ 2354:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const neq = (a, b, loose) => compare(a, b, loose) !== 0
 module.exports = neq
 
 
 /***/ }),
 
-/***/ 8989:
+/***/ 8523:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 const parse = (version, options, throwErrors = false) => {
   if (version instanceof SemVer) {
     return version
@@ -1496,24 +1395,20 @@ module.exports = parse
 
 /***/ }),
 
-/***/ 9489:
+/***/ 7209:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
+const SemVer = __nccwpck_require__(6997)
 const patch = (a, loose) => new SemVer(a, loose).patch
 module.exports = patch
 
 
 /***/ }),
 
-/***/ 6813:
+/***/ 9987:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const parse = __nccwpck_require__(8989)
+const parse = __nccwpck_require__(8523)
 const prerelease = (version, options) => {
   const parsed = parse(version, options)
   return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
@@ -1523,36 +1418,30 @@ module.exports = prerelease
 
 /***/ }),
 
-/***/ 9665:
+/***/ 7446:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compare = __nccwpck_require__(3659)
+const compare = __nccwpck_require__(3786)
 const rcompare = (a, b, loose) => compare(b, a, loose)
 module.exports = rcompare
 
 
 /***/ }),
 
-/***/ 4702:
+/***/ 5077:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compareBuild = __nccwpck_require__(9578)
+const compareBuild = __nccwpck_require__(7313)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
 
 
 /***/ }),
 
-/***/ 2275:
+/***/ 6059:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const Range = __nccwpck_require__(9333)
+const Range = __nccwpck_require__(9001)
 const satisfies = (version, range, options) => {
   try {
     range = new Range(range, options)
@@ -1566,79 +1455,20 @@ module.exports = satisfies
 
 /***/ }),
 
-/***/ 6344:
+/***/ 9731:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const compareBuild = __nccwpck_require__(9578)
+const compareBuild = __nccwpck_require__(7313)
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
 
 
 /***/ }),
 
-/***/ 3237:
+/***/ 5626:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const parse = __nccwpck_require__(8989)
-const constants = __nccwpck_require__(1421)
-const SemVer = __nccwpck_require__(1608)
-
-const truncate = (version, truncation, options) => {
-  if (!constants.RELEASE_TYPES.includes(truncation)) {
-    return null
-  }
-
-  const clonedVersion = cloneInputVersion(version, options)
-  return clonedVersion && doTruncation(clonedVersion, truncation)
-}
-
-const cloneInputVersion = (version, options) => {
-  const versionStringToParse = (
-    version instanceof SemVer ? version.version : version
-  )
-
-  return parse(versionStringToParse, options)
-}
-
-const doTruncation = (version, truncation) => {
-  if (isPrerelease(truncation)) {
-    return version.version
-  }
-
-  version.prerelease = []
-
-  switch (truncation) {
-    case 'major':
-      version.minor = 0
-      version.patch = 0
-      break
-    case 'minor':
-      version.patch = 0
-      break
-  }
-
-  return version.format()
-}
-
-const isPrerelease = (type) => {
-  return type.startsWith('pre')
-}
-
-module.exports = truncate
-
-
-/***/ }),
-
-/***/ 1736:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
-
-const parse = __nccwpck_require__(8989)
+const parse = __nccwpck_require__(8523)
 const valid = (version, options) => {
   const v = parse(version, options)
   return v ? v.version : null
@@ -1648,54 +1478,51 @@ module.exports = valid
 
 /***/ }),
 
-/***/ 2350:
+/***/ 6546:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
 // just pre-load all the stuff that index.js lazily exports
-const internalRe = __nccwpck_require__(4436)
-const constants = __nccwpck_require__(1421)
-const SemVer = __nccwpck_require__(1608)
-const identifiers = __nccwpck_require__(5680)
-const parse = __nccwpck_require__(8989)
-const valid = __nccwpck_require__(1736)
-const clean = __nccwpck_require__(3227)
-const inc = __nccwpck_require__(3772)
-const diff = __nccwpck_require__(3005)
-const major = __nccwpck_require__(4047)
-const minor = __nccwpck_require__(5012)
-const patch = __nccwpck_require__(9489)
-const prerelease = __nccwpck_require__(6813)
-const compare = __nccwpck_require__(3659)
-const rcompare = __nccwpck_require__(9665)
-const compareLoose = __nccwpck_require__(9390)
-const compareBuild = __nccwpck_require__(9578)
-const sort = __nccwpck_require__(6344)
-const rsort = __nccwpck_require__(4702)
-const gt = __nccwpck_require__(5343)
-const lt = __nccwpck_require__(1759)
-const eq = __nccwpck_require__(5331)
-const neq = __nccwpck_require__(7916)
-const gte = __nccwpck_require__(5923)
-const lte = __nccwpck_require__(7002)
-const cmp = __nccwpck_require__(2118)
-const coerce = __nccwpck_require__(4327)
-const truncate = __nccwpck_require__(3237)
-const Comparator = __nccwpck_require__(956)
-const Range = __nccwpck_require__(9333)
-const satisfies = __nccwpck_require__(2275)
-const toComparators = __nccwpck_require__(5197)
-const maxSatisfying = __nccwpck_require__(3006)
-const minSatisfying = __nccwpck_require__(4217)
-const minVersion = __nccwpck_require__(9621)
-const validRange = __nccwpck_require__(7858)
-const outside = __nccwpck_require__(3704)
-const gtr = __nccwpck_require__(2805)
-const ltr = __nccwpck_require__(975)
-const intersects = __nccwpck_require__(3802)
-const simplifyRange = __nccwpck_require__(4847)
-const subset = __nccwpck_require__(6331)
+const internalRe = __nccwpck_require__(6632)
+const constants = __nccwpck_require__(7425)
+const SemVer = __nccwpck_require__(6997)
+const identifiers = __nccwpck_require__(2683)
+const parse = __nccwpck_require__(8523)
+const valid = __nccwpck_require__(5626)
+const clean = __nccwpck_require__(2875)
+const inc = __nccwpck_require__(6183)
+const diff = __nccwpck_require__(9443)
+const major = __nccwpck_require__(5763)
+const minor = __nccwpck_require__(5387)
+const patch = __nccwpck_require__(7209)
+const prerelease = __nccwpck_require__(9987)
+const compare = __nccwpck_require__(3786)
+const rcompare = __nccwpck_require__(7446)
+const compareLoose = __nccwpck_require__(4924)
+const compareBuild = __nccwpck_require__(7313)
+const sort = __nccwpck_require__(9731)
+const rsort = __nccwpck_require__(5077)
+const gt = __nccwpck_require__(5106)
+const lt = __nccwpck_require__(7344)
+const eq = __nccwpck_require__(7995)
+const neq = __nccwpck_require__(2354)
+const gte = __nccwpck_require__(195)
+const lte = __nccwpck_require__(211)
+const cmp = __nccwpck_require__(7548)
+const coerce = __nccwpck_require__(9632)
+const Comparator = __nccwpck_require__(775)
+const Range = __nccwpck_require__(9001)
+const satisfies = __nccwpck_require__(6059)
+const toComparators = __nccwpck_require__(6282)
+const maxSatisfying = __nccwpck_require__(9770)
+const minSatisfying = __nccwpck_require__(4446)
+const minVersion = __nccwpck_require__(7914)
+const validRange = __nccwpck_require__(4667)
+const outside = __nccwpck_require__(2190)
+const gtr = __nccwpck_require__(34)
+const ltr = __nccwpck_require__(6780)
+const intersects = __nccwpck_require__(6475)
+const simplifyRange = __nccwpck_require__(1147)
+const subset = __nccwpck_require__(1021)
 module.exports = {
   parse,
   valid,
@@ -1720,7 +1547,6 @@ module.exports = {
   lte,
   cmp,
   coerce,
-  truncate,
   Comparator,
   Range,
   satisfies,
@@ -1748,10 +1574,8 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1421:
+/***/ 7425:
 /***/ ((module) => {
-
-
 
 // Note: this is the semver.org version of the spec that it implements
 // Not necessarily the package version of this code.
@@ -1792,10 +1616,8 @@ module.exports = {
 
 /***/ }),
 
-/***/ 2771:
+/***/ 8775:
 /***/ ((module) => {
-
-
 
 const debug = (
   typeof process === 'object' &&
@@ -1810,17 +1632,11 @@ module.exports = debug
 
 /***/ }),
 
-/***/ 5680:
+/***/ 2683:
 /***/ ((module) => {
-
-
 
 const numeric = /^[0-9]+$/
 const compareIdentifiers = (a, b) => {
-  if (typeof a === 'number' && typeof b === 'number') {
-    return a === b ? 0 : a < b ? -1 : 1
-  }
-
   const anum = numeric.test(a)
   const bnum = numeric.test(b)
 
@@ -1846,10 +1662,8 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8472:
+/***/ 3795:
 /***/ ((module) => {
-
-
 
 class LRUCache {
   constructor () {
@@ -1895,10 +1709,8 @@ module.exports = LRUCache
 
 /***/ }),
 
-/***/ 9194:
+/***/ 4074:
 /***/ ((module) => {
-
-
 
 // parse out just the options we care about
 const looseOption = Object.freeze({ loose: true })
@@ -1919,24 +1731,21 @@ module.exports = parseOptions
 
 /***/ }),
 
-/***/ 4436:
+/***/ 6632:
 /***/ ((module, exports, __nccwpck_require__) => {
-
-
 
 const {
   MAX_SAFE_COMPONENT_LENGTH,
   MAX_SAFE_BUILD_LENGTH,
   MAX_LENGTH,
-} = __nccwpck_require__(1421)
-const debug = __nccwpck_require__(2771)
+} = __nccwpck_require__(7425)
+const debug = __nccwpck_require__(8775)
 exports = module.exports = {}
 
 // The actual regexps go on exports.re
 const re = exports.re = []
 const safeRe = exports.safeRe = []
 const src = exports.src = []
-const safeSrc = exports.safeSrc = []
 const t = exports.t = {}
 let R = 0
 
@@ -1969,7 +1778,6 @@ const createToken = (name, value, isGlobal) => {
   debug(name, index, value)
   t[name] = index
   src[index] = value
-  safeSrc[index] = safe
   re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
   safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined)
 }
@@ -2002,14 +1810,12 @@ createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
-// Non-numeric identifiers include numeric identifiers but can be longer.
-// Therefore non-numeric identifiers must go first.
 
-createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NONNUMERICIDENTIFIER]
-}|${src[t.NUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
+}|${src[t.NONNUMERICIDENTIFIER]})`)
 
-createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NONNUMERICIDENTIFIER]
-}|${src[t.NUMERICIDENTIFIERLOOSE]})`)
+createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
+}|${src[t.NONNUMERICIDENTIFIER]})`)
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
@@ -2060,7 +1866,7 @@ createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`)
 createToken('GTLT', '((?:<|>)?=?)')
 
 // Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifier, meaning "any version"
+// Note that "x.x" is a valid xRange identifer, meaning "any version"
 // Only the first item is strictly required.
 createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`)
 createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`)
@@ -2149,25 +1955,21 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 
 /***/ }),
 
-/***/ 2805:
+/***/ 34:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
 // Determine if version is greater than all the versions possible in the range.
-const outside = __nccwpck_require__(3704)
+const outside = __nccwpck_require__(2190)
 const gtr = (version, range, options) => outside(version, range, '>', options)
 module.exports = gtr
 
 
 /***/ }),
 
-/***/ 3802:
+/***/ 6475:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const Range = __nccwpck_require__(9333)
+const Range = __nccwpck_require__(9001)
 const intersects = (r1, r2, options) => {
   r1 = new Range(r1, options)
   r2 = new Range(r2, options)
@@ -2178,12 +1980,10 @@ module.exports = intersects
 
 /***/ }),
 
-/***/ 975:
+/***/ 6780:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const outside = __nccwpck_require__(3704)
+const outside = __nccwpck_require__(2190)
 // Determine if version is less than all the versions possible in the range
 const ltr = (version, range, options) => outside(version, range, '<', options)
 module.exports = ltr
@@ -2191,13 +1991,11 @@ module.exports = ltr
 
 /***/ }),
 
-/***/ 3006:
+/***/ 9770:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
-const Range = __nccwpck_require__(9333)
+const SemVer = __nccwpck_require__(6997)
+const Range = __nccwpck_require__(9001)
 
 const maxSatisfying = (versions, range, options) => {
   let max = null
@@ -2225,13 +2023,11 @@ module.exports = maxSatisfying
 
 /***/ }),
 
-/***/ 4217:
+/***/ 4446:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
-const Range = __nccwpck_require__(9333)
+const SemVer = __nccwpck_require__(6997)
+const Range = __nccwpck_require__(9001)
 const minSatisfying = (versions, range, options) => {
   let min = null
   let minSV = null
@@ -2258,14 +2054,12 @@ module.exports = minSatisfying
 
 /***/ }),
 
-/***/ 9621:
+/***/ 7914:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
-const Range = __nccwpck_require__(9333)
-const gt = __nccwpck_require__(5343)
+const SemVer = __nccwpck_require__(6997)
+const Range = __nccwpck_require__(9001)
+const gt = __nccwpck_require__(5106)
 
 const minVersion = (range, loose) => {
   range = new Range(range, loose)
@@ -2328,20 +2122,18 @@ module.exports = minVersion
 
 /***/ }),
 
-/***/ 3704:
+/***/ 2190:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const SemVer = __nccwpck_require__(1608)
-const Comparator = __nccwpck_require__(956)
+const SemVer = __nccwpck_require__(6997)
+const Comparator = __nccwpck_require__(775)
 const { ANY } = Comparator
-const Range = __nccwpck_require__(9333)
-const satisfies = __nccwpck_require__(2275)
-const gt = __nccwpck_require__(5343)
-const lt = __nccwpck_require__(1759)
-const lte = __nccwpck_require__(7002)
-const gte = __nccwpck_require__(5923)
+const Range = __nccwpck_require__(9001)
+const satisfies = __nccwpck_require__(6059)
+const gt = __nccwpck_require__(5106)
+const lt = __nccwpck_require__(7344)
+const lte = __nccwpck_require__(211)
+const gte = __nccwpck_require__(195)
 
 const outside = (version, range, hilo, options) => {
   version = new SemVer(version, options)
@@ -2417,16 +2209,14 @@ module.exports = outside
 
 /***/ }),
 
-/***/ 4847:
+/***/ 1147:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-
 
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
-const satisfies = __nccwpck_require__(2275)
-const compare = __nccwpck_require__(3659)
+const satisfies = __nccwpck_require__(6059)
+const compare = __nccwpck_require__(3786)
 module.exports = (versions, range, options) => {
   const set = []
   let first = null
@@ -2473,16 +2263,14 @@ module.exports = (versions, range, options) => {
 
 /***/ }),
 
-/***/ 6331:
+/***/ 1021:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const Range = __nccwpck_require__(9333)
-const Comparator = __nccwpck_require__(956)
+const Range = __nccwpck_require__(9001)
+const Comparator = __nccwpck_require__(775)
 const { ANY } = Comparator
-const satisfies = __nccwpck_require__(2275)
-const compare = __nccwpck_require__(3659)
+const satisfies = __nccwpck_require__(6059)
+const compare = __nccwpck_require__(3786)
 
 // Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
 // - Every simple range `r1, r2, ...` is a null set, OR
@@ -2516,7 +2304,7 @@ const compare = __nccwpck_require__(3659)
 // - If LT
 //   - If LT.semver is greater than any < or <= comp in C, return false
 //   - If LT is <=, and LT.semver does not satisfy every C, return false
-//   - If LT.semver has a prerelease, and not in prerelease mode
+//   - If GT.semver has a prerelease, and not in prerelease mode
 //     - If no C has a prerelease and the LT.semver tuple, return false
 // - Else return true
 
@@ -2652,7 +2440,7 @@ const simpleSubset = (sub, dom, options) => {
         if (higher === c && higher !== gt) {
           return false
         }
-      } else if (gt.operator === '>=' && !c.test(gt.semver)) {
+      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options)) {
         return false
       }
     }
@@ -2670,7 +2458,7 @@ const simpleSubset = (sub, dom, options) => {
         if (lower === c && lower !== lt) {
           return false
         }
-      } else if (lt.operator === '<=' && !c.test(lt.semver)) {
+      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options)) {
         return false
       }
     }
@@ -2729,12 +2517,10 @@ module.exports = subset
 
 /***/ }),
 
-/***/ 5197:
+/***/ 6282:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const Range = __nccwpck_require__(9333)
+const Range = __nccwpck_require__(9001)
 
 // Mostly just for testing and legacy API reasons
 const toComparators = (range, options) =>
@@ -2746,12 +2532,10 @@ module.exports = toComparators
 
 /***/ }),
 
-/***/ 7858:
+/***/ 4667:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
-
-const Range = __nccwpck_require__(9333)
+const Range = __nccwpck_require__(9001)
 const validRange = (range, options) => {
   try {
     // Return '*' instead of '' so that truthiness works.
@@ -2769,6 +2553,7 @@ module.exports = validRange
 /***/ 4300:
 /***/ ((module) => {
 
+"use strict";
 module.exports = require("buffer");
 
 /***/ }),
@@ -2776,22 +2561,24 @@ module.exports = require("buffer");
 /***/ 7282:
 /***/ ((module) => {
 
+"use strict";
 module.exports = require("process");
 
 /***/ }),
 
-/***/ 3001:
+/***/ 153:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Scalar = __nccwpck_require__(640);
-var YAMLMap = __nccwpck_require__(9856);
-var YAMLSeq = __nccwpck_require__(6435);
-var resolveBlockMap = __nccwpck_require__(6429);
-var resolveBlockSeq = __nccwpck_require__(1008);
-var resolveFlowCollection = __nccwpck_require__(420);
+var identity = __nccwpck_require__(2296);
+var Scalar = __nccwpck_require__(1305);
+var YAMLMap = __nccwpck_require__(5210);
+var YAMLSeq = __nccwpck_require__(4185);
+var resolveBlockMap = __nccwpck_require__(2019);
+var resolveBlockSeq = __nccwpck_require__(5191);
+var resolveFlowCollection = __nccwpck_require__(9486);
 
 function resolveCollection(CN, ctx, token, onError, tagName, tag) {
     const coll = token.type === 'block-map'
@@ -2877,15 +2664,16 @@ exports.composeCollection = composeCollection;
 
 /***/ }),
 
-/***/ 8153:
+/***/ 9208:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Document = __nccwpck_require__(789);
-var composeNode = __nccwpck_require__(6378);
-var resolveEnd = __nccwpck_require__(7682);
-var resolveProps = __nccwpck_require__(8691);
+var Document = __nccwpck_require__(8878);
+var composeNode = __nccwpck_require__(6135);
+var resolveEnd = __nccwpck_require__(3409);
+var resolveProps = __nccwpck_require__(8381);
 
 function composeDoc(options, directives, { offset, start, value, end }, onError) {
     const opts = Object.assign({ _directives: directives }, options);
@@ -2929,17 +2717,18 @@ exports.composeDoc = composeDoc;
 
 /***/ }),
 
-/***/ 6378:
+/***/ 6135:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Alias = __nccwpck_require__(76);
-var identity = __nccwpck_require__(8438);
-var composeCollection = __nccwpck_require__(3001);
-var composeScalar = __nccwpck_require__(6040);
-var resolveEnd = __nccwpck_require__(7682);
-var utilEmptyScalarPosition = __nccwpck_require__(3340);
+var Alias = __nccwpck_require__(6102);
+var identity = __nccwpck_require__(2296);
+var composeCollection = __nccwpck_require__(153);
+var composeScalar = __nccwpck_require__(6564);
+var resolveEnd = __nccwpck_require__(3409);
+var utilEmptyScalarPosition = __nccwpck_require__(1034);
 
 const CN = { composeNode, composeEmptyNode };
 function composeNode(ctx, token, props, onError) {
@@ -3048,15 +2837,16 @@ exports.composeNode = composeNode;
 
 /***/ }),
 
-/***/ 6040:
+/***/ 6564:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Scalar = __nccwpck_require__(640);
-var resolveBlockScalar = __nccwpck_require__(9075);
-var resolveFlowScalar = __nccwpck_require__(2559);
+var identity = __nccwpck_require__(2296);
+var Scalar = __nccwpck_require__(1305);
+var resolveBlockScalar = __nccwpck_require__(9832);
+var resolveFlowScalar = __nccwpck_require__(4542);
 
 function composeScalar(ctx, token, tagToken, onError) {
     const { value, type, comment, range } = token.type === 'block-scalar'
@@ -3143,18 +2933,19 @@ exports.composeScalar = composeScalar;
 
 /***/ }),
 
-/***/ 4913:
+/***/ 9977:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
 var node_process = __nccwpck_require__(7282);
-var directives = __nccwpck_require__(7789);
-var Document = __nccwpck_require__(789);
-var errors = __nccwpck_require__(9649);
-var identity = __nccwpck_require__(8438);
-var composeDoc = __nccwpck_require__(8153);
-var resolveEnd = __nccwpck_require__(7682);
+var directives = __nccwpck_require__(2463);
+var Document = __nccwpck_require__(8878);
+var errors = __nccwpck_require__(2666);
+var identity = __nccwpck_require__(2296);
+var composeDoc = __nccwpck_require__(9208);
+var resolveEnd = __nccwpck_require__(3409);
 
 function getErrorPos(src) {
     if (typeof src === 'number')
@@ -3374,17 +3165,18 @@ exports.Composer = Composer;
 
 /***/ }),
 
-/***/ 6429:
+/***/ 2019:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Pair = __nccwpck_require__(6503);
-var YAMLMap = __nccwpck_require__(9856);
-var resolveProps = __nccwpck_require__(8691);
-var utilContainsNewline = __nccwpck_require__(5880);
-var utilFlowIndentCheck = __nccwpck_require__(3714);
-var utilMapIncludes = __nccwpck_require__(8049);
+var Pair = __nccwpck_require__(7897);
+var YAMLMap = __nccwpck_require__(5210);
+var resolveProps = __nccwpck_require__(8381);
+var utilContainsNewline = __nccwpck_require__(5798);
+var utilFlowIndentCheck = __nccwpck_require__(472);
+var utilMapIncludes = __nccwpck_require__(1365);
 
 const startColMsg = 'All mapping items must start at the same column';
 function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError, tag) {
@@ -3498,12 +3290,13 @@ exports.resolveBlockMap = resolveBlockMap;
 
 /***/ }),
 
-/***/ 9075:
+/***/ 9832:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
+var Scalar = __nccwpck_require__(1305);
 
 function resolveBlockScalar(ctx, scalar, onError) {
     const start = scalar.offset;
@@ -3705,14 +3498,15 @@ exports.resolveBlockScalar = resolveBlockScalar;
 
 /***/ }),
 
-/***/ 1008:
+/***/ 5191:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var YAMLSeq = __nccwpck_require__(6435);
-var resolveProps = __nccwpck_require__(8691);
-var utilFlowIndentCheck = __nccwpck_require__(3714);
+var YAMLSeq = __nccwpck_require__(4185);
+var resolveProps = __nccwpck_require__(8381);
+var utilFlowIndentCheck = __nccwpck_require__(472);
 
 function resolveBlockSeq({ composeNode, composeEmptyNode }, ctx, bs, onError, tag) {
     const NodeClass = tag?.nodeClass ?? YAMLSeq.YAMLSeq;
@@ -3763,9 +3557,10 @@ exports.resolveBlockSeq = resolveBlockSeq;
 
 /***/ }),
 
-/***/ 7682:
+/***/ 3409:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 function resolveEnd(end, offset, reqSpace, onError) {
@@ -3809,19 +3604,20 @@ exports.resolveEnd = resolveEnd;
 
 /***/ }),
 
-/***/ 420:
+/***/ 9486:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Pair = __nccwpck_require__(6503);
-var YAMLMap = __nccwpck_require__(9856);
-var YAMLSeq = __nccwpck_require__(6435);
-var resolveEnd = __nccwpck_require__(7682);
-var resolveProps = __nccwpck_require__(8691);
-var utilContainsNewline = __nccwpck_require__(5880);
-var utilMapIncludes = __nccwpck_require__(8049);
+var identity = __nccwpck_require__(2296);
+var Pair = __nccwpck_require__(7897);
+var YAMLMap = __nccwpck_require__(5210);
+var YAMLSeq = __nccwpck_require__(4185);
+var resolveEnd = __nccwpck_require__(3409);
+var resolveProps = __nccwpck_require__(8381);
+var utilContainsNewline = __nccwpck_require__(5798);
+var utilMapIncludes = __nccwpck_require__(1365);
 
 const blockMsg = 'Block collections are not allowed within flow collections';
 const isBlock = (token) => token && (token.type === 'block-map' || token.type === 'block-seq');
@@ -4025,13 +3821,14 @@ exports.resolveFlowCollection = resolveFlowCollection;
 
 /***/ }),
 
-/***/ 2559:
+/***/ 4542:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
-var resolveEnd = __nccwpck_require__(7682);
+var Scalar = __nccwpck_require__(1305);
+var resolveEnd = __nccwpck_require__(3409);
 
 function resolveFlowScalar(scalar, strict, onError) {
     const { offset, type, source, end } = scalar;
@@ -4260,9 +4057,10 @@ exports.resolveFlowScalar = resolveFlowScalar;
 
 /***/ }),
 
-/***/ 8691:
+/***/ 8381:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 function resolveProps(tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
@@ -4415,9 +4213,10 @@ exports.resolveProps = resolveProps;
 
 /***/ }),
 
-/***/ 5880:
+/***/ 5798:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 function containsNewline(key) {
@@ -4458,9 +4257,10 @@ exports.containsNewline = containsNewline;
 
 /***/ }),
 
-/***/ 3340:
+/***/ 1034:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 function emptyScalarPosition(offset, before, pos) {
@@ -4493,12 +4293,13 @@ exports.emptyScalarPosition = emptyScalarPosition;
 
 /***/ }),
 
-/***/ 3714:
+/***/ 472:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var utilContainsNewline = __nccwpck_require__(5880);
+var utilContainsNewline = __nccwpck_require__(5798);
 
 function flowIndentCheck(indent, fc, onError) {
     if (fc?.type === 'flow-collection') {
@@ -4517,12 +4318,13 @@ exports.flowIndentCheck = flowIndentCheck;
 
 /***/ }),
 
-/***/ 8049:
+/***/ 1365:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
+var identity = __nccwpck_require__(2296);
 
 function mapIncludes(ctx, items, search) {
     const { uniqueKeys } = ctx.options;
@@ -4539,22 +4341,23 @@ exports.mapIncludes = mapIncludes;
 
 /***/ }),
 
-/***/ 789:
+/***/ 8878:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Alias = __nccwpck_require__(76);
-var Collection = __nccwpck_require__(2793);
-var identity = __nccwpck_require__(8438);
-var Pair = __nccwpck_require__(6503);
-var toJS = __nccwpck_require__(5776);
-var Schema = __nccwpck_require__(3378);
-var stringifyDocument = __nccwpck_require__(5941);
-var anchors = __nccwpck_require__(8509);
-var applyReviver = __nccwpck_require__(1535);
-var createNode = __nccwpck_require__(7838);
-var directives = __nccwpck_require__(7789);
+var Alias = __nccwpck_require__(6102);
+var Collection = __nccwpck_require__(8172);
+var identity = __nccwpck_require__(2296);
+var Pair = __nccwpck_require__(7897);
+var toJS = __nccwpck_require__(2056);
+var Schema = __nccwpck_require__(8205);
+var stringifyDocument = __nccwpck_require__(2253);
+var anchors = __nccwpck_require__(6688);
+var applyReviver = __nccwpck_require__(8439);
+var createNode = __nccwpck_require__(2027);
+var directives = __nccwpck_require__(2463);
 
 class Document {
     constructor(value, replacer, options) {
@@ -4883,13 +4686,14 @@ exports.Document = Document;
 
 /***/ }),
 
-/***/ 8509:
+/***/ 6688:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var visit = __nccwpck_require__(1316);
+var identity = __nccwpck_require__(2296);
+var visit = __nccwpck_require__(5865);
 
 /**
  * Verify that the input string is a valid anchor.
@@ -4966,9 +4770,10 @@ exports.findNewAnchor = findNewAnchor;
 
 /***/ }),
 
-/***/ 1535:
+/***/ 8439:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 /**
@@ -5030,14 +4835,15 @@ exports.applyReviver = applyReviver;
 
 /***/ }),
 
-/***/ 7838:
+/***/ 2027:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Alias = __nccwpck_require__(76);
-var identity = __nccwpck_require__(8438);
-var Scalar = __nccwpck_require__(640);
+var Alias = __nccwpck_require__(6102);
+var identity = __nccwpck_require__(2296);
+var Scalar = __nccwpck_require__(1305);
 
 const defaultTagPrefix = 'tag:yaml.org,2002:';
 function findTagObject(value, tagName, tags) {
@@ -5127,13 +4933,14 @@ exports.createNode = createNode;
 
 /***/ }),
 
-/***/ 7789:
+/***/ 2463:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var visit = __nccwpck_require__(1316);
+var identity = __nccwpck_require__(2296);
+var visit = __nccwpck_require__(5865);
 
 const escapeChars = {
     '!': '%21',
@@ -5312,9 +5119,10 @@ exports.Directives = Directives;
 
 /***/ }),
 
-/***/ 9649:
+/***/ 2666:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 class YAMLError extends Error {
@@ -5381,28 +5189,29 @@ exports.prettifyError = prettifyError;
 
 /***/ }),
 
-/***/ 181:
+/***/ 8996:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 var __webpack_unused_export__;
 
 
-var composer = __nccwpck_require__(4913);
-var Document = __nccwpck_require__(789);
-var Schema = __nccwpck_require__(3378);
-var errors = __nccwpck_require__(9649);
-var Alias = __nccwpck_require__(76);
-var identity = __nccwpck_require__(8438);
-var Pair = __nccwpck_require__(6503);
-var Scalar = __nccwpck_require__(640);
-var YAMLMap = __nccwpck_require__(9856);
-var YAMLSeq = __nccwpck_require__(6435);
-var cst = __nccwpck_require__(8410);
-var lexer = __nccwpck_require__(1635);
-var lineCounter = __nccwpck_require__(1801);
-var parser = __nccwpck_require__(1667);
-var publicApi = __nccwpck_require__(3364);
-var visit = __nccwpck_require__(1316);
+var composer = __nccwpck_require__(9977);
+var Document = __nccwpck_require__(8878);
+var Schema = __nccwpck_require__(8205);
+var errors = __nccwpck_require__(2666);
+var Alias = __nccwpck_require__(6102);
+var identity = __nccwpck_require__(2296);
+var Pair = __nccwpck_require__(7897);
+var Scalar = __nccwpck_require__(1305);
+var YAMLMap = __nccwpck_require__(5210);
+var YAMLSeq = __nccwpck_require__(4185);
+var cst = __nccwpck_require__(9636);
+var lexer = __nccwpck_require__(3658);
+var lineCounter = __nccwpck_require__(3655);
+var parser = __nccwpck_require__(1146);
+var publicApi = __nccwpck_require__(3085);
+var visit = __nccwpck_require__(5865);
 
 
 
@@ -5439,9 +5248,10 @@ __webpack_unused_export__ = visit.visitAsync;
 
 /***/ }),
 
-/***/ 6888:
+/***/ 4783:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
 var node_process = __nccwpck_require__(7282);
@@ -5465,16 +5275,17 @@ exports.warn = warn;
 
 /***/ }),
 
-/***/ 76:
+/***/ 6102:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var anchors = __nccwpck_require__(8509);
-var visit = __nccwpck_require__(1316);
-var identity = __nccwpck_require__(8438);
-var Node = __nccwpck_require__(88);
-var toJS = __nccwpck_require__(5776);
+var anchors = __nccwpck_require__(6688);
+var visit = __nccwpck_require__(5865);
+var identity = __nccwpck_require__(2296);
+var Node = __nccwpck_require__(2877);
+var toJS = __nccwpck_require__(2056);
 
 class Alias extends Node.NodeBase {
     constructor(source) {
@@ -5592,14 +5403,15 @@ exports.Alias = Alias;
 
 /***/ }),
 
-/***/ 2793:
+/***/ 8172:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var createNode = __nccwpck_require__(7838);
-var identity = __nccwpck_require__(8438);
-var Node = __nccwpck_require__(88);
+var createNode = __nccwpck_require__(2027);
+var identity = __nccwpck_require__(2296);
+var Node = __nccwpck_require__(2877);
 
 function collectionFromPath(schema, path, value) {
     let v = value;
@@ -5750,14 +5562,15 @@ exports.isEmptyPath = isEmptyPath;
 
 /***/ }),
 
-/***/ 88:
+/***/ 2877:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var applyReviver = __nccwpck_require__(1535);
-var identity = __nccwpck_require__(8438);
-var toJS = __nccwpck_require__(5776);
+var applyReviver = __nccwpck_require__(8439);
+var identity = __nccwpck_require__(2296);
+var toJS = __nccwpck_require__(2056);
 
 class NodeBase {
     constructor(type) {
@@ -5797,15 +5610,16 @@ exports.NodeBase = NodeBase;
 
 /***/ }),
 
-/***/ 6503:
+/***/ 7897:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var createNode = __nccwpck_require__(7838);
-var stringifyPair = __nccwpck_require__(9711);
-var addPairToJSMap = __nccwpck_require__(9177);
-var identity = __nccwpck_require__(8438);
+var createNode = __nccwpck_require__(2027);
+var stringifyPair = __nccwpck_require__(6245);
+var addPairToJSMap = __nccwpck_require__(7473);
+var identity = __nccwpck_require__(2296);
 
 function createPair(key, value, ctx) {
     const k = createNode.createNode(key, undefined, ctx);
@@ -5843,14 +5657,15 @@ exports.createPair = createPair;
 
 /***/ }),
 
-/***/ 640:
+/***/ 1305:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Node = __nccwpck_require__(88);
-var toJS = __nccwpck_require__(5776);
+var identity = __nccwpck_require__(2296);
+var Node = __nccwpck_require__(2877);
+var toJS = __nccwpck_require__(2056);
 
 const isScalarValue = (value) => !value || (typeof value !== 'function' && typeof value !== 'object');
 class Scalar extends Node.NodeBase {
@@ -5877,17 +5692,18 @@ exports.isScalarValue = isScalarValue;
 
 /***/ }),
 
-/***/ 9856:
+/***/ 5210:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var stringifyCollection = __nccwpck_require__(9095);
-var addPairToJSMap = __nccwpck_require__(9177);
-var Collection = __nccwpck_require__(2793);
-var identity = __nccwpck_require__(8438);
-var Pair = __nccwpck_require__(6503);
-var Scalar = __nccwpck_require__(640);
+var stringifyCollection = __nccwpck_require__(514);
+var addPairToJSMap = __nccwpck_require__(7473);
+var Collection = __nccwpck_require__(8172);
+var identity = __nccwpck_require__(2296);
+var Pair = __nccwpck_require__(7897);
+var Scalar = __nccwpck_require__(1305);
 
 function findPair(items, key) {
     const k = identity.isScalar(key) ? key.value : key;
@@ -6031,17 +5847,18 @@ exports.findPair = findPair;
 
 /***/ }),
 
-/***/ 6435:
+/***/ 4185:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var createNode = __nccwpck_require__(7838);
-var stringifyCollection = __nccwpck_require__(9095);
-var Collection = __nccwpck_require__(2793);
-var identity = __nccwpck_require__(8438);
-var Scalar = __nccwpck_require__(640);
-var toJS = __nccwpck_require__(5776);
+var createNode = __nccwpck_require__(2027);
+var stringifyCollection = __nccwpck_require__(514);
+var Collection = __nccwpck_require__(8172);
+var identity = __nccwpck_require__(2296);
+var Scalar = __nccwpck_require__(1305);
+var toJS = __nccwpck_require__(2056);
 
 class YAMLSeq extends Collection.Collection {
     static get tagName() {
@@ -6153,16 +5970,17 @@ exports.YAMLSeq = YAMLSeq;
 
 /***/ }),
 
-/***/ 9177:
+/***/ 7473:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var log = __nccwpck_require__(6888);
-var merge = __nccwpck_require__(3408);
-var stringify = __nccwpck_require__(4581);
-var identity = __nccwpck_require__(8438);
-var toJS = __nccwpck_require__(5776);
+var log = __nccwpck_require__(4783);
+var merge = __nccwpck_require__(3913);
+var stringify = __nccwpck_require__(2595);
+var identity = __nccwpck_require__(2296);
+var toJS = __nccwpck_require__(2056);
 
 function addPairToJSMap(ctx, map, { key, value }) {
     if (identity.isNode(key) && key.addToJSMap)
@@ -6225,9 +6043,10 @@ exports.addPairToJSMap = addPairToJSMap;
 
 /***/ }),
 
-/***/ 8438:
+/***/ 2296:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 const ALIAS = Symbol.for('yaml.alias');
@@ -6285,12 +6104,13 @@ exports.isSeq = isSeq;
 
 /***/ }),
 
-/***/ 5776:
+/***/ 2056:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
+var identity = __nccwpck_require__(2296);
 
 /**
  * Recursively convert any node or its contents to native JavaScript
@@ -6331,15 +6151,16 @@ exports.toJS = toJS;
 
 /***/ }),
 
-/***/ 2676:
+/***/ 5465:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var resolveBlockScalar = __nccwpck_require__(9075);
-var resolveFlowScalar = __nccwpck_require__(2559);
-var errors = __nccwpck_require__(9649);
-var stringifyString = __nccwpck_require__(6078);
+var resolveBlockScalar = __nccwpck_require__(9832);
+var resolveFlowScalar = __nccwpck_require__(4542);
+var errors = __nccwpck_require__(2666);
+var stringifyString = __nccwpck_require__(6790);
 
 function resolveAsScalar(token, strict = true, onError) {
     if (token) {
@@ -6556,9 +6377,10 @@ exports.setScalarValue = setScalarValue;
 
 /***/ }),
 
-/***/ 7695:
+/***/ 2214:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 /**
@@ -6626,9 +6448,10 @@ exports.stringify = stringify;
 
 /***/ }),
 
-/***/ 5824:
+/***/ 9679:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 const BREAK = Symbol('break visit');
@@ -6732,14 +6555,15 @@ exports.visit = visit;
 
 /***/ }),
 
-/***/ 8410:
+/***/ 9636:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var cstScalar = __nccwpck_require__(2676);
-var cstStringify = __nccwpck_require__(7695);
-var cstVisit = __nccwpck_require__(5824);
+var cstScalar = __nccwpck_require__(5465);
+var cstStringify = __nccwpck_require__(2214);
+var cstVisit = __nccwpck_require__(9679);
 
 /** The byte order mark */
 const BOM = '\u{FEFF}';
@@ -6851,12 +6675,13 @@ exports.tokenType = tokenType;
 
 /***/ }),
 
-/***/ 1635:
+/***/ 3658:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var cst = __nccwpck_require__(8410);
+var cst = __nccwpck_require__(9636);
 
 /*
 START -> stream
@@ -7581,9 +7406,10 @@ exports.Lexer = Lexer;
 
 /***/ }),
 
-/***/ 1801:
+/***/ 3655:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 /**
@@ -7629,14 +7455,15 @@ exports.LineCounter = LineCounter;
 
 /***/ }),
 
-/***/ 1667:
+/***/ 1146:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
 var node_process = __nccwpck_require__(7282);
-var cst = __nccwpck_require__(8410);
-var lexer = __nccwpck_require__(1635);
+var cst = __nccwpck_require__(9636);
+var lexer = __nccwpck_require__(3658);
 
 function includesToken(list, type) {
     for (let i = 0; i < list.length; ++i)
@@ -8616,18 +8443,19 @@ exports.Parser = Parser;
 
 /***/ }),
 
-/***/ 3364:
+/***/ 3085:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var composer = __nccwpck_require__(4913);
-var Document = __nccwpck_require__(789);
-var errors = __nccwpck_require__(9649);
-var log = __nccwpck_require__(6888);
-var identity = __nccwpck_require__(8438);
-var lineCounter = __nccwpck_require__(1801);
-var parser = __nccwpck_require__(1667);
+var composer = __nccwpck_require__(9977);
+var Document = __nccwpck_require__(8878);
+var errors = __nccwpck_require__(2666);
+var log = __nccwpck_require__(4783);
+var identity = __nccwpck_require__(2296);
+var lineCounter = __nccwpck_require__(3655);
+var parser = __nccwpck_require__(1146);
 
 function parseOptions(options) {
     const prettyErrors = options.prettyErrors !== false;
@@ -8730,16 +8558,17 @@ exports.stringify = stringify;
 
 /***/ }),
 
-/***/ 3378:
+/***/ 8205:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var map = __nccwpck_require__(4483);
-var seq = __nccwpck_require__(8971);
-var string = __nccwpck_require__(5573);
-var tags = __nccwpck_require__(6382);
+var identity = __nccwpck_require__(2296);
+var map = __nccwpck_require__(7899);
+var seq = __nccwpck_require__(851);
+var string = __nccwpck_require__(3922);
+var tags = __nccwpck_require__(1787);
 
 const sortMapEntriesByKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
 class Schema {
@@ -8776,13 +8605,14 @@ exports.Schema = Schema;
 
 /***/ }),
 
-/***/ 4483:
+/***/ 7899:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var YAMLMap = __nccwpck_require__(9856);
+var identity = __nccwpck_require__(2296);
+var YAMLMap = __nccwpck_require__(5210);
 
 const map = {
     collection: 'map',
@@ -8802,12 +8632,13 @@ exports.map = map;
 
 /***/ }),
 
-/***/ 7814:
+/***/ 2238:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
+var Scalar = __nccwpck_require__(1305);
 
 const nullTag = {
     identify: value => value == null,
@@ -8826,13 +8657,14 @@ exports.nullTag = nullTag;
 
 /***/ }),
 
-/***/ 8971:
+/***/ 851:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var YAMLSeq = __nccwpck_require__(6435);
+var identity = __nccwpck_require__(2296);
+var YAMLSeq = __nccwpck_require__(4185);
 
 const seq = {
     collection: 'seq',
@@ -8852,12 +8684,13 @@ exports.seq = seq;
 
 /***/ }),
 
-/***/ 5573:
+/***/ 3922:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var stringifyString = __nccwpck_require__(6078);
+var stringifyString = __nccwpck_require__(6790);
 
 const string = {
     identify: value => typeof value === 'string',
@@ -8875,12 +8708,13 @@ exports.string = string;
 
 /***/ }),
 
-/***/ 7175:
+/***/ 7979:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
+var Scalar = __nccwpck_require__(1305);
 
 const boolTag = {
     identify: value => typeof value === 'boolean',
@@ -8903,13 +8737,14 @@ exports.boolTag = boolTag;
 
 /***/ }),
 
-/***/ 1768:
+/***/ 3128:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
-var stringifyNumber = __nccwpck_require__(9063);
+var Scalar = __nccwpck_require__(1305);
+var stringifyNumber = __nccwpck_require__(4594);
 
 const floatNaN = {
     identify: value => typeof value === 'number',
@@ -8957,12 +8792,13 @@ exports.floatNaN = floatNaN;
 
 /***/ }),
 
-/***/ 9652:
+/***/ 6334:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var stringifyNumber = __nccwpck_require__(9063);
+var stringifyNumber = __nccwpck_require__(4594);
 
 const intIdentify = (value) => typeof value === 'bigint' || Number.isInteger(value);
 const intResolve = (str, offset, radix, { intAsBigInt }) => (intAsBigInt ? BigInt(str) : parseInt(str.substring(offset), radix));
@@ -9006,18 +8842,19 @@ exports.intOct = intOct;
 
 /***/ }),
 
-/***/ 6536:
+/***/ 6657:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var map = __nccwpck_require__(4483);
-var _null = __nccwpck_require__(7814);
-var seq = __nccwpck_require__(8971);
-var string = __nccwpck_require__(5573);
-var bool = __nccwpck_require__(7175);
-var float = __nccwpck_require__(1768);
-var int = __nccwpck_require__(9652);
+var map = __nccwpck_require__(7899);
+var _null = __nccwpck_require__(2238);
+var seq = __nccwpck_require__(851);
+var string = __nccwpck_require__(3922);
+var bool = __nccwpck_require__(7979);
+var float = __nccwpck_require__(3128);
+var int = __nccwpck_require__(6334);
 
 const schema = [
     map.map,
@@ -9038,14 +8875,15 @@ exports.schema = schema;
 
 /***/ }),
 
-/***/ 8175:
+/***/ 990:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
-var map = __nccwpck_require__(4483);
-var seq = __nccwpck_require__(8971);
+var Scalar = __nccwpck_require__(1305);
+var map = __nccwpck_require__(7899);
+var seq = __nccwpck_require__(851);
 
 function intIdentify(value) {
     return typeof value === 'bigint' || Number.isInteger(value);
@@ -9109,27 +8947,28 @@ exports.schema = schema;
 
 /***/ }),
 
-/***/ 6382:
+/***/ 1787:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var map = __nccwpck_require__(4483);
-var _null = __nccwpck_require__(7814);
-var seq = __nccwpck_require__(8971);
-var string = __nccwpck_require__(5573);
-var bool = __nccwpck_require__(7175);
-var float = __nccwpck_require__(1768);
-var int = __nccwpck_require__(9652);
-var schema = __nccwpck_require__(6536);
-var schema$1 = __nccwpck_require__(8175);
-var binary = __nccwpck_require__(6873);
-var merge = __nccwpck_require__(3408);
-var omap = __nccwpck_require__(9312);
-var pairs = __nccwpck_require__(9790);
-var schema$2 = __nccwpck_require__(8439);
-var set = __nccwpck_require__(8234);
-var timestamp = __nccwpck_require__(2648);
+var map = __nccwpck_require__(7899);
+var _null = __nccwpck_require__(2238);
+var seq = __nccwpck_require__(851);
+var string = __nccwpck_require__(3922);
+var bool = __nccwpck_require__(7979);
+var float = __nccwpck_require__(3128);
+var int = __nccwpck_require__(6334);
+var schema = __nccwpck_require__(6657);
+var schema$1 = __nccwpck_require__(990);
+var binary = __nccwpck_require__(7530);
+var merge = __nccwpck_require__(3913);
+var omap = __nccwpck_require__(2859);
+var pairs = __nccwpck_require__(7633);
+var schema$2 = __nccwpck_require__(887);
+var set = __nccwpck_require__(6015);
+var timestamp = __nccwpck_require__(3939);
 
 const schemas = new Map([
     ['core', schema.schema],
@@ -9215,14 +9054,15 @@ exports.getTags = getTags;
 
 /***/ }),
 
-/***/ 6873:
+/***/ 7530:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
 var node_buffer = __nccwpck_require__(4300);
-var Scalar = __nccwpck_require__(640);
-var stringifyString = __nccwpck_require__(6078);
+var Scalar = __nccwpck_require__(1305);
+var stringifyString = __nccwpck_require__(6790);
 
 const binary = {
     identify: value => value instanceof Uint8Array, // Buffer inherits from Uint8Array
@@ -9292,12 +9132,13 @@ exports.binary = binary;
 
 /***/ }),
 
-/***/ 1332:
+/***/ 9618:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
+var Scalar = __nccwpck_require__(1305);
 
 function boolStringify({ value, source }, ctx) {
     const boolObj = value ? trueTag : falseTag;
@@ -9328,13 +9169,14 @@ exports.trueTag = trueTag;
 
 /***/ }),
 
-/***/ 2002:
+/***/ 3004:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
-var stringifyNumber = __nccwpck_require__(9063);
+var Scalar = __nccwpck_require__(1305);
+var stringifyNumber = __nccwpck_require__(4594);
 
 const floatNaN = {
     identify: value => typeof value === 'number',
@@ -9385,12 +9227,13 @@ exports.floatNaN = floatNaN;
 
 /***/ }),
 
-/***/ 7343:
+/***/ 7085:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var stringifyNumber = __nccwpck_require__(9063);
+var stringifyNumber = __nccwpck_require__(4594);
 
 const intIdentify = (value) => typeof value === 'bigint' || Number.isInteger(value);
 function intResolve(str, offset, radix, { intAsBigInt }) {
@@ -9468,13 +9311,14 @@ exports.intOct = intOct;
 
 /***/ }),
 
-/***/ 3408:
+/***/ 3913:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Scalar = __nccwpck_require__(640);
+var identity = __nccwpck_require__(2296);
+var Scalar = __nccwpck_require__(1305);
 
 // If the value associated with a merge key is a single mapping node, each of
 // its key/value pairs is inserted into the current mapping, unless the key
@@ -9546,16 +9390,17 @@ exports.merge = merge;
 
 /***/ }),
 
-/***/ 9312:
+/***/ 2859:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var toJS = __nccwpck_require__(5776);
-var YAMLMap = __nccwpck_require__(9856);
-var YAMLSeq = __nccwpck_require__(6435);
-var pairs = __nccwpck_require__(9790);
+var identity = __nccwpck_require__(2296);
+var toJS = __nccwpck_require__(2056);
+var YAMLMap = __nccwpck_require__(5210);
+var YAMLSeq = __nccwpck_require__(4185);
+var pairs = __nccwpck_require__(7633);
 
 class YAMLOMap extends YAMLSeq.YAMLSeq {
     constructor() {
@@ -9630,15 +9475,16 @@ exports.omap = omap;
 
 /***/ }),
 
-/***/ 9790:
+/***/ 7633:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Pair = __nccwpck_require__(6503);
-var Scalar = __nccwpck_require__(640);
-var YAMLSeq = __nccwpck_require__(6435);
+var identity = __nccwpck_require__(2296);
+var Pair = __nccwpck_require__(7897);
+var Scalar = __nccwpck_require__(1305);
+var YAMLSeq = __nccwpck_require__(4185);
 
 function resolvePairs(seq, onError) {
     if (identity.isSeq(seq)) {
@@ -9719,24 +9565,25 @@ exports.resolvePairs = resolvePairs;
 
 /***/ }),
 
-/***/ 8439:
+/***/ 887:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var map = __nccwpck_require__(4483);
-var _null = __nccwpck_require__(7814);
-var seq = __nccwpck_require__(8971);
-var string = __nccwpck_require__(5573);
-var binary = __nccwpck_require__(6873);
-var bool = __nccwpck_require__(1332);
-var float = __nccwpck_require__(2002);
-var int = __nccwpck_require__(7343);
-var merge = __nccwpck_require__(3408);
-var omap = __nccwpck_require__(9312);
-var pairs = __nccwpck_require__(9790);
-var set = __nccwpck_require__(8234);
-var timestamp = __nccwpck_require__(2648);
+var map = __nccwpck_require__(7899);
+var _null = __nccwpck_require__(2238);
+var seq = __nccwpck_require__(851);
+var string = __nccwpck_require__(3922);
+var binary = __nccwpck_require__(7530);
+var bool = __nccwpck_require__(9618);
+var float = __nccwpck_require__(3004);
+var int = __nccwpck_require__(7085);
+var merge = __nccwpck_require__(3913);
+var omap = __nccwpck_require__(2859);
+var pairs = __nccwpck_require__(7633);
+var set = __nccwpck_require__(6015);
+var timestamp = __nccwpck_require__(3939);
 
 const schema = [
     map.map,
@@ -9767,14 +9614,15 @@ exports.schema = schema;
 
 /***/ }),
 
-/***/ 8234:
+/***/ 6015:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Pair = __nccwpck_require__(6503);
-var YAMLMap = __nccwpck_require__(9856);
+var identity = __nccwpck_require__(2296);
+var Pair = __nccwpck_require__(7897);
+var YAMLMap = __nccwpck_require__(5210);
 
 class YAMLSet extends YAMLMap.YAMLMap {
     constructor(schema) {
@@ -9870,12 +9718,13 @@ exports.set = set;
 
 /***/ }),
 
-/***/ 2648:
+/***/ 3939:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var stringifyNumber = __nccwpck_require__(9063);
+var stringifyNumber = __nccwpck_require__(4594);
 
 /** Internal types handle bigint as number, because TS can't figure it out. */
 function parseSexagesimal(str, asBigInt) {
@@ -9982,9 +9831,10 @@ exports.timestamp = timestamp;
 
 /***/ }),
 
-/***/ 854:
+/***/ 251:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 const FOLD_FLOW = 'flow';
@@ -10140,15 +9990,16 @@ exports.foldFlowLines = foldFlowLines;
 
 /***/ }),
 
-/***/ 4581:
+/***/ 2595:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var anchors = __nccwpck_require__(8509);
-var identity = __nccwpck_require__(8438);
-var stringifyComment = __nccwpck_require__(8746);
-var stringifyString = __nccwpck_require__(6078);
+var anchors = __nccwpck_require__(6688);
+var identity = __nccwpck_require__(2296);
+var stringifyComment = __nccwpck_require__(7208);
+var stringifyString = __nccwpck_require__(6790);
 
 function createStringifyContext(doc, options) {
     const opt = Object.assign({
@@ -10279,14 +10130,15 @@ exports.stringify = stringify;
 
 /***/ }),
 
-/***/ 9095:
+/***/ 514:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var stringify = __nccwpck_require__(4581);
-var stringifyComment = __nccwpck_require__(8746);
+var identity = __nccwpck_require__(2296);
+var stringify = __nccwpck_require__(2595);
+var stringifyComment = __nccwpck_require__(7208);
 
 function stringifyCollection(collection, ctx, options) {
     const flow = ctx.inFlow ?? collection.flow;
@@ -10441,9 +10293,10 @@ exports.stringifyCollection = stringifyCollection;
 
 /***/ }),
 
-/***/ 8746:
+/***/ 7208:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 /**
@@ -10472,14 +10325,15 @@ exports.stringifyComment = stringifyComment;
 
 /***/ }),
 
-/***/ 5941:
+/***/ 2253:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var stringify = __nccwpck_require__(4581);
-var stringifyComment = __nccwpck_require__(8746);
+var identity = __nccwpck_require__(2296);
+var stringify = __nccwpck_require__(2595);
+var stringifyComment = __nccwpck_require__(7208);
 
 function stringifyDocument(doc, options) {
     const lines = [];
@@ -10566,9 +10420,10 @@ exports.stringifyDocument = stringifyDocument;
 
 /***/ }),
 
-/***/ 9063:
+/***/ 4594:
 /***/ ((__unused_webpack_module, exports) => {
 
+"use strict";
 
 
 function stringifyNumber({ format, minFractionDigits, tag, value }) {
@@ -10600,15 +10455,16 @@ exports.stringifyNumber = stringifyNumber;
 
 /***/ }),
 
-/***/ 9711:
+/***/ 6245:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
-var Scalar = __nccwpck_require__(640);
-var stringify = __nccwpck_require__(4581);
-var stringifyComment = __nccwpck_require__(8746);
+var identity = __nccwpck_require__(2296);
+var Scalar = __nccwpck_require__(1305);
+var stringify = __nccwpck_require__(2595);
+var stringifyComment = __nccwpck_require__(7208);
 
 function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
     const { allNullValues, doc, indent, indentStep, options: { commentString, indentSeq, simpleKeys } } = ctx;
@@ -10759,13 +10615,14 @@ exports.stringifyPair = stringifyPair;
 
 /***/ }),
 
-/***/ 6078:
+/***/ 6790:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var Scalar = __nccwpck_require__(640);
-var foldFlowLines = __nccwpck_require__(854);
+var Scalar = __nccwpck_require__(1305);
+var foldFlowLines = __nccwpck_require__(251);
 
 const getFoldOptions = (ctx, isBlock) => ({
     indentAtStart: isBlock ? ctx.indent.length : ctx.indentAtStart,
@@ -11104,12 +10961,13 @@ exports.stringifyString = stringifyString;
 
 /***/ }),
 
-/***/ 1316:
+/***/ 5865:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
+"use strict";
 
 
-var identity = __nccwpck_require__(8438);
+var identity = __nccwpck_require__(2296);
 
 const BREAK = Symbol('break visit');
 const SKIP = Symbol('skip children');
@@ -11397,8 +11255,9 @@ exports.visitAsync = visitAsync;
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
+"use strict";
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
@@ -11503,8 +11362,8 @@ const isExpired = (expires, today) => expires < today.toISOString().slice(0, 10)
 const isAppliesTo = (value) => typeof value === 'string' && APPLIES_TO_VALUES.some((allowed) => allowed === value);
 const isRecord = (value) => typeof value === 'object' && value !== null;
 
-// EXTERNAL MODULE: ./node_modules/.pnpm/semver@7.8.5/node_modules/semver/index.js
-var semver = __nccwpck_require__(2350);
+// EXTERNAL MODULE: ../../node_modules/.pnpm/semver@7.6.3/node_modules/semver/index.js
+var semver = __nccwpck_require__(6546);
 ;// CONCATENATED MODULE: ./src/lib/bumpAdvisor.ts
 
 /**
@@ -11622,20 +11481,38 @@ const findMinimalFix = async ({ chainPackages, client, currentMajor, currentSpec
     return { status: 'none' };
 };
 /**
- * Walks the dependency graph of `rootName@rootVersion`, restricted to the packages
- * that appeared on the introducing chains, resolving each hop to its highest
- * satisfying version. Returns whether every reachable version of the vulnerable
- * module lands in the patched range.
+ * Walks the dependency graph of `rootName@rootVersion`, resolving each dependency to its highest
+ * satisfying version, and returns whether every reachable copy of the vulnerable module is in
+ * the patched range.
  *
- * The chain restriction bounds registry requests per candidate. A path that a newer
- * version adds through a package off the original chain is not traced, so `clear` is a
- * suggestion: the plan's verify step re-runs the audit and catches any remaining copy.
+ * The first walk follows only the packages on the introducing chains (the dependency paths that
+ * the audit found to the module), which limits registry requests for each candidate. If that
+ * walk finds no copy, a chain package may have been renamed or replaced, so the whole graph is
+ * walked before the result is `clear`. A `clear` from the first walk can miss a new copy off the
+ * chain. The audit that runs again after the bump finds such a copy.
  */
 const traceModule = async ({ chainPackages, client, module, patchedRange, rootName, rootVersion, }) => {
     // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
     if (rootName === module && !(0,semver.satisfies)(rootVersion, patchedRange)) {
         return 'vulnerable';
     }
+    const root = { client, module, rootName, rootVersion };
+    const onChain = await collectModuleVersions({
+        ...root,
+        shouldFollow: (name) => chainPackages.has(name),
+    });
+    const moduleVersions = Array.isArray(onChain) && onChain.length === 0
+        ? await collectModuleVersions({ ...root, shouldFollow: () => true })
+        : onChain;
+    if (moduleVersions === 'unknown') {
+        return 'unknown';
+    }
+    return moduleVersions.every((version) => (0,semver.satisfies)(version, patchedRange))
+        ? 'clear'
+        : 'vulnerable';
+};
+/** Lists the versions of `module` reachable through packages that `shouldFollow` accepts. */
+const collectModuleVersions = async ({ client, module, rootName, rootVersion, shouldFollow, }) => {
     const moduleVersions = [];
     const visited = new Set([`${rootName}@${rootVersion}`]);
     const queue = [{ name: rootName, version: rootVersion }];
@@ -11654,7 +11531,7 @@ const traceModule = async ({ chainPackages, client, module, patchedRange, rootNa
         }
         for (const [depName, range] of Object.entries(dependencies)) {
             const isModule = depName === module;
-            if (!isModule && !chainPackages.has(depName)) {
+            if (!isModule && !shouldFollow(depName)) {
                 continue;
             }
             const depPackument = await client.fetchPackument(depName);
@@ -11676,17 +11553,11 @@ const traceModule = async ({ chainPackages, client, module, patchedRange, rootNa
             }
         }
     }
-    if (moduleVersions.length === 0) {
-        // The bumped dependency no longer pulls the module through the known chain.
-        return 'clear';
-    }
-    return moduleVersions.every((version) => (0,semver.satisfies)(version, patchedRange))
-        ? 'clear'
-        : 'vulnerable';
+    return moduleVersions;
 };
 
-// EXTERNAL MODULE: ./node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/index.js
-var dist = __nccwpck_require__(181);
+// EXTERNAL MODULE: ../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/index.js
+var dist = __nccwpck_require__(8996);
 ;// CONCATENATED MODULE: ./src/lib/catalog.ts
 
 
@@ -11797,9 +11668,8 @@ const readFlags = (argv) => {
 const external_node_os_namespaceObject = require("node:os");
 ;// CONCATENATED MODULE: ./src/lib/auditReport.ts
 /**
- * Parses `pnpm audit --json` stdout. Tolerant by design: registry errors (run
- * with `--ignore-registry-errors`) or empty output yield an empty report rather
- * than throwing, so a transient registry hiccup never fails the gate.
+ * Parses `pnpm audit --json` stdout. Output that is not a report yields an empty
+ * report; `assertAuditCompleted` decides whether that empty report is a failure.
  */
 const parseAuditReport = (stdout) => {
     let data;
@@ -11823,8 +11693,7 @@ const parseAuditReport = (stdout) => {
 };
 /**
  * Throws when `pnpm audit` exits non-zero without reporting advisories. That exit is
- * a tool failure (registry errors exit 0 under `--ignore-registry-errors`), and its
- * empty report would otherwise read as a clean audit.
+ * a tool or registry failure, and its empty report would otherwise read as a clean audit.
  */
 const assertAuditCompleted = ({ report, result, target, }) => {
     if (result.code === 0 || Object.keys(report.advisories).length > 0) {
@@ -11900,7 +11769,7 @@ const extractDirectDeps = ({ advisory, originPackage, }) => {
         for (const raw of finding.paths ?? []) {
             const direct = directDependencyFromPath({ originPackage, raw });
             if (direct) {
-                byKey.set(`${direct.workspacePackage ?? ''} ${direct.dependency}`, direct);
+                byKey.set(`${direct.workspacePackage ?? ''}\0${direct.dependency}`, direct);
             }
         }
     }
@@ -11932,9 +11801,9 @@ const directDependencyFromPath = ({ originPackage, raw, }) => {
 const compareDirectDeps = (a, b) => a.dependency.localeCompare(b.dependency) ||
     (a.workspacePackage ?? '').localeCompare(b.workspacePackage ?? '');
 const unionDirectDeps = (target, additions) => {
-    const keys = new Set(target.map((dep) => `${dep.workspacePackage ?? ''} ${dep.dependency}`));
+    const keys = new Set(target.map((dep) => `${dep.workspacePackage ?? ''}\0${dep.dependency}`));
     for (const addition of additions) {
-        const key = `${addition.workspacePackage ?? ''} ${addition.dependency}`;
+        const key = `${addition.workspacePackage ?? ''}\0${addition.dependency}`;
         if (!keys.has(key)) {
             keys.add(key);
             target.push(addition);
@@ -12081,13 +11950,12 @@ const auditPackage = async ({ pkg, run, }) => {
             cwd: dir,
         });
         if (install.code !== 0) {
-            // A failed resolve would otherwise yield an empty (falsely clean) audit.
-            console.warn(`Warning: could not resolve dependencies for ${pkg.name}; its audit was skipped.` +
-                (install.stderr ? `\n${install.stderr.trim()}` : ''));
-            return [];
+            // A package without an audit makes the whole result incomplete, not clean.
+            throw new Error(`could not resolve dependencies for ${pkg.name}` +
+                (install.stderr ? `:\n${install.stderr.trim()}` : ''));
         }
         const result = await run({
-            args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+            args: ['audit', '--prod', '--json'],
             cwd: dir,
         });
         const report = assertAuditCompleted({
@@ -12126,7 +11994,7 @@ const mapWithConcurrency = async (items, limit, task) => {
  */
 const runMonorepoAudit = async ({ cwd, run = runPnpm, }) => {
     const result = await run({
-        args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+        args: ['audit', '--prod', '--json'],
         cwd,
     });
     const report = assertAuditCompleted({
@@ -12474,6 +12342,13 @@ const printReport = ({ findings, jsonPath, packagesAudited, scope, severity, }) 
 /** True when a resolution (relock or bump) is now available for this dependency. */
 const isResolvableBump = ({ fix }) => fix.status === 'fix' || fix.status === 'relock';
 /**
+ * Lists each `<advisory> through <dependency>` whose fix is unknown because the registry did
+ * not answer. Such a finding could have a fix, so the plan built from it is incomplete.
+ */
+const listRegistryFailures = (findings) => findings.flatMap((finding) => finding.bumps
+    .filter(({ fix }) => fix.status === 'unknown' && fix.reason === 'registry')
+    .map(({ dependency }) => `${finding.advisory} through ${dependency}`));
+/**
  * Reviews allowlisted advisories that still appear: reports any whose vulnerability
  * a bump or relock can now clear, so the exception can be removed and the fix applied.
  */
@@ -12591,7 +12466,14 @@ const main = async () => {
         .map(toFinding);
     const reviewed = await annotateFindings({ client, findings: allowlistFindings, index });
     printAllowlistReview(reviewed);
-    return reported.length > 0 ? 1 : 0;
+    // Exit 0 means the audit is complete, with or without findings. Exit 1 means the result may
+    // be incomplete, so no step may act on it.
+    const registryFailures = listRegistryFailures(reported);
+    if (registryFailures.length > 0) {
+        console.error(`Error: the registry did not answer, so the fix is unknown for ${registryFailures.join(', ')}`);
+        return 1;
+    }
+    return 0;
 };
 const audit = async ({ catalogs, manifests, repoRoot, scope, }) => {
     if (scope === 'monorepo') {

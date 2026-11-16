@@ -1,6 +1,11 @@
 import type { FieldState, Validate } from 'payload'
 
 export type Options = {
+  /**
+   * Excludes this field's own value when form state is converted to document data, so the value is not submitted with the form.
+   * The value remains available in form state.
+   * Descendant fields are serialized independently.
+   */
   disableFormData?: boolean
   hasRows?: boolean
   /**

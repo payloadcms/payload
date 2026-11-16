@@ -34,7 +34,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
@@ -63,7 +63,7 @@ import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitial
 import { listViewSelectAPISlug } from '../../../admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from '../../../admin/collections/NoTimestamps.js'
 import { devUser } from '../../../credentials.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -633,6 +633,132 @@ describe('List View', () => {
 
       await page.waitForURL(new RegExp(encodedQueryString))
       expect(true).toBe(true)
+    })
+
+    test('should retain the selected relationship filter label throughout the filtered load', async () => {
+      const targetTitle = 'post1'
+      const { docs } = await payload.find({
+        collection: postsCollectionSlug,
+        where: { title: { equals: targetTitle } },
+      })
+      const target = docs[0]
+
+      await payload.update({
+        collection: postsCollectionSlug,
+        data: { relationship: target.id },
+        where: { title: { equals: 'post2' } },
+      })
+      await page.reload()
+
+      const { condition } = await addListFilter({
+        fieldLabel: 'Relationship',
+        operatorLabel: 'equals',
+        page,
+      })
+
+      await condition.locator('.condition-value-relationship').getByRole('combobox').click()
+      const option = getSelectMenu({ page }).getByRole('option', {
+        exact: true,
+        name: targetTitle,
+      })
+
+      await expect(option).toBeVisible()
+      // Observe the document, including replacement of the filter itself. Polling only the
+      // final label would miss the selected → placeholder → selected transition.
+      const selectionHistory = await page.evaluateHandle(
+        ({ targetTitle }) => {
+          const values: string[] = []
+          const observer = new MutationObserver(() => {
+            const value =
+              document.querySelector('.condition-value-relationship .react-select--single-value')
+                ?.textContent ?? ''
+
+            if (values.length === 0 && value !== targetTitle) {
+              return
+            }
+
+            if (values.at(-1) !== value) {
+              values.push(value)
+            }
+          })
+
+          observer.observe(document.body, { childList: true, characterData: true, subtree: true })
+
+          return { observer, values }
+        },
+        { targetTitle },
+      )
+
+      try {
+        await option.click()
+        await page.waitForURL(
+          (url) =>
+            url.searchParams.get('where[or][0][and][0][relationship][equals]') ===
+            String(target.id),
+        )
+        await expect(page.locator('tbody tr')).toHaveCount(1)
+        await expect(page.locator('tbody tr .cell-title')).toHaveText('post2')
+        // eslint-disable-next-line playwright/no-networkidle -- Keep observing through debounced navigation and relationship option reloads.
+        await page.waitForLoadState('networkidle')
+
+        // eslint-disable-next-line payload/no-flaky-assertions -- Check the complete history without retrying away a transient reset.
+        expect(await selectionHistory.evaluate(({ values }) => values)).toEqual([targetTitle])
+      } finally {
+        await selectionHistory.evaluate(({ observer }) => observer.disconnect())
+        await selectionHistory.dispose()
+      }
+    })
+
+    test('should reload relationship filter options when the content locale changes', async () => {
+      await page.goto(`${postsUrl.list}${qs.stringify({ locale: 'en' }, { addQueryPrefix: true })}`)
+      const { condition } = await addListFilter({
+        fieldLabel: 'Relationship',
+        operatorLabel: 'equals',
+        page,
+      })
+      const valueInput = condition.locator('.condition-value-relationship').getByRole('combobox')
+      const postsAPI = formatAdminURL({
+        apiRoute: adminRoutes.routes.api,
+        path: `/${postsCollectionSlug}`,
+        serverURL,
+      })
+
+      try {
+        await valueInput.click()
+        await expect(
+          getSelectMenu({ page }).getByRole('option', { exact: true, name: 'post1' }),
+        ).toBeVisible()
+        await valueInput.press('Escape')
+        await page.getByRole('button', { exact: true, name: 'Locale: English (en)' }).click()
+        const localizedOptionsResponse = page.waitForResponse(
+          (response) => {
+            const url = new URL(response.url())
+
+            return (
+              response.ok() &&
+              url.pathname === new URL(postsAPI).pathname &&
+              url.searchParams.get('locale') === 'es' &&
+              url.searchParams.get('select[title]') === 'true'
+            )
+          },
+          { timeout: EXPECT_TIMEOUT },
+        )
+
+        await page.getByRole('menuitemradio', { exact: true, name: 'Spanish (es)' }).click()
+        await localizedOptionsResponse
+        await expect(page).toHaveURL(/locale=es/)
+        await valueInput.click()
+        await expect(
+          getSelectMenu({ page }).getByRole('option', { exact: true, name: 'post1' }),
+        ).toBeVisible()
+      } finally {
+        await page.goto(
+          `${postsUrl.list}${qs.stringify({ locale: 'en' }, { addQueryPrefix: true })}`,
+        )
+        await expect(
+          page.getByRole('button', { exact: true, name: 'Locale: English (en)' }),
+        ).toBeVisible()
+      }
     })
 
     test('should refresh relationship values when a different field is selected', async () => {

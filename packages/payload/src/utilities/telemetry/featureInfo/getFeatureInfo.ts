@@ -1,9 +1,11 @@
 import type { SanitizedConfig } from '../../../config/types.js'
 import type { IncomingDrafts } from '../../../versions/types.js'
-import type { FeatureInfo, RichTextFeature } from './types.js'
+import type { FeatureInfo } from './types.js'
 
 import { defaultUserCollection } from '../../../auth/defaultUser.js'
 import { isUserMenuSettingsGroup } from '../../../config/types.js'
+import { traverseFields } from '../../traverseFields.js'
+import { getTelemetryWidgetType } from '../widgetType.js'
 
 export const getFeatureInfo = (config: SanitizedConfig): FeatureInfo => {
   const telemetryConfig = sanitizeTelemetryConfig(config)
@@ -24,6 +26,7 @@ export const getFeatureInfo = (config: SanitizedConfig): FeatureInfo => {
       collectUploadAndMedia,
       collectVersionsAndDrafts,
       collectRichTextFeatures,
+      collectRichTextFieldCount,
     ].map((collect) => safelyCollect(() => collect(telemetryConfig))),
   )
 }
@@ -36,8 +39,6 @@ const safelyCollect = (collect: () => FeatureInfo): FeatureInfo => {
   }
 }
 
-// sanitization adds 4 system widgets that we need to account for
-const SYSTEM_WIDGET_COUNT = 4
 const SYSTEM_COLLECTION_SLUGS = [
   'payload-llm-instructions',
   'payload-locked-documents',
@@ -102,16 +103,20 @@ const sanitizeTelemetryConfig = (config: SanitizedConfig): SanitizedConfig => {
   }
 }
 
-const collectAdminCustomization = (config: SanitizedConfig): FeatureInfo => ({
-  adminCustomization: {
-    customAdminComponentCount: countRootAdminComponents(config),
-    customAdminViewCount: Object.keys(config.admin?.components?.views ?? {}).length,
-    customDashboardWidgetCount: Math.max(
-      0,
-      (config.admin?.dashboard?.widgets?.length ?? 0) - SYSTEM_WIDGET_COUNT,
-    ),
-  },
-})
+const collectAdminCustomization = (config: SanitizedConfig): FeatureInfo => {
+  const widgetTypes = (config.admin?.dashboard?.widgets ?? [])
+    .map(({ Component }) => getTelemetryWidgetType({ component: Component }))
+    .filter((type) => type !== null)
+
+  return {
+    adminCustomization: {
+      customAdminComponentCount: countRootAdminComponents(config),
+      customAdminViewCount: Object.keys(config.admin?.components?.views ?? {}).length,
+      customDashboardWidgetCount: widgetTypes.filter((type) => type === 'custom').length,
+      widgetTypes: [...new Set(widgetTypes)].sort(),
+    },
+  }
+}
 
 const collectAuthentication = (config: SanitizedConfig): FeatureInfo => {
   const authCollections = (config.collections ?? []).filter(({ auth }) => Boolean(auth))
@@ -157,7 +162,6 @@ const collectHierarchy = (config: SanitizedConfig): FeatureInfo => ({
 
 const collectI18n = (config: SanitizedConfig): FeatureInfo => ({
   i18n: {
-    hasCustomAdminTranslations: Object.keys(config.i18n?.translations ?? {}).length > 0,
     supportedAdminLanguageCount: config.i18n?.supportedLanguages
       ? Object.keys(config.i18n.supportedLanguages).length
       : 1,
@@ -230,6 +234,30 @@ const collectRichTextFeatures = (config: SanitizedConfig): FeatureInfo => {
       featureSet.has(f),
     ),
   }
+}
+
+const collectRichTextFieldCount = (config: SanitizedConfig): FeatureInfo => {
+  const visitedFields = new Set<object>()
+  let fieldCount = 0
+
+  for (const entity of [...(config.collections ?? []), ...(config.globals ?? [])]) {
+    traverseFields({
+      callback: ({ field, next }) => {
+        // Skip shared and recursive block definitions already counted.
+        if (visitedFields.has(field)) {
+          return next?.()
+        }
+        visitedFields.add(field)
+        if (field.type === 'richText') {
+          fieldCount++
+        }
+      },
+      config,
+      fields: entity.fields,
+    })
+  }
+
+  return { richTextFieldCount: fieldCount }
 }
 
 const collectTrash = (config: SanitizedConfig): FeatureInfo => ({

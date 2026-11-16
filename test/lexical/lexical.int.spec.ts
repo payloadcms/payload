@@ -73,6 +73,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalFullyFeaturedSlug,
   lexicalHeadingFeatureSlug,
   lexicalListsFeatureSlug,
   lexicalRelationshipFieldsSlug,
@@ -1625,6 +1626,22 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           expect(result).toContain('background-color: #336699;')
           expect(result).toContain('colspan="2"')
           expect(result).toContain('Cell content')
+        })
+
+        test('ignores non-numeric colSpan and rowSpan values', async () => {
+          const result = await variant.table.tablecell!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              colSpan: '2" onmouseover="alert(1)',
+              headerState: 0,
+              rowSpan: '2" onmouseover="alert(1)',
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('onmouseover')
+          expect(result).not.toContain('colspan=')
+          expect(result).not.toContain('rowspan=')
         })
       })
     })
