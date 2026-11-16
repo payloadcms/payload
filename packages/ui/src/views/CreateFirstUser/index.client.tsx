@@ -44,6 +44,18 @@ export const CreateFirstUserClient: React.FC<{
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
+  const formInitialState = React.useMemo<FormState>(
+    () => ({
+      ...initialState,
+      'confirm-password': {
+        ...initialState['confirm-password'],
+        valid: initialState['confirm-password']['valid'] || false,
+        value: initialState['confirm-password']['value'] || '',
+      },
+    }),
+    [initialState],
+  )
+
   const handleFirstRegister = (data: UserWithToken) => {
     setUser(data)
   }
@@ -69,14 +81,7 @@ export const CreateFirstUserClient: React.FC<{
             path: `/${userSlug}/first-register`,
           })}
           className={baseClass}
-          initialState={{
-            ...initialState,
-            'confirm-password': {
-              ...initialState['confirm-password'],
-              valid: initialState['confirm-password']['valid'] || false,
-              value: initialState['confirm-password']['value'] || '',
-            },
-          }}
+          initialState={formInitialState}
           method="POST"
           onSuccess={handleFirstRegister}
           redirect={admin}

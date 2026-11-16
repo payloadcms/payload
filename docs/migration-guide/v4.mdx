@@ -961,6 +961,32 @@ BREAKING CHANGES:
 - Schema-backed forms with a local `onSubmit` validate on the server before committing. Remove `beforeSubmit` callbacks whose only purpose is fetching server form state. Invalid state or a validation request failure prevents the local commit.
 - After a successful save, `Form` refreshes permissions and state before calling `onSuccess`. Creates skip the state refresh because they replace the form. A failed refresh does not change the successful save outcome or suppress `onSuccess`.
 
+### `useQueue` tasks take an options object and report their outcome
+
+`useQueue().queueTask` now takes a `{ task, priority }` object and returns a promise that resolves to `{ status: 'completed', value }` or `{ status: 'superseded' }`. The queue keeps at most one pending task: lower `priority` values take precedence, and newer tasks win ties. The `beforeProcess` and `afterProcess` options have been removed, and a new `resetQueue` discards pending work and marks running tasks as stale through the `isCurrent()` check passed to each task.
+
+```diff
+'use client'
+import { useQueue } from '@payloadcms/ui'
+
+const { queueTask } = useQueue()
+
+-queueTask(async () => {
+-  await loadPosts()
+-})
++void queueTask({
++  task: async ({ isCurrent }) => {
++    const posts = await loadPosts()
++
++    if (isCurrent()) {
++      setPosts(posts)
++    }
++  },
++})
+```
+
+Task errors now reject the returned promise instead of being logged by the queue, so handle them at the call site.
+
 ### Locale hooks can now return null
 
 The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.
