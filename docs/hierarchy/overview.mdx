@@ -1026,3 +1026,5 @@ export const Pages: CollectionConfig = {
 ```
 
 The parent field defaults to `_h_parent`. Set `nestedDocs: { parentFieldName: 'parentPage' }` to choose another name. The field is single-value and cannot be localized. Configure only one of `nestedDocs`, `hierarchy`, `folders`, or `tags` on a collection; separate relationship fields can still assign a nested document to folders or tags.
+
+Tree queries respect collection read access and the collection's base filter. Custom parent fields with `access.read` rules cannot be queried as a tree: parent membership could otherwise be exposed through branches or expand controls even when the relationship value is hidden.
