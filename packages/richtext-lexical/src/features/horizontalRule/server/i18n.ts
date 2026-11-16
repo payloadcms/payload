@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Vízszintes vonal',
   },
+  id: {
+    label: 'Garis Horizontal',
+  },
   is: {
     label: 'Lárétt lína',
   },

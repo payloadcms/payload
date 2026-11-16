@@ -85,6 +85,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Igazítás balra',
     alignRightLabel: 'Igazítás jobbra',
   },
+  id: {
+    alignCenterLabel: 'Rata Tengah',
+    alignJustifyLabel: 'Rata Kiri-Kanan',
+    alignLeftLabel: 'Rata Kiri',
+    alignRightLabel: 'Rata Kanan',
+  },
   is: {
     alignCenterLabel: 'Miðju jöfnun',
     alignJustifyLabel: 'Samræmd jöfnun',
