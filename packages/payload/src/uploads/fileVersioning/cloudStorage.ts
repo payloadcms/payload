@@ -13,6 +13,7 @@ import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManage
 import {
   collectStoredFiles,
   getStoredFileIdentity,
+  hasManagedOriginal,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
@@ -161,8 +162,8 @@ export const runCloudFileUpdate = async <T>({
     write: async () => {
       if (
         collection.versions &&
-        !hasStoredOriginal({ doc: current }) &&
-        hasStoredOriginal({ doc: storedCurrent })
+        !hasManagedOriginal({ doc: current }) &&
+        hasManagedOriginal({ doc: storedCurrent })
       ) {
         await persistLegacyCloudVersions({ id, collection, current: storedCurrent, req })
       }
@@ -249,7 +250,7 @@ const persistLegacyCloudVersions = async ({
 
     for (const row of versions.docs) {
       hasVersions = true
-      if (hasStoredOriginal({ doc: row.version })) {
+      if (hasManagedOriginal({ doc: row.version })) {
         continue
       }
 
@@ -258,7 +259,7 @@ const persistLegacyCloudVersions = async ({
         doc: row.version,
         req,
       })
-      if (!hasStoredOriginal({ doc: version })) {
+      if (!hasManagedOriginal({ doc: version })) {
         continue
       }
 
@@ -283,7 +284,7 @@ const persistLegacyCloudVersions = async ({
     page += 1
   }
 
-  if (!hasVersions && hasStoredOriginal({ doc: current })) {
+  if (!hasVersions && hasManagedOriginal({ doc: current })) {
     await saveVersion({
       id,
       collection,
@@ -295,13 +296,6 @@ const persistLegacyCloudVersions = async ({
     })
   }
 }
-
-const hasStoredOriginal = ({ doc }: { doc: JsonObject }): boolean =>
-  Boolean(
-    doc.original &&
-    typeof doc.original === 'object' &&
-    typeof (doc.original as Record<string, unknown>).filename === 'string',
-  )
 
 const withCloudHookGuard = async <T>({
   metadata,

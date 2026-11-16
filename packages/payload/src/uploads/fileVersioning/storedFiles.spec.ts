@@ -7,8 +7,9 @@ import type { UploadFileEntry } from './types.js'
 import {
   collectStoredFiles,
   getUploadFileEntries,
-  getUploadFileEntryValue,
+  getUploadFileValue,
   getUploadFileValues,
+  hasManagedOriginal,
   hasStoredOriginal,
 } from './storedFiles.js'
 
@@ -378,5 +379,32 @@ it.for([
   const doc = { filename: 'photo.png', original, variants: { card } }
   const objects = { card, doc, original } as Record<string, unknown>
 
-  expect(getUploadFileEntryValue({ doc, role })).toBe(expected ? objects[expected] : undefined)
+  expect(getUploadFileValue({ doc, role })).toBe(expected ? objects[expected] : undefined)
+})
+
+it('should list an original marked as not stored as unmanaged, because an original is never built on request', () => {
+  const entries = getUploadFileEntries({
+    collection,
+    doc: { filename: 'photo.png', original: { ...original, _stored: false } },
+    req: {} as PayloadRequest,
+  })
+
+  expect(entries).toContainEqual({
+    filename: 'photo.png',
+    role: { type: 'original' },
+    status: 'unmanaged',
+  })
+})
+
+it.for([
+  {
+    name: 'an original with a filename',
+    doc: { original: { filename: 'photo.png' } },
+    expected: true,
+  },
+  { name: 'an original with no filename', doc: { original: { filename: null } }, expected: false },
+  { name: 'no original', doc: { original: null }, expected: false },
+  { name: 'an original that is not an object', doc: { original: 'photo.png' }, expected: false },
+])('should find a managed original for $name: $expected', ({ doc, expected }) => {
+  expect(hasManagedOriginal({ doc })).toBe(expected)
 })

@@ -88,14 +88,15 @@ export async function runRequestTimeFileRestore<T>({
       status === 'stored' && role.type === 'size' ? [role.sizeKey] : [],
     ),
   )
-  const unstoredVariantNames = (collection.upload.variants ?? [])
-    .map(({ name }) => name)
-    .filter((name) => !storedVariantNames.has(name))
+  const configuredVariantNames = (collection.upload.variants ?? []).map(({ name }) => name)
+  const unstoredVariantNames = configuredVariantNames.filter(
+    (name) => !storedVariantNames.has(name),
+  )
   const hasRequestTimeVariant = entries.some(
     ({ role, status }) =>
       status === 'requestTime' &&
       role.type === 'size' &&
-      unstoredVariantNames.includes(role.sizeKey),
+      configuredVariantNames.includes(role.sizeKey),
   )
 
   // The checks below use one plan, so the stages are planned at most once.

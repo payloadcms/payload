@@ -64,7 +64,7 @@ export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> =>
     doc: args.selected,
     req: args.req,
   })
-  return entries.some(({ role, status }) => status === 'requestTime' && role.type !== 'original')
+  return entries.some(({ status }) => status === 'requestTime')
     ? runRequestTimeFileRestore({ ...args, runStoredRestore: runStoredFileRestore })
     : runStoredFileRestore(args)
 }

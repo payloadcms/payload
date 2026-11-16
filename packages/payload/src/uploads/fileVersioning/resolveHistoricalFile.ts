@@ -7,8 +7,9 @@ import { checkFileAccess } from '../checkFileAccess.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import {
   getUploadFileEntries,
-  getUploadFileEntryValue,
+  getUploadFileValues,
   hasStoredOriginal,
+  isSameFileRole,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
@@ -98,21 +99,22 @@ const resolveVersionFile = async ({
     doc: row.version,
     req,
   })
-  const entries = getUploadFileEntries({ collection: collection.config, doc: saved, req })
   // A shared filename means the main file unless the request asks for the original.
-  const entry = isOriginalFileRequest({ doc: saved, filename, isOriginal })
-    ? entries.find(({ role }) => role.type === 'original')
-    : entries.find(
-        (candidate) => candidate.role.type !== 'original' && candidate.filename === filename,
-      )
-  const entryPrefix = entry && getUploadFileEntryValue({ doc: saved, role: entry.role })?.prefix
+  const values = getUploadFileValues({ doc: saved })
+  const match = isOriginalFileRequest({ doc: saved, filename, isOriginal })
+    ? values.find(({ role }) => role.type === 'original')
+    : values.find(({ role, value }) => role.type !== 'original' && value.filename === filename)
 
-  if (!entry || (prefix !== undefined && (entryPrefix ?? '') !== prefix)) {
+  // Find the requested file before reading the version's entries. Reading them can throw for a
+  // damaged entry, and that must not happen before the access checks for another file.
+  if (!match || (prefix !== undefined && (match.value.prefix ?? '') !== prefix)) {
     return
   }
 
-  const isBuiltAtRequest = entry.role.type !== 'original' && entry.status === 'requestTime'
-  const hasFile = isBuiltAtRequest ? hasStoredOriginal({ entries }) : entry.status === 'stored'
+  const entries = getUploadFileEntries({ collection: collection.config, doc: saved, req })
+  const entry = entries.find(({ role }) => isSameFileRole({ first: role, second: match.role }))
+  const isBuiltAtRequest = entry?.status === 'requestTime'
+  const hasFile = isBuiltAtRequest ? hasStoredOriginal({ entries }) : entry?.status === 'stored'
 
   if (!hasFile) {
     return

@@ -974,6 +974,50 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     }
   })
 
+  test('should return not found for a file missing from a version that has an unsafe storage key', async ({
+    payload,
+    restClient,
+  }) => {
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'A' },
+      filePath: imageFixture,
+    })
+    const {
+      docs: [selected],
+    } = await payload.db.findVersions({
+      collection: mediaSlug,
+      limit: 1,
+      where: { parent: { equals: created.id } },
+    })
+    const unsafeFilename = '../unsafe.png'
+
+    await payload.db.updateVersion({
+      id: selected!.id,
+      collection: mediaSlug,
+      versionData: {
+        createdAt: selected!.createdAt,
+        latest: selected!.latest,
+        parent: selected!.parent,
+        updatedAt: selected!.updatedAt,
+        version: {
+          ...selected!.version,
+          original: {
+            ...selected!.version.original,
+            filename: unsafeFilename,
+            url: `/api/${mediaSlug}/file/${encodeURIComponent(unsafeFilename)}`,
+          },
+        },
+      },
+    })
+
+    const response = await restClient.GET(
+      `/${mediaSlug}/file/not-in-this-version.png?version=${selected!.id}`,
+    )
+
+    expect(response.status).toBe(404)
+  })
+
   test('should restore saved original and output bytes without changing the selected version', async ({
     payload,
     restClient,

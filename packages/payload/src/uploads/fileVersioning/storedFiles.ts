@@ -50,15 +50,29 @@ export const getUploadFileValues = ({
 }
 
 /** The document's own object for one role, so a caller can change that entry. */
-export const getUploadFileEntryValue = ({
+export const getUploadFileValue = ({
   doc,
   role,
 }: {
   doc: Record<string, unknown>
   role: StoredFileRole
 }): Record<string, unknown> | undefined =>
-  getUploadFileValues({ doc }).find((entry) => isSameRole({ first: entry.role, second: role }))
+  getUploadFileValues({ doc }).find((entry) => isSameFileRole({ first: entry.role, second: role }))
     ?.value
+
+export const isSameFileRole = ({
+  first,
+  second,
+}: {
+  first: StoredFileRole
+  second: StoredFileRole
+}): boolean =>
+  first.type === second.type &&
+  (first.type !== 'size' || (second.type === 'size' && first.sizeKey === second.sizeKey))
+
+/** Older uploads without an original have not been identified as Payload-managed. */
+export const hasManagedOriginal = ({ doc }: { doc: Record<string, unknown> }): boolean =>
+  isEntryObject(doc.original) && typeof doc.original.filename === 'string'
 
 /**
  * Lists the main file, the original and each size of a saved upload, one entry per role. Each
@@ -71,8 +85,7 @@ export const getUploadFileEntries = ({
   req,
   trustGenerated = false,
 }: UploadFileEntriesArgs): UploadFileEntry[] => {
-  // Older uploads without an original have not been identified as Payload-managed.
-  const isManagedUpload = isEntryObject(doc.original) && typeof doc.original.filename === 'string'
+  const isManagedUpload = hasManagedOriginal({ doc })
 
   return getUploadFileValues({ doc }).flatMap(({ role, value }): UploadFileEntry[] => {
     if (typeof value.filename !== 'string') {
@@ -82,8 +95,9 @@ export const getUploadFileEntries = ({
     const filename = value.filename
 
     // A `_stored: false` entry is built when it is requested, so it has no object to copy or delete.
+    // An original is never built on request, so Payload does not manage one with that marker.
     if (isRequestTimeFile({ entry: value })) {
-      return [{ filename, role, status: 'requestTime' }]
+      return [{ filename, role, status: role.type === 'original' ? 'unmanaged' : 'requestTime' }]
     }
 
     if (
@@ -152,13 +166,13 @@ export const withLegacyUploadFileData = ({
   const filesize = doc.filesize
   const mimeType = doc.mimeType
 
-  const hasStoredOriginal =
+  const hasOriginalData =
     doc.original &&
     typeof doc.original === 'object' &&
     !Array.isArray(doc.original) &&
     Object.values(doc.original).some((value) => value !== null && value !== undefined)
 
-  if (hasStoredOriginal) {
+  if (hasOriginalData) {
     return doc
   }
 
@@ -224,9 +238,7 @@ export const withLegacyCloudUploadFileData = async <T extends Record<string, unk
     typeof collection.upload === 'object' ? collection.upload.fileOperations : undefined
 
   if (
-    (stored.original &&
-      typeof stored.original === 'object' &&
-      typeof (stored.original as Record<string, unknown>).filename === 'string') ||
+    hasManagedOriginal({ doc: stored }) ||
     !operations?.hasLegacyFile ||
     typeof stored.filename !== 'string' ||
     typeof stored.url !== 'string' ||
@@ -327,10 +339,6 @@ const resolveStorageKey = ({
 
   return normalizeStorageKey({ key })
 }
-
-const isSameRole = ({ first, second }: { first: StoredFileRole; second: StoredFileRole }) =>
-  first.type === second.type &&
-  (first.type !== 'size' || (second.type === 'size' && first.sizeKey === second.sizeKey))
 
 const validateRole = ({ role }: { role: StoredFileRole }): void => {
   if (role.type === 'size' && (!role.sizeKey || role.sizeKey.includes('/'))) {
