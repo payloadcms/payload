@@ -1049,7 +1049,7 @@ const MyComponent: React.FC = () => {
 
 `ThemeProvider` creates a local scope without rendering a DOM element. Without `targetRef`, its props control the context: omitted values inherit from the parent or use the hook defaults. Both local setters throw when no mounted target is supplied; update the props to change a controlled override.
 
-To make a local scope writable, wrap the themed element with the provider and pass its ref. Mount them together, or rerender the provider when a deferred target mounts so it can subscribe to the element:
+To make a local scope writable, wrap the themed element with the provider and pass its ref:
 
 ```tsx
 'use client'
@@ -1069,7 +1069,9 @@ const LocalTheme: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 }
 ```
 
-Once mounted, the target's attributes determine the context, including external attribute changes. The props supply fallback values before it mounts. `setTheme('light' | 'dark')` changes only the target's `data-theme`; `setTheme('auto')` removes that override and follows the surrounding DOM theme. It does not detect the system preference. `setHighContrastMode` toggles the target's `data-enhanced-contrast` flag; removing it does not disable inherited contrast. Built-in enhanced contrast styling follows the document or shadow host, so local contrast flags require custom styling.
+With `targetRef`, setters update local React state and only that element's attributes. Local choices last until the corresponding provider prop changes. Keep the element's attributes in sync when changing props; the provider does not read or observe DOM attributes.
+
+`setTheme('light' | 'dark')` sets the local theme and the target's `data-theme`. `setTheme('auto')` removes the attribute and follows the parent context; it does not detect the system preference. `setHighContrastMode` sets the local contrast value and toggles the target's `data-enhanced-contrast` flag. Removing that flag does not disable inherited styling. Built-in enhanced contrast styling follows the document or shadow host, so local contrast flags require custom styling.
 
 Local providers never read or write cookies or change the document root. The Admin explicitly mounts `RootThemeProvider` for preference persistence, system detection, and document attributes. Outside a local scope, `useTheme` exposes these root values and setters. Inside a local scope, use [`useRootTheme`](#useroottheme) to read or change root preferences. Without any provider, reading the hook returns defaults, but either setter throws.
 

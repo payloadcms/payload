@@ -514,8 +514,14 @@ test('should update only the popup theme and preserve its draft when the theme p
 
   const draft = screen.getByRole('textbox', { name: 'Popup draft' })
 
+  screen
+    .getByLabelText('Popup theme')
+    .element()
+    .closest('[popover]')!
+    .setAttribute('data-theme', 'dark')
   await draft.fill('Unsaved popup draft')
   await draft.click()
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('light')
   await screen.rerender(
     <Popup button="Open theme scope" theme="auto">
       <ThemeControls />

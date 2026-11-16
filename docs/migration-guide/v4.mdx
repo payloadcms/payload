@@ -51,9 +51,9 @@ Without `targetRef`, `ThemeProvider` props control the local context, and both s
 </ThemeProvider>
 ```
 
-After the target mounts, its attributes determine the context, and setters change only that element. Local `setTheme('auto')` removes its `data-theme` override and inherits the surrounding DOM theme. Local providers do not persist preferences or detect system settings. Host applications remain responsible for their preference persistence. Built-in enhanced contrast styling still follows the document or shadow host.
+Setters update local React state and only the target element's attributes. Later changes to the corresponding prop replace a local choice. Keep the target's attributes in sync when changing props; direct DOM changes are not read or observed. Local `setTheme('auto')` removes its `data-theme` override and follows the parent context. Local providers do not persist preferences or detect system settings. Host applications remain responsible for their preference persistence. Built-in enhanced contrast styling still follows the document or shadow host.
 
-The `useTheme` hook now returns the nearest provider's values. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. Without a target, an explicit `theme` prop sets `autoMode` to `false`, and omitted props inherit from the parent. With a mounted target, `autoMode` indicates that the target has no explicit light or dark attribute.
+The `useTheme` hook now returns the nearest provider's values. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit local theme sets `autoMode` to `false`. Omitted values inherit from the parent; local `setTheme('auto')` sets `autoMode` to `true` and follows the parent theme.
 
 Both hooks remain readable without a root preference provider; `useRootTheme` returns its defaults, and its setters throw when called without a root owner.
 

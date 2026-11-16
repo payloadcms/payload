@@ -11,13 +11,13 @@ export type ThemeContext = {
   highContrastMode: boolean
   /**
    * Toggles enhanced contrast on the nearest provider's target.
-   * Local providers require a mounted `targetRef`; removing the local flag does not disable inherited contrast.
+   * Local providers require a mounted `targetRef`; removing the local flag does not disable inherited contrast styling.
    * At the Admin root, updates the document and saved preference instead.
    */
   setHighContrastMode: (isHighContrast: boolean) => void
   /**
    * Sets the nearest provider's theme.
-   * Local providers require a mounted `targetRef`; `'auto'` removes its `data-theme` override and inherits the surrounding theme.
+   * Local providers require a mounted `targetRef`; `'auto'` removes its `data-theme` override and follows the parent context.
    * At the Admin root, updates the document and saved preference; `'auto'` uses the system preference.
    * Use `useRootTheme` to change root preferences from within a local provider.
    */
@@ -28,17 +28,16 @@ export type ThemeContext = {
 
 export type ThemeProviderProps = {
   children?: ReactNode
-  /** Controlled context value without `targetRef`; fallback until the target mounts otherwise. Built-in contrast styling follows the document or shadow host. */
+  /** Local contrast value; omitted values inherit from the parent. Later prop changes replace local setter choices. */
   highContrastMode?: boolean
   /**
-   * The local element whose theme attributes this provider reads and writes.
+   * The local element whose attributes the setters update.
    * Render it inside this provider; no wrapper element is added automatically.
-   * Mount them together, or rerender the provider when a deferred target mounts.
-   * Its attributes become the source of truth once mounted.
-   * Without a mounted target, local setters throw; controlled props remain readable.
+   * Attributes are not read or observed; keep them in sync when changing provider props.
+   * Without a mounted target, local setters throw; context remains readable.
    */
   targetRef?: RefObject<HTMLElement | null>
-  /** Controlled context value without `targetRef`; fallback until the target mounts otherwise. */
+  /** Local theme override; omitted values inherit from the parent. Later prop changes replace local setter choices. */
   theme?: Theme
 }
 
