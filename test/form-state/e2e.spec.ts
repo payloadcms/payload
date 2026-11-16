@@ -416,6 +416,71 @@ test.describe('Form State', () => {
     ).toHaveValue('This is a computed value.')
   })
 
+  test('should keep block fields and collapsed state with their IDs after a beforeChange reorder', async () => {
+    const doc = await createPost()
+
+    await page.goto(postsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
+    try {
+      for (const [index, blockType] of ['One', 'Two', 'Three'].entries()) {
+        await addBlock({ blockToSelect: blockType, fieldName: 'sortedBlocks', page })
+        await page.locator(`#field-sortedBlocks__${index}__title`).fill(blockType)
+        await page.locator(`#field-sortedBlocks__${index}__order`).fill(String(index + 1))
+        await saveDocAndAssert(page)
+
+        const expectedBlocks = ['One', 'Two', 'Three'].slice(0, index + 1).reverse()
+        const rows = page.locator('#field-sortedBlocks .blocks-field__row')
+
+        await expect(rows).toHaveCount(expectedBlocks.length)
+
+        for (const [rowIndex, title] of expectedBlocks.entries()) {
+          await expect(rows.nth(rowIndex).locator('.blocks-field__block-pill')).toHaveText(title)
+          await expect(rows.nth(rowIndex).locator('button.collapsible__toggle')).toHaveAttribute(
+            'aria-expanded',
+            rowIndex === 0 ? 'true' : 'false',
+          )
+          await expect(page.locator(`#field-sortedBlocks__${rowIndex}__title`)).toHaveValue(title)
+          await expect(page.locator(`#field-sortedBlocks__${rowIndex}__order`)).toHaveValue(
+            String(index + 1 - rowIndex),
+          )
+        }
+
+        await rows.first().locator('button.collapsible__toggle').press('Enter')
+        await expect(rows.first().locator('button.collapsible__toggle')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        )
+        await page.locator('#field-title').fill(`Sorted blocks save ${index + 1}`)
+        await saveDocAndAssert(page)
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              overrideAccess: true,
+              where: { id: { equals: doc.id } },
+            })
+
+            return docs[0]?.sortedBlocks?.map(({ blockType, order, title }) => ({
+              blockType,
+              order,
+              title,
+            }))
+          })
+          .toEqual(
+            expectedBlocks.map((title, rowIndex) => ({
+              blockType: title.toLowerCase(),
+              order: index + 1 - rowIndex,
+              title,
+            })),
+          )
+      }
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
   test('should finish post-save rebuilding before a pending edit refresh', async () => {
     const doc = await createPost({ title: 'Before save' })
     const { page: savePage } = await initPage({ context, serverURL })

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { Block, CollectionConfig } from 'payload'
 
 export const postsSlug = 'posts'
 
@@ -162,6 +162,23 @@ export const PostsCollection: CollectionConfig = {
         return (options as string[]).filter((option) => option !== 'excluded')
       },
       options: ['allowed', 'excluded'],
+    },
+    {
+      name: 'sortedBlocks',
+      type: 'blocks',
+      blocks: ['one', 'two', 'three'].map<Block>((slug) => ({
+        slug,
+        fields: [
+          { name: 'title', type: 'text' },
+          { name: 'order', type: 'number' },
+        ],
+      })),
+      hooks: {
+        beforeChange: [
+          ({ value }: { value?: { order: number }[] }) =>
+            value?.slice().sort((a, b) => b.order - a.order),
+        ],
+      },
     },
   ],
   versions: false,
