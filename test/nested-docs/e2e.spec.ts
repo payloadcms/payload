@@ -8,7 +8,7 @@ import type { Config } from './payload-types.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
-import { pagesSlug } from './shared.js'
+import { articlesSlug, pagesSlug } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 let serverURL: string
@@ -182,6 +182,80 @@ test.describe('Nested document tree', () => {
       )
     } finally {
       release()
+    }
+  })
+
+  test('should save the outgoing layout without changing another collection after navigation', async ({
+    page,
+  }) => {
+    await page.goto(
+      `${serverURL}/admin/collections/${pagesSlug}?listLayout=table&search=Contact&sort=title&limit=2`,
+    )
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await expect(page.getByRole('button', { name: 'Expand: About us', exact: true })).toBeVisible()
+
+    const destinationPreferenceURL = `${serverURL}/api/payload-preferences/collection-${articlesSlug}`
+    const previousPreference = await page.request.get(destinationPreferenceURL)
+    const previousValue = previousPreference.ok()
+      ? (await previousPreference.json()).value
+      : undefined
+
+    await page.request.post(destinationPreferenceURL, {
+      data: {
+        value: { documentLayout: 'table', layoutQueries: { table: { search: 'Article' } } },
+      },
+    })
+
+    let release = () => {}
+    let hasSavedPreference = false
+    const pending = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const preferenceURL = `${serverURL}/api/payload-preferences/collection-${pagesSlug}`
+
+    await page.route(preferenceURL, async (route) => {
+      const response = await route.fetch()
+
+      hasSavedPreference = true
+      await pending
+      await route.fulfill({ response })
+    })
+    try {
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
+      await expect.poll(() => hasSavedPreference).toBe(true)
+      await page.getByRole('link', { name: 'Nested Articles', exact: true }).click()
+      await expect
+        .poll(() => new URL(page.url()).pathname)
+        .toBe(`/admin/collections/${articlesSlug}`)
+      await expect(page).toHaveURL(/search=Article/)
+      const destinationURL = page.url()
+      const staleNavigation = page
+        .waitForRequest(
+          (request) =>
+            request.method() === 'GET' &&
+            request.url().includes(`/admin/collections/${articlesSlug}?`) &&
+            new URL(request.url()).searchParams.get('search') === 'Contact',
+          { timeout: 1000 },
+        )
+        .catch(() => null)
+      const preferenceResponse = page.waitForResponse(
+        (response) => response.url() === preferenceURL && response.request().method() === 'POST',
+      )
+
+      release()
+      await (await preferenceResponse).finished()
+      expect(await staleNavigation).toBeNull()
+      await expect(page).toHaveURL(destinationURL)
+      const saved = await page.request.get(preferenceURL)
+
+      expect((await saved.json()).value.documentLayout).toBe('table')
+    } finally {
+      release()
+      if (previousValue === undefined) {
+        await page.request.delete(destinationPreferenceURL)
+      } else {
+        await page.request.post(destinationPreferenceURL, { data: { value: previousValue } })
+      }
     }
   })
 
