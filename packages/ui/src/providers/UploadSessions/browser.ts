@@ -4,6 +4,9 @@ import { toast } from 'sonner'
 /**
  * An auto-updating progress toast the user can hide (WCAG 2.2.2). Once closed it stays hidden
  * while the upload carries on; completion and errors still show their own toasts.
+ *
+ * Sonner merges an update into the toast with the same id, so the actions and description of a
+ * recovery offer it replaces are cleared explicitly.
  */
 export const createProgressToast = ({ id }: { id: string }) => {
   let isHidden = false
@@ -13,7 +16,10 @@ export const createProgressToast = ({ id }: { id: string }) => {
       if (!isHidden) {
         toast.loading(message, {
           id,
+          action: undefined,
+          cancel: undefined,
           closeButton: true,
+          description: undefined,
           onDismiss: () => {
             isHidden = true
           },
