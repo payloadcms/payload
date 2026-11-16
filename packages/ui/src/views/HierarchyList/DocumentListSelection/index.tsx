@@ -64,7 +64,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   const { t } = useTranslation()
 
   const count = getTotalCount()
-  const groupedSelections = getSelectionsForActions()
+  const groupedSelections = useMemo(() => getSelectionsForActions(), [getSelectionsForActions])
 
   const collectionSlugs = Object.keys(groupedSelections)
   const singleCollectionSelected = collectionSlugs.length === 1

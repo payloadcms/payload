@@ -1077,6 +1077,21 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(
         modal.locator('.hierarchy-column-item', { hasText: 'General' }).getByRole('checkbox'),
       ).toBeEnabled()
+      await expect(
+        modal.locator('.hierarchy-column-item', { hasText: 'Orgs Only' }).getByRole('checkbox'),
+      ).toBeDisabled()
+      await expect(
+        modal.locator('.hierarchy-column-item', { hasText: 'Products Only' }).getByRole('checkbox'),
+      ).toBeDisabled()
+      await bothTypes.getByRole('checkbox').check()
+      await expect(modal.getByRole('button', { name: 'Confirm', exact: true })).toBeEnabled()
+      await modal.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(
+        contents
+          .getByRole('row')
+          .filter({ has: page.getByRole('link', { name: 'Orgs Only', exact: true }) })
+          .getByRole('checkbox'),
+      ).toBeChecked()
     })
 
     test('should show incompatible move destinations as disabled', async () => {
