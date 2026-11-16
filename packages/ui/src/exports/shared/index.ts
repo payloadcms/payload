@@ -32,7 +32,6 @@ export { handleTakeOver } from '../../utilities/handleTakeOver.js'
 export { hasSavePermission } from '../../utilities/hasSavePermission.js'
 export { isClientUserObject } from '../../utilities/isClientUserObject.js'
 export { isEditing } from '../../utilities/isEditing.js'
-export { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
 export { sanitizeID } from '../../utilities/sanitizeID.js'
 
 export { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
