@@ -76,7 +76,7 @@ async function validateNoCircularReference({
     }
 
     if (ancestorId === currentDocId) {
-      throw new Error('Cannot move folder into its own subfolder')
+      throw new Error('Document cannot be nested beneath one of its descendants')
     }
 
     visitedNodes.add(nodeKey)
