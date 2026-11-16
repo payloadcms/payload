@@ -1292,6 +1292,59 @@ The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/d
 + import { findMigrationDir } from 'payload'
 ```
 
+### Drizzle-based adapters now use Drizzle ORM 1.0 ([#19083](https://github.com/payloadcms/payload/pull/19083))
+
+`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-sqlite` and `@payloadcms/db-d1-sqlite` now use `drizzle-orm` and `drizzle-kit` `1.0.0-rc.5`. If you only use Payload's APIs, you don't need to change anything. You are affected if you use Drizzle directly, use schema hooks, have a generated Drizzle schema, or store `point` fields in Postgres.
+
+**Regenerate your Drizzle schema.** The generated file now exports one `relations` object built with `defineRelations` instead of a `relations_<table>` export per table. Files generated before this release fail to compile because `relations` is no longer exported from `@payloadcms/db-*/drizzle`. Run `npx payload generate:db-schema` again, and replace any imports of `relations_<table>` with `relations`.
+
+**Relational queries use Drizzle's new API.** `payload.db.drizzle.query` now uses [Relational Queries v2](https://orm.drizzle.team/docs/rqb-v2). `where` and `orderBy` take objects instead of SQL expressions or callbacks. The old API (`db._query`) isn't available. Use `RAW` for SQL filters:
+
+```diff
+- await payload.db.drizzle.query.posts.findMany({ where: eq(posts.id, 1) })
++ await payload.db.drizzle.query.posts.findMany({ where: { id: 1 } })
++ await payload.db.drizzle.query.posts.findMany({ where: { RAW: (t) => eq(t.id, 1) } })
+```
+
+`payload.db.relations` is now keyed by table name (`payload.db.relations.posts`) instead of `relations_<table>`. Relation names that clash with a column on the same table are prefixed with `_`. For example, use `with: { __parentID: true }` instead of `with: { _parentID: true }`.
+
+**Schema hooks must define relations with `defineRelationsPart`.** The `relations()` helper isn't supported anymore. Payload throws an error if `beforeSchemaInit` or `afterSchemaInit` returns relations created with it. Spread `defineRelationsPart(...)` into `schema.relations` instead. Payload merges it table by table with the relations it generates. See [Adding relations](/docs/database/postgres#adding-relations).
+
+```diff
+- import { relations } from '@payloadcms/db-postgres/drizzle'
++ import { defineRelationsPart } from '@payloadcms/db-postgres/drizzle'
+
+  afterSchemaInit: [
+    ({ schema }) => ({
+      ...schema,
+      relations: {
+        ...schema.relations,
+-       relations_users: relations(schema.tables.users, ({ one }) => ({
+-         country: one(schema.tables.countries, {
+-           fields: [schema.tables.users.countryId],
+-           references: [schema.tables.countries.id],
+-         }),
+-       })),
++       ...defineRelationsPart(schema.tables, (r) => ({
++         users: {
++           country: r.one.countries({ from: r.users.countryId, to: r.countries.id }),
++         },
++       })),
+      },
+    }),
+  ],
+```
+
+**Postgres `point` columns change type.** `point` fields are now stored as `geometry(point,4326)` instead of `geometry(Point)`. Payload already wrote every value with SRID 4326, so existing data is unchanged. Your next `payload migrate:create` adds an `ALTER COLUMN ... SET DATA TYPE geometry(point,4326)` statement for each `point` field, and dev mode `push` applies the same change.
+
+**Migration snapshots use the Drizzle Kit 1.0 format.** Existing migration snapshot (`.json`) files keep working; Payload upgrades the latest one in memory when you create a migration. New snapshots are written in the new format, which earlier Payload versions can't read.
+
+**Install matching Drizzle versions.** If your project depends on `drizzle-orm` or `drizzle-kit` directly, for example to use `drizzle-kit studio` or your own `drizzle.config.ts`, upgrade them to `1.0.0-rc.5`. Having two copies of `drizzle-orm` installed breaks Drizzle's internal type checks.
+
+**Renames are confirmed by prompt.** When `payload migrate:create` or dev mode `push` can't tell whether a column, table or other entity was renamed or newly created, Payload asks you to choose. If you create migrations non-interactively, a change like this fails with an error asking you to run the command interactively. `forceAcceptWarning` treats every ambiguous entity as newly created and accepts data loss.
+
+**Types.** The read replica type `PgWithReplicas` is now `PgAsyncWithReplicas`, and `GenericRelation` is now Drizzle's `TableRelationalConfig`. `PostgresDB`, `SQLiteDB`, `TransactionPg`, `TransactionSQLite` and `GeneratedDatabaseSchema` now take Drizzle relations instead of a schema record. In `RequireDrizzleKit`, `pushSchema` takes an entities filter object instead of positional filter arguments, and returns `hints` instead of `warnings` and `hasDataLoss`. These types mainly matter if you build on the adapters.
+
 ### Minimum supported Node.js version is now 24.22.3 ([#16540](https://github.com/payloadcms/payload/pull/16540))
 
 The minimum supported Node.js version is now **24.22.3** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.

@@ -3,7 +3,10 @@ import type { Init } from 'payload'
 import type { DrizzleAdapter } from '../types.js'
 import type { BaseSQLiteAdapter } from './types.js'
 
-import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
+import {
+  addMissingTablesToRelations,
+  buildDrizzleRelations,
+} from '../schema/buildDrizzleRelations.js'
 import { buildRawSchema } from '../schema/buildRawSchema.js'
 import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
 import { buildDrizzleTable } from './schema/buildDrizzleTable.js'
@@ -37,6 +40,8 @@ export const init: Init = async function init(this: BaseSQLiteAdapter) {
   })
 
   await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
+
+  addMissingTablesToRelations({ adapter })
 
   this.schema = {
     ...this.tables,

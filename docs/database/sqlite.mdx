@@ -78,8 +78,11 @@ import { posts } from './payload-generated-schema'
 // To avoid installing Drizzle, you can import everything that drizzle has from our re-export path.
 import { eq, sql, and } from '@payloadcms/db-sqlite/drizzle'
 
-// Drizzle's Querying API: https://orm.drizzle.team/docs/rqb
-const posts = await payload.db.drizzle.query.posts.findMany()
+// Drizzle's Relational Queries API: https://orm.drizzle.team/docs/rqb-v2
+const posts = await payload.db.drizzle.query.posts.findMany({
+  where: { id: 50 },
+  orderBy: { createdAt: 'desc' },
+})
 // Drizzle's Select API https://orm.drizzle.team/docs/select
 const result = await payload.db.drizzle
   .select()
@@ -95,6 +98,8 @@ In addition to exposing Drizzle directly, all of the tables and Drizzle relation
 
 - Tables - `payload.db.tables`
 - Relations - `payload.db.relations`
+
+`payload.db.relations` is the Drizzle relations config built with `defineRelations`, keyed by table name (for example `payload.db.relations.posts`). When a Payload relation name would clash with a column name on the same table, it is prefixed with `_` (for example `_parentID` becomes `__parentID`).
 
 ## Prototyping in development mode
 
@@ -243,6 +248,41 @@ export default buildConfig({
   }),
 })
 ```
+
+### Adding relations
+
+Drizzle relations power `payload.db.drizzle.query`. To add relations for your own tables, or to add new relations to tables Payload generates, define them with `defineRelationsPart` and spread the result into `schema.relations`. Payload merges them table by table, so relations it generates for the same table are kept.
+
+```ts
+import { defineRelationsPart } from '@payloadcms/db-sqlite/drizzle'
+
+sqliteAdapter({
+  afterSchemaInit: [
+    ({ schema }) => {
+      const { countries, users } = schema.tables
+
+      return {
+        ...schema,
+        relations: {
+          ...schema.relations,
+          ...defineRelationsPart({ countries, users }, (r) => ({
+            users: {
+              country: r.one.countries({
+                from: r.users.countryId,
+                to: r.countries.id,
+              }),
+            },
+          })),
+        },
+      }
+    },
+  ],
+})
+```
+
+The `relations()` helper from Drizzle 0.x is not supported. Payload throws an error if a schema hook returns relations created with it.
+
+Tables added in `afterSchemaInit` are available on `payload.db.drizzle.query` without relations. To give them relations, add them with `defineRelationsPart` as shown above.
 
 ### Note for generated schema:
 

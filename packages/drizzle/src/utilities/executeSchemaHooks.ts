@@ -1,5 +1,6 @@
 import type { DrizzleAdapter } from '../types.js'
 
+import { mergeDrizzleRelations } from '../schema/buildDrizzleRelations.js'
 import { extendDrizzleTable } from './extendDrizzleTable.js'
 
 type DatabaseSchema = {
@@ -42,6 +43,37 @@ export const executeSchemaHooks = async ({ type, adapter }: Args): Promise<void>
     }
 
     adapter.tables = result.tables
-    adapter.relations = result.relations
+    assertRelationsV2({ type, relations: result.relations })
+
+    // Merge per table so a hook spreading `defineRelationsPart(...)` over `schema.relations`
+    // adds to a Payload table's relations instead of replacing them.
+    adapter.relations = mergeDrizzleRelations({
+      base: adapter.relations,
+      extra: result.relations,
+    })
+  }
+}
+
+/**
+ * Drizzle 1.0 replaced per-table `relations()` with `defineRelations`/`defineRelationsPart`.
+ * Fail clearly when a hook still returns the old shape instead of letting `db.query` break later.
+ */
+const assertRelationsV2 = ({
+  type,
+  relations,
+}: {
+  relations: Record<string, unknown> | undefined
+  type: Args['type']
+}) => {
+  for (const key in relations) {
+    const value = relations[key]
+
+    if (!value || typeof value !== 'object' || !('relations' in value) || !('table' in value)) {
+      throw new Error(
+        `The ${type} hook returned relations["${key}"], which is not a Drizzle 1.0 relations config. ` +
+          `Define relations with defineRelationsPart() and spread the result into schema.relations ` +
+          `instead of using relations().`,
+      )
+    }
   }
 }

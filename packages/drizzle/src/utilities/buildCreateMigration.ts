@@ -5,9 +5,17 @@ import path from 'path'
 import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter, DrizzleSnapshotJSON } from '../types.js'
+import type { DrizzleAdapter, DrizzleMigrationHint, DrizzleSnapshotJSON } from '../types.js'
+import type { ChooseRenameSource, ConfirmDataLoss } from './resolveMigrationHints.js'
 
 import { getMigrationTemplate } from './getMigrationTemplate.js'
+import {
+  getDroppedSnapshotEntities,
+  invertMigrationHints,
+  promptDataLoss,
+  promptRenameSource,
+  resolveMigrationHints,
+} from './resolveMigrationHints.js'
 
 export const buildCreateMigration = ({
   executeMethod,
@@ -92,10 +100,27 @@ export const buildCreateMigration = ({
       }
 
       payload.logger.info('Starting migration: generating UP statements...')
-      const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+      let upHints: DrizzleMigrationHint[] = []
+
+      const sqlStatementsUp = await resolveMigrationHints({
+        ...getHintDecisionHandlers({ forceAcceptWarning, shouldPrompt }),
+        getDroppedEntities: () =>
+          getDroppedSnapshotEntities({ after: drizzleJsonAfter, before: drizzleJsonBefore }),
+        run: (hints) => {
+          upHints = hints
+          return generateMigration(drizzleJsonBefore, drizzleJsonAfter, { hints })
+        },
+      })
 
       payload.logger.info('Migration UP complete. Generating DOWN statements...')
-      const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+      // DOWN reverses the renames chosen for UP; everything else it re-creates or drops.
+      const sqlStatementsDown = await resolveMigrationHints({
+        chooseRenameSource: () => Promise.resolve(null),
+        confirmDataLoss: () => Promise.resolve(true),
+        getDroppedEntities: () => [],
+        initialHints: invertMigrationHints({ hints: upHints }),
+        run: (hints) => generateMigration(drizzleJsonAfter, drizzleJsonBefore, { hints }),
+      })
 
       payload.logger.info('Migration DOWN statements generation complete.')
 
@@ -147,4 +172,30 @@ export const buildCreateMigration = ({
 
     return { created: true, path: fullPath }
   }
+}
+
+/**
+ * Decides how ambiguous renames and data-loss changes are resolved: `forceAcceptWarning` creates
+ * every ambiguous entity and accepts data loss, interactive runs prompt, and anything else leaves
+ * the handlers unset so the migration fails with an explanatory error.
+ */
+const getHintDecisionHandlers = ({
+  forceAcceptWarning,
+  shouldPrompt,
+}: {
+  forceAcceptWarning?: boolean
+  shouldPrompt: boolean
+}): { chooseRenameSource?: ChooseRenameSource; confirmDataLoss?: ConfirmDataLoss } => {
+  if (forceAcceptWarning) {
+    return {
+      chooseRenameSource: () => Promise.resolve(null),
+      confirmDataLoss: () => Promise.resolve(true),
+    }
+  }
+
+  if (shouldPrompt) {
+    return { chooseRenameSource: promptRenameSource, confirmDataLoss: promptDataLoss }
+  }
+
+  return {}
 }

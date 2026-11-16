@@ -9,6 +9,7 @@ import toSnakeCase from 'to-snake-case'
 import type { BasePostgresAdapter } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
+import { generateMigrationWithCreateHints } from '../../../utilities/generateMigrationWithCreateHints.js'
 import { getTransaction } from '../../../utilities/getTransaction.js'
 import { groupUpSQLStatements } from './groupUpSQLStatements.js'
 import { migrateRelationships } from './migrateRelationships.js'
@@ -74,7 +75,12 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     drizzleJsonBefore = upSnapshot(drizzleJsonBefore)
   }
 
-  const generatedSQL = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+  // The v3 relationship columns are new entities whose data is copied explicitly below.
+  const generatedSQL = await generateMigrationWithCreateHints({
+    after: drizzleJsonAfter,
+    before: drizzleJsonBefore,
+    generateMigration,
+  })
 
   if (!generatedSQL.length) {
     payload.logger.info(`No schema changes needed.`)
