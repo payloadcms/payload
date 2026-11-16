@@ -28,7 +28,7 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ### Theme context distinguishes local overrides from root preferences
 
-`ThemeProvider` now only supplies context, including when rendered without a parent provider. It no longer initializes cookie persistence, system detection, query preferences, or document effects. The Admin installs its root preference provider explicitly, so its preference controls keep their existing behavior.
+`ThemeProvider` now creates a local scope, including when rendered without a parent provider. It no longer initializes cookie persistence, system detection, query preferences, or document root effects. The Admin installs its root preference provider explicitly, so its preference controls keep their existing behavior.
 
 Outside the Admin, supply the frontend's current values and update those props when the host theme changes:
 
@@ -41,9 +41,21 @@ Outside the Admin, supply the frontend's current values and update those props w
 </ThemeProvider>
 ```
 
-Without an explicit root preference provider, both hooks remain readable: `useTheme` returns supplied or inherited values, and `useRootTheme` keeps its default fallback. Calling `setTheme` or `setHighContrastMode` now throws an error instead of silently doing nothing. Update the controlled provider props to change a standalone theme or contrast value. Host applications remain responsible for reading and persisting their own preferences and applying their DOM styles.
+Without `targetRef`, `ThemeProvider` props control the local context, and both setters throw. Update the props to change those values. To make local setters writable, render the themed element inside the provider and pass its ref:
 
-The `useTheme` hook now returns the nearest `ThemeProvider` overrides. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit nested `theme` prop sets `autoMode` to `false`; omitted theme and contrast props inherit from the nearest parent. Nested overrides are controlled by their props and do not create preference state or write cookies or document attributes.
+```tsx
+<ThemeProvider targetRef={targetRef} theme="dark">
+  <div data-theme="dark" ref={targetRef}>
+    {children}
+  </div>
+</ThemeProvider>
+```
+
+After the target mounts, its attributes determine the context, and setters change only that element. Local `setTheme('auto')` removes its `data-theme` override and inherits the surrounding DOM theme. Local providers do not persist preferences or detect system settings. Host applications remain responsible for their preference persistence. Built-in enhanced contrast styling still follows the document or shadow host.
+
+The `useTheme` hook now returns the nearest provider's values. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. Without a target, an explicit `theme` prop sets `autoMode` to `false`, and omitted props inherit from the parent. With a mounted target, `autoMode` indicates that the target has no explicit light or dark attribute.
+
+Both hooks remain readable without a root preference provider; `useRootTheme` returns its defaults, and its setters throw when called without a root owner.
 
 Use the new `useRootTheme` hook for preference controls that need the root selection, even inside an override:
 
@@ -55,7 +67,7 @@ Use the new `useRootTheme` hook for preference controls that need the root selec
 +const { autoMode, setTheme, theme } = useRootTheme()
 ```
 
-Within the Admin, both hooks expose the same root setters, which update root preferences, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
+Within the Admin, `useTheme` exposes root setters only outside a local `ThemeProvider`. `useRootTheme` always exposes root setters, which update root preferences, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
 
 ```diff
 -setTheme('dark', { scoped: true })
@@ -65,7 +77,7 @@ Within the Admin, both hooks expose the same root setters, which update root pre
 +setHighContrastMode(true)
 ```
 
-These calls now update the root preference instead of local provider state. To change a local override, update the nested provider's props. For local theme styling, apply `data-theme` to the surrounding element; `Popup` already does this. Nested `highContrastMode` overrides affect context only. Built-in enhanced contrast styling follows the document or shadow host setting; local visual contrast overrides require custom styling.
+Root setters update preferences, document attributes, and cookies. Local setters require `targetRef` and change only its element; without a ref, update the provider's props instead. Controlled `highContrastMode` overrides affect context only. Built-in enhanced contrast styling follows the document or shadow host setting; local contrast flags require custom styling.
 
 ### Form-state data utilities are renamed
 

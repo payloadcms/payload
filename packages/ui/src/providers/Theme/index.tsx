@@ -1,48 +1,91 @@
 'use client'
-import React from 'react'
+import React, { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react'
 
 import type { ThemeProviderProps } from './context.js'
+import type { Theme } from './shared.js'
 
 import { Context, useTheme } from './context.js'
+import { createThemeTargetStore, getThemeTarget } from './utilities.js'
 
 export type { ThemeContext } from './context.js'
 export { useRootTheme, useTheme } from './context.js'
 export { defaultTheme, type Theme } from './shared.js'
 
 /**
- * Provides theme context to its children.
+ * Provides a local theme scope. Providers can be nested and do not add a DOM element.
  *
- * At the root (no parent ThemeProvider): provides the supplied theme and contrast values, falling back to the hook defaults when omitted.
- * It does not read cookies, detect system preferences, or change DOM attributes.
+ * Wrap the themed element with this provider and pass its ref as `targetRef`.
+ * Mount them together, or rerender the provider when a deferred target mounts so it can subscribe to the element.
+ * Once mounted, the target's attributes determine the context, including changes made outside this provider.
+ * `setTheme` writes only that element's `data-theme`; `'auto'` removes the override and inherits the surrounding theme.
+ * `setHighContrastMode` toggles its `data-enhanced-contrast` flag; inherited contrast remains enabled.
+ * Built-in enhanced contrast styling follows the document or shadow host; local flags need custom styling.
  *
- * When nested inside another ThemeProvider (e.g. inside a Popup): acts as a scoped context override.
- * The `theme` and `highContrastMode` props set local context values; omitted values inherit from the parent.
- * `useTheme` reads this local context, while `useRootTheme` reads the root preferences.
- * `Popup` sets its own `data-theme` attribute for its visual override.
+ * Without `targetRef`, `theme` and `highContrastMode` are controlled context overrides, and omitted values inherit from the parent.
+ * These props also supply fallback values before a target mounts.
+ * Both setters throw if no ref is supplied or its element is not mounted; update controlled props instead.
  *
- * The Admin explicitly mounts `RootThemeProvider` to manage preferences, cookies, system detection, and document attributes.
- * Its `setTheme` and `setHighContrastMode` functions are shared with descendants, so calls update the root preference.
- * Calling either setter without an explicit root provider throws.
- * Update the provider props to change a standalone or local override.
+ * This provider never reads or writes cookies, detects system preferences, or changes `<html>`.
+ * The Admin mounts `RootThemeProvider` for those responsibilities; use `useRootTheme` to change its preferences from within a local scope.
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   highContrastMode,
+  targetRef,
   theme,
 }) => {
   const parentContext = useTheme()
+  const targetStore = useMemo(() => createThemeTargetStore({ targetRef }), [targetRef])
+  const targetState = useSyncExternalStore(
+    targetStore.subscribe,
+    targetStore.getSnapshot,
+    getServerSnapshot,
+  )
 
-  const value =
-    theme === undefined && highContrastMode === undefined
-      ? parentContext
-      : {
-          autoMode: theme === undefined ? parentContext.autoMode : false,
-          highContrastMode: highContrastMode ?? parentContext.highContrastMode,
-          setHighContrastMode: parentContext.setHighContrastMode,
-          setTheme: parentContext.setTheme,
-          theme: theme ?? parentContext.theme,
-        }
+  useEffect(() => {
+    // Ref objects keep their identity when React replaces the referenced element.
+    targetStore.refresh()
+  })
+
+  const setTheme = useCallback(
+    (themeToSet: 'auto' | Theme) => {
+      const target = getThemeTarget({ method: 'setTheme', targetRef })
+
+      if (themeToSet === 'auto') {
+        target.removeAttribute('data-theme')
+      } else {
+        target.setAttribute('data-theme', themeToSet)
+      }
+
+      targetStore.refresh()
+    },
+    [targetRef, targetStore],
+  )
+
+  const setHighContrastMode = useCallback(
+    (isHighContrast: boolean) => {
+      getThemeTarget({ method: 'setHighContrastMode', targetRef }).toggleAttribute(
+        'data-enhanced-contrast',
+        isHighContrast,
+      )
+      targetStore.refresh()
+    },
+    [targetRef, targetStore],
+  )
+
+  const value = {
+    autoMode: targetState?.autoMode ?? (theme === undefined ? parentContext.autoMode : false),
+    highContrastMode:
+      targetState?.highContrastMode ?? highContrastMode ?? parentContext.highContrastMode,
+    setHighContrastMode,
+    setTheme,
+    theme: targetState
+      ? (targetState.theme ?? parentContext.theme)
+      : (theme ?? parentContext.theme),
+  }
 
   // Keep the provider mounted as overrides change so descendants retain state and focus.
   return <Context value={value}>{children}</Context>
 }
+
+const getServerSnapshot = () => null

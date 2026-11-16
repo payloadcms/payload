@@ -1,7 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { ThemeProviderProps } from '../context.js'
 import type { Theme } from '../shared.js'
 
 import { useConfig } from '../../Config/index.js'
@@ -16,14 +15,22 @@ import {
   setCookie,
 } from '../utilities.js'
 
+type RootThemeProviderProps = {
+  children?: React.ReactNode
+  /** Initial contrast preference, resolved from cookies or system settings after mounting. */
+  highContrastMode?: boolean
+  /** Initial theme; a fixed admin theme takes precedence over cookies and query preferences. */
+  theme?: Theme
+}
+
 /**
  * Theme providers can be nested, but only this root provider reads and writes cookies, detects system preferences, and updates theme and contrast attributes on `<html>`.
- * It owns the preference state and the setters shared by providers beneath it.
  *
  * The Admin mounts it explicitly to manage its theme preferences.
- * Nested providers can override the values their children read, but their setters still update the root preference.
+ * `useTheme` reads and updates these preferences until a local ThemeProvider is introduced.
+ * Inside a local scope, use `useRootTheme` to read or change the root preferences.
  */
-export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
+export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   children,
   highContrastMode: initialHighContrastMode,
   theme: themeOverride,
