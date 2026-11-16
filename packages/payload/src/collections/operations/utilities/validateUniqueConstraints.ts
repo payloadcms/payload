@@ -58,8 +58,8 @@ export const validateUniqueConstraints = async ({
     ref: data,
   })
 
-  const conflicts = await Promise.all(
-    uniqueFieldValues.map(async (uniqueFieldValue) => ({
+  const conflicts = await runUniqueChecks({
+    check: async (uniqueFieldValue) => ({
       ...uniqueFieldValue,
       exists: await fieldValueExists({
         id,
@@ -71,8 +71,10 @@ export const validateUniqueConstraints = async ({
         shouldUseTransaction: true,
         value: uniqueFieldValue.value,
       }),
-    })),
-  )
+    }),
+    items: uniqueFieldValues,
+    req,
+  })
   const errors: ValidationFieldError[] = conflicts
     .filter(({ exists }) => exists)
     .map(({ label, path }) => ({
@@ -82,8 +84,8 @@ export const validateUniqueConstraints = async ({
     }))
 
   const uniqueCompoundIndexes = collection.sanitizedIndexes.filter(({ unique }) => unique)
-  const compoundIndexConflicts = await Promise.all(
-    uniqueCompoundIndexes.map(async (index) => {
+  const compoundIndexConflicts = await runUniqueChecks({
+    check: async (index) => {
       // Core performs uniqueness validation, and the adapter contract has no index-membership check.
       // Match MongoDB's requireExists filters here; SQL adapters ignore this option. Payload's
       // `exists` query operator cannot express these filters because it excludes explicit nulls.
@@ -190,8 +192,10 @@ export const validateUniqueConstraints = async ({
       }
 
       return null
-    }),
-  )
+    },
+    items: uniqueCompoundIndexes,
+    req,
+  })
 
   for (const index of compoundIndexConflicts) {
     if (!index) {
@@ -243,4 +247,27 @@ function fieldPathExists({ data, segments }: { data: unknown; segments: string[]
       segments: remainingSegments,
     })
   )
+}
+
+async function runUniqueChecks<TItem, TResult>({
+  check,
+  items,
+  req,
+}: {
+  check: (item: TItem) => Promise<TResult>
+  items: TItem[]
+  req: PayloadRequest
+}): Promise<TResult[]> {
+  if (!req.transactionID) {
+    return Promise.all(items.map(check))
+  }
+
+  // MongoDB does not support concurrent operations on the same transaction session.
+  const results: TResult[] = []
+
+  for (const item of items) {
+    results.push(await check(item))
+  }
+
+  return results
 }

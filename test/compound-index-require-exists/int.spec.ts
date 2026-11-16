@@ -1,12 +1,39 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 
-import { createPayloadRequest, ValidationError } from 'payload'
+import { createPayloadRequest, initTransaction, ValidationError } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { arrayFilteredPostsSlug, localizedPostsSlug, postsSlug } from './shared.js'
 
 test.suite('Compound index existence filters', { config: './config.ts', db: 'mongo' }, () => {
+  test.options(
+    'should validate multiple compound indexes as the first operation in a transaction',
+    {
+      db: (adapter) =>
+        adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+    },
+    async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+
+      await initTransaction(req)
+      expect(req.transactionID).toBeTruthy()
+
+      try {
+        const result = await payload.validate({
+          collection: postsSlug,
+          data: { code: 'new-code', gate: 'present', slug: 'new-slug', tenant: 'same' },
+          overrideAccess: true,
+          req,
+        })
+
+        expect(result).toMatchObject({ valid: true })
+      } finally {
+        await payload.db.rollbackTransaction(await req.transactionID!)
+      }
+    },
+  )
+
   for (const { data, name } of [
     { data: { slug: null, tenant: 'same' }, name: 'an explicit null index key' },
     {
