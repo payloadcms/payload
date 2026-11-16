@@ -63,7 +63,7 @@ const requestArgs = { apiRoute: '/api', serverURL: '' }
 
 type HookProps = Parameters<typeof useRecoverUploadSessions>[0]
 
-const renderRecovery = async () => {
+const renderRecoveryHook = async () => {
   const recoveringSessionIDsRef = { current: new Set<string>() }
   const props: HookProps = {
     finishInBackground: vi.fn(() => Promise.resolve()),
@@ -77,9 +77,16 @@ const renderRecovery = async () => {
     initialProps: props,
   })
 
+  return { hook, props, recoveringSessionIDsRef }
+}
+
+/** Renders the hook and waits for the first recovery offer. */
+const renderRecovery = async () => {
+  const rendered = await renderRecoveryHook()
+
   await expect.poll(() => vi.mocked(toast.warning).mock.calls.length).toBe(1)
 
-  return { hook, props, recoveringSessionIDsRef }
+  return rendered
 }
 
 type ToastButton = { onClick: (event: MouseEvent) => void }
@@ -204,6 +211,60 @@ describe('useRecoverUploadSessions', () => {
 
       await expect.poll(() => vi.mocked(isUploadSessionGoneError).mock.calls.length).toBe(1)
       expect(toast.warning).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  test('should not offer recovery again when cancelling fails after the hook unmounts', async () => {
+    let rejectCancel: (err: unknown) => void = () => {}
+
+    vi.mocked(cancelUploadSession).mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectCancel = reject
+      }),
+    )
+    const { hook } = await renderRecovery()
+
+    clickCancel()
+
+    await hook.unmount()
+    rejectCancel(new Error('Network down'))
+
+    await expect.poll(() => vi.mocked(isUploadSessionGoneError).mock.calls.length).toBe(1)
+    expect(toast.warning).toHaveBeenCalledTimes(1)
+  })
+
+  test.each([
+    { case: 'another user signs in', nextUserID: 'user-b' },
+    { case: 'the user signs out', nextUserID: undefined },
+    { case: 'the hook unmounts', nextUserID: 'unmount' },
+  ])(
+    'should not offer the sessions of a listing that answers after $case',
+    async ({ nextUserID }) => {
+      let resolveList: (sessions: ClientUploadSession[]) => void = () => {}
+
+      vi.mocked(listUploadSessions).mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveList = resolve
+        }),
+      )
+      vi.mocked(listUploadSessions).mockResolvedValue([])
+      const { hook, props } = await renderRecoveryHook()
+
+      if (nextUserID === 'unmount') {
+        await hook.unmount()
+      } else {
+        await hook.rerender({ ...props, userID: nextUserID })
+      }
+
+      resolveList([
+        { ...session, isStorageComplete: false },
+        { ...session, id: 'session-2', isStorageComplete: true },
+      ])
+
+      // Lets the listing reply, and the other-tabs check after it, settle.
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      expect(toast.warning).not.toHaveBeenCalled()
+      expect(props.finishInBackground).not.toHaveBeenCalled()
     },
   )
 

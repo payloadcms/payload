@@ -44,7 +44,10 @@ export const useRecoverUploadSessions = ({
   const checkedUserIDRef = useRef<number | string | undefined>(undefined)
   /** Recovery uploads in progress, stopped when the user changes. */
   const recoveryControllersRef = useRef(new Map<string, AbortController>())
-  /** The signed-in user now, so a late reply does not show another user's sessions. */
+  /**
+   * The signed-in user now, so a late reply does not show another user's sessions. Cleared on
+   * unmount, since a reply that arrives after the hook is gone belongs to no one shown.
+   */
   const currentUserIDRef = useRef(userID)
 
   const hasSegmentedCollections = config.collections.some(
@@ -59,6 +62,8 @@ export const useRecoverUploadSessions = ({
     const recoveringSessionIDs = recoveringSessionIDsRef.current
 
     return () => {
+      currentUserIDRef.current = undefined
+
       for (const [sessionID, controller] of recoveryControllers) {
         controller.abort()
         recoveringSessionIDs.delete(sessionID)
@@ -193,8 +198,8 @@ export const useRecoverUploadSessions = ({
           sessionIDs: sessions.map(({ id }) => String(id)),
         })
 
-        // Another user signed in meanwhile.
-        if (checkedUserIDRef.current !== userID) {
+        // The user signed out, another user signed in, or the hook unmounted meanwhile.
+        if (currentUserIDRef.current !== userID) {
           return
         }
 

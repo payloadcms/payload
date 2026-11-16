@@ -81,13 +81,33 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await rm(imagePath, { force: true })
   })
 
+  /** The contexts the current test opened, closed after it even when the test fails early. */
+  let openedContexts: BrowserContext[] = []
+
   // Several tests hold S3 part uploads on purpose so they can act mid-upload.
   test.beforeEach(() => {
     test.setTimeout(TEST_TIMEOUT_LONG)
   })
 
+  // Each test removes the sessions it leaves behind, such as an upload it stopped on purpose, so
+  // the next test starts with none. Closing the test's contexts first stops their uploads.
+  test.afterEach(async ({ browser }) => {
+    await Promise.all(openedContexts.map((context) => context.close()))
+    openedContexts = []
+
+    const context = await browser.newContext()
+
+    try {
+      // The form shows only after auto-login, so the auth cookie is set for the cleanup requests.
+      await gotoAndWaitForForm(await context.newPage(), videosURL.create)
+      await deleteSessions(context)
+    } finally {
+      await context.close()
+    }
+  })
+
   /**
-   * Opens the create form in a fresh browser context with no leftover sessions. `holdParts`
+   * Opens the create form in a fresh browser context. `holdParts`
    * stops every S3 part upload until the test calls `releaseParts`, so the upload is certain to
    * be running when the test acts.
    */
@@ -106,6 +126,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     releaseParts: () => void
   }> => {
     const context = await browser.newContext()
+    openedContexts.push(context)
     const page = await context.newPage()
     const log: UploadLog = {
       intentBodies: [],
@@ -162,16 +183,13 @@ test.describe('storage-s3 upload sessions E2E', () => {
       },
     )
 
-    // The form shows only after auto-login, so the auth cookie is set for the cleanup requests.
-    await gotoAndWaitForForm(page, videosURL.create)
-    await deleteLeftoverSessions(context)
     await gotoAndWaitForForm(page, url)
 
     return { context, log, page, releaseParts }
   }
 
   /** Uses the context's request client, so the deletions stay out of the page's request log. */
-  const deleteLeftoverSessions = async (context: BrowserContext) => {
+  const deleteSessions = async (context: BrowserContext) => {
     const sessionsURL = `${serverURL}/api/payload-upload-sessions`
     const response = await context.request.get(sessionsURL)
 
