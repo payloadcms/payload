@@ -30,7 +30,8 @@ type RootThemeProviderProps = {
  * `useTheme` reads and updates these preferences until a local ThemeProvider is introduced.
  * Inside a local scope, use `useRootTheme` to read or change the root preferences.
  *
- * @example In the Admin, `useTheme` controls root preferences outside nested providers.
+ * @example
+ * In the Admin, `useTheme` controls root preferences outside nested providers.
  * ```tsx
  * function ThemeButton() {
  *   const { setTheme } = useTheme()

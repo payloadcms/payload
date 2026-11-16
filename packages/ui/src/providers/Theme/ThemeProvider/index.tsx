@@ -15,7 +15,8 @@ import { Context, useTheme } from '../context.js'
  * Props override inherited values. Local setters require a mounted `targetRef` and throw without one.
  * Wrap the referenced element with this provider; no DOM element is added.
  *
- * @example Inside a nested provider, `useTheme` reads that local scope; `useRootTheme` reads root preferences.
+ * @example
+ * Inside a nested provider, `useTheme` reads that local scope; `useRootTheme` reads root preferences.
  * ```tsx
  * function ThemeValues() {
  *   const { theme } = useTheme()
