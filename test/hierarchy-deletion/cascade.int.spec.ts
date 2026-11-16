@@ -183,9 +183,7 @@ test.suite('Explicit hierarchy cascade', { config: './config.ts' }, () => {
     expect((await payload.findByID({ id: leaf.id, collection: pagesSlug })).id).toBe(leaf.id)
   })
 
-  test('should roll back cascade when published and draft parents form a union cycle', async ({
-    payload,
-  }) => {
+  test('should roll back cascade for a legacy published/draft union cycle', async ({ payload }) => {
     const first = await payload.create({
       collection: pagesSlug,
       data: { _status: 'published', title: 'First' },
@@ -204,13 +202,13 @@ test.suite('Explicit hierarchy cascade', { config: './config.ts' }, () => {
     await payload.update({
       id: second.id,
       collection: pagesSlug,
-      data: { _status: 'published', parent: first.id },
-    })
-    await payload.update({
-      id: second.id,
-      collection: pagesSlug,
       data: { parent: null, title: 'Second draft' },
       draft: true,
+    })
+    await payload.db.updateOne({
+      id: second.id,
+      collection: pagesSlug,
+      data: { parent: first.id },
     })
 
     await expect(
