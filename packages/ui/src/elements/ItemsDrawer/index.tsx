@@ -25,6 +25,7 @@ export type ItemsDrawerProps = {
   readonly onItemClick: (item: DrawerItem, index?: number) => Promise<void> | void
   readonly searchPlaceholder?: string
   readonly title?: string
+  readonly variant?: 'default' | 'widgets'
 }
 
 const baseClass = 'items-drawer'
@@ -100,7 +101,17 @@ const getItemDisplayLabel = (item: DrawerItem, i18n: I18nClient): string => {
 }
 
 export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
-  const { addRowIndex, drawerSlug, items, labels, onItemClick, searchPlaceholder, title } = props
+  const {
+    addRowIndex,
+    drawerSlug,
+    items,
+    labels,
+    onItemClick,
+    searchPlaceholder,
+    title,
+    variant = 'default',
+  } = props
+  const isWidgetPicker = variant === 'widgets'
 
   const [searchTerm, setSearchTerm] = useState('')
   const [resultsAnnouncement, setResultsAnnouncement] = useState('')
@@ -186,7 +197,11 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
       : t('fields:addNew'))
 
   return (
-    <Drawer slug={drawerSlug} title={finalTitle}>
+    <Drawer
+      className={isWidgetPicker ? `${baseClass}--widgets` : undefined}
+      slug={drawerSlug}
+      title={finalTitle}
+    >
       <span aria-atomic="true" className="sr-only" role="status">
         {resultsAnnouncement}
       </span>
@@ -211,7 +226,7 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
                   <h3 className={`${baseClass}__item-group-label`}>{groupLabel}</h3>
                 )}
                 <ul className={`${baseClass}__items`}>
-                  {groupItems.map((_item, index) => {
+                  {groupItems.map((_item) => {
                     const item =
                       typeof _item === 'string' ? (config.blocksMap?.[_item] as DrawerItem) : _item
 
@@ -221,11 +236,16 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
 
                     const { imageAltText, imageURL } = getItemImageInfo(item)
                     const displayLabel = getItemDisplayLabel(item, i18n)
+                    const description =
+                      isWidgetPicker && 'description' in item && item.description
+                        ? getTranslation(item.description, i18n)
+                        : undefined
 
                     return (
-                      <li className={`${baseClass}__item`} key={index}>
+                      <li className={`${baseClass}__item`} key={item.slug}>
                         <ThumbnailCard
-                          alignLabel="center"
+                          alignLabel={isWidgetPicker ? 'left' : 'center'}
+                          description={description}
                           label={displayLabel}
                           onClick={() => {
                             void onItemClick(item, addRowIndex)
@@ -235,7 +255,7 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
                             <div className={`${baseClass}__default-image`}>
                               {imageURL ? (
                                 <img alt={imageAltText} src={imageURL} />
-                              ) : (
+                              ) : isWidgetPicker ? null : (
                                 <DefaultBlockImage />
                               )}
                             </div>

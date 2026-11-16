@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, TypeWithID } from 'payload'
 
-import React from 'react'
+import React, { useId } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -12,7 +12,11 @@ export type ThumbnailCardProps = {
   alignLabel?: 'center' | 'left'
   className?: string
   collection?: ClientCollectionConfig
+  description?: string
   doc?: { filename?: string } & TypeWithID
+  extraButtonProps?: {
+    ref?: React.Ref<HTMLButtonElement>
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>
   isSelected?: boolean
   label?: string
   onClick?: () => void
@@ -28,7 +32,9 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     alignLabel,
     className,
     collection,
+    description,
     doc,
+    extraButtonProps,
     isSelected,
     label: labelFromProps,
     onClick,
@@ -36,6 +42,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     thumbnail,
   } = props
 
+  const descriptionID = useId()
   const { config } = useConfig()
 
   const { i18n } = useTranslation()
@@ -64,7 +71,16 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
 
   return (
     <button
-      aria-pressed={typeof isSelected === 'boolean' ? isSelected : undefined}
+      {...extraButtonProps}
+      aria-describedby={
+        [extraButtonProps?.['aria-describedby'], description ? descriptionID : undefined]
+          .filter(Boolean)
+          .join(' ') || undefined
+      }
+      aria-label={description ? title : undefined}
+      aria-pressed={
+        typeof isSelected === 'boolean' ? isSelected : extraButtonProps?.['aria-pressed']
+      }
       className={classes}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
@@ -72,7 +88,14 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
       type="button"
     >
       <div className={`${baseClass}__thumbnail`}>{thumbnail}</div>
-      <div className={`${baseClass}__label`}>{title}</div>
+      <div className={`${baseClass}__details`}>
+        <div className={`${baseClass}__label`}>{title}</div>
+        {description && (
+          <div className={`${baseClass}__description`} id={descriptionID}>
+            {description}
+          </div>
+        )}
+      </div>
     </button>
   )
 }

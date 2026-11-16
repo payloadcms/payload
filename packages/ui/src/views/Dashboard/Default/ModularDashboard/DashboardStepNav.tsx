@@ -74,6 +74,7 @@ export function DashboardStepNav({
           onItemClick={(widget) => addWidget(widget.slug)}
           searchPlaceholder={t('dashboard:searchWidgets')}
           title={t('dashboard:addWidget')}
+          variant="widgets"
         />
       )}
     </>

@@ -60,3 +60,25 @@ describe('createClientConfig', () => {
     ])
   })
 })
+
+it.each([
+  { description: 'Show recent documents.', expected: 'Show recent documents.' },
+  {
+    description: { en: 'Recent documents', es: 'Documentos recientes' },
+    expected: 'Documentos recientes',
+  },
+  { description: ({ t }: { t: I18nClient['t'] }) => t('general:dashboard'), expected: 'Panel' },
+])('should serialize the widget description $expected', ({ description, expected }) => {
+  const clientConfig = createClientConfig({
+    config: {
+      admin: {
+        dashboard: { widgets: [{ slug: 'recent', Component: './Recent.js', description }] },
+      },
+    } as unknown as SanitizedConfig,
+    i18n: { language: 'es', t: () => 'Panel' } as unknown as I18nClient,
+    importMap: {},
+    user: true,
+  })
+
+  expect(clientConfig.admin.dashboard.widgets[0].description).toBe(expected)
+})

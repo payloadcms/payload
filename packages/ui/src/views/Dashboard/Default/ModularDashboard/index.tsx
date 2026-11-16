@@ -1,6 +1,7 @@
 import type { TFunction } from '@payloadcms/translations'
 import type { ClientWidget, WidgetServerProps } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { createClientWidgetControls, getWidgetControlData } from 'payload/shared'
 import React from 'react'
 
@@ -60,10 +61,11 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   // Resolve function labels to static labels for client components
   const clientWidgets: ClientWidget[] = widgets.map((widget) => {
-    const { Component: _, controls, fields: __, label, ...rest } = widget
+    const { Component: _, controls, description, fields: __, label, ...rest } = widget
     return {
       ...rest,
       controls: createClientWidgetControls({ controls, i18n, importMap }),
+      description: description ? getTranslation(description, i18n) : undefined,
       label: typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
     }
   })

@@ -42,6 +42,7 @@ export function WidgetReplaceControl({
         onItemClick={(widget) => onReplace({ widgetSlug: widget.slug })}
         searchPlaceholder={t('dashboard:searchWidgets')}
         title={`${t('general:replace')} ${widgetLabel}`}
+        variant="widgets"
       />
     </>
   )

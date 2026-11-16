@@ -1,6 +1,8 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
+import { getTranslation } from '@payloadcms/translations'
+
 import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, User } from '../index.js'
@@ -191,10 +193,11 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { Component: _, controls, fields, label, ...rest } = widget
+              const { Component: _, controls, description, fields, label, ...rest } = widget
               return {
                 ...rest,
                 controls: createClientWidgetControls({ controls, i18n, importMap }),
+                description: description ? getTranslation(description, i18n) : undefined,
                 ...(fields?.length
                   ? {
                       fields: createClientFields({

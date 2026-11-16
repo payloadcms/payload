@@ -952,6 +952,8 @@ export type Widget = {
   Component: PayloadComponent
   /** Simple widget settings displayed in the dashboard edit toolbar. */
   controls?: WidgetControl[]
+  /** Optional description displayed below the widget label in the Add Widget drawer. Supports translations and label functions. */
+  description?: LabelFunction | StaticLabel
   fields?: Field[]
   /**
    * Human-friendly label for the widget.
@@ -971,6 +973,7 @@ export type Widget = {
  */
 export type ClientWidget = {
   controls?: ClientWidgetControl[]
+  description?: StaticLabel
   fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth

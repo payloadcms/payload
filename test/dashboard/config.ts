@@ -180,6 +180,7 @@ export default buildConfigWithDefaults({
         widgets: [
           {
             slug: 'count',
+            description: 'Display the total number of documents in a collection.',
             Component: './components/Count.tsx#default',
             controls: [
               {
