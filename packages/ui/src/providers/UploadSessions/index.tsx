@@ -2,6 +2,7 @@
 import type { ClientUploadSession, UploadCollectionSlug, UploadInstructions } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -93,8 +94,6 @@ export type UploadSessionsContext = {
    * because the coordinator finishes the save, so its leave-without-saving prompt is skipped.
    */
   isSaveWaitingOnUpload: (args: { file: File }) => boolean
-  /** Whether a session upload for this file is still transferring. */
-  isUploading: (args: { file: File }) => boolean
   /** Starts a session upload when the file qualifies. Returns whether one was started. */
   start: (args: {
     collectionSlug: UploadCollectionSlug
@@ -105,6 +104,11 @@ export type UploadSessionsContext = {
     resumeSessionID?: string
     targetID?: number | string
   }) => boolean
+  /**
+   * Whether saving this file would wait for a transfer: the upload is still running, failed and
+   * resumes on save, or restarts because the document prefix changed since it started.
+   */
+  willSaveWaitForUpload: (args: { docPrefix?: string; file: File }) => boolean
 }
 
 const Context = React.createContext<null | UploadSessionsContext>(null)
@@ -121,7 +125,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   const userID = user?.id
 
   const getErrorMessage = useCallback(
-    (err: unknown) => {
+    ({ err }: { err: unknown }) => {
       if (err instanceof UploadSessionClientError) {
         return err.code === 'fileMismatch'
           ? t('upload:uploadFileMismatch')
@@ -140,7 +144,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   /** Upload toasts that belong to the signed-in user and are dismissed when the user changes. */
   const toastIDsRef = useRef(new Set<string>())
 
-  const trackToast = useCallback((id: string) => {
+  const trackToast = useCallback(({ id }: { id: string }) => {
     toastIDsRef.current.add(id)
     return id
   }, [])
@@ -185,7 +189,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   /** Opens the session's document with the upload attached, so the user can finish saving. */
   const getFinishSavingURL = useCallback(
     ({ session }: { session: ClientUploadSession }) =>
-      `${getDocumentURL({ id: session.targetID, collectionSlug: session.collectionSlug })}?uploadSession=${session.id}`,
+      `${getDocumentURL({ id: session.targetID, collectionSlug: session.collectionSlug })}${qs.stringify({ uploadSession: session.id }, { addQueryPrefix: true })}`,
     [getDocumentURL],
   )
 
@@ -193,7 +197,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     ({ id, collectionSlug }: { collectionSlug: string; id: number | string }) => {
       // Persistent so keyboard and screen-reader users can reach the action (WCAG 2.2.1).
       toast.success(t('upload:uploadSavedInBackground'), {
-        id: trackToast(`upload-session-saved-${collectionSlug}-${id}`),
+        id: trackToast({ id: `upload-session-saved-${collectionSlug}-${id}` }),
         action: {
           label: t('general:open'),
           onClick: () => router.push(getDocumentURL({ id, collectionSlug })),
@@ -208,7 +212,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   const showReadyToFinish = useCallback(
     ({ session }: { session: ClientUploadSession }) => {
       toast.info(t('upload:uploadReadyToFinishSaving', { filename: session.file.filename }), {
-        id: trackToast(`upload-session-ready-${session.id}`),
+        id: trackToast({ id: `upload-session-ready-${session.id}` }),
         action: {
           label: t('upload:finishSaving'),
           onClick: () => router.push(getFinishSavingURL({ session })),
@@ -233,8 +237,8 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
         showSaved({ id: doc.id, collectionSlug: session.collectionSlug })
       } catch (err) {
-        toast.error(getErrorMessage(err), {
-          id: trackToast(`upload-session-ready-${session.id}`),
+        toast.error(getErrorMessage({ err }), {
+          id: trackToast({ id: `upload-session-ready-${session.id}` }),
           action: {
             label: t('upload:finishSaving'),
             onClick: () => router.push(getFinishSavingURL({ session })),
@@ -259,12 +263,17 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     ({ collectionSlug, docPrefix, file, resumeSessionID, targetID }) => {
       const collectionConfig = getEntityConfig({ collectionSlug })
 
-      if (!collectionConfig || !shouldUseUploadSession({ collectionConfig, file })) {
+      // The save only sends a stored file reference when the Admin uses upload instructions;
+      // otherwise it posts the bytes itself, and an upload started here would never be used.
+      if (
+        !collectionConfig?.upload?.uploadInstructions.useInAdmin ||
+        !shouldUseUploadSession({ collectionConfig, file })
+      ) {
         return false
       }
 
       const controller = new AbortController()
-      const toastID = trackToast(`upload-session-${crypto.randomUUID()}`)
+      const toastID = trackToast({ id: `upload-session-${crypto.randomUUID()}` })
       let detach: UploadEntry['detach'] = () => {}
       const detached = new Promise<never>((_, reject) => {
         detach = reject
@@ -389,7 +398,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
           entry.isFailed = true
 
           toast.error(
-            `${t('upload:uploadInterrupted', { filename: file.name })} ${getErrorMessage(err)}`,
+            `${t('upload:uploadInterrupted', { filename: file.name })} ${getErrorMessage({ err })}`,
             { id: toastID, duration: Infinity },
           )
         },
@@ -510,8 +519,8 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
           releaseWaitingSave(entry)
 
           if (!entry.isAttached) {
-            toast.error(getErrorMessage(err), {
-              id: trackToast(`upload-session-intent-${entry.toastID}`),
+            toast.error(getErrorMessage({ err }), {
+              id: trackToast({ id: `upload-session-intent-${entry.toastID}` }),
               duration: Infinity,
             })
           }
@@ -645,11 +654,21 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [adoptSession],
   )
 
-  const isUploading = useCallback<UploadSessionsContext['isUploading']>(({ file }) => {
-    const entry = entriesRef.current.get(file)
+  const willSaveWaitForUpload = useCallback<UploadSessionsContext['willSaveWaitForUpload']>(
+    ({ docPrefix, file }) => {
+      const entry = entriesRef.current.get(file)
 
-    return Boolean(entry && !entry.isSettled)
-  }, [])
+      if (!entry) {
+        return false
+      }
+
+      // Mirrors `getUploadedFile`, which restarts or resumes these uploads before the save goes on.
+      const isRestartedForPrefix = docPrefix !== entry.startedDocPrefix && !entry.isAdopted
+
+      return !entry.isSettled || entry.isFailed === true || isRestartedForPrefix
+    },
+    [],
+  )
 
   // Sessions belong to the user who started them. On sign-out or a switch of user, stop this
   // tab's uploads and hide their toasts. The sessions are kept, so their owner is offered to
@@ -719,10 +738,10 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       detach,
       getUploadedFile,
       isSaveWaitingOnUpload,
-      isUploading,
       start,
+      willSaveWaitForUpload,
     }),
-    [adopt, cancel, detach, getUploadedFile, isSaveWaitingOnUpload, isUploading, start],
+    [adopt, cancel, detach, getUploadedFile, isSaveWaitingOnUpload, start, willSaveWaitForUpload],
   )
 
   return <Context value={value}>{children}</Context>

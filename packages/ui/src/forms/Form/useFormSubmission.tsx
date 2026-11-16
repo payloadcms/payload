@@ -429,7 +429,13 @@ export const useFormSubmission = ({
           // Document forms leave validation to the server, which would only answer after a large
           // upload finishes. Ask it now so field errors show immediately while the upload continues.
           const isWaitingOnUpload =
-            data?.file instanceof File && Boolean(uploadSessions?.isUploading({ file: data.file }))
+            data?.file instanceof File &&
+            Boolean(
+              uploadSessions?.willSaveWaitForUpload({
+                docPrefix: typeof data.prefix === 'string' ? data.prefix : undefined,
+                file: data.file,
+              }),
+            )
 
           if (isWaitingOnUpload && !skipValidation) {
             const serverValidation = await getServerValidationErrors({

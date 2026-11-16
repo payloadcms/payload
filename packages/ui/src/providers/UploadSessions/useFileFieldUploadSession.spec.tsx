@@ -77,7 +77,6 @@ describe('useFileFieldUploadSession', () => {
 
     hook.result.current.onFileChange({
       file: new File(['x'], 'video.mp4', { type: 'video/mp4' }),
-      isNewFile: true,
     })
     await hook.rerender()
 

@@ -34,7 +34,7 @@ export const useFileFieldUploadSession = ({
    * it started with, so the form locks the file name instead of sending the whole file again.
    */
   hasUploadSession: boolean
-  onFileChange: (args: { file: File | null; isNewFile: boolean }) => void
+  onFileChange: (args: { file: File | null }) => void
 } => {
   const { id } = useDocumentInfo()
   const { getDataByPath } = useForm()
@@ -62,7 +62,7 @@ export const useFileFieldUploadSession = ({
   const adoptedSessionID = canUseSessions ? searchParams.get('uploadSession') : null
 
   const onFileChange = useCallback(
-    ({ file, isNewFile }: { file: File | null; isNewFile: boolean }) => {
+    ({ file }: { file: File | null }) => {
       const uploadSessions = uploadSessionsRef.current
 
       if (!canUseSessions || !uploadSessions) {

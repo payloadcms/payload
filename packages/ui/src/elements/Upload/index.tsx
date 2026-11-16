@@ -191,7 +191,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
         setFileSrc(URL.createObjectURL(file))
       }
 
-      onSessionFileChange({ file, isNewFile })
+      onSessionFileChange({ file })
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)

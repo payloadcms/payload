@@ -168,7 +168,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           setFileSrc(URL.createObjectURL(file))
         }
       }
-      onSessionFileChange({ file, isNewFile })
+      onSessionFileChange({ file })
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)

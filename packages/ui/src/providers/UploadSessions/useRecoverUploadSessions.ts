@@ -30,12 +30,12 @@ export const useRecoverUploadSessions = ({
   userID,
 }: {
   finishInBackground: (args: { session: ClientUploadSession }) => Promise<void>
-  getErrorMessage: (err: unknown) => string
+  getErrorMessage: (args: { err: unknown }) => string
   /** Sessions this tab is resuming, reported to other tabs as held. */
   recoveringSessionIDsRef: React.RefObject<Set<string>>
   requestArgs: { apiRoute: string; serverURL: string }
   /** Registers a toast so it is dismissed when the user changes. */
-  trackToast: (id: string) => string
+  trackToast: (args: { id: string }) => string
   userID?: number | string
 }) => {
   const { config, getEntityConfig } = useConfig()
@@ -83,7 +83,7 @@ export const useRecoverUploadSessions = ({
       session: ClientUploadSession
     }) {
       const sessionID = String(session.id)
-      const toastID = trackToast(`upload-session-recovery-${sessionID}`)
+      const toastID = trackToast({ id: `upload-session-recovery-${sessionID}` })
 
       const resume = (file: File) => {
         const controller = new AbortController()
@@ -119,7 +119,7 @@ export const useRecoverUploadSessions = ({
             }
 
             if (isUploadSessionGoneError(err)) {
-              toast.error(getErrorMessage(err), { id: toastID })
+              toast.error(getErrorMessage({ err }), { id: toastID })
               return
             }
 
@@ -128,7 +128,7 @@ export const useRecoverUploadSessions = ({
               description:
                 err instanceof UploadSessionClientError && err.code === 'fileMismatch'
                   ? t('upload:uploadFileMismatch')
-                  : getErrorMessage(err),
+                  : getErrorMessage({ err }),
               session,
             })
           })
@@ -164,7 +164,7 @@ export const useRecoverUploadSessions = ({
                   !isUploadSessionGoneError(err) &&
                   currentUserIDRef.current === cancelledByUserID
                 ) {
-                  offer({ description: getErrorMessage(err), session })
+                  offer({ description: getErrorMessage({ err }), session })
                 }
               })
             },

@@ -2,7 +2,12 @@
 import { useEffect } from 'react'
 
 const TABS_CHANNEL_NAME = 'payload-upload-sessions'
-const TABS_REPLY_TIMEOUT_MS = 300
+/**
+ * How long to wait for other tabs to claim sessions. Generous, because a session missed here is
+ * offered for recovery, or finished, while another tab still holds it; a busy or background tab
+ * can take a while to answer.
+ */
+const TABS_REPLY_TIMEOUT_MS = 1500
 
 type TabsMessage =
   | { sessionIDs: string[]; type: 'held' }

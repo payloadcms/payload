@@ -67,10 +67,10 @@ const renderRecoveryHook = async () => {
   const recoveringSessionIDsRef = { current: new Set<string>() }
   const props: HookProps = {
     finishInBackground: vi.fn(() => Promise.resolve()),
-    getErrorMessage: (err) => String(err),
+    getErrorMessage: ({ err }) => String(err),
     recoveringSessionIDsRef,
     requestArgs,
-    trackToast: (id) => id,
+    trackToast: ({ id }) => id,
     userID: 'user-a',
   }
   const hook = await renderHook((hookProps?: HookProps) => useRecoverUploadSessions(hookProps!), {
