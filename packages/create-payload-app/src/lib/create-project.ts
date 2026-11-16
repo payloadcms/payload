@@ -26,6 +26,7 @@ import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { downloadExample } from './download-example.js'
 import { downloadTemplate } from './download-template.js'
 import { generateSecret } from './generate-secret.js'
+import { getInstallCommand, getRunCommand } from './get-package-manager.js'
 import { manageEnvFiles } from './manage-env-files.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -47,15 +48,7 @@ async function installDeps(args: {
   if (cliArgs['--no-deps']) {
     return true
   }
-  let installCmd = 'npm install --legacy-peer-deps'
-
-  if (packageManager === 'yarn') {
-    installCmd = 'yarn'
-  } else if (packageManager === 'pnpm') {
-    installCmd = 'pnpm install'
-  } else if (packageManager === 'bun') {
-    installCmd = 'bun install'
-  }
+  const installCmd = getInstallCommand(packageManager)
 
   await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
@@ -68,6 +61,65 @@ async function installDeps(args: {
     error(`Error installing dependencies${err instanceof Error ? `: ${err.message}` : ''}.`)
     return false
   }
+}
+
+type PayloadGenerateResult = { error: string; ok: false } | { ok: true }
+
+async function runPayloadCommand(args: {
+  command: string
+  packageManager: PackageManager
+  projectDir: string
+}): Promise<PayloadGenerateResult> {
+  const { command, packageManager, projectDir } = args
+
+  try {
+    await execa.command(`${getRunCommand(packageManager)} ${command}`, {
+      cwd: path.resolve(projectDir),
+    })
+    return { ok: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : String(err), ok: false }
+  }
+}
+
+/** Non-fatal: on failure, warn with the command to run later. */
+async function runPayloadGenerate(args: {
+  artifact: string
+  command: string
+  packageManager: PackageManager
+  projectDir: string
+  spinner: ReturnType<typeof p.spinner>
+}): Promise<void> {
+  const { artifact, command, packageManager, projectDir, spinner } = args
+
+  spinner.start(`Generating ${artifact}...`)
+  const result = await runPayloadCommand({ command, packageManager, projectDir })
+  const capitalized = artifact.charAt(0).toUpperCase() + artifact.slice(1)
+
+  if (result.ok) {
+    spinner.stop(`${capitalized} generated`)
+    return
+  }
+
+  spinner.stop(`Could not generate ${artifact}`, 1)
+  warning(`Run '${getRunCommand(packageManager)} ${command}' later. ${result.error}`)
+}
+
+async function runProjectCodegen(args: {
+  packageManager: PackageManager
+  projectDir: string
+  spinner: ReturnType<typeof p.spinner>
+}): Promise<void> {
+  await runPayloadGenerate({
+    ...args,
+    artifact: 'import map',
+    command: 'generate:importmap',
+  })
+  await runPayloadGenerate({
+    ...args,
+    artifact: 'types',
+    command: 'generate:types',
+  })
 }
 
 type TemplateOrExample =
@@ -182,6 +234,8 @@ export async function createProject(
     const result = await installDeps({ cliArgs, packageManager, projectDir })
     if (result) {
       spinner.stop('Successfully installed Payload and dependencies')
+
+      await runProjectCodegen({ packageManager, projectDir, spinner })
     } else {
       spinner.stop('Error installing dependencies', 1)
     }

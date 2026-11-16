@@ -88,6 +88,7 @@ describe('Join Field', () => {
           equals: 'example',
         },
       },
+      overrideAccess: true,
     })
 
     if (!docs[0]) {
@@ -96,7 +97,12 @@ describe('Join Field', () => {
 
     ;({ id: categoryID } = docs[0])
 
-    const folder = await payload.find({ collection: 'folders', depth: 0, sort: 'createdAt' })
+    const folder = await payload.find({
+      collection: 'folders',
+      depth: 0,
+      sort: 'createdAt',
+      overrideAccess: true,
+    })
     rootParentID = folder.docs[0]!.id
   })
 
@@ -127,6 +133,7 @@ describe('Join Field', () => {
     const result = await payload.find({
       collection: categoriesSlug,
       limit: 1,
+      overrideAccess: true,
     })
     const category = result.docs[0]
 
@@ -141,6 +148,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'a',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -149,6 +157,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'b',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -157,6 +166,7 @@ describe('Join Field', () => {
         category: category.id,
         title: 'z',
       },
+      overrideAccess: true,
     })
 
     await navigateToDoc(page, categoriesURL)
@@ -181,7 +191,7 @@ describe('Join Field', () => {
 
     const drawer = page.locator('[id^=doc-drawer_hidden-posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Hidden Post')
 
@@ -267,7 +277,11 @@ describe('Join Field', () => {
     const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
     await toggler.click()
 
-    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(page.locator('[id^=doc-drawer_undefined]')).toBeHidden()
+
+    const drawer = page.getByRole('dialog', { name: 'Editing Post', exact: true })
+    await expect(drawer.getByRole('textbox', { name: 'Title', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
     await expect(drawer).toBeHidden()
   })
 
@@ -387,7 +401,7 @@ describe('Join Field', () => {
     await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     const categoryValue = categoryField.locator('.relationship--single-value__text')
     await expect(categoryValue).toHaveText('example')
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Post 4')
 
@@ -431,7 +445,7 @@ describe('Join Field', () => {
     await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
 
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill(newTitle)
 
@@ -472,7 +486,7 @@ describe('Join Field', () => {
     await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
 
-    const titleField = createDrawer.locator('#field-title')
+    const titleField = createDrawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill(title)
 
@@ -523,6 +537,7 @@ describe('Join Field', () => {
         category: categoryID as string,
         title,
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesURL.edit(categoryID))
@@ -577,6 +592,7 @@ describe('Join Field', () => {
         title,
         category: categoryID as string,
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesURL.edit(categoryID))
@@ -613,7 +629,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
 
     const updatedTitle = 'Test Post 1 (Updated)'
@@ -632,6 +648,7 @@ describe('Join Field', () => {
       data: {
         title: 'Test Category (With Versions)',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -640,6 +657,7 @@ describe('Join Field', () => {
         categoryVersion: categoryVersionsDoc.id,
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))
@@ -655,7 +673,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_versions_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
 
     const updatedTitle = 'Test Post (Updated)'
@@ -712,7 +730,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-polymorphic')).toContainText('example')
@@ -729,7 +747,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-polymorphics')).toContainText('example')
@@ -746,7 +764,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-localizedPolymorphic')).toContainText('example')
@@ -763,7 +781,7 @@ describe('Join Field', () => {
     await joinField.locator('.relationship-table__add-new').click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Test polymorphic Post')
     await expect(drawer.locator('#field-localizedPolymorphics')).toContainText('example')
@@ -800,7 +818,7 @@ describe('Join Field', () => {
     await expect(uploadField).toBeVisible()
     const uploadValue = uploadField.locator('.upload-relationship-details img')
     await expect(uploadValue).toBeVisible()
-    const titleField = drawer.locator('#field-title')
+    const titleField = drawer.locator('input[name="title"]')
     await expect(titleField).toBeVisible()
     await titleField.fill('Edited title for upload')
     await drawer.locator('button[id="action-save"]').click()
@@ -821,6 +839,13 @@ describe('Join Field', () => {
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(1)
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
+  })
+
+  test('should hide the add new button when create access is denied', async () => {
+    await navigateToDoc(page, categoriesJoinRestrictedURL)
+    const joinField = page.locator('#field-collectionRestrictedJoin.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    await expect(joinField.locator('.relationship-table__add-new')).toHaveCount(0)
   })
 
   test('should render join field with array of collections', async () => {
@@ -855,7 +880,7 @@ describe('Join Field', () => {
     )
     await expect(pageOption).toHaveText('Example Page')
     await pageOption.click()
-    await page.locator('.drawer__content input#field-title').fill('Some new page')
+    await page.locator('.drawer__content input[name="title"]').fill('Some new page')
     await page.locator('.drawer__content #action-save').click()
 
     await expect(
@@ -868,7 +893,7 @@ describe('Join Field', () => {
   })
 
   test('should render create-first-user with when users collection has a join field and hide it', async () => {
-    await payload.delete({ collection: 'users', where: {} })
+    await payload.delete({ collection: 'users', where: {}, overrideAccess: true })
     const url = new AdminUrlUtil(serverURL, 'users')
     await page.goto(url.admin + '/create-first-user')
     await expect(page.locator('.field-type.join')).toBeHidden()
@@ -905,6 +930,7 @@ describe('Join Field', () => {
       data: {
         title: 'Category Versions',
       },
+      overrideAccess: true,
     })
 
     const versionDoc = await payload.create({
@@ -913,6 +939,7 @@ describe('Join Field', () => {
         categoryVersion: categoryVersionsDoc.id,
         title: 'Version 1',
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -922,6 +949,7 @@ describe('Join Field', () => {
         title: 'Version 1 - Draft',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     await page.goto(categoriesVersionsURL.edit(categoryVersionsDoc.id))

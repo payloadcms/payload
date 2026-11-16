@@ -17,7 +17,7 @@ jobs:
   # `@next/eslint-plugin-next` for the same version (would break
   # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
   probe:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       healthy: ${{ steps.probe.outputs.healthy }}
       next_version: ${{ steps.probe.outputs.next_version }}
@@ -58,7 +58,7 @@ jobs:
           fi
 
   notify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: probe
     permissions:
       pull-requests: write

@@ -1,7 +1,11 @@
-import type { CollectionSlug, File, FileData, PayloadRequest } from 'payload'
+import type { CollectionSlug, File, PayloadRequest } from 'payload'
 
 import { APIError, z } from 'payload'
-import { getExternalFile, getFileFromUploadInstructions, isURLAllowed } from 'payload/internal'
+import {
+  externalURLInputSchema,
+  getFileFromUploadInstructions,
+  resolveURLUploadInput,
+} from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
 const mimeTypeSchema = z
@@ -30,11 +34,7 @@ export const fileInputSchema = z
       mimeType: mimeTypeSchema.check(z.describe('The file MIME type, for example image/png.')),
       source: z.literal('base64'),
     }),
-    z.strictObject({
-      name: z.optional(z.string().check(z.minLength(1))).check(z.describe('File name override.')),
-      source: z.literal('externalURL'),
-      url: z.url().check(z.describe('The http or https URL to download.')),
-    }),
+    externalURLInputSchema,
     z.strictObject({
       file: uploadFileSchema.check(z.describe('getUploadInstructions file field post-upload.')),
       source: z.literal('uploadReference'),
@@ -75,6 +75,10 @@ export async function resolveFile({
     }
   }
 
+  if (input.source === 'externalURL') {
+    return resolveURLUploadInput({ slug, input, req })
+  }
+
   const uploadConfig = req.payload.collections[slug]?.config.upload
 
   if (!uploadConfig) {
@@ -82,48 +86,12 @@ export async function resolveFile({
   }
 
   const maxFileSize = req.payload.config.upload.limits?.fileSize
-  let file: File
-
-  if (input.source === 'base64') {
-    const data = decodeBase64({ maxFileSize, value: input.data })
-
-    file = {
-      name: sanitizeFilename(input.name),
-      data,
-      mimetype: input.mimeType,
-      size: data.length,
-    }
-  } else {
-    if (uploadConfig.pasteURL === false) {
-      throw new APIError(`Uploading files from URLs is disabled for collection "${slug}".`, 400)
-    }
-
-    const url = new URL(input.url)
-
-    if (!['http:', 'https:'].includes(url.protocol)) {
-      throw new APIError('File URLs must use http or https.', 400)
-    }
-
-    if (
-      typeof uploadConfig.pasteURL === 'object' &&
-      !isURLAllowed(input.url, uploadConfig.pasteURL.allowList)
-    ) {
-      throw new APIError('The provided file URL is not allowed.', 400)
-    }
-
-    file = await getExternalFile({
-      data: {
-        filename: sanitizeFilename(input.name || getURLFilename(url)),
-        url: input.url,
-      } as FileData,
-      req,
-      uploadConfig: {
-        ...uploadConfig,
-        externalFileHeaderFilter: uploadConfig.externalFileHeaderFilter ?? (() => ({})),
-      },
-    })
-    file.mimetype = file.mimetype?.split(';')[0] || 'application/octet-stream'
-    file.size = file.data.length
+  const data = decodeBase64({ maxFileSize, value: input.data })
+  const file: File = {
+    name: sanitizeFilename(input.name),
+    data,
+    mimetype: input.mimeType,
+    size: data.length,
   }
 
   if (maxFileSize !== undefined && Number.isFinite(maxFileSize) && file.size > maxFileSize) {
@@ -156,14 +124,4 @@ function decodeBase64({ maxFileSize, value }: { maxFileSize?: number; value: str
   }
 
   return data
-}
-
-function getURLFilename(url: URL): string {
-  const pathSegment = url.pathname.split('/').pop() || 'upload'
-
-  try {
-    return decodeURIComponent(pathSegment)
-  } catch {
-    return pathSegment
-  }
 }

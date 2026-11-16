@@ -1,5 +1,7 @@
-import type { CollectionConfig, ImageSize } from 'payload'
+import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
+import type { ImageSize } from 'payload'
 
+import '@payloadcms/transformer-sharp'
 import { describe, expect, test } from 'tstyche'
 
 type TestImageSizeOptions = {
@@ -14,23 +16,26 @@ declare module 'payload' {
   }
 }
 
-type CollectionUploadConfig = Exclude<NonNullable<CollectionConfig['upload']>, boolean>
-type CollectionImageSize = NonNullable<CollectionUploadConfig['imageSizes']>[number]
+type SharpVariant = NonNullable<SharpCollectionConfig['variants']>[number]
 
 describe('registered image size options', () => {
-  test('should use registered provider options in ImageSize', () => {
-    expect<ImageSize['name']>().type.toBe<string>()
-    expect<ImageSize['fit']>().type.toBe<'provider-fit' | undefined>()
-    expect<ImageSize['providerOption']>().type.toBe<boolean | undefined>()
-    expect<ImageSize['width']>().type.toBe<number | undefined>()
+  test('should accept the options registered by @payloadcms/transformer-sharp', () => {
+    expect<{
+      kernel: 'lanczos3'
+      name: string
+      withoutEnlargement: true
+    }>().type.toBeAssignableTo<ImageSize>()
   })
 
-  test('should replace Sharp-specific options', () => {
-    expect<'kernel' extends keyof ImageSize ? true : false>().type.toBe<false>()
-    expect<'withoutEnlargement' extends keyof ImageSize ? true : false>().type.toBe<false>()
+  test('should accept options from a third-party provider registered alongside sharp', () => {
+    expect<{
+      fit: 'provider-fit'
+      name: string
+      providerOption: true
+    }>().type.toBeAssignableTo<ImageSize>()
   })
 
-  test('should apply registered options to collection upload configuration', () => {
-    expect<CollectionImageSize>().type.toBe<ImageSize>()
+  test('should apply registered options to sharp transformer variants', () => {
+    expect<SharpVariant>().type.toBe<ImageSize>()
   })
 })

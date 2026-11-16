@@ -5,14 +5,15 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
-import type { Config, Tag } from './payload-types.js'
+import type { Config, Post, Tag } from './payload-types.js'
 
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { tagsSlug } from './config.js'
+import { postsSlug, tagsSlug } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,9 +23,11 @@ let serverURL: string
 
 test.describe('Tags', () => {
   let page: Page
+  let postsURL: AdminUrlUtil
   let tagsURL: AdminUrlUtil
 
   const createdTagIds: Tag['id'][] = []
+  const createdPostIds: Post['id'][] = []
 
   /** Navigate to the tags list and return the sidebar tree. */
   const openTagsTree = async (): Promise<Locator> => {
@@ -67,8 +70,12 @@ test.describe('Tags', () => {
       if (parentId !== undefined) {
         data[`_h_${tagsSlug}`] = parentId
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- hierarchy `_h_*` field is not in the generated type
-      const doc = await payload.create({ collection: tagsSlug, data: data as any })
+
+      const doc = await payload.create({
+        collection: tagsSlug,
+        data: data as any,
+        overrideAccess: true,
+      })
       created.push(doc)
       createdTagIds.push(doc.id)
       parentId = doc.id
@@ -83,7 +90,7 @@ test.describe('Tags', () => {
       .getByRole('button', { name: 'Create New' })
       .first()
       .click()
-    await page.getByRole('button', { name: 'Tag', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Tag', exact: true }).click()
 
     const drawer = page.locator('.drawer__content')
     await expect(drawer).toBeVisible()
@@ -93,6 +100,7 @@ test.describe('Tags', () => {
 
     const { docs } = await payload.find({
       collection: tagsSlug,
+      overrideAccess: true,
       where: { name: { equals: name } },
     })
     const createdTag = docs[0] as Tag
@@ -108,6 +116,7 @@ test.describe('Tags', () => {
 
     payload = payloadFromInit
     serverURL = serverFromInit
+    postsURL = new AdminUrlUtil(serverURL, postsSlug)
     tagsURL = new AdminUrlUtil(serverURL, tagsSlug)
 
     const context = await browser.newContext()
@@ -115,13 +124,82 @@ test.describe('Tags', () => {
   })
 
   test.afterAll(async () => {
+    for (const id of createdPostIds) {
+      await payload.delete({ id, collection: postsSlug, overrideAccess: true })
+    }
     for (const id of createdTagIds) {
-      await payload.delete({ id, collection: tagsSlug })
+      await payload.delete({ id, collection: tagsSlug, overrideAccess: true })
     }
   })
 
   test.afterEach(async () => {
     await page.unrouteAll()
+  })
+
+  test.describe('hierarchy relationship field', () => {
+    test('should apply, cancel, reopen, and clear Tags field selections', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Hierarchy field E2E' },
+        overrideAccess: true,
+      })
+      createdPostIds.push(post.id)
+
+      await page.goto(postsURL.edit(post.id))
+
+      const tagsField = page.locator('#field-_h_tags')
+      const browseButton = page.getByRole('button', { name: 'Select Tags' })
+      const modal = page.locator('.hierarchy-modal:visible')
+
+      await expect(tagsField).toBeVisible()
+      await browseButton.click()
+      await expect(modal).toBeVisible()
+      await expect(modal.getByRole('button', { name: 'Close' })).toBeVisible()
+      await expect(modal.getByRole('button', { name: 'Confirm' })).toBeVisible()
+
+      await modal.getByRole('button', { name: 'Seasons', exact: true }).click()
+      await modal.getByRole('checkbox', { name: 'Spring' }).check()
+      await modal.getByRole('button', { name: 'Confirm' }).click()
+      await expect(modal).toBeHidden()
+      await expect(tagsField.locator('.relationship--multi-value-label__text')).toHaveText([
+        'Spring',
+      ])
+      await saveDocAndAssert(page)
+      await page.reload()
+
+      await browseButton.click()
+      await expect(modal.getByRole('checkbox', { name: 'Spring' })).toBeChecked()
+      await modal.getByRole('checkbox', { name: 'Seasons' }).check()
+      await modal.getByRole('button', { name: 'Close' }).click()
+      await expect(modal).toBeHidden()
+      await expect(tagsField.locator('.relationship--multi-value-label__text')).toHaveText([
+        'Spring',
+      ])
+
+      await browseButton.click()
+      await expect(modal.getByRole('checkbox', { name: 'Spring' })).toBeChecked()
+      await modal.getByRole('button', { name: 'Clear' }).click()
+      await modal.getByRole('button', { name: 'Confirm' }).click()
+      await expect(modal).toBeHidden()
+      await expect(tagsField.locator('.relationship--multi-value-label__text')).toHaveCount(0)
+    })
+
+    test('should show ancestor paths when searching Tags field options', async () => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { title: 'Hierarchy option label E2E' },
+        overrideAccess: true,
+      })
+      createdPostIds.push(post.id)
+
+      await page.goto(postsURL.edit(post.id))
+
+      const tagsField = page.locator('#field-_h_tags')
+      await tagsField.locator('.rs__input').click()
+      await tagsField.locator('.rs__input').fill('Spring')
+
+      await expect(page.locator('.rs__option')).toContainText('Seasons / Spring')
+    })
   })
 
   test.describe('sidebar tree refresh', () => {

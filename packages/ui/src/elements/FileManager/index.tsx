@@ -2,8 +2,9 @@
 import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatFilesize, isImage } from 'payload/shared'
+import { formatFilesize, isImage, validateMimeType } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
@@ -21,6 +22,9 @@ import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
+import { getFileDownloadSrc, getFilePreviewSrc } from '../Upload/getFilePreviewSrc.js'
+import { getInitialCrop } from '../Upload/getInitialCrop.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
@@ -34,16 +38,6 @@ import { FileToolbar } from './FileToolbar/index.js'
 import './index.css'
 
 const baseClass = 'file-manager'
-
-const validate = (value) => {
-  if (!value && value !== undefined) {
-    return 'A file is required.'
-  }
-  if (value && (!value.name || value.name === '')) {
-    return 'A file name is required.'
-  }
-  return true
-}
 
 export type FileManagerProps = {
   readonly collectionSlug: string
@@ -74,6 +68,25 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { data } = useDocumentInfo()
+  const validate = useCallback(
+    (file: File | null | undefined) => {
+      if (!file && file !== undefined) {
+        return 'A file is required.'
+      }
+      if (file && (!file.name || file.name === '')) {
+        return 'A file name is required.'
+      }
+      if (
+        file instanceof File &&
+        uploadConfig.mimeTypes?.length &&
+        !validateMimeType(file.type, uploadConfig.mimeTypes)
+      ) {
+        return t('error:invalidFileType')
+      }
+      return true
+    },
+    [t, uploadConfig.mimeTypes],
+  )
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
@@ -98,18 +111,17 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
-  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
+  const hasVariants = uploadConfig?.variants?.length > 0
+  const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   const focalPointEnabled = uploadConfig?.focalPoint === true
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
-  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasVariants || hasImageAdjustments || focalPointEnabled)
 
   const selectedSizeData = selectedSize
-    ? (data?.sizes?.[selectedSize] as Record<string, unknown>)
+    ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
-  const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
-    | null
-    | string
+  const previewSrc = getFilePreviewSrc({ data, selectedSizeData })
+  const downloadSrc = getFileDownloadSrc({ data, selectedSizeData })
   const sidePanelMimeType = data?.mimeType as string | undefined
   const fileTypeIsAdjustable =
     !!sidePanelMimeType &&
@@ -125,15 +137,33 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
-      if (isNewFile && file instanceof File) {
-        setFileSrc(URL.createObjectURL(file))
+      if (
+        file instanceof File &&
+        uploadConfig.mimeTypes?.length &&
+        !validateMimeType(file.type, uploadConfig.mimeTypes)
+      ) {
+        toast.error(t('error:invalidFileType'))
+        return
+      }
+      if (isNewFile) {
+        setFilename(file?.name ?? '')
+        if (file instanceof File) {
+          setFileSrc(URL.createObjectURL(file))
+        }
       }
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
       setUploadControlFile(null)
     },
-    [setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
+    [
+      setValue,
+      setUploadControlFile,
+      setUploadControlFileName,
+      setUploadControlFileUrl,
+      t,
+      uploadConfig.mimeTypes,
+    ],
   )
 
   const handleFileNameChange = useCallback(
@@ -268,6 +298,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       <div className={`${baseClass}__selected-preview`}>
         <Thumbnail
           collectionSlug={collectionSlug}
+          doc={{ filename: filename || value?.name }}
           fileSrc={isImage(fileType) ? src : null}
           size="expand"
         />
@@ -281,20 +312,22 @@ export const FileManager: React.FC<FileManagerProps> = ({
         <EditDepthProvider>
           <EditUpload
             fileName={value?.name || (data?.filename as string)}
-            fileSrc={(data?.url as string) || fileSrc}
+            fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={uploadEdits?.crop ?? undefined}
+            initialCrop={getInitialCrop({ data, hasSelectedFile: Boolean(value), uploadEdits })}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || (data?.focalX as number) || 50,
               y: uploadEdits?.focalPoint?.y || (data?.focalY as number) || 50,
             }}
+            // The editor keeps its crop in state, so it starts again for each new file.
+            key={value ? `${value.name}-${value.lastModified}` : (data?.filename as string)}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
           />
         </EditDepthProvider>
       )}
-      {data && hasImageSizes && (
+      {data && hasVariants && (
         <Drawer
           className={`${baseClass}__preview-drawer`}
           hoverTitle
@@ -326,7 +359,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         {data?.filename && !removedFile && (
           <FileToolbar
             filename={data.filename as string}
-            fileSrc={sidePanelFileSrc}
+            fileSrc={downloadSrc}
             fileUrl={data?.url as string}
             hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
@@ -338,7 +371,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {data?.filename && !removedFile ? (
             <FilePreview
               collectionSlug={collectionSlug}
-              data={data as Record<string, unknown>}
+              data={data}
+              fileSrc={previewSrc}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}
@@ -350,6 +384,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <div className={`${baseClass}__upload`}>
               {!value && removedFile && data?.filename && (
                 <Button
+                  aria-label={t('general:cancel')}
                   buttonStyle="secondary"
                   className={`${baseClass}__remove`}
                   icon="x"
@@ -373,6 +408,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               {value && fileSrc && (
                 <Fragment>
                   <Button
+                    aria-label={t('general:cancel')}
                     buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"

@@ -83,8 +83,8 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
    */
   override exportJSON(): SerializedLexicalNode {
     return {
+      ...super.exportJSON(),
       type: 'horizontalrule',
-      version: 1,
     }
   }
 

@@ -60,6 +60,18 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4EE6A29F".
+ */
+export type LexicalNodes_4EE6A29F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4EE6A29F>
+  | SerializedListNode<LexicalNodes_4EE6A29F>
+  | SerializedListItemNode<LexicalNodes_4EE6A29F>
+  | SerializedHeadingNode<LexicalNodes_4EE6A29F, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -70,34 +82,48 @@ export interface Config {
     media: Media;
     'media-with-composite-prefixes': MediaWithCompositePrefix;
     'media-with-custom-url': MediaWithCustomUrl;
+    'media-with-disabled-plugin': MediaWithDisabledPlugin;
     'media-with-generate-file-url': MediaWithGenerateFileUrl;
     'media-with-overwrite': MediaWithOverwrite;
     'media-with-prefix': MediaWithPrefix;
     'media-with-throwing-hook': MediaWithThrowingHook;
     'restricted-media': RestrictedMedia;
     'test-metadata': TestMetadatum;
+    'unversioned-cloud-media': UnversionedCloudMedia;
     users: User;
+    'versioned-cloud-media': VersionedCloudMedia;
+    'versioned-converted-cloud-media': VersionedConvertedCloudMedia;
+    'versioned-public-cloud-media': VersionedPublicCloudMedia;
+    'versioned-s3-media': VersionedS3Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-composite-prefixes': MediaWithCompositePrefixesSelect<false> | MediaWithCompositePrefixesSelect<true>;
     'media-with-custom-url': MediaWithCustomUrlSelect<false> | MediaWithCustomUrlSelect<true>;
+    'media-with-disabled-plugin': MediaWithDisabledPluginSelect<false> | MediaWithDisabledPluginSelect<true>;
     'media-with-generate-file-url': MediaWithGenerateFileUrlSelect<false> | MediaWithGenerateFileUrlSelect<true>;
     'media-with-overwrite': MediaWithOverwriteSelect<false> | MediaWithOverwriteSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-with-throwing-hook': MediaWithThrowingHookSelect<false> | MediaWithThrowingHookSelect<true>;
     'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
     'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
+    'unversioned-cloud-media': UnversionedCloudMediaSelect<false> | UnversionedCloudMediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'versioned-cloud-media': VersionedCloudMediaSelect<false> | VersionedCloudMediaSelect<true>;
+    'versioned-converted-cloud-media': VersionedConvertedCloudMediaSelect<false> | VersionedConvertedCloudMediaSelect<true>;
+    'versioned-public-cloud-media': VersionedPublicCloudMediaSelect<false> | VersionedPublicCloudMediaSelect<true>;
+    'versioned-s3-media': VersionedS3MediaSelect<false> | VersionedS3MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -107,7 +133,11 @@ export interface Config {
   globalsSelect: {};
   locale: null;
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -140,6 +170,16 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -149,9 +189,19 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     square?: {
       url?: string | null;
       width?: number | null;
@@ -159,6 +209,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
     sixteenByNineMedium?: {
       url?: string | null;
@@ -167,193 +219,8 @@ export interface Media {
       mimeType?: string | null;
       filesize?: number | null;
       filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-with-composite-prefixes".
- */
-export interface MediaWithCompositePrefix {
-  id: string;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-with-custom-url".
- */
-export interface MediaWithCustomUrl {
-  id: string;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-with-generate-file-url".
- */
-export interface MediaWithGenerateFileUrl {
-  id: string;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-with-overwrite".
- */
-export interface MediaWithOverwrite {
-  id: string;
-  alt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    sixteenByNineMedium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-with-prefix".
- */
-export interface MediaWithPrefix {
-  id: string;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-with-throwing-hook".
- */
-export interface MediaWithThrowingHook {
-  id: string;
-  alt?: string | null;
-  /**
-   * When enabled, the afterChange hook throws during the cloud-storage plugin internal update. Used to reproduce the swallowed-error bug in the admin panel and integration tests.
-   */
-  shouldThrow?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-media".
- */
-export interface RestrictedMedia {
-  id: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "test-metadata".
- */
-export interface TestMetadatum {
-  id: string;
-  /**
-   * Test note to identify this upload
-   */
-  testNote?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
     };
   };
 }
@@ -363,6 +230,14 @@ export interface TestMetadatum {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -370,6 +245,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -381,6 +257,604 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-composite-prefixes".
+ */
+export interface MediaWithCompositePrefix {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-custom-url".
+ */
+export interface MediaWithCustomUrl {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-disabled-plugin".
+ */
+export interface MediaWithDisabledPlugin {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-generate-file-url".
+ */
+export interface MediaWithGenerateFileUrl {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-overwrite".
+ */
+export interface MediaWithOverwrite {
+  id: string;
+  alt?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    sixteenByNineMedium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-prefix".
+ */
+export interface MediaWithPrefix {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-throwing-hook".
+ */
+export interface MediaWithThrowingHook {
+  id: string;
+  alt?: string | null;
+  /**
+   * When enabled, the afterChange hook throws during updates. Used to test upload cleanup after a hook failure.
+   */
+  shouldThrow?: boolean | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-media".
+ */
+export interface RestrictedMedia {
+  id: string;
+  title?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "test-metadata".
+ */
+export interface TestMetadatum {
+  id: string;
+  bucketName?: string | null;
+  customStorageId?: string | null;
+  objectKey?: string | null;
+  processingStatus?: string | null;
+  storageProvider?: string | null;
+  /**
+   * Test note to identify this upload
+   */
+  testNote?: string | null;
+  uploadTimestamp?: string | null;
+  uploadVersion?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unversioned-cloud-media".
+ */
+export interface UnversionedCloudMedia {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-cloud-media".
+ */
+export interface VersionedCloudMedia {
+  id: string;
+  storageMarker?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-converted-cloud-media".
+ */
+export interface VersionedConvertedCloudMedia {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-public-cloud-media".
+ */
+export interface VersionedPublicCloudMedia {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-s3-media".
+ */
+export interface VersionedS3Media {
+  id: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -419,6 +893,10 @@ export interface PayloadLockedDocument {
         value: string | MediaWithCustomUrl;
       } | null)
     | ({
+        relationTo: 'media-with-disabled-plugin';
+        value: string | MediaWithDisabledPlugin;
+      } | null)
+    | ({
         relationTo: 'media-with-generate-file-url';
         value: string | MediaWithGenerateFileUrl;
       } | null)
@@ -443,8 +921,28 @@ export interface PayloadLockedDocument {
         value: string | TestMetadatum;
       } | null)
     | ({
+        relationTo: 'unversioned-cloud-media';
+        value: string | UnversionedCloudMedia;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'versioned-cloud-media';
+        value: string | VersionedCloudMedia;
+      } | null)
+    | ({
+        relationTo: 'versioned-converted-cloud-media';
+        value: string | VersionedConvertedCloudMedia;
+      } | null)
+    | ({
+        relationTo: 'versioned-public-cloud-media';
+        value: string | VersionedPublicCloudMedia;
+      } | null)
+    | ({
+        relationTo: 'versioned-s3-media';
+        value: string | VersionedS3Media;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -490,10 +988,36 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -503,9 +1027,21 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         square?:
@@ -517,6 +1053,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
         sixteenByNineMedium?:
           | T
@@ -527,6 +1065,8 @@ export interface MediaSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
 }
@@ -536,6 +1076,9 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -545,6 +1088,18 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -554,6 +1109,9 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
  */
 export interface MediaWithCustomUrlSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -563,6 +1121,51 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-disabled-plugin_select".
+ */
+export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -572,6 +1175,9 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
  */
 export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -581,6 +1187,18 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -590,6 +1208,10 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
  */
 export interface MediaWithOverwriteSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -599,9 +1221,21 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         square?:
@@ -613,6 +1247,8 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
         sixteenByNineMedium?:
           | T
@@ -623,6 +1259,8 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
 }
@@ -632,6 +1270,9 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -641,6 +1282,18 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -651,6 +1304,10 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
 export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   alt?: T;
   shouldThrow?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -660,6 +1317,18 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -669,6 +1338,10 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
  */
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -678,6 +1351,18 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -686,7 +1371,18 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  * via the `definition` "test-metadata_select".
  */
 export interface TestMetadataSelect<T extends boolean = true> {
+  bucketName?: T;
+  customStorageId?: T;
+  objectKey?: T;
+  processingStatus?: T;
+  storageProvider?: T;
   testNote?: T;
+  uploadTimestamp?: T;
+  uploadVersion?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -696,9 +1392,21 @@ export interface TestMetadataSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:
@@ -710,14 +1418,51 @@ export interface TestMetadataSelect<T extends boolean = true> {
               mimeType?: T;
               filesize?: T;
               filename?: T;
+              prefix?: T;
+              _objectKey?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unversioned-cloud-media_select".
+ */
+export interface UnversionedCloudMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -725,6 +1470,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -733,6 +1479,156 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-cloud-media_select".
+ */
+export interface VersionedCloudMediaSelect<T extends boolean = true> {
+  storageMarker?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-converted-cloud-media_select".
+ */
+export interface VersionedConvertedCloudMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-public-cloud-media_select".
+ */
+export interface VersionedPublicCloudMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-s3-media_select".
+ */
+export interface VersionedS3MediaSelect<T extends boolean = true> {
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
       };
 }
 /**
@@ -777,6 +1673,32 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -787,10 +1709,187 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'media'
+      | 'media-with-composite-prefixes'
+      | 'media-with-custom-url'
+      | 'media-with-disabled-plugin'
+      | 'media-with-generate-file-url'
+      | 'media-with-overwrite'
+      | 'media-with-prefix'
+      | 'media-with-throwing-hook'
+      | 'restricted-media'
+      | 'test-metadata'
+      | 'unversioned-cloud-media'
+      | 'users'
+      | 'versioned-cloud-media'
+      | 'versioned-converted-cloud-media'
+      | 'versioned-public-cloud-media'
+      | 'versioned-s3-media';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'media'
+          | 'media-with-composite-prefixes'
+          | 'media-with-custom-url'
+          | 'media-with-disabled-plugin'
+          | 'media-with-generate-file-url'
+          | 'media-with-overwrite'
+          | 'media-with-prefix'
+          | 'media-with-throwing-hook'
+          | 'restricted-media'
+          | 'test-metadata'
+          | 'unversioned-cloud-media'
+          | 'users'
+          | 'versioned-cloud-media'
+          | 'versioned-converted-cloud-media'
+          | 'versioned-public-cloud-media'
+          | 'versioned-s3-media'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'media'
+          | 'media-with-composite-prefixes'
+          | 'media-with-custom-url'
+          | 'media-with-disabled-plugin'
+          | 'media-with-generate-file-url'
+          | 'media-with-overwrite'
+          | 'media-with-prefix'
+          | 'media-with-throwing-hook'
+          | 'restricted-media'
+          | 'test-metadata'
+          | 'unversioned-cloud-media'
+          | 'versioned-cloud-media'
+          | 'versioned-converted-cloud-media'
+          | 'versioned-public-cloud-media'
+          | 'versioned-s3-media'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

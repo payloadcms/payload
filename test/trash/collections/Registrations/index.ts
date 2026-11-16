@@ -30,7 +30,9 @@ export const Registrations: CollectionConfig = {
         const postID = data?.post
 
         if (postID) {
-          await req.payload.findByID({ id: postID, collection: postsSlug, req }).catch(() => null)
+          await req.payload
+            .findByID({ id: postID, collection: postsSlug, req, overrideAccess: true })
+            .catch(() => null)
         }
 
         return doc

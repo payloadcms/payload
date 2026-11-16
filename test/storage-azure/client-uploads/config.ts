@@ -1,5 +1,9 @@
+import type { CollectionConfig } from 'payload'
+
 import { azureStorage } from '@payloadcms/storage-azure'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
+import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -18,6 +22,15 @@ import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaW
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const smallPNGPath = path.resolve(dirname, '../../uploads/small.png')
+
+const enableAzureClientUploads = (collection: CollectionConfig): CollectionConfig => ({
+  ...collection,
+  upload: {
+    ...(typeof collection.upload === 'object' ? collection.upload : {}),
+    allowRestrictedFileTypes: true,
+  },
+})
 
 dotenv.config({
   path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated'),
@@ -32,11 +45,11 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
-      Media,
-      MediaWithPrefix,
-      MediaWithDocPrefix,
-      MediaHeaderOnly,
-      MediaHeaderOnlyWithSizes,
+      enableAzureClientUploads(Media),
+      enableAzureClientUploads(MediaWithPrefix),
+      enableAzureClientUploads(MediaWithDocPrefix),
+      enableAzureClientUploads(MediaHeaderOnly),
+      enableAzureClientUploads(MediaHeaderOnlyWithSizes),
       Users,
     ],
     storage: [
@@ -49,7 +62,7 @@ export default buildConfigWithDefaults({
           [mediaHeaderOnlyWithSizesSlug]: true,
           [mediaSlug]: true,
           // Configure a collection-level prefix on this slug to test that
-          // a custom `prefix.defaultValue` does override the static prefix
+          // a custom `prefix.defaultValue` is contained beneath the static prefix
           [mediaWithDocPrefixSlug]: {
             prefix: 'docprefix-collection',
           },
@@ -64,6 +77,49 @@ export default buildConfigWithDefaults({
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
+    upload: {
+      transformers: [
+        sharpTransformer({
+          collections: {
+            [mediaHeaderOnlyWithSizesSlug]: {
+              variants: [
+                {
+                  name: 'thumbnail',
+                  height: 300,
+                  width: 400,
+                },
+              ],
+            },
+          },
+          dynamic: { collections: [mediaWithDocPrefixSlug] },
+        }),
+        // Declines every upload, so a client upload of a type it lists must still not be read.
+        {
+          slug: 'declining',
+          canTransform: () => false,
+          mimeTypes: ['audio/*'],
+          transformFile: () => Promise.reject(new Error('A declining transformer ran')),
+        },
+        {
+          slug: 'uppercase-text',
+          mimeTypes: ['text/plain'],
+          transformFile: async ({ file }) => ({
+            file: new File([(await file.text()).toUpperCase()], file.name, { type: file.type }),
+            status: 'complete',
+          }),
+        },
+        // Replaces a PNG, for a client upload whose type is found only after the full download.
+        {
+          slug: 'replace-png',
+          canTransform: ({ collectionSlug }) => collectionSlug === mediaHeaderOnlySlug,
+          mimeTypes: ['image/png'],
+          transformFile: async ({ file }) => ({
+            file: new File([await readFile(smallPNGPath)], file.name, { type: 'image/png' }),
+            status: 'complete',
+          }),
+        },
+      ],
+    },
   },
   seed: async (payload) => {
     await payload.create({
@@ -72,6 +128,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
 })

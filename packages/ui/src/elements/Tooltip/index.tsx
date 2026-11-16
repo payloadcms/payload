@@ -14,22 +14,22 @@ type Side = 'bottom' | 'left' | 'right' | 'top'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
+  'aria-hidden'?: boolean
   children: React.ReactNode
   className?: string
   delay?: number
-  /**
-   * Applied to the portaled tooltip element, so it can be located independent of its
-   * position in the DOM (e.g. by tests).
-   */
   id?: string
+  portal?: boolean
   position?: Side
+  role?: 'alert' | 'tooltip'
   show?: boolean
   /**
    * Disables adaptive placement: the tooltip always renders on `position` (or its
    * default) instead of flipping to whichever side has room. It does not affect
-   * portaling - every tooltip is portaled to `document.body` regardless. @default false
+   * the `portal` setting. @default false
    */
   staticPositioning?: boolean
+  tabIndex?: number
 }
 
 const TooltipCaret: React.FC = () => {
@@ -46,7 +46,6 @@ const TooltipCaret: React.FC = () => {
         clipPath={`url(#${clipId})`}
         d="M0,0 H14 L7.875,6.125 Q7,7 6.125,6.125 Z"
       />
-      {/* Fill path */}
       <path className="tooltip__caret-fill" d="M0,0 H14 L7.875,6.125 Q7,7 6.125,6.125 Z" />
     </svg>
   )
@@ -74,12 +73,16 @@ export const Tooltip: React.FC<Props> = (props) => {
   const {
     id,
     alignCaret = 'center',
+    'aria-hidden': ariaHidden,
     children,
     className,
     delay = 500,
+    portal = true,
     position: positionFromProps,
+    role = 'tooltip',
     show: showFromProps = true,
     staticPositioning = false,
+    tabIndex,
   } = props
 
   const generatedID = React.useId()
@@ -187,6 +190,8 @@ export const Tooltip: React.FC<Props> = (props) => {
 
     const hidden = isTriggerHidden(trigger) || Boolean(middlewareData.hide?.referenceHidden)
 
+    floatingElement.style.setProperty('--tooltip-x', `${x}px`)
+
     Object.assign(floatingElement.style, {
       left: `${x}px`,
       top: `${y}px`,
@@ -254,7 +259,7 @@ export const Tooltip: React.FC<Props> = (props) => {
   useEffect(() => {
     const trigger = triggerMarkerRef.current?.parentElement
 
-    if (!show || !trigger) {
+    if (ariaHidden || role !== 'tooltip' || !show || !trigger) {
       return
     }
 
@@ -275,32 +280,39 @@ export const Tooltip: React.FC<Props> = (props) => {
         trigger.removeAttribute('aria-describedby')
       }
     }
-  }, [show, tooltipID])
+  }, [ariaHidden, role, show, tooltipID])
+
+  const content = isMounted ? (
+    <aside
+      aria-hidden={ariaHidden}
+      className={[
+        'tooltip',
+        className,
+        show && 'tooltip--show',
+        `tooltip--caret-${alignCaret}`,
+        `tooltip--position-${placement}`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      id={tooltipID}
+      ref={setFloatingElement}
+      role={role}
+      tabIndex={tabIndex}
+    >
+      <TooltipCaret />
+      <div className="tooltip-content">{children}</div>
+    </aside>
+  ) : null
 
   return (
     <React.Fragment>
       <span aria-hidden="true" ref={triggerMarkerRef} style={{ display: 'none' }} />
-      {isMounted &&
-        createPortal(
-          <aside
-            className={[
-              'tooltip',
-              className,
-              show && 'tooltip--show',
-              `tooltip--caret-${alignCaret}`,
-              `tooltip--position-${placement}`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            id={tooltipID}
-            ref={setFloatingElement}
-            role="tooltip"
-          >
-            <TooltipCaret />
-            <div className="tooltip-content">{children}</div>
-          </aside>,
-          document.body,
-        )}
+      {portal && content
+        ? createPortal(
+            content,
+            triggerMarkerRef.current?.closest('dialog, [role="dialog"]') ?? document.body,
+          )
+        : content}
     </React.Fragment>
   )
 }

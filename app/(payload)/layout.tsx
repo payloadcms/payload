@@ -1,5 +1,4 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. MODIFY AT YOUR OWN RISK. */
 // import '@payloadcms/ui/styles.css' // Uncomment this line if `@payloadcms/ui` in `tsconfig.json` points to `/ui/dist` instead of `/ui/src`
 import type { ServerFunctionClient } from 'payload'
 

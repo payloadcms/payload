@@ -8,8 +8,8 @@ async function main() {
 
   const { bump = 'minor', 'dry-run': dryRun, tag, debug } = args
 
-  if (!tag || !['canary', 'internal', 'internal-debug'].includes(tag)) {
-    abort('Tag is required. Use --tag <canary|internal|internal-debug>')
+  if (!tag || !['internal', 'internal-debug'].includes(tag)) {
+    abort('Tag is required. Use --tag <internal|internal-debug>')
   }
 
   console.log(`\n  Bump: ${bump}`)

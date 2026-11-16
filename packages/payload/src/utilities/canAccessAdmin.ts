@@ -32,6 +32,7 @@ export const canAccessAdmin = async ({ req }: { req: PayloadRequest }) => {
       collection: adminUserSlug,
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
     })
 

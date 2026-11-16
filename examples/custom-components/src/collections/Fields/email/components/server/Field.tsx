@@ -1,9 +1,9 @@
-import type { EmailFieldServerComponent } from 'payload'
+import type { EmailFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { EmailField } from '@payloadcms/ui'
 
-export const CustomEmailFieldServer: EmailFieldServerComponent = ({
+export const CustomEmailFieldServer: React.FC<EmailFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

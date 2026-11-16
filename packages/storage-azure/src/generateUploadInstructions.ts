@@ -3,7 +3,10 @@ import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'paylo
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
-import { Forbidden } from 'payload'
+import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
+
+import { isClientUploadAllowed } from './isClientUploadAllowed.js'
 
 interface Args {
   access?: UploadInstructionsAccess
@@ -33,7 +36,17 @@ export const generateUploadInstructions = ({
       throw new Forbidden(req.t)
     }
 
-    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
+    const collection = req.payload.collections[collectionSlug]?.config
+    if (!isClientUploadAllowed(collection)) {
+      throw new APIError(
+        'Azure client uploads require allowRestrictedFileTypes to be enabled.',
+        400,
+      )
+    }
+
+    assertClientUploadAllowed({ collection, filename, mimeType })
+
+    const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
       docPrefix,
@@ -42,16 +55,17 @@ export const generateUploadInstructions = ({
       useCompositePrefixes,
     })
 
-    const blobClient = getStorageClient().getBlobClient(fileKey)
+    const blobClient = getStorageClient().getBlobClient(storageFilePath)
 
     const sasToken = generateBlobSASQueryParameters(
       {
-        blobName: fileKey,
+        blobName: storageFilePath,
         containerName,
         contentType: mimeType,
         expiresOn: new Date(Date.now() + 3 * 60 * 60 * 1000),
-        permissions: BlobSASPermissions.parse('w'),
+        permissions: BlobSASPermissions.parse('c'),
         startsOn: new Date(),
+        version: '2026-04-06',
       },
       getStorageClient().credential as StorageSharedKeyCredential,
     )
@@ -66,7 +80,7 @@ export const generateUploadInstructions = ({
         filename: sanitizedFilename,
         mimeType,
         size: filesize,
-        uploadReference: { prefix: sanitizedDocPrefix },
+        uploadReference,
       },
     }
   }

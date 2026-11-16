@@ -32,6 +32,9 @@
   }
 
   .hierarchy-column__header-title {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
     display: flex;
     align-items: center;
     gap: var(--spacer-2);

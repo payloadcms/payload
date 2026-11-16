@@ -1,12 +1,19 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { getAccessResults, UnauthorizedError } from 'payload'
+import { executeAuthStrategies, getAccessResults, UnauthorizedError } from 'payload'
+import { extractBearerToken } from 'payload/shared'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
+import { authenticateLoginToken } from './oauthLoginToken.js'
 
 export type GetAuthorizedMCPArgs = {
+  /**
+   * Whether the request came through the HTTP endpoint, whose response can carry the OAuth
+   * challenge and headers from auth strategies. stdio has no response to carry them.
+   */
+  isHTTP?: boolean
   overrideAccess: boolean
   req: PayloadRequest
 }
@@ -16,10 +23,12 @@ export type GetAuthorizedMCPArgs = {
  * `overrideAccess` skips Payload and MCP item access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
+  isHTTP = false,
   overrideAccess,
   req,
 }) => {
   const pluginConfig = getPluginConfig({ config: req.payload.config })
+  const isChallengedWhenSignedOut = isHTTP && Boolean(pluginConfig.oauth)
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({
@@ -34,11 +43,44 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     const hasAuthorization = headers.has('Authorization')
 
     headers.set('DisableAutologin', 'true')
-    req.user = (await req.payload.auth({ headers, req })).user
+    // Not `payload.auth()`, which also computes permissions that filterMCPItems computes anyway
+    const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders: isHTTP,
+      headers,
+      payload: req.payload,
+      req,
+    })
+    req.user = user
+    if (responseHeaders) {
+      req.responseHeaders = responseHeaders
+    }
 
-    if (hasAuthorization && !req.user) {
+    // Only bearer tokens that no auth strategy accepted get here, e.g. an OAuth access token.
+    // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
+    const bearerToken = extractBearerToken({ headers })
+    // Sealed Payload login tokens from the built-in OAuth server
+    if (
+      !req.user &&
+      bearerToken &&
+      pluginConfig.oauth?.type === 'builtin' &&
+      !pluginConfig.oauth.issueToken
+    ) {
+      req.user = await authenticateLoginToken({ req, token: bearerToken })
+    }
+    if (!req.user && bearerToken && pluginConfig.oauth?.authenticate) {
+      req.user = await pluginConfig.oauth.authenticate({ req, token: bearerToken })
+    }
+
+    // With OAuth, the endpoint answers with a challenge that starts the client's sign-in
+    if (hasAuthorization && !req.user && !isChallengedWhenSignedOut) {
       throw new UnauthorizedError(req.t)
     }
+  }
+
+  // Signed-out users only get the challenge, so they can't use any MCP items. Skipping the access
+  // checks saves work, and access callbacks only see signed-in users.
+  if (isChallengedWhenSignedOut && !req.user) {
+    return { items: [], overrideAccess }
   }
 
   return {

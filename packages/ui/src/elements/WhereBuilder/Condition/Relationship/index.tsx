@@ -53,6 +53,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const locale = useLocale()
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
+  const scrollAbortController = React.useRef<AbortController | null>(null)
 
   const loadedRelationships = React.useRef<
     Map<
@@ -143,6 +144,11 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
           if (response.ok) {
             const data: PaginatedDocs = await response.json()
+
+            if (abortController.signal.aborted) {
+              return
+            }
+
             if (data.docs.length > 0) {
               addOptions(data, relationSlug)
 
@@ -168,7 +174,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
 
-      setHasLoadedFirstOptions(true)
+      if (!abortController.signal.aborted) {
+        setHasLoadedFirstOptions(true)
+      }
     },
   )
 
@@ -176,7 +184,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     const relationshipToLoad = loadedRelationships.current.entries().next().value
 
     if (relationshipToLoad[0] && !relationshipToLoad[1].hasLoadedAll) {
+      scrollAbortController.current?.abort()
       const abortController = new AbortController()
+      scrollAbortController.current = abortController
 
       void loadOptions({
         abortController,
@@ -245,6 +255,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const handleInputChange = useCallback(
     (input: string) => {
       if (input !== search) {
+        scrollAbortController.current?.abort()
         dispatchOptions({ type: 'CLEAR', i18n, required: false })
 
         const relationSlugs = Array.isArray(relationTo) ? relationTo : [relationTo]
@@ -269,7 +280,13 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({
+            apiRoute: api,
+            path: `/${relation}/${id}${qs.stringify(
+              { depth: 0, locale: locale?.code },
+              { addQueryPrefix: true },
+            )}`,
+          }),
           {
             credentials: 'include',
             headers: {
@@ -287,15 +304,14 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, t],
+    [i18n, addOptions, api, errorLoading, locale?.code, t],
   )
 
-  /**
-   * When `relationTo` changes externally, reset the options and reload them from scratch
-   * The `loadOptions` dependency is a useEffectEvent which has no dependencies of its own
-   * This means we can safely depend on it without it triggering this effect to run
-   * This is useful because this effect should _only_ run when `relationTo` changes
-   */
+  const clearOptions = useEffectEvent(() => {
+    dispatchOptions({ type: 'CLEAR', i18n, required: false })
+  })
+
+  // Reset for changes to the query or language, rather than the i18n object's identity.
   useEffect(() => {
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
 
@@ -309,7 +325,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
       ]),
     )
 
-    dispatchOptions({ type: 'CLEAR', i18n, required: false })
+    clearOptions()
     setHasLoadedFirstOptions(false)
 
     const abortControllers: AbortController[] = []
@@ -326,6 +342,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     })
 
     return () => {
+      scrollAbortController.current?.abort()
       abortControllers.forEach((controller) => {
         if (controller.signal) {
           try {
@@ -336,7 +353,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo, debouncedSearch, filterOptions])
+  }, [i18n.language, locale?.code, relationTo, debouncedSearch, filterOptions])
 
   /**
    * Load any other options that might exist in the value that were not loaded already

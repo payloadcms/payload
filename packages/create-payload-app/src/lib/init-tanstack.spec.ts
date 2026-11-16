@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DbType, TanStackAppDetails } from '../types.js'
 
+import { DEFAULT_PAYLOAD_VERSION_TAG } from '../utils/resolvePackageVersion.js'
 import { initTanStack } from './init-tanstack.js'
 
 const mocks = vi.hoisted(() => ({
@@ -130,11 +131,10 @@ describe('initTanStack', () => {
         '@payloadcms/richtext-lexical@4.2.0',
         '@payloadcms/tanstack-start@4.2.0',
         '@payloadcms/ui@4.2.0',
-        '@vitejs/plugin-rsc@^0.5.21',
+        '@vitejs/plugin-rsc@^0.5.38',
         databasePackage,
         'graphql@^16.8.1',
         'payload@4.2.0',
-        'sharp@0.34.2',
       ],
       projectDir,
     })
@@ -195,12 +195,11 @@ describe('initTanStack', () => {
         '@payloadcms/richtext-lexical@4.2.0',
         '@payloadcms/tanstack-start@4.2.0',
         '@payloadcms/ui@4.2.0',
-        '@vitejs/plugin-rsc@^0.5.21',
+        '@vitejs/plugin-rsc@^0.5.38',
         '@payloadcms/db-mongodb@4.2.0',
         'graphql@^16.8.1',
         'payload@4.2.0',
-        'sharp@0.34.2',
-        '@tanstack/react-start@^1.168.26',
+        '@tanstack/react-start@^1.169.1',
       ],
       projectDir,
     })
@@ -246,11 +245,10 @@ describe('initTanStack', () => {
         '@payloadcms/ui': '4.2.0',
         '@tanstack/react-router': '^1.200.0',
         '@tanstack/react-start': '^1.200.0',
-        '@vitejs/plugin-rsc': '^0.5.21',
+        '@vitejs/plugin-rsc': '^0.5.38',
         graphql: '^16.8.1',
         payload: '4.2.0',
         react: '^19.0.0',
-        sharp: '0.34.2',
       },
       expectedDevDependencies: { vite: '^7.0.0' },
       kind: 'start' as const,
@@ -271,12 +269,11 @@ describe('initTanStack', () => {
         '@payloadcms/tanstack-start': '4.2.0',
         '@payloadcms/ui': '4.2.0',
         '@tanstack/react-router': '^1.200.0',
-        '@tanstack/react-start': '^1.168.26',
-        '@vitejs/plugin-rsc': '^0.5.21',
+        '@tanstack/react-start': '^1.169.1',
+        '@vitejs/plugin-rsc': '^0.5.38',
         graphql: '^16.8.1',
         payload: '4.2.0',
         react: '^19.0.0',
-        sharp: '0.34.2',
       },
       expectedDevDependencies: { vite: '^7.0.0' },
       kind: 'router-only' as const,
@@ -311,7 +308,7 @@ describe('initTanStack', () => {
       expect(mocks.resolvePackageVersion).toHaveBeenCalledWith({
         debug: undefined,
         packageName: 'payload',
-        versionOrTag: 'canary',
+        versionOrTag: DEFAULT_PAYLOAD_VERSION_TAG,
       })
       expect(mocks.ensurePnpmBuildApprovals).not.toHaveBeenCalled()
       expect(mocks.installPackages).not.toHaveBeenCalled()

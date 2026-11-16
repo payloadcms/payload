@@ -32,27 +32,33 @@ export default buildConfig({
 })
 ```
 
+## Transactions
+
+Transactions are disabled by default (`transactionOptions: false`). Leave `transactionOptions` unset or set to `false`. Transactions with the SQLite adapter are not fully supported or recommended because enabling them can cause database locking issues.
+
+Continue to pass `req` to nested Payload operations to preserve request context. With transactions disabled, these operations do not share an atomic commit or rollback: if a later operation fails, earlier writes can persist. Passing `req` does not enable transactions. See [Transactions](./transactions) for details.
+
 ## Options
 
-| Option                     | Description                                                                                                                                                                      |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `client` \*                | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
-| `push`                     | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
-| `migrationDir`             | Customize the directory that migrations are stored.                                                                                                                              |
-| `logger`                   | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
-| `idType`                   | A string of 'number', or 'uuid' that is used for the data type given to id columns.                                                                                              |
-| `transactionOptions`       | A SQLiteTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                   |
-| `localesSuffix`            | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                |
-| `relationshipsSuffix`      | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                      |
-| `versionsSuffix`           | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                             |
-| `beforeSchemaInit`         | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
-| `afterSchemaInit`          | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
-| `generateSchemaOutputFile` | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
-| `autoIncrement`            | Pass `true` to enable SQLite [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary keys to ensure the same ID cannot be reused from deleted rows                      |
-| `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
-| `blocksAsJSON`             | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
-| `busyTimeout`              | Maximum time in milliseconds to wait when the database is locked. Default is `0`.                                                                                                |
-| `wal`                      | Enable Write-Ahead Logging (WAL) mode for improved performance and concurrency. [More Details](#wal-mode)                                                                        |
+| Option                     | Description                                                                                                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `client` \*                | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                                       |
+| `push`                     | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                       |
+| `migrationDir`             | Customize the directory that migrations are stored.                                                                                                                                                    |
+| `logger`                   | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                                                 |
+| `idType`                   | A string of 'number', or 'uuid' that is used for the data type given to id columns.                                                                                                                    |
+| `transactionOptions`       | Defaults to `false`, which disables transactions. Leave unset or set to `false`; enabling transactions is not recommended because it can cause database locking issues. [More details](./transactions) |
+| `localesSuffix`            | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                                      |
+| `relationshipsSuffix`      | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                                            |
+| `versionsSuffix`           | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                                                   |
+| `beforeSchemaInit`         | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                                                |
+| `afterSchemaInit`          | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                                                  |
+| `generateSchemaOutputFile` | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                                             |
+| `autoIncrement`            | Pass `true` to enable SQLite [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary keys to ensure the same ID cannot be reused from deleted rows                                            |
+| `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                             |
+| `blocksAsJSON`             | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                                                    |
+| `busyTimeout`              | Maximum time in milliseconds to wait when the database is locked. Default is `0`.                                                                                                                      |
+| `wal`                      | Enable Write-Ahead Logging (WAL) mode for improved performance and concurrency. [More Details](#wal-mode)                                                                                              |
 
 ## Access to Drizzle
 

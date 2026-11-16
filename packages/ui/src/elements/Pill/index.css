@@ -6,7 +6,6 @@
     --pill-icon-size: var(--spacer-4);
     padding: var(--pill-padding-block) var(--pill-padding-inline-end) var(--pill-padding-block)
       var(--pill-padding-inline-start);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-style: normal;
     font-weight: var(--text-body-medium-font-weight);

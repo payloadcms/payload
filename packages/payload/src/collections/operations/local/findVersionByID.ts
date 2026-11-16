@@ -7,12 +7,13 @@ import type {
   User,
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
 type BaseOptions<TSlug extends CollectionSlug> = {
@@ -49,12 +50,6 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -81,7 +76,8 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+} & Pick<FindOptions<TSlug, SelectType>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
   DraftFlagFromCollectionSlug<TSlug>
@@ -95,7 +91,7 @@ export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
     collection: collectionSlug,
     depth,
     disableErrors = false,
-    overrideAccess = true,
+    overrideAccess = false,
     populate,
     select,
     showHiddenFields,
@@ -119,7 +115,10 @@ export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
     disableErrors,
     overrideAccess,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     trash,

@@ -5,7 +5,6 @@
     --upload-media-size: 28.125rem;
     border: var(--stroke-width-small) solid transparent;
     position: relative;
-    font-family: var(--font-body);
     margin-block: var(--spacer-2);
     border-radius: 0;
 
@@ -135,7 +134,6 @@
   }
 
   .LexicalEditorTheme__upload__filename {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

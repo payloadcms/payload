@@ -3,8 +3,10 @@ import type {
   ClientConfig,
   Column,
   ListQuery,
+  ListViewGroup,
   PaginatedDocs,
   PayloadRequest,
+  PopulateType,
   SanitizedCollectionConfig,
   SanitizedFieldsPermissions,
   SelectType,
@@ -31,9 +33,12 @@ export const handleGroupBy = async ({
   drawerSlug,
   enableRowSelections,
   fieldPermissions,
+  hierarchyParentFieldName,
   query,
   req,
   select,
+  thumbnailFieldName,
+  thumbnailPopulate,
   trash = false,
   user,
   viewType,
@@ -48,9 +53,12 @@ export const handleGroupBy = async ({
   drawerSlug?: string
   enableRowSelections?: boolean
   fieldPermissions?: SanitizedFieldsPermissions
+  hierarchyParentFieldName?: string
   query?: ListQuery
   req: PayloadRequest
   select?: SelectType
+  thumbnailFieldName?: string
+  thumbnailPopulate?: PopulateType
   trash?: boolean
   user: any
   viewType?: ViewTypes
@@ -58,12 +66,13 @@ export const handleGroupBy = async ({
 }): Promise<{
   columnState: Column[]
   data: PaginatedDocs
+  groupedData: ListViewGroup[]
   Table: null | React.ReactNode | React.ReactNode[]
 }> => {
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[]
 
-  const dataByGroup: Record<string, PaginatedDocs> = {}
+  const groupedData: ListViewGroup[] = []
 
   // NOTE: is there a faster/better way to do this?
   const flattenedFields = flattenAllFields({ fields: collectionConfig.fields })
@@ -117,7 +126,7 @@ export const handleGroupBy = async ({
 
       const groupData = await req.payload.find({
         collection: collectionSlug,
-        depth: 0,
+        depth: thumbnailFieldName ? 1 : 0,
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
@@ -129,6 +138,7 @@ export const handleGroupBy = async ({
         page: query?.queryByGroup?.[valueOrRelationshipID]?.page
           ? Number(query.queryByGroup[valueOrRelationshipID].page)
           : undefined,
+        populate: thumbnailPopulate,
         req,
         // Note: if we wanted to enable table-by-table sorting, we could use this:
         // sort: query?.queryByGroup?.[valueOrRelationshipID]?.sort,
@@ -201,6 +211,7 @@ export const handleGroupBy = async ({
           groupByFieldPath,
           groupByValue: serializableValue,
           heading: heading || req.i18n.t('general:noValue'),
+          hierarchyParentFieldName,
           i18n: req.i18n,
           key: `table-${serializableValue}`,
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
@@ -220,7 +231,11 @@ export const handleGroupBy = async ({
           Table = []
         }
 
-        dataByGroup[serializableValue] = groupData
+        groupedData[i] = {
+          data: groupData,
+          heading: heading || req.i18n.t('general:noValue'),
+          value: serializableValue,
+        }
         ;(Table as Array<React.ReactNode>)[i] = NewTable
       }
     }),
@@ -229,6 +244,7 @@ export const handleGroupBy = async ({
   return {
     columnState,
     data,
+    groupedData: groupedData.filter(Boolean),
     Table,
   }
 }

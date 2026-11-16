@@ -171,8 +171,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onDuplicate={onDuplicate}
       onSave={onSave}
     >
-      {!isLoading && <div className="drawer__fade-in">{DocumentView}</div>}
-      <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      <React.Suspense fallback={<LoadingOverlay animationDuration="200ms" overlayType="drawer" />}>
+        {!isLoading && <div className="drawer__fade-in">{DocumentView}</div>}
+        <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      </React.Suspense>
     </DocumentDrawerContextProvider>
   )
 }

@@ -14,6 +14,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         password: 'demo',
       },
       req,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -23,6 +24,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Home page',
       },
       req,
+      overrideAccess: true,
     })
 
     const { id: formID } = await payload.create({
@@ -76,6 +78,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Contact Form',
       },
+      overrideAccess: true,
     })
 
     const { id: dateFormID } = await payload.create({
@@ -135,6 +138,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Booking Form',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -152,6 +156,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -161,6 +166,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         form: formID,
         title: 'Contact',
       },
+      overrideAccess: true,
     })
 
     // Create a form with upload field for e2e testing
@@ -216,6 +222,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Upload Form',
       },
+      overrideAccess: true,
     })
 
     // Create a form with optional upload and MIME type restrictions
@@ -271,6 +278,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Image Upload Form',
       },
+      overrideAccess: true,
     })
 
     // Create a form with multiple-file upload field (media) + single upload field (documents)
@@ -329,6 +337,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Multi-File Upload Form',
       },
+      overrideAccess: true,
     })
 
     return true

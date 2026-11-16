@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useId, useRef } from 'react'
 
 import type { TreeNodeProps } from '../types.js'
 
@@ -51,6 +51,7 @@ export const TreeNode = ({
   useAsTitle,
 }: TreeNodeProps) => {
   const { t } = useTranslation()
+  const titleID = useId()
   const expanded = expandedNodes.has(node.id)
   const nodeRef = useRef<HTMLDivElement>(null)
   const { setFocusedId } = useTreeFocus()
@@ -148,6 +149,7 @@ export const TreeNode = ({
   return (
     <div
       aria-expanded={hasChildren ? expanded : undefined}
+      aria-labelledby={titleID}
       aria-level={depth + 1}
       aria-selected={selected}
       className={baseClass}
@@ -175,7 +177,8 @@ export const TreeNode = ({
         >
           {hasChildren && (
             <button
-              aria-label={expanded ? t('general:collapse') : t('general:open')}
+              aria-expanded={expanded}
+              aria-label={`${expanded ? t('general:collapse') : t('general:open')} ${node.title}`}
               className={`${baseClass}__toggle`}
               onClick={handleToggle}
               onMouseDown={(e) => e.preventDefault()}
@@ -199,7 +202,9 @@ export const TreeNode = ({
             type="button"
           >
             {Boolean(icon) && <span className="sidebar-row__icon">{icon}</span>}
-            <span className={`${baseClass}__title sidebar-row__title`}>{node.title}</span>
+            <span className={`${baseClass}__title sidebar-row__title`} id={titleID}>
+              {node.title}
+            </span>
           </button>
           {isLoading && expanded && (
             <span className={`${baseClass}__loading`}>

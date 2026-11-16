@@ -5,6 +5,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 interface Args {
   access?: UploadInstructionsAccess
@@ -36,13 +37,18 @@ export const generateUploadInstructions = ({
       throw new Forbidden(req.t)
     }
 
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
+      filename,
+      mimeType,
+    })
     let filesizeLimit = req.payload.config.upload.limits?.fileSize
 
     if (filesizeLimit === Infinity) {
       filesizeLimit = undefined
     }
 
-    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
+    const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
       docPrefix,
@@ -51,7 +57,7 @@ export const generateUploadInstructions = ({
       useCompositePrefixes,
     })
 
-    const signableHeaders = new Set<string>()
+    const signableHeaders = new Set<string>(['content-type'])
 
     if (filesizeLimit) {
       // Still force S3 to validate
@@ -65,7 +71,8 @@ export const generateUploadInstructions = ({
         Bucket: bucket,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
-        Key: fileKey,
+        IfNoneMatch: '*',
+        Key: storageFilePath,
       }),
       {
         expiresIn: 600,
@@ -79,12 +86,13 @@ export const generateUploadInstructions = ({
         filename: sanitizedFilename,
         mimeType,
         size: filesize,
-        uploadReference: { prefix: sanitizedDocPrefix },
+        uploadReference,
       },
       request: {
         headers: {
           'Content-Length': String(filesize),
           'Content-Type': mimeType,
+          'If-None-Match': '*',
         },
         method: 'PUT',
         url,

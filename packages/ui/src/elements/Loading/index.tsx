@@ -26,6 +26,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 }) => {
   return (
     <div
+      aria-hidden={!show}
       className={[
         baseClass,
         show ? `${baseClass}--entering` : `${baseClass}--exiting`,

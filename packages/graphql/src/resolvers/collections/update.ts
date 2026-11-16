@@ -51,7 +51,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
       id: args.id,
       autosave: args.autosave,
       collection,
-      data: args.data as any,
+      data: (args.data ?? {}) as any,
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),

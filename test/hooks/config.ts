@@ -87,6 +87,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         fieldBeforeChange: false,
         fieldBeforeValidate: false,
       },
+      overrideAccess: true,
     })
   },
 })

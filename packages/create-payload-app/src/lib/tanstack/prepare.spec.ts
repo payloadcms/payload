@@ -65,13 +65,13 @@ const templateFiles = {
   'routes/_payload/admin.$.tsx': 'export const payloadAdminSplat = true\n',
   'routes/_payload/admin.index.tsx': 'export const payloadAdminIndex = true\n',
   'routes/_payload/api.$.ts': 'export const payloadApi = true\n',
+  'routes/_payload/custom.css': '',
   'routes/_payload/importMap.js': 'export const importMap = {}\n',
   'routes/_payload/server.functions.ts': 'export const payloadServerFunctions = true\n',
   'src/collections/Folders.ts': "export const Folders = { slug: 'folders' }\n",
   'src/collections/Media.ts': "export const Media = { slug: 'media' }\n",
   'src/collections/Tags.ts': "export const Tags = { slug: 'tags' }\n",
   'src/collections/Users.ts': "export const Users = { slug: 'users' }\n",
-  'src/payload.css': "@import '@payloadcms/ui/css/app.css';\n",
   'src/payload.config.ts': 'export default { collections: [] }\n',
 }
 
@@ -130,13 +130,13 @@ describe('prepareTanStackInit', () => {
         'src/collections/Tags.ts',
         'src/collections/Users.ts',
         'src/payload.config.ts',
-        'src/payload.css',
         'src/router.tsx',
         'src/routes/__root.tsx',
         'src/routes/_payload.tsx',
         'src/routes/_payload/admin.$.tsx',
         'src/routes/_payload/admin.index.tsx',
         'src/routes/_payload/api.$.ts',
+        'src/routes/_payload/custom.css',
         'src/routes/_payload/importMap.js',
         'src/routes/_payload/server.functions.ts',
         'vite.config.ts',
@@ -263,7 +263,7 @@ describe('applyPreparedWrites', () => {
       },
       {
         content: '@layer payload;\n',
-        filePath: path.join(projectDir, 'src/payload.css'),
+        filePath: path.join(projectDir, 'src/routes/_payload/custom.css'),
       },
     ]
 

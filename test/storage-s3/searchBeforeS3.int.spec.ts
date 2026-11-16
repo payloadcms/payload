@@ -16,8 +16,9 @@ const dirname = path.dirname(filename)
  * searchPlugin processes the collection config — fixing the silent upload failure
  * that occurred when s3Storage appeared after searchPlugin in the old `plugins` array.
  */
-test.suite({ config: './searchBeforeS3.config.ts' })(
+test.suite(
   'Search plugin before S3 - Issue #15431',
+  { config: './searchBeforeS3.config.ts' },
   () => {
     test.beforeEach(async () => {
       await createTestBucket()
@@ -28,12 +29,14 @@ test.suite({ config: './searchBeforeS3.config.ts' })(
       await payload.delete({
         collection: mediaSlug,
         where: { id: { exists: true } },
+        overrideAccess: true,
       })
       // Only delete from search if the collection exists
       if (payload.collections['search']) {
         await payload.delete({
           collection: 'search',
           where: { id: { exists: true } },
+          overrideAccess: true,
         })
       }
       await clearTestBucket()
@@ -56,6 +59,7 @@ test.suite({ config: './searchBeforeS3.config.ts' })(
         collection: mediaSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -73,6 +77,7 @@ test.suite({ config: './searchBeforeS3.config.ts' })(
         collection: mediaSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       const { docs: searchDocs } = await payload.find({
@@ -81,6 +86,7 @@ test.suite({ config: './searchBeforeS3.config.ts' })(
           'doc.value': { equals: upload.id },
           'doc.relationTo': { equals: mediaSlug },
         },
+        overrideAccess: true,
       })
 
       expect(searchDocs.length).toBe(1)

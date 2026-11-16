@@ -162,7 +162,7 @@ export const usePreventLeave = ({
         onAccept()
       }
 
-      startRouteTransition(() => router.push(cancelledURL.current))
+      void startRouteTransition(() => router.push(cancelledURL.current))
     }
   }, [hasAccepted, onAccept, router, startRouteTransition])
 }

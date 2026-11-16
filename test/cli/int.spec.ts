@@ -3,7 +3,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
 
+import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
+
 import { test } from '../__helpers/int/vitest.js'
+import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_COMMAND_TEST_TIMEOUT = 180_000
@@ -22,10 +25,17 @@ const initialCLIEnvironment = {
   PAYLOAD_TEST_CLI_CONFIG_LOG: process.env.PAYLOAD_TEST_CLI_CONFIG_LOG,
 }
 
-test.suite({ config: './config.ts' })('CLI', () => {
+test.suite('CLI', { config: './config.ts' }, () => {
+  const uploadServers: TestFileServer[] = []
+
   test.beforeEach(async () => {
     restoreCLIEnvironment()
     await resetCLIArtifacts()
+  })
+
+  test.afterEach(async () => {
+    await Promise.all(uploadServers.map(({ close }) => close()))
+    uploadServers.length = 0
   })
 
   test.afterAll(async () => {
@@ -62,8 +72,9 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await expect(access(importMapFile)).rejects.toThrow()
   })
 
-  test.options({ db: 'drizzle' })(
+  test.options(
     'generate:db-schema --no-log --json',
+    { db: 'drizzle' },
     async ({ cli }) => {
       await expect(access(schemaFile)).rejects.toThrow()
 
@@ -80,7 +91,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.options({ db: 'drizzle' })('generate:db-schema --help', async ({ cli }) => {
+  test.options('generate:db-schema --help', { db: 'drizzle' }, async ({ cli }) => {
     await expect(access(schemaFile)).rejects.toThrow()
 
     const output = await cli('generate:db-schema --help')
@@ -338,6 +349,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
     const pages = await payload.count({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'not created' } },
     })
 
@@ -399,6 +411,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
     const seededPages = await payload.count({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'Seeded page' } },
     })
 
@@ -488,6 +501,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
       )
       const pages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         pagination: false,
         sort: 'title',
         where: { title: { in: ['one', 'two'] } },
@@ -528,6 +542,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const output = await cli(`createDocuments --slug pages --documents @${documentsFile} --json`)
     const pages = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       pagination: false,
       where: { title: { in: ['file one', 'file two'] } },
     })
@@ -560,6 +575,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const response = JSON.parse(output.stdout)
     const pages = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'Merged input' } },
     })
 
@@ -571,6 +587,44 @@ test.suite({ config: './config.ts' })('CLI', () => {
         errors: [],
       },
       success: true,
+    })
+  })
+
+  test('createDocuments --slug media --documents <external-url-json> --json', async ({
+    cli,
+    payload,
+  }) => {
+    const image = await readFile(uploadFile)
+    const server = await startTestFileServer({ contentType: 'image/png', data: image })
+    uploadServers.push(server)
+
+    const documents = JSON.stringify([
+      {
+        data: { title: 'External URL upload' },
+        file: {
+          source: 'externalURL',
+          url: `${server.url}/image.png`,
+        },
+      },
+    ])
+    const output = await cli(`createDocuments --slug media --documents '${documents}' --json`)
+    const response = JSON.parse(output.stdout)
+    const createdMedia = await payload.findByID({
+      id: response.result.docs[0].id,
+      collection: 'media',
+      overrideAccess: true,
+    })
+
+    expect(response).toMatchObject({
+      command: 'createDocuments',
+      result: { docs: [{ id: expect.anything(), index: 0 }], errors: [] },
+      success: true,
+    })
+    expect(createdMedia).toMatchObject({
+      filename: 'image.png',
+      filesize: image.length,
+      mimeType: 'image/png',
+      title: 'External URL upload',
     })
   })
 
@@ -605,6 +659,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const response = JSON.parse(output.stdout)
     const created = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'created' } },
     })
 
@@ -643,6 +698,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const response = JSON.parse(output.stdout)
     const pages = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'Seeded page' } },
     })
 
@@ -677,12 +733,17 @@ test.suite({ config: './config.ts' })('CLI', () => {
         requireMetadata: true,
         title: 'Nested update',
       },
+      overrideAccess: true,
     })
     const output = await cli({
       command: `updateDocument --slug pages --id ${page.id} --data '{"metadata":{"title":"Updated"}}' --returning --json`,
       reject: false,
     })
-    const updatedPage = await payload.findByID({ collection: 'pages', id: page.id })
+    const updatedPage = await payload.findByID({
+      id: page.id,
+      collection: 'pages',
+      overrideAccess: true,
+    })
 
     expect(output.exitCode).toBe(0)
     expect(updatedPage.metadata).toEqual({
@@ -691,17 +752,23 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test.options({ db: 'drizzle' })(
+  test.options(
     `updateDocument --slug pages --id <page-id> --data '{"title":"Updated"}' --override-access false --json`,
+    { db: 'drizzle' },
     async ({ cli, payload }) => {
       const page = await payload.create({
         collection: 'pages',
         data: { title: 'Numeric ID' },
+        overrideAccess: true,
       })
       const output = await cli(
         `updateDocument --slug pages --id ${page.id} --data '{"title":"Updated"}' --override-access false --json`,
       )
-      const updatedPage = await payload.findByID({ id: page.id, collection: 'pages' })
+      const updatedPage = await payload.findByID({
+        id: page.id,
+        collection: 'pages',
+        overrideAccess: true,
+      })
 
       expect(output.exitCode).toBe(0)
       expect(updatedPage.title).toBe('Updated')
@@ -715,17 +782,27 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await payload.create({
       collection: 'custom-ids',
       data: { id: '1e5', title: 'Target' },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'custom-ids',
       data: { id: '100000', title: 'Other' },
+      overrideAccess: true,
     })
 
     const output = await cli(
       `updateDocument --slug custom-ids --id 1e5 --data '{"title":"Updated"}' --json`,
     )
-    const target = await payload.findByID({ id: '1e5', collection: 'custom-ids' })
-    const other = await payload.findByID({ id: '100000', collection: 'custom-ids' })
+    const target = await payload.findByID({
+      id: '1e5',
+      collection: 'custom-ids',
+      overrideAccess: true,
+    })
+    const other = await payload.findByID({
+      id: '100000',
+      collection: 'custom-ids',
+      overrideAccess: true,
+    })
 
     expect(output.exitCode).toBe(0)
     expect(target.title).toBe('Updated')
@@ -739,12 +816,17 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await payload.create({
       collection: 'custom-ids',
       data: { id: '123', title: 'Target' },
+      overrideAccess: true,
     })
 
     const output = await cli(
       `updateDocument --input '{"slug":"custom-ids","id":123,"data":{"title":"Updated"},"overrideAccess":false}' --json`,
     )
-    const target = await payload.findByID({ id: '123', collection: 'custom-ids' })
+    const target = await payload.findByID({
+      id: '123',
+      collection: 'custom-ids',
+      overrideAccess: true,
+    })
 
     expect(output.exitCode).toBe(0)
     expect(target.title).toBe('Updated')
@@ -757,10 +839,12 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await payload.create({
       collection: 'custom-ids',
       data: { id: '12345678901234567890', title: 'Target' },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'custom-ids',
       data: { id: '12345678901234567000', title: 'Rounded ID' },
+      overrideAccess: true,
     })
 
     const output = await cli('deleteDocuments --slug custom-ids --id 12345678901234567890 --json')
@@ -768,10 +852,12 @@ test.suite({ config: './config.ts' })('CLI', () => {
       id: '12345678901234567890',
       collection: 'custom-ids',
       disableErrors: true,
+      overrideAccess: true,
     })
     const roundedIDDocument = await payload.findByID({
       id: '12345678901234567000',
       collection: 'custom-ids',
+      overrideAccess: true,
     })
 
     expect(output.exitCode).toBe(0)
@@ -786,6 +872,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const seededPage = await payload.find({
       collection: 'pages',
       limit: 1,
+      overrideAccess: true,
       where: { title: { equals: 'Seeded page' } },
     })
     const output = await cli({
@@ -793,7 +880,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
       reject: false,
     })
     const response = JSON.parse(output.stdout)
-    const pages = await payload.count({ collection: 'pages' })
+    const pages = await payload.count({ collection: 'pages', overrideAccess: true })
 
     expect(output.exitCode).toBe(1)
     expect(pages.totalDocs).toBe(1)
@@ -818,7 +905,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
       reject: false,
     })
     const response = JSON.parse(output.stdout)
-    const settings = await payload.findGlobal({ slug: 'settings' })
+    const settings = await payload.findGlobal({ slug: 'settings', overrideAccess: true })
 
     expect(output.exitCode).toBe(1)
     expect(settings.title).toBe('Seeded settings')
@@ -845,6 +932,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
       )
       const updated = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: { title: { equals: 'Updated page' } },
       })
 
@@ -866,6 +954,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const seededMedia = await payload.find({
       collection: 'media',
       limit: 1,
+      overrideAccess: true,
       where: { title: { equals: 'Seeded media' } },
     })
     const output = await cli(
@@ -874,10 +963,49 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const updatedMedia = await payload.findByID({
       id: seededMedia.docs[0]!.id,
       collection: 'media',
+      overrideAccess: true,
     })
 
     expect(output.stdout).toContain('"title": "Updated media"')
     expect(updatedMedia).toMatchObject({ filename: 'image.png', title: 'Updated media' })
+  })
+
+  test(`updateDocument --slug media --id <seeded-media-id> --data '{"title":"External media"}' --file <external-url-json>`, async ({
+    cli,
+    payload,
+  }) => {
+    const image = await readFile(uploadFile)
+    const server = await startTestFileServer({ contentType: 'image/png', data: image })
+    uploadServers.push(server)
+
+    const seededMedia = await payload.find({
+      collection: 'media',
+      limit: 1,
+      overrideAccess: true,
+      where: { title: { equals: 'Seeded media' } },
+    })
+    const file = JSON.stringify({
+      name: 'external-update.png',
+      source: 'externalURL',
+      url: `${server.url}/image.png`,
+    })
+
+    await cli(
+      `updateDocument --slug media --id ${seededMedia.docs[0]!.id} --data '{"title":"External media"}' --file '${file}'`,
+    )
+
+    const updatedMedia = await payload.findByID({
+      id: seededMedia.docs[0]!.id,
+      collection: 'media',
+      overrideAccess: true,
+    })
+
+    expect(updatedMedia).toMatchObject({
+      filename: 'external-update.png',
+      filesize: image.length,
+      mimeType: 'image/png',
+      title: 'External media',
+    })
   })
 
   test('deleteDocuments --slug pages --json', async ({ cli }) => {
@@ -913,6 +1041,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
       const jobsBefore = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
+        overrideAccess: true,
       } as never)) as { docs: unknown[] }
 
       expect(jobsBefore.docs).toHaveLength(0)
@@ -921,6 +1050,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
       const jobsAfter = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
+        overrideAccess: true,
       } as never)) as {
         docs: Array<{ meta?: { scheduled?: boolean }; taskSlug?: string }>
       }
@@ -944,6 +1074,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const jobsBefore = (await payload.find({
       collection: 'payload-jobs',
       limit: 100,
+      overrideAccess: true,
     } as never)) as { docs: unknown[] }
 
     expect(jobsBefore.docs).toHaveLength(0)
@@ -952,21 +1083,28 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const jobsAfter = (await payload.find({
       collection: 'payload-jobs',
       limit: 100,
+      overrideAccess: true,
     } as never)) as { docs: unknown[] }
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:handle-schedules')
     expect(jobsAfter.docs).toHaveLength(0)
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'jobs:run --all-queues --limit 1 --json',
+    { db: 'mongo' },
     async ({ cli, payload }) => {
-      await payload.jobs.queue({ input: {}, task: 'noop' } as never)
+      await payload.jobs.queue({ input: {}, overrideAccess: true, task: 'noop' } as never)
       const jobsBefore = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
+        overrideAccess: true,
       } as never)) as { docs: unknown[] }
-      const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+      const pagesBefore = (await payload.find({
+        collection: 'pages',
+        limit: 100,
+        overrideAccess: true,
+      } as never)) as {
         docs: Array<{ title: string }>
       }
 
@@ -974,7 +1112,11 @@ test.suite({ config: './config.ts' })('CLI', () => {
       expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
 
       const output = await cli('jobs:run --all-queues --limit 1 --json')
-      const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+      const pagesAfter = (await payload.find({
+        collection: 'pages',
+        limit: 100,
+        overrideAccess: true,
+      } as never)) as {
         docs: Array<{ title: string }>
       }
 
@@ -988,16 +1130,24 @@ test.suite({ config: './config.ts' })('CLI', () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.options({ db: 'mongo' })('jobs:run --help', async ({ cli, payload }) => {
-    await payload.jobs.queue({ input: {}, task: 'noop' } as never)
-    const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+  test.options('jobs:run --help', { db: 'mongo' }, async ({ cli, payload }) => {
+    await payload.jobs.queue({ input: {}, overrideAccess: true, task: 'noop' } as never)
+    const pagesBefore = (await payload.find({
+      collection: 'pages',
+      limit: 100,
+      overrideAccess: true,
+    } as never)) as {
       docs: Array<{ title: string }>
     }
 
     expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
 
     const output = await cli('jobs:run --help')
-    const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+    const pagesAfter = (await payload.find({
+      collection: 'pages',
+      limit: 100,
+      overrideAccess: true,
+    } as never)) as {
       docs: Array<{ title: string }>
     }
 
@@ -1005,17 +1155,25 @@ test.suite({ config: './config.ts' })('CLI', () => {
     expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
   })
 
-  test.options({ db: 'mongo' })('migrate --json', async ({ cli, payload }) => {
+  test.options('migrate --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
     const output = await cli('migrate --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
       batch: 1,
@@ -1031,17 +1189,25 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate --help', async ({ cli, payload }) => {
+  test.options('migrate --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
     const output = await cli('migrate --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate')
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
@@ -1083,18 +1249,26 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await expect(access(migrationsDirectory)).rejects.toThrow()
   })
 
-  test.options({ db: 'mongo' })('migrate:down --json', async ({ cli, payload }) => {
+  test.options('migrate:down --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
 
     const output = await cli('migrate:down --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
@@ -1108,7 +1282,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate:down --help', async ({ cli, payload }) => {
+  test.options('migrate:down --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
@@ -1116,25 +1290,38 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await cli('migrate --json')
 
     const output = await cli('migrate:down --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:down')
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'migrate:fresh --force-accept-warning --json',
+    { db: 'mongo' },
     async ({ cli, payload }) => {
       await cli('migrate:create fresh --force-accept-warning --json')
       const migrationName = (await readdir(migrationsDirectory))
         .find((file) => file.endsWith('_fresh.ts'))!
         .replace('.ts', '')
-      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const migrationsBefore = await payload.find({
+        collection: 'payload-migrations',
+        limit: 100,
+        overrideAccess: true,
+      })
 
       expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
       const output = await cli('migrate:fresh --force-accept-warning --json')
-      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const migrationsAfter = await payload.find({
+        collection: 'payload-migrations',
+        limit: 100,
+        overrideAccess: true,
+      })
 
       expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
         batch: 1,
@@ -1152,35 +1339,51 @@ test.suite({ config: './config.ts' })('CLI', () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.options({ db: 'mongo' })('migrate:fresh --help', async ({ cli, payload }) => {
+  test.options('migrate:fresh --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create fresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_fresh.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
     const output = await cli('migrate:fresh --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:fresh')
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
   })
 
-  test.options({ db: 'mongo' })('migrate:refresh --json', async ({ cli, payload }) => {
+  test.options('migrate:refresh --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create refresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_refresh.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
     const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
     expect(migrationBefore).toBeDefined()
 
     const output = await cli('migrate:refresh --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
     const migrationAfter = migrationsAfter.docs.find(({ name }) => name === migrationName)
 
     expect(migrationAfter).toBeDefined()
@@ -1196,7 +1399,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate:refresh --help', async ({ cli, payload }) => {
+  test.options('migrate:refresh --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create refresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_refresh.ts'))!
@@ -1205,6 +1408,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const migrationsBefore = await payload.find({
       collection: 'payload-migrations',
       limit: 100,
+      overrideAccess: true,
     })
     const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
@@ -1212,6 +1416,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const migrationsAfter = await payload.find({
       collection: 'payload-migrations',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
@@ -1220,18 +1425,26 @@ test.suite({ config: './config.ts' })('CLI', () => {
     )
   })
 
-  test.options({ db: 'mongo' })('migrate:reset --json', async ({ cli, payload }) => {
+  test.options('migrate:reset --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
 
     const output = await cli('migrate:reset --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsAfter.docs).toHaveLength(0)
 
@@ -1245,7 +1458,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate:reset --help', async ({ cli, payload }) => {
+  test.options('migrate:reset --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!
@@ -1256,6 +1469,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const migrationsAfter = await payload.find({
       collection: 'payload-migrations',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:reset')
@@ -1267,7 +1481,11 @@ test.suite({ config: './config.ts' })('CLI', () => {
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_status.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
@@ -1295,7 +1513,11 @@ test.suite({ config: './config.ts' })('CLI', () => {
       .replace('.ts', '')
 
     const output = await cli('migrate:status --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:status')
     expect(`${output.stdout}\n${output.stderr}`).not.toContain(migrationName)

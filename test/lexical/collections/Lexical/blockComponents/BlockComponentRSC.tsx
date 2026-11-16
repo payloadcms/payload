@@ -6,5 +6,9 @@ import React from 'react'
 export const BlockComponentRSC: React.FC<LexicalBlockServerProps> = (props) => {
   const { siblingData } = props
 
-  return <BlockCollapsible>Data: {siblingData?.key ?? ''}</BlockCollapsible>
+  return (
+    <BlockCollapsible>
+      <div data-testid="block-rsc-data">Data: {siblingData?.key ?? ''}</div>
+    </BlockCollapsible>
+  )
 }

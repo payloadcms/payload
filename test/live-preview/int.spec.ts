@@ -19,7 +19,12 @@ import type { CollectionPopulationRequestHandler } from '../../packages/live-pre
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
+const suiteOptions = {
+  config: './config.ts',
+  resetBetweenTests: false,
+}
+
+test.suite('Collections - Live Preview', suiteOptions, () => {
   const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post
@@ -34,7 +39,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
   ) => Promise<Record<string, any>> = mergeDataImport as any
   let createPageWithInitialData: (initialData: Partial<Page>) => Promise<Page>
 
-  test.beforeEach(async ({ payload, restClient }) => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
       const url = `/${endpoint}`
       const headers: Record<string, string> = {
@@ -87,6 +92,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
           ...initialData,
           slug: 'testPage',
         } as Page,
+        overrideAccess: true,
       })
     }
 
@@ -96,6 +102,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
         title: 'Tenant 1',
         clientURL: `http://localhost:${process.env.PORT || 3000}`,
       },
+      overrideAccess: true,
     })
 
     // Create image
@@ -109,6 +116,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
         alt: 'Image 1',
       },
       file,
+      overrideAccess: true,
     })
 
     testPost = await payload.create({
@@ -123,6 +131,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
           media: media.id,
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -767,6 +776,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
       data: {
         title: 'Test Post (Recently Updated)',
       },
+      overrideAccess: true,
     })
 
     const merge2 = await mergeData({
@@ -808,6 +818,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
         localizedTitle: 'Test Post Spanish',
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -817,6 +828,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
       data: {
         localizedTitle: 'Test Post English',
       },
+      overrideAccess: true,
     })
 
     const page = await payload.create({
@@ -827,6 +839,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
         slug: 'testpage',
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     const initialData = await createPageWithInitialData({

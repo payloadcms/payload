@@ -1,7 +1,7 @@
 import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
-import { usersSlug } from './shared.js'
+import { strategyName, usersSlug } from './shared.js'
 
 const [code, secret, name] = ['test', 'strategy', 'Tester']
 
@@ -9,7 +9,7 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-test.suite({ config: './config.ts' })('AuthStrategies', () => {
+test.suite('AuthStrategies', { config: './config.ts' }, () => {
   test.describe('create user', () => {
     test.beforeEach(async ({ restClient }) => {
       await restClient.POST(`/${usersSlug}`, {
@@ -36,6 +36,19 @@ test.suite({ config: './config.ts' })('AuthStrategies', () => {
       expect(response.headers.has('Smile-For-Me')).toBeTruthy()
       expect(response.status).toBe(200)
       expect(data.user.name).toBe(name)
+    })
+
+    test('should say which strategy logged the user in', async ({ restClient }) => {
+      const response = await restClient.GET(`/${usersSlug}/me`, {
+        headers: {
+          code,
+          secret,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.user._strategy).toBe(strategyName)
     })
   })
 })

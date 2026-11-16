@@ -46,6 +46,7 @@ export const EverySecondTask: TaskConfig<'EverySecond'> = {
         title: input.message,
       },
       req,
+      overrideAccess: true,
     })
     return {
       output: {},

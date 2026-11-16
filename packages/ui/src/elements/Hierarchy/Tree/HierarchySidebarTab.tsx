@@ -3,6 +3,7 @@
 import type { SidebarTabClientProps } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { HierarchyInitialData } from './types.js'
@@ -113,9 +114,12 @@ export const HierarchySidebarTab: React.FC<
     ({ id }: { id: number | string }) => {
       const url = formatAdminURL({
         adminRoute,
-        path: `/collections/${hierarchyCollectionSlug}/hierarchy?${resolvedParentFieldName}=${id}`,
+        path: `/collections/${hierarchyCollectionSlug}${qs.stringify(
+          { [resolvedParentFieldName]: id, view: 'hierarchy' },
+          { addQueryPrefix: true },
+        )}`,
       })
-      startRouteTransition(() => {
+      void startRouteTransition(() => {
         router.push(url)
         router.refresh()
       })

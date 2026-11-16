@@ -16,8 +16,6 @@ export const tgzToPkgNameMap = {
   '@payloadcms/drizzle': 'payloadcms-drizzle-*',
   '@payloadcms/email-nodemailer': 'payloadcms-email-nodemailer-*',
   '@payloadcms/email-resend': 'payloadcms-email-resend-*',
-  '@payloadcms/eslint-config': 'payloadcms-eslint-config-*',
-  '@payloadcms/eslint-plugin': 'payloadcms-eslint-plugin-*',
   '@payloadcms/figma': 'payloadcms-figma-*',
   '@payloadcms/graphql': 'payloadcms-graphql-*',
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',
@@ -45,6 +43,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/storage-s3': 'payloadcms-storage-s3-*',
   '@payloadcms/storage-vercel-blob': 'payloadcms-storage-vercel-blob-*',
   '@payloadcms/tanstack-start': 'payloadcms-tanstack-start-*',
+  '@payloadcms/transformer-sharp': 'payloadcms-transformer-sharp-*',
   '@payloadcms/translations': 'payloadcms-translations-*',
   '@payloadcms/ui': 'payloadcms-ui-*',
   'create-payload-app': 'create-payload-app-*',
@@ -65,14 +64,15 @@ export function setupProd() {
   const packageJsonString = fs.readFileSync(path.resolve(dirname, 'package.json'), 'utf8')
   const packageJson = JSON.parse(packageJsonString)
 
-  const allDependencies = {}
+  const allDependencies: Record<string, string> = {}
   // Go through all the dependencies and devDependencies, replace the normal package entry with the tgz entry
   for (const key of ['dependencies', 'devDependencies']) {
     const dependencies = packageJson[key]
     if (dependencies) {
       for (const [packageName, _packageVersion] of Object.entries(dependencies)) {
-        if (tgzToPkgNameMap[packageName]) {
-          const actualTgzPath = findActualTgzName(tgzToPkgNameMap[packageName])
+        const tgzPattern = tgzToPkgNameMap[packageName as keyof typeof tgzToPkgNameMap]
+        if (tgzPattern) {
+          const actualTgzPath = findActualTgzName(tgzPattern)
           if (actualTgzPath) {
             dependencies[packageName] = actualTgzPath
             allDependencies[packageName] = actualTgzPath

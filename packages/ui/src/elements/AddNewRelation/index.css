@@ -17,10 +17,6 @@
       padding-inline: var(--spacer-1);
       height: var(--field-min-height-large);
       margin: 0;
-      background: var(--color-bg-secondary);
-      border: none;
-      border-radius: var(--button-radius);
-      color: var(--color-icon);
       cursor: pointer;
 
       &:hover {

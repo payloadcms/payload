@@ -5,6 +5,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+import { useTranslation } from '@payloadcms/ui'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -37,6 +38,9 @@ export const LexicalEditor: React.FC<
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const { t } = useTranslation<Record<string, never>, string>()
+  const instructionsID = React.useId()
+  const hasTabIndentation = isEditable && editorConfig.features.enabledFeatures.includes('indent')
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -62,7 +66,7 @@ export const LexicalEditor: React.FC<
       editorConfigContext.blurEditor(editorConfigContext)
     }
 
-    const unregisterFocus = editor.registerCommand<MouseEvent>(
+    const unregisterFocus = editor.registerCommand(
       FOCUS_COMMAND,
       () => {
         handleFocus()
@@ -71,7 +75,7 @@ export const LexicalEditor: React.FC<
       COMMAND_PRIORITY_LOW,
     )
 
-    const unregisterBlur = editor.registerCommand<MouseEvent>(
+    const unregisterBlur = editor.registerCommand(
       BLUR_COMMAND,
       () => {
         handleBlur()
@@ -106,7 +110,10 @@ export const LexicalEditor: React.FC<
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef}>
-                <LexicalContentEditable editorConfig={editorConfig} />
+                <LexicalContentEditable
+                  editorConfig={editorConfig}
+                  instructionsID={hasTabIndentation ? instructionsID : undefined}
+                />
               </div>
             </div>
           }
@@ -190,6 +197,11 @@ export const LexicalEditor: React.FC<
           }
         })}
       </div>
+      {hasTabIndentation && (
+        <p className="ContentEditable__keyboard-hint" id={instructionsID}>
+          {t('lexical:indent:keyboardHint')}
+        </p>
+      )}
       {editorConfig.features.plugins?.map((plugin) => {
         if (plugin.position === 'belowContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />

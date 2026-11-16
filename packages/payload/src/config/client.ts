@@ -34,14 +34,15 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'i18n'
   | 'jobs'
   | 'kv'
+  | 'llmInstructions'
   | 'logger'
   | 'onInit'
   | 'plugins'
   | 'queryPresets'
   | 'secret'
-  | 'sharp'
   | 'storage'
   | 'typescript'
+  | 'upload'
 >
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
@@ -72,6 +73,7 @@ export type UnauthenticatedClientConfig = {
       slug: string
     },
   ]
+  cookiePrefix: ClientConfig['cookiePrefix']
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
@@ -86,7 +88,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'db',
   'editor',
   'plugins',
-  'sharp',
   'onInit',
   'secret',
   'hooks',
@@ -101,8 +102,10 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'jobs',
   'logger',
   'kv',
+  'llmInstructions',
   'queryPresets',
   'storage',
+  'upload',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
@@ -148,6 +151,7 @@ export const createUnauthenticatedClientConfig = ({
         auth: adminUserCollection.auth,
       },
     ],
+    cookiePrefix: clientConfig.cookiePrefix,
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,
@@ -173,6 +177,7 @@ export const createClientConfig = ({
           autoLogin: config.admin.autoLogin,
           autoRefresh: config.admin.autoRefresh,
           avatar: config.admin.avatar,
+          constrainWidth: config.admin.constrainWidth,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
           importMap: config.admin.importMap,
@@ -274,11 +279,6 @@ export const createClientConfig = ({
 
           if (config.localization.defaultLocale) {
             clientConfig.localization.defaultLocale = config.localization.defaultLocale
-          }
-
-          if (config.localization.defaultLocalePublishOption) {
-            clientConfig.localization.defaultLocalePublishOption =
-              config.localization.defaultLocalePublishOption
           }
 
           if (config.localization.fallback) {

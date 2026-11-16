@@ -1,4 +1,3 @@
-// @ts-ignore - ambient type declarations
 import './payload-types.d.ts'
 
 const validField: FieldConfig = {

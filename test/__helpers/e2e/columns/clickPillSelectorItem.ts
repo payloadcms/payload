@@ -53,7 +53,7 @@ export const getPillSelectorItem = ({
 
 /**
  * Get a locator for a column selector item (v4 design).
- * The new column selector uses `.column-selector__item` with aria-label for the label text.
+ * Locate the item by its full checkbox name, even when the displayed path is abbreviated.
  *
  * @param params.container - The container (Page or Locator) to search within
  * @param params.label - The exact text label of the column item
@@ -66,7 +66,11 @@ export const getColumnSelectorItem = ({
   container: Locator | Page
   label: string
 }): Locator => {
-  return container.locator(`.column-selector__item[aria-label="${label}"]`)
+  const page = 'page' in container ? container.page() : container
+
+  return container.locator('.column-selector__item').filter({
+    has: page.getByRole('checkbox', { name: label, exact: true, includeHidden: true }),
+  })
 }
 
 /**

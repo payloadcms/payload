@@ -1,6 +1,7 @@
 import type { SanitizedUploadConfig } from './types.js'
 
 import { canResizeImage } from './canResizeImage.js'
+import { isSvgUpload } from './getFileTypeIdentity.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
 
@@ -18,25 +19,35 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * so a client upload (e.g. Azure's chunkLargeFiles) only pays for what post-processing
  * actually reads instead of always being re-downloaded in full.
  *
- * - `full`: local storage needs the real bytes, or the file will be resized/reformatted/
- *   trimmed/animated, or additional image sizes will be generated from it, or the collection
- *   restricts mime types (which also runs SVG/PDF content-safety checks that must see the
- *   whole file), or the request itself carries a crop/resize edit (`uploadEdits`) that will
- *   run sharp against the fetched bytes.
+ * - `full`: local storage needs the real bytes, or a registered file transformer will adjust
+ *   the image (`upload.hasImageAdjustments`), or the file is animated, or additional image
+ *   sizes will be generated from it, or the collection restricts mime types (which also runs
+ *   SVG/PDF content-safety checks that must see the whole file), or the file is an SVG (its
+ *   safety check always runs and rejects a cut-off document), or the request itself carries
+ *   a crop/resize edit (`uploadEdits`) that will be applied to the fetched bytes.
  * - `header`: the file is an image and only its dimensions are needed.
  * - `none`: nothing downstream reads file content at all.
  */
 export function getFileContentRequirement({
+  filename,
   hasSizeEdits,
+  hasVariantsBuiltOnRequest = false,
   mimeType,
   uploadConfig,
 }: {
+  /** Used with `mimeType` to find an SVG, the same way the SVG safety check does. */
+  filename: string
   /**
    * Whether the request's `uploadEdits` (crop, heightInPixels, widthInPixels) will resize the
    * fetched file - if so, the full file is needed even when the collection config alone would
    * only require a header probe.
    */
   hasSizeEdits?: boolean
+  /**
+   * Whether no transformer stores the collection's `variants`, so each one is built from the
+   * original when it is requested and does not need the uploaded bytes.
+   */
+  hasVariantsBuiltOnRequest?: boolean
   mimeType: string
   uploadConfig: SanitizedUploadConfig
 }): FileContentRequirement {
@@ -45,21 +56,22 @@ export function getFileContentRequirement({
   }
 
   const hasMimeTypeAllowList =
-    !uploadConfig.allowRestrictedFileTypes &&
-    Array.isArray(uploadConfig.mimeTypes) &&
-    uploadConfig.mimeTypes.length > 0
+    Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
 
-  if (hasMimeTypeAllowList) {
+  if (hasMimeTypeAllowList || isSvgUpload({ filename, mimeType })) {
     return 'full'
   }
 
   const isResizableImage = canResizeImage(mimeType)
+  // `hasImageAdjustments` and `variants` are the transformer-agnostic projection a file
+  // transformer writes back onto the sanitized upload config at startup (see
+  // `@payloadcms/transformer-sharp`'s `initSharpCollections`), so core can make this decision
+  // without knowing which transformer is registered or how it is configured.
   const hasConfiguredAdjustments = Boolean(
-    uploadConfig.resizeOptions ||
-      uploadConfig.formatOptions ||
-      uploadConfig.trimOptions ||
-      uploadConfig.constructorOptions ||
-      (Array.isArray(uploadConfig.imageSizes) && uploadConfig.imageSizes.length > 0),
+    uploadConfig.hasImageAdjustments ||
+    (!hasVariantsBuiltOnRequest &&
+      Array.isArray(uploadConfig.variants) &&
+      uploadConfig.variants.length > 0),
   )
 
   if (hasSizeEdits || (isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {

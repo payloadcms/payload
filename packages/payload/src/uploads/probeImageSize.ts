@@ -5,8 +5,8 @@ import { imageDimensionsFromData, imageDimensionsFromStream } from 'image-dimens
 import type { ProbedImageSize } from './types.js'
 
 /**
- * Image dimension probe used as a fallback when `sharp` is not configured.
- * Reads only the header bytes needed to determine width and height.
+ * Dependency-free image dimension probe. Reads only the header bytes needed
+ * to determine width and height.
  *
  * PNG, JPEG, GIF, WebP, AVIF and HEIF/HEIC are delegated to `image-dimensions`
  * (actively maintained, zero dependencies). BMP, ICO/CUR, SVG, TIFF and JPEG

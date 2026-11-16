@@ -8,13 +8,14 @@ import { pagesSlug } from './shared.js'
 
 let page: Page
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
+test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload }) => {
     page = await payload.create({
       collection: 'pages',
       data: {
         title: 'Test',
       },
+      overrideAccess: true,
     })
   })
 
@@ -23,6 +24,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
       collection: 'redirects',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()
@@ -42,6 +44,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
         },
         type: '301',
       },
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()
@@ -60,6 +63,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
         },
         type: '301',
       },
+      overrideAccess: true,
     })
 
     expect(redirect).toBeTruthy()

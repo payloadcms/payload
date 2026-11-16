@@ -103,11 +103,11 @@ Settle on a convention so the ecosystem converges:
 
 Plugins often need to be aware of each other. The pattern for this is:
 
-1. A plugin with a `slug` exposes its `options` object — the same object passed at call time
-2. Another plugin finds it via the `plugins` map and mutates those options before the first plugin runs
-3. When the first plugin executes, it sees the mutated options
+1. A plugin with a `slug` exposes its `options` on the plugin function
+2. Another plugin finds it via the `plugins` map and mutates or replaces those options before the first plugin runs
+3. When the first plugin executes, it reads its current `options`, so it sees the changes
 
-Since options are resolved before any plugin runs, this works cleanly without re-execution.
+Since a plugin reads its `options` when it runs, changes made by plugins with a lower `order` are picked up without re-execution.
 
 ### The `plugins` map
 
@@ -119,7 +119,12 @@ export const writerPlugin = definePlugin({
   order: 1,
   plugin: ({ config, plugins }) => {
     const seo = plugins['plugin-seo']
-    seo?.options?.collections.push('my-collection')
+    if (seo) {
+      seo.options = {
+        ...seo.options,
+        collections: [...(seo.options?.collections ?? []), 'my-collection'],
+      }
+    }
     return config
   },
 })
@@ -163,7 +168,13 @@ export const writerPlugin = definePlugin({
   order: 1,
   plugin: ({ config, plugins }) => {
     // plugins['plugin-seo'] is typed — options is SEOPluginOptions
-    plugins['plugin-seo']?.options?.collections.push('my-collection')
+    const seo = plugins['plugin-seo']
+    if (seo) {
+      seo.options = {
+        ...seo.options,
+        collections: [...(seo.options?.collections ?? []), 'my-collection'],
+      }
+    }
     return config
   },
 })
@@ -207,8 +218,17 @@ export const writerPlugin = definePlugin({
   slug: 'my-writer',
   order: 1,
   plugin: ({ config, plugins }) => {
-    // Runs before reader — mutates reader's options before reader executes
-    plugins['my-reader']?.options?.items.push({ name: 'injected-by-writer' })
+    // Runs before reader — replaces reader's options before reader executes
+    const reader = plugins['my-reader']
+    if (reader) {
+      reader.options = {
+        ...reader.options,
+        items: [
+          ...(reader.options?.items ?? []),
+          { name: 'injected-by-writer' },
+        ],
+      }
+    }
     return config
   },
 })

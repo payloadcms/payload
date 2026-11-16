@@ -34,6 +34,30 @@ export async function getPackageManager(args: {
   }
 }
 
+/**
+ * The command that installs every dependency listed in package.json.
+ */
+export function getInstallCommand(packageManager: PackageManager): string {
+  if (packageManager === 'yarn') {
+    return 'yarn'
+  }
+  if (packageManager === 'pnpm') {
+    return 'pnpm install'
+  }
+  if (packageManager === 'bun') {
+    return 'bun install'
+  }
+  return 'npm install --legacy-peer-deps'
+}
+
+/**
+ * The prefix that runs a package.json script. npm needs `npm run <script>`, while
+ * pnpm, yarn, and bun run scripts directly.
+ */
+export function getRunCommand(packageManager: PackageManager): string {
+  return packageManager === 'npm' ? 'npm run' : packageManager
+}
+
 function getEnvironmentPackageManager(): PackageManager {
   const userAgent = process.env.npm_config_user_agent || ''
 

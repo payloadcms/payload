@@ -204,6 +204,7 @@ export const createTransactionsCollection: (props: Props) => CollectionConfig = 
         t('plugin-ecommerce:transactionsCollectionDescription'),
       group: 'Ecommerce',
     },
+    authorship: false,
     fields,
     labels: {
       plural: ({ t }) =>

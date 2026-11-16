@@ -7,7 +7,17 @@ import type { EntityInputSchema as JsonSchemaType } from './types.js'
  * JSON Schema draft 2020-12. Each is tagged **Correctness**, **Size**, or **LLM ergonomics**, with a
  * before/after example on its definition.
  */
-export const sanitizeEntitySchema = (schema: JsonSchemaType): JsonSchemaType => {
+export const sanitizeEntitySchema = ({
+  schema,
+  shouldKeepDeprecatedProperties = false,
+}: {
+  schema: JsonSchemaType
+  /**
+   * Keep optional properties marked `deprecated` instead of hiding them. Validation needs them, so
+   * that existing data that still contains them stays valid input.
+   */
+  shouldKeepDeprecatedProperties?: boolean
+}): JsonSchemaType => {
   // Work on a copy — the caller reuses the original schema elsewhere (e.g. when listing tools).
   let result = structuredClone(schema)
 
@@ -16,6 +26,11 @@ export const sanitizeEntitySchema = (schema: JsonSchemaType): JsonSchemaType => 
 
   // LLM ergonomics — rewrite point fields from a `[number, number]` tuple into a `{ longitude, latitude }` object.
   result = pointFieldsToObjects(result)
+
+  // LLM ergonomics — hide optional properties marked `deprecated` (e.g. Lexical's node `version`).
+  if (!shouldKeepDeprecatedProperties) {
+    result = removeDeprecatedProperties(result)
+  }
 
   // Size — strip inert type-gen leftovers that only bloat the schema (`tsType`, block-collision notes).
   result = removeTypeGenArtifacts(result)
@@ -171,6 +186,30 @@ const pointFieldsToObjects = (schema: JsonSchemaType): JsonSchemaType => {
 
   return transformed
 }
+
+/**
+ * **LLM ergonomics.** Removes optional properties marked `deprecated`, so the model never has to
+ * consider sending them. The schema used for validation keeps them, which keeps existing data that
+ * still contains them valid. Required properties are never removed, so data that matches the shown
+ * schema always passes validation.
+ *
+ * @example
+ * { properties: { text: { type: 'string' }, version: { type: 'integer', deprecated: true } }, required: ['text'] }
+ * → { properties: { text: { type: 'string' } }, required: ['text'] }
+ */
+const removeDeprecatedProperties = (schema: JsonSchemaType): JsonSchemaType =>
+  mapNodes(schema, (node) => {
+    if (!node.properties || typeof node.properties !== 'object') {
+      return node
+    }
+    for (const [key, property] of Object.entries(node.properties)) {
+      const isRequired = Array.isArray(node.required) && node.required.includes(key)
+      if (!isRequired && property?.deprecated === true) {
+        delete node.properties[key]
+      }
+    }
+    return node
+  }) as JsonSchemaType
 
 /**
  * **Size.** Strips type-generation leftovers that bloat the schema without helping the model: the `tsType`

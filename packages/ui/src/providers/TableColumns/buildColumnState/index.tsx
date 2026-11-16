@@ -47,6 +47,7 @@ export type BuildColumnStateArgs = {
   enableRowSelections: boolean
   enableRowTypes?: boolean
   fieldPermissions?: SanitizedFieldsPermissions
+  hierarchyParentFieldName?: string
   i18n: I18nClient
   payload: Payload
   req?: PayloadRequest
@@ -82,6 +83,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     enableLinkedCell = true,
     enableRowSelections,
     fieldPermissions,
+    hierarchyParentFieldName,
     i18n,
     payload,
     req,
@@ -271,6 +273,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               customCellProps,
               doc: dataType === 'monomorphic' ? doc : doc.value,
               enableRowSelections,
+              hierarchyParentFieldName,
               i18n,
               isLinkedColumn,
               payload,
