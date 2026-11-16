@@ -67,6 +67,29 @@ describe('nested document branch cache', () => {
     expect(cache.branches.get(branchKey({ parentID: 'a' })).page).toBe(2)
   })
 
+  it('should continue the root rail only when another loaded or unloaded root follows', () => {
+    for (const { hasFollowingRoot, hasNextPage, shouldContinue } of [
+      { hasFollowingRoot: false, hasNextPage: false, shouldContinue: false },
+      { hasFollowingRoot: true, hasNextPage: false, shouldContinue: true },
+      { hasFollowingRoot: false, hasNextPage: true, shouldContinue: true },
+    ]) {
+      const docs = [{ id: 'a' }, { id: 'b' }, ...(hasFollowingRoot ? [{ id: 'z' }] : [])]
+      const cache = createTreeCache({
+        columns: columns({ cells: docs.map(({ id }) => id) }),
+        data: page({ docs, hasNextPage }),
+        pageSize: 1,
+        rows: {
+          a: row({ hasChildren: true, isExpanded: true }),
+          b: row({ parentID: 'a', depth: 1 }),
+          ...(hasFollowingRoot ? { z: row() } : {}),
+        },
+      })
+      const visible = flattenTreeCache({ cache, pageSize: 1 })
+
+      expect(visible.rows.b.ancestorContinues).toEqual([shouldContinue])
+    }
+  })
+
   it('should retain cached descendants when collapsed and reopen them without fetching', () => {
     const cache = createTreeCache({
       columns: columns({ cells: ['A', 'B'] }),
@@ -103,7 +126,7 @@ describe('nested document branch cache', () => {
     })
     const visible = flattenTreeCache({ cache, pageSize: 10 })
 
-    expect(visible.rows.c.ancestorContinues).toEqual([true])
+    expect(visible.rows.c.ancestorContinues).toEqual([false, true])
     expect(visible.rows.c.depth).toBe(2)
     expect(visible.rows.d.isLastSibling).toBe(true)
   })

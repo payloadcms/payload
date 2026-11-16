@@ -155,7 +155,7 @@ export function flattenTreeCache({
       })
       if (cache.expanded.has(id) && node.row.hasChildren) {
         visit({
-          ancestorContinues: depth === 0 ? [] : [...ancestorContinues, !isLastSibling],
+          ancestorContinues: [...ancestorContinues, !isLastSibling],
           depth: depth + 1,
           parentID: node.doc.id,
         })
