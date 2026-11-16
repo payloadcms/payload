@@ -361,16 +361,20 @@ export function HierarchyListView(props: ListViewClientProps) {
     parentID: parentId,
   })
 
-  const collectionData = hierarchyData
-    ? {
-        [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-        ...Object.fromEntries(
-          Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
-            ([slug, related]) => [slug, { docs: related.result.docs }],
-          ),
-        ),
-      }
-    : {}
+  const collectionData = useMemo(
+    () =>
+      hierarchyData
+        ? {
+            [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+            ...Object.fromEntries(
+              Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
+                ([slug, related]) => [slug, { docs: related.result.docs }],
+              ),
+            ),
+          }
+        : {},
+    [collectionSlug, hierarchyData],
+  )
 
   return (
     <Fragment>
