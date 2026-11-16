@@ -16,13 +16,17 @@
       }
     }
 
-    td:first-child {
+    td.cell--linked {
       position: relative;
     }
 
     .tree-item {
-      --tree-gutter: var(--spacer-4);
+      --tree-gutter: var(--spacer-0);
       --tree-ghost-line-opacity: var(--hierarchy-contents-tree-ghost-line-opacity);
+    }
+
+    &[data-row-selections='false'] .tree-item {
+      --tree-gutter: var(--gutter-h);
     }
 
     .hierarchy-contents-tree__link {

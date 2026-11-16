@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { articlesSlug, foldersSlug, pagesSlug } from './shared.js'
+import { articlesSlug, foldersSlug, librariesSlug, pagesSlug } from './shared.js'
 
 export async function seed(payload: Payload) {
   await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
@@ -71,4 +71,24 @@ export async function seed(payload: Payload) {
       data: { title, '_h_page-folders': folder.id },
     })
   }
+  const library = await payload.create({
+    collection: librariesSlug,
+    data: { name: 'Research library' },
+  })
+  await payload.create({
+    collection: librariesSlug,
+    data: { name: 'Journal collection', shelfParent: library.id, acceptedTypes: [articlesSlug] },
+  })
+  const {
+    docs: [guide],
+  } = await payload.find({
+    collection: articlesSlug,
+    where: { title: { equals: titles[0] } },
+    limit: 1,
+  })
+  await payload.update({
+    collection: articlesSlug,
+    id: guide.id,
+    data: { shelfParent: library.id },
+  })
 }

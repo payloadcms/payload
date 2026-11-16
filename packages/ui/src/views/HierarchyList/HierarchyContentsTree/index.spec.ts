@@ -31,6 +31,17 @@ vi.mock('./useHierarchyContentsTree.js', () => ({
   }),
 }))
 
+vi.mock('../../../providers/DocumentSelection/index.js', () => ({
+  SelectAllStatus: { AllInPage: 'allInPage', None: 'none', Some: 'some' },
+  useDocumentSelection: () => ({
+    getSelectAllStatus: () => 'none',
+    isLocked: () => false,
+    isSelected: () => false,
+    toggleAllInCollection: vi.fn(),
+    toggleSelection: vi.fn(),
+  }),
+}))
+
 vi.mock('../../../providers/Config/index.js', () => ({
   useConfig: () => ({
     config: { routes: { admin: '/admin' } },
@@ -147,6 +158,21 @@ test('should identify the failed source and preserve its authorized counts', () 
   expect(html).toContain('role="alert">error:loadingItems')
   expect(html).toContain('1 general:of 12 Articles')
   expect(html).toContain('/admin/collections/articles/2')
+})
+
+test('should preserve a read-only list’s disabled selection configuration', () => {
+  const html = renderToStaticMarkup(
+    createElement(HierarchyContentsTree, {
+      collectionSlug: 'containers',
+      enableRowSelections: false,
+      initialContents: contents,
+      selectedTypes: ['articles'],
+    }),
+  )
+
+  expect(html).not.toContain('data-column="_select"')
+  expect(html).not.toContain('type="checkbox"')
+  expect(html).toContain('Reference library')
 })
 
 test('should encode custom document IDs while retaining numeric zero links', () => {

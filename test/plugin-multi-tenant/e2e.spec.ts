@@ -1533,8 +1533,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: foldersURL,
       })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       // The list table should only show Steel Cat folders
       await expect(
@@ -1568,8 +1567,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: foldersURL,
       })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       // Navigate into a Blue Dog folder by clicking the navigation link
       await page
@@ -1620,8 +1618,7 @@ test.describe('Multi Tenant', () => {
       await page.goto(foldersURL.list)
       await clearTenantFilter({ page })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       // The list table should show folders from all tenants
       await expect(
@@ -1655,8 +1652,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: foldersURL,
       })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       await expect(
         page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {

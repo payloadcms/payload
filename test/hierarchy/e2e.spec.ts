@@ -565,7 +565,7 @@ test.describe('Hierarchy Sidebar', () => {
   })
 
   test.describe('Folder title edit action', () => {
-    test('should keep the unfiltered default list when viewing a selected folder from All Folders', async () => {
+    test('should browse the selected folder’s contents from the default collection route', async () => {
       const folder = await payload.create({
         collection: 'folders',
         data: { name: 'Default list parent' },
@@ -587,11 +587,12 @@ test.describe('Hierarchy Sidebar', () => {
         await page.goto(`${foldersURL.list}?parentFolder=${folder.id}`)
 
         await expect(page.getByRole('heading', { name: folder.name, level: 1 })).toBeVisible()
-        await expect(page.getByRole('columnheader', { name: 'Parent' })).toBeVisible()
-        await expect(page.getByText(child.name, { exact: true })).toBeVisible()
+        const contents = page.locator('.hierarchy-list')
+
+        await expect(contents.getByRole('link', { name: child.name, exact: true })).toBeVisible()
         await expect(
-          page.getByRole('grid').getByText(unrelatedFolder.name, { exact: true }),
-        ).toBeVisible()
+          contents.getByRole('link', { name: unrelatedFolder.name, exact: true }),
+        ).toHaveCount(0)
       } finally {
         await payload.delete({ id: child.id, collection: 'folders', overrideAccess: true })
         await payload.delete({
@@ -619,11 +620,6 @@ test.describe('Hierarchy Sidebar', () => {
         const rootURL = mode === 'hierarchy' ? foldersURL.hierarchy : foldersURL.list
 
         try {
-          if (mode === 'list') {
-            await page.goto(foldersURL.hierarchy)
-            await page.getByRole('button', { name: 'All Folders', exact: true }).click()
-          }
-
           await page.goto(rootURL)
           await expect(page.locator('.list-header .hierarchy-edit-button')).toHaveCount(0)
           await expect(page.locator('.hierarchy-tables__edit-button')).toHaveCount(0)
@@ -1061,8 +1057,31 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(tree.getByText('Products Only', { exact: true })).toBeVisible()
     })
 
+    test('should preserve each selected Tree folder’s own destination restrictions', async () => {
+      await page.goto(foldersURL.list)
+      await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+      const contents = page.locator('.hierarchy-contents-tree')
+
+      for (const name of ['Orgs Only', 'Products Only']) {
+        await contents
+          .getByRole('row')
+          .filter({ has: page.getByRole('link', { name, exact: true }) })
+          .getByRole('checkbox')
+          .check()
+      }
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
+      const modal = page.locator('.hierarchy-modal')
+      const bothTypes = modal.locator('.hierarchy-column-item', { hasText: 'Orgs and Products' })
+
+      await expect(bothTypes.getByRole('checkbox')).toBeEnabled()
+      await expect(
+        modal.locator('.hierarchy-column-item', { hasText: 'General' }).getByRole('checkbox'),
+      ).toBeEnabled()
+    })
+
     test('should show incompatible move destinations as disabled', async () => {
       await page.goto(foldersURL.hierarchy)
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       const selectedFolderRow = page.locator('tr', { hasText: 'Orgs and Products' })
 
@@ -1107,6 +1126,7 @@ test.describe('Hierarchy Sidebar', () => {
 
     test('should disable scoped destinations when moving an unrestricted folder', async () => {
       await page.goto(foldersURL.hierarchy)
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       const selectedFolderRow = page.locator('tr', { hasText: 'General' })
 
@@ -2017,12 +2037,13 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(selfDestination).toHaveAttribute('aria-disabled', 'true')
     })
 
-    test('should restrict folder destinations from the hierarchy list cell', async () => {
+    test('should restrict folder destinations from the contents selection', async () => {
       await page.goto(foldersURL.list)
 
       const folderRow = page.locator('tr', { hasText: productsOnlyFolderName })
 
-      await folderRow.locator('.hierarchy-cell__button').click()
+      await folderRow.getByRole('checkbox').check()
+      await page.getByRole('button', { name: 'Move', exact: true }).click()
 
       const modal = page.locator('.hierarchy-modal')
       const organizationsDestination = modal.locator('.hierarchy-column-item', {

@@ -8,7 +8,13 @@ import type { Config } from './payload-types.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
-import { articlesSlug, foldersSlug, pagesSlug } from './shared.js'
+import {
+  articlesSlug,
+  customLibrariesSlug,
+  foldersSlug,
+  librariesSlug,
+  pagesSlug,
+} from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 let serverURL: string
@@ -18,7 +24,7 @@ let savedPreferences: unknown
 
 test.describe('Hierarchy contents Tree layout', () => {
   test.beforeAll(async ({ browser }) => {
-    ;({ serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     const {
       docs: [editorial],
     } = await payload.find({ collection: foldersSlug, where: { title: { equals: 'Editorial' } } })
@@ -59,10 +65,32 @@ test.describe('Hierarchy contents Tree layout', () => {
     await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
   })
 
-  test('should keep Tree opt-in alongside the existing Table layout', async ({ page }) => {
+  test('should honor saved Table and Grid preferences alongside Tree browsing', async ({
+    page,
+  }) => {
+    const tableSaved = page.waitForResponse(
+      (response) =>
+        response.url().includes(`/api/payload-preferences/collection-${foldersSlug}`) &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
     await page.getByRole('radio', { name: 'Table', exact: true }).check()
+    await tableSaved
     await expect(page.locator('.hierarchy-contents-tree')).toHaveCount(0)
+    await page.reload()
+    await expect(page.getByRole('radio', { name: 'Table', exact: true })).toBeChecked()
     await expect(page.getByRole('link', { name: 'Editorial', exact: true })).toBeVisible()
+    const gridSaved = page.waitForResponse(
+      (response) =>
+        response.url().includes(`/api/payload-preferences/collection-${foldersSlug}`) &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
+    await page.getByRole('radio', { name: 'Grid', exact: true }).check()
+    await gridSaved
+    await page.reload()
+    await expect(page.getByRole('radio', { name: 'Grid', exact: true })).toBeChecked()
+    await expect(page.locator('.hierarchy-contents-tree')).toHaveCount(0)
     await page.getByRole('radio', { name: 'Tree', exact: true }).check()
     await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Unassigned', exact: true })).toBeVisible()
@@ -193,11 +221,197 @@ test.describe('Hierarchy contents Tree layout', () => {
       .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
     await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
     const result = await runAxeScan({
-      page,
-      testInfo,
       include: ['.hierarchy-contents-tree'],
+      page,
       screenshotViolations: false,
+      testInfo,
     })
     expect(result.violations).toEqual([])
+  })
+
+  test('should default to contents Tree without a saved layout and keep legacy root URLs valid', async ({
+    page,
+  }) => {
+    await page.request.delete(`${serverURL}/api/payload-preferences/collection-${foldersSlug}`)
+    await page.goto(`${serverURL}/admin/collections/${foldersSlug}`)
+    await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
+    await expect(page.locator('#hierarchy-view-pill')).toHaveCount(0)
+    await page.goto(`${serverURL}/admin/collections/${foldersSlug}?view=hierarchy&_h_page-folders=`)
+    await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Unassigned', exact: true })).toBeVisible()
+  })
+
+  test('should preserve explicit selection across paging and collapse while select-all affects only visible documents', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: 'Expand: Editorial', exact: true }).click()
+    await page.getByRole('button', { name: 'Expand: Articles', exact: true }).click()
+    const selected = page.getByRole('checkbox', {
+      name: 'Select A guide to accessible content',
+      exact: true,
+    })
+
+    await selected.check()
+    await page.getByRole('button', { name: 'Load more: Articles (Editorial)', exact: true }).click()
+    await expect(
+      page.getByRole('link', { name: 'Working together for a better experience', exact: true }),
+    ).toBeVisible()
+    await expect(selected).toBeChecked()
+    await page.getByRole('button', { name: 'Collapse: Articles', exact: true }).click()
+    const selectAll = page.getByRole('checkbox', { name: /^(?:Select|Deselect) all rows$/ })
+
+    await expect(selectAll).toHaveCount(1)
+    await selectAll.check()
+    await selectAll.uncheck()
+    await page.getByRole('button', { name: 'Expand: Articles', exact: true }).click()
+    await expect(selected).toBeChecked()
+    await expect(
+      page.getByRole('checkbox', {
+        name: 'Select Working together for a better experience',
+        exact: true,
+      }),
+    ).not.toBeChecked()
+    await page.getByRole('link', { name: 'Campaigns', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Expand: Articles', exact: true }).click()
+    await expect(
+      page.getByRole('checkbox', { name: 'Select Campaign announcement', exact: true }),
+    ).not.toBeChecked()
+  })
+
+  test('should exclude another editor’s locked document from visible select-all', async ({
+    page,
+  }) => {
+    const {
+      docs: [article],
+    } = await payload.find({
+      collection: articlesSlug,
+      overrideAccess: true,
+      where: { title: { equals: 'A guide to accessible content' } },
+    })
+    if (!article) {
+      throw new Error('Missing seeded article for the lock regression.')
+    }
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        collection: 'users',
+        email: `contents-lock-${Date.now()}@payload.test`,
+        password: 'test',
+      },
+      overrideAccess: true,
+    })
+    const lock = await payload.create({
+      collection: 'payload-locked-documents',
+      data: {
+        document: { relationTo: articlesSlug, value: article.id },
+        user: { relationTo: 'users', value: editor.id },
+      },
+      overrideAccess: true,
+    })
+
+    try {
+      await page.getByRole('button', { name: 'Expand: Editorial', exact: true }).click()
+      await page.getByRole('button', { name: 'Expand: Articles', exact: true }).click()
+      const locked = page.getByRole('checkbox', {
+        name: 'Select A guide to accessible content',
+        exact: true,
+      })
+
+      await expect(locked).toBeDisabled()
+      await page.getByRole('checkbox', { name: 'Select all rows', exact: true }).check()
+      await expect(locked).not.toBeChecked()
+      await expect(
+        page.getByRole('checkbox', {
+          name: 'Select Behind the scenes of our spring campaign',
+          exact: true,
+        }),
+      ).toBeChecked()
+    } finally {
+      await payload.delete({
+        id: String(lock.id),
+        collection: 'payload-locked-documents',
+        overrideAccess: true,
+      })
+      await payload.delete({ id: String(editor.id), collection: 'users', overrideAccess: true })
+    }
+  })
+
+  test('should browse a custom single-assignment hierarchy with its configured label and small icon', async ({
+    page,
+  }) => {
+    await page.goto(`${serverURL}/admin/collections/${librariesSlug}`)
+    await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Libraries', exact: true, level: 1 }),
+    ).toBeVisible()
+    const library = page
+      .getByRole('row')
+      .filter({ has: page.getByRole('link', { name: 'Research library', exact: true }) })
+
+    await expect(library.locator('.icon--document')).toBeVisible()
+    await page.getByRole('button', { name: 'Expand: Research library', exact: true }).click()
+    await expect(page.getByRole('link', { name: 'Journal collection', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Expand: Articles', exact: true }).click()
+    await expect(
+      page.getByRole('link', { name: 'A guide to accessible content', exact: true }),
+    ).toBeVisible()
+    await page.getByRole('link', { name: 'Research library', exact: true }).click()
+    await expect(page).toHaveURL(/shelfParent=/)
+    await expect(
+      page.getByRole('heading', { name: 'Research library', exact: true, level: 1 }),
+    ).toBeVisible()
+  })
+
+  test('should keep a custom List Component on its standard data path', async ({ page }) => {
+    await page.goto(`${serverURL}/admin/collections/${customLibrariesSlug}`)
+    await expect(
+      page.getByRole('heading', { name: 'Custom library list', exact: true }),
+    ).toBeVisible()
+    await expect(page.getByText('Standard list data', { exact: true })).toBeVisible()
+    await expect(page.locator('.hierarchy-contents-tree')).toHaveCount(0)
+  })
+
+  test('should preserve List extension slots once and keep empty results local to their scope', async ({
+    page,
+  }) => {
+    await page.goto(`${serverURL}/admin/collections/${librariesSlug}`)
+    for (const text of [
+      'Before library list',
+      'After library list',
+      'Before library table',
+      'After library table',
+    ]) {
+      await expect(page.getByText(text, { exact: true })).toHaveCount(1)
+    }
+    await page.getByRole('button', { name: /more options/i }).click()
+    await expect(
+      page.getByRole('menuitem', { name: 'Library menu action', exact: true }),
+    ).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(
+      page.getByRole('menuitem', { name: 'Library menu action', exact: true }),
+    ).toBeHidden()
+    await expect(page).toHaveURL(new RegExp(librariesSlug))
+    const search = page.locator('.hierarchy-list').getByRole('textbox', { name: /^Search/ })
+    await search.fill('no such library result')
+    await expect(page.getByText('No library results', { exact: true })).toHaveCount(1)
+    await search.fill('')
+    await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
+    await page.getByRole('button', { name: 'Expand: Research library', exact: true }).click()
+    await page.getByRole('link', { name: 'Journal collection', exact: true }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'No Results.' })).toBeVisible()
+    await expect(page.getByText('No library results', { exact: true })).toHaveCount(0)
+  })
+
+  test('should keep the redundant hierarchy tab hidden in the built-in Trash view', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: 'Trash', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Trash', exact: true })).toBeDisabled()
+    await expect(page.locator('#hierarchy-view-pill')).toHaveCount(0)
+    await expect(page.getByRole('radio', { name: 'Tree', exact: true })).toHaveCount(0)
+    await page.getByRole('button', { name: 'All Folders', exact: true }).click()
+    await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
   })
 })

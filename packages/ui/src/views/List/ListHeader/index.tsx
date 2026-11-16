@@ -31,6 +31,7 @@ export type ListHeaderProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
+  hasContentsBrowser?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
@@ -52,6 +53,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   enableRowSelections,
+  hasContentsBrowser,
   hasCreatePermission,
   hasDeletePermission,
   hasTrashPermission,
@@ -120,6 +122,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
         <DefaultListViewTabs
           collectionConfig={collectionConfig}
           config={config}
+          hasContentsBrowser={hasContentsBrowser}
           key="default-list-actions"
           viewType={viewType}
         />,

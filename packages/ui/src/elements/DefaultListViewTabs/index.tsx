@@ -22,6 +22,7 @@ const baseClass = 'default-list-view-tabs'
 type DefaultListViewTabsProps = {
   collectionConfig: ClientCollectionConfig
   config: ClientConfig
+  hasContentsBrowser?: boolean
   onChange?: (viewType: ViewTypes) => void
   viewType?: ViewTypes
 }
@@ -29,6 +30,7 @@ type DefaultListViewTabsProps = {
 export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   collectionConfig,
   config,
+  hasContentsBrowser = false,
   onChange,
   viewType,
 }) => {
@@ -36,7 +38,9 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const { setPreference } = usePreferences()
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
-  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
+  const isHierarchyEnabled =
+    Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs && !hasContentsBrowser
+  const isListActive = viewType === 'list' || (hasContentsBrowser && viewType === 'hierarchy')
 
   if (!isTrashEnabled && !isHierarchyEnabled) {
     return null
@@ -85,11 +89,11 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   return (
     <div className={baseClass}>
       <Button
-        buttonStyle={viewType === 'list' ? 'pill' : 'ghost'}
-        className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
+        buttonStyle={isListActive ? 'pill' : 'ghost'}
+        className={[`${baseClass}__button`, isListActive && `${baseClass}__button--active`]
           .filter(Boolean)
           .join(' ')}
-        disabled={viewType === 'list'}
+        disabled={isListActive}
         el="button"
         id={allButtonId}
         onClick={() => handleViewChange('list')}

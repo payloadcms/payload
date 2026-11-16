@@ -13,6 +13,7 @@ export function ContentsAction({
   action,
   hasAction,
   hasError,
+  hasRowSelections,
   isPending,
   isSummary,
   label,
@@ -24,6 +25,7 @@ export function ContentsAction({
   action: string
   hasAction: boolean
   hasError: boolean
+  hasRowSelections: boolean
   isPending: boolean
   isSummary: boolean
   label: string
@@ -38,6 +40,7 @@ export function ContentsAction({
     <tr
       className={`hierarchy-contents-tree__action${isSummary ? ' hierarchy-contents-tree__summary' : ''}`}
     >
+      {hasRowSelections && <td data-column="_select" />}
       <td className="cell--linked">
         <TreeItem position={position} variant="continuation">
           <div className="hierarchy-contents-tree__action-content">
