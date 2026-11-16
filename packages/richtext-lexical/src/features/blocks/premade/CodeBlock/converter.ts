@@ -9,7 +9,7 @@ export const codeConverter: BlockJSX = {
     optional: true,
     regExp: /[ \t]*```$/,
   },
-  customStartRegex: /^[ \t]*```(\w+)?/,
+  customStartRegex: /^[ \t]*```([^\s`]+)?/,
   doNotTrimChildren: true,
   export: ({ fields }) => {
     const isSingleLine = !fields.code.includes('\n') && !fields.language?.length
@@ -31,11 +31,13 @@ export const codeConverter: BlockJSX = {
     }
 
     const isSingleLineAndComplete =
-      !!closeMatch && !children.includes('\n') && openMatch?.input?.trim() !== '```' + language
+      !!closeMatch &&
+      !children.includes('\n') &&
+      openMatch?.input?.trim() !== '```' + (language ?? '')
 
     if (isSingleLineAndComplete) {
       return {
-        code: language + (children?.length ? children : ''), // No need to add space to children as they are not trimmed
+        code: (language ?? '') + (children?.length ? children : ''), // No need to add space to children as they are not trimmed
         language: '',
       }
     }
