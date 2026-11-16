@@ -172,6 +172,7 @@ export const daTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i anmodningen: {{args}}',
     loadingDocument: 'Der opstod et problem med at loade dokumentet med ID {{id}}.',
+    loadingItems: 'Elementerne kunne ikke indlæses.',
     localesNotSaved_one: 'Følgende lokalitet kunne ikke gemmes:',
     localesNotSaved_other: 'Følgende lokaliteter kunne ikke gemmes:',
     logoutFailed: 'Log ud mislykket.',
@@ -552,6 +553,9 @@ export const daTranslations: DefaultTranslationsObject = {
     toggle: 'Skift',
     trash: 'Affald',
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til papirkurven.',
+    treeLayout: 'Træ',
+    treeSearchResults:
+      'Matchende dokumenter vises som en flad liste. Ryd søgning, filtre og gruppering for at vende tilbage til træet.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
     unchecked: 'Ikke markeret',

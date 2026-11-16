@@ -174,6 +174,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i forespørselen: {{args}}',
     loadingDocument: 'Det oppstod et problem under lasting av dokumentet med ID {{id}}.',
+    loadingItems: 'Kunne ikke laste inn elementer.',
     localesNotSaved_one: 'Følgende språk kunne ikke lagres:',
     localesNotSaved_other: 'Følgende språk kunne ikke lagres:',
     logoutFailed: 'Utlogging mislyktes.',
@@ -555,6 +556,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     toggle: 'Veksle',
     trash: 'Søppel',
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til søppel.',
+    treeLayout: 'Tre',
+    treeSearchResults:
+      'Samsvarende dokumenter vises som en flat liste. Fjern søk, filtre og gruppering for å gå tilbake til treet.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
     unchecked: 'Uavhuket',

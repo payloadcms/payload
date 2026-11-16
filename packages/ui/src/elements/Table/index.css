@@ -76,6 +76,7 @@
     }
 
     td.cell--linked > :is(a, button),
+    td.cell--linked > .tree-item > a:not(:has(.id-label)),
     .cell-link {
       font-weight: var(--text-body-medium-bold-font-weight);
       text-decoration-line: underline;
@@ -147,6 +148,10 @@
 
       &:focus-within {
         outline: none;
+      }
+
+      &:focus-within:not(:where(.table--nested-docs tr)),
+      &:has(:focus-visible) {
         background: var(--color-bg-secondary);
       }
 
@@ -160,6 +165,13 @@
       outline-offset: var(--accessibility-outline-offset);
       border-radius: var(--radius-small);
     }
+  }
+
+  .table--nested-docs :is(th, td)[data-column='_select'] {
+    padding-inline-start: var(--gutter-h);
+    padding-inline-end: var(--spacer-4);
+    min-inline-size: 0;
+    inline-size: var(--spacer-3);
   }
 
   [dir='rtl'] .table thead th {

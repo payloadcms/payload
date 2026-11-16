@@ -172,6 +172,7 @@ export const csTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Neplatný typ souboru: {{value}}',
     invalidRequestArgs: 'Neplatné argumenty v požadavku: {{args}}',
     loadingDocument: 'Při načítání dokumentu s ID {{id}} došlo k chybě.',
+    loadingItems: 'Položky se nepodařilo načíst.',
     localesNotSaved_one: 'Následující lokalitu se nepodařilo uložit:',
     localesNotSaved_other: 'Následující lokality se nepodařilo uložit:',
     logoutFailed: 'Odhlášení se nezdařilo.',
@@ -549,6 +550,9 @@ export const csTranslations: DefaultTranslationsObject = {
     toggle: 'Přepnout',
     trash: 'Koš',
     trashedCountSuccessfully: '{{count}} {{label}} přesunuto do koše.',
+    treeLayout: 'Strom',
+    treeSearchResults:
+      'Odpovídající dokumenty jsou zobrazeny jako plochý seznam. Pro návrat ke stromu zrušte hledání, filtry a seskupení.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',
     unchecked: 'Nezaškrtnuto',

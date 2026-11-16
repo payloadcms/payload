@@ -174,6 +174,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Невалидан тип датотеке: {{value}}',
     invalidRequestArgs: 'Неважећи аргументи прослеђени у захтеву: {{args}}',
     loadingDocument: 'Постоји проблем при учитавању документа чији је ИД {{id}}.',
+    loadingItems: 'Није могуће учитати ставке.',
     localesNotSaved_one: 'Следеће локалне поставке није могло бити сачувано:',
     localesNotSaved_other: 'Следеће локалне поставке нису могле бити сачуване:',
     logoutFailed: 'Odjava nije uspela.',
@@ -551,6 +552,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     toggle: 'Prekidač',
     trash: 'Smeće',
     trashedCountSuccessfully: '{{count}} {{label}} premješteno u smeće.',
+    treeLayout: 'Стабло',
+    treeSearchResults:
+      'Одговарајући документи су приказани као равна листа. Обришите претрагу, филтере и груписање за повратак на стабло.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
     unchecked: 'Neoznačeno',

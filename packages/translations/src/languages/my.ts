@@ -168,6 +168,7 @@ export const myTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား: {{value}}',
     invalidRequestArgs: 'တောင်းဆိုမှုတွင် မှားယွင်းသော အကြောင်းပြချက်များ ပေးပို့ထားသည်: {{args}}',
     loadingDocument: '{{id}} ID ဖြင့် ဖိုင်ကို ဖွင့်ရာတွင် ပြဿနာရှိနေသည်။',
+    loadingItems: 'အကြောင်းအရာများကို မတင်နိုင်ပါ။',
     localesNotSaved_one: 'အောက်ပါ ဒေသသတ်မှတ်ချက်ကို သိမ်းဆည်း၍ မရပါ။',
     localesNotSaved_other: 'အောက်ပါ ဒေသသတ်မှတ်ချက်များကို သိမ်းဆည်း၍ မရပါ။',
     logoutFailed: 'ထွက်မှားနေသည်။',
@@ -541,6 +542,9 @@ export const myTranslations: DefaultTranslationsObject = {
     toggle: 'အဖွင့်/အပိတ်',
     trash: 'ဖျက်သိမ်းခြင်း',
     trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
+    treeLayout: 'သစ်ပင်ပုံစံ',
+    treeSearchResults:
+      'ကိုက်ညီသော စာရွက်စာတမ်းများကို ရိုးရိုးစာရင်းဖြင့် ပြထားသည်။ သစ်ပင်ပုံစံသို့ ပြန်ရန် ရှာဖွေမှု၊ စစ်ထုတ်မှုနှင့် အုပ်စုဖွဲ့မှုကို ရှင်းလင်းပါ။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
     unchecked: 'မစစ်ဆေးရသေးပါ',

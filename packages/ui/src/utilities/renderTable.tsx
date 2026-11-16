@@ -8,6 +8,7 @@ import type {
   Field,
   ImportMap,
   ListQuery,
+  NestedDocRow,
   PaginatedDocs,
   Payload,
   PayloadRequest,
@@ -85,6 +86,7 @@ export const renderTable = ({
   hierarchyParentFieldName,
   i18n,
   key = 'table',
+  nestedDocRows,
   orderableFieldName,
   payload,
   query,
@@ -111,6 +113,7 @@ export const renderTable = ({
   hierarchyParentFieldName?: string
   i18n: I18nClient
   key?: string
+  nestedDocRows?: Record<string, NestedDocRow>
   orderableFieldName: string
   payload: Payload
   query?: ListQuery
@@ -318,7 +321,7 @@ export const renderTable = ({
     }
   }
 
-  if (!orderableFieldName) {
+  if (!orderableFieldName || nestedDocRows) {
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
@@ -335,6 +338,8 @@ export const renderTable = ({
               columns={columnsToUse}
               data={data?.docs || []}
               id={tableId}
+              nestedDocRows={nestedDocRows}
+              useAsTitle={useAsTitle}
             />
           </TableSectionContent>
         </TableSectionRoot>

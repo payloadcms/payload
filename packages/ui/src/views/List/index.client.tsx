@@ -8,6 +8,7 @@ import React, { useEffect, useId, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
+import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
@@ -25,9 +26,9 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { NestedDocsSelectionProvider } from '../../providers/NestedDocsSelection/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
-import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -63,8 +64,11 @@ export function DefaultListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
+    hasTreeLayout,
     hierarchyData,
     listMenuItems,
+    nestedDocExpanded,
+    nestedDocRows,
     newDocumentURL,
     NoResults,
     queryPreset,
@@ -79,7 +83,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const wherePanelID = `list-controls-where-${instanceID}`
 
   const [Table] = useControllableState(InitialTable)
-  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
+  const [layout, setLayout] = useControllableState<DocumentLayout>(documentLayout ?? 'table')
 
   const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
@@ -128,6 +132,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const isNestedDocsTreeLayout = Boolean(hasTreeLayout && layout === 'tree')
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
     const preferencesKey = `collection-${collectionSlug}`
@@ -205,6 +210,7 @@ export function DefaultListView(props: ListViewClientProps) {
     !isInDrawer &&
     viewType === 'list' &&
     collectionConfig.hierarchy &&
+    !collectionConfig.nestedDocs &&
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : undefined
@@ -297,7 +303,21 @@ export function DefaultListView(props: ListViewClientProps) {
     >
       <Container className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
-          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
+          <NestedDocsSelectionProvider
+            collectionSlug={collectionSlug}
+            columns={columnState}
+            data={data}
+            enabled={Boolean(
+              isNestedDocsTreeLayout &&
+              nestedDocRows &&
+              !resolvedSearch &&
+              !hasActiveFilters &&
+              !isGroupingBy,
+            )}
+            initialExpanded={nestedDocExpanded}
+            rows={nestedDocRows}
+            sort={query?.sort}
+          >
             {BeforeList}
             <CollectionListHeader
               collectionConfig={collectionConfig}
@@ -326,6 +346,7 @@ export function DefaultListView(props: ListViewClientProps) {
               i18n={i18n}
               isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
               newDocumentURL={newDocumentURL}
+              showSelectAllAcrossPages={!isNestedDocsTreeLayout}
               smallBreak={smallBreak}
               viewType={viewType}
             />
@@ -341,7 +362,11 @@ export function DefaultListView(props: ListViewClientProps) {
               isWhereOpen={isWhereOpen}
               layoutToggle={
                 !hierarchyData && !isInDrawer ? (
-                  <LayoutToggle layout={layout} onChange={handleLayoutChange} />
+                  <LayoutToggle
+                    hasTreeLayout={hasTreeLayout}
+                    layout={layout}
+                    onChange={handleLayoutChange}
+                  />
                 ) : undefined
               }
               listMenuItems={listMenuItems}
@@ -371,6 +396,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 <span key={resolvedSearch || ''}>{resultsAnnouncement}</span>
               )}
             </div>
+            {isNestedDocsTreeLayout && (resolvedSearch || hasActiveFilters || isGroupingBy) && (
+              <div className={`${baseClass}__tree-search-banner`} role="status">
+                <Banner>{i18n.t('general:treeSearchResults')}</Banner>
+              </div>
+            )}
             {BeforeListTable}
             {hierarchyData ? (
               <DocumentSelectionProvider
@@ -472,28 +502,32 @@ export function DefaultListView(props: ListViewClientProps) {
               ))}
             {AfterListTable}
             {AfterList}
-            {docs?.length > 0 && !isGroupingBy && (
-              <PageControls
-                AfterPageControls={
-                  smallBreak ? (
-                    <div className={`${baseClass}__list-selection`}>
-                      <ListSelection
-                        collectionConfig={collectionConfig}
-                        disableBulkDelete={disableBulkDelete}
-                        disableBulkEdit={disableBulkEdit}
-                        label={collectionLabel}
-                        showSelectAllAcrossPages={!isGroupingBy}
-                        viewType={viewType}
-                      />
-                      <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
-                    </div>
-                  ) : null
-                }
-                collectionConfig={collectionConfig}
-                tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
-              />
-            )}
-          </SelectionProvider>
+            {docs?.length > 0 &&
+              !isGroupingBy &&
+              (!isNestedDocsTreeLayout || resolvedSearch || hasActiveFilters) && (
+                <PageControls
+                  AfterPageControls={
+                    smallBreak ? (
+                      <div className={`${baseClass}__list-selection`}>
+                        <ListSelection
+                          collectionConfig={collectionConfig}
+                          disableBulkDelete={disableBulkDelete}
+                          disableBulkEdit={disableBulkEdit}
+                          label={collectionLabel}
+                          showSelectAllAcrossPages={!isGroupingBy && !isNestedDocsTreeLayout}
+                          viewType={viewType}
+                        />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          {beforeActions}
+                        </div>
+                      </div>
+                    ) : null
+                  }
+                  collectionConfig={collectionConfig}
+                  tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
+                />
+              )}
+          </NestedDocsSelectionProvider>
         </TableColumnsProvider>
         {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
           <PageControls collectionConfig={collectionConfig} />
