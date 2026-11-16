@@ -82,7 +82,7 @@ describe('hierarchy parent validation', () => {
           originalDoc: {},
         }),
       ),
-    ).rejects.toThrow('own subfolder')
+    ).rejects.toThrow('Document cannot be nested beneath one of its descendants')
   })
 
   it('should validate zero-valued parent and document IDs', async () => {
@@ -108,7 +108,9 @@ describe('hierarchy parent validation', () => {
   it('should reject a descendant parent reached through an ancestor', async () => {
     const findByID = vi.fn().mockResolvedValue({ id: 'other', parent: 'current' })
 
-    await expect(hook(makeArgs({ findByID }))).rejects.toThrow('own subfolder')
+    await expect(hook(makeArgs({ findByID }))).rejects.toThrow(
+      'Document cannot be nested beneath one of its descendants',
+    )
   })
 
   it('should reject an existing loop in an ancestor chain', async () => {
@@ -160,7 +162,7 @@ describe('hierarchy parent validation', () => {
           versions: { drafts: true },
         }),
       ),
-    ).rejects.toThrow('own subfolder')
+    ).rejects.toThrow('Document cannot be nested beneath one of its descendants')
   })
 
   it('should validate the latest graph without rejecting a draft-only move against the published graph', async () => {
@@ -186,7 +188,9 @@ describe('hierarchy parent validation', () => {
       parent: id === 'other' ? 0 : 'current',
     }))
 
-    await expect(hook(makeArgs({ findByID }))).rejects.toThrow('own subfolder')
+    await expect(hook(makeArgs({ findByID }))).rejects.toThrow(
+      'Document cannot be nested beneath one of its descendants',
+    )
     expect(findByID.mock.calls.map(([args]) => args.id)).toEqual(['other', 0])
   })
 
