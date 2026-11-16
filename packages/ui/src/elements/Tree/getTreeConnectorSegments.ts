@@ -13,15 +13,7 @@ export function getTreeConnectorSegments({
 }) {
   const shouldConnectChildren = hasChildren && isExpanded && !position.isLastRendered
   const isGroup = variant === 'group'
-  const outgoing: 'ghost' | 'none' | 'solid' = position.isLastRendered
-    ? 'none'
-    : isGroup && shouldConnectChildren
-      ? 'solid'
-      : position.isLastSibling
-        ? 'none'
-        : shouldConnectChildren
-          ? 'ghost'
-          : 'solid'
+  const outgoing = getOutgoingConnector({ isGroup, position, shouldConnectChildren })
 
   return {
     ancestorColumns: position.ancestorContinues.flatMap((continues, level) =>
@@ -32,4 +24,28 @@ export function getTreeConnectorSegments({
     outgoing,
     shouldTerminateAncestors: position.isLastRendered,
   }
+}
+
+function getOutgoingConnector({
+  isGroup,
+  position,
+  shouldConnectChildren,
+}: {
+  isGroup: boolean
+  position: TreePosition
+  shouldConnectChildren: boolean
+}): 'ghost' | 'none' | 'solid' {
+  if (position.isLastRendered) {
+    return 'none'
+  }
+  if (isGroup && shouldConnectChildren) {
+    return 'solid'
+  }
+  if (position.isLastSibling) {
+    return 'none'
+  }
+  if (shouldConnectChildren) {
+    return 'ghost'
+  }
+  return 'solid'
 }
