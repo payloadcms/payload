@@ -85,6 +85,30 @@ describe('independent list layout queries', () => {
     },
   )
 
+  it('should preserve JSON filter values in independent snapshots without sharing mutable objects', () => {
+    const where = {
+      and: [
+        { count: { greater_than: 0 } },
+        { isActive: { equals: false } },
+        { parent: { equals: null } },
+        { category: { in: ['a', 'b'] } },
+      ],
+    }
+    const snapshot = getListLayoutQuery({ query: { where } })
+
+    expect(snapshot.where).toEqual(where)
+    expect(snapshot.where).not.toBe(where)
+    where.and[0].count.greater_than = 2
+    expect(snapshot.where.and[0]).toEqual({ count: { greater_than: 0 } })
+  })
+
+  it('should discard filter objects that cannot be persisted as JSON', () => {
+    const where: Record<string, unknown> = {}
+    where.self = where
+
+    expect(getListLayoutQuery({ query: { where } })).toEqual({})
+  })
+
   it('should restore missing URL fields from the destination scope when its marker is absent', () => {
     const result = resolveListLayoutQuery({
       query: { columns: ['title'], custom: 'keep' },
