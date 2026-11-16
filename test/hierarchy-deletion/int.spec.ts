@@ -60,9 +60,45 @@ test.suite('Hierarchy child reparenting', { config: './config.ts' }, () => {
 
       await payload.delete({ id: parent.id, collection })
 
-      expect((await payload.findByID({ id: content.id, collection: contentSlug })).title).toBe(
-        'Assigned content',
+      const retainedContent = await payload.findByID({
+        id: content.id,
+        collection: contentSlug,
+        depth: 0,
+      })
+
+      expect(retainedContent.title).toBe('Assigned content')
+      expect(retainedContent[collection === foldersSlug ? folderFieldName : tagFieldName]).toEqual(
+        collection === foldersSlug ? null : [],
       )
+    })
+  }
+
+  for (const collection of [foldersSlug, tagsSlug]) {
+    test(`should retain assignments when trashing a hierarchy item in ${collection}`, async ({
+      payload,
+    }) => {
+      const parent = await payload.create({ collection, data: { title: 'Parent' } })
+      const fieldName = collection === foldersSlug ? folderFieldName : tagFieldName
+      const assignment = collection === foldersSlug ? parent.id : [parent.id]
+      const content = await payload.create({
+        collection: contentSlug,
+        data: { [fieldName]: assignment, title: 'Assigned content' },
+      })
+
+      await payload.update({
+        id: parent.id,
+        collection,
+        data: { deletedAt: new Date().toISOString() },
+      })
+
+      const retainedContent = await payload.findByID({
+        id: content.id,
+        collection: contentSlug,
+        depth: 0,
+      })
+
+      expect(retainedContent.title).toBe('Assigned content')
+      expect(retainedContent[fieldName]).toEqual(assignment)
     })
   }
 
