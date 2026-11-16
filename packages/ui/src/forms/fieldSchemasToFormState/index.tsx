@@ -14,6 +14,8 @@ import type {
   SelectType,
 } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload/shared'
+
 import type { RenderFieldMethod } from './types.js'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
@@ -82,6 +84,26 @@ type Args = {
   skipValidation?: boolean
 }
 
+/**
+ * Copies values from `source` into `target` where `target` has none, recursing into objects and arrays.
+ */
+const addMissingValues = (target: Data, source: Data): Data => {
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof target[key] === 'undefined') {
+      target[key] = value
+    } else if (
+      value &&
+      typeof value === 'object' &&
+      target[key] &&
+      typeof target[key] === 'object'
+    ) {
+      addMissingValues(target[key], value)
+    }
+  }
+
+  return target
+}
+
 export const fieldSchemasToFormState = async ({
   id,
   clientFieldSchemaMap,
@@ -116,7 +138,8 @@ export const fieldSchemasToFormState = async ({
   if (fields && fields.length) {
     const state: FormStateWithoutComponents = {}
 
-    const dataWithDefaultValues = { ...data }
+    // With `select`, unselected fields are deleted from nested objects too, so copy them deeply
+    const dataWithDefaultValues = select ? deepCopyObjectSimple(data) : { ...data }
 
     await calculateDefaultValues({
       id,
@@ -130,7 +153,12 @@ export const fieldSchemasToFormState = async ({
       user: req.user,
     })
 
-    let fullData = dataWithDefaultValues
+    // `select` strips unselected fields from `dataWithDefaultValues`, but field conditions may read them
+    const conditionData = select
+      ? addMissingValues(deepCopyObjectSimple(data), deepCopyObjectSimple(dataWithDefaultValues))
+      : undefined
+
+    let fullData = conditionData ?? dataWithDefaultValues
 
     if (documentData) {
       // By the time this function is used to get form state for nested forms, their default values should have already been calculated
@@ -144,6 +172,7 @@ export const fieldSchemasToFormState = async ({
       blockData: initialBlockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data: dataWithDefaultValues,
       fields,
       fieldSchemaMap,

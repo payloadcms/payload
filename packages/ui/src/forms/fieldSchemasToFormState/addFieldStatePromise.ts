@@ -36,9 +36,25 @@ import type { RenderFieldMethod } from './types.js'
 
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
-import { iterateFields } from './iterateFields.js'
+import { getUnstrippedSiblingData, iterateFields } from './iterateFields.js'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
+
+/**
+ * Returns the row's ID, taking it from the unstripped condition data when `select` stripped it,
+ * and gives a newly generated ID to the matching row in the condition data.
+ */
+const getRowId = (row: Data, rowPath: string, conditionData: Data | undefined): string => {
+  const conditionRow = conditionData && getUnstrippedSiblingData(conditionData, `${rowPath}.id`)
+  const hasConditionRow = Boolean(conditionRow) && typeof conditionRow === 'object'
+  const rowId = row?.id || (hasConditionRow && conditionRow.id) || new ObjectId().toHexString()
+
+  if (hasConditionRow && !conditionRow.id) {
+    conditionRow.id = rowId
+  }
+
+  return rowId
+}
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -52,6 +68,11 @@ export type AddFieldStatePromiseArgs = {
   blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
+  /**
+   * With `select`, a copy of `data` taken before unselected fields are stripped from it.
+   * Field conditions read it, so they still see fields outside `select`.
+   */
+  conditionData?: Data
   data: Data
   field: Field | TabAsField
   fieldIndex: number
@@ -120,6 +141,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     blockData,
     clientFieldSchemaMap,
     collectionSlug,
+    conditionData,
     data,
     field,
     fieldSchemaMap,
@@ -317,7 +339,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           (acc, row, rowIndex: number) => {
             const rowPath = path + '.' + rowIndex
 
-            row.id = row?.id || new ObjectId().toHexString()
+            row.id = getRowId(row, rowPath, conditionData)
 
             if (!omitParents && (!filter || filter(args))) {
               const idKey = rowPath + '.id'
@@ -340,6 +362,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 blockData,
                 clientFieldSchemaMap,
                 collectionSlug,
+                conditionData,
                 data: row,
                 fields: field.fields,
                 fieldSchemaMap,
@@ -487,7 +510,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const rowPath = path + '.' + i
 
             if (block) {
-              row.id = row?.id || new ObjectId().toHexString()
+              row.id = getRowId(row, rowPath, conditionData)
 
               const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
                 (prevRow) => prevRow.id === row.id,
@@ -576,9 +599,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
-                  blockData: row,
+                  // `select` strips unselected fields from `row`, but conditions may read them
+                  blockData:
+                    (conditionData && getUnstrippedSiblingData(conditionData, `${rowPath}.id`)) ||
+                    row,
                   clientFieldSchemaMap,
                   collectionSlug,
+                  conditionData,
                   data: row,
                   fields: block.fields,
                   fieldSchemaMap,
@@ -689,6 +716,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           blockData,
           clientFieldSchemaMap,
           collectionSlug,
+          conditionData,
           data: data?.[field.name] || {},
           fields: field.fields,
           fieldSchemaMap,
@@ -872,6 +900,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       blockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data,
       fields: field.fields,
       fieldSchemaMap,
@@ -955,6 +984,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       blockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data: isNamedTab ? data?.[field.name] || {} : data,
       fields: field.fields,
       fieldSchemaMap,
@@ -996,6 +1026,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       blockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data,
       fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
       fieldSchemaMap,
