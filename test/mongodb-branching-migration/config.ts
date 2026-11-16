@@ -1,6 +1,7 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { databaseAdapter } from '../databaseAdapter.js'
 import { Pages } from './collections/Pages.js'
 import { Uploads } from './collections/Uploads.js'
 import { pagesSlug, settingsSlug, uploadsSlug } from './shared.js'
@@ -8,14 +9,21 @@ import { pagesSlug, settingsSlug, uploadsSlug } from './shared.js'
 const config = await buildConfigWithDefaults({
   config: {
     collections: [Pages, Uploads],
-    db: mongooseAdapter({
-      connectOptions: { autoIndex: false },
-      ensureIndexes: false,
-      url:
-        process.env.MONGODB_URL ||
-        process.env.DATABASE_URL ||
-        'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
-    }),
+    db: {
+      ...databaseAdapter,
+      init: (args) => {
+        const adapter = databaseAdapter.init(args)
+
+        if (adapter.name === 'mongoose') {
+          const mongoAdapter = adapter as MongooseAdapter
+
+          mongoAdapter.connectOptions = { ...mongoAdapter.connectOptions, autoIndex: false }
+          mongoAdapter.ensureIndexes = false
+        }
+
+        return adapter
+      },
+    },
     globals: [{ slug: settingsSlug, versions: true, fields: [{ name: '_branch', type: 'text' }] }],
     localization: { defaultLocale: 'en', locales: ['en', 'de'] },
   },
