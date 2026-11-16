@@ -1991,6 +1991,7 @@ export {
 export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export { canReadNestedDocsTree } from './hierarchy/canReadNestedDocsTree.js'
 export {
   DEFAULT_ALLOW_HAS_MANY,
   DEFAULT_HIERARCHY_TREE_LIMIT,
@@ -2005,6 +2006,9 @@ export { createTagField } from './hierarchy/createTagField.js'
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
+export { getNestedDocsBranch } from './hierarchy/getNestedDocsBranch.js'
+export { getNestedDocsTreeMetadata } from './hierarchy/getNestedDocsTreeMetadata.js'
+export type { NestedDocRow } from './hierarchy/getNestedDocsTreeMetadata.js'
 export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
 export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
 export type {

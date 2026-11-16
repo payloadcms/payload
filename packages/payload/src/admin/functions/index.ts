@@ -119,6 +119,7 @@ export type BuildTableStateArgs = {
    */
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  nestedDocs?: { parentID: null | number | string }
   orderableFieldName: string
   parent?: {
     collectionSlug: CollectionSlug
