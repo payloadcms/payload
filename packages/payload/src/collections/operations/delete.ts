@@ -413,16 +413,25 @@ export const deleteOperation = async <
 
       const deletable: { doc: Doc; index: number }[] = []
 
-      await Promise.all(
-        unlocked.map(async (entry) => {
-          try {
-            await runBeforeDeleteWork(entry.doc)
-            deletable.push(entry)
-          } catch (error) {
-            pushError(entry.doc.id, error)
+      const prepareDocument = async (entry: { doc: Doc; index: number }) => {
+        try {
+          await runBeforeDeleteWork(entry.doc)
+          deletable.push(entry)
+        } catch (error) {
+          if (collectionConfig.hierarchy) {
+            throw error
           }
-        }),
-      )
+          pushError(entry.doc.id, error)
+        }
+      }
+
+      if (collectionConfig.hierarchy) {
+        for (const entry of unlocked) {
+          await prepareDocument(entry)
+        }
+      } else {
+        await Promise.all(unlocked.map(prepareDocument))
+      }
 
       if (!deletable.length) {
         return results

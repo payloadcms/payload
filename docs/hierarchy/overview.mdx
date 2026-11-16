@@ -723,8 +723,12 @@ If the title field (from `admin.useAsTitle`) is localized, path fields are autom
 Hierarchy maintains parent-child relationships through a simple `parent` field:
 
 1. Validates there are no circular references when parent changes
-2. Cleans up orphaned children when a parent is deleted (sets their parent to null)
+2. Reparents direct children to the deleted document’s parent, or to the root when no parent exists
 3. No cascade updates needed - paths are always computed fresh
+
+Deleting or trashing a hierarchy document preserves its children. Published and pending draft parent relationships are repaired independently without publishing pending content. Restoring the deleted document does not move those children back.
+
+This structural update maintains hierarchy links even when the caller cannot edit a child's parent field. Access to delete or trash the selected parent is still required. Collections using localized draft status reject parent deletion when children need reparenting.
 
 **Example:**
 
