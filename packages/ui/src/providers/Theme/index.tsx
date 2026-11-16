@@ -100,8 +100,8 @@ export const ThemeProvider: React.FC<{
 
   const { config } = useConfig()
   const preselectedTheme = config.admin.theme
-  const themeCookieKey = `${config.cookiePrefix || 'payload'}-theme`
-  const contrastCookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
+  const themeCookieKey = `${config.cookiePrefix}-theme`
+  const contrastCookieKey = `${config.cookiePrefix}-high-contrast-mode`
 
   const themeParam = useSearchParams().get('theme')?.toLowerCase()
 

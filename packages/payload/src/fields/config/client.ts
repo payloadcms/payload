@@ -3,7 +3,7 @@
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
 import type { ClientTranslationKeys, I18nClient, TFunction } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { LabelFunction } from '../../config/types.js'
 import type {
   AdminClient,
@@ -25,7 +25,7 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
-import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
+import { getFromImportMap } from '../../cli/commands/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
@@ -200,7 +200,7 @@ export const createClientField = ({
           break
         }
 
-        clientField.admin = {} as AdminClient
+        clientField.admin = {}
 
         for (const adminKey in incomingField.admin) {
           if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
@@ -434,7 +434,7 @@ export const createClientField = ({
                 t: i18n.t,
               })
             } else if (key === 'admin') {
-              clientTab.admin = {} as AdminClient
+              clientTab.admin = {}
 
               for (const adminKey in tab.admin) {
                 if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {

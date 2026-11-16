@@ -9,12 +9,12 @@ export {
 } from '../auth/cookies.js'
 
 export { extractAccessFromPermission } from '../auth/extractAccessFromPermission.js'
-export { extractJWT } from '../auth/extractJWT.js'
+export { extractBearerToken, extractJWT } from '../auth/extractJWT.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 
-export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
-export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
+export { getFromImportMap } from '../cli/commands/generateImportMap/utilities/getFromImportMap.js'
+export { parsePayloadComponent } from '../cli/commands/generateImportMap/utilities/parsePayloadComponent.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -41,6 +41,7 @@ export {
 } from '../config/orderable/fractional-indexing.js'
 export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 export { combineQueries } from '../database/combineQueries.js'
+export { isNestedRelationshipQuery } from '../database/isNestedRelationshipQuery.js'
 
 export { APIError, APIErrorName } from '../errors/APIError.js'
 export { MissingEditorProp } from '../errors/MissingEditorProp.js'
@@ -101,12 +102,27 @@ export {
 } from '../hierarchy/constants.js'
 
 export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
+export { instructionsCollectionSlug } from '../llm-instructions/shared.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
-export { validOperators, validOperatorSet } from '../types/constants.js'
+export {
+  hasManyRelationshipOperators,
+  hasManyRelationshipOperatorSet,
+  validOperators,
+  validOperatorSet,
+} from '../types/constants.js'
+export type { HasManyRelationshipOperator } from '../types/constants.js'
+export { formatFileMeta } from '../uploads/formatFileMeta.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export { generatePayloadFileURL } from '../uploads/generatePayloadFileURL.js'
+export {
+  getSanitizedUploadFilename,
+  uploadRequiresServerValidation,
+} from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
+export { defaultTransferConfig as defaultUploadTransferConfig } from '../uploads/sessions/defaults.js'
+export { cropToPercent } from '../uploads/transformState/cropUnits.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 
@@ -129,23 +145,39 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
+
+export {
+  expandOwnDottedKey,
+  hasUnsupportedFieldPathSegment,
+  setOwnProperty,
+} from '../utilities/fieldPath.js'
+
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
-export { formatAdminURL } from '../utilities/formatAdminURL.js'
+export { formatAdminURL, stripTrailingSlash } from '../utilities/formatAdminURL.js'
+
 export { formatErrors } from '../utilities/formatErrors.js'
 
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getBlockSelect } from '../utilities/getBlockSelect.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
+export { getDataFromFormState } from '../utilities/getDataFromFormState.js'
+export {
+  type DateOnlyComparison,
+  type DateOnlyConstraint,
+  getDateOnlyComparison,
+  isDateOnlyFilter,
+  isDateOnlyFilterValue,
+} from '../utilities/getDateOnlyComparison.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'
-export { getSiblingData } from '../utilities/getSiblingData.js'
+export { getSiblingDataFromFormState } from '../utilities/getSiblingDataFromFormState.js'
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export {
@@ -181,9 +213,12 @@ export {
 
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
 
-export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
+export { parseErrorResponse } from '../utilities/parseErrorResponse.js'
+export type { ParsedErrorResponse, ParsedNonFieldError } from '../utilities/parseErrorResponse.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
+
+export { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 
 export { sanitizeUrl } from '../utilities/sanitizeUrl.js'
 

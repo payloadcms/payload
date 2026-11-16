@@ -41,11 +41,13 @@ export default buildConfig({
 })
 ```
 
-| Option               | Description                                                          | Default                       |
-| -------------------- | -------------------------------------------------------------------- | ----------------------------- |
-| `enabled`            | Whether or not to enable the plugin                                  | `true`                        |
-| `collections`        | Collections to apply the Vercel Blob adapter to                      |                               |
-| `addRandomSuffix`    | Add a random suffix to the uploaded file name in Vercel Blob storage | `false`                       |
-| `cacheControlMaxAge` | Cache-Control max-age in seconds                                     | `365 * 24 * 60 * 60` (1 Year) |
-| `token`              | Vercel Blob storage read/write token                                 | `''`                          |
-| `clientUploads`      | Upload directly to Vercel Blob instead of through Payload.           |                               |
+| Option               | Description                                                                             | Default                       |
+| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------- |
+| `enabled`            | Whether or not to enable the plugin                                                     | `true`                        |
+| `collections`        | Collections to apply the Vercel Blob adapter to                                         |                               |
+| `addRandomSuffix`    | Must be `false` or omitted; enabled adapters with configured collections reject `true`. | `false`                       |
+| `cacheControlMaxAge` | Cache-Control max-age in seconds                                                        | `365 * 24 * 60 * 60` (1 Year) |
+| `token`              | Vercel Blob storage read/write token                                                    | `''`                          |
+| `clientUploads`      | Upload directly to Vercel Blob instead of through Payload.                              |                               |
+
+Set `addRandomSuffix` to `false` or omit it. Payload requires exact storage paths for reads, rollback, and deletion, and already allocates unique `_objectKey` folders for managed uploads. Enabled adapters with configured collections reject `true` during initialization. Disabled adapters retain their existing behavior. Changing this option does not rename existing blobs; migrate any mismatched stored paths and saved metadata together.

@@ -98,7 +98,12 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
-  const displayedValue = getDisplayedFieldValue(cellData, field, i18n)
+  const displayedValue = getDisplayedFieldValue({
+    cellData,
+    collectionConfig,
+    field,
+    i18n,
+  })
 
   // Check if this is a hierarchy relationship field by checking if the related collection has hierarchy config
   const isHierarchyField =

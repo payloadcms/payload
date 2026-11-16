@@ -65,7 +65,11 @@ export const Button: React.FC<Props> = (props) => {
   const {
     id,
     type = 'button',
+    'aria-controls': ariaControls,
+    'aria-expanded': ariaExpanded,
+    'aria-haspopup': ariaHasPopup,
     'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
     buttonStyle = 'primary',
     children,
     className,
@@ -79,7 +83,9 @@ export const Button: React.FC<Props> = (props) => {
     margin = true,
     newTab,
     onClick,
+    onKeyDown,
     onMouseDown,
+    popupAriaLabel,
     popupIconSize,
     ref,
     round,
@@ -137,11 +143,16 @@ export const Button: React.FC<Props> = (props) => {
   const buttonProps = {
     id,
     type,
+    'aria-controls': ariaControls,
     'aria-disabled': isDisabled,
+    'aria-expanded': ariaExpanded,
+    'aria-haspopup': ariaHasPopup,
     'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
     className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled: isDisabled,
     onClick: !isDisabled ? handleClick : undefined,
+    onKeyDown: !isDisabled ? onKeyDown : undefined,
     onMouseDown: !isDisabled ? onMouseDown : undefined,
     onPointerEnter: tooltip ? () => setShowTooltip(true) : undefined,
     onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
@@ -212,13 +223,14 @@ export const Button: React.FC<Props> = (props) => {
         {buttonElement}
         <Popup
           button={<ChevronIcon size={popupIconSize} />}
-          buttonAriaLabel={t('general:moreOptions')}
+          buttonAriaLabel={popupAriaLabel || t('general:moreOptions')}
           buttonSize={size}
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}
           horizontalAlign="right"
           id={`${id}-popup`}
           noBackground
+          popupType="menu"
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
           size="small"
           verticalAlign="bottom"

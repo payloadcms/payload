@@ -1,9 +1,8 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { generatePayloadCookie } from '../cookies.js'
 import { refreshOperation } from '../operations/refresh.js'
 
@@ -18,10 +17,11 @@ export const refreshHandler: PayloadHandler = async (req) => {
 
   const result = await refreshOperation({
     collection,
+    refreshToken: typeof req.data?.refreshToken === 'string' ? req.data.refreshToken : undefined,
     req,
   })
 
-  const { refreshedToken, ...resultWithoutToken } = result
+  const { refreshedToken, refreshToken: _refreshToken, ...resultWithoutToken } = result
 
   if (result.setCookie) {
     const cookie = generatePayloadCookie({

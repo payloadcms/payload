@@ -8,15 +8,6 @@ export type DescriptionFunction = (args: {
   t: TFunction<ClientTranslationKeys>
 }) => string
 
-export type FieldDescriptionClientComponent<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldDescriptionClientProps<TFieldClient>>
-
-export type FieldDescriptionServerComponent<
-  TFieldServer extends Field = Field,
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldDescriptionServerProps<TFieldServer, TFieldClient>>
-
 export type StaticDescription = Record<string, string> | string
 
 export type Description = DescriptionFunction | StaticDescription

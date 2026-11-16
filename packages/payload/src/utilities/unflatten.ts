@@ -16,6 +16,8 @@
  * Reference: https://www.npmjs.com/package/is-buffer
  * All rights reserved.
  */
+import { hasUnsupportedFieldPathSegment, setOwnProperty } from './fieldPath.js'
+
 function isBuffer(obj: any) {
   return (
     obj != null &&
@@ -28,6 +30,23 @@ function isBuffer(obj: any) {
 interface Opts {
   delimiter?: string
   object?: any
+  /**
+   * Allows descendant paths to replace scalar values or populate explicit empty arrays.
+   *
+   * @example
+   * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: false })
+   * // { person: 'Ada' }
+   *
+   * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: true })
+   * // { person: { me: true } }
+   *
+   * @example
+   * unflatten({ items: [], 'items.0.name': 'Milk' }, { overwrite: false })
+   * // { items: [] }
+   *
+   * unflatten({ items: [], 'items.0.name': 'Milk' }, { overwrite: true })
+   * // { items: [{ name: 'Milk' }] }
+   */
   overwrite?: boolean
   recursive?: boolean
 }
@@ -53,28 +72,41 @@ export const unflatten = (target: any, opts?: Opts) => {
   }
 
   const sortedKeys = Object.keys(target).sort((keyA, keyB) => keyA.length - keyB.length)
+  const explicitEmptyArrays = overwrite ? undefined : new Set<unknown>()
 
   sortedKeys.forEach((key) => {
     const split = key.split(delimiter)
+
+    if (hasUnsupportedFieldPathSegment({ segments: split })) {
+      return
+    }
+
     let key1 = getkey(split.shift())
     let key2 = getkey(split[0])
     let recipient = result as Record<string, any>
 
     while (key2 !== undefined) {
-      if (key1 === '__proto__') {
-        return
-      }
-
-      const type = Object.prototype.toString.call(recipient[key1])
+      const currentValue = Object.hasOwn(recipient, key1) ? recipient[key1] : undefined
+      const type = Object.prototype.toString.call(currentValue)
       const isobject = type === '[object Object]' || type === '[object Array]'
 
-      // do not write over falsey, non-undefined values if overwrite is false
-      if (!overwrite && !isobject && typeof recipient[key1] !== 'undefined') {
+      // Preserve scalar values and explicit empty arrays unless overwriting is enabled.
+      // An explicit empty array can represent a cleared list, so stale descendants must not repopulate it.
+      // Objects and nonempty arrays remain mergeable.
+      if (
+        !overwrite &&
+        ((!isobject && typeof currentValue !== 'undefined') ||
+          explicitEmptyArrays?.has(currentValue))
+      ) {
         return
       }
 
-      if ((overwrite && !isobject) || (!overwrite && recipient[key1] == null)) {
-        recipient[key1] = typeof key2 === 'number' && !opts.object ? [] : {}
+      if ((overwrite && !isobject) || (!overwrite && currentValue == null)) {
+        setOwnProperty({
+          key: key1,
+          target: recipient,
+          value: typeof key2 === 'number' && !opts.object ? [] : {},
+        })
       }
 
       recipient = recipient[key1]
@@ -85,8 +117,17 @@ export const unflatten = (target: any, opts?: Opts) => {
       }
     }
 
-    // unflatten again for 'messy objects'
-    recipient[key1] = recursive ? unflatten(target[key], opts) : target[key]
+    const value = recursive ? unflatten(target[key], opts) : target[key]
+
+    if (explicitEmptyArrays && Array.isArray(value) && value.length === 0) {
+      explicitEmptyArrays.add(value)
+    }
+
+    setOwnProperty({
+      key: key1,
+      target: recipient,
+      value,
+    })
   })
 
   return result

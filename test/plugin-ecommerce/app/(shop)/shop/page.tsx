@@ -15,6 +15,7 @@ export const Page = async () => {
     collection: 'products',
     depth: 2,
     limit: 10,
+    overrideAccess: true,
   })
 
   return (

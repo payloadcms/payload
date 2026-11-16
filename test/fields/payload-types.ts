@@ -64,22 +64,22 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3E252BA3".
+ * via the `definition` "LexicalNodes_FD47D92F".
  */
-export type LexicalNodes_3E252BA3 =
+export type LexicalNodes_FD47D92F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3E252BA3>
+  | SerializedParagraphNode<LexicalNodes_FD47D92F>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_3E252BA3>
+  | SerializedHeadingNode<LexicalNodes_FD47D92F>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_3E252BA3>
-  | SerializedListNode<LexicalNodes_3E252BA3>
-  | SerializedListItemNode<LexicalNodes_3E252BA3>
-  | SerializedAutoLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_FD47D92F>
+  | SerializedListNode<LexicalNodes_FD47D92F>
+  | SerializedListItemNode<LexicalNodes_FD47D92F>
+  | SerializedAutoLinkNode<LexicalNodes_FD47D92F, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_FD47D92F, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -94,6 +94,7 @@ export type LexicalNodes_3E252BA3 =
       | 'custom-tab-id'
       | 'custom-row-id'
       | 'date-fields'
+      | 'duplicate-fields'
       | 'email-fields'
       | 'radio-fields'
       | 'group-fields'
@@ -105,7 +106,12 @@ export type LexicalNodes_3E252BA3 =
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-field-access'
       | 'slug-autosave'
+      | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-nested-group'
+      | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -122,17 +128,17 @@ export type LexicalNodes_3E252BA3 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C8D96449".
+ * via the `definition` "LexicalNodes_DA189A21".
  */
-export type LexicalNodes_C8D96449 =
+export type LexicalNodes_DA189A21 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C8D96449>
+  | SerializedParagraphNode<LexicalNodes_DA189A21>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_C8D96449>
+  | SerializedQuoteNode<LexicalNodes_DA189A21>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -147,6 +153,7 @@ export type LexicalNodes_C8D96449 =
       | 'custom-tab-id'
       | 'custom-row-id'
       | 'date-fields'
+      | 'duplicate-fields'
       | 'email-fields'
       | 'radio-fields'
       | 'group-fields'
@@ -158,7 +165,12 @@ export type LexicalNodes_C8D96449 =
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-field-access'
       | 'slug-autosave'
+      | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-nested-group'
+      | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -173,11 +185,11 @@ export type LexicalNodes_C8D96449 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_C8D96449>
-  | SerializedListItemNode<LexicalNodes_C8D96449>
-  | SerializedHeadingNode<LexicalNodes_C8D96449>;
+  | SerializedAutoLinkNode<LexicalNodes_DA189A21, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_DA189A21, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_DA189A21>
+  | SerializedListItemNode<LexicalNodes_DA189A21>
+  | SerializedHeadingNode<LexicalNodes_DA189A21>;
 
 export interface Config {
   auth: {
@@ -185,6 +197,7 @@ export interface Config {
   };
   blocks: {
     ConfigBlockTest: ConfigBlockTest;
+    conditionalReference: ConditionalReference;
     localizedTextReference: LocalizedTextReference;
     localizedTextReference2: LocalizedTextReference2;
   };
@@ -202,6 +215,7 @@ export interface Config {
     'custom-tab-id': CustomTabId;
     'custom-row-id': CustomRowId;
     'date-fields': DateField;
+    'duplicate-fields': DuplicateField;
     'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
@@ -213,7 +227,12 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
+    'slug-field-access': SlugFieldAccess;
     'slug-autosave': SlugAutosave;
+    'slug-localized-required': SlugLocalizedRequired;
+    'slug-localized-required-siblings': SlugLocalizedRequiredSibling;
+    'slug-localized-required-nested-group': SlugLocalizedRequiredNestedGroup;
+    'slug-localized-required-nested-tab': SlugLocalizedRequiredNestedTab;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -246,6 +265,7 @@ export interface Config {
     'custom-tab-id': CustomTabIdSelect<false> | CustomTabIdSelect<true>;
     'custom-row-id': CustomRowIdSelect<false> | CustomRowIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
+    'duplicate-fields': DuplicateFieldsSelect<false> | DuplicateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
@@ -257,7 +277,12 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
+    'slug-field-access': SlugFieldAccessSelect<false> | SlugFieldAccessSelect<true>;
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
+    'slug-localized-required': SlugLocalizedRequiredSelect<false> | SlugLocalizedRequiredSelect<true>;
+    'slug-localized-required-siblings': SlugLocalizedRequiredSiblingsSelect<false> | SlugLocalizedRequiredSiblingsSelect<true>;
+    'slug-localized-required-nested-group': SlugLocalizedRequiredNestedGroupSelect<false> | SlugLocalizedRequiredNestedGroupSelect<true>;
+    'slug-localized-required-nested-tab': SlugLocalizedRequiredNestedTabSelect<false> | SlugLocalizedRequiredNestedTabSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -283,9 +308,11 @@ export interface Config {
   globalsSelect: {};
   locale: 'en' | 'es';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -323,6 +350,26 @@ export interface ConfigBlockTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConditionalReference".
+ */
+export interface ConditionalReference {
+  testBlocks?: TestBlock[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'conditionalReference';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock".
+ */
+export interface TestBlock {
+  testField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LocalizedTextReference".
  */
 export interface LocalizedTextReference {
@@ -348,6 +395,14 @@ export interface LocalizedTextReference2 {
 export interface User {
   id: string;
   canViewConditionalField?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -355,6 +410,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -373,6 +429,15 @@ export interface User {
  */
 export interface SelectVersionsField {
   id: string;
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
@@ -381,6 +446,14 @@ export interface SelectVersionsField {
       }[]
     | null;
   blocks?: Block[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -406,7 +479,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_3E252BA3> | null;
+    richTextField?: LexicalRichText<LexicalNodes_FD47D92F> | null;
     subArray?:
       | {
           text?: string | null;
@@ -503,6 +576,14 @@ export interface ArrayField {
         text?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -551,6 +632,13 @@ export interface BlockField {
   blockWithLabels?: Text[] | null;
   deduplicatedBlocks?: ConfigBlockTest[] | null;
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  configuration?: ConditionalReference[] | null;
+  showConditionalFields?: boolean | null;
+  conditionalGroup?: {
+    conditionalConfiguration?: ConditionalReference[] | null;
+  };
+  showInlineBlocks?: boolean | null;
+  testBlocks?: TestBlock[] | null;
   localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
   localizedReferences?: LocalizedTextReference2[] | null;
   /**
@@ -564,6 +652,14 @@ export interface BlockField {
   enabledBlocks?: string | null;
   blocksWithDynamicFilterOptions?: (BlockOne | BlockTwo | BlockThree)[] | null;
   blocksWithFilterOptions?: (BlockFour | BlockFive | BlockSix)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -573,7 +669,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
+  richText?: LexicalRichText<LexicalNodes_DA189A21> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -645,7 +741,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
+  richText?: LexicalRichText<LexicalNodes_DA189A21> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -826,6 +922,7 @@ export interface TextField {
   disabledTextField?: string | null;
   localizedText?: string | null;
   localizedRequiredText: string;
+  localizedCustomValidate?: string | null;
   /**
    * en description
    */
@@ -852,6 +949,14 @@ export interface TextField {
       }[]
     | null;
   blocks?: BlockWithText[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -993,6 +1098,15 @@ export interface CheckboxField {
   id: string;
   checkbox: boolean;
   checkboxNotRequired?: boolean | null;
+  checkboxRequiresTrue?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1008,6 +1122,14 @@ export interface CodeField {
   html?: string | null;
   css?: string | null;
   codeWithPadding?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1041,6 +1163,14 @@ export interface CollapsibleField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1060,7 +1190,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_3E252BA3> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_FD47D92F> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -1111,6 +1241,14 @@ export interface ConditionalLogic {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1142,6 +1280,14 @@ export interface BlockWithRadioCondition {
  */
 export interface CustomId {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1156,6 +1302,14 @@ export interface CustomIdNested {
   id: number;
   title: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1165,6 +1319,14 @@ export interface CustomIdNested {
  */
 export interface CustomTabId {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1174,6 +1336,14 @@ export interface CustomTabId {
  */
 export interface CustomRowId {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1229,6 +1399,14 @@ export interface DateField {
   dateWithTimezoneNoDefault_tz?: ('America/New_York' | 'Europe/London' | 'UTC') | null;
   dateWithTimezoneWithDisabledColumns?: string | null;
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1242,6 +1420,54 @@ export interface DateBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'dateBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "duplicate-fields".
+ */
+export interface DuplicateField {
+  id: string;
+  text: string;
+  disabledText?: string | null;
+  disabledGroup?: {
+    value?: string | null;
+  };
+  disabledArray?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disabledBlocks?: DisabledBlock[] | null;
+  childDisabledArray?:
+    | {
+        preserved?: string | null;
+        reset?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disabledLocalizedText?: string | null;
+  disabledHookText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DisabledBlock".
+ */
+export interface DisabledBlock {
+  value?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'disabledBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1265,6 +1491,14 @@ export interface EmailField {
   beforeAndAfterInput?: string | null;
   disableListColumnText?: string | null;
   disableListFilterText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1274,8 +1508,16 @@ export interface EmailField {
  */
 export interface RadioField {
   id: string;
-  radio?: ('one' | 'two' | 'three') | null;
+  radio: 'one' | 'two' | 'three';
   radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1390,6 +1632,14 @@ export interface GroupField {
   deeplyNestedGroup?: {
     insideNestedUnnamedGroup?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1425,6 +1675,14 @@ export interface RowField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1504,6 +1762,14 @@ export interface IndexedField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1545,6 +1811,14 @@ export interface JsonField {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1573,6 +1847,14 @@ export interface NumberField {
       }[]
     | null;
   blocks?: BlockWithNumber[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1614,6 +1896,14 @@ export interface PointField {
      */
     point?: [number, number] | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1700,6 +1990,14 @@ export interface RelationshipField {
     relationTo: 'text-fields';
     value: string | TextField;
   } | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1732,6 +2030,14 @@ export interface SelectField {
   selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
   disallowOption2?: boolean | null;
   selectAsyncFilterOptions?: ('one' | 'two' | 'three') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1750,6 +2056,36 @@ export interface SlugField {
   readOnlySlug?: string | null;
   sourcelessSlug?: string | null;
   test?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-field-access".
+ */
+export interface SlugFieldAccess {
+  id: string;
+  title?: string | null;
+  slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
+  sourcelessSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1763,9 +2099,103 @@ export interface SlugAutosave {
   slug: string;
   localizedTitle?: string | null;
   localizedSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-siblings".
+ */
+export interface SlugLocalizedRequiredSibling {
+  id: string;
+  title: string;
+  optionalTitle?: string | null;
+  body: string;
+  sharedSlug: string;
+  optionalSlug: string;
+  fallbackSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-group".
+ */
+export interface SlugLocalizedRequiredNestedGroup {
+  id: string;
+  title: string;
+  content: {
+    slug: string;
+  };
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-tab".
+ */
+export interface SlugLocalizedRequiredNestedTab {
+  id: string;
+  title: string;
+  content: {
+    slug: string;
+  };
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required".
+ */
+export interface SlugLocalizedRequired {
+  id: string;
+  title: string;
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1782,6 +2212,14 @@ export interface TabsFields2 {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1866,6 +2304,14 @@ export interface TabsField {
   nestedTab?: {
     text?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1916,6 +2362,14 @@ export interface TextareaField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   defaultValueFromReq?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1927,6 +2381,14 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1947,6 +2409,14 @@ export interface Uploads2 {
   id: string;
   text?: string | null;
   media?: (string | null) | Uploads2;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1966,6 +2436,14 @@ export interface Uploads2 {
 export interface Uploads3 {
   id: string;
   media?: (string | null) | Uploads3;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1986,6 +2464,14 @@ export interface UploadsMulti {
   id: string;
   text?: string | null;
   media?: (string | Upload)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2005,6 +2491,14 @@ export interface UploadsPoly {
         relationTo: 'uploads2';
         value: string | Uploads2;
       } | null);
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2027,6 +2521,14 @@ export interface UploadsMultiPoly {
           }
       )[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2040,6 +2542,14 @@ export interface UploadsRestricted {
   uploadWithoutRestriction?: (string | null) | Upload;
   uploadWithAllowCreateFalse?: (string | null) | Upload;
   uploadMultipleWithAllowCreateFalse?: (string | Upload)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2050,6 +2560,14 @@ export interface UploadsRestricted {
 export interface UiField {
   id: string;
   text: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2130,6 +2648,10 @@ export interface PayloadLockedDocument {
         value: string | DateField;
       } | null)
     | ({
+        relationTo: 'duplicate-fields';
+        value: string | DuplicateField;
+      } | null)
+    | ({
         relationTo: 'email-fields';
         value: string | EmailField;
       } | null)
@@ -2174,8 +2696,28 @@ export interface PayloadLockedDocument {
         value: string | SlugField;
       } | null)
     | ({
+        relationTo: 'slug-field-access';
+        value: string | SlugFieldAccess;
+      } | null)
+    | ({
         relationTo: 'slug-autosave';
         value: string | SlugAutosave;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required';
+        value: string | SlugLocalizedRequired;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-siblings';
+        value: string | SlugLocalizedRequiredSibling;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-nested-group';
+        value: string | SlugLocalizedRequiredNestedGroup;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-nested-tab';
+        value: string | SlugLocalizedRequiredNestedTab;
       } | null)
     | ({
         relationTo: 'tabs-fields-2';
@@ -2273,6 +2815,8 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   canViewConditionalField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2280,6 +2824,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -2295,6 +2840,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "select-versions-fields_select".
  */
 export interface SelectVersionsFieldsSelect<T extends boolean = true> {
+  customJSON?: T;
   hasMany?: T;
   array?:
     | T
@@ -2313,6 +2859,8 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2427,6 +2975,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         id?: T;
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2631,6 +3181,25 @@ export interface BlockFieldsSelect<T extends boolean = true> {
       };
   deduplicatedBlocks?: T | {};
   deduplicatedBlocks2?: T | {};
+  configuration?: T | {};
+  showConditionalFields?: T;
+  conditionalGroup?:
+    | T
+    | {
+        conditionalConfiguration?: T | {};
+      };
+  showInlineBlocks?: T;
+  testBlocks?:
+    | T
+    | {
+        testBlock?:
+          | T
+          | {
+              testField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   localizedReferencesLocalizedBlock?: T | {};
   localizedReferences?: T | {};
   groupedBlocks?:
@@ -2727,6 +3296,8 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2871,6 +3442,9 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
   checkboxNotRequired?: T;
+  checkboxRequiresTrue?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2885,6 +3459,8 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   html?: T;
   css?: T;
   codeWithPadding?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2925,6 +3501,8 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
         innerCollapsible?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3016,6 +3594,8 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3025,6 +3605,8 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
  */
 export interface CustomIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3036,6 +3618,8 @@ export interface CustomIdNestedSelect<T extends boolean = true> {
   id?: T;
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3045,6 +3629,8 @@ export interface CustomIdNestedSelect<T extends boolean = true> {
  */
 export interface CustomTabIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3054,6 +3640,8 @@ export interface CustomTabIdSelect<T extends boolean = true> {
  */
 export interface CustomRowIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3118,6 +3706,51 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "duplicate-fields_select".
+ */
+export interface DuplicateFieldsSelect<T extends boolean = true> {
+  text?: T;
+  disabledText?: T;
+  disabledGroup?:
+    | T
+    | {
+        value?: T;
+      };
+  disabledArray?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  disabledBlocks?:
+    | T
+    | {
+        disabledBlock?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  childDisabledArray?:
+    | T
+    | {
+        preserved?: T;
+        reset?: T;
+        id?: T;
+      };
+  disabledLocalizedText?: T;
+  disabledHookText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3139,6 +3772,8 @@ export interface EmailFieldsSelect<T extends boolean = true> {
   beforeAndAfterInput?: T;
   disableListColumnText?: T;
   disableListFilterText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3149,6 +3784,8 @@ export interface EmailFieldsSelect<T extends boolean = true> {
 export interface RadioFieldsSelect<T extends boolean = true> {
   radio?: T;
   radioWithJsxLabelOption?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3291,6 +3928,8 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         insideNestedUnnamedGroup?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3346,6 +3985,8 @@ export interface RowFieldsSelect<T extends boolean = true> {
         rightArrayChild?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3382,6 +4023,8 @@ export interface IndexedFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3397,6 +4040,8 @@ export interface JsonFieldsSelect<T extends boolean = true> {
         jsonWithinGroup?: T;
       };
   customJSON?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3434,6 +4079,8 @@ export interface NumberFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3450,6 +4097,8 @@ export interface PointFieldsSelect<T extends boolean = true> {
     | {
         point?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3486,6 +4135,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipDrawerHasManyPolymorphic?: T;
   relationshipDrawerWithAllowCreateFalse?: T;
   relationshipDrawerWithFilterOptions?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3521,6 +4172,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
   selectWithFilteredOptions?: T;
   disallowOption2?: T;
   selectAsyncFilterOptions?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3538,6 +4191,23 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   readOnlySlug?: T;
   sourcelessSlug?: T;
   test?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-field-access_select".
+ */
+export interface SlugFieldAccessSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
+  sourcelessSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3550,9 +4220,73 @@ export interface SlugAutosaveSelect<T extends boolean = true> {
   slug?: T;
   localizedTitle?: T;
   localizedSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-siblings_select".
+ */
+export interface SlugLocalizedRequiredSiblingsSelect<T extends boolean = true> {
+  title?: T;
+  optionalTitle?: T;
+  body?: T;
+  sharedSlug?: T;
+  optionalSlug?: T;
+  fallbackSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-group_select".
+ */
+export interface SlugLocalizedRequiredNestedGroupSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        slug?: T;
+      };
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-tab_select".
+ */
+export interface SlugLocalizedRequiredNestedTabSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        slug?: T;
+      };
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required_select".
+ */
+export interface SlugLocalizedRequiredSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3570,6 +4304,8 @@ export interface TabsFields2Select<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3665,6 +4401,8 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3699,6 +4437,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   disabledTextField?: T;
   localizedText?: T;
   localizedRequiredText?: T;
+  localizedCustomValidate?: T;
   i18nText?: T;
   defaultString?: T;
   defaultEmptyString?: T;
@@ -3732,6 +4471,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3754,6 +4495,8 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   defaultValueFromReq?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3764,6 +4507,8 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
 export interface UploadsSelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3783,6 +4528,8 @@ export interface UploadsSelect<T extends boolean = true> {
 export interface Uploads2Select<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3801,6 +4548,8 @@ export interface Uploads2Select<T extends boolean = true> {
  */
 export interface Uploads3Select<T extends boolean = true> {
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3820,6 +4569,8 @@ export interface Uploads3Select<T extends boolean = true> {
 export interface UploadsMultiSelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3830,6 +4581,8 @@ export interface UploadsMultiSelect<T extends boolean = true> {
 export interface UploadsPolySelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3840,6 +4593,8 @@ export interface UploadsPolySelect<T extends boolean = true> {
 export interface UploadsMultiPolySelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3852,6 +4607,8 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
   uploadWithoutRestriction?: T;
   uploadWithAllowCreateFalse?: T;
   uploadMultipleWithAllowCreateFalse?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3861,6 +4618,8 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
  */
 export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3906,6 +4665,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -3935,6 +4704,7 @@ export interface CollectionQueryWidget {
       | 'custom-tab-id'
       | 'custom-row-id'
       | 'date-fields'
+      | 'duplicate-fields'
       | 'email-fields'
       | 'radio-fields'
       | 'group-fields'
@@ -3946,7 +4716,12 @@ export interface CollectionQueryWidget {
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-field-access'
       | 'slug-autosave'
+      | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-nested-group'
+      | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -3995,6 +4770,7 @@ export interface ActivityWidget {
           | 'custom-tab-id'
           | 'custom-row-id'
           | 'date-fields'
+          | 'duplicate-fields'
           | 'email-fields'
           | 'radio-fields'
           | 'group-fields'
@@ -4006,7 +4782,12 @@ export interface ActivityWidget {
           | 'relationship-fields'
           | 'select-fields'
           | 'slug-fields'
+          | 'slug-field-access'
           | 'slug-autosave'
+          | 'slug-localized-required'
+          | 'slug-localized-required-siblings'
+          | 'slug-localized-required-nested-group'
+          | 'slug-localized-required-nested-tab'
           | 'tabs-fields-2'
           | 'tabs-fields'
           | 'text-fields'
@@ -4021,6 +4802,16 @@ export interface ActivityWidget {
           | 'ui-fields'
         )[]
       | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?: ('uploads' | 'uploads2' | 'uploads3')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

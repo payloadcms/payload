@@ -1,9 +1,9 @@
-import type { CodeFieldLabelServerComponent } from 'payload'
+import type { CodeFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent = ({
+export const CustomCodeFieldLabelServer: React.FC<CodeFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

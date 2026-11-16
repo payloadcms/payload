@@ -1,12 +1,7 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
   accessControlSlug,
   arraySlug,
@@ -16,23 +11,9 @@ import {
   spanishLocale,
 } from './config.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('globals', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('REST', () => {
-    it('should create', async () => {
+test.suite('globals', { config: './config.ts' }, () => {
+  test.describe('REST', () => {
+    test('should create', async ({ restClient }) => {
       const title = 'update'
       const data = {
         title,
@@ -46,7 +27,7 @@ describe('globals', () => {
       expect(result).toMatchObject(data)
     })
 
-    it('should read', async () => {
+    test('should read', async ({ restClient }) => {
       const title = 'read'
       const data = {
         title,
@@ -62,7 +43,7 @@ describe('globals', () => {
       expect(globalDoc).toMatchObject(data)
     })
 
-    it('should update with localization', async () => {
+    test('should update with localization', async ({ restClient }) => {
       const array = [
         {
           text: 'one',
@@ -83,8 +64,8 @@ describe('globals', () => {
     })
   })
 
-  describe('local', () => {
-    it('should save empty json objects', async () => {
+  test.describe('local', () => {
+    test('should save empty json objects', async ({ payload }) => {
       const createdJSON: any = await payload.updateGlobal({
         data: {
           json: {
@@ -92,23 +73,25 @@ describe('globals', () => {
           },
         },
         slug,
+        overrideAccess: true,
       })
 
       expect(createdJSON.json.state).toEqual({})
     })
 
-    it('should create', async () => {
+    test('should create', async ({ payload }) => {
       const data = {
         title: 'title',
       }
       const doc = await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
       expect(doc).toMatchObject(data)
     })
 
-    it('should read', async () => {
+    test('should read', async ({ payload }) => {
       const title = 'read'
       const data = {
         title,
@@ -116,16 +99,18 @@ describe('globals', () => {
       await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
       const doc = await payload.findGlobal({
         slug,
+        overrideAccess: true,
       })
 
       expect(doc.globalType).toEqual(slug)
       expect(doc).toMatchObject(data)
     })
 
-    it('should update with localization', async () => {
+    test('should update with localization', async ({ payload }) => {
       const localized = {
         en: {
           array: [
@@ -149,6 +134,7 @@ describe('globals', () => {
         },
         locale: englishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -157,23 +143,28 @@ describe('globals', () => {
         },
         locale: spanishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       const en = await payload.findGlobal({
         locale: englishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       const es = await payload.findGlobal({
         locale: spanishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       expect(en).toMatchObject(localized.en)
       expect(es).toMatchObject(localized.es)
     })
 
-    it('should return null when user is unauthorised and using findGlobal with disableErrors: true', async () => {
+    test('should return null when user is unauthorised and using findGlobal with disableErrors: true', async ({
+      payload,
+    }) => {
       const doc = await payload.findGlobal({
         disableErrors: true,
         overrideAccess: false,
@@ -183,7 +174,7 @@ describe('globals', () => {
       expect(doc).toBeNull()
     })
 
-    it('should respect valid access query constraint', async () => {
+    test('should respect valid access query constraint', async ({ payload }) => {
       const emptyGlobal = await payload.findGlobal({
         overrideAccess: false,
         slug: accessControlSlug,
@@ -196,6 +187,7 @@ describe('globals', () => {
           enabled: true,
         },
         slug: accessControlSlug,
+        overrideAccess: true,
       })
 
       const hasAccess = await payload.findGlobal({
@@ -206,9 +198,12 @@ describe('globals', () => {
       expect(hasAccess.title).toBeDefined()
     })
 
-    it('should get globals with defaultValues populated before first creation', async () => {
+    test('should get globals with defaultValues populated before first creation', async ({
+      payload,
+    }) => {
       const defaultValueGlobal = await payload.findGlobal({
         slug: defaultValueSlug,
+        overrideAccess: true,
       })
 
       expect(defaultValueGlobal.text).toStrictEqual('test')
@@ -217,8 +212,8 @@ describe('globals', () => {
     })
   })
 
-  describe('graphql', () => {
-    it('should create', async () => {
+  test.describe('graphql', () => {
+    test('should create', async ({ restClient }) => {
       const title = 'graphql-title'
       const query = `mutation {
           updateGlobal(data: {title: "${title}"}) {
@@ -235,13 +230,14 @@ describe('globals', () => {
       expect(data.updateGlobal).toMatchObject({ title })
     })
 
-    it('should read', async () => {
+    test('should read', async ({ payload, restClient }) => {
       const data = {
         title: 'updated graphql',
       }
       await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -259,7 +255,7 @@ describe('globals', () => {
       expect(queryResult.Global).toMatchObject(data)
     })
 
-    it('should not show globals with disabled graphql', async () => {
+    test('should not show globals with disabled graphql', async ({ restClient }) => {
       const query = `query {
         WithoutGraphql { __typename }
       }`

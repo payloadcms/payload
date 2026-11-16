@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -12,6 +12,7 @@ import { getColumnSelectorItem } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { selectInput } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -25,13 +26,14 @@ const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
-const { beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 const londonTimezone = 'Europe/London'
 const aucklandTimezone = 'Pacific/Auckland'
 const detroitTimezone = 'America/Detroit'
 
 let payload: PayloadTestSDK<Config>
+const browserContexts: BrowserContext[] = []
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -56,9 +58,12 @@ const getTimezoneOptionSelector = ({
 }
 
 describe('Date', () => {
+  afterEach(async () => {
+    await Promise.all(browserContexts.splice(0).map((context) => context.close()))
+  })
+
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -71,8 +76,6 @@ describe('Date', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -128,6 +131,115 @@ describe('Date', () => {
         /^(January|February|March|April|May|June|July|August|September|October|November|December)/,
       )
     }).toPass()
+  })
+
+  test('should preserve a filtered calendar day across browser timezones', async ({ browser }) => {
+    const cases = [
+      {
+        operator: 'equals',
+        operatorLabel: 'equals',
+        timezoneId: 'America/Los_Angeles',
+      },
+      {
+        operator: 'greater_than_equal',
+        operatorLabel: 'is greater than or equal to',
+        timezoneId: 'Pacific/Auckland',
+      },
+      {
+        operator: 'greater_than',
+        operatorLabel: 'is greater than',
+        timezoneId: 'America/Los_Angeles',
+      },
+    ]
+
+    for (const { operator, operatorLabel, timezoneId } of cases) {
+      const context = await browser.newContext({ timezoneId })
+      browserContexts.push(context)
+      const { page: timezonePage } = await initPage({ context, serverURL })
+
+      await goToListView(timezonePage)
+      const { condition } = await addListFilter({
+        fieldLabel: 'Default With Timezone',
+        operatorLabel,
+        page: timezonePage,
+      })
+      const dateInput = condition.locator(
+        '.condition-value-date .date-time-picker__input-wrapper input',
+      )
+      const expectedDate = await timezonePage.evaluate(() => {
+        const date = new Date()
+
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`
+      })
+
+      await dateInput.click()
+      await timezonePage
+        .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+        .click()
+
+      if (operator === 'equals') {
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is greater than or equal to',
+        })
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .toContain(`[greater_than_equal]=${expectedDate}`)
+
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is not equal to',
+        })
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .toContain(`[not_equals]=${expectedDate}`)
+
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is in',
+        })
+        await expect(dateInput).toHaveValue('')
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .not.toContain(expectedDate)
+        continue
+      }
+
+      await expect
+        .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+        .toContain(`[${operator}]=${expectedDate}`)
+      await dateInput.clear()
+      await expect
+        .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+        .not.toContain(`[${operator}]=${expectedDate}`)
+    }
+  })
+
+  test('should preserve date-shaped values when changing operators on non-date fields', async () => {
+    await goToListView(page)
+
+    const { condition } = await addListFilter({
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      page,
+      value: '2026-03-29',
+    })
+    const valueInput = condition.locator('.condition__value input')
+
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'is not equal to',
+    })
+
+    await expect(valueInput).toHaveValue('2026-03-29')
   })
 
   test('should display formatted date in useAsTitle', async () => {
@@ -363,6 +475,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -390,6 +503,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -419,6 +533,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -445,6 +560,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -473,6 +589,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -525,6 +642,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -548,6 +666,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -614,6 +733,7 @@ describe('Date', () => {
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -703,6 +823,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -749,7 +870,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
   describe(`Date with TZ - Context: ${contextName}`, () => {
     beforeAll(async ({ browser }, testInfo) => {
       testInfo.setTimeout(TEST_TIMEOUT_LONG)
-      process.env.SEED_IN_CONFIG_ONINIT = 'false'
       ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
         dirname,
       }))
@@ -762,8 +882,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
     beforeEach(async () => {
       await reInitializeDB({
         serverURL,
-        snapshotKey: 'fieldsTest',
-        uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
       })
 
       if (client) {
@@ -780,6 +898,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -891,6 +1010,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -931,6 +1051,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -971,6 +1092,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -1022,6 +1144,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
@@ -1074,6 +1197,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
@@ -1091,6 +1215,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -1120,6 +1245,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [updatedDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       expect(updatedDoc?.dayAndTimeWithTimezoneFixed).toEqual(expectedUpdatedUTCValue)
@@ -1134,6 +1260,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -1207,6 +1334,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
               equals: docID,
             },
           },
+          overrideAccess: true,
         })
 
         // The UTC value should be identical regardless of browser timezone context
@@ -1265,6 +1393,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
               equals: docID,
             },
           },
+          overrideAccess: true,
         })
 
         expect(existingDoc?.dateWithOffsetTimezone).toEqual(expectedUTCValue)
@@ -1326,6 +1455,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
               equals: docID,
             },
           },
+          overrideAccess: true,
         })
 
         // Should have saved with the offset timezone
@@ -1344,6 +1474,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             dateWithOffsetTimezone: '2025-01-01T12:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
+          overrideAccess: true,
         })
 
         await page.goto(url.edit(doc.id))

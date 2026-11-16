@@ -3,16 +3,17 @@
     --field-label-letter-spacing: -0.032px;
   }
 
-  label.field-label {
+  label.field-label,
+  .field-label--with-control {
     display: flex;
     align-items: center;
   }
 
-  label.field-label:not(.unstyled) {
+  label.field-label:not(.unstyled),
+  .field-label--with-control:not(.unstyled) {
     display: flex;
     color: var(--field-color-label);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     letter-spacing: var(--field-label-letter-spacing);
 
     html:not([dir='RTL']) & {

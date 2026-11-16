@@ -61,7 +61,6 @@ describe('Query Presets', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'querypresets',
     })
 
     const allDocs = (
@@ -75,6 +74,7 @@ describe('Query Presets', () => {
             in: ['Everyone', 'Only Me', 'Specific Users'],
           },
         },
+        overrideAccess: true,
       })
     ).docs
 
@@ -444,6 +444,7 @@ describe('Query Presets', () => {
     const posts = await payload.find({
       collection: 'posts',
       limit: 1,
+      overrideAccess: true,
     })
     const testPost = posts.docs[0]
 
@@ -490,6 +491,7 @@ describe('Query Presets', () => {
     const posts = await payload.find({
       collection: 'posts',
       limit: 2,
+      overrideAccess: true,
     })
     const [testPost1, testPost2] = posts.docs
 

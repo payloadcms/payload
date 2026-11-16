@@ -45,7 +45,8 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     },
   } = useConfig()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -141,7 +142,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
               })
             }
 
-            router.replace(
+            void router.replace(
               qs.stringify(
                 {
                   ...parseSearchParams(searchParams),

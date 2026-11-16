@@ -129,11 +129,11 @@ export const promise = async ({
               global,
               operation,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized!,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               previousDoc,
-              previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || ({} as JsonObject),
+              previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || {},
               req,
               siblingData: siblingData?.[field.name]?.[rowIndex] || {},
               siblingDoc: row ? { ...row } : {},
@@ -155,11 +155,13 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
+          const fieldBlock = field.blocks.find((curBlock) =>
+            typeof curBlock === 'string'
+              ? curBlock === blockTypeToMatch
+              : curBlock.slug === blockTypeToMatch,
+          )
           const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+            typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
           if (block) {
             promises.push(
@@ -173,11 +175,11 @@ export const promise = async ({
                 global,
                 operation,
                 parentIndexPath: '',
-                parentIsLocalized: parentIsLocalized || field.localized!,
+                parentIsLocalized: parentIsLocalized || Boolean(field.localized),
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
-                previousSiblingDoc: previousValData?.[field.name]?.[rowIndex] || ({} as JsonObject),
+                previousSiblingDoc: previousValData?.[field.name]?.[rowIndex] || {},
                 req,
                 siblingData: siblingData?.[field.name]?.[rowIndex] || {},
                 siblingDoc: row ? { ...row } : {},
@@ -229,7 +231,7 @@ export const promise = async ({
           global,
           operation,
           parentIndexPath: '',
-          parentIsLocalized: parentIsLocalized || field.localized!,
+          parentIsLocalized: parentIsLocalized || Boolean(field.localized),
           parentPath: path,
           parentSchemaPath: schemaPath,
           previousDoc,
@@ -328,7 +330,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
-        parentIsLocalized: parentIsLocalized || field.localized!,
+        parentIsLocalized: parentIsLocalized || Boolean(field.localized),
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,

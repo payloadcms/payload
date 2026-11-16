@@ -13,7 +13,6 @@ import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
 const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
-  { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },
@@ -85,6 +84,7 @@ const nextSuites: TestConfig[] = [
   { file: 'query-presets', shards: 1 },
   { file: 'form-state', shards: 1 },
   { file: 'live-preview', shards: 2 },
+  { file: 'llm-instructions', shards: 1 },
   { file: 'localization', shards: 2 },
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
@@ -106,6 +106,7 @@ const nextSuites: TestConfig[] = [
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
+  { file: 'upload-transformers', shards: 1 },
 ]
 
 const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
@@ -114,4 +115,10 @@ const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
   optional: false,
 }))
 
-export default createE2EConfig([...nextSuites, ...tanstackSuites])
+export default createE2EConfig([
+  ...nextSuites,
+  ...tanstackSuites,
+  // Next.js suites run with `cacheComponents` enabled. This runs the tests tagged
+  // `@also-without-cache-components` from every suite once more, with it disabled.
+  { file: '', shards: 1, disableCacheComponents: true, grep: '@also-without-cache-components' },
+])

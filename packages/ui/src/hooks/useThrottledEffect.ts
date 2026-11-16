@@ -1,7 +1,7 @@
 'use client'
 import type React from 'react'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type useThrottledEffect = (
   callback: React.EffectCallback,
@@ -17,7 +17,9 @@ type useThrottledEffect = (
  * @param deps The dependencies to watch for changes.
  */
 export const useThrottledEffect: useThrottledEffect = (callback, delay, deps = []) => {
-  const lastRan = useRef(Date.now())
+  // Render can't read the current time, so a lazy initializer reads it once
+  const [mountedAt] = useState(() => Date.now())
+  const lastRan = useRef(mountedAt)
 
   useEffect(() => {
     const handler = setTimeout(

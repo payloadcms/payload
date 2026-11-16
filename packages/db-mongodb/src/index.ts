@@ -206,8 +206,7 @@ export type MongooseAdapter = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<BaseDatabaseAdapter, 'sessions'>,
-      Omit<Args, 'migrationDir'> {
+    extends Omit<BaseDatabaseAdapter, 'sessions'>, Omit<Args, 'migrationDir'> {
     collections: {
       [slug: string]: CollectionModel
     }

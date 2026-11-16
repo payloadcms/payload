@@ -10,7 +10,11 @@ export type Props = {
   readOnly: boolean
   requirePassword?: boolean
   setValidateBeforeSubmit: (validate: boolean) => void
-  useAPIKey?: boolean
+  useAPIKey?:
+    | {
+        reveal?: boolean
+      }
+    | boolean
   username: string
   verify?: boolean
 }

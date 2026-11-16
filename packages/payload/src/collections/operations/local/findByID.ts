@@ -15,11 +15,12 @@ import type {
   PopulateType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
 type BaseFindByIDOptions<
@@ -79,12 +80,6 @@ type BaseFindByIDOptions<
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -112,7 +107,8 @@ type BaseFindByIDOptions<
    */
   user?: null | User
 } & Pick<FindByIDArgs, 'flattenLocales'> &
-  Pick<FindOptions<TSlug, TSelect>, 'select'>
+  Pick<FindOptions<TSlug, TSelect>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<
   TSlug extends CollectionSlug,
@@ -139,7 +135,7 @@ export async function findByIDLocal<
     flattenLocales,
     includeLockStatus,
     joins,
-    overrideAccess = true,
+    overrideAccess = false,
     populate,
     select,
     showHiddenFields,
@@ -167,7 +163,10 @@ export async function findByIDLocal<
     joins,
     overrideAccess,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     trash,

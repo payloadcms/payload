@@ -35,10 +35,12 @@ export const getPreferencesCollection = (config: Config): CollectionConfig => ({
   access: {
     delete: preferenceAccess,
     read: preferenceAccess,
+    update: preferenceAccess,
   },
   admin: {
     hidden: true,
   },
+  authorship: false,
   endpoints: [
     {
       handler: findByIDHandler,

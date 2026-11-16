@@ -29,7 +29,6 @@ describe('Lexical Heading Feature', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
     await page.close()

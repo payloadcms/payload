@@ -1,7 +1,7 @@
 export const generateFieldID = (
-  path: string,
+  path: string | undefined,
   editDepth: number,
-  uuid: string,
+  uuid: string | undefined,
   prefix: string = 'field',
 ) => {
   if (!path) {

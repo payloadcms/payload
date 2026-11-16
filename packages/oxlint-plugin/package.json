@@ -1,0 +1,30 @@
+{
+  "name": "@payloadcms/oxlint-plugin",
+  "version": "3.28.0",
+  "description": "Payload plugin for oxlint",
+  "keywords": [],
+  "homepage": "https://payloadcms.com",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/oxlint-plugin"
+  },
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.88.0",
+    "oxlint": "1.88.0"
+  }
+}

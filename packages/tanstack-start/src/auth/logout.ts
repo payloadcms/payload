@@ -2,7 +2,7 @@ import type { LogoutArgs } from 'payload/auth'
 
 import { logout as logoutFn } from 'payload/auth'
 
-import { tanstackServerAdapter } from '../utilities/serverAdapter.server.js'
+import { tanstackServerAdapter } from '../adapters/server.js'
 
 export async function logout(
   args: Omit<LogoutArgs, 'serverAdapter'>,

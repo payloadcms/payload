@@ -84,13 +84,13 @@ const resolveVersionedConfigObject = (node: Node) => {
   }
 
   // Form 2: { ... } satisfies CollectionConfig
-  if (node.getKind() === SyntaxKind.SatisfiesExpression) {
-    const typeNode = (node as any).getTypeNode?.()
+  if (Node.isSatisfiesExpression(node)) {
+    const typeNode = node.getTypeNode()
     if (!typeNode || !isVersionedConfigTypeName(typeNode.getText().trim())) {
       return undefined
     }
-    const expr = (node as any).getExpression?.()
-    if (expr && Node.isObjectLiteralExpression(expr)) {
+    const expr = node.getExpression()
+    if (Node.isObjectLiteralExpression(expr)) {
       return expr
     }
     return undefined

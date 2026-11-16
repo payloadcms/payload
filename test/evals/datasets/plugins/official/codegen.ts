@@ -84,10 +84,10 @@ export const pluginsOfficialCodegenDataset: EvalCase[] = [
     category: 'plugins',
     configPath: 'plugins/official/codegen/stripe',
     input:
-      'Add the Stripe plugin from "@payloadcms/plugin-stripe" to the config using the STRIPE_SECRET_KEY environment variable. Also enable the REST proxy endpoint.',
+      'Add the Stripe plugin from "@payloadcms/plugin-stripe" to the config using the STRIPE_SECRET_KEY environment variable. Also enable the REST proxy endpoint with only "subscriptions.list" allowed.',
     verify: ({ score }) =>
       score(
-        'named import { stripePlugin } from "@payloadcms/plugin-stripe", stripePlugin({ stripeSecretKey: process.env.STRIPE_SECRET_KEY, rest: true }) added to plugins array',
+        'named import { stripePlugin } from "@payloadcms/plugin-stripe", stripePlugin({ stripeSecretKey: process.env.STRIPE_SECRET_KEY, rest: { allowedMethods: ["subscriptions.list"] } }) added to plugins array',
       ),
   },
   {

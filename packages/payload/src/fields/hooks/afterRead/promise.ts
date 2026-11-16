@@ -156,12 +156,12 @@ export const promise = async ({
 
   const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
-      fieldAffectsDataResult &&
-      typeof siblingDoc[field.name!] === 'object' &&
-      siblingDoc[field.name!] !== null &&
-      shouldLocalizeField &&
-      locale !== 'all' &&
-      req.payload.config.localization,
+    fieldAffectsDataResult &&
+    typeof siblingDoc[field.name!] === 'object' &&
+    siblingDoc[field.name!] !== null &&
+    shouldLocalizeField &&
+    locale !== 'all' &&
+    req.payload.config.localization,
   )
 
   if (fieldAffectsDataResult && shouldHoistLocalizedValue) {
@@ -470,7 +470,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentIsLocalized: parentIsLocalized || field.localized!,
+            parentIsLocalized: parentIsLocalized || Boolean(field.localized),
             parentPath: path + '.' + rowIndex,
             parentSchemaPath: schemaPath,
             populate,
@@ -506,7 +506,7 @@ export const promise = async ({
                 locale,
                 overrideAccess,
                 parentIndexPath: '',
-                parentIsLocalized: parentIsLocalized || field.localized!,
+                parentIsLocalized: parentIsLocalized || Boolean(field.localized),
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath,
                 populate,
@@ -535,21 +535,23 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
+          const fieldBlock = field.blocks.find((curBlock) =>
+            typeof curBlock === 'string'
+              ? curBlock === blockTypeToMatch
+              : curBlock.slug === blockTypeToMatch,
+          )
           const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
-
-          const { blockSelect, blockSelectMode } = getBlockSelect({
-            block: block!,
-            // TODO: fix this
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            select: select?.[field.name]!,
-            selectMode: selectMode!,
-          })
+            typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
           if (block) {
+            const { blockSelect, blockSelectMode } = getBlockSelect({
+              block,
+              // TODO: fix this
+              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+              select: select?.[field.name]!,
+              selectMode: selectMode!,
+            })
+
             traverseFields({
               blockData: row,
               collection,
@@ -568,7 +570,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized!,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath + '.' + block.slug,
               populate,
@@ -589,11 +591,13 @@ export const promise = async ({
             localeRows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
 
+              const fieldBlock = field.blocks.find((curBlock) =>
+                typeof curBlock === 'string'
+                  ? curBlock === blockTypeToMatch
+                  : curBlock.slug === blockTypeToMatch,
+              )
               const block: Block | undefined =
-                req.payload.blocks[blockTypeToMatch] ??
-                (field.blocks.find(
-                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                ) as Block | undefined)
+                typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
               if (block) {
                 traverseFields({
@@ -614,7 +618,7 @@ export const promise = async ({
                   locale,
                   overrideAccess,
                   parentIndexPath: '',
-                  parentIsLocalized: parentIsLocalized || field.localized!,
+                  parentIsLocalized: parentIsLocalized || Boolean(field.localized),
                   parentPath: path + '.' + rowIndex,
                   parentSchemaPath: schemaPath + '.' + block.slug,
                   populate,
@@ -702,7 +706,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized!,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path,
               parentSchemaPath: schemaPath,
               populate,
@@ -735,7 +739,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentIsLocalized: parentIsLocalized || field.localized!,
+            parentIsLocalized: parentIsLocalized || Boolean(field.localized),
             parentPath: path,
             parentSchemaPath: schemaPath,
             populate,
@@ -911,7 +915,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized!,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path,
               parentSchemaPath: schemaPath,
               populate,
@@ -944,7 +948,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentIsLocalized: parentIsLocalized || field.localized!,
+            parentIsLocalized: parentIsLocalized || Boolean(field.localized),
             parentPath: path,
             parentSchemaPath: schemaPath,
             populate,
@@ -977,7 +981,7 @@ export const promise = async ({
           locale,
           overrideAccess,
           parentIndexPath: isNamedTab ? '' : indexPath,
-          parentIsLocalized: parentIsLocalized || field.localized!,
+          parentIsLocalized: parentIsLocalized || Boolean(field.localized),
           parentPath: isNamedTab ? path : parentPath,
           parentSchemaPath: schemaPath,
           populate,

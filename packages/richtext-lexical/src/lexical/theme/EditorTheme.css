@@ -38,7 +38,6 @@
   }
 
   .LexicalEditorTheme__paragraph {
-    font-family: var(--text-body-large-font-family);
     font-size: var(--text-body-large-font-size);
     font-weight: var(--text-body-large-font-weight);
     line-height: var(--text-body-large-line-height);
@@ -258,7 +257,6 @@
   }
 
   .LexicalEditorTheme__listItem {
-    font-family: var(--text-body-large-font-family);
     font-size: var(--text-body-large-font-size);
     margin-block-end: var(--spacer-3);
     margin-inline-start: var(--spacer-6);

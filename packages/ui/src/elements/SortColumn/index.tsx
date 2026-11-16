@@ -1,12 +1,14 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
-import React from 'react'
+import { getTranslation } from '@payloadcms/translations'
+import React, { useId, useRef } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useAriaSort } from '../Table/useAriaSort.js'
 import './index.css'
 
 export type SortColumnProps = {
@@ -22,7 +24,8 @@ const baseClass = 'sort-column'
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
   const { handleSortChange, query } = useListQuery()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const resolvedLabel = getTranslation(label || (typeof Label === 'string' ? Label : name), i18n)
 
   const { sort } = query
 
@@ -40,14 +43,22 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   }
 
   const isSorted = sort === asc || sort === desc
+  const labelId = useId()
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useAriaSort({
+    labelledBy: labelId,
+    ref: rootRef,
+    value: sort === asc ? 'ascending' : sort === desc ? 'descending' : undefined,
+  })
 
   const descLabel = t('general:sortByLabelDirection', {
     direction: t('general:descending'),
-    label,
+    label: resolvedLabel,
   })
   const ascLabel = t('general:sortByLabelDirection', {
     direction: t('general:ascending'),
-    label,
+    label: resolvedLabel,
   })
 
   return (
@@ -59,14 +70,16 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      ref={rootRef}
     >
-      <span className={`${baseClass}__label`}>
-        {Label ?? <FieldLabel hideLocale label={label} unstyled />}
+      <span className={`${baseClass}__label`} id={labelId}>
+        {Label ?? <FieldLabel hideLocale label={resolvedLabel} unstyled />}
       </span>
       {!disable && (
-        <div className={`${baseClass}__buttons`}>
+        <div className={`${baseClass}__buttons`} data-grid-sort-controls="">
           <button
             aria-label={descLabel}
+            aria-pressed={sort === desc}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}
             title={descLabel}
@@ -76,6 +89,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
           </button>
           <button
             aria-label={ascLabel}
+            aria-pressed={sort === asc}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(asc)}
             title={ascLabel}

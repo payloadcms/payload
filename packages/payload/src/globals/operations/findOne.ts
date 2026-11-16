@@ -17,7 +17,6 @@ import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/inde
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -63,228 +62,223 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
-  try {
-    // /////////////////////////////////////
-    // beforeOperation - Global
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeOperation - Global
+  // /////////////////////////////////////
 
-    if (globalConfig.hooks?.beforeOperation?.length) {
-      for (const hook of globalConfig.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            context: args.req.context,
-            global: globalConfig,
-            operation: 'read',
-            overrideAccess,
-            req: args.req,
-          })) || args
-      }
+  if (globalConfig.hooks?.beforeOperation?.length) {
+    for (const hook of globalConfig.hooks.beforeOperation) {
+      args =
+        (await hook({
+          args,
+          context: args.req.context,
+          global: globalConfig,
+          operation: 'read',
+          overrideAccess,
+          req: args.req,
+        })) || args
     }
+  }
 
-    // /////////////////////////////////////
-    // Retrieve and execute access
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // Retrieve and execute access
+  // /////////////////////////////////////
 
-    let accessResult!: AccessResult
+  let accessResult!: AccessResult
 
-    if (!overrideAccess) {
-      accessResult = await executeAccess(
-        { slug: globalConfig.slug, disableErrors, req },
-        globalConfig.access.read,
-      )
+  if (!overrideAccess) {
+    accessResult = await executeAccess(
+      { slug: globalConfig.slug, disableErrors, req },
+      globalConfig.access.read,
+    )
+  }
+
+  if (accessResult === false) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
     }
+    return null!
+  }
 
-    if (accessResult === false) {
-      if (!disableErrors) {
-        throw new NotFound(req.t)
-      }
-      return null!
-    }
-
-    const select = sanitizeSelect({
-      fields: globalConfig.flattenedFields,
-      select: resolveSelect({
-        config: globalConfig.select,
-        operation: 'read',
-        req,
-        select: incomingSelect,
-      }),
-    })
-
-    // /////////////////////////////////////
-    // Perform database operation
-    // /////////////////////////////////////
-
-    let dbSelect = select
-
-    if (
-      globalConfig.versions?.drafts &&
-      replaceWithVersion &&
-      select &&
-      getSelectMode(select) === 'include'
-    ) {
-      dbSelect = { ...select, createdAt: true, updatedAt: true }
-    }
-    const docFromDB = await req.payload.db.findGlobal({
-      slug,
-      locale: locale!,
+  const select = sanitizeSelect({
+    fields: globalConfig.flattenedFields,
+    select: resolveSelect({
+      config: globalConfig.select,
+      operation: 'read',
       req,
-      select: dbSelect,
-      where: overrideAccess ? undefined : (accessResult as Where),
-    })
+      select: incomingSelect,
+    }),
+  })
 
-    // Check if no document was returned (Postgres returns {} instead of null)
-    const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+  // /////////////////////////////////////
+  // Perform database operation
+  // /////////////////////////////////////
 
-    if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
-      if (!disableErrors) {
-        return {} as any
-      }
-      return null!
+  let dbSelect = select
+
+  if (
+    globalConfig.versions?.drafts &&
+    replaceWithVersion &&
+    select &&
+    getSelectMode(select) === 'include'
+  ) {
+    dbSelect = { ...select, createdAt: true, updatedAt: true }
+  }
+  const docFromDB = await req.payload.db.findGlobal({
+    slug,
+    locale: locale!,
+    req,
+    select: dbSelect,
+    where: overrideAccess ? undefined : (accessResult as Where),
+  })
+
+  // Check if no document was returned (Postgres returns {} instead of null)
+  const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
+
+  if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
+    if (!disableErrors) {
+      return {} as any
     }
+    return null!
+  }
 
-    let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
+  let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
 
-    // /////////////////////////////////////
-    // Include Lock Status if required
-    // /////////////////////////////////////
-    if (includeLockStatus && slug) {
-      let lockStatus: JsonObject | null = null
+  // /////////////////////////////////////
+  // Include Lock Status if required
+  // /////////////////////////////////////
+  if (includeLockStatus && slug) {
+    let lockStatus: JsonObject | null = null
 
-      try {
-        const lockDocumentsProp = globalConfig?.lockDocuments
+    try {
+      const lockDocumentsProp = globalConfig?.lockDocuments
 
-        const lockDurationDefault = 300 // Default 5 minutes in seconds
-        const lockDuration =
-          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
-        const lockDurationInMilliseconds = lockDuration * 1000
+      const lockDurationDefault = 300 // Default 5 minutes in seconds
+      const lockDuration =
+        typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+      const lockDurationInMilliseconds = lockDuration * 1000
 
-        const lockedDocument = await req.payload.find({
-          collection: lockedDocumentsCollectionSlug,
-          depth: 1,
-          limit: 1,
-          overrideAccess: false,
-          pagination: false,
-          req,
-          where: {
-            and: [
-              {
-                globalSlug: {
-                  equals: slug,
-                },
-              },
-              {
-                updatedAt: {
-                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
-                },
-              },
-            ],
-          },
-        })
-
-        if (lockedDocument && lockedDocument.docs.length > 0) {
-          lockStatus = lockedDocument.docs[0]!
-        }
-      } catch {
-        // swallow error
-      }
-
-      doc._isLocked = !!lockStatus
-      doc._userEditing = lockStatus?.user?.value ?? null
-    }
-
-    // /////////////////////////////////////
-    // Replace document with draft if available
-    // /////////////////////////////////////
-
-    if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
-      doc = await replaceWithDraftIfAvailable({
-        accessResult,
-        doc,
-        entity: globalConfig,
-        entityType: 'global',
-        overrideAccess,
+      const lockedDocument = await req.payload.find({
+        collection: lockedDocumentsCollectionSlug,
+        depth: 1,
+        limit: 1,
+        overrideAccess: false,
+        pagination: false,
         req,
-        select,
+        where: {
+          and: [
+            {
+              globalSlug: {
+                equals: slug,
+              },
+            },
+            {
+              updatedAt: {
+                greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+              },
+            },
+          ],
+        },
       })
-    }
 
-    // /////////////////////////////////////
-    // Execute before global hook
-    // /////////////////////////////////////
-
-    if (globalConfig.hooks?.beforeRead?.length) {
-      for (const hook of globalConfig.hooks.beforeRead) {
-        doc =
-          (await hook({
-            context: req.context,
-            doc,
-            global: globalConfig,
-            overrideAccess,
-            req,
-          })) || doc
+      if (lockedDocument && lockedDocument.docs.length > 0) {
+        lockStatus = lockedDocument.docs[0]!
       }
+    } catch {
+      // swallow error
     }
 
-    // /////////////////////////////////////
-    // Execute globalType field if not selected
-    // /////////////////////////////////////
-    if (select && doc.globalType) {
-      const selectMode = getSelectMode(select)
-      if (
-        (selectMode === 'include' && !select['globalType']) ||
-        (selectMode === 'exclude' && select['globalType'] === false)
-      ) {
-        delete doc['globalType']
-      }
-    }
+    doc._isLocked = !!lockStatus
+    doc._userEditing = lockStatus?.user?.value ?? null
+  }
 
-    // /////////////////////////////////////
-    // Execute field-level hooks and access
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // Replace document with draft if available
+  // /////////////////////////////////////
 
-    doc = await afterRead({
-      collection: null,
-      context: req.context,
-      depth: depth!,
+  if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
+    doc = await replaceWithDraftIfAvailable({
+      accessResult,
       doc,
-      draft: replaceWithVersion,
-      fallbackLocale: fallbackLocale!,
-      flattenLocales,
-      global: globalConfig,
-      locale: locale!,
+      entity: globalConfig,
+      entityType: 'global',
       overrideAccess,
-      populate,
       req,
       select,
-      showHiddenFields: showHiddenFields!,
     })
-
-    // /////////////////////////////////////
-    // Execute after global hook
-    // /////////////////////////////////////
-
-    if (globalConfig.hooks?.afterRead?.length) {
-      for (const hook of globalConfig.hooks.afterRead) {
-        doc =
-          (await hook({
-            context: req.context,
-            doc,
-            global: globalConfig,
-            overrideAccess,
-            req,
-          })) || doc
-      }
-    }
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    return doc
-  } catch (error: unknown) {
-    await killTransaction(req)
-    throw error
   }
+
+  // /////////////////////////////////////
+  // Execute before global hook
+  // /////////////////////////////////////
+
+  if (globalConfig.hooks?.beforeRead?.length) {
+    for (const hook of globalConfig.hooks.beforeRead) {
+      doc =
+        (await hook({
+          context: req.context,
+          doc,
+          global: globalConfig,
+          overrideAccess,
+          req,
+        })) || doc
+    }
+  }
+
+  // /////////////////////////////////////
+  // Execute globalType field if not selected
+  // /////////////////////////////////////
+  if (select && doc.globalType) {
+    const selectMode = getSelectMode(select)
+    if (
+      (selectMode === 'include' && !select['globalType']) ||
+      (selectMode === 'exclude' && select['globalType'] === false)
+    ) {
+      delete doc['globalType']
+    }
+  }
+
+  // /////////////////////////////////////
+  // Execute field-level hooks and access
+  // /////////////////////////////////////
+
+  doc = await afterRead({
+    collection: null,
+    context: req.context,
+    depth: depth!,
+    doc,
+    draft: replaceWithVersion,
+    fallbackLocale: fallbackLocale!,
+    flattenLocales,
+    global: globalConfig,
+    locale: locale!,
+    overrideAccess,
+    populate,
+    req,
+    select,
+    showHiddenFields: showHiddenFields!,
+  })
+
+  // /////////////////////////////////////
+  // Execute after global hook
+  // /////////////////////////////////////
+
+  if (globalConfig.hooks?.afterRead?.length) {
+    for (const hook of globalConfig.hooks.afterRead) {
+      doc =
+        (await hook({
+          context: req.context,
+          doc,
+          global: globalConfig,
+          overrideAccess,
+          req,
+        })) || doc
+    }
+  }
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  return doc
 }

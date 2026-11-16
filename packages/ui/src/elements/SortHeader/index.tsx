@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useRef } from 'react'
 
 import { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useAriaSort } from '../Table/useAriaSort.js'
 import './index.css'
 
 export type SortHeaderProps = {
@@ -32,6 +33,12 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
   const { appearance } = props
   const { handleSortPress, isActive, isAscending } = useSort()
   const { t } = useTranslation()
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  useAriaSort({
+    ref: buttonRef,
+    value: isActive ? (isAscending ? 'ascending' : 'descending') : undefined,
+  })
 
   return (
     <button
@@ -47,6 +54,7 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       onClick={handleSortPress}
+      ref={buttonRef}
       type="button"
     >
       {isAscending ? <SortUpIcon /> : <SortDownIcon />}

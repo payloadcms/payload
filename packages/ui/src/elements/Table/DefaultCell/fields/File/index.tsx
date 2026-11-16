@@ -14,8 +14,9 @@ import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'
 
-export interface FileCellProps
-  extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {
+export interface FileCellProps extends DefaultCellComponentProps<
+  TextFieldClient | UploadFieldClient
+> {
   readonly collectionConfig: ClientCollectionConfig
 }
 
@@ -36,7 +37,7 @@ export const FileCell: React.FC<FileCellProps> = ({
 
     if (isFileImage) {
       fileSrc = getBestFitFromSizes({
-        sizes: rowData?.sizes,
+        sizes: rowData?.variants,
         thumbnailURL: rowData?.thumbnailURL,
         url: rowData?.url,
         width: rowData?.width,

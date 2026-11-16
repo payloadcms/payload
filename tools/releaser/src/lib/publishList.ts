@@ -4,11 +4,15 @@
  *
  * Note that this does not include all packages in the monorepo.
  * Verified by publishList.spec.ts.
+ *
+ * Adding a package needs npm trusted publisher entries for both `publish-release.yml`
+ * (env `release`) and `publish-canary.yml` (env `canary`).
  */
 export const packagePublishList = [
   // Foundation
   'translations',
   'payload',
+  'transformer-sharp',
 
   // Core UI/API
   'ui',

@@ -1,7 +1,6 @@
 'use client'
 
-import { Banner } from '@payloadcms/ui'
-import { TrashIcon } from '@payloadcms/ui/icons/Trash'
+import { Banner, TrashIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section } from '../shared.js'

@@ -69,7 +69,6 @@ describe('Locked Documents', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lockedDocumentsTest',
     })
   })
 
@@ -91,6 +90,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(0)
@@ -125,6 +125,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -140,6 +141,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       testLockedDoc = await payload.create({
@@ -155,6 +157,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -208,9 +211,21 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
+      const grid = page.getByRole('grid')
+      const lockedRow = grid.getByRole('row').filter({ has: page.locator('.locked') })
+      const selectableRows = grid.getByRole('row').filter({
+        has: page.locator('.select-row__checkbox'),
+      })
+
+      await expect(lockedRow).toHaveCount(1)
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows).toHaveCount(2)
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'false')
       await page.locator('input#select-all').click()
+      await expect(lockedRow).not.toHaveAttribute('aria-selected')
+      await expect(selectableRows.nth(0)).toHaveAttribute('aria-selected', 'true')
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.delete-documents__toggle').click()
       await expect(page.locator('#confirm-delete-many-docs .dialog__body p')).toHaveText(
         'You are about to delete 2 Posts',
@@ -287,7 +302,7 @@ describe('Locked Documents', () => {
       const bulkText = 'Bulk update title'
       await page.locator('input#select-all').click()
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
@@ -348,6 +363,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       expiredDocOne = await createTestDoc({
@@ -367,6 +383,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       expiredDocTwo = await createTestDoc({
@@ -386,6 +403,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       testDoc = await createTestDoc({ text: 'hello' })
@@ -407,6 +425,7 @@ describe('Locked Documents', () => {
       const lockedTestDocs = await payload.find({
         collection: lockedDocumentCollection,
         pagination: false,
+        overrideAccess: true,
       })
 
       expect(lockedTestDocs.docs.length).toBe(2)
@@ -421,6 +440,7 @@ describe('Locked Documents', () => {
       const lockedDocs = await payload.find({
         collection: lockedDocumentCollection,
         pagination: false,
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -441,6 +461,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -461,6 +482,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -476,6 +498,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(unlockedDocs.docs.length).toBe(0)
@@ -496,11 +519,12 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('a[aria-label="API"]').click()
+      await page.getByRole('link', { name: 'API', exact: true }).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -518,6 +542,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(unlockedDocs.docs.length).toBe(1)
@@ -527,6 +552,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
     })
 
@@ -545,6 +571,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDocTwo.id },
         },
+        overrideAccess: true,
       })
 
       expect(lockedDocs.docs.length).toBe(1)
@@ -569,6 +596,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       expect(unlockedDocs.docs.length).toBe(0)
@@ -595,6 +623,7 @@ describe('Locked Documents', () => {
       serverComponentDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       expiredTestDoc = await createTestDoc({
@@ -608,6 +637,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -623,6 +653,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       expiredTestLockedDoc = await payload.create({
@@ -638,6 +669,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       expiredPostDoc = await createPostDoc({
@@ -659,6 +691,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedServerComponentDoc = await payload.create({
@@ -674,6 +707,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -816,6 +850,7 @@ describe('Locked Documents', () => {
       serverComponentDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       user2 = await payload.create({
@@ -825,6 +860,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -840,6 +876,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedServerComponentsDoc = await payload.create({
@@ -855,6 +892,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -876,6 +914,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -924,6 +963,7 @@ describe('Locked Documents', () => {
       serverComponentsDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       user2 = await payload.create({
@@ -933,6 +973,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedDoc = await payload.create({
@@ -948,6 +989,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedServerComponentsDoc = await payload.create({
@@ -963,6 +1005,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -986,6 +1029,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1037,6 +1081,7 @@ describe('Locked Documents', () => {
       serverComponentsDoc = await payload.create({
         collection: 'server-components',
         data: {},
+        overrideAccess: true,
       })
 
       user2 = await payload.create({
@@ -1046,6 +1091,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
     })
 
@@ -1065,6 +1111,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1079,6 +1126,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       await wait(1000)
@@ -1093,6 +1141,7 @@ describe('Locked Documents', () => {
       await payload.delete({
         id: lockedDoc.docs[0]?.id,
         collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
     })
 
@@ -1112,6 +1161,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1126,6 +1176,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       await wait(1000)
@@ -1145,6 +1196,7 @@ describe('Locked Documents', () => {
       await payload.delete({
         id: lockedDoc.docs[0]?.id,
         collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
     })
 
@@ -1164,6 +1216,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: postDoc.id },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1178,6 +1231,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1216,6 +1270,7 @@ describe('Locked Documents', () => {
         where: {
           'document.value': { equals: serverComponentsDoc.id },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1230,6 +1285,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1262,6 +1318,7 @@ describe('Locked Documents', () => {
           password: '1234',
           roles: ['is_user'],
         },
+        overrideAccess: true,
       })
 
       lockedAdminGlobal = await payload.create({
@@ -1274,6 +1331,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       lockedMenuGlobal = await payload.create({
@@ -1286,6 +1344,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1301,6 +1360,7 @@ describe('Locked Documents', () => {
       await payload.delete({
         id: lockedMenuGlobal.id,
         collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
 
       await wait(500)
@@ -1314,6 +1374,7 @@ describe('Locked Documents', () => {
       await payload.delete({
         id: lockedMenuGlobal.id,
         collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
 
       await page.goto(globalUrl.global('menu'))
@@ -1346,6 +1407,7 @@ describe('Locked Documents', () => {
       await payload.delete({
         id: lockedAdminGlobal.id,
         collection: lockedDocumentCollection,
+        overrideAccess: true,
       })
     })
 
@@ -1360,6 +1422,7 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
+        overrideAccess: true,
       })
 
       await page.goto(postsUrl.admin)
@@ -1392,21 +1455,23 @@ describe('Locked Documents', () => {
     beforeEach(async ({ browser }, testInfo) => {
       testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-      simpleDoc = (await payload.create({
+      simpleDoc = await payload.create({
         collection: 'simple',
         data: {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
-      })) as unknown as Simple
+        overrideAccess: true,
+      })
 
-      simpleWithVersionsDoc = (await payload.create({
+      simpleWithVersionsDoc = await payload.create({
         collection: 'simple-with-versions',
         data: {
           fieldA: 'Original A',
           fieldB: 'Original B',
         },
-      })) as unknown as SimpleWithVersion
+        overrideAccess: true,
+      })
 
       // Create a second browser context for user 2 (user 1 uses the parent test's page)
       user2Context = await browser.newContext()
@@ -1689,13 +1754,14 @@ describe('Locked Documents', () => {
         const createdAutosaveIDs: string[] = []
 
         // Create an autosave document
-        const autosaveDoc = (await payload.create({
+        const autosaveDoc = await payload.create({
           collection: 'autosave',
           data: {
             fieldA: 'Initial Value',
             fieldB: 'Initial Value B',
           },
-        })) as unknown as Autosave
+          overrideAccess: true,
+        })
 
         createdAutosaveIDs.push(autosaveDoc.id)
 
@@ -1733,7 +1799,7 @@ describe('Locked Documents', () => {
 
           // Clean up created autosave document
           for (const id of createdAutosaveIDs) {
-            await payload.delete({ id, collection: 'autosave' }).catch(() => {
+            await payload.delete({ id, collection: 'autosave', overrideAccess: true }).catch(() => {
               // Ignore deletion errors (document might already be deleted)
             })
           }
@@ -2143,19 +2209,22 @@ async function createPageDoc(data: Partial<PageType>): Promise<PageType> {
   return payload.create({
     collection: 'pages',
     data,
-  }) as unknown as Promise<PageType>
+    overrideAccess: true,
+  })
 }
 
 async function createPostDoc(data: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: 'posts',
     data,
-  }) as unknown as Promise<Post>
+    overrideAccess: true,
+  })
 }
 
 async function createTestDoc(data: Partial<Test>): Promise<Test> {
   return payload.create({
     collection: 'tests',
     data,
-  }) as unknown as Promise<Test>
+    overrideAccess: true,
+  })
 }

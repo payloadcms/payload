@@ -37,7 +37,7 @@ export const LinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
             payload.fields.linkType = clientProps.defaultLinkType as any
           }
           if (!payload.fields?.url) {
-            payload.fields.url = clientProps.defaultLinkURL as any
+            payload.fields.url = clientProps.defaultLinkURL
           }
           $toggleLink(payload as { fields: LinkFields } & LinkPayload)
           return true

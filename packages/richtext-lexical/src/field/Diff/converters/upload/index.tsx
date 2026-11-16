@@ -6,11 +6,11 @@ import { createHash } from 'crypto'
 
 import './index.css'
 
-import { formatFilesize } from 'payload/shared'
+import { formatFileMeta } from 'payload/shared'
 import React from 'react'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
-import type { UploadDataImproved } from '../../../../features/upload/server/schema.js'
+import type { UploadData } from '../../../../features/upload/server/schema.js'
 import type { SerializedUploadNode } from '../../../../types/nodeTypes.js'
 
 const baseClass = 'lexical-upload-diff'
@@ -21,7 +21,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
 }) => HTMLConvertersAsync<SerializedUploadNode> = ({ i18n, req }) => {
   return {
     upload: async ({ node, populate, providedCSSString }) => {
-      const uploadNode = node as UploadDataImproved
+      const uploadNode = node as UploadData
 
       let uploadDoc: (FileData & TypeWithID) | undefined = undefined
 
@@ -75,19 +75,12 @@ export const UploadDiffHTMLConverterAsync: (args: {
             <div className={`${baseClass}__info`} data-enable-match="false">
               <strong>{filename}</strong>
               <div className={`${baseClass}__meta`}>
-                {formatFilesize(uploadDoc?.filesize)}
-                {typeof uploadDoc?.width === 'number' && typeof uploadDoc?.height === 'number' && (
-                  <React.Fragment>
-                    &nbsp;-&nbsp;
-                    {uploadDoc?.width}x{uploadDoc?.height}
-                  </React.Fragment>
-                )}
-                {uploadDoc?.mimeType && (
-                  <React.Fragment>
-                    &nbsp;-&nbsp;
-                    {uploadDoc?.mimeType}
-                  </React.Fragment>
-                )}
+                {formatFileMeta({
+                  filesize: uploadDoc?.filesize,
+                  height: uploadDoc?.height,
+                  mimeType: uploadDoc?.mimeType,
+                  width: uploadDoc?.width,
+                })}
               </div>
             </div>
           </div>

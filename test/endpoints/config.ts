@@ -9,79 +9,87 @@ import { globalEndpoints } from './endpoints/globals.js'
 import { endpoints } from './endpoints/root.js'
 import {
   collectionSlug,
+  customAPIRoute,
   globalSlug,
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
 } from './shared.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'endpoints',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: collectionSlug,
+        access: {
+          create: () => true,
+          delete: () => true,
+          read: () => true,
+          update: () => true,
+        },
+        endpoints: collectionEndpoints,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: noEndpointsCollectionSlug,
+        endpoints: false,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        graphQL: false,
+        versions: false,
+      },
+    ],
+    endpoints,
+    globals: [
+      {
+        slug: globalSlug,
+        endpoints: globalEndpoints,
+        fields: [],
+        versions: false,
+      },
+      {
+        slug: noEndpointsGlobalSlug,
+        endpoints: false,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        graphQL: false,
+        versions: false,
+      },
+    ],
+    routes: {
+      api: customAPIRoute,
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: collectionSlug,
-      access: {
-        create: () => true,
-        delete: () => true,
-        read: () => true,
-        update: () => true,
-      },
-      endpoints: collectionEndpoints,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: noEndpointsCollectionSlug,
-      endpoints: false,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      graphQL: false,
-      versions: false,
-    },
-  ],
-  endpoints,
-  globals: [
-    {
-      slug: globalSlug,
-      endpoints: globalEndpoints,
-      fields: [],
-      versions: false,
-    },
-    {
-      slug: noEndpointsGlobalSlug,
-      endpoints: false,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      graphQL: false,
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

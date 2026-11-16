@@ -1,12 +1,14 @@
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { Project } from 'ts-morph'
 
 import type { NextAppDetails, TanStackAppDetails } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { info } from '../utils/log.js'
 import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
+import { getAdminRoute } from './get-admin-route.js'
 import { getPackageManager } from './get-package-manager.js'
 import { installPackages } from './install-packages.js'
 import { TANSTACK_TEMPLATE_FILES } from './tanstack/template-files.js'
@@ -30,6 +32,10 @@ export async function updatePayloadPackages({
   return { message: result.message, success: result.success }
 }
 
+/**
+ * Upgrade Payload packages and refresh Next.js wrappers at the configured admin route.
+ * Validate the route only when an upgrade is needed, before installing packages.
+ */
 export async function updatePayloadInNextProject({
   appDetails,
   versionOrTag,
@@ -42,7 +48,14 @@ export async function updatePayloadInNextProject({
   }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
-  const packageUpdate = await performPayloadPackageUpdate({ projectDir, versionOrTag })
+  let adminRoute = '/admin'
+  const packageUpdate = await performPayloadPackageUpdate({
+    beforeInstall: () => {
+      adminRoute = getAdminRoute({ projectDir })
+    },
+    projectDir,
+    versionOrTag,
+  })
 
   if (!packageUpdate.isUpdated) {
     return { message: packageUpdate.message, success: packageUpdate.success }
@@ -72,7 +85,25 @@ export async function updatePayloadInNextProject({
     )
   }
 
-  copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+  if (adminRoute === '/admin') {
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+  } else {
+    // Next.js uses %5F for routable segments that begin with an underscore.
+    const adminFolder = adminRoute
+      .slice(1)
+      .split('/')
+      .map((segment) => segment.replace(/^_/, '%5F'))
+      .join('/')
+
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$', '^admin$'])
+    copyRecursiveSync(path.join(templateSrcDir, 'admin'), path.join(payloadDirPath, adminFolder))
+
+    const layout = new Project().addSourceFileAtPath(path.join(payloadDirPath, 'layout.tsx'))
+    const importMapPath = adminFolder ? `./${adminFolder}/importMap.js` : './importMap.js'
+
+    layout.getImportDeclaration('./admin/importMap.js')?.setModuleSpecifier(importMapPath)
+    layout.saveSync()
+  }
 
   return { message: packageUpdate.message, success: packageUpdate.success }
 }
@@ -99,11 +130,21 @@ export async function updatePayloadInTanStackProject({
   const hasPackedTemplateLayout = fse.existsSync(path.join(templateRoot, 'routes'))
 
   for (const { destination, relativePath, sourcePath } of TANSTACK_TEMPLATE_FILES) {
-    if (destination !== 'routes' || !relativePath.startsWith('_payload')) {
+    const isPayloadRoute = destination === 'routes' && relativePath.startsWith('_payload')
+    const isCustomStyles = destination === 'routes' && relativePath === '_payload/custom.css'
+
+    if (!isPayloadRoute) {
       continue
     }
 
-    const destinationPath = path.join(appDetails.routesDir, relativePath)
+    const destinationPath = path.join(
+      destination === 'routes' ? appDetails.routesDir : appDetails.sourceDir,
+      relativePath,
+    )
+    if (isCustomStyles && fse.existsSync(destinationPath)) {
+      continue
+    }
+
     const templatePath = hasPackedTemplateLayout
       ? path.join(templateRoot, destination, relativePath)
       : path.join(templateRoot, sourcePath)
@@ -121,10 +162,13 @@ export async function updatePayloadInProject(
   return updatePayloadInNextProject({ appDetails, versionOrTag })
 }
 
+/** Resolve package versions, run any required preflight, then install only if needed. */
 async function performPayloadPackageUpdate({
+  beforeInstall,
   projectDir,
   versionOrTag,
 }: {
+  beforeInstall?: () => void
   projectDir: string
   versionOrTag?: string
 }): Promise<PackageUpdateResult> {
@@ -161,6 +205,8 @@ async function performPayloadPackageUpdate({
       success: true,
     }
   }
+
+  beforeInstall?.()
 
   const payloadPackages = payloadPackageEntries
     .map(([packageName]) => packageName)

@@ -85,6 +85,7 @@ Return all documents including trashed:
 ```ts
 const result = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   trash: true,
 })
 ```
@@ -94,6 +95,7 @@ Return only trashed documents:
 ```ts
 const result = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   trash: true,
   where: {
     deletedAt: {
@@ -108,6 +110,7 @@ Return only non-trashed documents:
 ```ts
 const result = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   trash: false,
 })
 ```
