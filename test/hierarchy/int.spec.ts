@@ -307,7 +307,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           data: { parent: childPage.id },
           overrideAccess: true,
         }),
-      ).rejects.toThrow('Cannot move folder into its own subfolder')
+      ).rejects.toThrow('Document cannot be nested beneath one of its descendants')
     })
 
     test('should prevent circular reference with grandchild', async ({ payload }) => {
@@ -336,7 +336,7 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
           data: { parent: child.id },
           overrideAccess: true,
         }),
-      ).rejects.toThrow('Cannot move folder into its own subfolder')
+      ).rejects.toThrow('Document cannot be nested beneath one of its descendants')
     })
 
     test('should allow moving to a non-circular parent', async ({ payload }) => {
