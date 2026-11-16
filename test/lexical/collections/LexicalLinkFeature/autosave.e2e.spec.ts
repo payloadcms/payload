@@ -97,10 +97,21 @@ test.describe('Lexical Link Feature Autosave', () => {
       const finalizedURL = 'https://example.com/autosave-finalized'
       const { lexical, linkDrawer, assetLabelField, selectedFilename, uploadDocumentDrawer } =
         await openNestedUploadDrawer({ page, finalizedURL })
+      const uploadTextField = uploadDocumentDrawer.getByRole('textbox', {
+        name: 'Text',
+        exact: true,
+      })
+
+      await uploadTextField.focus()
 
       releaseAutosave()
       await waitForAutoSaveToRunAndComplete(page)
       await expect(uploadDocumentDrawer).toBeVisible()
+      await expect(uploadTextField).toBeFocused()
+      await expect(lexical.editor.locator('a', { hasText: 'custom link' })).toHaveAttribute(
+        'target',
+        '_blank',
+      )
       await expect(assetLabelField).toHaveValue('Client asset')
       await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
 
