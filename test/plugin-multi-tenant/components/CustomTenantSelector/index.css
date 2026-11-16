@@ -1,0 +1,5 @@
+.custom-tenant-selector__label {
+  padding-inline-start: var(--nav-padding-inline-start);
+  padding-block-start: var(--nav-padding-block-start);
+  margin-block-end: calc(var(--spacer-2) * -1);
+}

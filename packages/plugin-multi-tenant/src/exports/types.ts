@@ -1,1 +1,1 @@
-export type { MultiTenantPluginConfig } from '../types.js'
+export type { AssignTenantModalProps, MultiTenantPluginConfig } from '../types.js'

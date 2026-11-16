@@ -6,10 +6,14 @@ import { toast, useAuth, useConfig, useRouter } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
+import type { AssignTenantModalProps } from '../../types.js'
+
 import { generateCookie } from '../../utilities/generateCookie.js'
 import { shouldRefreshTenantSelection } from '../../utilities/shouldRefreshTenantSelection.js'
 
 type ContextType = {
+  AssignTenantModal?: React.ComponentType<AssignTenantModalProps>
+  assignTenantModalClientProps?: object
   /**
    * What is the context of the selector? It is either 'document' | 'global' | undefined.
    *
@@ -101,11 +105,15 @@ const getTenantCookie = (args: { cookieName?: string } = {}): string | undefined
 }
 
 export const TenantSelectionProviderClient = ({
+  AssignTenantModal,
+  assignTenantModalClientProps,
   children,
   initialTenantOptions,
   initialValue,
   tenantsCollectionSlug,
 }: {
+  AssignTenantModal?: React.ComponentType<AssignTenantModalProps>
+  assignTenantModalClientProps?: object
   children: React.ReactNode
   initialTenantOptions: OptionObject[]
   initialValue?: number | string
@@ -320,6 +328,8 @@ export const TenantSelectionProviderClient = ({
     >
       <Context
         value={{
+          AssignTenantModal,
+          assignTenantModalClientProps,
           entityType,
           modified,
           options: tenantOptions,

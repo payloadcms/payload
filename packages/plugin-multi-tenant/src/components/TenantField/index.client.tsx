@@ -33,7 +33,15 @@ type Props = {
 } & RelationshipFieldClientProps
 
 export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
-  const { entityType, options, selectedTenantID, setEntityType, setTenant } = useTenantSelection()
+  const {
+    AssignTenantModal = AssignTenantFieldModal,
+    assignTenantModalClientProps,
+    entityType,
+    options,
+    selectedTenantID,
+    setEntityType,
+    setTenant,
+  } = useTenantSelection()
   const tenantField = useField<TenantValue>()
   const { setValue, showError, value } = tenantField
   const { isValid: isFormValid } = useForm()
@@ -150,13 +158,18 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (!unique) {
       /** Editing a non-global tenant document */
       return (
-        <AssignTenantFieldModal afterModalOpen={afterModalOpen} onConfirm={onConfirm}>
+        <AssignTenantModal
+          {...assignTenantModalClientProps}
+          afterModalOpen={afterModalOpen}
+          onConfirm={onConfirm}
+          slug={assignTenantModalSlug}
+        >
           <FieldPathContext value={tenantField.path}>
             <FieldContext value={localTenantField}>
               <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
             </FieldContext>
           </FieldPathContext>
-        </AssignTenantFieldModal>
+        </AssignTenantModal>
       )
     }
 

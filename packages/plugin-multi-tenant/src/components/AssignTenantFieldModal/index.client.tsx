@@ -24,6 +24,7 @@ import type {
   PluginMultiTenantTranslationKeys,
   PluginMultiTenantTranslations,
 } from '../../translations/index.js'
+import type { AssignTenantModalProps } from '../../types.js'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 
@@ -45,13 +46,16 @@ export const AssignTenantFieldTrigger: React.FC = () => {
   )
 }
 
-export const AssignTenantFieldModal: React.FC<{
-  afterModalClose?: () => void
-  afterModalOpen?: () => void
-  children: React.ReactNode
-  onCancel?: () => void
-  onConfirm?: () => void
-}> = ({ afterModalClose, afterModalOpen, children, onCancel, onConfirm }) => {
+export const AssignTenantFieldModal: React.FC<
+  { slug?: string } & Omit<AssignTenantModalProps, 'slug'>
+> = ({
+  slug = assignTenantModalSlug,
+  afterModalClose,
+  afterModalOpen,
+  children,
+  onCancel,
+  onConfirm,
+}) => {
   const { i18n, t } = useTranslation<
     PluginMultiTenantTranslations,
     PluginMultiTenantTranslationKeys
@@ -61,7 +65,7 @@ export const AssignTenantFieldModal: React.FC<{
   const { getEntityConfig } = useConfig()
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
   const { isModalOpen: isModalOpenFn } = useModal()
-  const isModalOpen = isModalOpenFn(assignTenantModalSlug)
+  const isModalOpen = isModalOpenFn(slug)
   const wasModalOpenRef = React.useRef<boolean>(isModalOpen)
 
   React.useEffect(() => {
@@ -79,7 +83,7 @@ export const AssignTenantFieldModal: React.FC<{
   }
 
   return (
-    <DialogModal size="medium" slug={assignTenantModalSlug}>
+    <DialogModal size="medium" slug={slug}>
       <DialogHeader title={t('plugin-multi-tenant:assign-tenant-modal-title', { title })}>
         <Pill size="small">{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
       </DialogHeader>
