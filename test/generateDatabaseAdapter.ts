@@ -127,6 +127,15 @@ export const databaseAdapter = contentAPIAdapter({
   contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
 })
   `,
+  'vercel-postgres': `
+  import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+
+  export const databaseAdapter = vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+    },
+  })
+  `,
   'vercel-postgres-read-replica': `
   import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 
