@@ -179,6 +179,7 @@ export interface Post {
       | null;
   };
   selectWithAsyncFilterOptions?: ('allowed' | 'excluded') | null;
+  sortedBlocks?: (One | Two | Three)[] | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -209,6 +210,44 @@ export interface Number {
   id?: string | null;
   blockName?: string | null;
   blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "One".
+ */
+export interface One {
+  title?: string | null;
+  order?: number | null;
+  content?: {
+    text?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'one';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Two".
+ */
+export interface Two {
+  title?: string | null;
+  order?: number | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'two';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Three".
+ */
+export interface Three {
+  title?: string | null;
+  order?: number | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'three';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -501,6 +540,41 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   selectWithAsyncFilterOptions?: T;
+  sortedBlocks?:
+    | T
+    | {
+        one?:
+          | T
+          | {
+              title?: T;
+              order?: T;
+              content?:
+                | T
+                | {
+                    text?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        two?:
+          | T
+          | {
+              title?: T;
+              order?: T;
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        three?:
+          | T
+          | {
+              title?: T;
+              order?: T;
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

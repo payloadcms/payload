@@ -69,11 +69,16 @@ function parseArrayFieldPath(path: string): {
 }
 
 /**
- * Merges a current server response into client form state.
- * Callers must reject responses invalidated by newer edits before invoking this function.
- * Existing values are preserved unless `acceptValues` requests server values.
- * Authoritative merges accept server row membership and order; other merges retain local row structure and match values by row ID.
- * Client-only field and row metadata is preserved when the server has not replaced it.
+ * This function receives form state from the server and intelligently merges it into the client state.
+ * The server contains extra properties that the client may not have, e.g. custom components and error states.
+ * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
+ * Doing this would cause the client to lose any local changes to those fields.
+ *
+ * Unless `acceptValues` is `true`, local state is the source of truth. This is critical for array row
+ * manipulation specifically, where the user may have added, removed, or reordered rows while a request was pending and is now stale.
+ *
+ * This function applies some defaults, as well as cleans up the server response in preparation for the client.
+ * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
   acceptValues,
@@ -81,7 +86,6 @@ export const mergeServerFormState = ({
   incomingState,
 }: Args): FormState => {
   const currentState: FormState = acceptValues === true ? {} : previousState
-  const newState: FormState = acceptValues === true ? {} : { ...previousState }
 
   // Keep local fields attached to row IDs when authoritative responses change their paths.
   if (acceptValues === true) {
@@ -92,11 +96,8 @@ export const mergeServerFormState = ({
       const incomingSegments = [...segments]
       let shouldKeepField = true
 
-      for (let index = 1; index < segments.length; index++) {
-        const segment = segments[index]
-        const isRowIndex = /^\d+$/.test(segment)
-
-        if (!isRowIndex) {
+      for (const [index, segment] of segments.entries()) {
+        if (index === 0 || !/^\d+$/.test(segment)) {
           continue
         }
 
@@ -118,15 +119,12 @@ export const mergeServerFormState = ({
         let incomingRowIndexes = incomingRowIndexesByPath.get(incomingArrayPath)
 
         if (!incomingRowIndexes) {
-          incomingRowIndexes = new Map<string, number>(
-            incomingRows.map((row, rowIndex) => [row.id, rowIndex]),
-          )
+          incomingRowIndexes = new Map(incomingRows.map((row, rowIndex) => [row.id, rowIndex]))
           incomingRowIndexesByPath.set(incomingArrayPath, incomingRowIndexes)
         }
 
         const incomingRowIndex = incomingRowIndexes.get(currentRow.id)
 
-        // Removed or replaced rows must not contribute fields to the next save.
         if (
           incomingRowIndex === undefined ||
           incomingRows[incomingRowIndex]?.blockType !== currentRow.blockType
@@ -139,31 +137,42 @@ export const mergeServerFormState = ({
       }
 
       if (shouldKeepField) {
-        const incomingPath = incomingSegments.join('.')
-
-        currentState[incomingPath] = field
-        newState[incomingPath] = field
+        currentState[incomingSegments.join('.')] = field
       }
     }
   }
 
-  const shouldAcceptValues =
-    acceptValues === true ||
-    (typeof acceptValues === 'object' &&
-      acceptValues !== null &&
-      acceptValues.overrideLocalChanges === false)
+  const newState = { ...currentState }
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in previousState) && !incomingField.addedByServer) {
       continue
     }
 
-    // Server-added fields need their values even when existing local values are being preserved.
-    // Callers must reject stale responses before merging so accepted server values cannot overwrite newer local edits.
-    let shouldAcceptValue = incomingField.addedByServer || shouldAcceptValues
+    /**
+     * If it's a new field added by the server, always accept the value.
+     * Otherwise:
+     *   a. accept all values when explicitly requested, e.g. on submit
+     *   b. accept values while preserving local rows when overrideLocalChanges is false
+     * Callers must reject stale responses before merging.
+     */
+    let shouldAcceptValue =
+      incomingField.addedByServer ||
+      acceptValues === true ||
+      (typeof acceptValues === 'object' &&
+        acceptValues !== null &&
+        // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
+        acceptValues.overrideLocalChanges === false)
 
-    // Row-preserving merges must not apply values from a different row at the same index.
-    // Authoritative merges have already reconciled incoming row membership above.
+    /**
+     * For array row fields, verify the row IDs match at the given index before accepting
+     * server values. If rows were reordered or deleted while the request was in-flight,
+     * the same index may refer to different rows, and accepting the server value would
+     * overwrite the wrong row's data.
+     *
+     * This guard only applies during autosave. On explicit save (acceptValues === true),
+     * the server response is authoritative and this check is bypassed.
+     */
     if (shouldAcceptValue && !incomingField.addedByServer && acceptValues !== true) {
       const parsed = parseArrayFieldPath(path)
       if (parsed) {
@@ -180,8 +189,11 @@ export const mergeServerFormState = ({
     let sanitizedIncomingField = incomingField
 
     if (!shouldAcceptValue) {
-      // Do not delete properties from `incomingField`; this would mutate the original object.
-      // Omit them via destructuring to avoid introducing unnecessary `undefined` values.
+      /**
+       * Note: do not delete properties off `incomingField` as this will mutate the original object
+       * Instead, omit them from the destructured object by excluding specific keys
+       * This will also ensure we don't set `undefined` into the result unnecessarily
+       */
       const { initialValue, value, ...rest } = incomingField
       sanitizedIncomingField = rest
     }
@@ -199,20 +211,33 @@ export const mergeServerFormState = ({
       newState[path].errorPaths = []
     }
 
-    // Read `currentState`, since incoming rows have already been assigned to `newState`.
-    // Authoritative responses determine row membership and order.
-    // Other responses preserve local row membership.
+    /**
+     * Deeply merge the rows array to ensure changes to local state are not lost while the request was pending
+     * For example, the server response could come back with a row which has been deleted on the client
+     * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
+     * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
+     *
+     * On explicit save (acceptValues === true), the server is authoritative - accept server row order.
+     * On autosave (acceptValues !== true), the client is source of truth - use ID-based matching.
+     */
     if (Array.isArray(incomingField.rows) && path in currentState) {
       if (acceptValues === true) {
-        const currentRowsByID = new Map(currentState[path].rows?.map((row) => [row.id, row]))
+        const currentRowsByID = new Map(currentState[path]?.rows?.map((row) => [row.id, row]))
 
-        // Keep metadata attached to row IDs when the server removes or reorders rows.
-        newState[path].rows = incomingField.rows.map((serverRow) => ({
-          ...currentRowsByID.get(serverRow.id),
-          ...serverRow,
-        }))
+        newState[path].rows = incomingField.rows.map((serverRow) => {
+          const currentRow = currentRowsByID.get(serverRow.id)
+
+          return {
+            ...currentRow,
+            ...serverRow,
+            // A moved nested row may receive the server's collapse default for its new path.
+            ...(typeof currentRow?.collapsed === 'boolean'
+              ? { collapsed: currentRow.collapsed }
+              : {}),
+          }
+        })
       } else {
-        // Non-authoritative merges retain local membership and order.
+        // Autosave: client is source of truth, use ID-based matching
         newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
         incomingField.rows.forEach((row) => {
@@ -226,17 +251,27 @@ export const mergeServerFormState = ({
               ...row,
             }
           } else if (row.addedByServer) {
-            // Appending server-added rows preserves the existing local order.
+            /**
+             * Note: This is a known limitation of computed array and block rows
+             * If a new row was added by the server, we append it to the _end_ of this array
+             * This is because the client is the source of truth, and it has arrays ordered in a certain position
+             * For example, the user may have re-ordered rows client-side while a long running request is processing
+             * This means that we _cannot_ slice a new row into the second position on the server, for example
+             * By the time it gets back to the client, its index is stale
+             */
             const newRow = { ...row }
             delete newRow.addedByServer
             newState[path].rows.push(newRow)
           }
         })
+      }
 
-        // Keep the serialized row count aligned with the retained local membership.
-        if ('value' in incomingField) {
-          const rowCount = newState[path].rows.length
+      // Client rows may have changed while the request was pending.
+      // Background merges preserve their row count and null/empty distinction; explicit saves accept server values.
+      if ('value' in incomingField) {
+        const rowCount = newState[path].rows.length
 
+        if (acceptValues !== true) {
           newState[path].value =
             rowCount === 0 && currentState[path]?.value === null ? null : rowCount
         }
@@ -253,8 +288,11 @@ export const mergeServerFormState = ({
       newState[path].passesCondition = true
     }
 
-    // Undefined values for blocksFilterOptions coming back should be treated as "all blocks allowed" and should always be merged in.
-    // Without this, an undefined value coming back will incorrectly be ignored, and the previous filter will remain.
+    /**
+     * Undefined values for blocksFilterOptions coming back should be treated as "all blocks allowed" and
+     * should always be merged in.
+     * Without this, an undefined value coming back will incorrectly be ignored, and the previous filter will remain.
+     */
     if (!incomingField.blocksFilterOptions) {
       delete newState[path].blocksFilterOptions
     }
@@ -264,7 +302,7 @@ export const mergeServerFormState = ({
     delete newState[path].addedByServer
   }
 
-  // Return the original object reference if the state is unchanged.
-  // This will avoid unnecessary re-renders and dependency updates.
+  // Return the original object reference if the state is unchanged
+  // This will avoid unnecessary re-renders and dependency updates
   return dequal(newState, previousState) ? previousState : newState
 }
