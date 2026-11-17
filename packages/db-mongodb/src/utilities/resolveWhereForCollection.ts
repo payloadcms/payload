@@ -60,12 +60,13 @@ function combineConditions({
   conditions: ResolvedCollectionCondition[]
   operator: 'and' | 'or'
 }): ResolvedCollectionCondition {
-  // Every AND condition must be possible; one satisfied OR condition is sufficient.
   if (operator === 'and') {
+    // One impossible condition makes the entire AND impossible.
     if (conditions.some(({ matches }) => matches === 'no-documents')) {
       return { matches: 'no-documents' }
     }
   } else if (conditions.some(({ matches }) => matches === 'all-documents')) {
+    // One satisfied condition makes the entire OR satisfied.
     return { matches: 'all-documents' }
   }
 
