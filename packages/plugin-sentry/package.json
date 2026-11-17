@@ -54,7 +54,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@sentry/nextjs": "^9.5.0",
+    "@sentry/nextjs": "^11.11.0",
     "@sentry/types": "^9.5.0"
   },
   "devDependencies": {
