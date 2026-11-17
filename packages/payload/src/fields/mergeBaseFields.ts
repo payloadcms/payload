@@ -28,7 +28,11 @@ export const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] =
 
         const mergedField = deepMergeWithReactComponents<Field>(baseField, matchCopy)
 
-        if (fieldHasOptions(baseField) && fieldHasOptions(matchCopy)) {
+        if (
+          fieldHasOptions(baseField) &&
+          fieldHasOptions(matchCopy) &&
+          matchCopy.options.length > 0
+        ) {
           ;(mergedField as RadioField | SelectField).options = matchCopy.options
         }
 
