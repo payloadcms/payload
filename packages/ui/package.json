@@ -276,6 +276,11 @@
       "types": "./src/utilities/getRequestEmbed.ts",
       "default": "./src/utilities/getRequestEmbed.ts"
     },
+    "./utilities/getRequestHighContrast": {
+      "import": "./src/utilities/getRequestHighContrast.ts",
+      "types": "./src/utilities/getRequestHighContrast.ts",
+      "default": "./src/utilities/getRequestHighContrast.ts"
+    },
     "./utilities/getRequestTheme": {
       "import": "./src/utilities/getRequestTheme.ts",
       "types": "./src/utilities/getRequestTheme.ts",

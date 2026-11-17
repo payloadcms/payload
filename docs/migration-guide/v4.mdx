@@ -26,6 +26,40 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ## Breaking Changes
 
+### Theme context distinguishes local overrides from root preferences
+
+`useTheme` now reads and updates the nearest provider. Use `useRootTheme` for root preference controls and all `setTheme('auto')` calls:
+
+```diff
+-import { useTheme } from '@payloadcms/ui'
++import { useRootTheme } from '@payloadcms/ui'
+
+-const { autoMode, setTheme, theme } = useTheme()
++const { autoMode, setTheme, theme } = useRootTheme()
+```
+
+Theme setters no longer accept an options argument. Remove the second argument from both methods:
+
+```diff
+-setTheme('dark', { scoped: true })
++setTheme('dark')
+
+-setHighContrastMode(true, { scoped: true })
++setHighContrastMode(true)
+```
+
+`ThemeProvider` now manages only local overrides, including outside the Admin. The host supplies initial theme and contrast values and handles saved preferences. To use local setters, bind the provider to the themed element with `targetRef`:
+
+```tsx
+<ThemeProvider targetRef={targetRef} theme="dark">
+  <div data-theme="dark" ref={targetRef}>
+    {children}
+  </div>
+</ThemeProvider>
+```
+
+Without `targetRef`, control the theme through the provider's props. See [theme hooks](../admin/react-hooks#usetheme) for usage.
+
 ### Form-state data utilities are renamed
 
 The shared form-state utilities exported from `payload/shared` now explicitly name their source:

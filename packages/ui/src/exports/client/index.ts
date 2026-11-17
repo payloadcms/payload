@@ -518,9 +518,11 @@ export { UploadHandlersProvider, useUploadHandlers } from '../../providers/Uploa
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export {
   defaultTheme,
+  type RootThemeContext,
   type Theme,
   type ThemeContext,
   ThemeProvider,
+  useRootTheme,
   useTheme,
 } from '../../providers/Theme/index.js'
 export { EmbedProvider, useEmbed } from '../../providers/Embed/index.js'

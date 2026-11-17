@@ -1,9 +1,12 @@
 import type { CSSProperties } from 'react'
 
+import { useEffect } from 'react'
+
 import { expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
+import { useTheme } from '../../providers/Theme/index.js'
 import { Popup, PopupList } from './index.js'
 
 test.each([
@@ -471,4 +474,72 @@ test('should position a nested menu beside its parent and offset its top by its 
   expect(Math.round(subchildMenu!.getBoundingClientRect().top)).toBe(
     Math.round(colorElement!.getBoundingClientRect().top - 8),
   )
+})
+
+test('should update only the popup theme and preserve its draft when the theme prop changes', async () => {
+  const originalTheme = document.documentElement.getAttribute('data-theme')
+  const themeContexts: ReturnType<typeof useTheme>[] = []
+
+  function ThemeControls() {
+    const context = useTheme()
+    const { setTheme, theme } = context
+
+    useEffect(() => {
+      themeContexts.push(context)
+    }, [context])
+
+    return (
+      <div data-popup-prevent-close>
+        <output aria-label="Popup theme">{theme}</output>
+        <input aria-label="Popup draft" />
+        <button onClick={() => setTheme('light')} type="button">
+          Set popup light
+        </button>
+      </div>
+    )
+  }
+
+  const screen = await render(
+    <Popup button="Open theme scope" theme="dark">
+      <ThemeControls />
+    </Popup>,
+  )
+
+  await screen.getByRole('button', { name: 'Open theme scope' }).click()
+  expect(themeContexts).toHaveLength(1)
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('dark')
+  expect(() => {
+    // @ts-expect-error Automatic mode is a root preference.
+    themeContexts[0]!.setTheme('auto')
+  }).toThrow(/useRootTheme/)
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('dark')
+  await screen.getByRole('button', { name: 'Set popup light' }).click()
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('light')
+  expect(document.documentElement.getAttribute('data-theme')).toBe(originalTheme)
+
+  const draft = screen.getByRole('textbox', { name: 'Popup draft' })
+
+  screen
+    .getByLabelText('Popup theme')
+    .element()
+    .closest('[popover]')!
+    .setAttribute('data-theme', 'dark')
+  await draft.fill('Unsaved popup draft')
+  await draft.click()
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('light')
+  await screen.rerender(
+    <Popup button="Open theme scope" theme="auto">
+      <ThemeControls />
+    </Popup>,
+  )
+  await expect.element(draft).toHaveValue('Unsaved popup draft')
+  await expect.element(draft).toHaveFocus()
+  await screen.rerender(
+    <Popup button="Open theme scope" theme="dark">
+      <ThemeControls />
+    </Popup>,
+  )
+  await expect.element(screen.getByLabelText('Popup theme')).toHaveTextContent('dark')
+  await expect.element(draft).toHaveValue('Unsaved popup draft')
+  await expect.element(draft).toHaveFocus()
 })
