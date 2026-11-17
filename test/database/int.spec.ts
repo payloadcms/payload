@@ -81,6 +81,51 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     token = loginResult.token
   })
 
+  for (const field of ['reference', 'localizedReference'] as const) {
+    test.options(
+      `should clear omitted ${field} when reordering array rows`,
+      { db: 'drizzle' },
+      async ({ payload }) => {
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { title: 'Array relationship target' },
+          overrideAccess: true,
+        })
+        const doc = await payload.create({
+          collection: writeInputSlug,
+          data: {
+            links: [
+              { label: 'Internal', [field]: { relationTo: postsSlug, value: post.id } },
+              { label: 'External' },
+            ],
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+        const updated = await payload.update({
+          id: doc.id,
+          collection: writeInputSlug,
+          data: {
+            links: [
+              { id: doc.links[1].id, label: 'External' },
+              {
+                id: doc.links[0].id,
+                label: 'Internal',
+                [field]: { relationTo: postsSlug, value: post.id },
+              },
+            ],
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(updated.links[0].id).toBe(doc.links[1].id)
+        expect(updated.links[0][field] ?? null).toBeNull()
+        expect(updated.links[1][field]).toEqual({ relationTo: postsSlug, value: post.id })
+      },
+    )
+  }
+
   test.options(
     'should preserve nested input and logical row IDs when saving a version',
     { db: 'all' },
