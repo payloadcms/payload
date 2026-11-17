@@ -19,30 +19,19 @@ type RootThemeProviderProps = {
   children?: React.ReactNode
   /** Initial contrast preference, resolved from cookies or system settings after mounting. */
   highContrastMode?: boolean
-  /** Initial theme; a fixed admin theme takes precedence over cookies and query preferences. */
+  /** Initial theme, with a fixed admin theme taking precedence over cookies and query preferences. */
   theme?: Theme
 }
 
 /**
- * Use one `RootThemeProvider` per document, with nested `ThemeProvider`s as needed.
- * The root scope reads and writes cookies, detects system preferences, and writes HTML attributes directly to the document's `<html>` element.
+ * The Admin mounts one `RootThemeProvider` per app.
+ * It alone reads and writes preference cookies, detects system preferences, and updates `<html>` attributes.
+ *
+ * Nest `ThemeProvider`s for local overrides.
+ * Use `useRootTheme` to escape local overrides and access root preferences.
  *
  * @example
- * ```tsx
- * <html data-theme="light" data-enhanced-contrast="true">
- *   {
- *     // ...
- *   }
- * </html>
- * ```
- *
- * The admin panel mounts the `RootThemeProvider` at the top-level to manage its site-wide theme preferences.
- * - Use `useTheme` to read and update the nearest theme scope, which may be the `RootThemeProvider` or the nearest nested `ThemeProvider`.
- * - Within a nested `ThemeProvider`, use `useRootTheme` to step outside the nested context to read and update the root theme.
- *
- * @example
- * Inside the `RootThemeProvider` scope, `useTheme` controls the root preferences until a nested provider is introduced.
- * It interacts with the system preference and cookies to determine the effective theme.
+ * Outside a nested provider, `useTheme` reads and updates the root theme.
  *
  * ```tsx
  * function MyComponent() {
@@ -55,7 +44,7 @@ type RootThemeProviderProps = {
  * </RootThemeProvider>
  * ```
  *
- * @see `ThemeProvider` for managing nested theme scopes within the root provider.
+ * @see `ThemeProvider` for managing nested theme scopes.
  */
 export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   children,
@@ -78,7 +67,7 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   )
 
   /**
-   * Sets the theme on `<html>` and saves to cookies.
+   * Sets the root `<html>` element's `data-theme` HTML attribute and saves the preference to cookies.
    * `'auto'` uses the system theme and clears the theme cookie.
    */
   const setTheme = useCallback(
@@ -102,7 +91,7 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   )
 
   /**
-   * Sets contrast on `<html>` and saves to cookies.
+   * Sets the root `<html>` element's `data-enhanced-contrast` HTML attribute and saves the preference to cookies.
    */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {

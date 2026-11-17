@@ -28,36 +28,7 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ### Theme context distinguishes local overrides from root preferences
 
-`ThemeProvider` now creates a local scope, including when rendered without a parent provider. It no longer initializes cookie persistence, system detection, query preferences, or document root effects. The Admin installs its root preference provider explicitly, so its preference controls keep their existing behavior.
-
-Outside the Admin, supply the frontend's current values and update those props when the host theme changes:
-
-```tsx
-<ThemeProvider
-  theme={frontendTheme}
-  highContrastMode={frontendHighContrastMode}
->
-  {children}
-</ThemeProvider>
-```
-
-Without `targetRef`, `ThemeProvider` props control the local context, and both setters throw. Update the props to change those values. To make local setters writable, render the themed element inside the provider and pass its ref:
-
-```tsx
-<ThemeProvider targetRef={targetRef} theme="dark">
-  <div data-theme="dark" ref={targetRef}>
-    {children}
-  </div>
-</ThemeProvider>
-```
-
-Setters update local React state and only the target element's attributes. Later changes to the corresponding prop replace a local choice. Keep the target's attributes in sync when changing props; direct DOM changes are not read or observed. Local `setTheme` accepts only `'light'` or `'dark'` and rejects `'auto'`. Use `useRootTheme().setTheme('auto')` for the root system preference. Local providers do not persist preferences or detect system settings. Host applications remain responsible for their preference persistence. Built-in enhanced contrast styling still follows the document or shadow host.
-
-The `useTheme` hook now returns the nearest provider's values. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit local theme sets `autoMode` to `false`. Without a local theme override, the theme and `autoMode` inherit from the parent.
-
-Both hooks remain readable without a root preference provider; `useRootTheme` returns its defaults, and its setters throw when called without a root owner.
-
-Use the new `useRootTheme` hook for preference controls that need the root selection, even inside an override. All calls to `setTheme('auto')` now use this hook, including at the Admin root:
+`useTheme` now reads and updates the nearest provider. Use `useRootTheme` for root preference controls and all `setTheme('auto')` calls:
 
 ```diff
 -import { useTheme } from '@payloadcms/ui'
@@ -67,7 +38,7 @@ Use the new `useRootTheme` hook for preference controls that need the root selec
 +const { autoMode, setTheme, theme } = useRootTheme()
 ```
 
-Within the Admin, `useTheme` exposes root light/dark setters only outside a local `ThemeProvider`. `useRootTheme` always exposes root setters, which update root preferences, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
+Theme setters no longer accept an options argument. Remove the second argument from both methods:
 
 ```diff
 -setTheme('dark', { scoped: true })
@@ -77,7 +48,17 @@ Within the Admin, `useTheme` exposes root light/dark setters only outside a loca
 +setHighContrastMode(true)
 ```
 
-Root setters update preferences, document attributes, and cookies. Local setters require `targetRef` and change only its element; without a ref, update the provider's props instead. Controlled `highContrastMode` overrides affect context only. Built-in enhanced contrast styling follows the document or shadow host setting; local contrast flags require custom styling.
+`ThemeProvider` now manages only local overrides, including outside the Admin. The host supplies initial theme and contrast values and handles saved preferences. To use local setters, bind the provider to the themed element with `targetRef`:
+
+```tsx
+<ThemeProvider targetRef={targetRef} theme="dark">
+  <div data-theme="dark" ref={targetRef}>
+    {children}
+  </div>
+</ThemeProvider>
+```
+
+Without `targetRef`, control the theme through the provider's props. See [theme hooks](../admin/react-hooks#usetheme) for usage.
 
 ### Form-state data utilities are renamed
 

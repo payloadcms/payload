@@ -10,21 +10,22 @@ import { getThemeTarget } from '../utilities.js'
 
 /**
  * `ThemeProvider` can be nested as needed to override the theme for part of the UI.
- * Unlike the `RootThemeProvider`, within each nesting, site-wide cookies and system preferences are never read or written, and the HTML attributes are managed only on the provided `targetRef`.
+ * Unlike the `RootThemeProvider`, a `ThemeProvider`:
+ *
+ * - Never reads or writes site-wide cookies or detects system preferences.
+ * - Sets HTML attributes on the provided `targetRef` element, rather than the document's `<html>` element.
  *
  * @example
  * ```tsx
- * <div data-theme="dark" data-enhanced-contrast="true">
- *   {
- *     // ...
- *   }
- * </div>
+ * <div data-theme="dark" data-enhanced-contrast="true">...</div>
  * ```
  *
- * Within the admin panel, when using a `ThemeProvider`, call `useRootTheme` to step outside any nested providers to read and update the `RootThemeProvider`.
+ * Within the admin panel, when using a `ThemeProvider`, call `useRootTheme` to escape any nested providers and read or update the `RootThemeProvider`.
  *
  * @example
- * Inside a nested provider, `useTheme` reads that local scope, whereas `useRootTheme` reads root preferences.
+ * Inside a nested provider, `useTheme` reads that local scope.
+ * `useRootTheme` escapes to the root preferences.
+ *
  * ```tsx
  * function ThemeValues() {
  *   const { theme } = useTheme()
@@ -72,7 +73,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const highContrastMode = contrastPreference ?? parentContext.highContrastMode
 
   /**
-   * Sets the local theme and target's `data-theme`. Requires a mounted `targetRef`.
+   * Sets the local theme and target's `data-theme` HTML attribute.
+   * Requires a mounted `targetRef`.
    */
   const setTheme = useCallback(
     (themeToSet: Theme) => {
@@ -91,7 +93,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   )
 
   /**
-   * Sets local contrast and the target flag. Requires a mounted `targetRef`.
+   * Sets local contrast and target's `data-enhanced-contrast` HTML attribute.
+   * Requires a mounted `targetRef`.
    */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
