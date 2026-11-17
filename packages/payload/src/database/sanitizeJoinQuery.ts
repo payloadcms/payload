@@ -136,6 +136,7 @@ export const sanitizeJoinQuery = async ({
   for (const join of collectionConfig.polymorphicJoins) {
     const joinQuery = joinsQuery[join.joinPath]
 
+    // Preserve joins explicitly disabled by the caller.
     if (joinQuery === false) {
       continue
     }
@@ -159,6 +160,7 @@ export const sanitizeJoinQuery = async ({
 
       const collectionQuery = collectionJoins[join.joinPath]
 
+      // Include only targets the current user can read.
       if (collectionQuery !== false) {
         readableCollections.push(
           combineQueries(collectionQuery?.where || {}, {
@@ -168,6 +170,7 @@ export const sanitizeJoinQuery = async ({
       }
     }
 
+    // Disable the join when none of its targets are readable.
     joinsQuery[join.joinPath] = readableCollections.length
       ? { ...joinQuery, where: { or: readableCollections } }
       : false
