@@ -10,15 +10,16 @@ type GetRequestThemeArgs = {
   headers: Request['headers']
 }
 
+/**
+ * The request input used to resolve the theme.
+ * `'fallback'` means no usable config, cookie, or client hint was available; the browser may still resolve the system preference.
+ */
 export type RequestThemeSource = 'fallback' | keyof GetRequestThemeArgs
 
 export type RequestThemeResult = {
   /** The request's resolved theme. */
   theme: Theme
-  /**
-   * The input used to resolve the theme.
-   * `'fallback'` means no usable config, cookie, or client hint was available; the browser may still resolve the system preference.
-   */
+  /** The input used to resolve the theme. */
   themeSource: RequestThemeSource
 }
 
