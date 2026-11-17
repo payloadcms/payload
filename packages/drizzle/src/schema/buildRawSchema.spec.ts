@@ -361,6 +361,86 @@ describe('buildRawSchema', () => {
       expect(adapter.rawTables.p_texts.columns.text).toBeDefined()
     })
 
+    it('should pick an unused name when the suffixed name is taken by another field', () => {
+      const adapter = buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'numbersField', type: 'array', fields: [{ name: 'label', type: 'text' }] },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field_2')
+      expect(adapter.tableNameMap.get('p_numbers_field')).toBe('p_numbers_field')
+      expect(adapter.rawTables.p_numbers_field_2.columns.drawPosition).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field.columns.label).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field.columns.drawPosition).toBeUndefined()
+      expect(adapter.rawTables.p_numbers.columns.number).toBeDefined()
+    })
+
+    it('should not rename into a name used as a prefix by nested tables', () => {
+      // Only `p_numbers_field_items` exists, not `p_numbers_field`. Renaming `p_numbers` to
+      // `p_numbers_field` would turn its nested `items` table into `p_numbers_field_items` too.
+      const adapter = buildCollection([
+        {
+          name: 'numbers',
+          type: 'array',
+          fields: [
+            { name: 'items', type: 'array', fields: [{ name: 'position', type: 'number' }] },
+          ],
+        },
+        {
+          name: 'numbersFieldItems',
+          type: 'array',
+          fields: [{ name: 'label', type: 'text' }],
+        },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field_2')
+      expect(adapter.rawTables.p_numbers_field_2_items.columns.position).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_items.columns.label).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_items.columns.position).toBeUndefined()
+    })
+
+    it('should rename a nested table that clashes only after its parent was renamed', () => {
+      // `p_numbers` is renamed to `p_numbers_field` because of the `scores` numbers table. Its
+      // nested `locales` array then becomes `p_numbers_field_locales`, the name of the renamed
+      // array's own locales table.
+      const config = sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'numbers',
+                type: 'array',
+                fields: [
+                  { name: 'title', type: 'text', localized: true },
+                  { name: 'locales', type: 'array', fields: [{ name: 'code', type: 'text' }] },
+                ],
+              },
+              { name: 'scores', type: 'number', hasMany: true },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'de'] },
+      } as Config)
+
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      const numbersTableName = adapter.tableNameMap.get('p_numbers')!
+      const nestedLocalesTableName = adapter.tableNameMap.get(`${numbersTableName}_locales`)!
+
+      expect(numbersTableName).toBe('p_numbers_field')
+      expect(nestedLocalesTableName).not.toBe('p_numbers_field_locales')
+      expect(adapter.rawTables[nestedLocalesTableName].columns.code).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_locales.columns.title).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_locales.columns.code).toBeUndefined()
+    })
+
     it('should keep the table name when there is no companion table with that name', () => {
       // No `hasMany` number or text fields, so there are no `p_numbers` or `p_texts` companion tables.
       const adapter = buildCollection([

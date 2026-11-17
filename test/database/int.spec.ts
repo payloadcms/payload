@@ -3953,6 +3953,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         collection: 'reserved-field-names',
         overrideAccess: true,
         data: {
+          locales: [{ value: 'en' }],
           numbers: [{ drawPosition: 1 }],
           texts: [{ value: 'hello' }],
           rels: [{ value: 'world' }],
@@ -3965,12 +3966,43 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
 
+      expect(found.locales?.[0]?.value).toStrictEqual('en')
       expect(found.numbers?.[0]?.drawPosition).toStrictEqual(1)
       expect(found.texts?.[0]?.value).toStrictEqual('hello')
       expect(found.rels?.[0]?.value).toStrictEqual('world')
 
       await payload.delete({
         collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+      })
+    })
+
+    test('should keep arrays apart when the renamed table name is taken by another array', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 1 }, { drawPosition: 2 }],
+          numbersField: [{ label: 'first' }],
+          scores: [10, 20, 30],
+        },
+      })
+
+      const found = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      expect(found.numbers?.map((row) => row.drawPosition)).toStrictEqual([1, 2])
+      expect(found.numbersField?.map((row) => row.label)).toStrictEqual(['first'])
+      expect(found.scores).toStrictEqual([10, 20, 30])
+
+      await payload.delete({
+        collection: 'reserved-field-name-clashes',
         id: created.id,
         overrideAccess: true,
       })

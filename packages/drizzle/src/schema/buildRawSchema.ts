@@ -21,18 +21,76 @@ type Args = {
  * Builds abstract Payload SQL schema
  */
 export const buildRawSchema = ({ adapter, setColumnID }: Args) => {
-  adapter.subTableNameClashes = new Set()
+  adapter.subTableNameReplacements = new Map()
 
-  buildTables({ adapter, setColumnID })
+  const seenTableNames = new Set<string>()
 
-  // An array or `hasMany` select table had the same name as a companion table of its parent (an
-  // array field called `rels`, for example). Build again so those tables get a distinct name.
-  if (adapter.subTableNameClashes.size) {
-    adapter.rawRelations = {}
-    adapter.rawTables = {}
+  // An array or `hasMany` select table can have the same name as a companion table of its parent
+  // (an array field called `rels`, for example). Build again so those tables get a distinct name.
+  // Renaming a table also renames its nested tables, which can clash in turn, so repeat until a
+  // build finds no new clashes.
+  for (let pass = 1; ; pass++) {
+    adapter.subTableNameClashes = new Set()
 
     buildTables({ adapter, setColumnID })
+
+    if (!adapter.subTableNameClashes.size) {
+      return
+    }
+
+    if (pass >= MAX_BUILD_PASSES) {
+      throw new Error(
+        `Could not give distinct names to these tables: ${[...adapter.subTableNameClashes].join(', ')}. Set a custom dbName on the fields that create them.`,
+      )
+    }
+
+    for (const tableName of Object.keys(adapter.rawTables)) {
+      seenTableNames.add(tableName)
+    }
+
+    addSubTableNameReplacements({
+      clashes: adapter.subTableNameClashes,
+      replacements: adapter.subTableNameReplacements,
+      seenTableNames,
+    })
+
+    adapter.rawRelations = {}
+    adapter.rawTables = {}
   }
+}
+
+const MAX_BUILD_PASSES = 10
+
+/**
+ * Picks a replacement for each clashing sub-table name: `<name>_field`, or `<name>_field_2`,
+ * `<name>_field_3`... when that is taken. A candidate is taken when a table seen in any build has
+ * that name or starts with it, since the renamed table's own nested tables are prefixed with it.
+ */
+const addSubTableNameReplacements = ({
+  clashes,
+  replacements,
+  seenTableNames,
+}: {
+  clashes: Set<string>
+  replacements: Map<string, string>
+  seenTableNames: Set<string>
+}): Map<string, string> => {
+  const isNameTaken = (candidate: string) =>
+    [...seenTableNames].some((name) => name === candidate || name.startsWith(`${candidate}_`))
+
+  for (const clash of [...clashes].sort()) {
+    const base = `${clash}_field`
+    let candidate = base
+
+    for (let suffix = 2; isNameTaken(candidate); suffix++) {
+      candidate = `${base}_${suffix}`
+    }
+
+    replacements.set(clash, candidate)
+    seenTableNames.add(candidate)
+  }
+
+  return replacements
 }
 
 const buildTables = ({ adapter, setColumnID }: Args) => {

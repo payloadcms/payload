@@ -1,6 +1,8 @@
 import type { ArrayRowToInsert } from '../transform/write/types.js'
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
+import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
+
 type Args = {
   adapter: DrizzleAdapter
   arrays: {
@@ -96,7 +98,10 @@ export const insertArrays = async ({
     }
 
     // Insert locale rows
-    if (adapter.tables[`${tableName}${adapter.localesSuffix}`] && row.locales.length > 0) {
+    if (
+      hasCompanionRelation({ adapter, relation: '_locales', tableName }) &&
+      row.locales.length > 0
+    ) {
       if (!row.locales[0]._parentID) {
         row.locales = row.locales.map((localeRow) => {
           if (typeof localeRow._getParentID === 'function') {

@@ -7,7 +7,7 @@ import type { DrizzleAdapter } from './types.js'
 import { validateIdentifierLength } from './utilities/validateIdentifierLength.js'
 
 type Args = {
-  adapter: Pick<DrizzleAdapter, 'subTableNameClashes' | 'tableNameMap' | 'versionsSuffix'>
+  adapter: Pick<DrizzleAdapter, 'subTableNameReplacements' | 'tableNameMap' | 'versionsSuffix'>
   /** The collection, global or field config **/
   config: {
     dbName?: DBIdentifierName
@@ -72,9 +72,11 @@ export const createTableName = ({
   let result = customTableNameResult || defaultTableName
 
   // A sub-table can share its name with a companion table of its parent, for example an array
-  // field called `rels` next to the `_rels` relationships table. Only those tables get a suffix.
-  if (prefix && adapter.subTableNameClashes?.has(result)) {
-    result = `${result}_field`
+  // field called `rels` next to the `_rels` relationships table. Only those tables are renamed.
+  const subTableNameReplacement = prefix ? adapter.subTableNameReplacements?.get(result) : undefined
+
+  if (subTableNameReplacement) {
+    result = subTableNameReplacement
   }
 
   adapter.tableNameMap.set(defaultTableName, result)
