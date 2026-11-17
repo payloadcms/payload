@@ -893,7 +893,7 @@ jobs:
   # gives each run an isolated sandbox, avoiding data collisions between
   # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
-    name: Content API Tests
+    name: Content API Tests (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-26.04
     needs: [changes, build]
     # Skip fork PRs, bot PRs and audit fix branches. This job assumes an AWS role, and a bot PR
@@ -903,10 +903,14 @@ jobs:
       && github.event.pull_request.head.repo.fork == false
       && github.event.pull_request.user.type != 'Bot'
       && !startsWith(github.head_ref, 'ci/audit-deps-fix-')
-    # Non-blocking while adapter coverage is incomplete. Once the full suite
-    # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
-    # with --shard); `test:int:summary` cannot shard.
+    # Non-blocking while adapter coverage is incomplete, so it is not in `all-green`. Once the
+    # full suite passes, migrate to the `tests-int` matrix pattern (`pnpm test:int --shard`).
     continue-on-error: true
+    # Suite-level shards: each gets its own Content API stack, so shards share no data.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     permissions:
       actions: read
       id-token: write
@@ -1033,7 +1037,7 @@ jobs:
 
       - name: Run Content API Integration Tests
         continue-on-error: true
-        run: pnpm test:int:summary
+        run: pnpm test:int:summary --shard=${{ matrix.shard }}/${{ strategy.job-total }}
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: content-api
@@ -1058,7 +1062,6 @@ jobs:
         tests-a11y,
         tests-types,
         tests-type-generation,
-        tests-content-api,
         visual-regression,
       ]
 

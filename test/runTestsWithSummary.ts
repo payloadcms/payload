@@ -104,6 +104,37 @@ function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.Proc
   return env
 }
 
+type Shard = {
+  index: number
+  total: number
+}
+
+/** Parses `--shard=<index>/<total>` (1-based), matching the vitest flag format. */
+function parseShardArg(argv: string[]): Shard | undefined {
+  const arg = argv.find((value) => value.startsWith('--shard='))
+  if (!arg) {
+    return undefined
+  }
+
+  const match = /^--shard=(\d+)\/(\d+)$/.exec(arg)
+  const index = Number(match?.[1])
+  const total = Number(match?.[2])
+  if (!match || total < 1 || index < 1 || index > total) {
+    throw new Error(`Invalid ${arg}: expected --shard=<index>/<total> with 1 <= index <= total`)
+  }
+
+  return { index, total }
+}
+
+/** Round-robin keeps shards balanced without a duration table that goes stale. */
+function selectShardSuites(suites: string[], shard: Shard | undefined): string[] {
+  if (!shard) {
+    return suites
+  }
+
+  return suites.filter((_, i) => i % shard.total === shard.index - 1)
+}
+
 function getTestDirectories(): string[] {
   const testDir = dirname
 
@@ -490,8 +521,10 @@ function formatDuration(ms: number): string {
 function main() {
   console.log('🧪 Running integration tests suite by suite...\n')
 
-  const testDirs = getTestDirectories()
-  console.log(`Found ${testDirs.length} test suites\n`)
+  const shard = parseShardArg(process.argv.slice(2))
+  const testDirs = selectShardSuites(getTestDirectories(), shard)
+  const shardLabel = shard ? ` (shard ${shard.index}/${shard.total})` : ''
+  console.log(`Found ${testDirs.length} test suites${shardLabel}\n`)
 
   const results: SuiteResult[] = []
   const overallStart = Date.now()
