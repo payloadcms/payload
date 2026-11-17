@@ -22,9 +22,6 @@ CLAUDE.local.md
 .agents/skills/writing-scss/
 .worktrees/
 
-# Custom actions
-!.github/actions/**/dist
-
 test/packed
 test-results
 playwright-report
@@ -188,6 +185,9 @@ out
 .nuxt
 dist
 dist_optimized
+
+# Custom actions
+!.github/actions/**/dist
 
 # Gatsby files
 .cache/
