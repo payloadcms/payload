@@ -21,9 +21,7 @@ test.suite('Polymorphic fallback query conditions', { config: './config.ts', db:
     adapter.useJoinAggregations = originalUseJoinAggregations
   })
 
-  test('should return no documents when the collection discriminator must not exist', async ({
-    payload,
-  }) => {
+  test('should reject exists constraints on the collection discriminator', async ({ payload }) => {
     const parent = await payload.create({
       collection: accessJoinParentsSlug,
       data: {},
@@ -36,15 +34,17 @@ test.suite('Polymorphic fallback query conditions', { config: './config.ts', db:
       overrideAccess: true,
     })
 
-    const result = await payload.findByID({
-      collection: accessJoinParentsSlug,
-      id: parent.id,
-      depth: 0,
-      overrideAccess: true,
-      joins: { children: { count: true, where: { relationTo: { exists: false } } } },
-    })
-
-    expect(result.children).toMatchObject({ docs: [], totalDocs: 0, hasNextPage: false })
+    for (const exists of [true, false]) {
+      await expect(
+        payload.findByID({
+          collection: accessJoinParentsSlug,
+          id: parent.id,
+          depth: 0,
+          overrideAccess: true,
+          joins: { children: { where: { relationTo: { exists } } } },
+        }),
+      ).rejects.toMatchObject({ name: 'QueryError', data: [{ path: 'relationTo.exists' }] })
+    }
   })
 
   test('should reject collection operators the fallback cannot evaluate', async ({ payload }) => {
