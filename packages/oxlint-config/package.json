@@ -28,7 +28,7 @@
     "@payloadcms/oxlint-plugin": "workspace:*",
     "@vitest/eslint-plugin": "1.6.27",
     "eslint": "9.39.2",
-    "eslint-plugin-perfectionist": "4.0.0",
+    "eslint-plugin-perfectionist": "5.14.0",
     "eslint-plugin-playwright": "2.3.0",
     "eslint-plugin-regexp": "2.7.0"
   },
