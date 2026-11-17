@@ -18,8 +18,8 @@ import type {
 import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { exceedsIdentifierLength, fitIdentifierLength } from '../utilities/fitIdentifierLength.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
-import { maxIdentifierLength } from '../utilities/validateIdentifierLength.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -807,7 +807,7 @@ export const buildTable = ({
  * When that name exceeds the Postgres identifier limit, Postgres stores a truncated name, so push
  * never matches it and drops and re-adds the foreign key on every run, which can fail with
  * "already exists". Those foreign keys are moved to explicitly named table-level foreign keys
- * instead. Shorter names keep `.references()` unchanged.
+ * instead. Names that fit, and every foreign key on non-Postgres adapters, keep `.references()`.
  */
 const promoteLongInlineForeignKeys = ({
   adapter,
@@ -824,13 +824,13 @@ const promoteLongInlineForeignKeys = ({
     const { name: targetColumnName, onDelete, table: targetTableName } = column.reference
     const drizzleForeignKeyName = `${table.name}_${column.name}_${targetTableName}_${targetColumnName}`
 
-    if (`${drizzleForeignKeyName}_fk`.length <= maxIdentifierLength) {
+    if (!exceedsIdentifierLength({ adapter, identifier: `${drizzleForeignKeyName}_fk` })) {
       continue
     }
 
     table.foreignKeys ??= {}
     table.foreignKeys[`${columnKey}Fk`] = {
-      name: buildForeignKeyName({ name: drizzleForeignKeyName, adapter }),
+      name: fitIdentifierLength({ name: drizzleForeignKeyName, adapter, suffix: '_fk' }),
       columns: [columnKey],
       foreignColumns: [{ name: targetColumnName, table: targetTableName }],
       onDelete,
