@@ -306,6 +306,8 @@ export const useFormSubmission = ({
       let errorToast, successToast
       let promiseToastID: number | string | undefined
       let saveUpload: ReturnType<typeof trackSaveUploadProgress> | undefined
+      // A save's own progress toast when it has no "Submitting…" toast to show progress in.
+      let uploadToast: ReturnType<typeof createProgressToast<string>> | undefined
       let preservePromiseToast = false
 
       const promise = new Promise((resolve, reject) => {
@@ -319,8 +321,10 @@ export const useFormSubmission = ({
       if (redirect || disableToast || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
-        successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
+        successToast = (data) =>
+          toast.success(data, uploadToast ? { id: uploadToast.getResultID() } : undefined)
+        errorToast = (data) =>
+          toast.error(data, uploadToast ? { id: uploadToast.getResultID() } : undefined)
       } else {
         const promiseToast = toast.promise(promise, {
           error: (data) => {
@@ -492,14 +496,17 @@ export const useFormSubmission = ({
           const uploadFile = contextRef.current.fields?.file?.value
 
           if (uploadFile instanceof File) {
+            if (promiseToastID === undefined) {
+              uploadToast = createProgressToast({ id: `save-upload-${crypto.randomUUID()}` })
+            }
+
             saveUpload = trackSaveUploadProgress({
               fileName: uploadFile.name,
               onChange: setUploadProgress,
               progressToast:
-                promiseToastID === undefined
-                  ? undefined
-                  : // The same id, not its string: Sonner matches ids strictly.
-                    createProgressToast({ id: promiseToastID }),
+                uploadToast ??
+                // The same id, not its string: Sonner matches ids strictly.
+                createProgressToast({ id: promiseToastID }),
               t,
               totalBytes: uploadFile.size,
             })
@@ -770,6 +777,18 @@ export const useFormSubmission = ({
           }
         } else if (!preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
+        }
+
+        // Without a result toast, e.g. a create that redirects, the progress toast is removed.
+        const uploadToastID = uploadToast?.getResultID()
+
+        if (
+          uploadToastID !== undefined &&
+          toast
+            .getToasts()
+            .some((item) => item.id === uploadToastID && 'type' in item && item.type === 'loading')
+        ) {
+          toast.dismiss(uploadToastID)
         }
       }
     },
