@@ -146,7 +146,6 @@
   .widget-wrapper--editing:not(.widget-wrapper--controls-active):hover
     .widget-wrapper__edit-overlay {
     background: color-mix(in srgb, var(--color-bg-brand-tertiary-hover) 50%, transparent);
-    border-color: var(--color-border-brand);
     opacity: 1;
   }
 
@@ -200,6 +199,12 @@
     }
   }
 
+  .widget-wrapper__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
   .widget-wrapper__controls-divider {
     align-self: stretch;
     width: var(--stroke-width-small);
@@ -207,26 +212,80 @@
     background: var(--color-border);
   }
 
-  .widget-wrapper__controls .widget-wrapper__select-btn,
-  .widget-wrapper__controls .widget-wrapper__size-btn {
-    padding-inline-start: var(--spacer-2);
+  .widget-wrapper__controls
+    .btn.btn--size-medium:is(.widget-wrapper__select-btn, .widget-wrapper__size-btn) {
+    height: var(--spacer-4);
+    padding: 0;
     text-transform: capitalize;
 
     & .btn__content {
+      block-size: 100%;
+      align-items: center;
       gap: 0;
+      flex-wrap: nowrap;
     }
+
+    & .btn__label {
+      display: flex;
+      align-items: center;
+      block-size: 100%;
+    }
+  }
+
+  .widget-wrapper__controls .btn.btn--size-medium.widget-wrapper__size-btn,
+  .widget-wrapper__controls
+    .btn.btn--size-medium.widget-wrapper__select-btn:not(.widget-wrapper__select-btn--with-icon) {
+    padding-inline-start: var(--spacer-2);
+  }
+
+  .widget-wrapper__controls
+    .btn.btn--style-ghost:not(.btn--disabled):is(:hover, :active, .btn--selected) {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text);
   }
 
   .widget-wrapper__select-btn-label,
   .widget-wrapper__select-btn-label > span {
     display: inline-flex;
     align-items: center;
-    gap: var(--spacer-1);
+    gap: 0;
+  }
+
+  .widget-wrapper__select-btn-icon {
+    flex: 0 0 var(--spacer-4);
+    inline-size: var(--spacer-4);
+    block-size: var(--spacer-4);
+  }
+
+  .widget-wrapper__controls :is(.widget-wrapper__select-btn, .widget-wrapper__size-btn) .btn__icon {
+    flex: 0 0 var(--spacer-3);
+    inline-size: var(--spacer-3);
+    block-size: var(--spacer-3);
+  }
+
+  .widget-wrapper__select-btn-icon svg {
+    inline-size: var(--spacer-4);
+    block-size: var(--spacer-4);
+    flex-shrink: 0;
+  }
+
+  .popup__content.widget-toolbar-menu.popup--size-small {
+    min-inline-size: calc(var(--spacer-6) * 3.5);
+  }
+
+  .widget-toolbar-menu .popup-button-list__label {
+    flex: 1;
+    justify-content: space-between;
+    gap: var(--spacer-3);
   }
 
   .widget-wrapper__size-btn-percentage {
-    margin-left: var(--spacer-1);
     color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .widget-toolbar-menu .popup-button-list__button:hover .widget-wrapper__size-btn-percentage {
+    color: inherit;
   }
 
   .step-nav .dashboard-breadcrumb-dropdown .btn {

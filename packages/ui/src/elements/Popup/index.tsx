@@ -128,6 +128,8 @@ export type PopupProps = {
    * @default 'bottom'
    */
   verticalAlign?: 'bottom' | 'top'
+  /** Gap in CSS pixels for popups above or below their trigger. @default 8 */
+  verticalOffset?: number
 }
 
 /**
@@ -166,6 +168,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     size = 'fit-content',
     theme = 'dark',
     verticalAlign = 'bottom',
+    verticalOffset = 8,
   } = props
 
   const popupRef = useRef<HTMLDivElement>(null)
@@ -336,7 +339,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const triggerRect = trigger.getBoundingClientRect()
     const popupRect = popup.getBoundingClientRect()
 
-    // Gap between the popup and the trigger/viewport edges (in pixels)
+    // Minimum gap between the popup and viewport edges (in pixels).
     const offset = 8
     // Additional gap used in side mode so the child popup has breathing room from its parent
     const sideOffset = 4
@@ -405,11 +408,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
       let onTop = verticalAlign === 'top'
 
       if (verticalAlign === 'bottom') {
-        top = triggerRect.bottom + offset
+        top = triggerRect.bottom + verticalOffset
 
-        if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
+        if (triggerRect.bottom + popupRect.height + verticalOffset > window.innerHeight) {
           // Try to flip above — only do so if there's actually enough room
-          const topIfAbove = triggerRect.top - popupRect.height - offset
+          const topIfAbove = triggerRect.top - popupRect.height - verticalOffset
           if (topIfAbove >= 0) {
             top = topIfAbove
             onTop = true
@@ -417,10 +420,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
           // else: not enough room above either — keep below and let it overflow rather than going off-screen
         }
       } else {
-        top = triggerRect.top - popupRect.height - offset
+        top = triggerRect.top - popupRect.height - verticalOffset
 
-        if (triggerRect.top - popupRect.height - offset < 0) {
-          top = triggerRect.bottom + offset
+        if (triggerRect.top - popupRect.height - verticalOffset < 0) {
+          top = triggerRect.bottom + verticalOffset
           onTop = false
         }
       }
@@ -534,10 +537,19 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
+    if (e.defaultPrevented) {
+      return
+    }
+
     if (e.key === 'Escape') {
       e.preventDefault()
       e.stopPropagation()
       closePopup()
+      return
+    }
+
+    // Form controls in dialog popovers handle Tab and arrow keys natively.
+    if (popupRole === 'dialog') {
       return
     }
 

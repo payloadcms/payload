@@ -17,11 +17,12 @@ export default async function Count({
       : 'tickets'
   const payload = req.payload
   const title =
-    typeof widgetData?.title === 'string' && widgetData.title ? widgetData.title : 'Tickets'
+    widgetData?.caption ||
+    (typeof widgetData?.title === 'string' && widgetData.title ? widgetData.title : 'Tickets')
   const color = 'blue'
   const icon = '📊'
-  const changePercent = 10
-  const changeText = '10% increase'
+  const changePercent = widgetData?.changePercent ?? 10
+  const changeText = `${changePercent}% increase${widgetData?.timeframe === 'month' ? ' this month' : ''}`
 
   try {
     if (isPreview) {
@@ -62,6 +63,12 @@ export default async function Count({
         flexDirection: 'column',
         gap: '12px',
         height: '100%',
+        textAlign:
+          widgetData?.alignment === 'center'
+            ? 'center'
+            : widgetData?.alignment === 'right'
+              ? 'right'
+              : 'left',
       }}
     >
       {error ? (
@@ -104,14 +111,26 @@ export default async function Count({
                 {icon}
               </span>
             </div>
-            <h3 style={{ fontSize: '14px', fontWeight: 500, margin: 0 }}>{title}</h3>
+            <h3
+              style={{
+                fontSize: '14px',
+                fontWeight: widgetData?.emphasis === 'strong' ? 700 : 500,
+                margin: 0,
+              }}
+            >
+              {title}
+            </h3>
           </div>
 
           <div>
-            <span style={{ fontSize: '32px', fontWeight: 700 }}>{count.toLocaleString()}</span>
+            <span style={{ fontSize: '32px', fontWeight: 700 }}>
+              {(
+                count + (typeof widgetData?.countOffset === 'number' ? widgetData.countOffset : 0)
+              ).toLocaleString()}
+            </span>
           </div>
 
-          {changePercent !== undefined && changeText && (
+          {widgetData?.showTrend !== false && changePercent !== undefined && changeText && (
             <div style={{ alignItems: 'center', display: 'flex', gap: '6px', marginTop: 'auto' }}>
               <span
                 style={{

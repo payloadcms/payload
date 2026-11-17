@@ -41,6 +41,7 @@ import { useDashboardSensors } from './utils/sensors.js'
 import { getLayoutRows, placeWidgetInLayout } from './utils/widgetLayoutRows.js'
 import { WidgetContent } from './WidgetContent/index.js'
 import { WidgetEditControl } from './WidgetEditControl.js'
+import { WidgetPopoutControl } from './WidgetPopoutControl/index.js'
 import { WidgetReplaceControl } from './WidgetReplaceControl/index.js'
 import { WidgetResizeHandles } from './WidgetResizeHandles/index.js'
 import { WidgetSelectControl } from './WidgetSelectControl/index.js'
@@ -544,51 +545,71 @@ export function ModularDashboardClient({
                           onResize={(width) => resizeWidget({ widgetID: widget.item.id, width })}
                           widgetLabel={label}
                         />
-                        {widgetConfig?.controls?.map((control) => (
-                          <WidgetSelectControl
-                            control={control}
-                            key={control.name}
-                            onChange={({ value }) => {
-                              updateWidgetData(widget.item.id, {
-                                ...widget.item.data,
-                                [control.name]: value,
-                              })
+                        {widgetConfig?.controls?.map((control, index) =>
+                          control.type === 'popout' ? (
+                            <WidgetPopoutControl
+                              control={control}
+                              data={widget.item.data ?? {}}
+                              key={`popout-${index}`}
+                              onChange={({ name, value }) =>
+                                updateWidgetData(widget.item.id, {
+                                  ...widget.item.data,
+                                  [name]: value,
+                                })
+                              }
+                              widgetLabel={label}
+                            />
+                          ) : (
+                            <WidgetSelectControl
+                              control={control}
+                              key={control.name}
+                              onChange={({ value }) => {
+                                updateWidgetData(widget.item.id, {
+                                  ...widget.item.data,
+                                  [control.name]: value,
+                                })
+                              }}
+                              value={widget.item.data?.[control.name]}
+                              widgetLabel={label}
+                            />
+                          ),
+                        )}
+                        {Boolean(widgetConfig?.controls?.length) && (
+                          <span aria-hidden="true" className="widget-wrapper__controls-divider" />
+                        )}
+                        <div className="widget-wrapper__actions">
+                          <WidgetEditControl
+                            onSave={(data) => {
+                              updateWidgetData(widget.item.id, data)
                             }}
-                            value={widget.item.data?.[control.name]}
+                            widgetData={widget.item.data}
+                            widgetID={widget.item.id}
                             widgetLabel={label}
                           />
-                        ))}
-                        <WidgetEditControl
-                          onSave={(data) => {
-                            updateWidgetData(widget.item.id, data)
-                          }}
-                          widgetData={widget.item.data}
-                          widgetID={widget.item.id}
-                          widgetLabel={label}
-                        />
-                        <WidgetReplaceControl
-                          onReplace={({ widgetSlug }) => {
-                            const newWidgetID = replaceWidget({
-                              widgetID: widget.item.id,
-                              widgetSlug,
-                            })
+                          <WidgetReplaceControl
+                            onReplace={({ widgetSlug }) => {
+                              const newWidgetID = replaceWidget({
+                                widgetID: widget.item.id,
+                                widgetSlug,
+                              })
 
-                            if (newWidgetID) {
-                              setSelectedWidgetID(newWidgetID)
-                            }
-                          }}
-                          widgetLabel={label}
-                          widgets={widgets}
-                        />
-                        <Button
-                          aria-label={t('general:deleteLabel', { label })}
-                          buttonStyle="ghost"
-                          className="widget-wrapper__delete-btn"
-                          extraButtonProps={{ tabIndex: 0 }}
-                          icon={<TrashIcon />}
-                          margin={false}
-                          onClick={() => deleteWidget(widget.item.id)}
-                        />
+                              if (newWidgetID) {
+                                setSelectedWidgetID(newWidgetID)
+                              }
+                            }}
+                            widgetLabel={label}
+                            widgets={widgets}
+                          />
+                          <Button
+                            aria-label={t('general:deleteLabel', { label })}
+                            buttonStyle="ghost"
+                            className="widget-wrapper__delete-btn"
+                            extraButtonProps={{ tabIndex: 0 }}
+                            icon={<TrashIcon />}
+                            margin={false}
+                            onClick={() => deleteWidget(widget.item.id)}
+                          />
+                        </div>
                       </div>
                     )}
                     {isEditing &&
@@ -718,9 +739,11 @@ function WidgetWidthDropdown({
   return (
     <>
       <Popup
+        horizontalAlign="center"
         onToggleClose={() => onOpenChange(false)}
         onToggleOpen={onOpenChange}
         popupType="menu"
+        portalClassName="widget-toolbar-menu"
         render={({ close }) => (
           <PopupList.ButtonGroup>
             {validOptions.map((option) => {
@@ -734,7 +757,9 @@ function WidgetWidthDropdown({
                     close()
                   }}
                 >
-                  <span className="widget-wrapper__size-btn-label">{option.width}</span>
+                  <span className="widget-wrapper__size-btn-label">
+                    {toWords(option.width.replace('x-', 'extra-'))}
+                  </span>
                   <span className="widget-wrapper__size-btn-percentage">
                     {option.percentage.toFixed(0)}%
                   </span>
@@ -758,11 +783,12 @@ function WidgetWidthDropdown({
             onClick={onClick}
             selected={_active}
           >
-            {currentWidth}
+            {toWords(currentWidth.replace('x-', 'extra-'))}
           </Button>
         )}
         size="small"
         verticalAlign="bottom"
+        verticalOffset={12}
       />
       <span aria-hidden="true" className="widget-wrapper__controls-divider" />
     </>

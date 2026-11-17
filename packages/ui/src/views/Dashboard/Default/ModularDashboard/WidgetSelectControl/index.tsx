@@ -19,7 +19,7 @@ export function WidgetSelectControl({
   value,
   widgetLabel,
 }: {
-  control: ClientWidgetControl
+  control: Extract<ClientWidgetControl, { type: 'select' }>
   onChange: (args: { value: string }) => void
   value: unknown
   widgetLabel: string
@@ -37,8 +37,10 @@ export function WidgetSelectControl({
   return (
     <Popup
       disabled={options.length === 0}
+      horizontalAlign="center"
       popupAriaLabel={accessibleLabel}
       popupType="menu"
+      portalClassName="widget-toolbar-menu"
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {options.map((option) => (
@@ -61,7 +63,7 @@ export function WidgetSelectControl({
         <Button
           aria-label={`${accessibleLabel}: ${selectedOption?.label ?? label}`}
           buttonStyle="ghost"
-          className="widget-wrapper__select-btn"
+          className={`widget-wrapper__select-btn${control.Icon ? ' widget-wrapper__select-btn--with-icon' : ''}`}
           disabled={options.length === 0}
           extraButtonProps={{ onKeyDown, ...ariaProps }}
           icon={<ChevronIcon size={16} />}
@@ -70,13 +72,18 @@ export function WidgetSelectControl({
           selected={active}
         >
           <span className="widget-wrapper__select-btn-label">
-            {control.Icon ? <span aria-hidden="true">{control.Icon}</span> : null}
+            {control.Icon ? (
+              <span aria-hidden="true" className="widget-wrapper__select-btn-icon">
+                {control.Icon}
+              </span>
+            ) : null}
             {selectedOption?.label ?? label}
           </span>
         </Button>
       )}
       size="small"
       verticalAlign="bottom"
+      verticalOffset={12}
     />
   )
 }

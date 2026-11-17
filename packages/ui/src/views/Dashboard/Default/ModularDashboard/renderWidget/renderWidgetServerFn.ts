@@ -1,6 +1,6 @@
 import type { ServerFunction, WidgetServerProps } from 'payload'
 
-import { getWidgetControlData } from 'payload/shared'
+import { getWidgetControlData, getWidgetControlFields } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
@@ -82,7 +82,10 @@ export const renderWidgetHandler: ServerFunction<
       data: isPreview ? preview?.data : widgetData,
     })
     const controlData = Object.fromEntries(
-      widgetConfig.controls?.map(({ name }) => [name, data[name]]) ?? [],
+      getWidgetControlFields({ controls: widgetConfig.controls }).map(({ name }) => [
+        name,
+        data[name],
+      ]),
     )
     const localeFilteredData = widgetConfig.fields?.length
       ? {

@@ -204,6 +204,8 @@ export { LoadingOverlay } from '../../elements/Loading/index.js'
 export { Spinner } from '../../elements/Spinner/index.js'
 export type { SpinnerProps } from '../../elements/Spinner/index.js'
 export { SegmentedControl } from '../../elements/SegmentedControl/index.js'
+export { Slider } from '../../elements/Slider/index.js'
+export type { SliderProps } from '../../elements/Slider/index.js'
 export type {
   SegmentedControlOptionProps,
   SegmentedControlRootProps,

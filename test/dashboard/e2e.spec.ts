@@ -72,6 +72,53 @@ describe('Dashboard', () => {
     ).toBeFocused()
   })
 
+  test('should preview and save grouped popout controls without nesting widget data', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    const widget = dashboard.widgetByPos(4)
+
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await widget.getByRole('button', { name: 'Count Widget: Options', exact: true }).click()
+    const popout = page.getByRole('dialog', { name: 'Count Widget: Options', exact: true })
+
+    await popout.getByRole('checkbox', { name: 'Show trend' }).uncheck()
+    await popout.getByRole('textbox', { name: 'Caption' }).fill('Custom headline')
+    await popout.getByRole('spinbutton', { name: 'Count offset' }).fill('10')
+    await popout.getByRole('radio', { name: 'Center', exact: true }).check()
+    await popout.getByRole('combobox', { name: 'Period' }).click()
+    await page.getByRole('option', { name: 'Month', exact: true }).click()
+    await expect(popout).toBeVisible()
+    await popout.getByRole('button', { name: 'Emphasis: Normal', exact: true }).click()
+    await page.getByRole('menuitemradio', { name: 'Strong', exact: true }).click()
+    await expect(
+      popout.getByRole('button', { name: 'Emphasis: Strong', exact: true }),
+    ).toBeFocused()
+    await expect(widget.locator('.count-widget h3')).toHaveText('Custom headline')
+    await page.keyboard.press('Escape')
+    await expect(popout).toBeHidden()
+    await expect(
+      widget.getByRole('button', { name: 'Count Widget: Options', exact: true }),
+    ).toBeFocused()
+    await dashboard.saveChangesAndValidate()
+    await expect(dashboard.widgetByPos(4).locator('.count-widget h3')).toHaveText('Custom headline')
+    await dashboard.setEditing()
+    await dashboard.widgetByPos(4).locator('.widget-wrapper__drag-btn').click()
+    await dashboard
+      .widgetByPos(4)
+      .getByRole('button', { name: 'Count Widget: Options', exact: true })
+      .click()
+    await expect(popout.getByRole('checkbox', { name: 'Show trend' })).not.toBeChecked()
+    await expect(popout.getByRole('spinbutton', { name: 'Count offset' })).toHaveValue('10')
+    await expect(popout.getByRole('radio', { name: 'Center', exact: true })).toBeChecked()
+    await expect(popout.locator('.rs__single-value')).toHaveText('Month')
+    await expect(
+      popout.getByRole('button', { name: 'Emphasis: Strong', exact: true }),
+    ).toBeVisible()
+  })
+
   test('should keep dashboard height stable and delay loading feedback', async ({ page }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
     const documents = (await (await page.request.get(`${serverURL}/api/tickets?limit=14`)).json())

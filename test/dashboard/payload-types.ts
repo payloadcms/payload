@@ -643,6 +643,13 @@ export interface CountWidget {
   data?: {
     title: string;
     collection?: ('tickets' | 'events') | null;
+    showTrend?: boolean | null;
+    caption?: string | null;
+    changePercent?: number | null;
+    countOffset?: number | null;
+    alignment?: ('left' | 'center' | 'right') | null;
+    timeframe?: ('week' | 'month') | null;
+    emphasis?: ('normal' | 'strong') | null;
   };
   width: 'x-small' | 'small' | 'medium';
 }

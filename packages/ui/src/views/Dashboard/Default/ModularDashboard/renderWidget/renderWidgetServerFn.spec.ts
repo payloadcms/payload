@@ -180,3 +180,53 @@ it('should fall back to a neutral thumbnail if preview rendering fails', async (
 
   expect(await renderWidgetHandler(getPreviewArgs())).toEqual({ component: null })
 })
+
+it('should include flat popout controls when rendering localized drawer fields', async () => {
+  await renderWidgetHandler({
+    req: {
+      locale: 'es',
+      user: { id: 'user-1' },
+      payload: {
+        config: {
+          admin: {
+            dashboard: {
+              widgets: [
+                {
+                  slug: 'sales',
+                  Component: './Sales',
+                  fields: [{ type: 'text', name: 'title', localized: true }],
+                  controls: [
+                    {
+                      type: 'popout',
+                      label: 'Options',
+                      controls: [
+                        {
+                          type: 'group',
+                          controls: [
+                            { type: 'switch', name: 'showTrend', defaultValue: true },
+                            { type: 'number', name: 'limit', defaultValue: 5 },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        importMap: {},
+      },
+    },
+    widgetSlug: 'sales',
+    widgetData: { title: { en: 'Sales', es: 'Ventas' }, showTrend: false },
+  } as unknown as Parameters<typeof renderWidgetHandler>[0])
+
+  expect(RenderServerComponent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      serverProps: expect.objectContaining({
+        widgetData: { title: 'Ventas', showTrend: false, limit: 5 },
+      }),
+    }),
+  )
+})

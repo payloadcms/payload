@@ -194,6 +194,92 @@ export default buildConfigWithDefaults({
                   { label: 'Events', value: 'events' },
                 ],
               },
+              {
+                type: 'popout',
+                label: 'Options',
+                controls: [
+                  {
+                    type: 'group',
+                    label: 'Content',
+                    controls: [
+                      {
+                        type: 'switch',
+                        name: 'showTrend',
+                        label: 'Show trend',
+                        defaultValue: true,
+                      },
+                      {
+                        type: 'text',
+                        name: 'caption',
+                        label: 'Caption',
+                        placeholder: 'Widget title',
+                      },
+                      {
+                        type: 'number',
+                        name: 'changePercent',
+                        label: 'Trend percent',
+                        defaultValue: 10,
+                        min: 0,
+                        max: 100,
+                        step: 1,
+                        slider: true,
+                      },
+                      {
+                        type: 'number',
+                        name: 'countOffset',
+                        label: 'Count offset',
+                        defaultValue: 0,
+                        min: 0,
+                        max: 15,
+                        step: 5,
+                        slider: { hints: [0, 5, 10, 15] },
+                      },
+                    ],
+                  },
+                  {
+                    type: 'group',
+                    label: 'Appearance',
+                    controls: [
+                      {
+                        type: 'segment',
+                        name: 'alignment',
+                        label: 'Alignment',
+                        defaultValue: 'left',
+                        options: [
+                          { label: 'Left', value: 'left' },
+                          { label: 'Center', value: 'center' },
+                          { label: 'Right', value: 'right' },
+                        ],
+                      },
+                      {
+                        type: 'select',
+                        name: 'timeframe',
+                        label: 'Period',
+                        defaultValue: 'week',
+                        options: [
+                          { label: 'Week', value: 'week' },
+                          { label: 'Month', value: 'month' },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    type: 'group',
+                    controls: [
+                      {
+                        type: 'menu',
+                        name: 'emphasis',
+                        label: 'Emphasis',
+                        defaultValue: 'normal',
+                        options: [
+                          { label: 'Normal', value: 'normal' },
+                          { label: 'Strong', value: 'strong' },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
             fields: [
               {

@@ -63,7 +63,7 @@ export default buildConfig({
 | -------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | `slug` \*      | `string`                       | Unique identifier for the widget                                                                                                |
 | `Component` \* | `string`                       | Path to the widget component (supports `#` syntax for named exports)                                                            |
-| `controls`     | `WidgetControl[]`              | Optional settings shown in the edit toolbar, currently supporting select dropdowns                                              |
+| `controls`     | `WidgetControl[]`              | Optional settings shown in the edit toolbar, supporting select dropdowns and grouped popouts                                    |
 | `preview`      | `false \| object`              | Customize the automatic picker thumbnail with sample `data` or an alternative `Component`, or disable it with `false`.          |
 | `description`  | `string \| object \| function` | Optional description shown beneath the widget title in the Add Widget drawer. Supports translation objects and label functions. |
 | `fields`       | `Field[]`                      | Optional widget-specific form fields shown in the edit drawer                                                                   |
@@ -108,7 +108,7 @@ Use `controls` for simple settings that editors can change directly in the selec
     {
       name: 'timeframe',
       type: 'select',
-      Icon: { path: '@payloadcms/ui#TableIcon', clientProps: { size: 16 } },
+      Icon: { path: '@payloadcms/ui#TableIcon', clientProps: { size: 24 } },
       label: 'Timeframe',
       defaultValue: 'monthly',
       options: [
@@ -127,6 +127,57 @@ A select control accepts `name`, `type: 'select'`, `options`, an optional `label
 Each control reads and updates its named top-level property in `widgetData`, such as `widgetData.timeframe`. Use distinct names for controls and drawer fields. Defaults apply when a value is unset, including when adding or replacing a widget. Choosing an option previews the change immediately; dashboard **Save changes** persists it, and **Cancel** restores the previous settings. Drawer saves preserve control values.
 
 Controls are included in generated widget data types alongside drawer fields. Controls do not render in the edit drawer.
+
+### Grouped Popout Controls
+
+Use `type: 'popout'` to put related settings in a panel below a toolbar trigger. Its `label` stays on the trigger, and it accepts the same optional `Icon` as a toolbar select. Groups are visual sections: they never add a nesting level to `widgetData`. Group labels are optional; an unlabeled group renders a divider without a heading. A popout can also contain controls directly, without a group.
+
+```ts
+{
+  type: 'popout',
+  label: 'Options',
+  controls: [
+    {
+      type: 'group',
+      label: 'Content',
+      controls: [
+        { name: 'showTrend', type: 'switch', label: 'Show trend', defaultValue: true },
+        { name: 'caption', type: 'text', label: 'Caption', placeholder: 'Widget title' },
+        { name: 'limit', type: 'number', label: 'Limit', defaultValue: 5, min: 0, max: 15, step: 5 },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Appearance',
+      controls: [
+        {
+          name: 'alignment',
+          type: 'segment',
+          label: 'Alignment',
+          defaultValue: 'left',
+          options: [
+            { label: 'Left', value: 'left', Icon: './icons/AlignLeft.tsx' },
+            { label: 'Right', value: 'right', Icon: './icons/AlignRight.tsx' },
+          ],
+        },
+        { name: 'period', type: 'select', label: 'Period', options: ['week', 'month'] },
+      ],
+    },
+    {
+      type: 'group',
+      controls: [
+        { name: 'display', type: 'menu', label: 'Display', options: ['list', 'grid'] },
+      ],
+    },
+  ],
+}
+```
+
+Popouts support `switch` (boolean), `text` (string), `number` (number or `null` when empty), `segment`, `select`, and `menu` (string). Numeric controls accept `min`, `max`, and a shared `step` for the number input, keyboard increments, and slider. Add `slider: true` to show a range slider below the input, or `slider: { hints: [0, 5, 10, 15] }` for a stepped track with stopping-point markers. Sliders require finite `min` and `max` values. For example, use `min: 0, max: 15, step: 5, slider: { hints: [0, 5, 10, 15] }`. Number inputs and sliders stay synchronized on the same step grid. Hint markers briefly attract pointer movement and stop large keyboard steps. Arrow keys move by `step`, Shift+Arrow and Page Up/Down move by ten steps, Home/End move to the bounds, and Delete/Backspace resets to `defaultValue` when supplied. A `select` renders an input dropdown; a `menu` opens a submenu beside the panel. Segment options display their optional `Icon` with the label as an accessible name and tooltip, or display the label directly when no icon is supplied. Labels and placeholders support translations and label functions.
+
+Every value-bearing control requires a unique `name`, such as `widgetData.showTrend`; groups and popouts do not need one. Updates preview immediately and keep the panel open. Escape and outside clicks close the panel while retaining edits. Dashboard **Save changes** persists them; dashboard **Cancel** discards them after confirmation. Defaults, picker previews, import maps, and generated types include controls inside groups.
+
+The popout uses a labeled dialog with normal Tab navigation between inputs, rather than menu-style arrow navigation. Escape closes a nested menu first and returns focus to its trigger; Escape from the panel returns focus to the toolbar trigger.
 
 ### Creating a Widget Component
 

@@ -4,6 +4,15 @@ import type { WidgetWidth } from 'payload'
 
 import { expect, type Locator, type Page } from '@playwright/test'
 
+const widthLabels: Record<WidgetWidth, string> = {
+  'x-small': 'Extra Small',
+  small: 'Small',
+  medium: 'Medium',
+  large: 'Large',
+  'x-large': 'Extra Large',
+  full: 'Full',
+}
+
 export class DashboardHelper {
   private page: Page
 
@@ -145,7 +154,7 @@ export class DashboardHelper {
     const activePopup = this.page.locator('.popup__content:visible')
     await expect(activePopup).toBeVisible()
     const widthOptions = activePopup.locator('.popup-button-list__button')
-    await widthOptions.getByText(width).click()
+    await widthOptions.getByText(widthLabels[width], { exact: true }).click()
     const slug = await widget.getAttribute('data-slug')
     if (!slug) {
       throw new Error(`Widget at position ${position} has no slug`)
@@ -168,9 +177,11 @@ export class DashboardHelper {
     await expect(activePopup).toBeVisible()
     const widthOptions = activePopup.locator('.popup-button-list__button')
     await expect(widthOptions.first().locator('.widget-wrapper__size-btn-label')).toHaveText(
-      arg.min,
+      widthLabels[arg.min],
     )
-    await expect(widthOptions.last().locator('.widget-wrapper__size-btn-label')).toHaveText(arg.max)
+    await expect(widthOptions.last().locator('.widget-wrapper__size-btn-label')).toHaveText(
+      widthLabels[arg.max],
+    )
   }
 
   assertWidget = async (pos: number, slug: string, width: WidgetWidth) => {
