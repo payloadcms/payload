@@ -77,9 +77,15 @@ function combineConditions({
     .filter((condition) => condition.matches === 'documents-matching-where')
     .map((condition) => condition.where)
 
+  const [firstFilter] = filters
+
   // No filters means every AND condition passed, or every OR condition failed.
-  if (filters.length === 0) {
+  if (!firstFilter) {
     return { matches: operator === 'and' ? 'all-documents' : 'no-documents' }
+  }
+
+  if (filters.length === 1) {
+    return { matches: 'documents-matching-where', where: firstFilter }
   }
 
   return { matches: 'documents-matching-where', where: { [operator]: filters } }
