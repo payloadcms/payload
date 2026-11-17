@@ -26,7 +26,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 - Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocuments`, `updateDocument`, `deleteDocuments`, `getUploadInstructions`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
-- Gate tools, prompts, and resources with code-level `access` callbacks while Payload access control still protects the underlying documents
+- Gate tools, prompts, and resources with code-level `access` callbacks while Payload access control still protects the underlying documents, and limit which users can use MCP at all with a top-level `access`
 - Observe or transform every completed tool response with `hooks.afterToolCall`
 - Custom auth strategies via `overrideGetAuthorizedMCP`
 
@@ -155,6 +155,7 @@ authenticated user, provide an override object with `access: () => true`.
 
 | Option                                 | Type              | Description                                                                                                                                                         |
 | -------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `access`                               | `function`        | Decide which users can use MCP at all. See [Limiting who can use MCP](#limiting-who-can-use-mcp).                                                                   |
 | `collections`                          | `object`          | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                                                |
 | `globals`                              | `object`          | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                                            |
 | `tools`                                | `object`          | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)).                       |
@@ -265,12 +266,33 @@ If no authorization is sent, MCP asks the client to [sign in with OAuth](#oauth)
 4. Use that key as `Authorization: users API-Key <key>`. Replace `users` with
    that auth collection's slug.
 
+### Limiting who can use MCP
+
+Use `access` to decide which users can use MCP at all, for example only the
+users of an `admins` collection:
+
+```ts
+mcpPlugin({
+  access: ({ req }) => req.user?.collection === 'admins',
+})
+```
+
+It runs on every MCP request once the user is authenticated, before the
+`access` callbacks of tools, prompts, and resources, and receives the same `req`
+and `permissions`. A [custom auth](#custom-auth) resolver replaces it. When it returns `false`, MCP requests get a `403`. With
+[OAuth](#oauth), signed-out users get the sign-in challenge before it runs, and
+Payload's sign-in page tells users it denies that their account can't use MCP
+clients, instead of asking them to allow the client.
+
+`access` only applies to MCP. Users can still call Payload's REST and GraphQL
+APIs, so it doesn't replace access control on your collections and globals.
+
 ### `overrideAccess`
 
 By default, MCP runs access control. Set `overrideAccess` explicitly when you
 want MCP to behave like a Payload local API call with `overrideAccess: true`.
-When true, MCP skips item access callbacks, built-in permission checks, and
-Payload access control inside built-in handlers.
+When true, MCP skips the plugin's `access`, item access callbacks, built-in
+permission checks, and Payload access control inside built-in handlers.
 
 For HTTP in development, add `overrideAccess=true` or `overrideAccess=false` to
 the MCP URL:
@@ -490,6 +512,9 @@ mcpPlugin({
 This example allows every configured MCP item for any resolved user. Filter
 `pluginConfig.items` before returning when different users should see different
 items.
+
+Your resolver also replaces the plugin's [`access`](#limiting-who-can-use-mcp)
+on MCP requests. To keep it, call `pluginConfig.access` yourself.
 
 The handler receives:
 

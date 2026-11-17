@@ -10,21 +10,21 @@ import { isSafeCssColor } from '../../shared/cssColors.js'
 export const TableHTMLConverterAsync: HTMLConvertersAsync<
   SerializedTableCellNode | SerializedTableNode | SerializedTableRowNode
 > = {
-  table: async ({ node, nodesToHTML, providedStyleTag }) => {
+  table: async ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = (
       await nodesToHTML({
         nodes: node.children,
       })
     ).join('')
 
-    return `<div${providedStyleTag} class="lexical-table-container">
+    return `<div${providedDirAttribute}${providedStyleTag} class="lexical-table-container">
         <table class="lexical-table" style="border-collapse: collapse;">
           <tbody>${children}</tbody>
         </table>
       </div>`
   },
 
-  tablecell: async ({ node, nodesToHTML, providedCSSString }) => {
+  tablecell: async ({ node, nodesToHTML, providedCSSString, providedDirAttribute }) => {
     const children = (
       await nodesToHTML({
         nodes: node.children,
@@ -46,7 +46,7 @@ export const TableHTMLConverterAsync: HTMLConvertersAsync<
     const rowSpanAttr =
       typeof node.rowSpan === 'number' && node.rowSpan > 1 ? ` rowspan="${node.rowSpan}"` : ''
 
-    return `<${TagName}
+    return `<${TagName}${providedDirAttribute}
         class="lexical-table-cell ${headerStateClass}"
         ${colSpanAttr}
         ${rowSpanAttr}
@@ -57,14 +57,14 @@ export const TableHTMLConverterAsync: HTMLConvertersAsync<
     `
   },
 
-  tablerow: async ({ node, nodesToHTML, providedStyleTag }) => {
+  tablerow: async ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = (
       await nodesToHTML({
         nodes: node.children,
       })
     ).join('')
 
-    return `<tr${providedStyleTag} class="lexical-table-row">
+    return `<tr${providedDirAttribute}${providedStyleTag} class="lexical-table-row">
         ${children}
       </tr>`
   },

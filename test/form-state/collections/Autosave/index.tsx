@@ -26,6 +26,17 @@ export const AutosavePostsCollection: CollectionConfig = {
         create: () => false,
       },
     },
+    {
+      name: 'showConditionalField',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalField',
+      type: 'text',
+      admin: {
+        condition: (data) => data?.showConditionalField === true,
+      },
+    },
   ],
   versions: {
     drafts: {

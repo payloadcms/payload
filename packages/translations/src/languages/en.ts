@@ -641,6 +641,7 @@ export const enTranslations = {
     addFile: 'Add file',
     addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
+    cancelUpload: 'Cancel upload',
     copyLinkToFile: 'Copy link to file',
     copyURL: 'Copy URL',
     crop: 'Crop',
@@ -662,6 +663,7 @@ export const enTranslations = {
     fileSize: 'File Size',
     filesToUpload: 'Files to Upload',
     fileToUpload: 'File to Upload',
+    finishSaving: 'Finish saving',
     focalPoint: 'Focal Point',
     focalPointDescription:
       'Drag the focal point directly on the preview or adjust the values below.',
@@ -676,12 +678,26 @@ export const enTranslations = {
     previewSizes: 'Preview Sizes',
     renameFile: 'Rename file',
     replaceFile: 'Replace file',
+    resumingFile: 'Resuming {{filename}}',
+    savingInBackground:
+      'The upload will finish in the background and the document will be saved then.',
     selectCollectionToBrowse: 'Select a Collection to Browse',
     selectFile: 'Select a file',
     setCropArea: 'Set crop area',
     setFocalPoint: 'Set focal point',
     sizes: 'Sizes',
     sizesFor: 'Sizes for {{label}}',
+    uploadFileMismatch: 'The selected file does not match the interrupted upload.',
+    uploadingFile: 'Uploading {{filename}}',
+    uploadingFileProgress: 'Uploading {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'An upload is still in progress. Leaving now will interrupt it.',
+    uploadInterrupted: 'Upload of {{filename}} was interrupted.',
+    uploadInterruptedWillSave:
+      'Upload of {{filename}} was interrupted. The document will be saved when it finishes.',
+    uploadReadyToFinishSaving: '{{filename}} finished uploading. Open the form to finish saving.',
+    uploadSavedInBackground: 'Upload finished and the document was saved.',
+    uploadStorageRejectedSegments:
+      'Storage did not accept any upload segments. Check the bucket CORS policy.',
     width: 'Width',
   },
   validation: {

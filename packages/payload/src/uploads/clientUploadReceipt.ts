@@ -19,7 +19,7 @@ type ClientUploadReceipt = {
 }
 
 // Longer than the longest provider upload URL (GCS: five hours).
-const LIFETIME_MS = 6 * 60 * 60 * 1000
+export const CLIENT_UPLOAD_RECEIPT_LIFETIME_MS = 6 * 60 * 60 * 1000
 // Separates these signatures from any future receipt format.
 const DOMAIN = 'payload-client-upload-receipt-v1'
 
@@ -47,7 +47,7 @@ export const createClientUploadReceipt = ({
     ...(adapterData !== undefined && { adapterData }),
     ...(allowOverwrite && { allowOverwrite: true }),
     collectionSlug,
-    expiresAt: Date.now() + LIFETIME_MS,
+    expiresAt: Date.now() + CLIENT_UPLOAD_RECEIPT_LIFETIME_MS,
     filename,
     filePrefix,
     storageFilePath,
