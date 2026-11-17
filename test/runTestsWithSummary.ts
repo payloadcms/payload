@@ -80,7 +80,9 @@ interface SuiteResult {
 }
 
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
-const contentAPISuiteTimeout = 120000
+// Some suites run longer than 2 minutes. A suite killed at the timeout writes no
+// JSON report, so it is recorded as 0/<collected>.
+const contentAPISuiteTimeout = 300000
 // Chatty suites can exceed Node's 1 MiB execSync default; truncated stdout has
 // no JSON report, so the suite is recorded as 0/<collected>.
 const vitestExecMaxBuffer = 64 * 1024 * 1024
