@@ -125,7 +125,7 @@ export const createSchemaGenerator = ({
       }
 
       for (const fkKey in table.foreignKeys ?? {}) {
-        for (const foreignColumn of table.foreignKeys![fkKey].foreignColumns) {
+        for (const foreignColumn of table.foreignKeys[fkKey].foreignColumns) {
           if (foreignColumn.table !== tableName) {
             fkGraph[tableName].add(foreignColumn.table)
           }
