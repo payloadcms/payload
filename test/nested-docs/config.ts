@@ -64,7 +64,12 @@ export default buildConfigWithDefaults({
           allowHasMany: false,
           collectionSpecific: { fieldName: 'acceptedTypes' },
           parentFieldName: 'shelfParent',
-          admin: { components: { SmallIcon: '@payloadcms/ui#DocumentIcon' } },
+          admin: {
+            components: {
+              Icon: '@payloadcms/ui#TagIcon',
+              SmallIcon: '@payloadcms/ui#TagIcon',
+            },
+          },
         },
       },
       {

@@ -349,7 +349,10 @@ test.describe('Hierarchy contents Tree layout', () => {
       .getByRole('row')
       .filter({ has: page.getByRole('link', { name: 'Research library', exact: true }) })
 
-    await expect(library.locator('.icon--document')).toBeVisible()
+    await expect(
+      page.getByRole('tab', { name: 'Libraries', exact: true }).locator('.icon--tag'),
+    ).toBeVisible()
+    await expect(library.locator('.icon--tag')).toBeVisible()
     await page.getByRole('button', { name: 'Expand: Research library', exact: true }).click()
     await expect(page.getByRole('link', { name: 'Journal collection', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Expand: Articles', exact: true }).click()
