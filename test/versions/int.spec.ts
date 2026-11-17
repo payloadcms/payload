@@ -1983,21 +1983,34 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Unpublish', () => {
+      test.afterEach(async ({ payload }) => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug, localizedCollectionSlug],
+          payload,
+        })
+      })
+
       test('should unpublish a locale with missing required array content', async ({ payload }) => {
         const doc = await payload.create({
           collection: localizedCollectionSlug,
+          overrideAccess: true,
           locale: 'en',
           data: { _status: 'published', items: [{ label: 'A-en' }] },
         })
         await payload.update({
           id: doc.id,
           collection: localizedCollectionSlug,
+          overrideAccess: true,
           locale: 'es',
-          data: { _status: 'published', items: [{ id: doc.items![0]!.id, label: 'A-es' }] },
+          data: {
+            _status: 'published',
+            items: [{ id: doc.items![0]!.id, label: 'A-es' }],
+          },
         })
         await payload.update({
           id: doc.id,
           collection: localizedCollectionSlug,
+          overrideAccess: true,
           locale: 'en',
           data: {
             _status: 'published',
@@ -2009,6 +2022,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           payload.update({
             id: doc.id,
             collection: localizedCollectionSlug,
+            overrideAccess: true,
             locale: 'es',
             data: { _status: 'published' },
           }),
@@ -2018,6 +2032,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           payload.update({
             id: doc.id,
             collection: localizedCollectionSlug,
+            overrideAccess: true,
             locale: 'es',
             data: { _status: 'draft', items: [{ label: '' }] },
           }),
@@ -2026,6 +2041,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         const unpublished = await payload.update({
           id: doc.id,
           collection: localizedCollectionSlug,
+          overrideAccess: true,
           locale: 'es',
           data: { _status: 'draft' },
         })
@@ -2033,16 +2049,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         const english = await payload.findByID({
           id: doc.id,
           collection: localizedCollectionSlug,
+          overrideAccess: true,
           locale: 'en',
         })
         expect(english._status).toBe('published')
-      })
-
-      test.afterEach(async ({ payload }) => {
-        await cleanupDocuments({
-          collectionSlugs: [draftCollectionSlug],
-          payload,
-        })
       })
 
       test('should not create a new version when unpublishing a collection document', async ({
