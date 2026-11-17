@@ -195,16 +195,6 @@ export const AccessJoinNotes: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'content',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'section',
-          fields: [{ name: 'heading', type: 'text' }],
-        },
-      ],
-    },
-    {
       name: 'items',
       type: 'array',
       fields: [

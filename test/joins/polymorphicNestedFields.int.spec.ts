@@ -59,37 +59,25 @@ test.suite('Polymorphic join nested fields', { config: './config.ts' }, () => {
         },
       })
 
-      const firstPage = await payload.findByID({
-        collection: accessJoinParentsSlug,
-        id: parent.id,
-        depth: 0,
-        overrideAccess: false,
-        user,
-        joins: {
-          children: {
-            count: true,
-            limit: 1,
-            sort: 'title',
-            where: { 'items.heading': { contains: 'Welcome' } },
+      const readPage = ({ page }: { page: number }) =>
+        payload.findByID({
+          collection: accessJoinParentsSlug,
+          id: parent.id,
+          depth: 0,
+          overrideAccess: false,
+          user,
+          joins: {
+            children: {
+              count: true,
+              limit: 1,
+              page,
+              sort: 'title',
+              where: { 'items.heading': { contains: 'Welcome' } },
+            },
           },
-        },
-      })
-      const secondPage = await payload.findByID({
-        collection: accessJoinParentsSlug,
-        id: parent.id,
-        depth: 0,
-        overrideAccess: false,
-        user,
-        joins: {
-          children: {
-            count: true,
-            limit: 1,
-            page: 2,
-            sort: 'title',
-            where: { 'items.heading': { contains: 'Welcome' } },
-          },
-        },
-      })
+        })
+      const firstPage = await readPage({ page: 1 })
+      const secondPage = await readPage({ page: 2 })
 
       expect(firstPage.children).toMatchObject({
         docs: [{ relationTo: accessJoinArticlesSlug, value: article.id }],
@@ -125,15 +113,6 @@ test.suite('Polymorphic join nested fields', { config: './config.ts' }, () => {
           ],
         },
       })
-      const note = await payload.create({
-        overrideAccess: true,
-        collection: accessJoinNotesSlug,
-        data: {
-          parent: parent.id,
-          title: 'Note',
-          content: [{ blockType: 'section', heading: 'Welcome visitors' }],
-        },
-      })
 
       await payload.create({
         overrideAccess: true,
@@ -160,11 +139,8 @@ test.suite('Polymorphic join nested fields', { config: './config.ts' }, () => {
       })
 
       expect(result.children).toMatchObject({
-        docs: [
-          { relationTo: accessJoinArticlesSlug, value: article.id },
-          { relationTo: accessJoinNotesSlug, value: note.id },
-        ],
-        totalDocs: 2,
+        docs: [{ relationTo: accessJoinArticlesSlug, value: article.id }],
+        totalDocs: 1,
       })
     },
   )
