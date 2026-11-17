@@ -36,8 +36,10 @@ import { findResolver } from '../resolvers/collections/find.js'
 import { findByIDResolver } from '../resolvers/collections/findByID.js'
 import { findVersionByIDResolver } from '../resolvers/collections/findVersionByID.js'
 import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
+import { renameFileResolver } from '../resolvers/collections/renameFile.js'
 import { restoreVersionResolver } from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
+import { validateResolver } from '../resolvers/collections/validate.js'
 import { formatName } from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
@@ -54,7 +56,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     const collection: Collection = graphqlResult.collections[slug]
     const {
       config: collectionConfig,
-      config: { fields, graphQL = {} as SanitizedCollectionConfig['graphQL'], versions },
+      config: { fields, graphQL = {}, versions },
     } = collection
 
     if (!graphQL) {
@@ -192,6 +194,16 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       collection.graphQL.updateMutationInputType = new GraphQLNonNull(updateMutationInputType)
     }
 
+    const validationMutationInputType = buildMutationInputType({
+      name: `${singularName}Validation`,
+      config,
+      fields: mutationCreateInputFields,
+      forceNullable: true,
+      graphqlResult,
+      parentIsLocalized: false,
+      parentName: `${singularName}Validation`,
+    })
+
     const queriesEnabled =
       typeof collectionConfig.graphQL !== 'object' || !collectionConfig.graphQL.disableQueries
     const mutationsEnabled =
@@ -306,6 +318,21 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         resolve: updateResolver(collection),
       }
 
+      graphqlResult.Mutation.fields[`validate${singularName}`] = {
+        type: graphqlResult.types.validationResultType,
+        args: {
+          id: { type: idType },
+          ...(validationMutationInputType ? { data: { type: validationMutationInputType } } : {}),
+          draft: { type: GraphQLBoolean },
+          ...(config.localization
+            ? {
+                locale: { type: graphqlResult.types.localeInputType },
+              }
+            : {}),
+        },
+        resolve: validateResolver(collection),
+      }
+
       graphqlResult.Mutation.fields[`delete${singularName}`] = {
         type: collection.graphQL.type,
         args: {
@@ -416,6 +443,18 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       }
     }
 
+    if (mutationsEnabled && collectionConfig.upload) {
+      graphqlResult.Mutation.fields[`renameFile${formatName(singularName)}`] = {
+        type: collection.graphQL.type,
+        args: {
+          id: { type: new GraphQLNonNull(idType) },
+          draft: { type: GraphQLBoolean },
+          filename: { type: new GraphQLNonNull(GraphQLString) },
+        },
+        resolve: renameFileResolver(collection),
+      }
+    }
+
     if (collectionConfig.auth) {
       const authFields: Field[] =
         collectionConfig.auth.disableLocalStrategy ||
@@ -489,11 +528,17 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
               refreshedToken: {
                 type: GraphQLString,
               },
+              ...(collectionConfig.auth.refreshTokens
+                ? { refreshToken: { type: GraphQLString } }
+                : {}),
               user: {
                 type: collection.graphQL.JWT,
               },
             },
           }),
+          args: collectionConfig.auth.refreshTokens
+            ? { refreshToken: { type: GraphQLString } }
+            : undefined,
           resolve: refresh(collection),
         }
 
@@ -534,6 +579,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                 exp: {
                   type: GraphQLInt,
                 },
+                ...(collectionConfig.auth.refreshTokens
+                  ? { refreshToken: { type: GraphQLString } }
+                  : {}),
                 token: {
                   type: GraphQLString,
                 },

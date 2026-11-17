@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { WriteInput } from './collections/WriteInput/index.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
@@ -36,6 +37,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   },
   collections: [
+    WriteInput,
     {
       slug: 'noTimeStamps',
       fields: [
@@ -97,6 +99,9 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: 'simple',
+      // Disabled: authorship adds a `_rels` field that defeats the single-call `RETURNING`
+      // fast path this collection's postgres-logs benchmark measures.
+      authorship: false,
       fields: [
         {
           name: 'text',
@@ -108,6 +113,29 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
       versions: false,
+    },
+    {
+      slug: 'draft-with-array',
+      fields: [
+        {
+          name: 'items',
+          type: 'array',
+          fields: Array.from({ length: 8 }, (_, i) => ({
+            name: `text${i + 1}`,
+            type: 'text' as const,
+          })),
+        },
+        {
+          name: 'itemsWithDefaults',
+          type: 'array',
+          fields: Array.from({ length: 8 }, (_, i) => ({
+            name: `text${i + 1}`,
+            type: 'text' as const,
+            defaultValue: `default${i + 1}`,
+          })),
+        },
+      ],
+      versions: { drafts: true },
     },
     {
       slug: 'simple-localized',
@@ -136,6 +164,9 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: postsSlug,
+      // Disabled: authorship's createdBy/updatedBy FK-link to a real user, which breaks
+      // the postgres-logs benchmark counts and the transaction tests that use a synthetic user.
+      authorship: false,
       fields: [
         {
           name: 'title',

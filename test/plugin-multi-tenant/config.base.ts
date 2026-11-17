@@ -81,6 +81,23 @@ export const baseConfig: Partial<Config> = {
       },
     },
   },
+  endpoints: [
+    {
+      path: '/unassign-tenant/:id',
+      method: 'post',
+      handler: async (req) => {
+        // Bypass tenant validation to simulate content created before the multi-tenant plugin was installed.
+        await req.payload.db.updateOne({
+          collection: menuItemsSlug,
+          id: String(req.routeParams?.id),
+          data: { tenant: null },
+          returning: false,
+        })
+
+        return Response.json({ success: true })
+      },
+    },
+  ],
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
@@ -121,6 +138,10 @@ export const baseConfig: Partial<Config> = {
         },
         ['relationships']: {},
         [multiTenantPostsSlug]: {
+          accessResultOverride: ({ accessKey, accessResult }) => {
+            multiTenantPostsAccessResultEvents.push({ accessKey, accessResult })
+            return accessResult
+          },
           tenantFieldOverrides: {
             hasMany: true,
           },
@@ -147,6 +168,7 @@ export const baseConfig: Partial<Config> = {
         const fullTenant = await req.payload.findByID({
           collection: 'tenants',
           id: tenant,
+          overrideAccess: true,
         })
         if (
           fullTenant &&
@@ -168,5 +190,10 @@ export const baseConfig: Partial<Config> = {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export const multiTenantPostsAccessResultEvents: Array<{
+  accessKey: string
+  accessResult: unknown
+}> = []
 
 export { seed }

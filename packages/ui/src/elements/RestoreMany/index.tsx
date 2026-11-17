@@ -3,7 +3,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -21,15 +21,16 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 
-const confirmManyRestoreDrawerSlug = `confirm-restore-many-docs`
-
 export type Props = {
   collection: ClientCollectionConfig
+  modalPrefix?: string
   viewType?: ViewTypes
+  where?: Where
 }
 
 export const RestoreMany: React.FC<Props> = (props) => {
-  const { collection: { slug } = {}, viewType } = props
+  const { collection: { slug } = {}, modalPrefix, viewType, where } = props
+  const confirmManyRestoreDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-restore-many-docs`
 
   const { permissions } = useAuth()
   const {
@@ -59,12 +60,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
 
   const baseWhere = parseSearchParams(searchParams)?.where as Where
 
-  const finalWhere = {
-    and: [
-      ...(Array.isArray(baseWhere?.and) ? baseWhere.and : baseWhere ? [baseWhere] : []),
-      { deletedAt: { exists: true } },
-    ],
-  }
+  const finalWhere = combineWhereConstraints([baseWhere, where, { deletedAt: { exists: true } }])
 
   const handleRestore = async () => {
     const collectionConfig = collections.find((c) => c.slug === slug)
@@ -144,7 +140,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
 
     toggleAll()
 
-    router.replace(
+    void router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),

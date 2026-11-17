@@ -16,11 +16,15 @@ import { LexicalAccessControl } from './collections/LexicalAccessControl/index.j
 import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
 import { LexicalAutosaveBlock } from './collections/LexicalAutosaveBlock/index.js'
 import { LexicalBenchmark } from './collections/LexicalBenchmark/index.js'
+import { LexicalCopyPaste } from './collections/LexicalCopyPaste/index.js'
 import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
-import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
+import {
+  LexicalLinkFeature,
+  LexicalLinkFeatureAutosave,
+} from './collections/LexicalLinkFeature/index.js'
 import { LexicalListsFeature } from './collections/LexicalListsFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import {
@@ -56,6 +60,7 @@ export const baseConfig: Partial<Config> = {
     LexicalFullyFeatured,
     LexicalAutosave,
     LexicalLinkFeature,
+    LexicalLinkFeatureAutosave,
     LexicalListsFeature,
     LexicalHeadingFeature,
     LexicalJSXConverter,
@@ -77,6 +82,7 @@ export const baseConfig: Partial<Config> = {
     LexicalRelationshipsFields,
     LexicalSlugFieldNameCollision,
     LexicalNestedBlocks,
+    LexicalCopyPaste,
     RichTextFields,
     TextFields,
     Uploads,

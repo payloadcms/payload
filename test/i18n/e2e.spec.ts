@@ -203,6 +203,7 @@ describe('i18n', () => {
         data: {
           i18nFieldLabel: 'Test',
         },
+        overrideAccess: true,
       })
 
       // set language to Spanish
@@ -220,6 +221,29 @@ describe('i18n', () => {
         page.locator('#heading-i18nFieldLabel .sort-column__label', { hasText: 'es-label' }),
       ).toBeVisible()
       await expect(page.locator('#search-filter-input')).toHaveAttribute('placeholder', 'Buscar')
+    })
+
+    test('should show translated field label in the sort button labels', async () => {
+      await payload.create({
+        collection: 'collection1',
+        data: {
+          i18nFieldLabel: 'Test',
+        },
+        overrideAccess: true,
+      })
+
+      await setUserLanguage('en')
+
+      await page.goto(collection1URL.list)
+
+      await expect(page.locator('#heading-i18nFieldLabel .sort-column__asc')).toHaveAttribute(
+        'aria-label',
+        'Sort by en-label Ascending',
+      )
+      await expect(page.locator('#heading-i18nFieldLabel .sort-column__desc')).toHaveAttribute(
+        'aria-label',
+        'Sort by en-label Descending',
+      )
     })
 
     test('should display translated collections and globals config options', async () => {

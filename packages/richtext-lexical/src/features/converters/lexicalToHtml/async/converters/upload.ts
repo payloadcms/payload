@@ -1,14 +1,15 @@
 import type { FileData, FileSize, TypeWithID } from 'payload'
 
 import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
 
 import type { SerializedUploadNode } from '../../../../../types/nodeTypes.js'
-import type { UploadDataImproved } from '../../../../upload/server/schema.js'
+import type { UploadData } from '../../../../upload/server/schema.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
 export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode> = {
   upload: async ({ node, populate, providedStyleTag }) => {
-    const uploadNode = node as UploadDataImproved
+    const uploadNode = node as UploadData
 
     let uploadDoc: (FileData & TypeWithID) | undefined = undefined
 
@@ -33,7 +34,7 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
       (node.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || '',
     )
 
-    const url = escapeHTML(uploadDoc.url ?? '')
+    const url = escapeHTML(sanitizeUrl(uploadDoc.url ?? ''))
 
     // 1) If upload is NOT an image, return a link
     if (!uploadDoc.mimeType.startsWith('image')) {
@@ -41,7 +42,7 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
     }
 
     // 2) If image has no different sizes, return a simple <img />
-    if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {
+    if (!uploadDoc.variants || !Object.keys(uploadDoc.variants).length) {
       return `
         <img${providedStyleTag}
           alt="${alt}"
@@ -55,8 +56,8 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
     // 3) If image has different sizes, build a <picture> element with <source> tags
     let pictureHTML = ''
 
-    for (const size in uploadDoc.sizes) {
-      const imageSize = uploadDoc.sizes[size] as FileSize
+    for (const size in uploadDoc.variants) {
+      const imageSize = uploadDoc.variants[size] as FileSize
 
       if (
         !imageSize ||

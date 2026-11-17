@@ -14,7 +14,7 @@ const EditorField: React.FC<{
   fieldName: string
   useBlockComponentContext: () => BlockComponentContextType
 }> = ({ fieldName, useBlockComponentContext }) => {
-  // eslint-disable-next-line react-compiler/react-compiler -- useCtx is a stable context hook passed as prop
+  // eslint-disable-next-line react-hooks/hooks -- useCtx is a stable context hook passed as prop
   const { formSchema } = useBlockComponentContext()
   const isEditable = useLexicalEditable()
 
@@ -83,7 +83,7 @@ const BannerTitle: React.FC<{
 const BlockActions: React.FC<{
   useBlockComponentContext: () => BlockComponentContextType
 }> = ({ useBlockComponentContext }) => {
-  // eslint-disable-next-line react-compiler/react-compiler -- useCtx is a stable context hook passed as prop
+  // eslint-disable-next-line react-hooks/hooks -- useCtx is a stable context hook passed as prop
   const { EditButton, RemoveButton } = useBlockComponentContext()
   return (
     <div style={{ display: 'flex', gap: '4px', position: 'absolute', right: '8px', top: '8px' }}>

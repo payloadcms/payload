@@ -4,6 +4,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: 'pages',
     data: { title: 'Seeded page' },
+    overrideAccess: true,
   } as never)
 
   const fileData = Buffer.from('Seeded media')
@@ -17,10 +18,12 @@ export const seed = async (payload: Payload): Promise<void> => {
       mimetype: 'text/plain',
       size: fileData.length,
     },
+    overrideAccess: true,
   } as never)
 
   await payload.updateGlobal({
     slug: 'settings',
     data: { title: 'Seeded settings' },
+    overrideAccess: true,
   } as never)
 }

@@ -1,4 +1,5 @@
 import { CheckIcon } from '@payloadcms/ui/rsc'
+import escapeHTML from 'escape-html'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedListItemNode } from '../../../../types/nodeTypes.js'
@@ -63,7 +64,7 @@ export const ListItemDiffHTMLConverterAsync: HTMLConvertersAsync<SerializedListI
       return `<li
           class="${hasSubLists ? 'nestedListItem' : ''}"
           style="${hasSubLists ? `list-style-type: none;${providedCSSString}` : providedCSSString}"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
           data-enable-match="true"
         >${children}</li>`
     }

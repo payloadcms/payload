@@ -3,7 +3,7 @@ import type {
   ClientTab,
   FieldDiffClientProps,
   TabsFieldClient,
-  TabsFieldDiffClientComponent,
+  TabsFieldDiffClientProps,
   VersionTab,
 } from 'payload'
 
@@ -18,8 +18,8 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'tabs-diff'
 
-export const Tabs: TabsFieldDiffClientComponent = (props) => {
-  const { baseVersionField, comparisonValue: valueFrom, field, versionValue: valueTo } = props
+export const Tabs: React.FC<TabsFieldDiffClientProps> = (props) => {
+  const { baseVersionField, field, valueFrom, valueTo } = props
   const { selectedLocales } = useSelectedLocales()
 
   return (
@@ -40,11 +40,11 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
                 return selectedLocales.map((locale, index) => {
                   const localizedTabProps: TabProps = {
                     ...props,
-                    comparisonValue: valueFrom?.[tab.name]?.[locale],
                     fieldTab,
                     locale,
                     tab,
-                    versionValue: valueTo?.[tab.name]?.[locale],
+                    valueFrom: valueFrom?.[tab.name]?.[locale],
+                    valueTo: valueTo?.[tab.name]?.[locale],
                   }
                   return (
                     <div className={`${baseClass}__tab-locale`} key={[locale, index].join('-')}>
@@ -58,10 +58,10 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
                 // Named tab
                 const namedTabProps: TabProps = {
                   ...props,
-                  comparisonValue: valueFrom?.[tab.name],
                   fieldTab,
                   tab,
-                  versionValue: valueTo?.[tab.name],
+                  valueFrom: valueFrom?.[tab.name],
+                  valueTo: valueTo?.[tab.name],
                 }
                 return <Tab key={i} {...namedTabProps} />
               } else {
@@ -82,12 +82,12 @@ type TabProps = {
 } & FieldDiffClientProps<TabsFieldClient>
 
 const Tab: React.FC<TabProps> = ({
-  comparisonValue: valueFrom,
   fieldTab,
   locale,
   parentIsLocalized,
   tab,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()

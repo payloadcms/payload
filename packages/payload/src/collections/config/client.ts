@@ -24,6 +24,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
   | 'hooks'
   | 'indexes'
   | 'joins'
+  | 'llmInstructions'
   | 'polymorphicJoins'
   | 'sanitizedIndexes'
   | 'select'
@@ -39,15 +40,18 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'admin'
   | 'adminThumbnail'
   | 'externalFileHeaderFilter'
+  | 'fileOperations'
   | 'handlers'
   | 'modifyResponseHeaders'
   | 'uploadInstructions'
-  | 'withMetadata'
 >
 
 type ClientUploadConfig = {
-  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
-} & Omit<SanitizedUploadConfig, 'uploadInstructions'>
+  uploadInstructions: {
+    /** Whether the adapter supports resumable, segmented upload sessions. @experimental */
+    supportsSegmentedUploads: boolean
+  } & Pick<UploadInstructionsCapability, 'useInAdmin'>
+} & Omit<SanitizedUploadConfig, 'fileOperations' | 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
   admin: {
@@ -64,10 +68,10 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: { verify?: true } & Omit<
-    SanitizedCollectionConfig['auth'],
-    'forgotPassword' | 'strategies' | 'verify'
-  >
+  auth?: {
+    forgotPassword: Pick<SanitizedCollectionConfig['auth']['forgotPassword'], 'minRequestInterval'>
+    verify?: true
+  } & Omit<SanitizedCollectionConfig['auth'], 'forgotPassword' | 'strategies' | 'verify'>
   fields: ClientField[]
   hierarchy?: ClientHierarchyConfig | false
   labels: {
@@ -86,6 +90,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'llmInstructions',
   'polymorphicJoins',
   'flattenedFields',
   'indexes',
@@ -100,10 +105,10 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'admin',
   'adminThumbnail',
   'externalFileHeaderFilter',
+  'fileOperations',
   'handlers',
   'modifyResponseHeaders',
   'uploadInstructions',
-  'withMetadata',
 ]
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
@@ -139,7 +144,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.admin = {} as ClientCollectionConfig['admin']
+        clientCollection.admin = {}
 
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
@@ -195,6 +200,10 @@ export const createClientCollectionConfig = ({
         }
 
         clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+
+        clientCollection.auth.forgotPassword = {
+          minRequestInterval: collection.auth.forgotPassword.minRequestInterval,
+        }
 
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
@@ -259,7 +268,7 @@ export const createClientCollectionConfig = ({
 
         // Strip slugify function as it can't cross server-client boundary
         const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
-        clientCollection.hierarchy = clientHierarchy as ClientHierarchyConfig
+        clientCollection.hierarchy = clientHierarchy
 
         break
       }
@@ -285,6 +294,7 @@ export const createClientCollectionConfig = ({
 
         clientCollection.upload = {
           uploadInstructions: {
+            supportsSegmentedUploads: Boolean(collection.upload.uploadInstructions?.segmented),
             useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
           },
         } as ClientUploadConfig
@@ -294,8 +304,8 @@ export const createClientCollectionConfig = ({
             continue
           }
 
-          if (uploadKey === 'imageSizes') {
-            clientCollection.upload.imageSizes = collection.upload.imageSizes?.map((size) => {
+          if (uploadKey === 'variants') {
+            clientCollection.upload.variants = collection.upload.variants?.map((size) => {
               const sanitizedSize = { ...size }
               if ('generateImageName' in sanitizedSize) {
                 delete sanitizedSize.generateImageName

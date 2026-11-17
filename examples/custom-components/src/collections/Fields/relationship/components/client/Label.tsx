@@ -1,10 +1,10 @@
 'use client'
-import type { RelationshipFieldLabelClientComponent } from 'payload'
+import type { RelationshipFieldLabelClientProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomRelationshipFieldLabelClient: RelationshipFieldLabelClientComponent = ({
+export const CustomRelationshipFieldLabelClient: React.FC<RelationshipFieldLabelClientProps> = ({
   field,
   path,
 }) => {

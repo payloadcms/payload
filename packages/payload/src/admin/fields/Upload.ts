@@ -2,21 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { UploadField, UploadFieldClient } from '../../fields/config/types.js'
 import type { UploadFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
@@ -33,45 +27,28 @@ export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutTyp
 
 export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType> &
   UploadFieldBaseServerProps
-
-export type UploadFieldServerComponent = FieldServerComponent<
-  UploadField,
-  UploadFieldClientWithoutType,
-  UploadFieldBaseServerProps
->
-
-export type UploadFieldClientComponent = FieldClientComponent<
-  UploadFieldClientWithoutType,
-  UploadFieldBaseClientProps
->
-
-export type UploadFieldLabelServerComponent = FieldLabelServerComponent<
+export type UploadFieldLabelServerProps = FieldLabelServerProps<
   UploadField,
   UploadFieldClientWithoutType
 >
 
-export type UploadFieldLabelClientComponent =
-  FieldLabelClientComponent<UploadFieldClientWithoutType>
+export type UploadFieldLabelClientProps = FieldLabelClientProps<UploadFieldClientWithoutType>
 
-export type UploadFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type UploadFieldDescriptionServerProps = FieldDescriptionServerProps<
   UploadField,
   UploadFieldClientWithoutType
 >
 
-export type UploadFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<UploadFieldClientWithoutType>
+export type UploadFieldDescriptionClientProps =
+  FieldDescriptionClientProps<UploadFieldClientWithoutType>
 
-export type UploadFieldErrorServerComponent = FieldErrorServerComponent<
+export type UploadFieldErrorServerProps = FieldErrorServerProps<
   UploadField,
   UploadFieldClientWithoutType
 >
 
-export type UploadFieldErrorClientComponent =
-  FieldErrorClientComponent<UploadFieldClientWithoutType>
+export type UploadFieldErrorClientProps = FieldErrorClientProps<UploadFieldClientWithoutType>
 
-export type UploadFieldDiffServerComponent = FieldDiffServerComponent<
-  UploadField,
-  UploadFieldClient
->
+export type UploadFieldDiffServerProps = FieldDiffServerProps<UploadField, UploadFieldClient>
 
-export type UploadFieldDiffClientComponent = FieldDiffClientComponent<UploadFieldClient>
+export type UploadFieldDiffClientProps = FieldDiffClientProps<UploadFieldClient>

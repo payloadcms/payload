@@ -30,7 +30,7 @@ export type Props = {
 
 import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
 
-import { isFieldDisabled } from 'payload/shared'
+import { isDateOnlyFilter, isDateOnlyFilterValue, isFieldDisabled } from 'payload/shared'
 
 import type { Option } from '../../ReactSelect/index.js'
 
@@ -136,13 +136,22 @@ export const Condition: React.FC<Props> = (props) => {
   )
 
   const handleOperatorChange = useCallback(
-    async (operator: Option<Operator>) => {
+    async (nextOperator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
-      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
-      const isValidValue =
-        validOperatorValue === 'any' ||
-        typeof value === validOperatorValue ||
-        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+      const validOperatorValue = operatorValueTypes[nextOperator.value] || 'any'
+      const dateField = reducedField.field.type === 'date' ? reducedField.field : undefined
+      const isCalendarDayValue = dateField !== undefined && isDateOnlyFilterValue(internalValue)
+      const shouldPreserveCalendarDay =
+        isCalendarDayValue &&
+        dateField &&
+        isDateOnlyFilter({ field: dateField, operator }) &&
+        isDateOnlyFilter({ field: dateField, operator: nextOperator.value })
+      const isValidValue = isCalendarDayValue
+        ? shouldPreserveCalendarDay
+        : validOperatorValue === 'any' ||
+          typeof internalValue === validOperatorValue ||
+          (validOperatorValue === 'boolean' &&
+            (internalValue === 'true' || internalValue === 'false'))
 
       if (!isValidValue) {
         // if the current value is not valid for the new operator
@@ -154,12 +163,12 @@ export const Condition: React.FC<Props> = (props) => {
         type: 'operator',
         andIndex,
         field: reducedField,
-        operator: operator.value,
+        operator: nextOperator.value,
         orIndex,
-        value: isValidValue ? value : undefined,
+        value: isValidValue ? internalValue : undefined,
       })
     },
-    [andIndex, reducedField, orIndex, updateCondition, value],
+    [andIndex, internalValue, operator, reducedField, orIndex, updateCondition],
   )
 
   return (
@@ -170,6 +179,7 @@ export const Condition: React.FC<Props> = (props) => {
             <span className={`${baseClass}__join-label`}>{t('general:where')}</span>
           ) : (
             <ReactSelect
+              aria-label={t('general:filter')}
               classNames={{
                 menu: () => 'condition__join-menu',
               }}
@@ -188,12 +198,15 @@ export const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              aria-label={t('general:field')}
               disabled={disabled}
-              filterOption={(option, inputValue) =>
-                ((option?.data?.plainTextLabel as string) || option.label)
-                  .toLowerCase()
-                  .includes(inputValue.toLowerCase())
-              }
+              filterOption={(option, inputValue) => {
+                const label =
+                  typeof option?.data?.plainTextLabel === 'string'
+                    ? option.data.plainTextLabel
+                    : option.label
+                return label.toLowerCase().includes(inputValue.toLowerCase())
+              }}
               isClearable={false}
               onChange={handleFieldChange}
               options={reducedFields
@@ -204,6 +217,7 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
+              aria-label={t('general:filter')}
               disabled={disabled}
               isClearable={false}
               onChange={handleOperatorChange}
@@ -230,6 +244,7 @@ export const Condition: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
+            aria-label={t('general:removeFilter')}
             buttonStyle="ghost"
             className={`${baseClass}__actions-remove`}
             disabled={disableRemoveButton}

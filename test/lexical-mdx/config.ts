@@ -3,9 +3,10 @@ import * as fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { docsBasePath } from './collections/Posts/shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -14,6 +15,9 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   suite: 'lexical-mdx',
   config: {
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
+    },
     // ...extend config here
     admin: {
       importMap: {
@@ -48,10 +52,12 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.delete({
       collection: 'posts',
+      overrideAccess: true,
       where: {},
     })
 
@@ -79,6 +85,7 @@ export default buildConfigWithDefaults({
           docPath: file,
         },
         depth: 0,
+        overrideAccess: true,
       })
     }
   },

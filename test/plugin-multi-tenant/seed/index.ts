@@ -11,6 +11,7 @@ export const seed = async (payload: Payload) => {
       name: 'Blue Dog',
       domain: 'bluedog.com',
     },
+    overrideAccess: true,
   })
   const steelCatTenant = await payload.create({
     collection: tenantsSlug,
@@ -18,6 +19,7 @@ export const seed = async (payload: Payload) => {
       name: 'Steel Cat',
       domain: 'steelcat.com',
     },
+    overrideAccess: true,
   })
   const anchorBarTenant = await payload.create({
     collection: tenantsSlug,
@@ -26,6 +28,7 @@ export const seed = async (payload: Payload) => {
       domain: 'anchorbar.com',
       selectedLocales: ['en'],
     },
+    overrideAccess: true,
   })
   const publicTenant = await payload.create({
     collection: tenantsSlug,
@@ -34,6 +37,7 @@ export const seed = async (payload: Payload) => {
       domain: 'public.com',
       isPublic: true,
     },
+    overrideAccess: true,
   })
 
   // Create folders for Blue Dog
@@ -43,6 +47,7 @@ export const seed = async (payload: Payload) => {
       name: 'Blue Dog Documents',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   const blueDogArchivesFolder = await payload.create({
     collection: foldersSlug,
@@ -50,6 +55,7 @@ export const seed = async (payload: Payload) => {
       name: 'Blue Dog Archives',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   const blueDogRecipesFolder = await payload.create({
     collection: foldersSlug,
@@ -58,6 +64,7 @@ export const seed = async (payload: Payload) => {
       folder: blueDogDocumentsFolder.id, // parentFieldName is 'folder' in config
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
 
   // Create folders for Steel Cat
@@ -67,6 +74,7 @@ export const seed = async (payload: Payload) => {
       name: 'Steel Cat Documents',
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
   const steelCatArchivesFolder = await payload.create({
     collection: foldersSlug,
@@ -74,6 +82,7 @@ export const seed = async (payload: Payload) => {
       name: 'Steel Cat Archives',
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
 
   // Create folders for Anchor Bar
@@ -83,6 +92,7 @@ export const seed = async (payload: Payload) => {
       name: 'Anchor Bar Files',
       tenant: anchorBarTenant.id,
     },
+    overrideAccess: true,
   })
 
   // Create blue dog menu items (some in folders, some at root)
@@ -93,6 +103,7 @@ export const seed = async (payload: Payload) => {
       folder: blueDogRecipesFolder.id,
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -101,6 +112,7 @@ export const seed = async (payload: Payload) => {
       folder: blueDogRecipesFolder.id,
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -109,6 +121,7 @@ export const seed = async (payload: Payload) => {
       folder: blueDogDocumentsFolder.id,
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   // Menu items at root (no folder)
   await payload.create({
@@ -117,6 +130,7 @@ export const seed = async (payload: Payload) => {
       name: 'Veggie Wrap',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -124,6 +138,7 @@ export const seed = async (payload: Payload) => {
       name: 'House Salad',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -131,6 +146,7 @@ export const seed = async (payload: Payload) => {
       name: 'Draft Beer',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -139,6 +155,7 @@ export const seed = async (payload: Payload) => {
       title: 'Owned by blue dog',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -147,6 +164,7 @@ export const seed = async (payload: Payload) => {
       title: 'Owned by steelcat',
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -155,6 +173,7 @@ export const seed = async (payload: Payload) => {
       title: 'Owned by bar with no ac',
       tenant: anchorBarTenant.id,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -163,6 +182,7 @@ export const seed = async (payload: Payload) => {
       title: 'Owned by public tenant',
       tenant: publicTenant.id,
     },
+    overrideAccess: true,
   })
 
   // Create steel cat menu items (in folders)
@@ -173,6 +193,7 @@ export const seed = async (payload: Payload) => {
       folder: steelCatDocumentsFolder.id,
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -181,6 +202,7 @@ export const seed = async (payload: Payload) => {
       folder: steelCatDocumentsFolder.id,
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -189,6 +211,7 @@ export const seed = async (payload: Payload) => {
       folder: steelCatArchivesFolder.id,
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
 
   // Create anchor bar menu items (in folders)
@@ -201,6 +224,7 @@ export const seed = async (payload: Payload) => {
       localizedName: 'Peanuts EN',
     },
     locale: 'en',
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -211,6 +235,7 @@ export const seed = async (payload: Payload) => {
       localizedName: 'Pretzels EN',
     },
     locale: 'en',
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -221,6 +246,7 @@ export const seed = async (payload: Payload) => {
       localizedName: 'Popcorn EN',
     },
     locale: 'en',
+    overrideAccess: true,
   })
 
   // Public tenant menu items
@@ -230,6 +256,7 @@ export const seed = async (payload: Payload) => {
       name: 'Free Pizza',
       tenant: publicTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuItemsSlug,
@@ -237,6 +264,7 @@ export const seed = async (payload: Payload) => {
       name: 'Free Dogs',
       tenant: publicTenant.id,
     },
+    overrideAccess: true,
   })
 
   // create users
@@ -246,6 +274,7 @@ export const seed = async (payload: Payload) => {
       ...credentials.admin,
       roles: ['admin'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -259,6 +288,7 @@ export const seed = async (payload: Payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -275,6 +305,7 @@ export const seed = async (payload: Payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   // create menus
@@ -285,6 +316,7 @@ export const seed = async (payload: Payload) => {
       title: 'Blue Dog Menu',
       tenant: blueDogTenant.id,
     },
+    overrideAccess: true,
   })
   await payload.create({
     collection: menuSlug,
@@ -293,6 +325,7 @@ export const seed = async (payload: Payload) => {
       title: 'Steel Cat Menu',
       tenant: steelCatTenant.id,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -306,6 +339,7 @@ export const seed = async (payload: Payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   // User with mixed tenant roles: admin for Steel Cat, member for Blue Dog
@@ -329,6 +363,7 @@ export const seed = async (payload: Payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   // Create a user with no tenant associations
@@ -339,5 +374,6 @@ export const seed = async (payload: Payload) => {
       roles: ['user'],
       // tenants: [],
     },
+    overrideAccess: true,
   })
 }

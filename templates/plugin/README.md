@@ -60,7 +60,7 @@ In the root folder, you will see various files that relate to the configuration 
 - **package**.json\* - Contains necessary scripts and dependencies. Overwrite the metadata in this file to describe your Plugin.
 - .**eslint**.config.js - Eslint configuration for reporting on problematic patterns.
 - .**gitignore** - List specific untracked files to omit from Git.
-- .**prettierrc**.json - Configuration for Prettier code formatting.
+- **oxfmt**.config.ts - Configuration for Oxfmt code formatting.
 - **tsconfig**.json - Configures the compiler options for TypeScript
 - .**swcrc** - Configuration for SWC, a fast compiler that transpiles and bundles TypeScript.
 - **vitest**.config.js - Config file for Vitest, defining how tests are run and how modules are resolved

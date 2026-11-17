@@ -2,7 +2,7 @@ import { expect } from 'vitest'
 
 import { test } from './vitest.js'
 
-test.suite({ config: './configImport.config.ts' })('integration config fixture', () => {
+test.suite('integration config fixture', { config: './configImport.config.ts' }, () => {
   test.beforeAll(() => {
     expect(process.env.PAYLOAD_TEST_CONFIG_IMPORTED).toBe('true')
   })

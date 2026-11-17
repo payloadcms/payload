@@ -1,7 +1,6 @@
 @layer payload-default {
   .lexical-diff .field-diff-content {
     .html-diff {
-      font-family: var(--text-body-large-font-family);
       font-size: var(--text-body-large-font-size);
       font-weight: var(--text-body-large-font-weight);
       line-height: var(--text-body-large-line-height);
@@ -119,7 +118,6 @@
     }
 
     li {
-      font-family: var(--text-body-large-font-family);
       font-size: var(--text-body-large-font-size);
       margin-block: 0 var(--spacer-1);
       margin-inline-start: var(--spacer-4);

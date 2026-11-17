@@ -21,6 +21,11 @@ export const TANSTACK_TEMPLATE_FILES = [
   },
   {
     destination: 'routes',
+    relativePath: '_payload/custom.css',
+    sourcePath: 'app/_payload/custom.css',
+  },
+  {
+    destination: 'routes',
     relativePath: '_payload/importMap.js',
     sourcePath: 'app/_payload/importMap.js',
   },
@@ -48,11 +53,6 @@ export const TANSTACK_TEMPLATE_FILES = [
     destination: 'src',
     relativePath: 'collections/Users.ts',
     sourcePath: 'collections/Users.ts',
-  },
-  {
-    destination: 'src',
-    relativePath: 'payload.css',
-    sourcePath: 'payload.css',
   },
   {
     destination: 'src',

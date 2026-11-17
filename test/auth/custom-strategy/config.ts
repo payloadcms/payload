@@ -7,9 +7,7 @@ const dirname = path.dirname(filename)
 import type { AuthStrategyFunction } from 'payload'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
-import { usersSlug } from './shared.js'
-
-export const strategyName = 'test-local'
+import { strategyName, usersSlug } from './shared.js'
 
 const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, payload }) => {
   const usersQuery = await payload.find({
@@ -22,10 +20,13 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
         equals: headers.get('secret'),
       },
     },
+    overrideAccess: true,
   })
 
   const user = usersQuery.docs[0] || null
-  if (!user) return { user: null }
+  if (!user) {
+    return { user: null }
+  }
 
   return {
     responseHeaders: new Headers({
@@ -33,7 +34,6 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
     }),
     user: {
       ...user,
-      _strategy: `${usersSlug}-${strategyName}`,
       collection: usersSlug,
     },
   }

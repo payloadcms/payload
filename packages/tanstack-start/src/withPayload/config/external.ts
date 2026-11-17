@@ -1,7 +1,7 @@
-/**
- * SSR/RSC externalization config used by `withPayload`. Kept separate from the
- * client optimizer config (`./optimizeDeps.ts`) so each concern stays small.
- */
+import {
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
+} from 'payload/build-config'
 
 /**
  * Packages externalized during dev serve (`ssr.external`). Node's loader resolves
@@ -16,15 +16,9 @@
 export const ssrExternalPackages: string[] = [
   'zod',
   'fast-uri',
-  'drizzle-kit',
-  'drizzle-kit/api',
+  ...serverExternalPayloadPackages,
   'drizzle-orm',
-  'sharp',
-  'require-in-the-middle',
-  'json-schema-to-typescript',
-  'pino',
   'pino-pretty',
-  'graphql',
   'nodemailer',
   'aws4',
   'pluralize',
@@ -40,7 +34,6 @@ export const ssrExternalPackages: string[] = [
   'pg-cloudflare',
   // SQLite (`@payloadcms/db-sqlite`)
   'better-sqlite3',
-  'libsql',
   // Mongo (`@payloadcms/db-mongodb`)
   'mongodb',
   'mongoose',
@@ -66,21 +59,8 @@ export const buildBundledPackages: string[] = [
   '@google-cloud/storage',
 ]
 
-/**
- * External packages for the production `vite build` only (not dev serve).
- *
- * Externalizes the `@payloadcms/*` package boundaries — plus `payload` — so each
- * resolves its own transitive Node deps (`pino`, `drizzle-orm`, `libsql`, …) from
- * its own `node_modules` at runtime. Externalizing only the leaf deps breaks under
- * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
- * `dist/`, since pnpm does not hoist it; see {@link buildBundledPackages}.
- *
- * Kept out of dev's `ssr.external` on purpose: the monorepo resolves these to
- * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
- * transform can resolve — an externalized copy would hit Node's raw resolver and
- * fail on the `.js`→`.ts` mismatch.
- */
-export const buildExternalPackages: string[] = [
+/** Server-only package boundaries loaded directly by Node in development and production. */
+export const serverExternalPackages: string[] = [
   'payload',
   'payload/node',
   '@payloadcms/drizzle',
@@ -89,6 +69,24 @@ export const buildExternalPackages: string[] = [
   '@payloadcms/db-vercel-postgres',
   '@payloadcms/db-sqlite',
   '@payloadcms/db-d1-sqlite',
+]
+
+/** Additional installed packages that can bypass Vite's development server transforms. */
+export const devExternalPackages: string[] = [
+  ...new Set([
+    // Vite otherwise transforms date-fns' full module graph during SSR.
+    'date-fns',
+    ...devServerExternalPayloadPackages,
+    ...serverExternalPackages,
+  ]),
+]
+
+/**
+ * Externalizes package boundaries so packages resolve their own transitive dependencies under pnpm.
+ * Leaves that must bundle in production are excluded; see {@link buildBundledPackages}.
+ */
+export const buildExternalPackages: string[] = [
+  ...serverExternalPackages,
   ...ssrExternalPackages.filter((pkg) => !buildBundledPackages.includes(pkg)),
 ]
 

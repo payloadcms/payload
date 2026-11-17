@@ -1,17 +1,18 @@
 'use client'
-import { formatFilesize } from 'payload/shared'
+import { formatFileMeta } from 'payload/shared'
 import React from 'react'
 
 export type FileMetaProps = {
   filename: string
-  filesize: number
+  filesize: null | number
   height?: number
   mimeType: string
-  sizes?: unknown
   url: string
+  variants?: unknown
   width?: number
 }
 
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { CopyToClipboard } from '../../CopyToClipboard/index.js'
 import './index.css'
 
@@ -20,28 +21,18 @@ const baseClass = 'file-meta'
 export const FileMeta: React.FC<FileMetaProps> = (props) => {
   const { filename, filesize, height, mimeType, url: fileURL, width } = props
 
+  const { t } = useTranslation()
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__url`}>
         <a href={fileURL} rel="noopener noreferrer" target="_blank">
           {filename}
         </a>
-        <CopyToClipboard defaultMessage="Copy URL" value={fileURL} />
+        <CopyToClipboard defaultMessage={t('upload:copyURL')} value={fileURL} />
       </div>
       <div className={`${baseClass}__size-type`}>
-        {formatFilesize(filesize)}
-        {typeof width === 'number' && typeof height === 'number' && (
-          <React.Fragment>
-            &nbsp;-&nbsp;
-            {width}x{height}
-          </React.Fragment>
-        )}
-        {mimeType && (
-          <React.Fragment>
-            &nbsp;-&nbsp;
-            {mimeType}
-          </React.Fragment>
-        )}
+        {formatFileMeta({ filesize, height, mimeType, width })}
       </div>
     </div>
   )

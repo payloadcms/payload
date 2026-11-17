@@ -6,7 +6,7 @@ import type { TenantAccessConfig } from './addCollectionAccess.js'
 
 import { addCollectionAccess } from './addCollectionAccess.js'
 
-const createScope = (
+const createAccessConfig = (
   collection: CollectionConfig,
   accessResultCallback?: TenantAccessConfig['accessResultCallback'],
 ): TenantAccessConfig => ({
@@ -29,6 +29,31 @@ const createArgs = (slug = 'posts'): AccessArgs => ({
 })
 
 describe('addCollectionAccess', () => {
+  it('should keep collection overrides separate from shared tenant access rules', async () => {
+    const readPosts = vi.fn(() => ({ published: { equals: true } }))
+    const readPages = vi.fn(() => true)
+    const override: NonNullable<TenantAccessConfig['accessResultCallback']> = ({ accessResult }) =>
+      accessResult
+    const posts: CollectionConfig = { slug: 'posts', access: { read: readPosts }, fields: [] }
+    const pages: CollectionConfig = { slug: 'pages', access: { read: readPages }, fields: [] }
+    const source = { collections: [posts, pages] } as Config
+    const result = addCollectionAccess({
+      collectionAccessConfigs: [createAccessConfig(posts, override), createAccessConfig(pages)],
+      config: source,
+    })
+
+    await expect(result.collections?.[0]?.access?.read?.(createArgs())).resolves.toEqual({
+      and: [{ published: { equals: true } }, { tenant: { in: ['tenant-1'] } }],
+    })
+    await expect(result.baseAccess?.collections?.read?.(createArgs())).resolves.toBe(true)
+    await expect(result.baseAccess?.collections?.read?.(createArgs('pages'))).resolves.toEqual({
+      tenant: { in: ['tenant-1'] },
+    })
+    expect(result.collections?.[1]?.access?.read).toBe(readPages)
+    expect(posts.access?.read).toBe(readPosts)
+    expect(source.baseAccess).toBeUndefined()
+  })
+
   it('adds tenant constraints through base access without replacing collection access', async () => {
     const documentRead = vi.fn(() => ({ published: { equals: true } }))
     const collection: CollectionConfig = {
@@ -36,7 +61,7 @@ describe('addCollectionAccess', () => {
       access: { read: documentRead },
       fields: [],
     }
-    const config = {
+    let config = {
       baseAccess: {
         collections: {
           read: () => ({ archived: { not_equals: true } }),
@@ -44,7 +69,10 @@ describe('addCollectionAccess', () => {
       },
     } as Config
 
-    addCollectionAccess({ config, scopes: [createScope(collection)] })
+    config = addCollectionAccess({
+      config,
+      collectionAccessConfigs: [createAccessConfig(collection)],
+    })
 
     expect(collection.access?.read).toBe(documentRead)
     await expect(config.baseAccess?.collections?.read?.(createArgs())).resolves.toEqual({
@@ -58,35 +86,68 @@ describe('addCollectionAccess', () => {
 
   it('returns a boolean tenant result for collection create access', async () => {
     const collection: CollectionConfig = { slug: 'posts', fields: [] }
-    const config = {} as Config
+    let config = {} as Config
 
-    addCollectionAccess({ config, scopes: [createScope(collection)] })
+    config = addCollectionAccess({
+      config,
+      collectionAccessConfigs: [createAccessConfig(collection)],
+    })
 
     await expect(config.baseAccess?.collections?.create?.(createArgs())).resolves.toBe(true)
   })
 
-  it('keeps callback wrapping when an access result override is configured', async () => {
-    const documentResult = { published: { equals: true } }
-    const documentRead = vi.fn(() => documentResult)
-    const accessResultCallback = vi.fn(({ accessResult }) => accessResult)
-    const collection: CollectionConfig = {
-      slug: 'posts',
-      access: { read: documentRead },
-      fields: [],
-    }
-    const config = {} as Config
+  it('uses explicit base validate access and otherwise falls back to update access', async () => {
+    const collection: CollectionConfig = { slug: 'posts', fields: [] }
+    let fallbackUpdateCalls = 0
+    let fallbackConfig = {
+      baseAccess: {
+        collections: {
+          update: () => {
+            fallbackUpdateCalls += 1
+            return false
+          },
+        },
+      },
+    } as Config
 
-    addCollectionAccess({
-      config,
-      scopes: [createScope(collection, accessResultCallback)],
+    fallbackConfig = addCollectionAccess({
+      config: fallbackConfig,
+      collectionAccessConfigs: [createAccessConfig(collection)],
     })
 
-    expect(config.baseAccess).toBeUndefined()
-    await expect(collection.access?.read?.(createArgs())).resolves.toEqual({
-      and: [documentResult, { tenant: { in: ['tenant-1'] } }],
-    })
-    expect(accessResultCallback).toHaveBeenCalledWith(
-      expect.objectContaining({ accessKey: 'read' }),
+    await expect(fallbackConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toBe(
+      false,
     )
+    expect(fallbackUpdateCalls).toBe(1)
+
+    let explicitUpdateCalls = 0
+    let explicitValidateCalls = 0
+    let explicitConfig = {
+      baseAccess: {
+        collections: {
+          update: () => {
+            explicitUpdateCalls += 1
+            return false
+          },
+          validate: () => {
+            explicitValidateCalls += 1
+            return true
+          },
+        },
+      },
+    } as Config
+
+    explicitConfig = addCollectionAccess({
+      config: explicitConfig,
+      collectionAccessConfigs: [createAccessConfig(collection)],
+    })
+
+    await expect(explicitConfig.baseAccess?.collections?.validate?.(createArgs())).resolves.toEqual(
+      {
+        tenant: { in: ['tenant-1'] },
+      },
+    )
+    expect(explicitUpdateCalls).toBe(0)
+    expect(explicitValidateCalls).toBe(1)
   })
 })

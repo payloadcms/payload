@@ -116,7 +116,7 @@ describe('initTanStack default template', () => {
     )
   })
 
-  it('should use the UI stylesheet without copying project-level foundations', async () => {
+  it('should import the UI and custom stylesheets from the admin routes', async () => {
     const result = await initTanStack({
       '--no-deps': true,
       '--payload-version': '4.2.0',
@@ -127,12 +127,25 @@ describe('initTanStack default template', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(fse.readFileSync(path.join(projectDir, 'src/routes/_payload.tsx'), 'utf8')).toContain(
-      "import styles from '../payload.css?url'",
+    for (const routeFile of ['admin.$.tsx', 'admin.index.tsx']) {
+      const route = fse.readFileSync(
+        path.join(projectDir, 'src/routes/_payload', routeFile),
+        'utf8',
+      )
+
+      expect(route).toContain("import payloadStyles from '@payloadcms/ui/css/app.css?url'")
+      expect(route).toContain("import customStyles from './custom.css?url'")
+      expect(route).toContain('const adminHead = adminRoute.head(context)')
+      expect(route).toContain('...adminHead.links')
+      expect(route).toContain("{ rel: 'stylesheet', href: payloadStyles }")
+      expect(route).toContain("{ rel: 'stylesheet', href: customStyles }")
+      expect(route).not.toContain("import '@payloadcms/ui/css/app.css'")
+      expect(route).not.toContain("import './custom.css'")
+    }
+    expect(fse.readFileSync(path.join(projectDir, 'src/routes/_payload/custom.css'), 'utf8')).toBe(
+      '',
     )
-    expect(fse.readFileSync(path.join(projectDir, 'src/payload.css'), 'utf8')).toBe(
-      "@import '@payloadcms/ui/css/app.css';\n",
-    )
+    expect(fse.pathExistsSync(path.join(projectDir, 'src/payload.css'))).toBe(false)
     expect(fse.pathExistsSync(path.join(projectDir, 'src/payload-foundation.css'))).toBe(false)
   })
 })

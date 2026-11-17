@@ -36,7 +36,6 @@ export const RenderDefaultCell: React.FC<{
         onSelect({
           collectionSlug: rowColl,
           doc: rowData,
-          docID: rowData.id as string,
         })
       }
     }

@@ -91,7 +91,7 @@ export function ssrStripDistStyleImports(): PluginOption {
       // there to collect them as client stylesheets. Stripping them here means
       // their CSS is never emitted and the admin renders unstyled (broken nav
       // scroll/layout, etc.). The Node-side `.css` no-op is handled by
-      // `cssLoader.mjs` (dev) and by Vite's CSS extraction (build), so the
+      // the test dev server's asset loader and by Vite's CSS extraction (build), so the
       // crash this plugin guards against does not require touching the RSC env.
       if (envName === 'rsc') {
         return

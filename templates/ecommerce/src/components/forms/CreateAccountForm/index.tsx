@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { getSafeRedirect } from 'payload/shared'
 import React, { useCallback, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -52,7 +53,10 @@ export const CreateAccountForm: React.FC = () => {
         return
       }
 
-      const redirect = searchParams.get('redirect')
+      const redirect = getSafeRedirect({
+        fallbackTo: `/account?success=${encodeURIComponent('Account created successfully')}`,
+        redirectTo: searchParams.get('redirect') ?? '',
+      })
 
       const timer = setTimeout(() => {
         setLoading(true)
@@ -61,8 +65,7 @@ export const CreateAccountForm: React.FC = () => {
       try {
         await login(data)
         clearTimeout(timer)
-        if (redirect) router.push(redirect)
-        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
+        router.push(redirect)
       } catch (_) {
         clearTimeout(timer)
         setError('There was an error with the credentials provided. Please try again.')

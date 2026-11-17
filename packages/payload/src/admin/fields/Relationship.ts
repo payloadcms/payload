@@ -2,21 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { RelationshipField, RelationshipFieldClient } from '../../fields/config/types.js'
 import type { RelationshipFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type RelationshipFieldClientWithoutType = MarkOptional<RelationshipFieldClient, 'type'>
@@ -33,45 +27,33 @@ export type RelationshipFieldClientProps = ClientFieldBase<RelationshipFieldClie
 
 export type RelationshipFieldServerProps = RelationshipFieldBaseServerProps &
   ServerFieldBase<RelationshipField, RelationshipFieldClientWithoutType>
-
-export type RelationshipFieldServerComponent = FieldServerComponent<
-  RelationshipField,
-  RelationshipFieldClientWithoutType,
-  RelationshipFieldBaseServerProps
->
-
-export type RelationshipFieldClientComponent = FieldClientComponent<
-  RelationshipFieldClientWithoutType,
-  RelationshipFieldBaseClientProps
->
-
-export type RelationshipFieldLabelServerComponent = FieldLabelServerComponent<
+export type RelationshipFieldLabelServerProps = FieldLabelServerProps<
   RelationshipField,
   RelationshipFieldClientWithoutType
 >
 
-export type RelationshipFieldLabelClientComponent =
-  FieldLabelClientComponent<RelationshipFieldClientWithoutType>
+export type RelationshipFieldLabelClientProps =
+  FieldLabelClientProps<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type RelationshipFieldDescriptionServerProps = FieldDescriptionServerProps<
   RelationshipField,
   RelationshipFieldClientWithoutType
 >
 
-export type RelationshipFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<RelationshipFieldClientWithoutType>
+export type RelationshipFieldDescriptionClientProps =
+  FieldDescriptionClientProps<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldErrorServerComponent = FieldErrorServerComponent<
+export type RelationshipFieldErrorServerProps = FieldErrorServerProps<
   RelationshipField,
   RelationshipFieldClientWithoutType
 >
 
-export type RelationshipFieldErrorClientComponent =
-  FieldErrorClientComponent<RelationshipFieldClientWithoutType>
+export type RelationshipFieldErrorClientProps =
+  FieldErrorClientProps<RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldDiffServerComponent = FieldDiffServerComponent<
+export type RelationshipFieldDiffServerProps = FieldDiffServerProps<
   RelationshipField,
   RelationshipFieldClient
 >
 
-export type RelationshipFieldDiffClientComponent = FieldDiffClientComponent<RelationshipFieldClient>
+export type RelationshipFieldDiffClientProps = FieldDiffClientProps<RelationshipFieldClient>

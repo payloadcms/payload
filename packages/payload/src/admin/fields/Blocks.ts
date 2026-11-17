@@ -1,23 +1,16 @@
-import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { BlocksField, BlocksFieldClient } from '../../fields/config/types.js'
 import type { BlocksFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
@@ -33,25 +26,12 @@ export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
 
 export type BlocksFieldServerProps = BlocksFieldBaseServerProps &
   ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
-
-export type BlocksFieldServerComponent = FieldServerComponent<
-  BlocksField,
-  BlocksFieldClientWithoutType,
-  BlocksFieldBaseServerProps
->
-
-export type BlocksFieldClientComponent = FieldClientComponent<
-  BlocksFieldClientWithoutType,
-  BlocksFieldBaseClientProps
->
-
-export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<
+export type BlocksFieldLabelServerProps = FieldLabelServerProps<
   BlocksField,
   BlocksFieldClientWithoutType
 >
 
-export type BlocksFieldLabelClientComponent =
-  FieldLabelClientComponent<BlocksFieldClientWithoutType>
+export type BlocksFieldLabelClientProps = FieldLabelClientProps<BlocksFieldClientWithoutType>
 
 type BlockRowLabelBase = {
   blockType: string
@@ -59,33 +39,27 @@ type BlockRowLabelBase = {
   rowNumber: number
 }
 
-export type BlockRowLabelClientComponent = React.ComponentType<
-  BlockRowLabelBase & ClientFieldBase<BlocksFieldClientWithoutType>
->
+export type BlockRowLabelClientProps = BlockRowLabelBase &
+  ClientFieldBase<BlocksFieldClientWithoutType>
 
-export type BlockRowLabelServerComponent = React.ComponentType<
-  BlockRowLabelBase & ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
->
+export type BlockRowLabelServerProps = BlockRowLabelBase &
+  ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
 
-export type BlocksFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type BlocksFieldDescriptionServerProps = FieldDescriptionServerProps<
   BlocksField,
   BlocksFieldClientWithoutType
 >
 
-export type BlocksFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<BlocksFieldClientWithoutType>
+export type BlocksFieldDescriptionClientProps =
+  FieldDescriptionClientProps<BlocksFieldClientWithoutType>
 
-export type BlocksFieldErrorServerComponent = FieldErrorServerComponent<
+export type BlocksFieldErrorServerProps = FieldErrorServerProps<
   BlocksField,
   BlocksFieldClientWithoutType
 >
 
-export type BlocksFieldErrorClientComponent =
-  FieldErrorClientComponent<BlocksFieldClientWithoutType>
+export type BlocksFieldErrorClientProps = FieldErrorClientProps<BlocksFieldClientWithoutType>
 
-export type BlocksFieldDiffServerComponent = FieldDiffServerComponent<
-  BlocksField,
-  BlocksFieldClient
->
+export type BlocksFieldDiffServerProps = FieldDiffServerProps<BlocksField, BlocksFieldClient>
 
-export type BlocksFieldDiffClientComponent = FieldDiffClientComponent<BlocksFieldClient>
+export type BlocksFieldDiffClientProps = FieldDiffClientProps<BlocksFieldClient>

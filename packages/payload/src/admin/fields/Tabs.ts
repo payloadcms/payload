@@ -7,21 +7,15 @@ import type {
   TabsFieldClient,
   UnnamedTab,
 } from '../../fields/config/types.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 export type ClientTab =
@@ -39,36 +33,22 @@ export type TabsFieldClientProps = ClientFieldBase<TabsFieldClientWithoutType> &
   TabsFieldBaseClientProps
 
 export type TabsFieldServerProps = ServerFieldBase<TabsField, TabsFieldClientWithoutType>
+export type TabsFieldLabelServerProps = FieldLabelServerProps<TabsField, TabsFieldClientWithoutType>
 
-export type TabsFieldServerComponent = FieldServerComponent<TabsField, TabsFieldClientWithoutType>
+export type TabsFieldLabelClientProps = FieldLabelClientProps<TabsFieldClientWithoutType>
 
-export type TabsFieldClientComponent = FieldClientComponent<
-  TabsFieldClientWithoutType,
-  TabsFieldBaseClientProps
->
-
-export type TabsFieldLabelServerComponent = FieldLabelServerComponent<
+export type TabsFieldDescriptionServerProps = FieldDescriptionServerProps<
   TabsField,
   TabsFieldClientWithoutType
 >
 
-export type TabsFieldLabelClientComponent = FieldLabelClientComponent<TabsFieldClientWithoutType>
+export type TabsFieldDescriptionClientProps =
+  FieldDescriptionClientProps<TabsFieldClientWithoutType>
 
-export type TabsFieldDescriptionServerComponent = FieldDescriptionServerComponent<
-  TabsField,
-  TabsFieldClientWithoutType
->
+export type TabsFieldErrorServerProps = FieldErrorServerProps<TabsField, TabsFieldClientWithoutType>
 
-export type TabsFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<TabsFieldClientWithoutType>
+export type TabsFieldErrorClientProps = FieldErrorClientProps<TabsFieldClientWithoutType>
 
-export type TabsFieldErrorServerComponent = FieldErrorServerComponent<
-  TabsField,
-  TabsFieldClientWithoutType
->
+export type TabsFieldDiffServerProps = FieldDiffServerProps<TabsField, TabsFieldClient>
 
-export type TabsFieldErrorClientComponent = FieldErrorClientComponent<TabsFieldClientWithoutType>
-
-export type TabsFieldDiffServerComponent = FieldDiffServerComponent<TabsField, TabsFieldClient>
-
-export type TabsFieldDiffClientComponent = FieldDiffClientComponent<TabsFieldClient>
+export type TabsFieldDiffClientProps = FieldDiffClientProps<TabsFieldClient>

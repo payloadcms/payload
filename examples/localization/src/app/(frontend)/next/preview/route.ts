@@ -75,6 +75,7 @@ export async function GET(
             equals: slug,
           },
         },
+        overrideAccess: true,
       })
 
       if (!docs.docs.length) {

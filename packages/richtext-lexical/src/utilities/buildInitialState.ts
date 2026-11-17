@@ -3,9 +3,9 @@ import type {
   ClientFieldSchemaMap,
   ComponentRenderer,
   DocumentPreferences,
+  FieldOperation,
   FieldSchemaMap,
   FormState,
-  Operation,
   PayloadRequest,
   RichTextField,
   SanitizedFieldPermissions,
@@ -19,6 +19,7 @@ export type InitialLexicalFormState = {
   [nodeID: string]: {
     [key: string]: any
     formState?: FormState
+    schemaPath?: string
   }
 }
 
@@ -32,7 +33,7 @@ type Props = {
     fieldSchemaMap: FieldSchemaMap
     id?: number | string
     lexicalFieldSchemaPath: string
-    operation: Operation
+    operation: FieldOperation
     permissions?: SanitizedFieldPermissions
     preferences: DocumentPreferences
     renderComponent: ComponentRenderer
@@ -81,7 +82,7 @@ export async function buildInitialState({
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,
         fieldSchemaMap: context.fieldSchemaMap,
         initialBlockData: blockNode.fields,
-        operation: context.operation as any, // TODO: Type
+        operation: context.operation,
         permissions: true,
         preferences: context.preferences,
         readOnly: context.disabled,
@@ -96,6 +97,7 @@ export async function buildInitialState({
       }
 
       initialState[id].formState = formStateResult
+      initialState[id].schemaPath = schemaFieldsPath
 
       if (node.type === 'block') {
         const currentFieldPreferences = context.preferences?.fields?.[context.field.name]
