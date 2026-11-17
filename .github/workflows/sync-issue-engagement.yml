@@ -11,6 +11,10 @@ on:
         required: false
         default: false
 
+concurrency:
+  group: sync-issue-engagement
+  cancel-in-progress: false
+
 jobs:
   run:
     if: github.repository == 'payloadcms/payload'
