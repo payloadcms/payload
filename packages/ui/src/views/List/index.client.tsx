@@ -1,10 +1,10 @@
 'use client'
 
-import type { CollectionPreferences, ListViewClientProps } from 'payload'
+import type { CollectionPreferences, ListQuery, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
@@ -25,13 +25,20 @@ import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
+import { getSearchWithListQuery } from '../../providers/ListQuery/getSearchWithListQuery.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { NestedDocsSelectionProvider } from '../../providers/NestedDocsSelection/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { useRouter } from '../../providers/RouterAdapter/index.js'
+import { usePathname, useRouter } from '../../providers/RouterAdapter/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
+import {
+  getListLayoutQuery,
+  getSavedListLayoutQuery,
+  resolveListLayoutQuery,
+} from '../../utilities/listLayoutPreferences.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
 import { getHierarchyListURL } from '../HierarchyList/getHierarchyListURL.js'
@@ -87,6 +94,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
+  const pathname = usePathname()
   const router = useRouter()
 
   const hasCreatePermission =
@@ -118,31 +126,127 @@ export function DefaultListView(props: ListViewClientProps) {
   const shouldRenderGrid = layout === 'grid' && !isInDrawer
 
   const hasWhereParam = useRef(Boolean(query?.where))
+  const previousLayoutScope = useRef(query?.listLayout)
   const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
 
   useEffect(() => {
-    if (hasWhereParam.current && !query?.where) {
+    if (previousLayoutScope.current !== query?.listLayout) {
+      previousLayoutScope.current = query?.listLayout
+      hasWhereParam.current = Boolean(query?.where)
+      setIsWhereOpen(hasActiveFilters)
+    } else if (hasWhereParam.current && !query?.where) {
       hasWhereParam.current = false
       setIsWhereOpen(false)
     } else if (query?.where) {
       hasWhereParam.current = true
     }
-  }, [query?.where])
+  }, [hasActiveFilters, query?.listLayout, query?.where])
 
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const isNestedDocsTreeLayout = Boolean(hasTreeLayout && layout === 'tree')
 
+  const layoutNavigationOrigin = useRef({})
+  useLayoutEffect(() => {
+    layoutNavigationOrigin.current = {}
+    return () => {
+      layoutNavigationOrigin.current = {}
+    }
+  }, [pathname])
+
+  const [pendingLayout, setPendingLayout] = useState<DocumentLayout | null>(null)
+
+  if (
+    pendingLayout !== null &&
+    pendingLayout === documentLayout &&
+    query.listLayout === (pendingLayout === 'tree' ? 'tree' : 'table')
+  ) {
+    setPendingLayout(null)
+  }
+
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+    const origin = layoutNavigationOrigin.current
+    const sourcePathname = window.location.pathname
+    const isCurrentLayoutNavigation = () =>
+      layoutNavigationOrigin.current === origin && window.location.pathname === sourcePathname
     const preferencesKey = `collection-${collectionSlug}`
 
+    if (!hasTreeLayout) {
+      setLayout(nextLayout)
+      await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
+        ...(preferences ?? {}),
+        documentLayout: nextLayout,
+      }))
+      if (isCurrentLayoutNavigation()) {
+        router.refresh()
+      }
+      return
+    }
+
+    if (pendingLayout) {
+      return
+    }
+    setPendingLayout(nextLayout)
     setLayout(nextLayout)
-    await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
-      ...(preferences ?? {}),
-      documentLayout: nextLayout,
-    }))
-    router.refresh()
+
+    try {
+      const currentScope = query.listLayout ?? (layout === 'tree' ? 'tree' : 'table')
+      const nextScope = nextLayout === 'tree' ? 'tree' : 'table'
+      const liveQuery = parseSearchParams(new URLSearchParams(window.location.search))
+      const snapshot = getListLayoutQuery({
+        query: {
+          ...query,
+          ...(currentScope === 'tree'
+            ? {
+                treeExpanded: [liveQuery.treeExpanded]
+                  .flat()
+                  .filter((id): id is string => typeof id === 'string'),
+              }
+            : {}),
+        },
+      })
+      let nextQuery: ListQuery
+
+      await setPreference<CollectionPreferences>(preferencesKey, (preferences) => {
+        const layoutQueries = {
+          table: getSavedListLayoutQuery({
+            layout: 'table',
+            preferences: preferences ?? undefined,
+          }),
+          ...preferences?.layoutQueries,
+          [currentScope]: snapshot,
+        }
+        nextQuery = resolveListLayoutQuery({
+          defaultLimit: collectionConfig.admin.pagination.defaultLimit,
+          defaultSort: collectionConfig.defaultSort,
+          layout: nextScope,
+          query: { ...layoutQueries[nextScope], columns: query.columns, listLayout: nextScope },
+        })
+        return { ...preferences, documentLayout: nextLayout, layoutQueries }
+      })
+
+      if (!isCurrentLayoutNavigation()) {
+        return
+      }
+
+      const search = getSearchWithListQuery({
+        currentSearch: window.location.search,
+        query: nextQuery!,
+        updatedQuery: { treeExpanded: nextQuery!.treeExpanded },
+      })
+      if (search === window.location.search) {
+        router.refresh()
+      } else {
+        await router.replace(search)
+      }
+    } catch (err) {
+      if (isCurrentLayoutNavigation()) {
+        setPendingLayout(null)
+        setLayout(documentLayout ?? 'table')
+      }
+      throw err
+    }
   }
 
   const { labels, upload } = collectionConfig

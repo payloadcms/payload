@@ -96,6 +96,7 @@ export type ListQuery = {
    */
   groupBy?: string
   limit?: number
+  listLayout?: 'table' | 'tree'
   page?: number
   preset?: number | string
   queryByGroup?: Record<string, ListQuery>
