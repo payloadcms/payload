@@ -195,7 +195,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "16.4.2",
+    "@next/env": "16.4.6",
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
