@@ -154,12 +154,17 @@ describe('deepMerge', () => {
     const isMergeableObject = (value: object) =>
       Object.prototype.toString.call(value) === '[object Object]'
     const options: deepMerge.Options = { isMergeableObject }
+    const arrayMergeOptions: deepMerge.ArrayMergeOptions = {
+      cloneUnlessOtherwiseSpecified: (value: object): object => value,
+      isMergeableObject,
+    }
 
     const merged: object = deepMerge.all([{ a: 1 }, { b: 'b' }], options)
     const typed = deepMerge.all<{ a: number; b: string }>([{ a: 1 }, { b: 'b' }])
 
     expect(merged).toStrictEqual({ a: 1, b: 'b' })
     expect(typed.b).toBe('b')
+    expect(arrayMergeOptions.cloneUnlessOtherwiseSpecified(merged)).toBe(merged)
   })
 })
 
