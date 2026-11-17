@@ -1047,7 +1047,7 @@ const MyComponent: React.FC = () => {
 
 Use `ThemeProvider` to override theme or contrast for part of the UI. Values you omit inherit from the parent. To use the local setters, pass a ref to the themed element through `targetRef`.
 
-For standalone UIs, `getThemeFromSystem()` reads the browser's system color-scheme preference and returns `'light'` or `'dark'`. Call it in the browser before mounting your UI and pass the resolved value to `ThemeProvider`. It returns `defaultTheme` (`'light'`) when `matchMedia` is unavailable:
+For internal integrations that host standalone Payload UIs, `getThemeFromSystem()` reads the browser's system color-scheme preference and returns `'light'` or `'dark'`. The helper remains marked `@internal` and is outside Payload's stable public API guarantees. Call it in the browser before mounting your UI and pass the resolved value to `ThemeProvider`. It returns `defaultTheme` (`'light'`) when `matchMedia` is unavailable:
 
 ```ts
 import { getThemeFromSystem } from '@payloadcms/ui/providers/Theme'

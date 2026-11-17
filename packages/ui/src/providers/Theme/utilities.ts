@@ -43,7 +43,7 @@ export const detectHighContrastMode = ({ cookieKey }: { cookieKey: string }): bo
       : !!(window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches)
 }
 
-/** Reads the browser's system color-scheme preference, falling back to `defaultTheme` when `matchMedia` is unavailable. */
+/** Reads the browser's system color-scheme preference, falling back to `defaultTheme` when `matchMedia` is unavailable. @internal */
 export const getThemeFromSystem = (): Theme =>
   window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : defaultTheme
 
