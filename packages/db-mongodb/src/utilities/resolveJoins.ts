@@ -103,14 +103,6 @@ export async function resolveJoins({
         localizationConfig &&
         localizationConfig.defaultLocale)
 
-    // Extract relationTo filter from the where clause to determine which collections to query
-    const relationToFilter = extractRelationToFilter(joinQuery.where || {})
-
-    // Determine which collections to query based on relationTo filter
-    const collections = relationToFilter
-      ? allCollections.filter((col) => relationToFilter.includes(col))
-      : allCollections
-
     // Check if this is a polymorphic collection join (where field.collection is an array)
     const isPolymorphicJoin = Array.isArray(joinDef.field.collection)
 
@@ -120,7 +112,7 @@ export async function resolveJoins({
     const skip = (page - 1) * limit
 
     // Process collections concurrently
-    const collectionPromises = collections.map(async (joinCollectionSlug) => {
+    const collectionPromises = allCollections.map(async (joinCollectionSlug) => {
       const targetConfig = adapter.payload.collections[joinCollectionSlug]?.config
       if (!targetConfig) {
         return null
@@ -443,71 +435,6 @@ export async function resolveJoins({
   }
 }
 
-/**
- * Extracts relationTo filter values from a WHERE clause
- *
- * @purpose When you have a polymorphic join field that can reference multiple collection types (e.g. the documentsAndFolders join field on
- * folders that points to all folder-enabled collections), Payload needs to decide which collections to actually query. Without filtering,
- * it would query ALL possible collections even when the WHERE clause clearly indicates it only needs specific ones.
- *
- * extractRelationToFilter analyzes the WHERE clause to extract relationTo conditions and returns only the collection slugs that
- * could possibly match, avoiding unnecessary database queries.
- *
- * @description The function recursively traverses a WHERE clause looking for relationTo conditions in these patterns:
- *
- * 1. Direct conditions: { relationTo: { equals: 'posts' } }
- * 2. IN conditions: { relationTo: { in: ['posts', 'media'] } }
- * 3. Nested in AND/OR: Recursively searches through logical operators
-
- * @param where - The WHERE clause to search
- * @returns Array of collection slugs if relationTo filter found, null otherwise
- */
-function extractRelationToFilter(where: Record<string, unknown>): null | string[] {
-  if (!where || typeof where !== 'object') {
-    return null
-  }
-
-  // Check for direct relationTo conditions
-  if (where.relationTo && typeof where.relationTo === 'object') {
-    const relationTo = where.relationTo as Record<string, unknown>
-    if (relationTo.in && Array.isArray(relationTo.in)) {
-      return relationTo.in as string[]
-    }
-    if (relationTo.equals) {
-      return [relationTo.equals as string]
-    }
-  }
-
-  // Check for relationTo in logical operators
-  if (where.and && Array.isArray(where.and)) {
-    const allResults: string[] = []
-    for (const condition of where.and) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        allResults.push(...result)
-      }
-    }
-    if (allResults.length > 0) {
-      return [...new Set(allResults)] // Remove duplicates
-    }
-  }
-
-  if (where.or && Array.isArray(where.or)) {
-    const allResults: string[] = []
-    for (const condition of where.or) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        allResults.push(...result)
-      }
-    }
-    if (allResults.length > 0) {
-      return [...new Set(allResults)] // Remove duplicates
-    }
-  }
-
-  return null
-}
-
 function filterWhereForCollection({
   availableFields,
   collectionSlug,
@@ -554,13 +481,24 @@ function filterWhereForCollection({
         filtered[key] = matchingConditions
       }
     } else if (key === 'relationTo') {
-      if (
-        value &&
-        typeof value === 'object' &&
-        'equals' in value &&
-        value.equals !== collectionSlug
-      ) {
-        return null
+      if (value && typeof value === 'object') {
+        const constraints = value as Record<string, unknown>
+        const includesCollection = ({ constraint }: { constraint: unknown }) => {
+          if (typeof constraint === 'string') {
+            return constraint.split(',').includes(collectionSlug)
+          }
+
+          return Array.isArray(constraint) && constraint.includes(collectionSlug)
+        }
+
+        if (
+          ('equals' in constraints && constraints.equals !== collectionSlug) ||
+          ('not_equals' in constraints && constraints.not_equals === collectionSlug) ||
+          ('in' in constraints && !includesCollection({ constraint: constraints.in })) ||
+          ('not_in' in constraints && includesCollection({ constraint: constraints.not_in }))
+        ) {
+          return null
+        }
       }
     } else if (fieldNames.has(key)) {
       filtered[key] = value

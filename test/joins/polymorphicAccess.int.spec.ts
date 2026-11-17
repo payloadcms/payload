@@ -1,3 +1,5 @@
+import type { Where } from 'payload'
+
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -74,6 +76,55 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
               articleAccess.read = originalArticleRead
               noteAccess.read = originalNoteRead
             }
+          })
+        }
+
+        for (const [operator, constraint] of Object.entries({
+          in: { relationTo: { in: [accessJoinArticlesSlug] } },
+          not_in: { relationTo: { not_in: [accessJoinNotesSlug] } },
+          not_equals: { relationTo: { not_equals: accessJoinNotesSlug } },
+          nested: {
+            and: [
+              { relationTo: { in: [accessJoinArticlesSlug, accessJoinNotesSlug] } },
+              {
+                or: [
+                  { relationTo: { equals: accessJoinArticlesSlug } },
+                  { title: { equals: 'Absent' } },
+                ],
+              },
+            ],
+          },
+        } satisfies Record<string, Where>)) {
+          test(`should preserve caller ${operator} collection filters`, async ({ payload }) => {
+            const parent = await payload.create({
+              collection: accessJoinParentsSlug,
+              data: {},
+              overrideAccess: true,
+            })
+            const article = await payload.create({
+              collection: accessJoinArticlesSlug,
+              data: { parent: parent.id, title: 'Article' },
+              overrideAccess: true,
+            })
+
+            await payload.create({
+              collection: accessJoinNotesSlug,
+              data: { parent: parent.id, title: 'Note' },
+              overrideAccess: true,
+            })
+
+            const result = await payload.findByID({
+              collection: accessJoinParentsSlug,
+              id: parent.id,
+              depth: 0,
+              overrideAccess: true,
+              joins: { children: { count: true, where: constraint } },
+            })
+
+            expect(
+              result.children.docs.map(({ relationTo, value }) => ({ relationTo, value })),
+            ).toEqual([{ relationTo: accessJoinArticlesSlug, value: article.id }])
+            expect(result.children.totalDocs).toBe(1)
           })
         }
 
