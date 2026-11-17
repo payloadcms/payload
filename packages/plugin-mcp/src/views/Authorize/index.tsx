@@ -13,9 +13,15 @@ import './index.css'
 
 const baseClass = 'mcp-authorize'
 
-const errorTitles: Record<AuthorizeViewError, string> = {
-  expired: 'This sign-in request expired',
-  'invalid-link': 'This sign-in link is invalid',
+const restartSignIn = 'Start the sign-in again from your MCP client.'
+
+const errorMessages: Record<AuthorizeViewError, { description: string; heading: string }> = {
+  expired: { description: restartSignIn, heading: 'This sign-in request expired' },
+  forbidden: {
+    description: 'Ask an admin of this app if you need access.',
+    heading: "Your account can't use MCP clients",
+  },
+  'invalid-link': { description: restartSignIn, heading: 'This sign-in link is invalid' },
 }
 
 /**
@@ -40,8 +46,9 @@ export function MCPAuthorizeView({
     consent &&
     req.user?.id === consent.userID &&
     req.user.collection === consent.collection
+  const errorParam = getSearchParam(searchParams?.error)
   const error: AuthorizeViewError =
-    getSearchParam(searchParams?.error) === 'invalid-link' ? 'invalid-link' : 'expired'
+    errorParam === 'forbidden' || errorParam === 'invalid-link' ? errorParam : 'expired'
   const account = String(user?.email ?? consent?.userID)
   const returnHost = consent && (new URL(consent.redirectURI).host || consent.redirectURI)
 
@@ -80,8 +87,8 @@ export function MCPAuthorizeView({
           </>
         ) : (
           <FormHeader
-            description="Start the sign-in again from your MCP client."
-            heading={errorTitles[error]}
+            description={errorMessages[error].description}
+            heading={errorMessages[error].heading}
           />
         )}
       </div>
