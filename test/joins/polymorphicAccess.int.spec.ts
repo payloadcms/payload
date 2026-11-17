@@ -182,6 +182,61 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           })
         })
 
+        test('should resolve mixed-case Boolean keys without changing document field names', async ({
+          payload,
+        }) => {
+          const parent = await payload.create({
+            collection: accessJoinParentsSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const article = await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: parent.id, title: 'Selected article' },
+            overrideAccess: true,
+          })
+
+          await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: parent.id, title: 'Other article' },
+            overrideAccess: true,
+          })
+          await payload.create({
+            collection: accessJoinNotesSlug,
+            data: { parent: parent.id, title: 'Public note' },
+            overrideAccess: true,
+          })
+
+          const result = await payload.findByID({
+            collection: accessJoinParentsSlug,
+            id: parent.id,
+            depth: 0,
+            overrideAccess: true,
+            joins: {
+              children: {
+                count: true,
+                where: {
+                  AnD: [
+                    {
+                      oR: [
+                        { relationTo: { equals: accessJoinArticlesSlug } },
+                        { title: { equals: 'Public note' } },
+                      ],
+                    },
+                    { title: { equals: 'Selected article' } },
+                    { createdAt: { exists: true } },
+                  ],
+                },
+              },
+            },
+          })
+
+          expect(result.children).toMatchObject({
+            docs: [{ relationTo: accessJoinArticlesSlug, value: article.id }],
+            totalDocs: 1,
+          })
+        })
+
         test('should keep pagination metadata unchanged when unreadable documents are added', async ({
           payload,
         }) => {
@@ -206,7 +261,7 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           articleAccess.read = () => false
           noteAccess.read = () => ({ title: { equals: 'Readable note' } })
 
-          const readPages = async () => {
+          const readPages = async ({ where }: { where?: Where }) => {
             const pages = []
 
             for (const count of [true, false]) {
@@ -217,7 +272,7 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
                   depth: 0,
                   overrideAccess: false,
                   user,
-                  joins: { children: { count, limit: 1, page, sort: 'title' } },
+                  joins: { children: { count, limit: 1, page, sort: 'title', where } },
                 })
 
                 pages.push(result.children)
@@ -228,13 +283,31 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           }
 
           try {
-            const before = await readPages()
+            const before = await readPages({})
 
             expect(before[0]).toMatchObject({
               docs: [{ relationTo: accessJoinNotesSlug, value: readable.id }],
               totalDocs: 1,
               hasNextPage: false,
             })
+
+            noteAccess.read = () => ({
+              AnD: [{ oR: [{ title: { equals: 'Readable note' } }] }],
+            })
+
+            const mixedCaseWhere: Where = {
+              AnD: [
+                {
+                  oR: [
+                    { relationTo: { equals: accessJoinArticlesSlug } },
+                    { relationTo: { equals: accessJoinNotesSlug } },
+                  ],
+                },
+              ],
+            }
+
+            expect(await readPages({})).toEqual(before)
+            expect(await readPages({ where: mixedCaseWhere })).toEqual(before)
 
             for (const collection of [accessJoinArticlesSlug, accessJoinNotesSlug]) {
               for (const title of ['Before readable', 'Unrelated', 'Z after readable']) {
@@ -246,7 +319,8 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
               }
             }
 
-            expect(await readPages()).toEqual(before)
+            expect(await readPages({})).toEqual(before)
+            expect(await readPages({ where: mixedCaseWhere })).toEqual(before)
           } finally {
             articleAccess.read = originalArticleRead
             noteAccess.read = originalNoteRead

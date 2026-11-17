@@ -17,14 +17,16 @@ export function resolveWhereForCollection({
   const conditions: ResolvedCollectionCondition[] = []
 
   for (const [key, value] of Object.entries(where)) {
+    const operator = key.toLowerCase()
+
     // Resolve nested groups before combining them with the surrounding conditions.
-    if ((key === 'and' || key === 'or') && Array.isArray(value)) {
+    if ((operator === 'and' || operator === 'or') && Array.isArray(value)) {
       conditions.push(
         combineConditions({
           conditions: value.map((nestedWhere) =>
             resolveWhereForCollection({ collectionSlug, fieldNames, where: nestedWhere }),
           ),
-          operator: key,
+          operator,
         }),
       )
       continue
