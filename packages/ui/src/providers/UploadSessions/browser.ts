@@ -52,6 +52,11 @@ export const createProgressToast = ({ id }: { id: string }) => {
   let isHidden = false
 
   return {
+    /**
+     * The id for the toast that ends the upload: this toast, or a new one once the user closed it.
+     * Sonner leaves an update to a dismissed toast on screen without a working close button.
+     */
+    getResultID: () => (isHidden ? `${id}-result` : id),
     show: (message: string) => {
       if (!isHidden) {
         toast.loading(message, {

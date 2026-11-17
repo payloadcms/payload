@@ -250,7 +250,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       toastID?: string
     }) => {
       if (!session.hasIntent) {
-        showReadyToFinish({ session, toastID })
+        showReadyToFinish({ session, toastID: progress?.getResultID() ?? toastID })
         return
       }
 
@@ -259,10 +259,16 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       try {
         const { doc } = await completeUploadSession({ id: session.id, ...requestArgs })
 
-        showSaved({ id: doc.id, collectionSlug: session.collectionSlug, toastID })
+        showSaved({
+          id: doc.id,
+          collectionSlug: session.collectionSlug,
+          toastID: progress?.getResultID() ?? toastID,
+        })
       } catch (err) {
+        const resultID = progress?.getResultID() ?? toastID
+
         toast.error(getErrorMessage({ err }), {
-          id: trackToast({ id: toastID ?? `upload-session-ready-${session.id}` }),
+          id: trackToast({ id: resultID ?? `upload-session-ready-${session.id}` }),
           action: {
             label: t('upload:finishSaving'),
             onClick: () => router.push(getFinishSavingURL({ session })),

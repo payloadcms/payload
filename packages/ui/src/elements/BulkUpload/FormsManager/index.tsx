@@ -663,19 +663,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
       const errorCount = currentForms.length - successCount
       const label = getTranslation(collectionConfig?.labels?.plural, i18n)
+      const resultToastID = batchToast.getResultID()
 
       if (errorCount === 0) {
         toast.success(t('upload:bulkUploadSucceeded', { count: successCount, label }), {
-          id: batchToastID,
+          id: resultToastID,
         })
       } else if (successCount === 0) {
         toast.error(t('upload:bulkUploadFailed', { count: errorCount, label }), {
-          id: batchToastID,
+          id: resultToastID,
         })
       } else {
         toast.warning(
           t('upload:bulkUploadPartiallySucceeded', { count: successCount, label, total }),
-          { id: batchToastID },
+          { id: resultToastID },
         )
       }
 

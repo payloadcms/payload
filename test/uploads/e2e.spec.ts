@@ -1733,9 +1733,9 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
-      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-        'Failed to upload 2 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to upload 2 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
@@ -1761,9 +1761,9 @@ describe('Uploads', () => {
         .click()
 
       await saveButton.click()
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Uploaded 2 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-success:has-text("Uploaded 2 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       await saveDocAndAssert(page)
@@ -1991,9 +1991,9 @@ describe('Uploads', () => {
       await saveButton.click()
 
       // Should show error message for failed files
-      await expect(page.locator('.payload-toast-container .toast-warning')).toContainText(
-        'Uploaded 1 of 2 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 1 of 2 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
@@ -2017,9 +2017,9 @@ describe('Uploads', () => {
 
       await saveButton.click()
 
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Uploaded 1 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-success:has-text("Uploaded 1 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       await expect(bulkUploadModal).toBeHidden()
@@ -2062,9 +2062,9 @@ describe('Uploads', () => {
       await saveButton.click()
 
       // Should show error message for all failed files
-      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-        'Failed to upload 3 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to upload 3 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       // Check that each file has exactly 1 error (the missing required field)
@@ -2122,9 +2122,9 @@ describe('Uploads', () => {
       await saveButton.click()
 
       // Should show mixed results: 1 successful, 2 failed
-      await expect(page.locator('.payload-toast-container .toast-warning')).toContainText(
-        'Uploaded 1 of 3 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 1 of 3 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
       // After submission, the successful form (form 3) is removed from sidebar
       // Only the 2 failed forms remain in the sidebar
@@ -2207,10 +2207,9 @@ describe('Uploads', () => {
       // (incl. uploading the 2MB file that hits the size limit) sequentially, which
       // can take longer than the default expect timeout under slower adapters, so
       // wait longer for the success toast to appear.
-      await expect(page.locator('.payload-toast-container .toast-warning')).toContainText(
-        'Uploaded 2 of 3 ',
-        { timeout: POLL_TOPASS_TIMEOUT },
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 2 of 3 ")'),
+      ).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
       // Verify the error message indicates file size limit
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
@@ -2252,9 +2251,9 @@ describe('Uploads', () => {
       const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      await expect(page.locator('.payload-toast-container .toast-warning')).toContainText(
-        'Uploaded 1 of 2 ',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 1 of 2 ")'),
+      ).toBeVisible()
       await expect(
         page.locator(
           '.payload-toast-container .toast-error:has-text("Simulated hook error in beforeChange")',
