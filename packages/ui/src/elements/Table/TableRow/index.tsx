@@ -9,8 +9,8 @@ import { useSelection } from '../../../providers/Selection/index.js'
 
 export type TableRowProps = {
   columns: Column[]
+  hasCellNavigation: boolean
   hasRowSelection?: boolean
-  isGrid: boolean
   renderCell?: (args: { column: Column }) => React.ReactNode
   row: Record<string, unknown>
   rowIndex: number
@@ -18,8 +18,8 @@ export type TableRowProps = {
 
 export function TableRow({
   columns,
+  hasCellNavigation,
   hasRowSelection,
-  isGrid,
   renderCell,
   row,
   rowIndex,
@@ -31,7 +31,7 @@ export function TableRow({
 
   return (
     <tr
-      aria-label={isGrid ? String(rowIndex + 1) : undefined}
+      aria-label={hasCellNavigation ? String(rowIndex + 1) : undefined}
       aria-selected={
         hasRowSelection && !isLockedByAnotherUser
           ? Boolean(
@@ -41,7 +41,7 @@ export function TableRow({
       }
       className={`row-${rowIndex + 1}`}
       data-id={row.id}
-      role={isGrid ? 'row' : undefined}
+      role={hasCellNavigation ? 'row' : undefined}
     >
       {columns.map((column) => (
         <td
@@ -53,7 +53,7 @@ export function TableRow({
             .join(' ')}
           data-column={column.accessor}
           key={column.accessor}
-          role={isGrid ? 'gridcell' : undefined}
+          role={hasCellNavigation ? 'gridcell' : undefined}
         >
           {renderCell ? renderCell({ column }) : column.renderedCells[rowIndex]}
         </td>
