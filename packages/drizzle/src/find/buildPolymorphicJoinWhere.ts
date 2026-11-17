@@ -279,7 +279,7 @@ const resolveWherePath = ({
   if (schemaPath === 'relationTo') {
     return {
       type: 'scalar',
-      column: sql`${collection}`,
+      column: adapter.name === 'postgres' ? sql`cast(${collection} as text)` : sql`${collection}`,
       pathPlan,
       queryValueContext: {
         type: 'scalar',
