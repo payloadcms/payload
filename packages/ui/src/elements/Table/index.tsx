@@ -54,12 +54,17 @@ export const Table: React.FC<Props> = ({
   const navigationLabelFromContext = useTableNavigationLabel()
   const navigationLabel = navigationLabelFromProps ?? navigationLabelFromContext
   const tableRef = useRef<HTMLTableElement>(null)
-  const isGrid = Boolean(navigationLabel)
+  const hasCellNavigation = Boolean(navigationLabel)
 
   const activeColumns = columns?.filter((col) => col?.active)
-  const hasRowSelection = isGrid && activeColumns?.some((column) => column.accessor === '_select')
+  const hasRowSelection =
+    hasCellNavigation && activeColumns?.some((column) => column.accessor === '_select')
 
-  useGridNavigation({ id, isEnabled: isGrid && Boolean(activeColumns?.length), ref: tableRef })
+  useGridNavigation({
+    id,
+    isEnabled: hasCellNavigation && Boolean(activeColumns?.length),
+    ref: tableRef,
+  })
 
   if (!activeColumns || activeColumns.length === 0) {
     return <div>No columns selected</div>
@@ -76,7 +81,7 @@ export const Table: React.FC<Props> = ({
         .join(' ')}
     >
       {BeforeTable}
-      <TableGridContext value={isGrid}>
+      <TableGridContext value={hasCellNavigation}>
         <table
           aria-label={ariaLabel ?? navigationLabel}
           aria-multiselectable={hasRowSelection || undefined}
@@ -84,16 +89,16 @@ export const Table: React.FC<Props> = ({
           cellSpacing="0"
           id={tableID}
           ref={tableRef}
-          role={isGrid ? 'grid' : undefined}
+          role={hasCellNavigation ? 'grid' : undefined}
         >
           <thead>
-            <tr role={isGrid ? 'row' : undefined}>
+            <tr role={hasCellNavigation ? 'row' : undefined}>
               {activeColumns.map((col) => (
                 <th
                   data-column={col.accessor}
                   id={`heading-${col.accessor.replace(/\./g, '__')}`}
                   key={col.accessor}
-                  role={isGrid ? 'columnheader' : undefined}
+                  role={hasCellNavigation ? 'columnheader' : undefined}
                   scope="col"
                 >
                   {col.Heading}
@@ -110,8 +115,8 @@ export const Table: React.FC<Props> = ({
                 <NestedDocRow
                   columns={activeColumns}
                   documentsByID={documentsByID}
+                  hasCellNavigation={hasCellNavigation}
                   hasRowSelection={hasRowSelection}
-                  isGrid={isGrid}
                   isLastDocument={rowIndex === data.length - 1}
                   key={key}
                   label={ariaLabel ?? navigationLabel}
@@ -123,8 +128,8 @@ export const Table: React.FC<Props> = ({
               ) : (
                 <TableRow
                   columns={activeColumns}
+                  hasCellNavigation={hasCellNavigation}
                   hasRowSelection={hasRowSelection}
-                  isGrid={isGrid}
                   key={key}
                   row={row}
                   rowIndex={rowIndex}
