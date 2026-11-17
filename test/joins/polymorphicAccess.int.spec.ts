@@ -128,6 +128,77 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           })
         }
 
+        test('should keep pagination metadata unchanged when unreadable documents are added', async ({
+          payload,
+        }) => {
+          const {
+            docs: [user],
+          } = await payload.find({ collection: 'users', overrideAccess: true })
+          const parent = await payload.create({
+            collection: accessJoinParentsSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const readable = await payload.create({
+            collection: accessJoinNotesSlug,
+            data: { parent: parent.id, title: 'Readable note' },
+            overrideAccess: true,
+          })
+          const articleAccess = payload.collections[accessJoinArticlesSlug].config.access
+          const noteAccess = payload.collections[accessJoinNotesSlug].config.access
+          const originalArticleRead = articleAccess.read
+          const originalNoteRead = noteAccess.read
+
+          articleAccess.read = () => false
+          noteAccess.read = () => ({ title: { equals: 'Readable note' } })
+
+          const readPages = async () => {
+            const pages = []
+
+            for (const count of [true, false]) {
+              for (const page of [1, 2, 3]) {
+                const result = await payload.findByID({
+                  collection: accessJoinParentsSlug,
+                  id: parent.id,
+                  depth: 0,
+                  overrideAccess: false,
+                  user,
+                  joins: { children: { count, limit: 1, page, sort: 'title' } },
+                })
+
+                pages.push(result.children)
+              }
+            }
+
+            return pages
+          }
+
+          try {
+            const before = await readPages()
+
+            expect(before[0]).toMatchObject({
+              docs: [{ relationTo: accessJoinNotesSlug, value: readable.id }],
+              totalDocs: 1,
+              hasNextPage: false,
+            })
+
+            for (const collection of [accessJoinArticlesSlug, accessJoinNotesSlug]) {
+              for (const title of ['Before readable', 'Unrelated', 'Z after readable']) {
+                await payload.create({
+                  collection,
+                  data: { parent: parent.id, title },
+                  overrideAccess: true,
+                })
+              }
+            }
+
+            expect(await readPages()).toEqual(before)
+          } finally {
+            articleAccess.read = originalArticleRead
+            noteAccess.read = originalNoteRead
+          }
+        })
+
         test('should scope each target access constraint before counting and pagination', async ({
           payload,
         }) => {
