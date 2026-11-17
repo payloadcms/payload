@@ -10,7 +10,7 @@ for (let i = 0; i < 256; i++) {
   HEX_TABLE.push((i < 16 ? '0' : '') + i.toString(16))
 }
 
-const HEX_24_REGEX = /^[0-9a-fA-F]{24}$/
+const HEX_24_REGEX = /^[0-9a-f]{24}$/i
 
 type ObjectIdLike = {
   toHexString: () => string

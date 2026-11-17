@@ -2,8 +2,8 @@
 import type { DOMConversionMap, EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import type { JSX } from 'react'
 
-import { generateObjectIdHex } from 'payload/shared'
 import { $applyNodeReplacement } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 import * as React from 'react'
 
 import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../../server/schema.js'
