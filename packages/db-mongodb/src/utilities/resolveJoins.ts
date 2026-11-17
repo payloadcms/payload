@@ -509,7 +509,7 @@ function filterWhereForCollection({
           return null
         }
       }
-      } else if (fieldNames.has(key)) {
+    } else if (fieldNames.has(key)) {
       // Pass document-field constraints to this collection's database query.
       filtered[key] = value
     } else {
