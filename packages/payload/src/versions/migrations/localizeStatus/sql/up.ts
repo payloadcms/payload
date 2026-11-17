@@ -1,6 +1,7 @@
 import type { Payload } from '../../../../types/index.js'
 
 import { calculateVersionLocaleStatuses, toSnakeCase } from '../shared.js'
+import { getGeneratedColumnType, getGeneratedTable } from './getGeneratedColumnType.js'
 import { migrateMainCollectionStatus } from './migrateMainCollection.js'
 import { migrateMainGlobalStatus } from './migrateMainGlobal.js'
 
@@ -111,15 +112,51 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     // SCENARIO 1: Create the locales table (first localized field in versions)
     payload.logger.info({ msg: `Creating new locales table: ${localesTable}` })
 
+    const localeType = await getGeneratedColumnType({
+      columnName: '_locale',
+      db,
+      fallbackType: 'VARCHAR',
+      payload,
+      sql,
+      tableName: localesTable,
+    })
+    const parentIDType = await getGeneratedColumnType({
+      columnName: '_parent_id',
+      db,
+      fallbackType: 'INTEGER',
+      payload,
+      sql,
+      tableName: localesTable,
+    })
+    const versionStatusType = await getGeneratedColumnType({
+      columnName: 'version__status',
+      db,
+      fallbackType: 'VARCHAR',
+      payload,
+      sql,
+      tableName: localesTable,
+    })
+    const generatedLocalesTable = getGeneratedTable({ payload, tableName: localesTable })
+    const parentForeignKeyName =
+      generatedLocalesTable?.foreignKeys?._parentIdFk?.name ?? `${localesTable}_parent_id_fk`
+    const localeParentIndexName =
+      generatedLocalesTable?.indexes?._localeParent?.name ??
+      `${localesTable}_locale_parent_id_unique`
+
     await db.execute(sql`
         CREATE TABLE ${sql.identifier(localesTable)} (
           id SERIAL PRIMARY KEY,
-          _locale VARCHAR NOT NULL,
-          _parent_id INTEGER NOT NULL,
-          version__status VARCHAR,
-          UNIQUE(_locale, _parent_id),
-          FOREIGN KEY (_parent_id) REFERENCES ${sql.identifier(versionsTable)}(id) ON DELETE CASCADE
+          _locale ${localeType} NOT NULL,
+          _parent_id ${parentIDType} NOT NULL,
+          version__status ${versionStatusType},
+          CONSTRAINT ${sql.identifier(parentForeignKeyName)}
+            FOREIGN KEY (_parent_id) REFERENCES ${sql.identifier(versionsTable)}(id) ON DELETE CASCADE
         )
+      `)
+
+    await db.execute(sql`
+        CREATE UNIQUE INDEX ${sql.identifier(localeParentIndexName)}
+        ON ${sql.identifier(localesTable)} (_locale, _parent_id)
       `)
 
     // Create one row per locale per version record
@@ -127,7 +164,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     for (const locale of locales) {
       const inserted = await db.execute(sql`
           INSERT INTO ${sql.identifier(localesTable)} (_locale, _parent_id, version__status)
-          SELECT ${locale}, id, version__status
+          SELECT CAST(${locale} AS ${localeType}), id, CAST(CAST(version__status AS TEXT) AS ${versionStatusType})
           FROM ${sql.identifier(versionsTable)}
           RETURNING id
         `)
@@ -139,8 +176,17 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     // SCENARIO 2: Add version__status column to existing locales table
     payload.logger.info({ msg: `Adding version__status column to existing table: ${localesTable}` })
 
+    const versionStatusType = await getGeneratedColumnType({
+      columnName: 'version__status',
+      db,
+      fallbackType: 'VARCHAR',
+      payload,
+      sql,
+      tableName: localesTable,
+    })
+
     await db.execute(sql`
-        ALTER TABLE ${sql.identifier(localesTable)} ADD COLUMN version__status VARCHAR
+        ALTER TABLE ${sql.identifier(localesTable)} ADD COLUMN version__status ${versionStatusType}
       `)
 
     // INTELLIGENT DATA MIGRATION using historical publishedLocale data
@@ -224,9 +270,18 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
 
     if (!statusColumnCheck.rows[0]?.exists) {
       // Add _status column to locales table
+      const statusType = await getGeneratedColumnType({
+        columnName: '_status',
+        db,
+        fallbackType: 'VARCHAR',
+        payload,
+        sql,
+        tableName: mainLocalesTable,
+      })
+
       await db.execute(sql`
         ALTER TABLE ${sql.identifier(mainLocalesTable)}
-        ADD COLUMN _status VARCHAR DEFAULT 'draft'
+        ADD COLUMN _status ${statusType} DEFAULT 'draft'
       `)
     }
 

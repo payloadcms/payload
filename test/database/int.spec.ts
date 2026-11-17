@@ -3445,14 +3445,10 @@ describe('database', () => {
         outputFile,
       })
 
-      const generatedSchema = fs.readFileSync(outputFile, 'utf-8')
+      const module = await import(outputFile)
 
-      expect(generatedSchema).not.toMatch(
-        /enum_categories_status[\s\S]*'draft',\s*'published',\s*'draft',\s*'published'/,
-      )
-      expect(generatedSchema).not.toMatch(
-        /enum__categories_v_version_status[\s\S]*'draft',\s*'published',\s*'draft',\s*'published'/,
-      )
+      expect(module.enum_categories_status?.enumValues).toEqual(['draft', 'published'])
+      expect(module.enum__categories_v_version_status?.enumValues).toEqual(['draft', 'published'])
     })
 
     it('should generate Drizzle SQLite schema', async () => {
