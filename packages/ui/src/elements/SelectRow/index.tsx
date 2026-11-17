@@ -22,7 +22,7 @@ export const SelectRow: React.FC<{
   rowIndex?: number
   selectRowLabel: string
 }> = ({ rowData, rowIndex, selectRowLabel }) => {
-  const isGrid = use(TableGridContext)
+  const hasCellNavigation = use(TableGridContext)
   const { t } = useTranslation()
   const { user } = useAuth()
   const { selected, setSelection } = useSelection()
@@ -37,7 +37,7 @@ export const SelectRow: React.FC<{
   return (
     <CheckboxInput
       aria-label={
-        isGrid && rowIndex !== undefined
+        hasCellNavigation && rowIndex !== undefined
           ? `${selectRowLabel}, ${t('general:row')} ${rowIndex + 1}`
           : selectRowLabel
       }

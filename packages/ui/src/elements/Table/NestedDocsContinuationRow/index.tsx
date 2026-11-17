@@ -15,13 +15,13 @@ import './index.css'
 
 export function NestedDocsContinuationRow({
   columns,
-  isGrid,
+  hasCellNavigation,
   label,
   parentID,
   titleColumn,
 }: {
   columns: Column[]
-  isGrid: boolean
+  hasCellNavigation: boolean
   label: string
   parentID: ParentID
   titleColumn?: string
@@ -72,7 +72,7 @@ export function NestedDocsContinuationRow({
       className={`nested-docs-continuation-row${isPending ? ' nested-docs-continuation-row--pending' : ''}`}
       data-id={`load-${key}`}
       ref={ref}
-      role={isGrid ? 'row' : undefined}
+      role={hasCellNavigation ? 'row' : undefined}
     >
       {columns.map(({ accessor }) => (
         <td
@@ -81,7 +81,7 @@ export function NestedDocsContinuationRow({
           }
           data-column={accessor}
           key={accessor}
-          role={isGrid ? 'gridcell' : undefined}
+          role={hasCellNavigation ? 'gridcell' : undefined}
         >
           {accessor === titleColumn && (
             <>
