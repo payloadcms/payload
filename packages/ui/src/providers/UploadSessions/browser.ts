@@ -48,7 +48,7 @@ export const getUploadPercent = ({ progress }: { progress: UploadTransferProgres
  * Sonner merges an update into the toast with the same id, so the actions and description of a
  * recovery offer it replaces are cleared explicitly.
  */
-export const createProgressToast = ({ id }: { id: string }) => {
+export const createProgressToast = <ID extends number | string>({ id }: { id: ID }) => {
   let isHidden = false
 
   return {
@@ -56,7 +56,7 @@ export const createProgressToast = ({ id }: { id: string }) => {
      * The id for the toast that ends the upload: this toast, or a new one once the user closed it.
      * Sonner leaves an update to a dismissed toast on screen without a working close button.
      */
-    getResultID: () => (isHidden ? `${id}-result` : id),
+    getResultID: (): ID | string => (isHidden ? `${id}-result` : id),
     show: (message: string) => {
       if (!isHidden) {
         toast.loading(message, {

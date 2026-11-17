@@ -498,7 +498,8 @@ export const useFormSubmission = ({
               progressToast:
                 promiseToastID === undefined
                   ? undefined
-                  : createProgressToast({ id: String(promiseToastID) }),
+                  : // The same id, not its string: Sonner matches ids strictly.
+                    createProgressToast({ id: promiseToastID }),
               t,
               totalBytes: uploadFile.size,
             })

@@ -1403,6 +1403,7 @@ describe('Uploads', () => {
       '.bulk-upload--actions-bar__saveButtons button',
     )
     await saveButton.click()
+    await waitForBulkUploadResult(page)
     await closeAllToasts(page)
 
     await expect(
@@ -1443,6 +1444,7 @@ describe('Uploads', () => {
       .locator('.dropzone input[type="file"]')
       .setInputFiles([path.resolve(dirname, './test-image.png')])
     await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await waitForBulkUploadResult(page)
     await closeAllToasts(page)
 
     await expect(
@@ -1514,6 +1516,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
@@ -1629,6 +1632,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
@@ -1692,6 +1696,7 @@ describe('Uploads', () => {
         .locator('.edit-many-bulk-uploads__header__actions button')
         .click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
@@ -1832,6 +1837,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
@@ -3354,3 +3360,16 @@ describe('Uploads', () => {
     })
   })
 })
+
+/**
+ * Waits for the bulk upload toast to show the batch result. The toast appears as soon as the save
+ * starts, so closing toasts before the result would race it.
+ */
+async function waitForBulkUploadResult(page: Page): Promise<void> {
+  await expect(
+    page
+      .locator('.payload-toast-container .payload-toast-item')
+      .filter({ hasText: /(Uploaded \d+|Failed to upload \d+)/ })
+      .first(),
+  ).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+}

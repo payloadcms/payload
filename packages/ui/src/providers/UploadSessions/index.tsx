@@ -245,7 +245,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       session,
       toastID,
     }: {
-      progress?: ReturnType<typeof createProgressToast>
+      progress?: ReturnType<typeof createProgressToast<string>>
       session: ClientUploadSession
       toastID?: string
     }) => {

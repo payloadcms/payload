@@ -30,7 +30,7 @@ export const useRecoverUploadSessions = ({
   userID,
 }: {
   finishInBackground: (args: {
-    progress?: ReturnType<typeof createProgressToast>
+    progress?: ReturnType<typeof createProgressToast<string>>
     session: ClientUploadSession
     toastID?: string
   }) => Promise<void>
