@@ -6,6 +6,7 @@ import type {
   DocumentPreferences,
   DocumentSlots,
   FormState,
+  HierarchyContents,
   Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
@@ -23,6 +24,7 @@ import type {
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
+import type { GetHierarchyContentsArgs } from '../../utilities/getHierarchyContents.js'
 import type {
   getUpcomingScheduledPublishHandler,
   GetUpcomingScheduledPublishHandlerArgs,
@@ -49,6 +51,10 @@ type GetUpcomingScheduledPublishClient = (
     signal?: AbortSignal
   } & Omit<GetUpcomingScheduledPublishHandlerArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof getUpcomingScheduledPublishHandler>
+
+type GetHierarchyContentsClient = (
+  args: { signal?: AbortSignal } & GetHierarchyContentsArgs,
+) => Promise<HierarchyContents | undefined>
 
 type GetTableStateClient = (
   args: {
@@ -121,6 +127,7 @@ export type ServerFunctionsContextType = {
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
   getFormState: GetFormStateClient
+  getHierarchyContents: GetHierarchyContentsClient
   getTableState: GetTableStateClient
   getUpcomingScheduledPublish: GetUpcomingScheduledPublishClient
   renderDocument: RenderDocumentServerFunctionHookFn
@@ -251,6 +258,24 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getHierarchyContents = useCallback<GetHierarchyContentsClient>(
+    async ({ signal, ...args }) => {
+      if (signal?.aborted) {
+        return
+      }
+
+      const result = (await serverFunction({
+        name: 'hierarchy-contents',
+        args,
+      })) as HierarchyContents
+
+      if (!signal?.aborted) {
+        return result
+      }
+    },
+    [serverFunction],
+  )
+
   const getTableState = useCallback<GetTableStateClient>(
     async (args) => {
       const { signal: remoteSignal, ...rest } = args
@@ -361,6 +386,7 @@ export const ServerFunctionsProvider: React.FC<{
         copyDataFromLocale,
         getDocumentSlots,
         getFormState,
+        getHierarchyContents,
         getTableState,
         getUpcomingScheduledPublish,
         renderDocument,

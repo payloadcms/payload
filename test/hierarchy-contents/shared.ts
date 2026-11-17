@@ -1,0 +1,7 @@
+export const usersSlug = 'users'
+export const containersSlug = 'containers'
+export const foldersSlug = 'content-folders'
+export const postsSlug = 'content-posts'
+export const assetsSlug = 'content-assets'
+export const guardedMembersSlug = 'guarded-members'
+export const containerParentField = 'containerParent'
