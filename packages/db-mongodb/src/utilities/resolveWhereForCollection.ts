@@ -1,5 +1,7 @@
 import type { Where } from 'payload'
 
+import { QueryError } from 'payload'
+
 type ResolvedCollectionCondition =
   | { matches: 'all-documents' }
   | { matches: 'documents-matching-where'; where: Where }
@@ -98,19 +100,26 @@ function matchesCollectionConstraint({
   collectionSlug: string
   constraint: unknown
 }): boolean {
-  if (!constraint || typeof constraint !== 'object') {
-    return true
+  if (!constraint || typeof constraint !== 'object' || Array.isArray(constraint)) {
+    throw new QueryError([{ path: 'relationTo' }])
   }
 
-  const constraints = constraint as Record<string, unknown>
+  const matches = Object.entries(constraint).map(([operator, value]) => {
+    switch (operator) {
+      case 'equals':
+        return value === collectionSlug
+      case 'in':
+        return includesCollection({ collectionSlug, constraint: value })
+      case 'not_equals':
+        return value !== collectionSlug
+      case 'not_in':
+        return !includesCollection({ collectionSlug, constraint: value })
+      default:
+        throw new QueryError([{ path: `relationTo.${operator}` }])
+    }
+  })
 
-  return !(
-    ('equals' in constraints && constraints.equals !== collectionSlug) ||
-    ('not_equals' in constraints && constraints.not_equals === collectionSlug) ||
-    ('in' in constraints && !includesCollection({ collectionSlug, constraint: constraints.in })) ||
-    ('not_in' in constraints &&
-      includesCollection({ collectionSlug, constraint: constraints.not_in }))
-  )
+  return matches.every(Boolean)
 }
 
 function includesCollection({
