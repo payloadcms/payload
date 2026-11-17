@@ -3,18 +3,14 @@ import type { TransformerWithInternalBridge } from 'payload/internal'
 
 import { uploadTransformerInternal } from 'payload/internal'
 
-import type {
-  CloudflareDynamicOptions,
-  CloudflareTransformerOptions,
-  CloudflareUploadTask,
-} from './types.js'
+import type { CloudflareDynamicOptions, CloudflareTransformerOptions } from './types.js'
 
 import { createImagesClient } from './client.js'
 import { createHandleRequest } from './handleRequest.js'
 import { initCollections, validateDynamic } from './initCollections.js'
 import { parseDynamicTransform } from './parseDynamicTransform.js'
-import { createPrepareUpload } from './prepareUpload.js'
-import { resolveOutput, resolveResize } from './transformation.js'
+import { createTransformFile } from './transformFile.js'
+import { createTransformUpload } from './transformUpload.js'
 
 /** Cloudflare Images processing through a local binding or an authenticated companion Worker. */
 export function cloudflareTransformer(
@@ -40,68 +36,35 @@ export function cloudflareTransformer(
     Boolean(collections[collectionSlug])
   const transformer: TransformerWithInternalBridge & UploadTransformer = {
     slug,
-    canTransform: ({ collectionSlug, operation, req }) =>
-      operation === 'upload'
-        ? handlesCollection({ collectionSlug })
-        : Boolean(
-            dynamic &&
-              (!dynamic.collections || dynamic.collections.includes(collectionSlug)) &&
-              parseDynamicTransform({
-                limits: {
-                  maxHeight: dynamic.maxHeight!,
-                  maxPixels: dynamic.maxPixels!,
-                  maxWidth: dynamic.maxWidth!,
-                },
-                searchParams: req.searchParams ?? new URLSearchParams(),
-              }).isRouted,
-          ),
+    canTransform: ({ collectionSlug, operation, purpose, req }) => {
+      if (operation === 'upload') {
+        return handlesCollection({ collectionSlug })
+          ? { canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }
+          : false
+      }
+
+      // Saved transforms are applied at upload time, so requests only resize on demand.
+      return Boolean(
+        dynamic &&
+        purpose !== 'persisted-default' &&
+        (!dynamic.collections || dynamic.collections.includes(collectionSlug)) &&
+        parseDynamicTransform({
+          limits: {
+            maxHeight: dynamic.maxHeight!,
+            maxPixels: dynamic.maxPixels!,
+            maxWidth: dynamic.maxWidth!,
+          },
+          searchParams: req.searchParams ?? new URLSearchParams(),
+        }).isRouted,
+      )
+    },
     mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'],
     ...(dynamic ? { handleRequest: createHandleRequest({ client, dynamic }) } : {}),
     init: (config) => initCollections({ collections, config, dynamic, transformer }),
-    transformFile: async ({ collectionSlug, file, options: taskOptions, req }) => {
-      const config = collections[collectionSlug]
-      let task: CloudflareUploadTask | undefined
-
-      if (taskOptions !== undefined) {
-        if (
-          !taskOptions ||
-          typeof taskOptions !== 'object' ||
-          !('transformerSlug' in taskOptions) ||
-          taskOptions.transformerSlug !== slug
-        ) {
-          return { status: 'continue' }
-        }
-        task = taskOptions as CloudflareUploadTask
-      }
-      const transforms =
-        task?.transforms ??
-        (config?.resizeOptions ? [resolveResize({ options: config.resizeOptions })] : [])
-      const formatOptions = task?.formatOptions ?? config?.formatOptions
-
-      if (!transforms.length && !formatOptions) {
-        return { status: 'continue' }
-      }
-      const response = await client.transform({
-        file,
-        output: resolveOutput({ formatOptions, mimeType: file.type }),
-        req,
-        transforms,
-      })
-      const mimeType = response.headers.get('content-type')!
-      const extension = mimeType === 'image/jpeg' ? 'jpg' : mimeType.slice(6)
-      const name = `${file.name.replace(/\.[^.]+$/, '')}.${extension}`
-
-      return {
-        file: new File([await response.arrayBuffer()], name, {
-          type: mimeType,
-          lastModified: file.lastModified,
-        }),
-        status: 'continue',
-      }
-    },
+    transformFile: createTransformFile({ slug, client, collections }),
     [uploadTransformerInternal]: {
       handlesCollection,
-      prepareUpload: createPrepareUpload({ slug, client, collections }),
+      transformUpload: createTransformUpload({ slug, client, collections }),
     },
   }
 

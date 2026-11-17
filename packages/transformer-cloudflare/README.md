@@ -32,9 +32,7 @@ import { cloudflareTransformer } from '@payloadcms/transformer-cloudflare'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  collections: [
-    /* your upload collections */
-  ],
+  collections: [/* your upload collections */],
   upload: {
     transformers: [
       cloudflareTransformer({
@@ -197,7 +195,7 @@ cloudflareTransformer({
 ```
 
 The main file runs through the pipeline once. Variants derive from that main file,
-including the selected Admin crop and any main resize. Metadata is read from the
+including the saved crop and any main resize. Metadata is read from the
 actual output files, and variants are persisted under `variants.<name>`. Variants
 can override format and quality with their own `formatOptions`. Custom
 `generateImageName` callbacks receive the actual dimensions and output extension.
@@ -210,10 +208,14 @@ dimensions must be smaller for a two-dimension variant, or the specified axis mu
 be smaller for a single-dimension variant. `withoutEnlargement: false` permits
 upscaling; `true` produces a smaller result instead of omitting it.
 
-Admin focal points map to Cloudflare's `box-center` gravity. An explicit variant
-`gravity` takes precedence. `crop` and `focalPoint` use the existing Admin controls;
-startup publishes their configuration and variant names to Payload without
-mutating authored collections. A collection can have upload settings on only one
+The crop and focal point come from the document's saved `_transforms`. For the
+collections in `collections`, the transformer claims `crop` and `focalPoint` at
+upload (`handledTransformKeys`) and applies them into the stored files. The saved
+focal point maps to Cloudflare's `box-center` gravity on variants that use `cover`
+or `crop` with both dimensions. An explicit variant `gravity` takes precedence.
+`crop` and `focalPoint` use the existing Admin controls. Startup registers the
+variants with Payload's `registerUploadVariants` without changing authored
+collections. A collection can have upload settings on only one
 transformer instance; different collections can use different providers.
 
 `resizeOptions` additionally supports `background`, `blur`, `brightness`,

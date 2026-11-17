@@ -144,11 +144,31 @@ export type DynamicTransformParseResult =
   | { height?: number; isRouted: true; valid: true; width?: number; withoutEnlargement?: boolean }
   | { isRouted: false }
 
-export type CloudflareUploadTask = {
-  formatOptions?: CloudflareFormatOptions
-  transformerSlug: string
-  transforms: CloudflareTransformation[]
-}
+/**
+ * `options` for one upload task that `transformUpload` hands to core: the main file or one named
+ * variant. The crop and focal point are not options: `transformFile` reads them from
+ * `doc._transforms`.
+ */
+export type CloudflareUploadTask =
+  | {
+      /**
+       * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
+       * `heightInPixels`). It replaces the saved crop's size for this upload only.
+       */
+      cropSize?: { height: number; width: number }
+      formatOptions?: CloudflareFormatOptions
+      kind: 'main'
+      transformerSlug: string
+      transforms: CloudflareTransformation[]
+    }
+  | {
+      /** Whether a saved focal point may set the gravity of this variant's resize. */
+      canUseFocalPoint: boolean
+      formatOptions?: CloudflareFormatOptions
+      kind: 'variant'
+      transformerSlug: string
+      transforms: [CloudflareTransformation]
+    }
 
 export type ImagesClient = {
   info: (args: { file: File; req: PayloadRequest }) => Promise<CloudflareImageInfo>

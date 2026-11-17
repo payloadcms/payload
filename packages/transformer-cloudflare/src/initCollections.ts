@@ -1,5 +1,6 @@
 import type { Config, SanitizedUploadConfig, UploadTransformer } from 'payload'
 
+import { registerUploadVariants } from 'payload'
 import { getUploadTransformerInternal } from 'payload/internal'
 
 import type {
@@ -15,19 +16,12 @@ import {
   validateTransformation,
 } from './validation.js'
 
-const RESERVED_NAMES = [
-  'filename',
-  'mimeType',
-  'filesize',
-  'width',
-  'height',
-  'url',
-  'thumbnailURL',
-  'variants',
-  'focalX',
-  'focalY',
-]
-
+/**
+ * Checks `cloudflareTransformer({ collections, dynamic })`, then registers the variants with
+ * `registerUploadVariants`, which checks each collection and the variant names Payload reserves.
+ * Then writes `crop`/`focalPoint`/`hasImageAdjustments` onto each targeted collection's `upload`
+ * config, so core's field generation and Admin UI keep working without knowing about Cloudflare.
+ */
 export function initCollections({
   collections,
   config,
@@ -39,24 +33,21 @@ export function initCollections({
   dynamic: CloudflareDynamicOptions | false
   transformer: UploadTransformer
 }): Config {
-  const assertUploadCollection = ({ slug }: { slug: string }) => {
-    if (!config.collections?.some((collection) => collection.slug === slug && collection.upload)) {
-      throw new Error(
-        `cloudflareTransformer targets an unknown or non-upload collection: "${slug}".`,
-      )
-    }
-  }
-
   if (dynamic) {
     for (const slug of dynamic.collections ?? []) {
-      assertUploadCollection({ slug })
+      if (
+        !config.collections?.some((collection) => collection.slug === slug && collection.upload)
+      ) {
+        throw new Error(
+          `cloudflareTransformer targets an unknown or non-upload collection: "${slug}".`,
+        )
+      }
     }
   }
   for (const [slug, options] of Object.entries(collections)) {
     if (!options) {
       continue
     }
-    assertUploadCollection({ slug })
     const owners = (config.upload?.transformers ?? []).filter(
       (candidate) =>
         candidate === transformer ||
@@ -77,18 +68,12 @@ export function initCollections({
     }
     assertBoolean({ name: 'crop', value: options.crop })
     assertBoolean({ name: 'focalPoint', value: options.focalPoint })
-    const names = new Set<string>()
-
     for (const size of options.variants ?? []) {
-      if (
-        typeof size.name !== 'string' ||
-        !/^[\w-]+$/.test(size.name) ||
-        names.has(size.name) ||
-        RESERVED_NAMES.includes(size.name)
-      ) {
-        throw new Error(`Invalid or duplicate Cloudflare variant name: "${size.name}".`)
+      if (typeof size.name !== 'string' || !/^[\w-]+$/.test(size.name)) {
+        throw new Error(
+          `Invalid Cloudflare variant name: "${size.name}". Use only letters, digits, underscores, or hyphens.`,
+        )
       }
-      names.add(size.name)
       const resize = size as CloudflareImageSizeOptions
 
       validateTransformation({
@@ -104,9 +89,17 @@ export function initCollections({
     }
   }
 
+  const registeredConfig = registerUploadVariants({
+    collections,
+    config,
+    transformerSlug: transformer.slug,
+  })
+
+  // Write onto copies, never the caller's config or collection objects: a rebuilt config (e.g. on
+  // a dev reload) would otherwise see `upload.variants` on the collection and reject it as authored.
   return {
-    ...config,
-    collections: config.collections?.map((collection) => {
+    ...registeredConfig,
+    collections: registeredConfig.collections?.map((collection) => {
       const options = collections[collection.slug]
 
       if (!options || !collection.upload) {
@@ -118,11 +111,6 @@ export function initCollections({
         crop: options.crop ?? authoredUpload.crop,
         focalPoint: options.focalPoint ?? authoredUpload.focalPoint,
         hasImageAdjustments: Boolean(options.resizeOptions || options.formatOptions),
-        variants: options.variants?.map(({ name, admin, generateImageName }) => ({
-          name,
-          admin,
-          generateImageName,
-        })),
       }
 
       return { ...collection, upload }

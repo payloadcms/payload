@@ -1,18 +1,21 @@
 import type { ImageSize, PayloadRequest } from 'payload'
-import type { PreparedUploadTransformation, UploadTransformerInternal } from 'payload/internal'
+import type { UploadTransformation, UploadTransformerInternal } from 'payload/internal'
 
 import type {
   CloudflareCollectionConfig,
   CloudflareImageSizeOptions,
-  CloudflareTransformation,
   CloudflareUploadTask,
   ImagesClient,
 } from './types.js'
 
 import { resolveResize } from './transformation.js'
 
-/** Plans the main file and persisted variants through Payload's existing pipeline. */
-export function createPrepareUpload({
+/**
+ * Creates the bridge's `transformUpload`: plans the main file and each persisted variant, and runs
+ * each one through core's stage pipeline. `transformFile` applies the saved crop and focal point
+ * from `doc._transforms`.
+ */
+export function createTransformUpload({
   slug,
   client,
   collections,
@@ -20,57 +23,22 @@ export function createPrepareUpload({
   client: ImagesClient
   collections: Partial<Record<string, CloudflareCollectionConfig>>
   slug: string
-}): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
+}): NonNullable<UploadTransformerInternal['transformUpload']> {
+  return async ({ collectionSlug, cropSize, file, req, transform }) => {
     const options = collections[collectionSlug] ?? {}
-    const needsDimensions = Boolean(uploadEdits?.crop)
-    const dimensions = needsDimensions ? await client.info({ file, req }) : undefined
-    const mainTransforms: CloudflareTransformation[] = []
-    const crop = uploadEdits?.crop
-
-    if (crop && dimensions && 'width' in dimensions) {
-      const width = uploadEdits.widthInPixels
-      const height = uploadEdits.heightInPixels
-      const left = Math.floor(crop.unit === 'px' ? crop.x : (crop.x / 100) * dimensions.width)
-      const top = Math.floor(crop.unit === 'px' ? crop.y : (crop.y / 100) * dimensions.height)
-
-      if (
-        !width ||
-        !height ||
-        !Number.isSafeInteger(width) ||
-        !Number.isSafeInteger(height) ||
-        width < 1 ||
-        height < 1 ||
-        !Number.isFinite(left) ||
-        !Number.isFinite(top) ||
-        left < 0 ||
-        top < 0 ||
-        left + width > dimensions.width ||
-        top + height > dimensions.height
-      ) {
-        throw new Error('Invalid Cloudflare crop rectangle.')
-      }
-      mainTransforms.push({
-        trim: {
-          bottom: dimensions.height - top - height,
-          left,
-          right: dimensions.width - left - width,
-          top,
-        },
-      })
-    }
-    if (options.resizeOptions) {
-      mainTransforms.push(resolveResize({ options: options.resizeOptions }))
-    }
     const mainFile = await transform({
       fieldPath: 'filename',
       options: {
+        cropSize,
         formatOptions: options.formatOptions,
+        kind: 'main',
         transformerSlug: slug,
-        transforms: mainTransforms,
+        transforms: options.resizeOptions
+          ? [resolveResize({ options: options.resizeOptions })]
+          : [],
       } satisfies CloudflareUploadTask,
     })
-    const results: PreparedUploadTransformation[] = [
+    const results: UploadTransformation[] = [
       await describeResult({
         client,
         fieldPath: 'filename',
@@ -90,10 +58,9 @@ export function createPrepareUpload({
       throw new Error('Cloudflare variants require raster image dimensions.')
     }
 
-    const shouldUseFocalPoint =
+    const isFocalPointEnabled =
       (options.focalPoint ?? req.payload.collections[collectionSlug]?.config.upload?.focalPoint) !==
       false
-    const focalPoint = shouldUseFocalPoint ? uploadEdits?.focalPoint : undefined
 
     for (const rawSize of options.variants) {
       const size = rawSize as CloudflareImageSizeOptions & ImageSize
@@ -121,25 +88,20 @@ export function createPrepareUpload({
         },
       })
 
-      if (
-        focalPoint &&
+      const canUseFocalPoint = Boolean(
+        isFocalPointEnabled &&
         !size.gravity &&
         size.width &&
         size.height &&
-        ['cover', 'crop'].includes(resize.fit!)
-      ) {
-        const { x = 50, y = 50 } = focalPoint
-
-        if (![x, y].every((value) => Number.isFinite(value) && value >= 0 && value <= 100)) {
-          throw new Error('Cloudflare focal point must be between 0 and 100.')
-        }
-        resize.gravity = { mode: 'box-center', x: x / 100, y: y / 100 }
-      }
+        ['cover', 'crop'].includes(resize.fit!),
+      )
       const resultFile = await transform({
         fieldPath,
         file: mainFile,
         options: {
+          canUseFocalPoint,
           formatOptions: size.formatOptions ?? options.formatOptions,
+          kind: 'variant',
           transformerSlug: slug,
           transforms: [resize],
         } satisfies CloudflareUploadTask,
@@ -184,10 +146,10 @@ async function describeResult({
   req,
 }: {
   client: ImagesClient
-  fieldPath: PreparedUploadTransformation['fieldPath']
+  fieldPath: UploadTransformation['fieldPath']
   file: File
   req: PayloadRequest
-}): Promise<PreparedUploadTransformation> {
+}): Promise<UploadTransformation> {
   const dimensions = await client.info({ file, req })
 
   return {

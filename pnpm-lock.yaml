@@ -1598,8 +1598,8 @@ importers:
         specifier: workspace:*
         version: link:../payload
       sharp:
-        specifier: 0.35.4
-        version: 0.35.4
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@24.12.3)
 
   packages/transformer-sharp:
     dependencies:

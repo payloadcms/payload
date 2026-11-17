@@ -1,4 +1,4 @@
-import type { Config, PayloadRequest } from 'payload'
+import type { Config, Document, PayloadRequest, UploadTransformer } from 'payload'
 
 import sharp from 'sharp'
 import { describe, expect, it, vi } from 'vitest'
@@ -7,6 +7,7 @@ import { getUploadTransformerInternal } from 'payload/internal'
 
 import { cloudflareTransformer } from './cloudflareTransformer.js'
 import { createCloudflareImagesHandler } from './worker.js'
+import { createFileSource } from '../../payload/src/uploads/transformers/createFileSource.js'
 import { transformUploadFile } from '../../payload/src/uploads/transformers/transformUploadFile.js'
 import { finalizeFileResponse } from '../../payload/src/uploads/transformers/finalizeFileResponse.js'
 
@@ -98,12 +99,105 @@ function request({ query = '', method = 'GET', headers = {} } = {}): PayloadRequ
     headers: new Headers(headers),
     method,
     searchParams: new URLSearchParams(query),
-    payload: { collections: { media: { config: { upload: {} } } } },
+    payload: { collections: { media: { config: { upload: {} } } }, config: {} },
   } as unknown as PayloadRequest
 }
 
-function config(): Config {
-  return { collections: [{ slug: 'media', fields: [], upload: true }] } as unknown as Config
+function config({ transformers = [] }: { transformers?: UploadTransformer[] } = {}): Config {
+  return {
+    collections: [{ slug: 'media', fields: [], upload: true }],
+    upload: { transformers },
+  } as unknown as Config
+}
+
+function initWith({ transformer }: { transformer: UploadTransformer }): Config {
+  return transformer.init!(config({ transformers: [transformer] })) as Config
+}
+
+function canTransformArgs({
+  collectionSlug = 'media',
+  operation,
+  purpose,
+  req = request(),
+}: {
+  collectionSlug?: string
+  operation: 'request' | 'upload'
+  purpose?: 'persisted-default' | 'request-override'
+  req?: PayloadRequest
+}) {
+  return {
+    collectionSlug,
+    doc: {},
+    mimeType: 'image/png',
+    operation,
+    originalDoc: {},
+    purpose,
+    req,
+  }
+}
+
+function transformFileArgs({ file, req = request() }: { file: File; req?: PayloadRequest }) {
+  return {
+    collectionSlug: 'media',
+    doc: {},
+    file,
+    options: undefined,
+    originalDoc: {},
+    originalSource: createFileSource({ file }),
+    req,
+    source: createFileSource({ file }),
+  }
+}
+
+/** Runs Payload's real stage pipeline, as core does for one upload task. */
+function runPipeline({
+  doc = {},
+  file,
+  options,
+  req,
+  transformer,
+}: {
+  doc?: Document
+  file: File
+  options?: unknown
+  req: PayloadRequest
+  transformer: UploadTransformer
+}) {
+  return transformUploadFile({
+    claims: new Map(),
+    collectionSlug: 'media',
+    doc,
+    file,
+    getOptions: () => options,
+    originalDoc: doc,
+    originalFile: file,
+    pipeline: [transformer],
+    req,
+  })
+}
+
+/** Runs the upload bridge, as core does, with each task going through the real stage pipeline. */
+function runTransformUpload({
+  cropSize,
+  doc = {},
+  file,
+  req = request(),
+  transformer,
+}: {
+  cropSize?: { height: number; width: number }
+  doc?: Document
+  file: File
+  req?: PayloadRequest
+  transformer: UploadTransformer
+}) {
+  return getUploadTransformerInternal(transformer)!.transformUpload!({
+    collectionSlug: 'media',
+    cropSize,
+    file,
+    req,
+    transform: (task) =>
+      runPipeline({ doc, file: task.file ?? file, options: task.options, req, transformer }),
+  })
 }
 
 async function dimensions(response: Response | File) {
@@ -123,10 +217,14 @@ function dynamicArgs({
 }) {
   return {
     collectionSlug: 'media',
+    doc: {},
     documentID: '1',
     filename: file.name,
+    getOriginalFile: getSourceFile,
     getSourceFile,
     mimeType: file.type,
+    options: undefined,
+    originalDoc: {},
     req,
   }
 }
@@ -199,14 +297,9 @@ describe('Cloudflare transformer transports', () => {
     })
     const file = await imageFile()
 
-    await expect(
-      transformer.transformFile!({
-        collectionSlug: 'media',
-        file,
-        options: undefined,
-        req: request(),
-      }),
-    ).rejects.toThrow('Cloudflare Images request failed (500)')
+    await expect(transformer.transformFile!(transformFileArgs({ file }))).rejects.toThrow(
+      'Cloudflare Images request failed (500)',
+    )
   })
 })
 
@@ -258,20 +351,15 @@ describe('Cloudflare dynamic requests', () => {
       transport: { mode: 'binding', binding: createImages() },
       dynamic: { collections: ['media'] },
     })
-    const args = {
-      collectionSlug: 'media',
-      mimeType: 'image/png',
-      operation: 'request' as const,
-      req: request(),
-    }
-
-    expect(transformer.canTransform!(args)).toBe(false)
+    expect(transformer.canTransform!(canTransformArgs({ operation: 'request' }))).toBe(false)
     expect(
-      transformer.canTransform!({
-        ...args,
-        collectionSlug: 'other',
-        req: request({ query: 'width=100' }),
-      }),
+      transformer.canTransform!(
+        canTransformArgs({
+          collectionSlug: 'other',
+          operation: 'request',
+          req: request({ query: 'width=100' }),
+        }),
+      ),
     ).toBe(false)
   })
 
@@ -281,14 +369,30 @@ describe('Cloudflare dynamic requests', () => {
     })
 
     expect(
-      transformer.canTransform!({
-        collectionSlug: 'media',
-        mimeType: 'image/png',
-        operation: 'request',
-        req: request({ query: 'width=100' }),
-      }),
+      transformer.canTransform!(
+        canTransformArgs({ operation: 'request', req: request({ query: 'width=100' }) }),
+      ),
     ).toBe(false)
   })
+
+  it.each([
+    { expected: false, purpose: 'persisted-default' as const },
+    { expected: true, purpose: 'request-override' as const },
+  ])(
+    'should route only request parameters, not saved transforms, in the $purpose phase',
+    ({ expected, purpose }) => {
+      const transformer = cloudflareTransformer({
+        transport: { mode: 'binding', binding: createImages() },
+        dynamic: true,
+      })
+
+      expect(
+        transformer.canTransform!(
+          canTransformArgs({ operation: 'request', purpose, req: request({ query: 'width=100' }) }),
+        ),
+      ).toBe(expected)
+    },
+  )
 
   it('should preserve source errors without calling Images', async () => {
     const binding = createImages()
@@ -366,13 +470,7 @@ describe('Cloudflare upload processing', () => {
       collections: { media: { resizeOptions: { width: 200 }, formatOptions: { format: 'webp' } } },
     })
     const file = await imageFile()
-    const result = await transformUploadFile({
-      collectionSlug: 'media',
-      file,
-      options: undefined,
-      pipeline: [transformer],
-      req: request(),
-    })
+    const result = await runPipeline({ file, req: request(), transformer })
 
     expect(result.name).toBe('photo.webp')
     expect(result.type).toBe('image/webp')
@@ -383,12 +481,7 @@ describe('Cloudflare upload processing', () => {
     const binding = createImages()
     const transformer = cloudflareTransformer({ transport: { mode: 'binding', binding } })
     const file = await imageFile()
-    const result = await transformer.transformFile!({
-      collectionSlug: 'media',
-      file,
-      options: undefined,
-      req: request(),
-    })
+    const result = await transformer.transformFile!(transformFileArgs({ file }))
 
     expect(result).toEqual({ status: 'continue' })
     expect(binding.input).not.toHaveBeenCalled()
@@ -426,21 +519,7 @@ describe('Cloudflare upload processing', () => {
         },
       })
       const file = await imageFile()
-      const req = request()
-      const results = await getUploadTransformerInternal(transformer)!.prepareUpload!({
-        collectionSlug: 'media',
-        file,
-        req,
-        uploadEdits: {},
-        transform: (task) =>
-          transformUploadFile({
-            collectionSlug: 'media',
-            file: task.file ?? file,
-            options: task.options,
-            pipeline: [transformer],
-            req,
-          }),
-      })
+      const results = await runTransformUpload({ file, transformer })
 
       expect(results[0]!.file).toBe(file)
       expect(results.find((r) => r.fieldPath === 'variants.thumb')).toMatchObject({
@@ -456,56 +535,63 @@ describe('Cloudflare upload processing', () => {
     },
   )
 
-  it.each(['%', 'px'] as const)(
-    'should crop the main file and derive variants using %s coordinates',
-    async (unit) => {
+  it.each([
+    {
+      cropSize: undefined,
+      doc: { _transforms: { crop: { height: 300, width: 400, x: 200, y: 150 } } },
+      expectedTrim: { bottom: 150, left: 200, right: 200, top: 150 },
+      name: 'the saved crop',
+    },
+    {
+      cropSize: { height: 300, width: 400 },
+      doc: {},
+      expectedTrim: { bottom: 300, left: 0, right: 400, top: 0 },
+      name: 'a request crop size with no saved crop',
+    },
+  ])(
+    'should crop the main file and derive variants from $name',
+    async ({ cropSize, doc, expectedTrim }) => {
+      const binding = createImages()
       const transformer = cloudflareTransformer({
-        transport: { mode: 'binding', binding: createImages() },
+        transport: { mode: 'binding', binding },
         collections: { media: { crop: true, variants: [{ name: 'thumb', width: 100 }] } },
       })
       const file = await imageFile()
-      const req = request()
-      const results = await getUploadTransformerInternal(transformer)!.prepareUpload!({
-        collectionSlug: 'media',
-        file,
-        req,
-        uploadEdits: {
-          crop: {
-            height: unit === '%' ? 50 : 300,
-            unit,
-            width: unit === '%' ? 50 : 400,
-            x: unit === '%' ? 25 : 200,
-            y: unit === '%' ? 25 : 150,
-          },
-          widthInPixels: 400,
-          heightInPixels: 300,
-        },
-        transform: (task) =>
-          transformUploadFile({
-            collectionSlug: 'media',
-            file: task.file ?? file,
-            options: task.options,
-            pipeline: [transformer],
-            req,
-          }),
-      })
+      const results = await runTransformUpload({ cropSize, doc, file, transformer })
 
+      expect(binding.transformOptions[0]!.trim).toEqual(expectedTrim)
       expect(results[0]).toMatchObject({ height: 300, width: 400 })
       expect(results[1]).toMatchObject({ height: 75, width: 100 })
     },
   )
 
+  it('should claim crop and focal point only for its configured collections at upload', () => {
+    const transformer = cloudflareTransformer({
+      transport: { mode: 'binding', binding: createImages() },
+      collections: { media: {} },
+    })
+
+    expect(transformer.canTransform!(canTransformArgs({ operation: 'upload' }))).toEqual({
+      canTransform: true,
+      handledTransformKeys: ['crop', 'focalPoint'],
+    })
+    expect(
+      transformer.canTransform!(canTransformArgs({ collectionSlug: 'other', operation: 'upload' })),
+    ).toBe(false)
+  })
+
   it('should publish variant metadata without mutating authored collections', () => {
-    const authored = config()
     const transformer = cloudflareTransformer({
       transport: { mode: 'binding', binding: createImages() },
       collections: { media: { crop: true, variants: [{ name: 'thumb', width: 100 }] } },
     })
+    const authored = config({ transformers: [transformer] })
     const result = transformer.init!(authored) as Config
 
     expect(result.collections![0]!.upload).toMatchObject({
       crop: true,
       variants: [{ name: 'thumb' }],
+      variantsTransformerSlug: 'cloudflare',
     })
     expect(authored.collections![0]!.upload).toBe(true)
   })
@@ -517,18 +603,22 @@ describe('Cloudflare upload processing', () => {
     }
     const first = cloudflareTransformer(options)
     const second = cloudflareTransformer({ ...options, slug: 'second' })
-    const authored = { ...config(), upload: { transformers: [first, second] } }
+    const authored = config({ transformers: [first, second] })
 
-    expect(() => first.init!(authored)).toThrow()
+    expect(() => first.init!(authored)).toThrow('more than one transformer')
     expect(() =>
-      cloudflareTransformer({ ...options, collections: { other: {} } }).init!(config()),
-    ).toThrow()
+      initWith({
+        transformer: cloudflareTransformer({ ...options, collections: { other: {} } }),
+      }),
+    ).toThrow('does not match any configured collection')
     expect(() =>
-      cloudflareTransformer({
-        ...options,
-        collections: { media: { variants: [{ name: 'filename', width: 100 }] } },
-      }).init!(config()),
-    ).toThrow()
+      initWith({
+        transformer: cloudflareTransformer({
+          ...options,
+          collections: { media: { variants: [{ name: 'filename', width: 100 }] } },
+        }),
+      }),
+    ).toThrow('reserved name')
   })
 })
 
@@ -539,21 +629,7 @@ describe('Cloudflare upload configuration contracts', () => {
       collections: { media: {} },
     })
     const file = await imageFile()
-    const req = request()
-    const results = await getUploadTransformerInternal(transformer)!.prepareUpload!({
-      collectionSlug: 'media',
-      file,
-      req,
-      uploadEdits: {},
-      transform: (task) =>
-        transformUploadFile({
-          collectionSlug: 'media',
-          file: task.file ?? file,
-          options: task.options,
-          pipeline: [transformer],
-          req,
-        }),
-    })
+    const results = await runTransformUpload({ file, transformer })
 
     expect(results[0]).toMatchObject({ file, height: 600, width: 800 })
   })
@@ -567,12 +643,7 @@ describe('Cloudflare upload configuration contracts', () => {
     const file = await imageFile()
     const req = request({ query: 'width=100' })
 
-    transformer.canTransform!({
-      collectionSlug: 'media',
-      mimeType: 'image/png',
-      operation: 'request',
-      req,
-    })
+    transformer.canTransform!(canTransformArgs({ operation: 'request', req }))
     expect(resolver).not.toHaveBeenCalled()
     const result = await transformer.handleRequest!(dynamicArgs({ file, req }))
 
@@ -580,41 +651,40 @@ describe('Cloudflare upload configuration contracts', () => {
     expect(resolver).toHaveBeenCalledWith({ req })
   })
 
-  it.each([true, false])(
-    'should respect focalPoint=%s when translating Admin focal points',
-    async (isEnabled) => {
-      const binding = createImages()
-      const transformer = cloudflareTransformer({
-        transport: { mode: 'binding', binding },
-        collections: {
-          media: { focalPoint: isEnabled, variants: [{ name: 'thumb', width: 100, height: 100 }] },
-        },
-      })
-      const file = await imageFile()
-      const req = request()
-
-      await getUploadTransformerInternal(transformer)!.prepareUpload!({
-        collectionSlug: 'media',
-        file,
-        req,
-        uploadEdits: { focalPoint: { x: 75, y: 25 } },
-        transform: (task) =>
-          transformUploadFile({
-            collectionSlug: 'media',
-            file: task.file ?? file,
-            options: task.options,
-            pipeline: [transformer],
-            req,
-          }),
-      })
-
-      expect(binding.transformOptions[0]!.gravity).toEqual(
-        isEnabled ? { mode: 'box-center', x: 0.75, y: 0.25 } : undefined,
-      )
+  it.each([
+    {
+      doc: { _transforms: { focalPoint: { x: 75, y: 25 } } },
+      expected: { mode: 'box-center', x: 0.75, y: 0.25 },
+      focalPoint: true,
+      name: 'a saved focal point',
     },
-  )
+    {
+      doc: { focalX: 75, focalY: 25 },
+      expected: { mode: 'box-center', x: 0.75, y: 0.25 },
+      focalPoint: true,
+      name: 'a legacy focalX and focalY',
+    },
+    {
+      doc: { _transforms: { focalPoint: { x: 75, y: 25 } } },
+      expected: undefined,
+      focalPoint: false,
+      name: 'a saved focal point when focalPoint is disabled',
+    },
+  ])('should set variant gravity from $name', async ({ doc, expected, focalPoint }) => {
+    const binding = createImages()
+    const transformer = cloudflareTransformer({
+      transport: { mode: 'binding', binding },
+      collections: {
+        media: { focalPoint, variants: [{ name: 'thumb', width: 100, height: 100 }] },
+      },
+    })
 
-  it('should preserve explicit gravity over an Admin focal point', async () => {
+    await runTransformUpload({ doc, file: await imageFile(), transformer })
+
+    expect(binding.transformOptions[0]!.gravity).toEqual(expected)
+  })
+
+  it('should preserve explicit gravity over a saved focal point', async () => {
     const binding = createImages()
     const transformer = cloudflareTransformer({
       transport: { mode: 'binding', binding },
@@ -622,22 +692,11 @@ describe('Cloudflare upload configuration contracts', () => {
         media: { variants: [{ name: 'thumb', width: 100, height: 100, gravity: 'auto' }] },
       },
     })
-    const file = await imageFile()
-    const req = request()
 
-    await getUploadTransformerInternal(transformer)!.prepareUpload!({
-      collectionSlug: 'media',
-      file,
-      req,
-      uploadEdits: { focalPoint: { x: 75, y: 25 } },
-      transform: (task) =>
-        transformUploadFile({
-          collectionSlug: 'media',
-          file: task.file ?? file,
-          options: task.options,
-          pipeline: [transformer],
-          req,
-        }),
+    await runTransformUpload({
+      doc: { _transforms: { focalPoint: { x: 75, y: 25 } } },
+      file: await imageFile(),
+      transformer,
     })
 
     expect(binding.transformOptions[0]!.gravity).toBe('auto')
