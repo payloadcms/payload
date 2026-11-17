@@ -1983,6 +1983,61 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Unpublish', () => {
+      test('should unpublish a locale with missing required array content', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          data: { _status: 'published', items: [{ label: 'A-en' }] },
+        })
+        await payload.update({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'es',
+          data: { _status: 'published', items: [{ id: doc.items![0]!.id, label: 'A-es' }] },
+        })
+        await payload.update({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+          data: {
+            _status: 'published',
+            items: [{ id: doc.items![0]!.id, label: 'A-en' }, { label: 'B-en' }],
+          },
+        })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: localizedCollectionSlug,
+            locale: 'es',
+            data: { _status: 'published' },
+          }),
+        ).rejects.toThrow(ValidationError)
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: localizedCollectionSlug,
+            locale: 'es',
+            data: { _status: 'draft', items: [{ label: '' }] },
+          }),
+        ).rejects.toThrow(ValidationError)
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'es',
+          data: { _status: 'draft' },
+        })
+        expect(unpublished._status).toBe('draft')
+        const english = await payload.findByID({
+          id: doc.id,
+          collection: localizedCollectionSlug,
+          locale: 'en',
+        })
+        expect(english._status).toBe('published')
+      })
+
       test.afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
