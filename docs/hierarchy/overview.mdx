@@ -1028,3 +1028,7 @@ export const Pages: CollectionConfig = {
 The parent field defaults to `_h_parent_document`. Set `nestedDocs: { parentFieldName: 'parentPage' }` to choose another name. The field is single-value and cannot be localized. Configure only one of `nestedDocs`, `hierarchy`, `folders`, or `tags` on a collection; separate relationship fields can still assign a nested document to folders or tags.
 
 Tree queries respect collection read access and the collection's base filter. Custom parent fields with `access.read` rules cannot be queried as a tree: parent membership could otherwise be exposed through branches or expand controls even when the relationship value is hidden.
+
+Nested document collections offer Table, Grid, and Tree layouts. Tree keeps the list's columns and document selection while loading children when their parent is expanded. More roots or children load as their continuation row comes into view; a **Load more** button is also available. Expanding a branch updates the URL so the same branches can be reopened after a refresh.
+
+Searching, filtering, or grouping shows matching documents as a flat list while Tree remains selected. Clear those conditions to return to the tree. Collections whose custom parent field has a read access rule retain Table and Grid layouts.

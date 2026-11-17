@@ -177,6 +177,7 @@ export const roTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Tip de fișier invalid: {{value}}',
     invalidRequestArgs: 'Argumente invalide transmise în cerere: {{args}}',
     loadingDocument: 'A existat o problemă la încărcarea documentului cu ID-ul de {{id}}.',
+    loadingItems: 'Elementele nu au putut fi încărcate.',
     localesNotSaved_one: 'Următoarea localizare nu a putut fi salvată:',
     localesNotSaved_other: 'Următoarele localizări nu au putut fi salvate:',
     logoutFailed: 'Deconectarea a eșuat.',
@@ -559,6 +560,9 @@ export const roTranslations: DefaultTranslationsObject = {
     toggle: 'Comutare',
     trash: 'Gunoi',
     trashedCountSuccessfully: '{{count}} {{label}} mutate la coșul de gunoi.',
+    treeLayout: 'Arbore',
+    treeSearchResults:
+      'Documentele corespunzătoare sunt afișate ca listă plată. Ștergeți căutarea, filtrele și gruparea pentru a reveni la arbore.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
     unchecked: 'Necompletat',

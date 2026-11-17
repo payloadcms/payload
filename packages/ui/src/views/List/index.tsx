@@ -9,13 +9,14 @@ import type {
   ListViewClientProps,
   ListViewGroup,
   ListViewServerPropsOnly,
+  NestedDocRow,
   PaginatedDocs,
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { docAccessOperation } from 'payload'
+import { canReadNestedDocsTree, docAccessOperation, getNestedDocsTreeMetadata } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   combineWhereConstraints,
@@ -142,7 +143,7 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query: ListQuery = queryFromArgs || queryFromReq
+  const query: ListQuery = { ...(queryFromArgs || queryFromReq) }
 
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
@@ -207,9 +208,7 @@ export const renderListView = async (
 
   query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
-  query.sort =
-    collectionPreferences?.sort ||
-    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+  query.sort = collectionPreferences?.sort || collectionConfig.defaultSort
 
   const baseFilterConstraint = await (
     collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
@@ -217,7 +216,7 @@ export const renderListView = async (
     limit: query.limit,
     page: query.page,
     req,
-    sort: query.sort,
+    sort: Array.isArray(query.sort) ? query.sort.join(',') : query.sort,
   })
 
   let whereWithMergedSearch = mergeListSearchAndWhere({
@@ -322,7 +321,16 @@ export const renderListView = async (
   }
 
   // Check for hierarchy parent param
-  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  const hasTreeLayout =
+    canReadNestedDocsTree({ collectionConfig }) && viewType === 'list' && !drawerSlug
+  const shouldLoadNestedDocsTree = Boolean(
+    hasTreeLayout &&
+    collectionPreferences?.documentLayout === 'tree' &&
+    !query.groupBy &&
+    !query.search &&
+    (!query.where || Object.keys(query.where).length === 0),
+  )
+  const isHierarchyCollection = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
   const hierarchyParentFieldName =
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
@@ -378,6 +386,7 @@ export const renderListView = async (
 
   // Hierarchy data for client-side rendering
   let hierarchyData: HierarchyViewData | undefined
+  let nestedDocRows: Record<string, NestedDocRow> | undefined
 
   try {
     if (query.groupBy) {
@@ -419,18 +428,53 @@ export const renderListView = async (
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
-        limit: query?.limit ? Number(query.limit) : undefined,
+        limit: shouldLoadNestedDocsTree
+          ? Math.min(100, Math.max(1, Number(query.limit) || 10))
+          : query?.limit
+            ? Number(query.limit)
+            : undefined,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.page ? Number(query.page) : undefined,
+        page: shouldLoadNestedDocsTree ? 1 : query?.page ? Number(query.page) : undefined,
         populate: thumbnailPopulate,
         req,
         select,
         sort: query?.sort,
         trash,
         user,
-        where: whereWithMergedSearch,
+        where: shouldLoadNestedDocsTree
+          ? combineWhereConstraints([
+              whereWithMergedSearch,
+              {
+                or: [
+                  { [hierarchyParentFieldName]: { exists: false } },
+                  { [hierarchyParentFieldName]: { equals: null } },
+                ],
+              },
+            ])
+          : whereWithMergedSearch,
       })
+
+      if (shouldLoadNestedDocsTree) {
+        ;({ rows: nestedDocRows } = await getNestedDocsTreeMetadata({
+          data,
+          findArgs: {
+            collection: collectionSlug,
+            depth: thumbnailFieldName ? 1 : 0,
+            draft: true,
+            fallbackLocale: false,
+            includeLockStatus: true,
+            limit: data.limit,
+            locale: req.locale,
+            populate: thumbnailPopulate,
+            select,
+            sort: query.sort,
+            where: whereWithMergedSearch,
+          },
+          parentFieldName: hierarchyParentFieldName,
+          req,
+        }))
+      }
 
       // Enrich documents with correct display status for drafts
       data = await enrichDocsWithVersionStatus({
@@ -452,6 +496,7 @@ export const renderListView = async (
             ? hierarchyParentFieldName
             : undefined,
         i18n: req.i18n,
+        nestedDocRows,
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,
         query,
@@ -603,16 +648,26 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
-      documentLayout: collectionPreferences?.documentLayout,
+      documentLayout:
+        collectionPreferences?.documentLayout === 'tree' && !hasTreeLayout
+          ? 'table'
+          : collectionPreferences?.documentLayout,
       documentURLs,
       enableRowSelections,
       groupedData,
       hasCreatePermission,
       hasDeletePermission,
       hasTrashPermission,
+      hasTreeLayout,
       hierarchyData,
       HierarchyIcon,
       listPreferences: collectionPreferences,
+      nestedDocExpanded: shouldLoadNestedDocsTree
+        ? (Array.isArray(query?.treeExpanded) ? query.treeExpanded : [query?.treeExpanded]).filter(
+            (value): value is string => typeof value === 'string',
+          )
+        : undefined,
+      nestedDocRows,
       newDocumentURL,
       queryPreset,
       queryPresetPermissions,

@@ -1,13 +1,14 @@
 'use client'
 
-import type { Column, User } from 'payload'
+import type { Column, NestedDocRow as NestedDocRowData } from 'payload'
 
-import React, { useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 
-import { useAuth } from '../../providers/Auth/index.js'
-import { useSelection } from '../../providers/Selection/index.js'
+import { useNestedDocsTree } from '../../providers/NestedDocs/index.js'
 import { useGridNavigation } from './GridNavigation/useGridNavigation.js'
+import { NestedDocRow } from './NestedDocRow/index.js'
 import { TableGridContext, useTableID, useTableNavigationLabel } from './TableIdentity.js'
+import { TableRow } from './TableRow/index.js'
 import './index.css'
 
 const baseClass = 'table'
@@ -20,6 +21,8 @@ export type Props = {
   readonly data: Record<string, unknown>[]
   readonly id?: string
   readonly navigationLabel?: string
+  readonly nestedDocRows?: Record<string, NestedDocRowData>
+  readonly useAsTitle?: string
 }
 
 export const Table: React.FC<Props> = ({
@@ -27,22 +30,41 @@ export const Table: React.FC<Props> = ({
   appearance,
   ariaLabel,
   BeforeTable,
-  columns,
-  data,
+  columns: originalColumns,
+  data: originalData,
   navigationLabel: navigationLabelFromProps,
+  nestedDocRows: originalRows,
+  useAsTitle,
 }) => {
+  const contextTree = useNestedDocsTree()
+  const tree = originalRows ? contextTree : null
+  const data = tree?.docs ?? originalData
+  const nestedDocRows = tree?.rows ?? originalRows
+  const columns = tree
+    ? [
+        ...(originalColumns?.filter((column) => column.accessor === '_select') ?? []),
+        ...tree.columns,
+      ]
+    : originalColumns
+  const documentsByID = useMemo(
+    () => (nestedDocRows ? new Map(data.map((doc) => [doc.id, doc])) : undefined),
+    [data, nestedDocRows],
+  )
   const tableID = useTableID(id)
   const navigationLabelFromContext = useTableNavigationLabel()
   const navigationLabel = navigationLabelFromProps ?? navigationLabelFromContext
   const tableRef = useRef<HTMLTableElement>(null)
-  const isGrid = Boolean(navigationLabel)
-  const { selected } = useSelection()
-  const { user } = useAuth()
+  const hasCellNavigation = Boolean(navigationLabel)
 
   const activeColumns = columns?.filter((col) => col?.active)
-  const hasRowSelection = isGrid && activeColumns?.some((column) => column.accessor === '_select')
+  const hasRowSelection =
+    hasCellNavigation && activeColumns?.some((column) => column.accessor === '_select')
 
-  useGridNavigation({ id, isEnabled: isGrid && Boolean(activeColumns?.length), ref: tableRef })
+  useGridNavigation({
+    id,
+    isEnabled: hasCellNavigation && Boolean(activeColumns?.length),
+    ref: tableRef,
+  })
 
   if (!activeColumns || activeColumns.length === 0) {
     return <div>No columns selected</div>
@@ -50,12 +72,16 @@ export const Table: React.FC<Props> = ({
 
   return (
     <div
-      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+      className={[
+        baseClass,
+        appearance && `${baseClass}--appearance-${appearance}`,
+        nestedDocRows && `${baseClass}--nested-docs`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >
       {BeforeTable}
-      <TableGridContext value={isGrid}>
+      <TableGridContext value={hasCellNavigation}>
         <table
           aria-label={ariaLabel ?? navigationLabel}
           aria-multiselectable={hasRowSelection || undefined}
@@ -63,16 +89,16 @@ export const Table: React.FC<Props> = ({
           cellSpacing="0"
           id={tableID}
           ref={tableRef}
-          role={isGrid ? 'grid' : undefined}
+          role={hasCellNavigation ? 'grid' : undefined}
         >
           <thead>
-            <tr role={isGrid ? 'row' : undefined}>
+            <tr role={hasCellNavigation ? 'row' : undefined}>
               {activeColumns.map((col) => (
                 <th
                   data-column={col.accessor}
                   id={`heading-${col.accessor.replace(/\./g, '__')}`}
                   key={col.accessor}
-                  role={isGrid ? 'columnheader' : undefined}
+                  role={hasCellNavigation ? 'columnheader' : undefined}
                   scope="col"
                 >
                   {col.Heading}
@@ -81,54 +107,35 @@ export const Table: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {data &&
-              data?.map((row, rowIndex) => {
-                const userEditing = row._userEditing as undefined | User
-                const isLockedByAnotherUser =
-                  row._isLocked && userEditing && userEditing.id !== user?.id
+            {data?.map((row, rowIndex) => {
+              const key =
+                typeof row.id === 'string' || typeof row.id === 'number' ? String(row.id) : rowIndex
 
-                return (
-                  <tr
-                    aria-label={isGrid ? String(rowIndex + 1) : undefined}
-                    aria-selected={
-                      hasRowSelection && !isLockedByAnotherUser
-                        ? Boolean(
-                            (typeof row.id === 'string' || typeof row.id === 'number') &&
-                            selected.get(row.id),
-                          )
-                        : undefined
-                    }
-                    className={`row-${rowIndex + 1}`}
-                    data-id={row.id}
-                    key={
-                      typeof row.id === 'string' || typeof row.id === 'number'
-                        ? String(row.id)
-                        : rowIndex
-                    }
-                    role={isGrid ? 'row' : undefined}
-                  >
-                    {activeColumns.map((col) => {
-                      const { accessor } = col
-
-                      return (
-                        <td
-                          className={[
-                            `cell-${accessor.replace(/\./g, '__')}`,
-                            col.isLinkedColumn && 'cell--linked',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          data-column={accessor}
-                          key={accessor}
-                          role={isGrid ? 'gridcell' : undefined}
-                        >
-                          {col.renderedCells[rowIndex]}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
-              })}
+              return nestedDocRows ? (
+                <NestedDocRow
+                  columns={activeColumns}
+                  documentsByID={documentsByID}
+                  hasCellNavigation={hasCellNavigation}
+                  hasRowSelection={hasRowSelection}
+                  isLastDocument={rowIndex === data.length - 1}
+                  key={key}
+                  label={ariaLabel ?? navigationLabel}
+                  row={row}
+                  rowIndex={rowIndex}
+                  rows={nestedDocRows}
+                  useAsTitle={useAsTitle}
+                />
+              ) : (
+                <TableRow
+                  columns={activeColumns}
+                  hasCellNavigation={hasCellNavigation}
+                  hasRowSelection={hasRowSelection}
+                  key={key}
+                  row={row}
+                  rowIndex={rowIndex}
+                />
+              )
+            })}
           </tbody>
         </table>
       </TableGridContext>

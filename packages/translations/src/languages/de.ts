@@ -179,6 +179,7 @@ export const deTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ungültiger Datei-Typ: {{value}}',
     invalidRequestArgs: 'Ungültige Argumente in der Anfrage: {{args}}',
     loadingDocument: 'Es gab ein Problem, das Dokument mit der ID {{id}} zu laden.',
+    loadingItems: 'Elemente konnten nicht geladen werden.',
     localesNotSaved_one: 'Die folgende Sprache konnte nicht gespeichert werden:',
     localesNotSaved_other: 'Die folgenden Sprachen konnten nicht gespeichert werden:',
     logoutFailed: 'Abmeldung fehlgeschlagen.',
@@ -566,6 +567,9 @@ export const deTranslations: DefaultTranslationsObject = {
     toggle: 'Umschalten',
     trash: 'Papierkorb',
     trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
+    treeLayout: 'Baum',
+    treeSearchResults:
+      'Passende Dokumente werden als flache Liste angezeigt. Entferne Suche, Filter und Gruppierung, um zum Baum zurückzukehren.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
     unchecked: 'Nicht ausgewählt',

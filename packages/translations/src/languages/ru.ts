@@ -177,6 +177,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Недопустимый тип файла: {{value}}',
     invalidRequestArgs: 'В запрос переданы недопустимые аргументы: {{args}}',
     loadingDocument: 'Возникла проблема при загрузке документа с ID {{id}}.',
+    loadingItems: 'Не удалось загрузить элементы.',
     localesNotSaved_one: 'Следующую локализацию не удалось сохранить:',
     localesNotSaved_other: 'Следующие локализации не удалось сохранить:',
     logoutFailed: 'Выход не удался.',
@@ -556,6 +557,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     toggle: 'Переключатель',
     trash: 'Мусор',
     trashedCountSuccessfully: '{{count}} {{label}} перемещено в корзину.',
+    treeLayout: 'Дерево',
+    treeSearchResults:
+      'Найденные документы показаны плоским списком. Сбросьте поиск, фильтры и группировку, чтобы вернуться к дереву.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
     unchecked: 'Не отмечено',

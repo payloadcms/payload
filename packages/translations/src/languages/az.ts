@@ -174,6 +174,7 @@ export const azTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Yanlış fayl növü: {{value}}',
     invalidRequestArgs: 'Sorguda etibarsız arqumentlər təqdim edildi: {{args}}',
     loadingDocument: '{{id}} ID-li sənədin yüklənməsində problem baş verdi.',
+    loadingItems: 'Elementləri yükləmək mümkün olmadı.',
     localesNotSaved_one: 'Aşağıdakı yerləşdirmə saxlanıla bilmədi:',
     localesNotSaved_other: 'Aşağıdakı yerləşdirmələr saxlanıla bilmədi:',
     logoutFailed: 'Çıxış uğursuz oldu.',
@@ -556,6 +557,9 @@ export const azTranslations: DefaultTranslationsObject = {
     toggle: 'Dəyişmək',
     trash: 'Zibil',
     trashedCountSuccessfully: '{{count}} {{label}} zibilə köçürüldü.',
+    treeLayout: 'Ağac',
+    treeSearchResults:
+      'Uyğun sənədlər düz siyahıda göstərilir. Ağaca qayıtmaq üçün axtarışı, filtrləri və qruplaşdırmanı təmizləyin.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
     unchecked: 'Seçilməmiş',
