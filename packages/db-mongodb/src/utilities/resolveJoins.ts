@@ -444,6 +444,7 @@ function filterWhereForCollection({
   collectionSlug: string
   where: Record<string, unknown>
 }): null | Record<string, unknown> {
+  // Leave absent or non-object constraints unchanged.
   if (!where || typeof where !== 'object') {
     return where
   }
@@ -452,15 +453,18 @@ function filterWhereForCollection({
   const filtered: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(where)) {
+    // Resolve nested conditions against this collection before combining them.
     if ((key === 'and' || key === 'or') && Array.isArray(value)) {
       const conditions = value.map((condition) =>
         filterWhereForCollection({ availableFields, collectionSlug, where: condition }),
       )
 
+      // One impossible condition makes the entire AND impossible.
       if (key === 'and' && conditions.some((condition) => condition === null)) {
         return null
       }
 
+      // An empty condition is already true, so this OR needs no further constraint.
       if (
         key === 'or' &&
         conditions.some((condition) => condition && Object.keys(condition).length === 0)
@@ -473,17 +477,21 @@ function filterWhereForCollection({
           condition !== null && Object.keys(condition).length > 0,
       )
 
+      // An OR with no possible branches cannot match this collection.
       if (key === 'or' && matchingConditions.length === 0) {
         return null
       }
 
+      // Keep only conditions that still need to be evaluated against documents.
       if (matchingConditions.length > 0) {
         filtered[key] = matchingConditions
       }
     } else if (key === 'relationTo') {
+      // Evaluate collection scopes here; relationTo is not a stored document field.
       if (value && typeof value === 'object') {
         const constraints = value as Record<string, unknown>
         const includesCollection = ({ constraint }: { constraint: unknown }) => {
+          // Accept comma-separated lists as well as array operands.
           if (typeof constraint === 'string') {
             return constraint.split(',').includes(collectionSlug)
           }
@@ -491,6 +499,7 @@ function filterWhereForCollection({
           return Array.isArray(constraint) && constraint.includes(collectionSlug)
         }
 
+        // Reject the branch if any collection constraint excludes this target.
         if (
           ('equals' in constraints && constraints.equals !== collectionSlug) ||
           ('not_equals' in constraints && constraints.not_equals === collectionSlug) ||
@@ -500,9 +509,11 @@ function filterWhereForCollection({
           return null
         }
       }
-    } else if (fieldNames.has(key)) {
+      } else if (fieldNames.has(key)) {
+      // Pass document-field constraints to this collection's database query.
       filtered[key] = value
     } else {
+      // Treat constraints on unavailable fields as nonmatching branches.
       return null
     }
   }
