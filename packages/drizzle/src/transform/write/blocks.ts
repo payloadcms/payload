@@ -8,6 +8,7 @@ import type {
   BlockRowToInsert,
   NumberToDelete,
   RelationshipToDelete,
+  RowToInsert,
   TextToDelete,
 } from './types.js'
 
@@ -29,6 +30,7 @@ type Args = {
   numbersToDelete: NumberToDelete[]
   parentIsLocalized: boolean
   path: string
+  pathPrefixesToDelete: RowToInsert['pathPrefixesToDelete']
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
   selects: {
@@ -54,6 +56,7 @@ export const transformBlocks = ({
   numbersToDelete,
   parentIsLocalized,
   path,
+  pathPrefixesToDelete,
   relationships,
   relationshipsToDelete,
   selects,
@@ -129,6 +132,7 @@ export const transformBlocks = ({
       parentIsLocalized: parentIsLocalized || field.localized,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
+      pathPrefixesToDelete,
       relationships,
       relationshipsToAppend: [],
       relationshipsToDelete,
