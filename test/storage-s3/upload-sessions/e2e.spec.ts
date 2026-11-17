@@ -240,7 +240,8 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should show progress as the parts of a picked file are sent', async ({ browser }) => {
     const { page } = await openCreateForm({ browser })
     const getToastHistory = await recordToastHistory({ page })
-    // 11 MiB at 2 MiB/s takes several seconds, so more than one part finishes on its own.
+    // 11 MiB at 2 MiB/s takes several seconds. The file is three parts, so more than three
+    // percentages means progress moves while parts are still being sent.
     const stopThrottling = await throttleUploads({ bytesPerSecond: 2 * 1024 * 1024, page })
     const progressPattern = new RegExp(`Uploading ${path.basename(filePath)}: (\\d+)%`)
     const getPercents = async () =>
@@ -250,14 +251,14 @@ test.describe('storage-s3 upload sessions E2E', () => {
       await pickFile(page)
       await expect
         .poll(async () => (await getPercents()).length, { timeout: TEST_TIMEOUT_LONG })
-        .toBeGreaterThan(1)
+        .toBeGreaterThan(4)
     } finally {
       await stopThrottling()
     }
 
     const percents = await getPercents()
 
-    expect(percents.length, `Toasts: ${(await getToastHistory()).join(' | ')}`).toBeGreaterThan(1)
+    expect(percents.length, `Toasts: ${(await getToastHistory()).join(' | ')}`).toBeGreaterThan(4)
     expect(percents).toEqual([...percents].sort((a, b) => a - b))
   })
 

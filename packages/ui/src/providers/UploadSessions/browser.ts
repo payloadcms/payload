@@ -50,6 +50,8 @@ export const getUploadPercent = ({ progress }: { progress: UploadTransferProgres
  */
 export const createProgressToast = <ID extends number | string>({ id }: { id: ID }) => {
   let isHidden = false
+  // Progress can be reported many times a second; the toast only redraws when its text changes.
+  let shownMessage: string | undefined
 
   return {
     /**
@@ -58,7 +60,8 @@ export const createProgressToast = <ID extends number | string>({ id }: { id: ID
      */
     getResultID: (): ID | string => (isHidden ? `${id}-result` : id),
     show: (message: string) => {
-      if (!isHidden) {
+      if (!isHidden && message !== shownMessage) {
+        shownMessage = message
         toast.loading(message, {
           id,
           action: undefined,
