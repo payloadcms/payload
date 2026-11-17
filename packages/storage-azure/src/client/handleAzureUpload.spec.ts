@@ -49,4 +49,23 @@ describe('handleAzureUpload', () => {
       handleAzureUpload({ data: { url: signedURL }, file: createFile() }),
     ).rejects.toThrow('block upload failed')
   })
+
+  it('should report clamped, never decreasing progress', async () => {
+    const onProgress = vi.fn()
+
+    uploadDataMock.mockImplementation((_file, options) => {
+      options.onProgress({ loadedBytes: 2 })
+      options.onProgress({ loadedBytes: 1 })
+      options.onProgress({ loadedBytes: 10 })
+      return Promise.resolve()
+    })
+
+    await handleAzureUpload({ data: { url: signedURL }, file: createFile(), onProgress })
+
+    expect(onProgress.mock.calls.map(([progress]) => progress)).toEqual([
+      { loadedBytes: 2, totalBytes: 3 },
+      { loadedBytes: 2, totalBytes: 3 },
+      { loadedBytes: 3, totalBytes: 3 },
+    ])
+  })
 })

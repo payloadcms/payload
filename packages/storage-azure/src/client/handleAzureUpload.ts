@@ -1,4 +1,5 @@
 'use client'
+import type { OnUploadProgress } from 'payload'
 
 // Balances upload parallelism against browser memory: `blockSize * concurrency`
 // bytes are buffered in flight. The SDK uses a single Put Blob for small files
@@ -10,9 +11,14 @@ const CONCURRENCY = 4
 type HandleAzureUploadArgs = {
   data?: unknown
   file: File
+  onProgress?: OnUploadProgress
 }
 
-export const handleAzureUpload = async ({ data, file }: HandleAzureUploadArgs): Promise<void> => {
+export const handleAzureUpload = async ({
+  data,
+  file,
+  onProgress,
+}: HandleAzureUploadArgs): Promise<void> => {
   const { url } = data as { url: string }
 
   // Loaded on demand so @azure/storage-blob is only pulled into the client bundle
@@ -20,10 +26,18 @@ export const handleAzureUpload = async ({ data, file }: HandleAzureUploadArgs): 
   const { BlockBlobClient } = await import('@azure/storage-blob')
 
   const blockBlobClient = new BlockBlobClient(url)
+  let loadedBytes = 0
 
   await blockBlobClient.uploadData(file, {
     blobHTTPHeaders: { blobContentType: file.type },
     blockSize: BLOCK_SIZE,
     concurrency: CONCURRENCY,
+    // Blocks finish in any order, so the reported total never goes backwards.
+    onProgress: onProgress
+      ? (progress) => {
+          loadedBytes = Math.max(loadedBytes, Math.min(progress.loadedBytes, file.size))
+          onProgress({ loadedBytes, totalBytes: file.size })
+        }
+      : undefined,
   })
 }

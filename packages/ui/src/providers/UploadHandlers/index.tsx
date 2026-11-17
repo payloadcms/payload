@@ -18,7 +18,7 @@ type UploadHandler = (args: {
   intent?: UploadSessionIntentData
   /**
    * Reports bytes sent to storage. Not called for an upload that was already running since the
-   * file was picked, or by client upload handlers that do not report progress.
+   * file was picked, or by custom client upload handlers that do not report progress.
    */
   onProgress?: OnUploadProgress
   /** The document whose file is replaced. Omitted when creating a document. */
@@ -117,6 +117,7 @@ export const UploadHandlersProvider = ({ children }) => {
             data: instructions.data,
             docPrefix,
             file,
+            onProgress,
             reject,
             resolve,
             updateFilename: (filename: string) => {
