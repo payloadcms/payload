@@ -546,6 +546,7 @@ export const myTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'ကိုက်ညီသော စာရွက်စာတမ်းများကို ရိုးရိုးစာရင်းဖြင့် ပြထားသည်။ သစ်ပင်ပုံစံသို့ ပြန်ရန် ရှာဖွေမှု၊ စစ်ထုတ်မှုနှင့် အုပ်စုဖွဲ့မှုကို ရှင်းလင်းပါ။',
     true: 'အမှန်',
+    unassigned: 'သတ်မှတ်မထားသော',
     unauthorized: 'အခွင့်မရှိပါ။',
     unchecked: 'မစစ်ဆေးရသေးပါ',
     unlock: 'ဖွင့်',

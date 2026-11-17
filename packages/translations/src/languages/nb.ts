@@ -560,6 +560,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Samsvarende dokumenter vises som en flat liste. Fjern søk, filtre og gruppering for å gå tilbake til treet.',
     true: 'Sann',
+    unassigned: 'Ikke tilordnet',
     unauthorized: 'Ikke autorisert',
     unchecked: 'Uavhuket',
     unlock: 'Lås opp',

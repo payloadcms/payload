@@ -559,6 +559,7 @@ export const svTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Matchande dokument visas som en platt lista. Rensa sökning, filter och gruppering för att återgå till trädet.',
     true: 'Sann',
+    unassigned: 'Ej tilldelade',
     unauthorized: 'Obehörig',
     unchecked: 'Omarkerad',
     unlock: 'Lås upp',

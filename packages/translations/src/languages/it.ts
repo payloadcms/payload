@@ -565,6 +565,7 @@ export const itTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'I documenti corrispondenti sono mostrati in un elenco piatto. Rimuovi ricerca, filtri e raggruppamento per tornare all’albero.',
     true: 'Vero',
+    unassigned: 'Non assegnati',
     unauthorized: 'Non autorizzato',
     unchecked: 'Non selezionato',
     unlock: 'Sblocca',

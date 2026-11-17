@@ -557,6 +557,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       '一致するドキュメントをフラットなリストで表示しています。ツリーに戻るには検索、フィルター、グループ化を解除してください。',
     true: 'true',
+    unassigned: '未割り当て',
     unauthorized: '未認証',
     unchecked: 'チェックなし',
     unlock: 'アンロック',

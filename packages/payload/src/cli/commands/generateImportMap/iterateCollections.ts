@@ -30,6 +30,11 @@ export function iterateCollections({
       imports,
     })
 
+    if (typeof collection.hierarchy === 'object') {
+      addToImportMap(collection.hierarchy.admin.components.Icon)
+      addToImportMap(collection.hierarchy.admin.components.SmallIcon)
+    }
+
     addToImportMap(collection.admin?.components?.afterList)
     addToImportMap(collection.admin?.components?.listMenuItems)
     addToImportMap(collection.admin?.components?.afterListTable)

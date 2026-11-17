@@ -556,6 +556,7 @@ export const slTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Ujemajoči se dokumenti so prikazani kot raven seznam. Počistite iskanje, filtre in združevanje za vrnitev v drevo.',
     true: 'Da',
+    unassigned: 'Nedodeljeno',
     unauthorized: 'Nepooblaščeno',
     unchecked: 'Nepotrjeno',
     unlock: 'Odkleni',

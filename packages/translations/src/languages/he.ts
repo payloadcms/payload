@@ -541,6 +541,7 @@ export const heTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'המסמכים התואמים מוצגים ברשימה שטוחה. יש לנקות את החיפוש, המסננים והקיבוץ כדי לחזור לעץ.',
     true: 'True',
+    unassigned: 'ללא שיוך',
     unauthorized: 'אין הרשאה',
     unchecked: 'לא מסומן',
     unlock: 'שחרר',

@@ -167,6 +167,19 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
       }[]
     | null;
   password?: string | null;
@@ -180,6 +193,7 @@ export interface NestedArticle {
   id: number;
   ancestor?: (number | null) | NestedArticle;
   title?: string | null;
+  '_h_page-folders'?: (number | null) | PageFolder;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -366,6 +380,11 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -375,6 +394,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface NestedArticlesSelect<T extends boolean = true> {
   ancestor?: T;
   title?: T;
+  '_h_page-folders'?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

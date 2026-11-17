@@ -565,6 +565,7 @@ export const enTranslations = {
     untitled: 'Untitled',
     upcomingEvents: 'Upcoming Events',
     updatedAgo: 'Updated {{distance}} ago',
+    unassigned: 'Unassigned',
     updatedAt: 'Updated At',
     updatedBy: 'Updated By',
     updatedCountSuccessfully: 'Updated {{count}} {{label}} successfully.',

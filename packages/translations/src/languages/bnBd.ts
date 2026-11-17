@@ -558,6 +558,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'মিলে যাওয়া নথিগুলি সমতল তালিকায় দেখানো হচ্ছে। ট্রিতে ফিরতে অনুসন্ধান, ফিল্টার ও গ্রুপিং সরান।',
     true: 'সত্য',
+    unassigned: 'বরাদ্দ করা হয়নি',
     unauthorized: 'অননুমোদিত',
     unchecked: 'অচিহ্নিত',
     unlock: 'আনলক করুন',

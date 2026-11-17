@@ -531,6 +531,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     treeLayout: '树形',
     treeSearchResults: '匹配的文档以平铺列表显示。清除搜索、筛选和分组以返回树形视图。',
     true: '是',
+    unassigned: '未分配',
     unauthorized: '未经授权',
     unchecked: '未选中',
     unlock: '解锁',

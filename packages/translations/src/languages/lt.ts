@@ -562,6 +562,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Atitinkantys dokumentai rodomi plokščiame sąraše. Norėdami grįžti prie medžio, išvalykite paiešką, filtrus ir grupavimą.',
     true: 'Tiesa',
+    unassigned: 'Nepriskirta',
     unauthorized: 'Neleistinas',
     unchecked: 'Nežymėta',
     unlock: 'Atrakinti',

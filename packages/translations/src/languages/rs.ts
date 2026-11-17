@@ -556,6 +556,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Одговарајући документи су приказани као равна листа. Обришите претрагу, филтере и груписање за повратак на стабло.',
     true: 'Istinito',
+    unassigned: 'Недодељено',
     unauthorized: 'Нисте ауторизовани',
     unchecked: 'Neoznačeno',
     unlock: 'Otključaj',

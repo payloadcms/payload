@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { foldersSlug, pagesSlug } from './shared.js'
+import { articlesSlug, foldersSlug, pagesSlug } from './shared.js'
 
 export async function seed(payload: Payload) {
   await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
@@ -38,6 +38,37 @@ export async function seed(payload: Payload) {
         parent: about.id,
         _status: 'published',
       },
+    })
+  }
+
+  const campaigns = await payload.create({
+    collection: foldersSlug,
+    data: { title: 'Campaigns', '_h_page-folders': folder.id },
+  })
+  await payload.create({ collection: foldersSlug, data: { title: 'Empty folder' } })
+  await payload.create({
+    collection: articlesSlug,
+    data: { title: 'Campaign announcement', '_h_page-folders': campaigns.id },
+  })
+
+  const titles = [
+    'A guide to accessible content',
+    'Behind the scenes of our spring campaign',
+    'Building stronger community partnerships',
+    'Choosing the right training programme',
+    'Designing services around real people',
+    'Five ways to improve your team newsletter',
+    'How our membership programme works',
+    'Making public information easier to find',
+    'Planning a successful community event',
+    'Small changes that make a big difference',
+    'The people shaping our next chapter',
+    'Working together for a better experience',
+  ]
+  for (const title of titles) {
+    await payload.create({
+      collection: articlesSlug,
+      data: { title, '_h_page-folders': folder.id },
     })
   }
 }

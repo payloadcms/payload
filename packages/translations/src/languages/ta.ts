@@ -550,6 +550,7 @@ export const taTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'பொருந்தும் ஆவணங்கள் தட்டையான பட்டியலாகக் காட்டப்படுகின்றன. மரத்திற்குத் திரும்ப தேடல், வடிப்பான்கள் மற்றும் குழுவாக்கத்தை நீக்கவும்.',
     true: 'உண்மை',
+    unassigned: 'ஒதுக்கப்படாதவை',
     unauthorized: 'அனுமதி இல்லை',
     unchecked: 'தேர்வு செய்யப்படாத',
     unlock: 'திறக்க',

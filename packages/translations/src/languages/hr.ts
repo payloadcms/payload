@@ -557,6 +557,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     treeSearchResults:
       'Odgovarajući dokumenti prikazani su kao ravni popis. Očistite pretraživanje, filtre i grupiranje za povratak na stablo.',
     true: 'Istinito',
+    unassigned: 'Nedodijeljeno',
     unauthorized: 'Neovlašteno',
     unchecked: 'Neoznačeno',
     unlock: 'Otključaj',
