@@ -361,6 +361,10 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
           item.item.id === widgetId
             ? {
                 component: React.createElement(RenderWidget, {
+                  initialComponent:
+                    React.isValidElement(item.component) && item.component.type === RenderWidget
+                      ? undefined
+                      : item.component,
                   widgetData: data,
                   widgetId,
                 }),

@@ -1,11 +1,8 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { startTransition, Suspense, useCallback, useEffect, useRef } from 'react'
 
-import type {
-  RenderWidgetServerFnArgs,
-  RenderWidgetServerFnReturnType,
-} from './renderWidgetServerFn.js'
+import type { RenderWidgetServerFnReturnType } from './renderWidgetServerFn.js'
 
 import { ShimmerEffect } from '../../../../../elements/ShimmerEffect/index.js'
 import { useServerFunctions } from '../../../../../providers/ServerFunctions/index.js'
@@ -17,20 +14,20 @@ export const RenderWidget: React.FC<{
   /**
    * Instance-specific data for this widget
    */
+  initialComponent?: React.ReactNode
   widgetData?: Record<string, unknown>
   /**
    * Unique ID for this widget instance (format: "slug-timestamp")
    */
   widgetId: string
-}> = ({ widgetData, widgetId }) => {
-  const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
+}> = ({ initialComponent, widgetData, widgetId }) => {
+  const [Component, setComponent] = React.useState<React.ReactNode>(initialComponent ?? null)
   const { serverFunction } = useServerFunctions()
   const requestIDRef = useRef(0)
 
   const renderWidget = useCallback(() => {
     async function render() {
       const requestID = ++requestIDRef.current
-      setComponent(null)
 
       try {
         const widgetSlug = widgetId.slice(0, widgetId.lastIndexOf('-'))
@@ -48,7 +45,9 @@ export const RenderWidget: React.FC<{
           return
         }
 
-        setComponent(result.component)
+        startTransition(() => {
+          setComponent(result.component)
+        })
       } catch (_error) {
         if (requestID !== requestIDRef.current) {
           return
@@ -80,11 +79,14 @@ export const RenderWidget: React.FC<{
 
   useEffect(() => {
     void renderWidget()
+    return () => {
+      requestIDRef.current += 1
+    }
   }, [renderWidget])
 
   if (!Component) {
     return <ShimmerEffect height="100%" />
   }
 
-  return <>{Component}</>
+  return <Suspense fallback={<ShimmerEffect height="100%" />}>{Component}</Suspense>
 }
