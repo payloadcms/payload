@@ -34,7 +34,6 @@ import {
 } from '../../../providers/UploadSessions/browser.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { uploadRequest } from '../../../utilities/uploadRequest.js'
-import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
 import { useBulkUpload } from '../index.js'
@@ -58,6 +57,8 @@ type FormsManagerContext = {
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
   readonly isInitializing: boolean
+  /** Whether a bulk save is uploading its files. */
+  readonly isUploading: boolean
   readonly removeFile: (index: number) => void
   readonly resetUploadEdits?: () => void
   readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
@@ -87,6 +88,7 @@ const Context = React.createContext<FormsManagerContext>({
   hasSavePermission: false,
   hasSubmitted: false,
   isInitializing: false,
+  isUploading: false,
   removeFile: () => {},
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
@@ -160,7 +162,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     : undefined
 
   const [isUploading, setIsUploading] = React.useState(false)
-  const [loadingText, setLoadingText] = React.useState('')
 
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
@@ -507,7 +508,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               total,
             })
 
-          setLoadingText(t('general:uploadingBulk', { current: i + 1, total }))
           batchToast.show(`${position} · ${getUploadProgressMessage({ fileName, t })}`)
 
           if (fileValue instanceof File) {
@@ -649,7 +649,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       setHasSubmitted(true)
-      setLoadingText('')
       setIsUploading(false)
 
       const remainingForms = []
@@ -909,6 +908,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         hasSavePermission,
         hasSubmitted,
         isInitializing,
+        isUploading,
         removeFile,
         resetUploadEdits,
         saveAllDocs,
@@ -918,14 +918,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         updateUploadEdits,
       }}
     >
-      {isUploading && (
-        <LoadingOverlay
-          animationDuration="250ms"
-          loadingText={loadingText}
-          overlayType="fullscreen"
-          show
-        />
-      )}
       {children}
     </Context>
   )
