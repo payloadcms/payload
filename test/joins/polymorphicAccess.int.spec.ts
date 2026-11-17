@@ -128,6 +128,60 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           })
         }
 
+        test('should keep an outer document constraint when a nested OR matches the collection', async ({
+          payload,
+        }) => {
+          const parent = await payload.create({
+            collection: accessJoinParentsSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const article = await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: parent.id, title: 'Selected article' },
+            overrideAccess: true,
+          })
+
+          await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: parent.id, title: 'Other article' },
+            overrideAccess: true,
+          })
+          await payload.create({
+            collection: accessJoinNotesSlug,
+            data: { parent: parent.id, title: 'Public note' },
+            overrideAccess: true,
+          })
+
+          const result = await payload.findByID({
+            collection: accessJoinParentsSlug,
+            id: parent.id,
+            depth: 0,
+            overrideAccess: true,
+            joins: {
+              children: {
+                count: true,
+                where: {
+                  and: [
+                    {
+                      or: [
+                        { relationTo: { equals: accessJoinArticlesSlug } },
+                        { title: { equals: 'Public note' } },
+                      ],
+                    },
+                    { title: { equals: 'Selected article' } },
+                  ],
+                },
+              },
+            },
+          })
+
+          expect(result.children).toMatchObject({
+            docs: [{ relationTo: accessJoinArticlesSlug, value: article.id }],
+            totalDocs: 1,
+          })
+        })
+
         test('should keep pagination metadata unchanged when unreadable documents are added', async ({
           payload,
         }) => {

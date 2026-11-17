@@ -12,6 +12,7 @@ import type { MongooseAdapter } from '../index.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
+import { resolveWhereForCollection } from './resolveWhereForCollection.js'
 import { transform } from './transform.js'
 
 export type ResolveJoinsArgs = {
@@ -133,20 +134,28 @@ export async function resolveJoins({
       // Extract all parent document IDs to use in the join query
       const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
 
-      // Build the base query
-      let whereQuery: null | Record<string, unknown> = null
-      whereQuery = isPolymorphicJoin
-        ? filterWhereForCollection({
-            availableFields: targetConfig.flattenedFields,
-            collectionSlug: joinCollectionSlug,
-            where: joinQuery.where || {},
-          })
-        : joinQuery.where || {}
+      let whereQuery: Record<string, unknown> = joinQuery.where || {}
 
-      // Skip this collection if the WHERE clause cannot be satisfied for polymorphic collection joins
-      if (whereQuery === null) {
-        return null
+      if (isPolymorphicJoin) {
+        const condition = resolveWhereForCollection({
+          collectionSlug: joinCollectionSlug,
+          fieldNames: new Set(targetConfig.flattenedFields.map(({ name }) => name)),
+          where: joinQuery.where || {},
+        })
+
+        // Skip targets whose collection-specific condition cannot be satisfied.
+        if (condition.matches === 'no-documents') {
+          return null
+        }
+
+        // Only unresolved document conditions need to reach the database.
+        if (condition.matches === 'documents-matching-where') {
+          whereQuery = condition.where
+        } else {
+          whereQuery = {}
+        }
       }
+
       whereQuery = useDrafts
         ? await JoinModel.buildQuery({
             locale,
@@ -433,92 +442,6 @@ export async function resolveJoins({
       ref[segments[segments.length - 1]!] = value
     }
   }
-}
-
-function filterWhereForCollection({
-  availableFields,
-  collectionSlug,
-  where,
-}: {
-  availableFields: Array<{ name: string }>
-  collectionSlug: string
-  where: Record<string, unknown>
-}): null | Record<string, unknown> {
-  // Leave absent or non-object constraints unchanged.
-  if (!where || typeof where !== 'object') {
-    return where
-  }
-
-  const fieldNames = new Set(availableFields.map((field) => field.name))
-  const filtered: Record<string, unknown> = {}
-
-  for (const [key, value] of Object.entries(where)) {
-    // Resolve nested conditions against this collection before combining them.
-    if ((key === 'and' || key === 'or') && Array.isArray(value)) {
-      const conditions = value.map((condition) =>
-        filterWhereForCollection({ availableFields, collectionSlug, where: condition }),
-      )
-
-      // One impossible condition makes the entire AND impossible.
-      if (key === 'and' && conditions.some((condition) => condition === null)) {
-        return null
-      }
-
-      // An empty condition is already true, so this OR needs no further constraint.
-      if (
-        key === 'or' &&
-        conditions.some((condition) => condition && Object.keys(condition).length === 0)
-      ) {
-        continue
-      }
-
-      const matchingConditions = conditions.filter(
-        (condition): condition is Record<string, unknown> =>
-          condition !== null && Object.keys(condition).length > 0,
-      )
-
-      // An OR with no possible branches cannot match this collection.
-      if (key === 'or' && matchingConditions.length === 0) {
-        return null
-      }
-
-      // Keep only conditions that still need to be evaluated against documents.
-      if (matchingConditions.length > 0) {
-        filtered[key] = matchingConditions
-      }
-    } else if (key === 'relationTo') {
-      // Evaluate collection scopes here; relationTo is not a stored document field.
-      if (value && typeof value === 'object') {
-        const constraints = value as Record<string, unknown>
-        const includesCollection = ({ constraint }: { constraint: unknown }) => {
-          // Accept comma-separated lists as well as array operands.
-          if (typeof constraint === 'string') {
-            return constraint.split(',').includes(collectionSlug)
-          }
-
-          return Array.isArray(constraint) && constraint.includes(collectionSlug)
-        }
-
-        // Reject the branch if any collection constraint excludes this target.
-        if (
-          ('equals' in constraints && constraints.equals !== collectionSlug) ||
-          ('not_equals' in constraints && constraints.not_equals === collectionSlug) ||
-          ('in' in constraints && !includesCollection({ constraint: constraints.in })) ||
-          ('not_in' in constraints && includesCollection({ constraint: constraints.not_in }))
-        ) {
-          return null
-        }
-      }
-    } else if (fieldNames.has(key)) {
-      // Pass document-field constraints to this collection's database query.
-      filtered[key] = value
-    } else {
-      // Treat constraints on unavailable fields as nonmatching branches.
-      return null
-    }
-  }
-
-  return filtered
 }
 
 type SanitizedJoin = SanitizedJoins[string][number]
