@@ -10,6 +10,7 @@ import type {
 
 import { applyLocaleFiltering } from 'payload/shared'
 
+import type { RequestHighContrastResult } from '../../utilities/getRequestHighContrast.js'
 import type { RequestThemeResult } from '../../utilities/getRequestTheme.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
@@ -24,7 +25,6 @@ export type RootLayoutData = {
   dateFNSKey: I18nClient['dateFNSKey']
   dir: 'ltr' | 'rtl'
   fallbackLang: AcceptedLanguages
-  highContrastMode: boolean
   isEmbedded: boolean
   isNavOpen: boolean
   languageCode: string
@@ -34,7 +34,8 @@ export type RootLayoutData = {
   suppressHydrationWarning: boolean
   translations: I18nClient['translations']
   user: null | User
-} & RequestThemeResult
+} & RequestHighContrastResult &
+  RequestThemeResult
 
 type Args = {
   importMap: ImportMap
@@ -54,6 +55,12 @@ export async function getRootLayoutData({
   } = req
 
   const { theme, themeSource } = getRequestTheme({ config, cookies, headers })
+
+  const { highContrastMode, highContrastModeSource } = getRequestHighContrast({
+    config,
+    cookies,
+    headers,
+  })
 
   const languageOptions: LanguageOptions = Object.entries(config.i18n.supportedLanguages || {}).map(
     ([language, languageConfig]) => ({
@@ -78,7 +85,8 @@ export async function getRootLayoutData({
     dateFNSKey: req.i18n.dateFNSKey,
     dir: getLanguageDir({ languageCode }),
     fallbackLang: config.i18n.fallbackLanguage,
-    highContrastMode: getRequestHighContrast({ config, cookies, headers }),
+    highContrastMode,
+    highContrastModeSource,
     isEmbedded: getRequestEmbed({ config, cookies }),
     isNavOpen: navPrefs?.open ?? true,
     languageCode,

@@ -518,6 +518,7 @@ export { UploadHandlersProvider, useUploadHandlers } from '../../providers/Uploa
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export {
   defaultTheme,
+  getHighContrastModeFromSystem,
   getThemeFromSystem,
   type RootThemeContext,
   type Theme,
