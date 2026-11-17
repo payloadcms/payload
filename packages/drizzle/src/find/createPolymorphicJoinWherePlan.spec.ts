@@ -329,14 +329,18 @@ describe('createPolymorphicJoinWherePlan', () => {
       'variantTags',
     ],
     ['a localized field', { localizedTitle: { equals: 'value' } }, 'localizedTitle'],
-    ['a field stored in array rows', { 'entries.tags': { equals: 'value' } }, 'entries.tags'],
-    [
-      'a field stored in block rows',
-      { 'content.hero.tags': { equals: 'value' } },
-      'content.hero.tags',
-    ],
   ] as const)('marks %s as invalid', (_description, where, schemaPath) => {
     expect(createPlan(where as Where).get(schemaPath)).toMatchObject({ type: 'invalid' })
+  })
+
+  it('delegates array and block field filters to the collection query builder', () => {
+    const plan = createPlan({
+      'entries.tags': { equals: 'available' },
+      'content.tags': { equals: 'available' },
+    })
+
+    expect(plan.get('entries.tags')).toMatchObject({ type: 'nested' })
+    expect(plan.get('content.tags')).toMatchObject({ type: 'nested' })
   })
 
   it('marks both schema paths as invalid when they resolve to the same flattened column path', () => {

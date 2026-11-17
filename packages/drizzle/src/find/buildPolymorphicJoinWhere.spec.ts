@@ -174,6 +174,29 @@ describe('buildPolymorphicJoinWhere', () => {
     expect(query.params).toEqual([])
   })
 
+  it('should retain NULL semantics when a nested field is absent from a collection', () => {
+    const wherePlan: PolymorphicJoinWherePlan = new Map([
+      [
+        'items.heading',
+        {
+          columnPath: 'items_heading',
+          fieldsByCollection: new Map([['articles', { type: 'nested', field: textField }]]),
+          schemaPath: 'items.heading',
+          type: 'nested',
+        },
+      ],
+    ])
+    const query = renderWhere({
+      collection: 'notes',
+      table: notesTable,
+      where: { 'items.heading': { exists: false } },
+      wherePlan,
+    })
+
+    expect(query.sql).toContain('where null is null')
+    expect(query.params).toEqual([])
+  })
+
   it.each([
     ['exists', { exists: 'false' }, 'where null is null', []],
     ['in', { in: '1,2' }, 'where null in (?, ?)', [1, 2]],

@@ -15,13 +15,15 @@ export type ScalarWhereField = {
   type: 'scalar'
 }
 
-type CollectionWhereField = { field: FlattenedField; type: 'hasManySelect' } | ScalarWhereField
+type CollectionWhereField =
+  | { field: FlattenedField; type: 'hasManySelect' | 'nested' }
+  | ScalarWhereField
 
 export type WherePathPlan = {
   columnPath: string
   fieldsByCollection: Map<string, CollectionWhereField>
   schemaPath: string
-  type: 'hasManySelect' | 'invalid' | 'scalar'
+  type: 'hasManySelect' | 'invalid' | 'nested' | 'scalar'
 }
 
 export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
@@ -29,11 +31,11 @@ export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
 /**
  * Analyzes every leaf path in a polymorphic join where clause before SQL is built. Each plan entry
  * records the flattened column path, the compatible field shape for each target collection, and
- * whether the path uses a scalar column or a has-many select value table. A field may be absent
+ * whether the path uses a column, a has-many select value table, or nested rows. A field may be absent
  * from some target collections; those branches compare against SQL NULL or an empty JSON array.
  *
- * Paths are marked as invalid when their storage shapes conflict, require separate-row
- * traversal, have no matching field, lack a required column, or collide after path flattening.
+ * Paths are marked as invalid when their storage shapes conflict, have no matching field,
+ * lack a required column, or collide after path flattening.
  *
  * @returns A plan keyed by each unique schema path in `where`.
  * @throws If a target collection or its mapped database table is not available in the adapter.
@@ -81,12 +83,15 @@ export const createPolymorphicJoinWherePlan = ({
     const fieldsByCollection = new Map<string, CollectionWhereField>()
     let isFieldPresent = schemaPath === 'id' || schemaPath === 'relationTo'
     let hasManySelect = false
+    let hasNestedField = false
     let hasUnsupportedFieldShape = false
     const scalarQueryValueSignatures = new Set<string>()
+    const nestedQueryValueSignatures = new Set<string>()
 
     for (const { collection, collectionConfig, table, tableName } of collectionContexts) {
-      const fieldAtPath = getFieldByPath({
-        fields: collectionConfig.flattenedFields,
+      const fieldAtPath = getFieldAtQueryPath({
+        adapter,
+        flattenedFields: collectionConfig.flattenedFields,
         path: schemaPath,
       })
 
@@ -115,7 +120,7 @@ export const createPolymorphicJoinWherePlan = ({
       if (!fieldAtPath) {
         if (
           pathHasUnsupportedNestedContainer({
-            fields: collectionConfig.flattenedFields,
+            flattenedFields: collectionConfig.flattenedFields,
             path: schemaPath,
           })
         ) {
@@ -127,8 +132,14 @@ export const createPolymorphicJoinWherePlan = ({
 
       isFieldPresent = true
 
-      if (pathHasSeparateRows({ fields: collectionConfig.flattenedFields, path: schemaPath })) {
-        hasUnsupportedFieldShape = true
+      if (
+        pathHasArrayOrBlock({ flattenedFields: collectionConfig.flattenedFields, path: schemaPath })
+      ) {
+        hasNestedField = true
+        nestedQueryValueSignatures.add(
+          `${'hasMany' in fieldAtPath.field && fieldAtPath.field.hasMany ? 'many' : 'one'}:${getScalarQueryValueSignature({ field: fieldAtPath.field })}`,
+        )
+        fieldsByCollection.set(collection, { type: 'nested', field: fieldAtPath.field })
         continue
       }
 
@@ -173,10 +184,22 @@ export const createPolymorphicJoinWherePlan = ({
       !isFieldPresent ||
       hasUnsupportedFieldShape ||
       (hasManySelect && scalarQueryValueSignatures.size > 0) ||
+      (hasNestedField && (hasManySelect || scalarQueryValueSignatures.size > 0)) ||
+      nestedQueryValueSignatures.size > 1 ||
       scalarQueryValueSignatures.size > 1
 
+    let type: WherePathPlan['type'] = 'scalar'
+
+    if (isInvalid) {
+      type = 'invalid'
+    } else if (hasNestedField) {
+      type = 'nested'
+    } else if (hasManySelect) {
+      type = 'hasManySelect'
+    }
+
     plan.set(schemaPath, {
-      type: isInvalid ? 'invalid' : hasManySelect ? 'hasManySelect' : 'scalar',
+      type,
       columnPath,
       fieldsByCollection,
       schemaPath,
@@ -198,7 +221,7 @@ const getScalarQueryValueSignature = ({
   column,
   field,
 }: {
-  column: Column
+  column?: Column
   field: FlattenedField
 }): string => {
   if (field.type === 'select' || field.type === 'radio') {
@@ -213,7 +236,7 @@ const getScalarQueryValueSignature = ({
     return 'text'
   }
 
-  return `${field.type}:${column.getSQLType()}`
+  return `${field.type}:${column?.getSQLType() ?? ''}`
 }
 
 const getWhereSchemaPaths = (where: Where): string[] => {
@@ -240,12 +263,18 @@ const getColumnPath = (schemaPath: string): string =>
     .map((segment) => sanitizePathSegment(segment))
     .join('_')
 
-const pathHasSeparateRows = ({ fields, path }: { fields: FlattenedField[]; path: string }) => {
+const pathHasArrayOrBlock = ({
+  flattenedFields,
+  path,
+}: {
+  flattenedFields: FlattenedField[]
+  path: string
+}) => {
   const pathSegments = path.split('.')
 
   for (let segmentIndex = 1; segmentIndex < pathSegments.length; segmentIndex++) {
     const fieldAtParentPath = getFieldByPath({
-      fields,
+      fields: flattenedFields,
       path: pathSegments.slice(0, segmentIndex).join('.'),
     })
 
@@ -258,17 +287,17 @@ const pathHasSeparateRows = ({ fields, path }: { fields: FlattenedField[]; path:
 }
 
 const pathHasUnsupportedNestedContainer = ({
-  fields,
+  flattenedFields,
   path,
 }: {
-  fields: FlattenedField[]
+  flattenedFields: FlattenedField[]
   path: string
 }) => {
   const pathSegments = path.split('.')
 
   for (let segmentIndex = 1; segmentIndex < pathSegments.length; segmentIndex++) {
     const fieldAtParentPath = getFieldByPath({
-      fields,
+      fields: flattenedFields,
       path: pathSegments.slice(0, segmentIndex).join('.'),
     })
 
@@ -276,10 +305,56 @@ const pathHasUnsupportedNestedContainer = ({
       return false
     }
 
-    if (!['group', 'tab'].includes(fieldAtParentPath.field.type)) {
+    if (!['array', 'blocks', 'group', 'tab'].includes(fieldAtParentPath.field.type)) {
       return true
     }
   }
 
   return false
+}
+
+function getFieldAtQueryPath({
+  adapter,
+  flattenedFields,
+  path,
+}: {
+  adapter: DrizzleAdapter
+  flattenedFields: FlattenedField[]
+  path: string
+}): { field: FlattenedField; pathHasLocalized: boolean } | undefined {
+  const [name, ...segments] = path.split('.')
+  const field = flattenedFields.find((field) => field.name === name)
+
+  if (!field) {
+    return undefined
+  }
+
+  if (segments.length === 0) {
+    return { field, pathHasLocalized: Boolean(field.localized) }
+  }
+
+  let nestedFields: FlattenedField[][] = []
+
+  if ('flattenedFields' in field) {
+    nestedFields = [field.flattenedFields]
+  } else if (field.type === 'blocks') {
+    nestedFields = field.blocks.map((block) =>
+      typeof block === 'string'
+        ? adapter.payload.blocks[block].flattenedFields
+        : block.flattenedFields,
+    )
+  }
+
+  for (const flattenedFields of nestedFields) {
+    const nestedField = getFieldAtQueryPath({ adapter, flattenedFields, path: segments.join('.') })
+
+    if (nestedField) {
+      return {
+        field: nestedField.field,
+        pathHasLocalized: Boolean(field.localized) || nestedField.pathHasLocalized,
+      }
+    }
+  }
+
+  return undefined
 }
