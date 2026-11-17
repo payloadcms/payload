@@ -1,6 +1,8 @@
 import type { SanitizedConfig } from 'payload'
 
-import { defaultTheme, type Theme } from '../providers/Theme/shared.js'
+import type { Theme } from '../providers/Theme/shared.js'
+
+import { defaultTheme, themeCookieSuffix } from '../providers/Theme/shared.js'
 
 type GetRequestThemeArgs = {
   config: SanitizedConfig
@@ -19,6 +21,7 @@ export type RequestThemeResult = {
 
 const acceptedThemes: Theme[] = ['dark', 'light']
 
+/** @internal */
 export const getRequestTheme = ({
   config,
   cookies,
@@ -28,7 +31,7 @@ export const getRequestTheme = ({
     return { theme: config.admin.theme, themeSource: 'config' }
   }
 
-  const themeFromCookie = cookies.get(`${config.cookiePrefix}-theme`) as Theme
+  const themeFromCookie = cookies.get(`${config.cookiePrefix}${themeCookieSuffix}`) as Theme
 
   if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
     return { theme: themeFromCookie, themeSource: 'cookie' }
