@@ -73,6 +73,10 @@ If you wish to use a different key other than the field `name`, you can define `
 
 </Banner>
 
+The JWT keys `id`, `collection`, `email`, `sid`, `iat`, and `exp` are reserved for Payload. A custom string passed to `saveToJWT` cannot replace these keys.
+
+Payload signs an `authVersion: 1` marker in each token's protected JWT header. This identifies tokens issued by the fixed authentication format. Tokens issued before this protection was added do not have the marker and must be replaced by signing in again; integrations must also reissue stored bearer tokens. The decoded JWT payload remains flat and keeps fields configured with `saveToJWT` at the same paths, and `/me` returns the same data for a valid new token. The version marker is not a payload field.
+
 ### Using Token Data
 
 This is especially helpful when writing [Hooks](../hooks/overview) and [Access Control](../access-control/overview) that depend on user defined fields.

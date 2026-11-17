@@ -3,6 +3,7 @@ import { ListItemNode, ListNode } from '@lexical/list'
 import { createServerFeature } from '../../../../utilities/createServerFeature.js'
 import { createNode } from '../../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../../htmlConverter.js'
+import { listItemValidation, listValidation } from '../../shared/validate.js'
 import { UNORDERED_LIST } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
@@ -17,12 +18,14 @@ export const UnorderedListFeature = createServerFeature({
           html: ListHTMLConverter as any, // ListHTMLConverter uses a different generic type than ListNode[exportJSON], thus we need to cast as any
         },
         node: ListNode,
+        validations: [listValidation],
       }),
       createNode({
         converters: {
           html: ListItemHTMLConverter as any,
         },
         node: ListItemNode,
+        validations: [listItemValidation],
       }),
     ],
   },

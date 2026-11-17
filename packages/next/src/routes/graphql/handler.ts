@@ -11,6 +11,7 @@ import {
   headersWithCors,
   logError,
   mergeHeaders,
+  unlinkClientUploadTempFile,
 } from 'payload'
 
 const handleError = async ({
@@ -112,49 +113,55 @@ export const POST =
       })
     }
 
-    await addDataAndFileToRequest(req)
-    addLocalesToRequestFromData(req)
+    try {
+      await addDataAndFileToRequest(req)
+      addLocalesToRequestFromData(req)
 
-    const { schema, validationRules } = await getGraphql(config)
+      const { schema, validationRules } = await getGraphql(config)
 
-    const headers = {}
-    const apiResponse = await createHandler({
-      context: { headers, req },
-      onOperation: async (request, args, result) => {
-        const response =
-          typeof payload.extensions === 'function'
-            ? await payload.extensions({
-                args,
-                req: request,
-                result,
-              })
-            : result
-        if (response.errors) {
-          const errors = (await Promise.all(
-            result.errors.map((error) => {
-              return handleError({ err: error, payload, req })
-            }),
-          )) as GraphQLError[]
-          // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
-          return { ...response, errors }
-        }
-        return response
-      },
-      schema,
-      validationRules: (_, args, defaultRules) => defaultRules.concat(validationRules(args)),
-    })(originalRequest)
+      const headers = {}
+      const apiResponse = await createHandler({
+        context: { headers, req },
+        onOperation: async (request, args, result) => {
+          const response =
+            typeof payload.extensions === 'function'
+              ? await payload.extensions({
+                  args,
+                  req: request,
+                  result,
+                })
+              : result
+          if (response.errors) {
+            const errors = (await Promise.all(
+              result.errors.map((error) => {
+                return handleError({ err: error, payload, req })
+              }),
+            )) as GraphQLError[]
+            // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
+            return { ...response, errors }
+          }
+          return response
+        },
+        schema,
+        validationRules: (_, args, defaultRules) => defaultRules.concat(validationRules(args)),
+      })(originalRequest)
 
-    const resHeaders = headersWithCors({
-      headers: new Headers(apiResponse.headers),
-      req,
-    })
+      const resHeaders = headersWithCors({
+        headers: new Headers(apiResponse.headers),
+        req,
+      })
 
-    for (const key in headers) {
-      resHeaders.append(key, headers[key])
+      for (const key in headers) {
+        resHeaders.append(key, headers[key])
+      }
+
+      return new Response(apiResponse.body, {
+        headers: req.responseHeaders ? mergeHeaders(req.responseHeaders, resHeaders) : resHeaders,
+        status: apiResponse.status,
+      })
+    } finally {
+      // GraphQL parses the body itself instead of going through wrapInternalEndpoints, and an
+      // operation that writes no document never reaches the operation-level cleanup.
+      await unlinkClientUploadTempFile({ req })
     }
-
-    return new Response(apiResponse.body, {
-      headers: req.responseHeaders ? mergeHeaders(req.responseHeaders, resHeaders) : resHeaders,
-      status: apiResponse.status,
-    })
   }

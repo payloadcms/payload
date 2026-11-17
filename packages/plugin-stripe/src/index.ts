@@ -8,18 +8,18 @@ import { deleteFromStripe } from './hooks/deleteFromStripe.js'
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
 import { stripeREST } from './routes/rest.js'
 import { stripeWebhooks } from './routes/webhooks.js'
+import { sanitizeStripeRESTConfig } from './utilities/sanitizeStripeRESTConfig.js'
 
 export { stripeProxy } from './utilities/stripeProxy.js'
 
-export const stripePlugin =
-  (incomingStripeConfig: StripePluginConfig) =>
-  (config: Config): Config => {
+export const stripePlugin = (incomingStripeConfig: StripePluginConfig) => {
+  const plugin = (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
     const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingStripeConfig,
-      rest: incomingStripeConfig?.rest ?? false,
+      rest: sanitizeStripeRESTConfig({ rest: incomingStripeConfig?.rest }),
       sync: incomingStripeConfig?.sync || [],
     }
 
@@ -44,7 +44,7 @@ export const stripePlugin =
       },
     ]
 
-    if (incomingStripeConfig?.rest) {
+    if (pluginConfig.rest) {
       endpoints.push({
         handler: async (req) => {
           const res = await stripeREST({
@@ -111,3 +111,6 @@ export const stripePlugin =
 
     return config
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-stripe' })
+}

@@ -54,6 +54,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     newPassword: '新密碼',
     passed: '驗證通過',
     passwordResetSuccessfully: '密碼重設成功。',
+    resend: '重新傳送',
     resetPassword: '重設密碼',
     resetPasswordExpiration: '密碼重設有效期限',
     resetPasswordToken: '密碼重設憑證',

@@ -1,0 +1,35 @@
+---
+title: AnimateHeight
+label: Animate Height
+order: 20
+desc: Animate content between collapsed and expanded heights with Payload's AnimateHeight component.
+keywords: ui, component, animate height, collapse, expand, transition
+---
+
+The `AnimateHeight` component animates its children between a collapsed height and their natural height. It is useful when building disclosure controls and expandable regions.
+
+## Import
+
+```tsx
+import { AnimateHeight } from '@payloadcms/ui'
+```
+
+## Interactive example
+
+<ComponentPreview component="AnimateHeight" example="interactive" />
+
+The control that changes `height` remains your responsibility. Give that control an accessible label and expose its expanded state with `aria-expanded` when it controls a disclosure region.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop          | Type               | Default | Description                                     |
+| ------------- | ------------------ | ------- | ----------------------------------------------- |
+| `children` \* | `ReactNode`        | —       | Content whose height is animated.               |
+| `height`      | `number \| 'auto'` | —       | Target height. Use `0` to collapse the content. |
+| `duration`    | `number`           | `300`   | Animation duration in milliseconds.             |
+| `id`          | `string`           | —       | Sets the wrapper element ID.                    |
+| `className`   | `string`           | —       | Adds a class to the wrapper element.            |
+
+_\* An asterisk denotes that a prop is required._

@@ -96,11 +96,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       : defaultLocalStorage
 
   const { apiRoute = '/api', cartsFetchQuery = {} } = api || {}
-  const baseAPIURL = formatAdminURL({
-    apiRoute,
-    path: '',
-  })
-
   const config = useMemo<EcommerceConfig>(
     () => ({
       addressesSlug,
@@ -170,7 +165,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     async (initialData: Record<string, unknown>) => {
       const query = qs.stringify(cartQuery)
 
-      const response = await fetch(`${baseAPIURL}/${cartsSlug}?${query}`, {
+      const response = await fetch(formatAdminURL({ apiRoute, path: `/${cartsSlug}?${query}` }), {
         body: JSON.stringify({
           ...initialData,
           currency: selectedCurrency.code,
@@ -201,7 +196,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       return data.doc as CartsCollection
     },
-    [baseAPIURL, cartQuery, cartsSlug, selectedCurrency.code, user],
+    [apiRoute, cartQuery, cartsSlug, selectedCurrency.code, user],
   )
 
   const getCart = useCallback(
@@ -211,13 +206,16 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         ...(options?.secret ? { secret: options.secret } : {}),
       })
 
-      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}?${query}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({ apiRoute, path: `/${cartsSlug}/${cartID}?${query}` }),
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'GET',
         },
-        method: 'GET',
-      })
+      )
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -232,7 +230,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       return data as CartsCollection
     },
-    [baseAPIURL, cartQuery, cartsSlug],
+    [apiRoute, cartQuery, cartsSlug],
   )
 
   const refreshCart = useCallback<EcommerceContextType['refreshCart']>(async () => {
@@ -268,18 +266,21 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       try {
         if (cartID) {
           // Use server-side endpoint for adding items
-          const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/add-item`, {
-            body: JSON.stringify({
-              item,
-              quantity,
-              secret: cartSecret,
-            }),
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            formatAdminURL({ apiRoute, path: `/${cartsSlug}/${cartID}/add-item` }),
+            {
+              body: JSON.stringify({
+                item,
+                quantity,
+                secret: cartSecret,
+              }),
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              method: 'POST',
             },
-            method: 'POST',
-          })
+          )
 
           if (!response.ok) {
             const errorText = await response.text()
@@ -315,7 +316,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, createCart, debug, getCart],
+    [apiRoute, cartID, cartSecret, cartsSlug, createCart, debug, getCart],
   )
 
   const removeItem: EcommerceContextType['removeItem'] = useCallback(
@@ -326,17 +327,20 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       setIsLoading(true)
       try {
-        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/remove-item`, {
-          body: JSON.stringify({
-            itemID: targetID,
-            secret: cartSecret,
-          }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          formatAdminURL({ apiRoute, path: `/${cartsSlug}/${cartID}/remove-item` }),
+          {
+            body: JSON.stringify({
+              itemID: targetID,
+              secret: cartSecret,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           },
-          method: 'POST',
-        })
+        )
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -365,7 +369,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
+    [apiRoute, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const incrementItem: EcommerceContextType['incrementItem'] = useCallback(
@@ -376,18 +380,21 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       setIsLoading(true)
       try {
-        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/update-item`, {
-          body: JSON.stringify({
-            itemID: targetID,
-            quantity: { $inc: 1 },
-            secret: cartSecret,
-          }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          formatAdminURL({ apiRoute, path: `/${cartsSlug}/${cartID}/update-item` }),
+          {
+            body: JSON.stringify({
+              itemID: targetID,
+              quantity: { $inc: 1 },
+              secret: cartSecret,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           },
-          method: 'POST',
-        })
+        )
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -416,7 +423,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
+    [apiRoute, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const decrementItem: EcommerceContextType['decrementItem'] = useCallback(
@@ -427,18 +434,21 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       setIsLoading(true)
       try {
-        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/update-item`, {
-          body: JSON.stringify({
-            itemID: targetID,
-            quantity: { $inc: -1 },
-            secret: cartSecret,
-          }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          formatAdminURL({ apiRoute, path: `/${cartsSlug}/${cartID}/update-item` }),
+          {
+            body: JSON.stringify({
+              itemID: targetID,
+              quantity: { $inc: -1 },
+              secret: cartSecret,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           },
-          method: 'POST',
-        })
+        )
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -467,7 +477,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart],
+    [apiRoute, cartID, cartSecret, cartsSlug, debug, getCart],
   )
 
   const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
@@ -477,16 +487,19 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
     setIsLoading(true)
     try {
-      const response = await fetch(`${baseAPIURL}/${cartsSlug}/${cartID}/clear`, {
-        body: JSON.stringify({
-          secret: cartSecret,
-        }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({ apiRoute, path: `/${cartsSlug}/${cartID}/clear` }),
+        {
+          body: JSON.stringify({
+            secret: cartSecret,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      })
+      )
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -514,7 +527,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }, [baseAPIURL, cartID, cartSecret, cartsSlug, debug, getCart])
+  }, [apiRoute, cartID, cartSecret, cartsSlug, debug, getCart])
 
   const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {
@@ -548,19 +561,22 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       if (paymentMethod.initiatePayment) {
         try {
-          const response = await fetch(`${baseAPIURL}/payments/${paymentMethodID}/initiate`, {
-            body: JSON.stringify({
-              cartID,
-              currency: selectedCurrency.code,
-              secret: cartSecret,
-              ...(options?.additionalData || {}),
-            }),
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            formatAdminURL({ apiRoute, path: `/payments/${paymentMethodID}/initiate` }),
+            {
+              body: JSON.stringify({
+                cartID,
+                currency: selectedCurrency.code,
+                secret: cartSecret,
+                ...(options?.additionalData || {}),
+              }),
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              method: 'POST',
             },
-            method: 'POST',
-          })
+          )
 
           if (!response.ok) {
             const responseError = await response.text()
@@ -585,7 +601,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
       }
     },
-    [baseAPIURL, cartID, cartSecret, debug, paymentMethods, selectedCurrency.code],
+    [apiRoute, cartID, cartSecret, debug, paymentMethods, selectedCurrency.code],
   )
 
   const confirmOrder = useCallback<EcommerceContextType['initiatePayment']>(
@@ -601,19 +617,22 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       if (paymentMethod.confirmOrder) {
-        const response = await fetch(`${baseAPIURL}/payments/${paymentMethodID}/confirm-order`, {
-          body: JSON.stringify({
-            cartID,
-            currency: selectedCurrency.code,
-            secret: cartSecret,
-            ...(options?.additionalData || {}),
-          }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          formatAdminURL({ apiRoute, path: `/payments/${paymentMethodID}/confirm-order` }),
+          {
+            body: JSON.stringify({
+              cartID,
+              currency: selectedCurrency.code,
+              secret: cartSecret,
+              ...(options?.additionalData || {}),
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           },
-          method: 'POST',
-        })
+        )
 
         if (!response.ok) {
           const responseError = await response.text()
@@ -631,7 +650,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Payment method "${paymentMethodID}" does not support order confirmation`)
       }
     },
-    [baseAPIURL, cartID, cartSecret, paymentMethods, selectedCurrency.code],
+    [apiRoute, cartID, cartSecret, paymentMethods, selectedCurrency.code],
   )
 
   const getUser = useCallback(async () => {
@@ -644,13 +663,16 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         },
       })
 
-      const response = await fetch(`${baseAPIURL}/${customersSlug}/me?${query}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({ apiRoute, path: `/${customersSlug}/me?${query}` }),
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'GET',
         },
-        method: 'GET',
-      })
+      )
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -677,7 +699,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         `Failed to fetch user: ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
     }
-  }, [baseAPIURL, customersSlug, debug])
+  }, [apiRoute, customersSlug, debug])
 
   const getAddresses = useCallback(async () => {
     if (!user) {
@@ -691,13 +713,16 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         pagination: false,
       })
 
-      const response = await fetch(`${baseAPIURL}/${addressesSlug}?${query}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({ apiRoute, path: `/${addressesSlug}?${query}` }),
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'GET',
         },
-        method: 'GET',
-      })
+      )
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -724,7 +749,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         `Failed to fetch addresses: ${error instanceof Error ? error.message : 'Unknown error'}`,
       )
     }
-  }, [user, baseAPIURL, addressesSlug, debug])
+  }, [user, apiRoute, addressesSlug, debug])
 
   const updateAddress = useCallback<EcommerceContextType['updateAddress']>(
     async (addressID, address) => {
@@ -733,14 +758,17 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       try {
-        const response = await fetch(`${baseAPIURL}/${addressesSlug}/${addressID}`, {
-          body: JSON.stringify(address),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          formatAdminURL({ apiRoute, path: `/${addressesSlug}/${addressID}` }),
+          {
+            body: JSON.stringify(address),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'PATCH',
           },
-          method: 'PATCH',
-        })
+        )
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -766,7 +794,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         )
       }
     },
-    [user, baseAPIURL, addressesSlug, getAddresses, debug],
+    [user, apiRoute, addressesSlug, getAddresses, debug],
   )
 
   const createAddress = useCallback<EcommerceContextType['createAddress']>(
@@ -776,7 +804,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       try {
-        const response = await fetch(`${baseAPIURL}/${addressesSlug}`, {
+        const response = await fetch(formatAdminURL({ apiRoute, path: `/${addressesSlug}` }), {
           body: JSON.stringify(address),
           credentials: 'include',
           headers: {
@@ -809,7 +837,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         )
       }
     },
-    [user, baseAPIURL, addressesSlug, getAddresses, debug],
+    [user, apiRoute, addressesSlug, getAddresses, debug],
   )
 
   /**
@@ -849,17 +877,20 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     async (targetCartID, sourceCartID, sourceSecret) => {
       setIsLoading(true)
       try {
-        const response = await fetch(`${baseAPIURL}/${cartsSlug}/${targetCartID}/merge`, {
-          body: JSON.stringify({
-            sourceCartID,
-            sourceSecret,
-          }),
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          formatAdminURL({ apiRoute, path: `/${cartsSlug}/${targetCartID}/merge` }),
+          {
+            body: JSON.stringify({
+              sourceCartID,
+              sourceSecret,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           },
-          method: 'POST',
-        })
+        )
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -888,7 +919,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setIsLoading(false)
       }
     },
-    [baseAPIURL, cartsSlug, debug, getCart],
+    [apiRoute, cartsSlug, debug, getCart],
   )
 
   /**
@@ -942,7 +973,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         // User has no existing cart - transfer guest cart to user
         try {
           const response = await fetch(
-            `${baseAPIURL}/${cartsSlug}/${guestCartID}?secret=${guestSecret}`,
+            formatAdminURL({
+              apiRoute,
+              path: `/${cartsSlug}/${guestCartID}?secret=${guestSecret}`,
+            }),
             {
               body: JSON.stringify({
                 customer: fetchedUser.id,
@@ -981,7 +1015,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       localStorage.setItem(localStorageConfig.key, cartID as string)
     }
   }, [
-    baseAPIURL,
+    apiRoute,
     cartID,
     cartSecret,
     cartsSlug,

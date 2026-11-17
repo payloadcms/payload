@@ -57,6 +57,7 @@ export const trTranslations: DefaultTranslationsObject = {
     newPassword: 'Yeni Parola',
     passed: 'Doğrulama Başarılı',
     passwordResetSuccessfully: 'Parola başarıyla sıfırlandı.',
+    resend: 'Yeniden gönder',
     resetPassword: 'Parolayı Sıfırla',
     resetPasswordExpiration: 'Parola Geçerlik Süresini Sıfırla',
     resetPasswordToken: 'Parola tokenini sıfırla',

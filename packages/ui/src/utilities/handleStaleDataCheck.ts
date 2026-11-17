@@ -35,6 +35,7 @@ export const handleStaleDataCheck = async ({
         collection: collectionSlug,
         depth: 0,
         draft: collectionHasDrafts,
+        locale: req.locale,
         overrideAccess: false,
         select: {
           updatedAt: true,
@@ -52,6 +53,7 @@ export const handleStaleDataCheck = async ({
         slug: globalSlug,
         depth: 0,
         draft: globalHasDrafts,
+        locale: req.locale,
         overrideAccess: false,
         select: {
           updatedAt: true,

@@ -36,7 +36,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     timestamps: true,
   })
 
-  let query = await buildQuery({
+  const query = await buildQuery({
     adapter: this,
     collectionSlug: collectionConfig.slug,
     fields: collectionConfig.flattenedFields,
@@ -93,6 +93,10 @@ export const updateJobs: UpdateJobs = async function updateMany(
   }
 
   let result: Job[] = []
+  const claimedIDs: unknown[] = []
+  const isJobClaim =
+    data.processing === true &&
+    Object.keys(data).every((field) => field === 'processing' || field === 'updatedAt')
 
   try {
     if (id) {
@@ -105,29 +109,90 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const doc = await Model.findOneAndUpdate(query, updateData, findOptions)
         result = doc ? [doc] : []
       }
-    } else {
-      if (typeof limit === 'number' && limit > 0) {
-        const documentsToUpdate = await Model.find(
-          query,
-          {},
-          { ...findOptions, limit, projection: { _id: 1 }, sort },
-        )
-        if (documentsToUpdate.length === 0) {
-          return null
-        }
-
-        query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
-      }
-
-      await Model.updateMany(query, updateData, baseOptions)
+    } else if (limit === 1) {
+      /**
+       * Select, update, and return one job atomically in a single database call.
+       * We can only do this with limit === 1, which can be expressed as findOne.
+       */
+      const doc = await Model.findOneAndUpdate(query, updateData, {
+        ...findOptions,
+        projection: returning === false ? { _id: 1 } : undefined,
+        sort,
+      })
 
       if (returning === false) {
         return null
       }
 
-      result = await Model.find(query, {}, { ...findOptions, sort })
+      result = doc ? [doc] : []
+    } else {
+      const hasLimit = typeof limit === 'number' && limit > 0
+
+      if (!hasLimit && returning === false) {
+        await Model.updateMany(query, updateData, baseOptions)
+
+        return null
+      }
+
+      const candidates = await Model.find(
+        query,
+        {},
+        { ...findOptions, limit: hasLimit ? limit : undefined, projection: { _id: 1 }, sort },
+      )
+
+      /**
+       * Update each candidate with a conditional findOneAndUpdate that re-checks the original query.
+       * A job that another runner modified since it was selected (e.g. claimed it by setting
+       * `processing: true`) no longer matches and is skipped, so only the documents this call
+       * actually updated are returned. Reading back by the candidate IDs would return jobs claimed
+       * by other runners, and reading back by the original query would miss the jobs this call claimed.
+       */
+      for (const candidate of candidates) {
+        const doc = await Model.findOneAndUpdate(
+          { $and: [query, { _id: candidate._id }] },
+          updateData,
+          {
+            ...findOptions,
+            projection: returning === false ? { _id: 1 } : undefined,
+          },
+        )
+
+        if (doc) {
+          result.push(doc)
+          if (isJobClaim) {
+            claimedIDs.push(candidate._id)
+          }
+        }
+      }
+
+      // Losing every candidate does not mean the queue is empty. Select again
+      // so jobs beyond this batch remain available to this runner.
+      if (isJobClaim && candidates.length && !result.length) {
+        return updateJobs.call(this, { data, limit, req, returning, sort: sortArg, where })
+      }
+
+      if (returning === false) {
+        return null
+      }
     }
   } catch (error) {
+    // Earlier per-document claims have not been returned to a runner yet. Release
+    // those known winners if a later write fails, so the batch can be retried.
+    // A caller-supplied transaction owns its rollback instead.
+    if (claimedIDs.length && !baseOptions.session) {
+      try {
+        await Model.updateMany(
+          { _id: { $in: claimedIDs }, processing: true },
+          { $set: { processing: false } },
+          baseOptions,
+        )
+      } catch (releaseError) {
+        this.payload.logger.error({
+          err: releaseError,
+          msg: 'Failed to release partial job claims',
+        })
+      }
+    }
     handleError({ collection: collectionConfig.slug, error, req })
   }
 

@@ -56,6 +56,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     newPassword: 'Нова парола',
     passed: 'Удостоверението е успешно',
     passwordResetSuccessfully: 'Паролата е променена успешно.',
+    resend: 'Изпрати отново',
     resetPassword: 'Възстанови парола',
     resetPasswordExpiration: 'Нулиране на изтичане на паролата',
     resetPasswordToken: 'Ключ за възстановяване на парола',

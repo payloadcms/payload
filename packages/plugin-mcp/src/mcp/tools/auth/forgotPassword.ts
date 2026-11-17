@@ -8,7 +8,7 @@ export const forgotPasswordTool = (
   req: PayloadRequest,
   verboseLogs: boolean,
 ) => {
-  const tool = async (collection: string, email: string, disableEmail: boolean = false) => {
+  const tool = async (collection: string, email: string) => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -18,12 +18,14 @@ export const forgotPasswordTool = (
     }
 
     try {
-      const result = await payload.forgotPassword({
+      await payload.forgotPassword({
         collection,
         data: {
           email,
         },
-        disableEmail,
+        disableEmail: false,
+        overrideAccess: false,
+        req,
       })
 
       if (verboseLogs) {
@@ -36,7 +38,7 @@ export const forgotPasswordTool = (
         content: [
           {
             type: 'text' as const,
-            text: `# Password Reset Email Sent\n\n**User:** ${email}\n**Collection:** ${collection}\n**Email Disabled:** ${disableEmail}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+            text: 'If an account matches that email, password reset instructions have been sent.',
           },
         ],
       }
@@ -63,8 +65,8 @@ export const forgotPasswordTool = (
       description: toolSchemas.forgotPassword.description,
       inputSchema: toolSchemas.forgotPassword.parameters.shape,
     },
-    async ({ collection, disableEmail, email }) => {
-      return await tool(collection, email, disableEmail)
+    async ({ collection, email }) => {
+      return await tool(collection, email)
     },
   )
 }

@@ -11,5 +11,6 @@ export class Forbidden extends APIError {
       t ? t('error:notAllowedToPerformAction') : en.translations.error.notAllowedToPerformAction,
       httpStatus.FORBIDDEN,
     )
+    this.name = 'Forbidden'
   }
 }

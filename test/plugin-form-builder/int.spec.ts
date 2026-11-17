@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -93,6 +93,29 @@ describe('@payloadcms/plugin-form-builder', () => {
     it('adds form submissions collection', async () => {
       const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug })
       expect(formSubmissions).toHaveLength(1)
+    })
+
+    it('should restrict form data reads to admin collection users', async () => {
+      const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
+      const submissionsCollection = payload.config.collections.find(
+        ({ slug }) => slug === formSubmissionsSlug,
+      )!
+      const emailsField = formsCollection.fields.find(
+        (field) => 'name' in field && field.name === 'emails',
+      )!
+      const adminRequest = {
+        payload,
+        user: { collection: payload.config.admin.user },
+      } as PayloadRequest
+      const unrelatedRequest = {
+        payload,
+        user: { collection: 'customers' },
+      } as PayloadRequest
+
+      expect(await submissionsCollection.access.read({ req: adminRequest })).toBe(true)
+      expect(await submissionsCollection.access.read({ req: unrelatedRequest })).toBe(false)
+      expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
+      expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
     })
   })
 
@@ -622,6 +645,20 @@ describe('@payloadcms/plugin-form-builder', () => {
       const result = serializeSlate(nodes)
       expect(result).not.toContain('<script>')
       expect(result).toContain('&quot;')
+    })
+
+    it('sanitizes link URLs after replacing submission variables', () => {
+      const nodes = [
+        {
+          children: [{ text: 'website' }],
+          type: 'link',
+          url: '{{website}}',
+        },
+      ]
+      const submissionData = [{ field: 'website', value: 'javascript:alert(1)' }]
+      const result = serializeSlate(nodes, submissionData)
+      expect(result).not.toContain('javascript:')
+      expect(result).toContain('href="#"')
     })
 
     it('uses proper HTML attribute quotes for links (not JSX syntax)', () => {

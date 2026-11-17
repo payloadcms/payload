@@ -1,14 +1,114 @@
 import path from 'path'
 import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
+const stripeMock = vi.hoisted(() => {
+  const customers = new Map<string, { email: string; id: string; object: 'customer' }>()
+  let paymentIntentSequence = 0
+  const paymentIntents = new Map<
+    string,
+    {
+      amount: number
+      client_secret: string
+      currency: string
+      customer: string
+      id: string
+      metadata: Record<string, string>
+      object: 'payment_intent'
+      status: 'succeeded'
+    }
+  >()
+
+  return {
+    createCustomer: (email: string) => {
+      const customer = {
+        email,
+        id: `cus_test_${customers.size + 1}`,
+        object: 'customer' as const,
+      }
+
+      customers.set(email, customer)
+
+      return customer
+    },
+    createPaymentIntent: ({
+      amount,
+      currency,
+      customer,
+      metadata,
+    }: {
+      amount: number
+      currency: string
+      customer: string
+      metadata: Record<string, string>
+    }) => {
+      const id = `pi_test_${++paymentIntentSequence}`
+      const paymentIntent = {
+        amount,
+        client_secret: `${id}_secret_test`,
+        currency: currency.toLowerCase(),
+        customer,
+        id,
+        metadata,
+        object: 'payment_intent' as const,
+        status: 'succeeded' as const,
+      }
+
+      paymentIntents.set(id, paymentIntent)
+
+      return paymentIntent
+    },
+    findCustomer: (email: string) => customers.get(email),
+    findPaymentIntent: (id: string) => paymentIntents.get(id),
+    reset: () => {
+      customers.clear()
+      paymentIntents.clear()
+    },
+  }
+})
+
+vi.mock('../../packages/plugin-ecommerce/node_modules/stripe', () => ({
+  default: class Stripe {
+    customers = {
+      create: ({ email }: { email: string }) => Promise.resolve(stripeMock.createCustomer(email)),
+      list: ({ email }: { email: string }) =>
+        Promise.resolve({
+          data: stripeMock.findCustomer(email) ? [stripeMock.findCustomer(email)] : [],
+          has_more: false,
+          object: 'list',
+          url: '/v1/customers',
+        }),
+    }
+
+    paymentIntents = {
+      create: (data: {
+        amount: number
+        currency: string
+        customer: string
+        metadata: Record<string, string>
+      }) => Promise.resolve(stripeMock.createPaymentIntent(data)),
+      retrieve: (id: string) => {
+        const paymentIntent = stripeMock.findPaymentIntent(id)
+
+        if (!paymentIntent) {
+          return Promise.reject(new Error(`Unknown test PaymentIntent: ${id}`))
+        }
+
+        return Promise.resolve(paymentIntent)
+      },
+    }
+  },
+}))
+
 let payload: Payload
 let restClient: NextRESTClient
+
+const originalStripeSecretKey = process.env.STRIPE_SECRET_KEY
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -52,10 +152,21 @@ async function createGuestCartWithItems(
 
 describe('ecommerce', () => {
   beforeAll(async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_offline'
     ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
+  beforeEach(() => {
+    stripeMock.reset()
+  })
+
   afterAll(async () => {
+    if (originalStripeSecretKey === undefined) {
+      delete process.env.STRIPE_SECRET_KEY
+    } else {
+      process.env.STRIPE_SECRET_KEY = originalStripeSecretKey
+    }
+
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
@@ -1217,6 +1328,121 @@ describe('ecommerce', () => {
 
       expect(userCartResponse.id).toBe(guestCartId)
       expect(userCartResponse.items).toHaveLength(1)
+    })
+  })
+
+  describe('Stripe payment settlement', () => {
+    it.each([
+      { concurrent: true, requestOrder: 'simultaneous' },
+      { concurrent: false, requestOrder: 'sequential replay' },
+    ])('should settle $requestOrder confirmation requests only once', async ({ concurrent }) => {
+      const customerEmail = 'stripe-replay@example.com'
+      const products = await payload.find({
+        collection: 'products',
+        limit: 100,
+      })
+      const product = products.docs.find((candidate) => !candidate.enableVariants)!
+
+      await payload.update({
+        id: product.id,
+        collection: 'products',
+        data: {
+          inventory: 10,
+        },
+      })
+
+      const productBefore = await payload.findByID({
+        id: product.id,
+        collection: 'products',
+        depth: 0,
+      })
+      const startingInventory = productBefore.inventory!
+      const { cartId, cartSecret } = await createGuestCartWithItems(restClient, product.id)
+      const initiateResponse = await restClient.POST('/payments/stripe/initiate', {
+        auth: false,
+        body: JSON.stringify({
+          cartID: cartId,
+          customerEmail,
+          secret: cartSecret,
+        }),
+      })
+      const initiateBody = await initiateResponse.json()
+
+      expect(initiateResponse.status).toBe(200)
+
+      const paymentIntentID = initiateBody.paymentIntentID as string
+      const confirmationRequest = () =>
+        restClient.POST('/payments/stripe/confirm-order', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail,
+            paymentIntentID,
+            secret: cartSecret,
+          }),
+        })
+      const [firstResponse, secondResponse] = concurrent
+        ? await Promise.all([confirmationRequest(), confirmationRequest()])
+        : [await confirmationRequest(), await confirmationRequest()]
+      const [firstBody, secondBody] = await Promise.all([
+        firstResponse.json(),
+        secondResponse.json(),
+      ])
+
+      expect(firstResponse.status).toBe(200)
+      expect(secondResponse.status).toBe(200)
+      expect(firstBody).toEqual(secondBody)
+      expect(firstBody.orderID).toBeTruthy()
+      expect(firstBody.transactionID).toBeTruthy()
+      expect(secondBody.transactionID).toBe(firstBody.transactionID)
+
+      const transactions = await payload.find({
+        collection: 'transactions',
+        depth: 0,
+        where: {
+          'stripe.paymentIntentID': {
+            equals: paymentIntentID,
+          },
+        },
+      })
+
+      expect(transactions.totalDocs).toBe(1)
+      expect(transactions.docs[0]?.cart).toBe(cartId)
+      expect(transactions.docs[0]?.customerEmail).toBe(customerEmail)
+      expect(transactions.docs[0]?.status).toBe('succeeded')
+      expect(transactions.docs[0]?.order).toBe(firstBody.orderID)
+      expect(transactions.docs[0]?.id).toBe(firstBody.transactionID)
+
+      const canonicalOrders = await payload.find({
+        collection: 'orders',
+        depth: 0,
+        where: {
+          transactions: {
+            equals: transactions.docs[0]?.id,
+          },
+        },
+      })
+
+      expect(canonicalOrders.totalDocs).toBe(1)
+      expect(canonicalOrders.docs[0]?.id).toBe(firstBody.orderID)
+      expect(canonicalOrders.docs[0]?.transactions).toEqual([transactions.docs[0]?.id])
+
+      const purchasedCart = await payload.findByID({
+        id: cartId,
+        collection: 'carts',
+        depth: 0,
+      })
+
+      expect(purchasedCart.purchasedAt).toBeTruthy()
+      expect(purchasedCart.status).toBe('purchased')
+
+      const productAfter = await payload.findByID({
+        id: product.id,
+        collection: 'products',
+        depth: 0,
+      })
+
+      expect(productAfter.inventory).toBe(startingInventory - 1)
     })
   })
 })

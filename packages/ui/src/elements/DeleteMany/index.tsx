@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -45,6 +45,7 @@ export type Props = {
    */
   title?: string
   viewType?: ViewTypes
+  where?: Where
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
@@ -84,7 +85,11 @@ export const DeleteMany: React.FC<Props> = (props) => {
     return null
   }
 
-  const baseWhere = parseSearchParams(searchParams)?.where as Where
+  const combinedWhere = combineWhereConstraints([
+    parseSearchParams(searchParams)?.where as Where,
+    props.where,
+  ])
+  const baseWhere = Object.keys(combinedWhere).length > 0 ? combinedWhere : undefined
 
   const finalWhere =
     viewType === 'trash'
@@ -260,6 +265,7 @@ export function DeleteMany_v4({
           // selecting specific documents
           whereConstraint = {
             and: [
+              ...(where ? [where] : []),
               { id: { in: ids } },
               ...(viewType === 'trash' ? [{ deletedAt: { exists: true } }] : []),
             ],

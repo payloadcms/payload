@@ -12,6 +12,7 @@ type Args = {
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
   blockData?: JsonObject
+  blockFields?: Field[]
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -54,6 +55,7 @@ type Args = {
    */
   siblingDocWithLocales: JsonObject
   skipValidation?: boolean
+  submittedTopLevelFieldNames?: ReadonlySet<string>
 }
 
 /**
@@ -67,6 +69,7 @@ type Args = {
 export const traverseFields = async ({
   id,
   blockData,
+  blockFields,
   collection,
   context,
   data,
@@ -88,6 +91,7 @@ export const traverseFields = async ({
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
+  submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
   const promises: Promise<void>[] = []
 
@@ -96,6 +100,7 @@ export const traverseFields = async ({
       promise({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -119,6 +124,7 @@ export const traverseFields = async ({
         siblingDocWithLocales,
         siblingFields: fields,
         skipValidation: skipValidation!,
+        submittedTopLevelFieldNames,
       }),
     )
   })

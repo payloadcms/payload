@@ -416,7 +416,7 @@ export const date: DateFieldValidation = (
   }
 
   if (value) {
-    return t('validation:notValidDate', { value })
+    return t('validation:notValidDate', { value: String(value) })
   }
 
   if (required) {
@@ -510,11 +510,11 @@ export const number: NumberFieldValidation = (
     const numberValue = parseFloat(number as unknown as string)
 
     if (typeof max === 'number' && numberValue > max) {
-      return t('validation:greaterThanMax', { label: t('general:value'), max, value })
+      return t('validation:greaterThanMax', { label: t('general:value'), max, value: numberValue })
     }
 
     if (typeof min === 'number' && numberValue < min) {
-      return t('validation:lessThanMin', { label: t('general:value'), min, value })
+      return t('validation:lessThanMin', { label: t('general:value'), min, value: numberValue })
     }
   }
 
@@ -632,7 +632,17 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
+  {
+    id,
+    blockData,
+    data,
+    filterOptions,
+    overrideAccess,
+    relationTo,
+    req,
+    req: { t, user },
+    siblingData,
+  },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -695,7 +705,9 @@ const validateFilterOptions: Validate<
           const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
+            disableErrors: true,
             limit: 0,
+            overrideAccess: overrideAccess ?? false,
             pagination: false,
             req,
             where: findWhere,

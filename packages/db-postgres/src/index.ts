@@ -47,13 +47,13 @@ import {
   createDatabase,
   createExtensions,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -63,8 +63,11 @@ import { fileURLToPath } from 'url'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { findDocumentLocks } from './findDocumentLocks.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({ from: import.meta.url })
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -133,6 +136,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       },
       fieldConstraints: {},
       findDistinct,
+      findDocumentLocks,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',

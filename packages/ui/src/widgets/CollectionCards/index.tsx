@@ -107,7 +107,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                             hasCreatePermission && type === EntityType.collection ? (
                               <Button
                                 aria-label={t('general:createNewLabel', {
-                                  label,
+                                  label: title,
                                 })}
                                 buttonStyle="icon-label"
                                 el="link"

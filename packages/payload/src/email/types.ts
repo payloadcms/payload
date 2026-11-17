@@ -1,5 +1,6 @@
 import type { SendMailOptions as NodemailerSendMailOptions } from 'nodemailer'
-import type { Address } from 'nodemailer/lib/mailer'
+
+type Address = { address: string; name?: string }
 
 import type { Payload } from '../types/index.js'
 

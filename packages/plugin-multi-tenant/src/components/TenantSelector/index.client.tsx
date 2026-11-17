@@ -26,7 +26,8 @@ export const TenantSelectorClient = ({
   label?: MultiTenantPluginConfig['tenantSelectorLabel']
   viewType?: ViewTypes
 }) => {
-  const { entityType, modified, options, selectedTenantID, setTenant } = useTenantSelection()
+  const { entityType, hasAccessToAllTenants, modified, options, selectedTenantID, setTenant } =
+    useTenantSelection()
   const { closeModal, openModal } = useModal()
   const { i18n, t } = useTranslation<
     PluginMultiTenantTranslations,
@@ -66,7 +67,7 @@ export const TenantSelectorClient = ({
     [selectedTenantID, entityType, modified, switchTenant, openModal],
   )
 
-  if (options.length <= 1) {
+  if (options.length === 0 || (options.length === 1 && !hasAccessToAllTenants)) {
     return null
   }
 

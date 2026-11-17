@@ -1,10 +1,13 @@
 import { ListItemNode, ListNode } from '@lexical/list'
+import escapeHTML from 'escape-html'
 import { v4 as uuidv4 } from 'uuid'
 
 import type { HTMLConverter } from '../converters/lexicalToHtml_deprecated/converter/types.js'
 import type { SerializedListItemNode, SerializedListNode } from './plugin/index.js'
 
+import { ALLOWED_LIST_TYPES } from '../converters/lexicalToHtml_deprecated/converter/constants.js'
 import { convertLexicalNodesToHTML } from '../converters/lexicalToHtml_deprecated/converter/index.js'
+import { ALLOWED_LIST_TAGS } from './shared/constants.js'
 
 export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
   converter: async ({
@@ -33,7 +36,10 @@ export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
       showHiddenFields,
     })
 
-    return `<${node?.tag} class="list-${node?.listType}">${childrenText}</${node?.tag}>`
+    const tag = ALLOWED_LIST_TAGS.has(node.tag) ? node.tag : 'ul'
+    const listType = ALLOWED_LIST_TYPES.has(node.listType) ? node.listType : 'bullet'
+
+    return `<${tag} class="list-${listType}">${childrenText}</${tag}>`
   },
   nodeTypes: [ListNode.getType()],
 }
@@ -77,7 +83,7 @@ export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
       }"
           role="checkbox"
           tabIndex=${-1}
-          value=${node?.value}
+          value="${escapeHTML(String(node?.value))}"
       >
       ${
         hasSubLists
@@ -91,7 +97,7 @@ export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
 
           </li>`
     } else {
-      return `<li ${hasSubLists ? `class="nestedListItem" ` : ''}value=${node?.value}>${childrenText}</li>`
+      return `<li ${hasSubLists ? `class="nestedListItem" ` : ''}value="${escapeHTML(String(node?.value))}">${childrenText}</li>`
     }
   },
   nodeTypes: [ListItemNode.getType()],

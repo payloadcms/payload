@@ -20,6 +20,15 @@ export const getObjectDotNotation = <T>(
   if (!path || !obj) {
     return defaultValue!
   }
-  const result = path.split('.').reduce((o, i) => o?.[i] as Record<string, unknown>, obj)
+  let result: unknown = obj
+
+  for (const segment of path.split('.')) {
+    if (result === null || typeof result !== 'object' || !Object.hasOwn(result, segment)) {
+      return defaultValue!
+    }
+
+    result = (result as Record<string, unknown>)[segment]
+  }
+
   return result === undefined ? defaultValue! : (result as T)
 }

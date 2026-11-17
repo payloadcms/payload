@@ -77,6 +77,7 @@ export interface Config {
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
+    'select-documents': SelectDocument;
     'custom-ids': CustomId;
     users: User;
     'payload-kv': PayloadKv;
@@ -96,6 +97,7 @@ export interface Config {
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
+    'select-documents': SelectDocumentsSelect<false> | SelectDocumentsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -116,6 +118,9 @@ export interface Config {
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
   };
   locale: 'en' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -217,6 +222,7 @@ export interface Rel {
  */
 export interface Upload {
   id: string;
+  link?: (string | null) | Rel;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -491,6 +497,27 @@ export interface RelationshipsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-documents".
+ */
+export interface SelectDocument {
+  id: string;
+  blocks?: SelectRelationshipBlock[] | null;
+  upload?: (string | null) | Upload;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SelectRelationshipBlock".
+ */
+export interface SelectRelationshipBlock {
+  link?: (string | null) | Rel;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select-relationship-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -514,6 +541,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -589,6 +617,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-blocks';
         value: string | RelationshipsBlock;
+      } | null)
+    | ({
+        relationTo: 'select-documents';
+        value: string | SelectDocument;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -935,6 +967,7 @@ export interface ForceSelectSelect<T extends boolean = true> {
  * via the `definition` "upload_select".
  */
 export interface UploadSelect<T extends boolean = true> {
+  link?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -978,6 +1011,29 @@ export interface RelationshipsBlocksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-documents_select".
+ */
+export interface SelectDocumentsSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        'select-relationship-block'?: T | SelectRelationshipBlockSelect<T>;
+      };
+  upload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SelectRelationshipBlock_select".
+ */
+export interface SelectRelationshipBlockSelect<T extends boolean = true> {
+  link?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids_select".
  */
 export interface CustomIdsSelect<T extends boolean = true> {
@@ -1000,6 +1056,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1105,6 +1162,16 @@ export interface ForceSelectGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

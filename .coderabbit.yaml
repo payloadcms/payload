@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Manage CodeRabbit configuration in this file so settings are version-controlled.
+# Update this YAML instead of using the CodeRabbit website's admin interface.
+reviews:
+  high_level_summary: false
+  auto_review:
+    base_branches:
+      - '^3\.x$'

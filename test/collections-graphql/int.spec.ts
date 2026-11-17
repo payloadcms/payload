@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
@@ -1374,6 +1374,76 @@ describe('collections-graphql', () => {
       expect(errors[0].path[0]).toEqual('QueryWithInternalError')
       expect(errors[0].extensions.statusCode).toEqual(500)
       expect(errors[0].extensions.name).toEqual('Error')
+    })
+  })
+  describe('select projection', () => {
+    const createdPostIDs: (number | string)[] = []
+    const createdRelationIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdPostIDs) {
+        await payload.delete({ collection: slug, id })
+      }
+      for (const id of createdRelationIDs) {
+        await payload.delete({ collection: relationSlug, id })
+      }
+
+      createdPostIDs.length = 0
+      createdRelationIDs.length = 0
+    })
+
+    it('should keep the sub-selection for an aliased relationship', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'aliased' },
+      })
+      createdRelationIDs.push(relation.id)
+      const post = await payload.create({
+        collection: slug,
+        data: { relationField: relation.id, title: 'post' },
+      })
+      createdPostIDs.push(post.id)
+      const query = `query {
+        Post(id: ${formatID(post.id)}, select: true) {
+          aliased: relationField { id name }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.Post.aliased).toMatchObject({ id: relation.id, name: 'aliased' })
+    })
+
+    it('should keep concurrent root field selections separate', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'concurrent' },
+      })
+      createdRelationIDs.push(relation.id)
+      const post = await payload.create({
+        collection: slug,
+        data: { relationField: relation.id, title: 'post' },
+      })
+      createdPostIDs.push(post.id)
+      const query = `query {
+        first: Post(id: ${formatID(post.id)}, select: true) {
+          relationField { name }
+        }
+        second: Post(id: ${formatID(post.id)}, select: true) {
+          relationField { id }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.first.relationField.name).toBe('concurrent')
+      expect(data.second.relationField.id).toBe(relation.id)
     })
   })
 })

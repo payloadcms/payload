@@ -2,6 +2,7 @@
 import type { FormEvent } from 'react'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import { getSafeRedirect } from 'payload/shared'
 import React from 'react'
 
 import './index.scss'
@@ -42,7 +43,10 @@ export const Login = ({ tenantSlug, tenantDomain }: Props) => {
     const json = await actionRes.json()
 
     if (actionRes.status === 200 && json.user) {
-      const redirectTo = searchParams.get('redirect')
+      const redirectTo = getSafeRedirect({
+        fallbackTo: '',
+        redirectTo: searchParams.get('redirect') ?? '',
+      })
       if (redirectTo) {
         router.push(redirectTo)
         return

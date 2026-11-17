@@ -56,6 +56,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     newPassword: 'Jauna parole',
     passed: 'Autentifikācija veiksmīga',
     passwordResetSuccessfully: 'Parole veiksmīgi atiestatīta.',
+    resend: 'Nosūtīt vēlreiz',
     resetPassword: 'Atiestatīt paroli',
     resetPasswordExpiration: 'Paroles atiestatīšanas termiņš',
     resetPasswordToken: 'Paroles atiestatīšanas tokens',

@@ -47,26 +47,27 @@ export async function getGlobalViewRedirect({
     collectionSlug: tenantsCollectionSlug,
     payload,
   })
-  let tenant = getTenantFromCookie(headers, idType)
+  const selectedTenant = getTenantFromCookie(headers, idType)
   let redirectRoute: `/${string}` | void = undefined
 
   if (!user) {
     return unauthorized()
   }
 
-  if (!tenant) {
-    const tenantOptions = await getTenantOptions({
-      payload,
-      tenantsArrayFieldName,
-      tenantsArrayTenantFieldName,
-      tenantsCollectionSlug,
-      useAsTitle,
-      user,
-      userHasAccessToAllTenants,
-    })
-
-    tenant = tenantOptions[0]?.value || null
-  }
+  const hasAccessToAllTenants = userHasAccessToAllTenants(user)
+  const tenantOptions = await getTenantOptions({
+    hasAccessToAllTenants,
+    payload,
+    tenantsArrayFieldName,
+    tenantsArrayTenantFieldName,
+    tenantsCollectionSlug,
+    useAsTitle,
+    user,
+  })
+  const tenant =
+    tenantOptions.find(({ value }) => String(value) === String(selectedTenant))?.value ||
+    tenantOptions[0]?.value ||
+    null
 
   if (tenant) {
     try {
@@ -74,10 +75,12 @@ export async function getGlobalViewRedirect({
         collection: collectionSlug,
         depth: 0,
         limit: 1,
+        overrideAccess: false,
         pagination: false,
         select: {
           id: true,
         },
+        user,
         where: {
           [tenantFieldName]: {
             in: [tenant],
@@ -99,7 +102,9 @@ export async function getGlobalViewRedirect({
           redirectRoute = await generateCreateRedirect({
             collectionSlug,
             payload,
+            tenantFieldName,
             tenantID: tenant,
+            user,
           })
         }
       } else if (view === 'list') {
@@ -113,7 +118,9 @@ export async function getGlobalViewRedirect({
           redirectRoute = await generateCreateRedirect({
             collectionSlug,
             payload,
+            tenantFieldName,
             tenantID: tenant,
+            user,
           })
         }
       }
@@ -146,7 +153,9 @@ export async function getGlobalViewRedirect({
 type GenerateCreateArgs = {
   collectionSlug: string
   payload: Payload
+  tenantFieldName: string
   tenantID: number | string
+  user: TypedUser
 }
 /**
  * Generate a redirect URL for creating a new document in a multi-tenant collection.
@@ -157,7 +166,9 @@ type GenerateCreateArgs = {
 async function generateCreateRedirect({
   collectionSlug,
   payload,
+  tenantFieldName,
   tenantID,
+  user,
 }: GenerateCreateArgs): Promise<`/${string}` | undefined> {
   const collectionConfig = payload.collections[collectionSlug]?.config
   if (hasAutosaveEnabled(collectionConfig!)) {
@@ -166,13 +177,15 @@ async function generateCreateRedirect({
       const doc = await payload.create({
         collection: collectionSlug,
         data: {
-          tenant: tenantID,
+          [tenantFieldName]: tenantID,
         },
         depth: 0,
         draft: true,
+        overrideAccess: false,
         select: {
           id: true,
         },
+        user,
       })
       return `/collections/${collectionSlug}/${doc.id}`
     } catch (error) {

@@ -64,6 +64,7 @@ import {
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
   autosaveWithDraftValidateSlug,
+  autosaveWithVirtualSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -80,6 +81,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  restoreAccessCollectionSlug,
   simpleDraftGlobalSlug,
   textCollectionSlug,
   versionCollectionSlug,
@@ -96,6 +98,13 @@ let context: BrowserContext
 
 const londonTimezone = 'Europe/London'
 
+async function waitForVersionViewToLoad(page: Page): Promise<void> {
+  const versionView = page.locator('.view-version')
+
+  await expect(versionView).not.toContainText('Loading...')
+  await expect(versionView.locator('.render-field-diffs').first()).toBeVisible()
+}
+
 describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -103,6 +112,7 @@ describe('Versions', () => {
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithDraftValidateURL: AdminUrlUtil
+  let autosaveWithVirtualURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let draftWithChangeHookURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -151,6 +161,7 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
+      autosaveWithVirtualURL = new AdminUrlUtil(serverURL, autosaveWithVirtualSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -284,6 +295,94 @@ describe('Versions', () => {
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
     })
 
+    test('should restore a draft without changing the published document', async () => {
+      const doc = await payload.create({
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'draft', title: 'Historical' },
+        draft: true,
+        overrideAccess: true,
+      })
+      const { docs } = await payload.findVersions({
+        collection: restoreAccessCollectionSlug,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-updatedAt',
+        where: { parent: { equals: doc.id } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Current' },
+        overrideAccess: true,
+      })
+
+      const restoreURL = new AdminUrlUtil(serverURL, restoreAccessCollectionSlug)
+      const editorURL = restoreURL.edit(doc.id)
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${restoreAccessCollectionSlug}/${doc.id}`,
+        serverURL,
+      })
+
+      await page.goto(restoreURL.version(doc.id, docs[0]!.id))
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click()
+      await page.waitForURL(editorURL)
+      await expect(page.locator('#field-title')).toHaveValue('Historical')
+
+      const draftResponse = await page.request.get(apiURL, { params: { draft: true } })
+
+      await expect(draftResponse).toBeOK()
+      expect(await draftResponse.json()).toMatchObject({ _status: 'draft', title: 'Historical' })
+
+      const liveResponse = await page.request.get(apiURL, { params: { draft: false } })
+
+      await expect(liveResponse).toBeOK()
+      expect(await liveResponse.json()).toMatchObject({ _status: 'published', title: 'Current' })
+    })
+
+    test('should restore a version as published after a cancelled restore as draft', async () => {
+      const doc = await payload.create({
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Historical' },
+        overrideAccess: true,
+      })
+      const { docs } = await payload.findVersions({
+        collection: restoreAccessCollectionSlug,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-updatedAt',
+        where: { parent: { equals: doc.id } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Current' },
+        overrideAccess: true,
+      })
+
+      const restoreURL = new AdminUrlUtil(serverURL, restoreAccessCollectionSlug)
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${restoreAccessCollectionSlug}/${doc.id}`,
+        serverURL,
+      })
+
+      await page.goto(restoreURL.version(doc.id, docs[0]!.id))
+      await page.locator('.restore-version .popup__trigger-wrap button').click()
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click()
+      await page.getByRole('button', { name: 'Restore this version', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click()
+      await page.waitForURL(restoreURL.edit(doc.id))
+
+      await expect
+        .poll(async () => (await page.request.get(apiURL, { params: { draft: false } })).json())
+        .toMatchObject({ _status: 'published', title: 'Historical' })
+    })
+
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
       await waitForFormReady(page)
@@ -297,7 +396,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -320,7 +419,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version .popup__trigger-wrap button').click()
       await page.getByRole('button', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
@@ -533,6 +632,116 @@ describe('Versions', () => {
       await expect(page.locator('#custom-field-label')).toHaveText(
         `Value in DocumentInfoContext: ${postID}`,
       )
+    })
+
+    describe('virtual field autosave', () => {
+      const createdDocIDs: string[] = []
+
+      test.afterEach(async () => {
+        for (const id of createdDocIDs) {
+          await payload.delete({ collection: autosaveWithVirtualSlug, id })
+        }
+
+        createdDocIDs.length = 0
+      })
+
+      test('should not re-autosave when virtual fields change in the response', async () => {
+        const { id: docID } = await payload.create({
+          collection: autosaveWithVirtualSlug,
+          data: {
+            array: [{ title: 'array title' }],
+            title: 'title',
+          },
+        })
+
+        createdDocIDs.push(docID)
+
+        await page.goto(autosaveWithVirtualURL.edit(docID))
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:title')
+
+        const autosaveRequestURL = formatAdminURL({
+          apiRoute: '/api',
+          path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          serverURL,
+        })
+
+        // A second edit exercises the modification flag left behind by the first autosave.
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await page.locator('#field-title').fill('first change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:first change')
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await page.locator('#field-title').fill('second change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:second change')
+      })
+
+      test('should not re-autosave when nested virtual fields change in the response', async () => {
+        const { id: docID } = await payload.create({
+          collection: autosaveWithVirtualSlug,
+          data: {
+            array: [{ title: 'array title' }],
+            title: 'title',
+          },
+        })
+
+        createdDocIDs.push(docID)
+
+        await page.goto(autosaveWithVirtualURL.edit(docID))
+
+        const nestedTitle = page.locator('#field-array__0__title')
+        await expect(nestedTitle).toHaveValue('array title')
+
+        const autosaveRequestURL = formatAdminURL({
+          apiRoute: '/api',
+          path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          serverURL,
+        })
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await nestedTitle.fill('first change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await nestedTitle.fill('second change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-array__0__titleDerived')).toHaveValue(
+          'derived:second change',
+        )
+      })
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -1230,7 +1439,9 @@ describe('Versions', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
       await waitForFormReady(page)
@@ -2210,7 +2421,7 @@ describe('Versions', () => {
         serverURL,
       })
       await page.goto(versionURL)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
     }
 
     async function navigateToDiffVersionView(versionID?: string) {
@@ -2380,6 +2591,67 @@ describe('Versions', () => {
       )
       await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInRowInCollapsibleBlock2',
+      )
+    })
+
+    test('should render a replaced block when both block schemas contain unnamed layouts', async () => {
+      await payload.update({
+        id: diffID,
+        collection: diffCollectionSlug,
+        data: {
+          blocks: diffDoc.blocks?.map((block, i) => {
+            if (i === 1) {
+              return {
+                blockType: 'TabsBlock',
+                namedTab1InBlock: {
+                  textInNamedTab1InBlock: 'replacement named tab',
+                },
+                textInRowInUnnamedTab2InBlock: 'replacement row',
+                textInUnnamedTab2InBlock: 'replacement unnamed tab',
+              }
+            }
+
+            return block
+          }),
+        },
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const sourceField = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+      await expect(sourceField.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+
+      const replacementField = page.locator(
+        '[data-field-path="blocks.1.textInRowInUnnamedTab2InBlock"]',
+      )
+      await expect(replacementField.locator('.html-diff__diff-new')).toHaveText('replacement row')
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+      await blocks.locator('.diff-collapser__toggle-button').first().click()
+      await expect(blocks.locator('.diff-collapser__field-change-count').first()).toHaveText(
+        '5 changed fields',
+      )
+
+      await blocks.locator('.diff-collapser__toggle-button').first().click()
+      const changedRow = blocks.locator('.iterable-diff__row', {
+        has: page.getByText('Block 02', { exact: true }),
+      })
+      await changedRow.locator('.diff-collapser__toggle-button').first().click()
+      await expect(changedRow.locator('.diff-collapser__field-change-count')).toHaveText(
+        '5 changed fields',
       )
     })
 
@@ -2582,6 +2854,21 @@ describe('Versions', () => {
 
       expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
       expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
+    })
+
+    test('should respect relationship read access in rich text diffs', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtextWithConstrainedRelationship"]')
+      const oldRelationshipLink = richtext.locator(
+        '.html-diff__diff-old .lexical-relationship-diff__link',
+      )
+      const newRelationshipLink = richtext.locator(
+        '.html-diff__diff-new .lexical-relationship-diff__link',
+      )
+
+      await expect(oldRelationshipLink).toHaveCount(0)
+      await expect(newRelationshipLink).toHaveText('Document 2')
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {

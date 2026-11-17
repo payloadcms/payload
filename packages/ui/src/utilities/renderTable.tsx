@@ -267,6 +267,7 @@ export const renderTable = ({
               groupByFieldPath={groupByFieldPath}
               groupByValue={groupByValue}
               heading={heading}
+              viewType={viewType}
             />
             <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
             <GroupByPageControls

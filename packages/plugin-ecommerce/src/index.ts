@@ -21,9 +21,8 @@ import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
 import { pushTypeScriptProperties } from './utilities/pushTypeScriptProperties.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
 
-export const ecommercePlugin =
-  (pluginConfig?: EcommercePluginConfig) =>
-  async (incomingConfig: Config): Promise<Config> => {
+export const ecommercePlugin = (pluginConfig?: EcommercePluginConfig) => {
+  const plugin = async (incomingConfig: Config): Promise<Config> => {
     if (!pluginConfig) {
       return incomingConfig
     }
@@ -197,6 +196,7 @@ export const ecommercePlugin =
         customersSlug: collectionSlugMap.customers,
         enableVariants,
         productsSlug: collectionSlugMap.products,
+        transactionsSlug: collectionSlugMap.transactions,
         variantsSlug: collectionSlugMap.variants ?? 'variants',
       })
 
@@ -365,6 +365,9 @@ export const ecommercePlugin =
 
     return incomingConfig
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-ecommerce' })
+}
 
 export {
   createAddressesCollection,
