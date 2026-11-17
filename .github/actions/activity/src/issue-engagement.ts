@@ -131,6 +131,10 @@ async function syncEngagementLabels(
     (label) => ENGAGEMENT_LABELS.includes(label) && label !== desiredLabel,
   )
 
+  if (!labelToAdd && labelsToRemove.length === 0) {
+    return false
+  }
+
   if (isDryRun) {
     info(
       `[dry run] #${issue.number}: added ${labelToAdd ?? 'none'}, removed ${labelsToRemove.join(', ')}`,
