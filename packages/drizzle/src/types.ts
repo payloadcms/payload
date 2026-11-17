@@ -508,6 +508,13 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
     }
   }
   tableNameMap: Map<string, string>
+  /**
+   * Array and `hasMany` select table names that turned out to equal a companion table of their
+   * parent (`_rels`, `_texts`, `_numbers`, `_locales`) while the schema was built. The schema is
+   * then built again and `createTableName` gives those tables a distinct name.
+   * @internal
+   */
+  subTableNameClashes?: Set<string>
   tables: Record<string, any>
   transactionOptions: unknown
   versionsSuffix?: string

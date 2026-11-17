@@ -12,16 +12,30 @@ import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
 import { buildTable } from './build.js'
 
+type Args = {
+  adapter: DrizzleAdapter
+  setColumnID: SetColumnID
+}
+
 /**
  * Builds abstract Payload SQL schema
  */
-export const buildRawSchema = ({
-  adapter,
-  setColumnID,
-}: {
-  adapter: DrizzleAdapter
-  setColumnID: SetColumnID
-}) => {
+export const buildRawSchema = ({ adapter, setColumnID }: Args) => {
+  adapter.subTableNameClashes = new Set()
+
+  buildTables({ adapter, setColumnID })
+
+  // An array or `hasMany` select table had the same name as a companion table of its parent (an
+  // array field called `rels`, for example). Build again so those tables get a distinct name.
+  if (adapter.subTableNameClashes.size) {
+    adapter.rawRelations = {}
+    adapter.rawTables = {}
+
+    buildTables({ adapter, setColumnID })
+  }
+}
+
+const buildTables = ({ adapter, setColumnID }: Args) => {
   adapter.indexes = new Set()
   adapter.foreignKeys = new Set()
 

@@ -1,4 +1,4 @@
-import type { Block, Config, SanitizedConfig } from 'payload'
+import type { Block, CollectionConfig, Config, SanitizedConfig } from 'payload'
 import { sanitizeConfig } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -53,6 +53,7 @@ const createAdapter = (
     },
     rawRelations: {},
     rawTables: {},
+    relationshipsSuffix: '_rels',
     tableNameMap: new Map(),
     versionsSuffix: '_versions',
   }) as unknown as DrizzleAdapter
@@ -315,5 +316,63 @@ describe('buildRawSchema', () => {
 
     expect(message).toContain(`${arrayTable}_order_idx`)
     expect(message).toContain(`${arrayTable}_parent_id_fk`)
+  })
+
+  describe('sub-tables named like a companion table', () => {
+    const buildCollection = (fields: CollectionConfig['fields']) => {
+      const config = sanitizeConfig({
+        collections: [
+          { slug: 'p', fields, timestamps: false, versions: false },
+          { slug: 'authors', fields: [], timestamps: false, versions: false },
+        ],
+      } as Config)
+
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      return adapter
+    }
+
+    it('should rename an array table that shares its name with the relationships table', () => {
+      const adapter = buildCollection([
+        { name: 'rels', type: 'array', fields: [{ name: 'value', type: 'text' }] },
+        { name: 'authors', type: 'relationship', hasMany: true, relationTo: 'authors' },
+      ])
+
+      expect(adapter.tableNameMap.get('p_rels')).toBe('p_rels_field')
+      expect(adapter.rawTables.p_rels_field.columns.value).toBeDefined()
+      expect(adapter.rawTables.p_rels.columns.authorsID).toBeDefined()
+      expect(adapter.rawTables.p_rels.columns.value).toBeUndefined()
+    })
+
+    it('should rename array and select tables that share their names with the texts and numbers tables', () => {
+      const adapter = buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'texts', type: 'select', hasMany: true, options: ['a', 'b'] },
+        { name: 'scores', type: 'number', hasMany: true },
+        { name: 'tags', type: 'text', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field')
+      expect(adapter.tableNameMap.get('p_texts')).toBe('p_texts_field')
+      expect(adapter.rawTables.p_numbers_field.columns.drawPosition).toBeDefined()
+      expect(adapter.rawTables.p_numbers.columns.number).toBeDefined()
+      expect(adapter.rawTables.p_texts.columns.text).toBeDefined()
+    })
+
+    it('should keep the table name when there is no companion table with that name', () => {
+      // No `hasMany` number or text fields, so there are no `p_numbers` or `p_texts` companion tables.
+      const adapter = buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'texts', type: 'array', fields: [{ name: 'value', type: 'text' }] },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers')
+      expect(adapter.tableNameMap.get('p_texts')).toBe('p_texts')
+      expect(adapter.rawTables.p_numbers.columns.drawPosition).toBeDefined()
+      expect(adapter.rawTables.p_texts.columns.value).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field).toBeUndefined()
+    })
   })
 })

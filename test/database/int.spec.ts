@@ -3951,6 +3951,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     }) => {
       const created = await payload.create({
         collection: 'reserved-field-names',
+        overrideAccess: true,
         data: {
           numbers: [{ drawPosition: 1 }],
           texts: [{ value: 'hello' }],
@@ -3961,13 +3962,18 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       const found = await payload.findByID({
         collection: 'reserved-field-names',
         id: created.id,
+        overrideAccess: true,
       })
 
       expect(found.numbers?.[0]?.drawPosition).toStrictEqual(1)
       expect(found.texts?.[0]?.value).toStrictEqual('hello')
       expect(found.rels?.[0]?.value).toStrictEqual('world')
 
-      await payload.delete({ collection: 'reserved-field-names', id: created.id })
+      await payload.delete({
+        collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+      })
     })
   })
 
