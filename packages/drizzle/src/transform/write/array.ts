@@ -116,7 +116,6 @@ export const transformArray = ({
         data: arrayRow,
         fieldPrefix: '',
         fields: field.flattenedFields,
-        insideArray: true,
         insideArrayOrBlock: true,
         locales: newRow.locales,
         numbers,
