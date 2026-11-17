@@ -9,11 +9,14 @@ import type {
   DocumentSelectionContextValue,
   DocumentSelectionProviderProps,
   SelectableDocument,
+  SelectionDocument,
   SelectionMetadata,
   SelectionState,
 } from './types.js'
 
 import { SelectAllStatus } from '../Selection/index.js'
+import { getVisibleSelectionStatus, isSelectionDocumentLocked } from './incremental.js'
+import { useIncrementalSelection } from './useIncrementalSelection.js'
 
 export { SelectAllStatus }
 export type {
@@ -22,6 +25,7 @@ export type {
   DocumentSelectionContextValue,
   DocumentSelectionProviderProps,
   SelectableDocument,
+  SelectionDocument,
   SelectionMetadata,
   SelectionState,
 }
@@ -62,10 +66,20 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
   children,
   collectionData,
   currentUserId,
+  selectionScopeKey,
 }) => {
   const contextRef = useRef({} as DocumentSelectionContextValue)
 
-  const [selections, setSelections] = useState<SelectionState>(() => {
+  const {
+    clearAll: clearAllIncremental,
+    clearCollection: clearIncrementalCollection,
+    registerVisibleDocuments,
+    state: incrementalState,
+    toggleAllInCollection: toggleAllIncremental,
+    toggleSelection: toggleIncremental,
+  } = useIncrementalSelection({ currentUserId, selectionScopeKey })
+  const hasIncrementalSelection = selectionScopeKey !== undefined
+  const [legacySelections, setSelections] = useState<SelectionState>(() => {
     const initial: SelectionState = {}
 
     for (const collectionSlug of Object.keys(collectionData)) {
@@ -75,8 +89,13 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
     return initial
   })
 
+  const selections = hasIncrementalSelection ? incrementalState.selections : legacySelections
+
   // Reset selections when collectionData changes (new docs loaded)
   useEffect(() => {
+    if (hasIncrementalSelection) {
+      return
+    }
     setSelections(() => {
       const reset: SelectionState = {}
 
@@ -86,10 +105,15 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
       return reset
     })
-  }, [collectionData])
+  }, [collectionData, hasIncrementalSelection])
 
   const isLocked = useCallback(
     ({ id, collectionSlug }: { collectionSlug: string; id: number | string }): boolean => {
+      if (hasIncrementalSelection) {
+        const entry = incrementalState.known.get(JSON.stringify([collectionSlug, id]))
+
+        return entry ? isSelectionDocumentLocked({ currentUserId, entry }) : false
+      }
       const docs = collectionData[collectionSlug]?.docs ?? []
       const doc = docs.find((d) => d.id === id)
 
@@ -99,7 +123,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
       return Boolean(doc._isLocked && doc._userEditing?.id !== currentUserId)
     },
-    [collectionData, currentUserId],
+    [collectionData, currentUserId, hasIncrementalSelection, incrementalState.known],
   )
 
   const isSelected = useCallback(
@@ -111,9 +135,16 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
   const getSelectAllStatus = useCallback(
     ({ collectionSlug }: { collectionSlug: string }): SelectAllStatus => {
+      if (hasIncrementalSelection) {
+        return getVisibleSelectionStatus({
+          collectionSlug,
+          currentUserId,
+          state: incrementalState,
+        })
+      }
       return selections[collectionSlug]?.selectAllStatus ?? SelectAllStatus.None
     },
-    [selections],
+    [currentUserId, hasIncrementalSelection, incrementalState, selections],
   )
 
   const getCollectionCount = useCallback(
@@ -190,12 +221,16 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
     ({
       id,
       collectionSlug,
-      metadata = {},
+      metadata,
     }: {
       collectionSlug: string
       id: number | string
       metadata?: SelectionMetadata
     }): void => {
+      if (hasIncrementalSelection) {
+        toggleIncremental({ id, collectionSlug, metadata })
+        return
+      }
       // Check if doc is locked
       if (isLocked({ id, collectionSlug })) {
         return
@@ -210,7 +245,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
         if (isCurrentlySelected) {
           newMap.delete(id)
         } else {
-          newMap.set(id, metadata)
+          newMap.set(id, metadata ?? {})
         }
 
         const docCount = collectionData[collectionSlug]?.docs.length ?? 0
@@ -225,11 +260,15 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
         }
       })
     },
-    [collectionData, isLocked],
+    [collectionData, hasIncrementalSelection, toggleIncremental, isLocked],
   )
 
   const toggleAllInCollection = useCallback(
     ({ collectionSlug }: { collectionSlug: string }): void => {
+      if (hasIncrementalSelection) {
+        toggleAllIncremental({ collectionSlug })
+        return
+      }
       setSelections((prev) => {
         const collectionState = prev[collectionSlug] ?? createEmptyCollectionState()
         const docs = collectionData[collectionSlug]?.docs ?? []
@@ -271,17 +310,28 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
         }
       })
     },
-    [collectionData, currentUserId],
+    [collectionData, currentUserId, hasIncrementalSelection, toggleAllIncremental],
   )
 
-  const clearCollection = useCallback(({ collectionSlug }: { collectionSlug: string }): void => {
-    setSelections((prev) => ({
-      ...prev,
-      [collectionSlug]: createEmptyCollectionState(),
-    }))
-  }, [])
+  const clearCollection = useCallback(
+    ({ collectionSlug }: { collectionSlug: string }): void => {
+      if (hasIncrementalSelection) {
+        clearIncrementalCollection({ collectionSlug })
+        return
+      }
+      setSelections((prev) => ({
+        ...prev,
+        [collectionSlug]: createEmptyCollectionState(),
+      }))
+    },
+    [hasIncrementalSelection, clearIncrementalCollection],
+  )
 
   const clearAll = useCallback((): void => {
+    if (hasIncrementalSelection) {
+      clearAllIncremental()
+      return
+    }
     setSelections((prev) => {
       const cleared: SelectionState = {}
 
@@ -291,7 +341,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
       return cleared
     })
-  }, [])
+  }, [hasIncrementalSelection, clearAllIncremental])
 
   const contextValue = useMemo<DocumentSelectionContextValue>(
     () => ({
@@ -304,6 +354,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
       getTotalCount,
       isLocked,
       isSelected,
+      registerVisibleDocuments: hasIncrementalSelection ? registerVisibleDocuments : undefined,
       selections,
       toggleAllInCollection,
       toggleSelection,
@@ -318,6 +369,8 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
       getTotalCount,
       isLocked,
       isSelected,
+      hasIncrementalSelection,
+      registerVisibleDocuments,
       selections,
       toggleAllInCollection,
       toggleSelection,
