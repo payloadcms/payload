@@ -7,9 +7,14 @@
     text-align: start;
   }
 
-  .popup-button-list__submenu-trigger.btn--style-ghost:hover {
+  .popup-button-list__submenu-trigger.btn--style-ghost:not(.btn--disabled):hover {
     background-color: var(--color-bg-selected-strong);
     color: var(--color-text-onselected-strong);
+  }
+
+  .popup-button-list__submenu-trigger.btn--disabled {
+    cursor: not-allowed;
+    color: var(--color-text-disabled);
   }
 
   .popup__content[role='menu']:has(

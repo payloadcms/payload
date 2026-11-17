@@ -12,6 +12,7 @@ type SubmenuTriggerProps = {
   buttonProps: PopupButtonRenderProps
   children: ReactNode
   className?: string
+  disabled?: boolean
   icon?: ReactNode
   trailingIcon?: ReactNode
 }
@@ -20,6 +21,7 @@ export const SubmenuTrigger: React.FC<SubmenuTriggerProps> = ({
   buttonProps: { active, role, tabIndex, ...triggerProps },
   children,
   className,
+  disabled,
   icon,
   trailingIcon,
 }) => (
@@ -27,6 +29,7 @@ export const SubmenuTrigger: React.FC<SubmenuTriggerProps> = ({
     {...triggerProps}
     buttonStyle="ghost"
     className={[baseClass, className].filter(Boolean).join(' ')}
+    disabled={disabled ?? triggerProps.disabled}
     extraButtonProps={{ role, tabIndex }}
     margin={false}
     selected={active}

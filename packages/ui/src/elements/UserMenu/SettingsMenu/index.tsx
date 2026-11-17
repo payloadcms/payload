@@ -13,6 +13,7 @@ export type UserMenuSettingsGroup = {
 }
 
 type SettingsMenuProps = {
+  disabled?: boolean
   groups: UserMenuSettingsGroup[]
   onMobileOpen?: () => void
 }
@@ -31,7 +32,7 @@ export const SettingsMenuContent: React.FC<{ groups: UserMenuSettingsGroup[] }> 
   </>
 )
 
-export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen }) => {
+export const SettingsMenu: React.FC<SettingsMenuProps> = ({ disabled, groups, onMobileOpen }) => {
   const { t } = useTranslation()
 
   if (onMobileOpen) {
@@ -39,6 +40,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       <button
         className="popup-button-list__button popup-button-list__button--submenu-trigger"
         data-popup-prevent-close
+        disabled={disabled}
         onClick={onMobileOpen}
         role="menuitem"
         tabIndex={-1}
@@ -57,11 +59,13 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
 
   return (
     <Popup
+      disabled={disabled}
       hoverSubmenu
       popupType="menu"
       renderButton={(buttonProps) => (
         <PopupList.SubmenuTrigger
           buttonProps={buttonProps}
+          disabled={disabled}
           icon={<GearIcon size={24} />}
           trailingIcon={<ChevronIcon direction="right" size={16} />}
         >

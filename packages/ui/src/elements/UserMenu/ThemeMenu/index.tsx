@@ -37,8 +37,9 @@ export const ThemeMenuContent: React.FC = () => {
 }
 
 export const ThemeMenu: React.FC<{
+  readonly disabled?: boolean
   readonly onMobileOpen?: () => void
-}> = ({ onMobileOpen }) => {
+}> = ({ disabled, onMobileOpen }) => {
   const { t } = useTranslation()
 
   if (onMobileOpen) {
@@ -46,6 +47,7 @@ export const ThemeMenu: React.FC<{
       <button
         className="popup-button-list__button popup-button-list__button--submenu-trigger"
         data-popup-prevent-close
+        disabled={disabled}
         onClick={onMobileOpen}
         role="menuitem"
         tabIndex={-1}
@@ -64,11 +66,13 @@ export const ThemeMenu: React.FC<{
 
   return (
     <Popup
+      disabled={disabled}
       hoverSubmenu
       popupType="menu"
       renderButton={(buttonProps) => (
         <PopupList.SubmenuTrigger
           buttonProps={buttonProps}
+          disabled={disabled}
           icon={<VariableColorIcon size={24} />}
           trailingIcon={<ChevronIcon direction="right" size={16} />}
         >

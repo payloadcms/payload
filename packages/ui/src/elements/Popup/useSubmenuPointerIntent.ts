@@ -1,6 +1,6 @@
 import type { PointerEvent, RefObject } from 'react'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import type { PointerPosition } from '../../hooks/usePointerSafeArea.js'
 
@@ -9,6 +9,7 @@ import { usePointerSafeArea } from '../../hooks/usePointerSafeArea.js'
 type UseSubmenuPointerIntentArgs = {
   active: boolean
   contentRef: RefObject<HTMLElement | null>
+  disabled?: boolean
   enabled: boolean
   onClose: () => void
   onOpen: () => void
@@ -19,12 +20,15 @@ type UseSubmenuPointerIntentArgs = {
 export const useSubmenuPointerIntent = ({
   active,
   contentRef,
+  disabled = false,
   enabled,
   onClose,
   onOpen,
   onSafeAreaExpire,
   triggerRef,
 }: UseSubmenuPointerIntentArgs) => {
+  const isEnabled = enabled && !disabled
+
   const renderSafeArea = useCallback(
     ({ polygon }: { polygon: null | string }) => {
       const content = contentRef.current
@@ -41,7 +45,7 @@ export const useSubmenuPointerIntent = ({
   )
 
   const safeArea = usePointerSafeArea({
-    enabled: enabled && active,
+    enabled: isEnabled && active,
     from: triggerRef,
     onChange: renderSafeArea,
     onRelease: onSafeAreaExpire,
@@ -50,7 +54,7 @@ export const useSubmenuPointerIntent = ({
   const { clear, protect, trackSource, trackTarget } = safeArea
 
   const handleEnter = (event: PointerEvent) => {
-    if (event.pointerType !== 'mouse') {
+    if (disabled || event.pointerType !== 'mouse') {
       return
     }
     const pointer = { x: event.clientX, y: event.clientY }
@@ -64,7 +68,7 @@ export const useSubmenuPointerIntent = ({
   }
 
   const handleLeave = (event: PointerEvent) => {
-    if (event.pointerType !== 'mouse' || !active || !safeArea.isTracking()) {
+    if (disabled || event.pointerType !== 'mouse' || !active || !safeArea.isTracking()) {
       return
     }
     const target = event.relatedTarget as Node | null
@@ -78,15 +82,21 @@ export const useSubmenuPointerIntent = ({
     }
   }
 
+  useEffect(() => {
+    if (!isEnabled) {
+      clear()
+    }
+  }, [clear, isEnabled])
+
   return {
     contentProps: {
-      onPointerEnter: enabled ? handleEnter : undefined,
-      onPointerLeave: enabled ? handleLeave : undefined,
+      onPointerEnter: isEnabled ? handleEnter : undefined,
+      onPointerLeave: isEnabled ? handleLeave : undefined,
     },
     isProtected: safeArea.isProtected,
     triggerProps: {
-      onPointerEnter: enabled ? handleEnter : undefined,
-      onPointerLeave: enabled ? handleLeave : undefined,
+      onPointerEnter: isEnabled ? handleEnter : undefined,
+      onPointerLeave: isEnabled ? handleLeave : undefined,
     },
     updateSafeArea: safeArea.refresh,
   }

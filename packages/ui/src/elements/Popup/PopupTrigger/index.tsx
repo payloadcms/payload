@@ -12,6 +12,7 @@ export type PopupButtonRenderProps = {
   'aria-controls': AriaAttributes['aria-controls']
   'aria-expanded': AriaAttributes['aria-expanded']
   'aria-haspopup'?: AriaAttributes['aria-haspopup']
+  disabled?: boolean
   onClick: React.MouseEventHandler
   onKeyDown: React.KeyboardEventHandler
   role?: 'menuitem'
@@ -99,6 +100,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
           'aria-controls': contentId,
           'aria-expanded': active,
           'aria-haspopup': popupType,
+          disabled,
           onClick: handleClick,
           onKeyDown: handleKeyDown,
           role: isMenuItem ? 'menuitem' : undefined,
@@ -116,6 +118,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
         'aria-haspopup'?: AriaAttributes['aria-haspopup']
         'aria-label'?: string
         className?: string
+        disabled?: boolean
         onClick?: React.MouseEventHandler
         onKeyDown?: React.KeyboardEventHandler
         role?: React.AriaRole
@@ -133,6 +136,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
         'aria-haspopup': popupType,
         'aria-label': buttonAriaLabel ?? button.props['aria-label'],
         className: [classes, button.props.className].filter(Boolean).join(' '),
+        disabled: disabled || button.props.disabled,
         onClick: (event) => {
           originalOnClick?.(event)
           handleClick(event)
@@ -149,6 +153,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     return (
       <div
         aria-controls={contentId}
+        aria-disabled={disabled}
         aria-expanded={active}
         aria-haspopup={popupType}
         aria-label={buttonAriaLabel}
@@ -156,7 +161,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         role={isMenuItem ? 'menuitem' : 'button'}
-        tabIndex={isMenuItem ? -1 : 0}
+        tabIndex={disabled ? -1 : isMenuItem ? -1 : 0}
       >
         {button}
       </div>
