@@ -3,6 +3,8 @@ import type { SanitizedConfig } from 'payload'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
+import type { RequestThemeResult, RequestThemeSource } from '../../utilities/getRequestTheme.js'
+
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { DocumentRoot } from './DocumentRoot.js'
 import { getViewportMeta, isIPhoneUserAgent } from './viewport.js'
@@ -31,14 +33,14 @@ describe('RootLayout', () => {
 describe('request theme resolution', () => {
   it.each([
     { configTheme: 'dark', cookie: 'light', header: 'light', theme: 'dark', themeSource: 'config' },
-    { configTheme: 'all', cookie: 'dark', header: 'light', theme: 'dark', themeSource: 'cookie' },
-    { configTheme: 'all', cookie: 'auto', header: 'dark', theme: 'dark', themeSource: 'header' },
+    { configTheme: 'all', cookie: 'dark', header: 'light', theme: 'dark', themeSource: 'cookies' },
+    { configTheme: 'all', cookie: 'auto', header: 'dark', theme: 'dark', themeSource: 'headers' },
     {
       configTheme: 'all',
       cookie: 'invalid',
       header: 'light',
       theme: 'light',
-      themeSource: 'header',
+      themeSource: 'headers',
     },
     { configTheme: 'all', cookie: 'auto', header: null, theme: 'light', themeSource: 'fallback' },
     {
@@ -55,7 +57,11 @@ describe('request theme resolution', () => {
       theme: 'light',
       themeSource: 'fallback',
     },
-  ])(
+  ] satisfies ({
+    configTheme: SanitizedConfig['admin']['theme']
+    cookie?: string
+    header: null | string
+  } & RequestThemeResult)[])(
     'should resolve $theme from $themeSource with config=$configTheme, cookie=$cookie, header=$header',
     ({ configTheme, cookie, header, theme, themeSource }) => {
       const config = { admin: { theme: configTheme }, cookiePrefix: 'payload' } as SanitizedConfig
@@ -68,7 +74,7 @@ describe('request theme resolution', () => {
     },
   )
 
-  it.each(['config', 'cookie', 'fallback', 'header'] as const)(
+  it.each(['config', 'cookies', 'fallback', 'headers'] satisfies RequestThemeSource[])(
     'should include pre-paint system resolution only for the fallback source (%s)',
     (themeSource) => {
       const markup = renderToStaticMarkup(

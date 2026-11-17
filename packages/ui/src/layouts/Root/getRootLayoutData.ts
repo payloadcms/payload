@@ -10,8 +10,7 @@ import type {
 
 import { applyLocaleFiltering } from 'payload/shared'
 
-import type { Theme } from '../../providers/Theme/shared.js'
-import type { RequestThemeSource } from '../../utilities/getRequestTheme.js'
+import type { RequestThemeResult } from '../../utilities/getRequestTheme.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -33,12 +32,9 @@ export type RootLayoutData = {
   locale?: string
   permissions: null | SanitizedPermissions
   suppressHydrationWarning: boolean
-  theme: Theme
-  /** The request input used to resolve the theme. */
-  themeSource: RequestThemeSource
   translations: I18nClient['translations']
   user: null | User
-}
+} & RequestThemeResult
 
 type Args = {
   importMap: ImportMap
