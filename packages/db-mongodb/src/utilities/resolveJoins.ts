@@ -144,11 +144,11 @@ export async function resolveJoins({
       // Build the base query
       let whereQuery: null | Record<string, unknown> = null
       whereQuery = isPolymorphicJoin
-        ? filterWhereForCollection(
-            joinQuery.where || {},
-            targetConfig.flattenedFields,
-            true, // exclude relationTo for individual collections
-          )
+        ? filterWhereForCollection({
+            availableFields: targetConfig.flattenedFields,
+            collectionSlug: joinCollectionSlug,
+            where: joinQuery.where || {},
+          })
         : joinQuery.where || {}
 
       // Skip this collection if the WHERE clause cannot be satisfied for polymorphic collection joins
@@ -508,80 +508,63 @@ function extractRelationToFilter(where: Record<string, unknown>): null | string[
   return null
 }
 
-/**
- * Filters a WHERE clause to only include fields that exist in the target collection
- * This is needed for polymorphic joins where different collections have different fields
- * @param where - The original WHERE clause
- * @param availableFields - The fields available in the target collection
- * @param excludeRelationTo - Whether to exclude relationTo field (for individual collections)
- * @returns A filtered WHERE clause, or null if the query cannot match this collection
- */
-function filterWhereForCollection(
-  where: Record<string, unknown>,
-  availableFields: Array<{ name: string }>,
-  excludeRelationTo: boolean = false,
-): null | Record<string, unknown> {
+function filterWhereForCollection({
+  availableFields,
+  collectionSlug,
+  where,
+}: {
+  availableFields: Array<{ name: string }>
+  collectionSlug: string
+  where: Record<string, unknown>
+}): null | Record<string, unknown> {
   if (!where || typeof where !== 'object') {
     return where
   }
 
-  const fieldNames = new Set(availableFields.map((f) => f.name))
-  // Add special fields that are available in polymorphic relationships
-  if (!excludeRelationTo) {
-    fieldNames.add('relationTo')
-  }
-
+  const fieldNames = new Set(availableFields.map((field) => field.name))
   const filtered: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(where)) {
-    if (key === 'and') {
-      // Handle AND operator - all conditions must be satisfiable
-      if (Array.isArray(value)) {
-        const filteredConditions: Record<string, unknown>[] = []
+    if ((key === 'and' || key === 'or') && Array.isArray(value)) {
+      const conditions = value.map((condition) =>
+        filterWhereForCollection({ availableFields, collectionSlug, where: condition }),
+      )
 
-        for (const condition of value) {
-          const filteredCondition = filterWhereForCollection(
-            condition,
-            availableFields,
-            excludeRelationTo,
-          )
-
-          // If any condition in AND cannot be satisfied, the whole AND fails
-          if (filteredCondition === null) {
-            return null
-          }
-
-          if (Object.keys(filteredCondition).length > 0) {
-            filteredConditions.push(filteredCondition)
-          }
-        }
-
-        if (filteredConditions.length > 0) {
-          filtered[key] = filteredConditions
-        }
+      if (key === 'and' && conditions.some((condition) => condition === null)) {
+        return null
       }
-    } else if (key === 'or') {
-      // Handle OR operator - at least one condition must be satisfiable
-      if (Array.isArray(value)) {
-        const filteredConditions = value
-          .map((condition) =>
-            filterWhereForCollection(condition, availableFields, excludeRelationTo),
-          )
-          .filter((condition) => condition !== null && Object.keys(condition).length > 0)
 
-        if (filteredConditions.length > 0) {
-          filtered[key] = filteredConditions
-        }
-        // If no OR conditions can be satisfied, we still continue (OR is more permissive)
+      if (
+        key === 'or' &&
+        conditions.some((condition) => condition && Object.keys(condition).length === 0)
+      ) {
+        continue
       }
-    } else if (key === 'relationTo' && excludeRelationTo) {
-      // Skip relationTo field for non-polymorphic collections
-      continue
+
+      const matchingConditions = conditions.filter(
+        (condition): condition is Record<string, unknown> =>
+          condition !== null && Object.keys(condition).length > 0,
+      )
+
+      if (key === 'or' && matchingConditions.length === 0) {
+        return null
+      }
+
+      if (matchingConditions.length > 0) {
+        filtered[key] = matchingConditions
+      }
+    } else if (key === 'relationTo') {
+      if (
+        value &&
+        typeof value === 'object' &&
+        'equals' in value &&
+        value.equals !== collectionSlug
+      ) {
+        return null
+      }
     } else if (fieldNames.has(key)) {
-      // Include the condition if the field exists in this collection
       filtered[key] = value
     } else {
-      // Field doesn't exist in this collection - this makes the query unsatisfiable
       return null
     }
   }
