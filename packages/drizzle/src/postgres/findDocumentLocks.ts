@@ -1,13 +1,14 @@
-import type { TransactionPg } from '@payloadcms/drizzle'
 import type { FindArgs, PaginatedDocs, TypeWithID } from 'payload'
 
-import { find } from '@payloadcms/drizzle'
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from './types.js'
+import type { TransactionPg } from '../types.js'
+import type { BasePostgresAdapter } from './types.js'
+
+import { find } from '../find.js'
 
 export async function findDocumentLocks<T = TypeWithID>(
-  this: PostgresAdapter,
+  this: BasePostgresAdapter,
   args: FindArgs,
 ): Promise<PaginatedDocs<T>> {
   const transactionID = await args.req?.transactionID
