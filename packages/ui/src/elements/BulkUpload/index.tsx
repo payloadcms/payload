@@ -7,6 +7,8 @@ import { validateMimeType } from 'payload/shared'
 import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import type { UploadProgress } from '../../providers/DocumentInfo/types.js'
+
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
@@ -145,6 +147,23 @@ export function BulkUploadModal() {
   )
 }
 
+/**
+ * Progress of a bulk upload. Files upload one at a time; `current` is the file being sent.
+ * Undefined before the first batch, kept after it ends until the next batch starts.
+ * @experimental
+ */
+export type BulkUploadProgress = {
+  /** Files saved successfully in this batch. */
+  completed: number
+  current: {
+    fileName: string
+    formID: string
+    /** One-based position in this batch. */
+    index: number
+  } & UploadProgress
+  total: number
+}
+
 export type BulkUploadContext = {
   collectionSlug: CollectionSlug
   initialFiles: FileList
@@ -188,7 +207,14 @@ export type BulkUploadContext = {
    */
   setSelectableCollections: (collections: null | string[]) => void
   setSuccessfullyUploaded: (successfullyUploaded: boolean) => void
+  /** @internal Set by Payload while a bulk upload runs. */
+  setUploadProgress: (progress: BulkUploadProgress | undefined) => void
   successfullyUploaded: boolean
+  /**
+   * Progress of the current or last bulk upload.
+   * @experimental
+   */
+  uploadProgress?: BulkUploadProgress
 }
 
 const Context = React.createContext<BulkUploadContext>({
@@ -210,7 +236,9 @@ const Context = React.createContext<BulkUploadContext>({
   setParentID: () => null,
   setSelectableCollections: () => null,
   setSuccessfullyUploaded: () => false,
+  setUploadProgress: () => null,
   successfullyUploaded: false,
+  uploadProgress: undefined,
 })
 export function BulkUploadProvider({
   children,
@@ -228,6 +256,7 @@ export function BulkUploadProvider({
   const [initialForms, setInitialForms] = React.useState<InitialForms>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
   const [successfullyUploaded, setSuccessfullyUploaded] = React.useState<boolean>(false)
+  const [uploadProgress, setUploadProgress] = React.useState<BulkUploadProgress>()
 
   const modalSlug = `${modalSlugPrefix ? `${modalSlugPrefix}-` : ''}${useBulkUploadModalSlug()}`
 
@@ -267,7 +296,9 @@ export function BulkUploadProvider({
         setParentID,
         setSelectableCollections,
         setSuccessfullyUploaded,
+        setUploadProgress,
         successfullyUploaded,
+        uploadProgress,
       }}
     >
       <React.Fragment>

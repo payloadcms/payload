@@ -650,6 +650,11 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    bulkUploadFailed: 'Nem sikerült feltölteni {{count}} {{label}} elemet.',
+    bulkUploadPartiallySucceeded:
+      '{{total}} {{label}} közül {{count}} feltöltve. Javítsa a többit, és mentse újra.',
+    bulkUploadPosition: '{{current}}/{{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} feltöltve.',
     cancelUpload: 'Feltöltés megszakítása',
     copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
     copyURL: 'URL másolása',

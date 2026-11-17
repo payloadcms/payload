@@ -648,6 +648,11 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    bulkUploadFailed: '{{count}} {{label}} yüklenemedi.',
+    bulkUploadPartiallySucceeded:
+      '{{total}} {{label}} içinden {{count}} tanesi yüklendi. Kalanları düzeltip yeniden kaydedin.',
+    bulkUploadPosition: '{{current}} / {{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} yüklendi.',
     cancelUpload: 'Yüklemeyi iptal et',
     copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     copyURL: 'URL’yi kopyala',

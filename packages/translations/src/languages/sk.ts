@@ -638,6 +638,11 @@ export const skTranslations: DefaultTranslationsObject = {
     addFile: 'Pridať súbor',
     addFiles: 'Pridať súbory',
     bulkUpload: 'Hromadné nahranie',
+    bulkUploadFailed: 'Nepodarilo sa nahrať {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Nahraných {{count}} z {{total}} {{label}}. Opravte zvyšné a uložte znova.',
+    bulkUploadPosition: '{{current}} z {{total}}',
+    bulkUploadSucceeded: 'Nahraných {{count}} {{label}}.',
     cancelUpload: 'Zrušiť nahrávanie',
     copyLinkToFile: 'Kopírovať odkaz na súbor',
     copyURL: 'Kopírovať URL',

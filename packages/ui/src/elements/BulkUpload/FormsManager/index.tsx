@@ -11,21 +11,29 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, parseErrorResponse, validateMimeType } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
+import type { UploadProgress } from '../../../providers/DocumentInfo/types.js'
 import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
+import { trackSaveUploadProgress } from '../../../forms/Form/trackSaveUploadProgress.js'
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
+import {
+  createProgressToast,
+  getUploadProgressMessage,
+} from '../../../providers/UploadSessions/browser.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { uploadRequest } from '../../../utilities/uploadRequest.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
@@ -143,6 +151,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     setInitialFiles,
     setInitialForms,
     setSuccessfullyUploaded,
+    setUploadProgress,
   } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
@@ -476,12 +485,43 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       setIsUploading(true)
 
+      const total = currentForms.length
+      // One toast for the whole batch, updated as files are sent.
+      const batchToastID = `bulk-upload-${crypto.randomUUID()}`
+      const batchToast = createProgressToast({ id: batchToastID })
+      let completed = 0
+
       for (let i = 0; i < currentForms.length; i++) {
+        let wasSuccessful = false
+        let fileUpload: ReturnType<typeof trackSaveUploadProgress> | undefined
+
         try {
           const form = currentForms[i]
           const fileValue = form.formState?.file?.value
+          const fileName = fileValue instanceof File ? fileValue.name : ''
+          const position = t('upload:bulkUploadPosition', { current: i + 1, total })
+          const showCurrent = (progress: UploadProgress) =>
+            setUploadProgress({
+              completed,
+              current: { ...progress, fileName, formID: form.formID, index: i + 1 },
+              total,
+            })
 
-          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
+          setLoadingText(t('general:uploadingBulk', { current: i + 1, total }))
+          batchToast.show(`${position} · ${getUploadProgressMessage({ fileName, t })}`)
+
+          if (fileValue instanceof File) {
+            fileUpload = trackSaveUploadProgress({
+              fileName,
+              formatMessage: (message) => `${position} · ${message}`,
+              onChange: showCurrent,
+              progressToast: batchToast,
+              t,
+              totalBytes: fileValue.size,
+            })
+          } else {
+            showCurrent({ loadedBytes: 0, status: 'uploading', totalBytes: 0 })
+          }
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
@@ -493,23 +533,37 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             },
           )}`
 
-          const req = await fetch(actionURLWithParams, {
-            body: await createFormData(
-              form.formState,
-              overrides,
-              getUploadHandler({ collectionSlug }),
-              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
-                ?.allowRestrictedFileTypes,
-            ),
-            credentials: 'include',
-            method: 'POST',
-          })
+          const body = await createFormData(
+            form.formState,
+            overrides,
+            getUploadHandler({ collectionSlug }),
+            config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+              ?.allowRestrictedFileTypes,
+            fileUpload?.report,
+          )
+
+          // A file still in the body is sent with this request, which reports its progress.
+          const req =
+            body.get('file') instanceof Blob
+              ? await uploadRequest({
+                  body,
+                  method: 'POST',
+                  onProgress: fileUpload?.report,
+                  url: actionURLWithParams,
+                  withCredentials: true,
+                })
+              : await fetch(actionURLWithParams, {
+                  body,
+                  credentials: 'include',
+                  method: 'POST',
+                })
 
           const json = await req.json()
 
-          const wasSuccessful = req.status === 201 && json?.doc
+          wasSuccessful = Boolean(req.status === 201 && json?.doc)
 
           if (wasSuccessful) {
+            completed += 1
             newDocs.push({
               collectionSlug,
               doc: json.doc,
@@ -578,8 +632,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               })
             }
           }
-        } catch (_) {
-          // swallow
+        } catch (err) {
+          // A failure in the browser, e.g. a network error, keeps the form for a retry like a
+          // rejected save does, and the batch continues with the next file.
+          if (!wasSuccessful) {
+            currentForms[i] = {
+              ...currentForms[i],
+              errorCount: Math.max(1, currentForms[i].errorCount ?? 0),
+            }
+
+            toast.error(err instanceof Error ? err.message : t('error:unknown'))
+          }
+        } finally {
+          fileUpload?.settle({ isSuccessful: wasSuccessful })
         }
       }
 
@@ -597,9 +662,24 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
       const errorCount = currentForms.length - successCount
+      const label = getTranslation(collectionConfig?.labels?.plural, i18n)
+
+      if (errorCount === 0) {
+        toast.success(t('upload:bulkUploadSucceeded', { count: successCount, label }), {
+          id: batchToastID,
+        })
+      } else if (successCount === 0) {
+        toast.error(t('upload:bulkUploadFailed', { count: errorCount, label }), {
+          id: batchToastID,
+        })
+      } else {
+        toast.warning(
+          t('upload:bulkUploadPartiallySucceeded', { count: successCount, label, total }),
+          { id: batchToastID },
+        )
+      }
 
       if (successCount) {
-        toast.success(`Successfully saved ${successCount} files`)
         setSuccessfullyUploaded(true)
 
         if (typeof onSuccess === 'function') {
@@ -607,9 +687,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         }
       }
 
-      if (errorCount) {
-        toast.error(`Failed to save ${errorCount} files`)
-      } else {
+      if (!errorCount) {
         closeModal(drawerSlug)
       }
 
@@ -644,6 +722,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       getFormState,
       docPermissions,
       setSuccessfullyUploaded,
+      setUploadProgress,
+      collectionConfig,
+      i18n,
       onSuccess,
       closeModal,
       drawerSlug,

@@ -641,6 +641,11 @@ export const hrTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno dodavanje',
+    bulkUploadFailed: 'Prijenos {{count}} {{label}} nije uspio.',
+    bulkUploadPartiallySucceeded:
+      'Preneseno {{count}} od {{total}} {{label}}. Ispravite ostale i ponovno spremite.',
+    bulkUploadPosition: '{{current}} od {{total}}',
+    bulkUploadSucceeded: 'Preneseno {{count}} {{label}}.',
     cancelUpload: 'Otkaži prijenos',
     copyLinkToFile: 'Kopirajte poveznicu na datoteku',
     copyURL: 'Kopirajte URL',

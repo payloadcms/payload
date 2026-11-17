@@ -644,6 +644,11 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFile: 'Legg til fil',
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
+    bulkUploadFailed: 'Kunne ikke laste opp {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Lastet opp {{count}} av {{total}} {{label}}. Rett resten og lagre på nytt.',
+    bulkUploadPosition: '{{current}} av {{total}}',
+    bulkUploadSucceeded: 'Lastet opp {{count}} {{label}}.',
     cancelUpload: 'Avbryt opplasting',
     copyLinkToFile: 'Kopier lenke til fil',
     copyURL: 'Kopier URL',

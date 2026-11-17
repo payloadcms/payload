@@ -641,6 +641,11 @@ export const daTranslations: DefaultTranslationsObject = {
     addFile: 'Tilføj fil',
     addFiles: 'Tilføj Filer',
     bulkUpload: 'Masseupload',
+    bulkUploadFailed: 'Kunne ikke uploade {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Uploadede {{count}} af {{total}} {{label}}. Ret resten, og gem igen.',
+    bulkUploadPosition: '{{current}} af {{total}}',
+    bulkUploadSucceeded: 'Uploadede {{count}} {{label}}.',
     cancelUpload: 'Annuller upload',
     copyLinkToFile: 'Kopier link til fil',
     copyURL: 'Kopier URL',

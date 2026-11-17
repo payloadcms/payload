@@ -646,6 +646,11 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
+    bulkUploadFailed: 'Nepavyko įkelti {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Įkelta {{count}} iš {{total}} {{label}}. Pataisykite likusius ir išsaugokite dar kartą.',
+    bulkUploadPosition: '{{current}} iš {{total}}',
+    bulkUploadSucceeded: 'Įkelta {{count}} {{label}}.',
     cancelUpload: 'Atšaukti įkėlimą',
     copyLinkToFile: 'Kopijuoti nuorodą į failą',
     copyURL: 'Kopijuoti URL',

@@ -640,6 +640,11 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    bulkUploadFailed: 'Nalaganje {{count}} {{label}} ni uspelo.',
+    bulkUploadPartiallySucceeded:
+      'Naloženih {{count}} od {{total}} {{label}}. Popravite ostale in znova shranite.',
+    bulkUploadPosition: '{{current}} od {{total}}',
+    bulkUploadSucceeded: 'Naloženih {{count}} {{label}}.',
     cancelUpload: 'Prekliči nalaganje',
     copyLinkToFile: 'Kopiraj povezavo do datoteke',
     copyURL: 'Kopiraj URL',

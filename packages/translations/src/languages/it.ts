@@ -649,6 +649,11 @@ export const itTranslations: DefaultTranslationsObject = {
     addFile: 'Aggiungi file',
     addFiles: 'Aggiungi File',
     bulkUpload: 'Caricamento in Blocco',
+    bulkUploadFailed: 'Impossibile caricare {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Caricati {{count}} di {{total}} {{label}}. Correggi gli altri e salva di nuovo.',
+    bulkUploadPosition: '{{current}} di {{total}}',
+    bulkUploadSucceeded: 'Caricati {{count}} {{label}}.',
     cancelUpload: 'Annulla caricamento',
     copyLinkToFile: 'Copia link al file',
     copyURL: 'Copia URL',

@@ -639,6 +639,11 @@ export const isTranslations: DefaultTranslationsObject = {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
+    bulkUploadFailed: 'Mistókst að hlaða upp {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Hlóð upp {{count}} af {{total}} {{label}}. Lagaðu hin og vistaðu aftur.',
+    bulkUploadPosition: '{{current}} af {{total}}',
+    bulkUploadSucceeded: 'Hlóð upp {{count}} {{label}}.',
     cancelUpload: 'Hætta við upphleðslu',
     copyLinkToFile: 'Afrita hlekk á skrá',
     copyURL: 'Afrita URL',

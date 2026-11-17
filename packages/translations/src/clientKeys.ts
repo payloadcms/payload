@@ -542,6 +542,10 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'operators:intersects',
 
   'upload:addFile',
+  'upload:bulkUploadFailed',
+  'upload:bulkUploadPartiallySucceeded',
+  'upload:bulkUploadPosition',
+  'upload:bulkUploadSucceeded',
   'upload:cancelUpload',
   'upload:finishSaving',
   'upload:processingAndSavingFile',

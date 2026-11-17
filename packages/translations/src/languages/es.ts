@@ -650,6 +650,11 @@ export const esTranslations: DefaultTranslationsObject = {
     addFile: 'Añadir archivo',
     addFiles: 'Añadir archivos',
     bulkUpload: 'Subida en lotes',
+    bulkUploadFailed: 'No se pudieron cargar {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Se cargaron {{count}} de {{total}} {{label}}. Corrige el resto y vuelve a guardar.',
+    bulkUploadPosition: '{{current}} de {{total}}',
+    bulkUploadSucceeded: 'Se cargaron {{count}} {{label}}.',
     cancelUpload: 'Cancelar carga',
     copyLinkToFile: 'Copiar enlace al archivo',
     copyURL: 'Copiar URL',

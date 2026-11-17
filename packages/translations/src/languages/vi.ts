@@ -642,6 +642,11 @@ export const viTranslations: DefaultTranslationsObject = {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
     bulkUpload: 'Tải lên số lượng lớn',
+    bulkUploadFailed: 'Không thể tải lên {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Đã tải lên {{count}}/{{total}} {{label}}. Hãy sửa các mục còn lại và lưu lại.',
+    bulkUploadPosition: '{{current}}/{{total}}',
+    bulkUploadSucceeded: 'Đã tải lên {{count}} {{label}}.',
     cancelUpload: 'Hủy tải lên',
     copyLinkToFile: 'Sao chép liên kết đến tệp',
     copyURL: 'Sao chép URL',

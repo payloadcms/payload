@@ -657,6 +657,11 @@ export const deTranslations: DefaultTranslationsObject = {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
+    bulkUploadFailed: '{{count}} {{label}} konnten nicht hochgeladen werden.',
+    bulkUploadPartiallySucceeded:
+      '{{count}} von {{total}} {{label}} hochgeladen. Korrigiere die übrigen und speichere erneut.',
+    bulkUploadPosition: '{{current}} von {{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} hochgeladen.',
     cancelUpload: 'Upload abbrechen',
     copyLinkToFile: 'Link zum Datei kopieren',
     copyURL: 'URL kopieren',

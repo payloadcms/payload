@@ -646,6 +646,11 @@ export const idTranslations: DefaultTranslationsObject = {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
     bulkUpload: 'Unggah Massal',
+    bulkUploadFailed: 'Gagal mengunggah {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Berhasil mengunggah {{count}} dari {{total}} {{label}}. Perbaiki sisanya lalu simpan lagi.',
+    bulkUploadPosition: '{{current}} dari {{total}}',
+    bulkUploadSucceeded: 'Berhasil mengunggah {{count}} {{label}}.',
     cancelUpload: 'Batalkan unggahan',
     copyLinkToFile: 'Salin tautan ke file',
     copyURL: 'Salin URL',

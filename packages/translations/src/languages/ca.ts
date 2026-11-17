@@ -646,6 +646,11 @@ export const caTranslations: DefaultTranslationsObject = {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
+    bulkUploadFailed: "No s'han pogut carregar {{count}} {{label}}.",
+    bulkUploadPartiallySucceeded:
+      "S'han carregat {{count}} de {{total}} {{label}}. Corregiu la resta i torneu a desar.",
+    bulkUploadPosition: '{{current}} de {{total}}',
+    bulkUploadSucceeded: "S'han carregat {{count}} {{label}}.",
     cancelUpload: 'Cancel·la la càrrega',
     copyLinkToFile: "Copia l'enllaç al fitxer",
     copyURL: 'Copia l’URL',

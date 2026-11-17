@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { UploadProgress } from '../../providers/DocumentInfo/types.js'
 
+import { createProgressToast } from '../../providers/UploadSessions/browser.js'
 import { trackSaveUploadProgress } from './trackSaveUploadProgress.js'
 
 const t = ((key: string, vars?: Record<string, unknown>) =>
@@ -23,7 +24,13 @@ describe('trackSaveUploadProgress', () => {
     const onChange = vi.fn()
 
     toast.loading('Submitting…', { id: toastID })
-    trackSaveUploadProgress({ fileName: 'video.mp4', onChange, t, toastID, totalBytes: 100 })
+    trackSaveUploadProgress({
+      fileName: 'video.mp4',
+      onChange,
+      progressToast: createProgressToast({ id: toastID }),
+      t,
+      totalBytes: 100,
+    })
 
     expect(onChange).toHaveBeenCalledWith({ loadedBytes: 0, status: 'uploading', totalBytes: 100 })
     expect(getToastTitle()).toBe('Submitting…')
@@ -34,8 +41,8 @@ describe('trackSaveUploadProgress', () => {
     const upload = trackSaveUploadProgress({
       fileName: 'video.mp4',
       onChange,
+      progressToast: createProgressToast({ id: toastID }),
       t,
-      toastID,
       totalBytes: 1000,
     })
 
@@ -51,7 +58,12 @@ describe('trackSaveUploadProgress', () => {
   })
 
   it('should show processing once every byte is sent', () => {
-    const upload = trackSaveUploadProgress({ fileName: 'video.mp4', t, toastID, totalBytes: 10 })
+    const upload = trackSaveUploadProgress({
+      fileName: 'video.mp4',
+      progressToast: createProgressToast({ id: toastID }),
+      t,
+      totalBytes: 10,
+    })
 
     upload.report({ loadedBytes: 10, totalBytes: 10 })
 
@@ -62,7 +74,7 @@ describe('trackSaveUploadProgress', () => {
     const states: UploadProgress[] = []
     const upload = trackSaveUploadProgress({
       fileName: 'video.mp4',
-      onChange: (progress) => states.push(progress!),
+      onChange: (progress) => states.push(progress),
       t,
       totalBytes: 100,
     })

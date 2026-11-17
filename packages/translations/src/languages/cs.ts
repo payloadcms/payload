@@ -638,6 +638,11 @@ export const csTranslations: DefaultTranslationsObject = {
     addFile: 'Přidat soubor',
     addFiles: 'Přidat soubory',
     bulkUpload: 'Hromadné nahrání',
+    bulkUploadFailed: 'Nepodařilo se nahrát {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Nahráno {{count}} z {{total}} {{label}}. Opravte zbývající a uložte znovu.',
+    bulkUploadPosition: '{{current}} z {{total}}',
+    bulkUploadSucceeded: 'Nahráno {{count}} {{label}}.',
     cancelUpload: 'Zrušit nahrávání',
     copyLinkToFile: 'Zkopírovat odkaz na soubor',
     copyURL: 'Zkopírovat URL',

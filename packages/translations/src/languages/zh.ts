@@ -612,6 +612,11 @@ export const zhTranslations: DefaultTranslationsObject = {
     addFile: '添加文件',
     addFiles: '添加文件',
     bulkUpload: '批量上传',
+    bulkUploadFailed: '{{count}} 个{{label}}上传失败。',
+    bulkUploadPartiallySucceeded:
+      '已上传 {{count}}/{{total}} 个{{label}}。请修正其余项目后再次保存。',
+    bulkUploadPosition: '第 {{current}}/{{total}} 个',
+    bulkUploadSucceeded: '已上传 {{count}} 个{{label}}。',
     cancelUpload: '取消上传',
     copyLinkToFile: '复制文件链接',
     copyURL: '复制 URL',

@@ -623,6 +623,11 @@ export const heTranslations: DefaultTranslationsObject = {
     addFile: 'הוסף קובץ',
     addFiles: 'הוסף קבצים',
     bulkUpload: 'העלאה בתפוצה רחבה',
+    bulkUploadFailed: 'העלאת {{count}} {{label}} נכשלה.',
+    bulkUploadPartiallySucceeded:
+      'הועלו {{count}} מתוך {{total}} {{label}}. תקנו את השאר ושמרו שוב.',
+    bulkUploadPosition: '{{current}} מתוך {{total}}',
+    bulkUploadSucceeded: 'הועלו {{count}} {{label}}.',
     cancelUpload: 'בטל העלאה',
     copyLinkToFile: 'העתק קישור לקובץ',
     copyURL: 'העתק כתובת URL',

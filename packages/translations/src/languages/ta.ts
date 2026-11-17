@@ -634,6 +634,11 @@ export const taTranslations: DefaultTranslationsObject = {
     addFile: 'கோப்பை சேர்க்கவும்',
     addFiles: 'கோப்புகளை சேர்க்கவும்',
     bulkUpload: 'மொத்தமாக பதிவேற்றம்',
+    bulkUploadFailed: '{{count}} {{label}} பதிவேற்ற முடியவில்லை.',
+    bulkUploadPartiallySucceeded:
+      '{{total}} {{label}} இல் {{count}} பதிவேற்றப்பட்டன. மீதமுள்ளவற்றைச் சரிசெய்து மீண்டும் சேமிக்கவும்.',
+    bulkUploadPosition: '{{total}} இல் {{current}}',
+    bulkUploadSucceeded: '{{count}} {{label}} பதிவேற்றப்பட்டன.',
     cancelUpload: 'பதிவேற்றத்தை ரத்துசெய்',
     copyLinkToFile: 'கோப்புக்கான இணைப்பை நகலெடுக்கவும்',
     copyURL: 'URL-ஐ நகலெடுக்கவும்',

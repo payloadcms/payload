@@ -647,6 +647,11 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFile: 'Добавить файл',
     addFiles: 'Добавить файлы',
     bulkUpload: 'Массовая загрузка',
+    bulkUploadFailed: 'Не удалось загрузить {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Загружено {{count}} из {{total}} {{label}}. Исправьте остальные и сохраните снова.',
+    bulkUploadPosition: '{{current}} из {{total}}',
+    bulkUploadSucceeded: 'Загружено {{count}} {{label}}.',
     cancelUpload: 'Отменить загрузку',
     copyLinkToFile: 'Скопировать ссылку на файл',
     copyURL: 'Скопировать URL',

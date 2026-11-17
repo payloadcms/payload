@@ -637,6 +637,11 @@ export const koTranslations: DefaultTranslationsObject = {
     addFile: '파일 추가',
     addFiles: '파일 추가',
     bulkUpload: '일괄 업로드',
+    bulkUploadFailed: '{{label}} {{count}}개를 업로드하지 못했습니다.',
+    bulkUploadPartiallySucceeded:
+      '{{label}} {{total}}개 중 {{count}}개를 업로드했습니다. 나머지를 수정한 후 다시 저장하세요.',
+    bulkUploadPosition: '{{total}}개 중 {{current}}번째',
+    bulkUploadSucceeded: '{{label}} {{count}}개를 업로드했습니다.',
     cancelUpload: '업로드 취소',
     copyLinkToFile: '파일에 대한 링크 복사',
     copyURL: 'URL 복사',

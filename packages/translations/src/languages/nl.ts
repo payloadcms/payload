@@ -650,6 +650,11 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
+    bulkUploadFailed: 'Uploaden van {{count}} {{label}} mislukt.',
+    bulkUploadPartiallySucceeded:
+      '{{count}} van {{total}} {{label}} geüpload. Corrigeer de rest en sla opnieuw op.',
+    bulkUploadPosition: '{{current}} van {{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} geüpload.',
     cancelUpload: 'Upload annuleren',
     copyLinkToFile: 'Kopieer link naar bestand',
     copyURL: 'Kopieer URL',

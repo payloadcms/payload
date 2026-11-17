@@ -101,7 +101,7 @@ export {
   useBulkUploadModalSlug,
 } from '../../elements/BulkUpload/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
-export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
+export type { BulkUploadProgress, BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { APIKeyInput } from '../../elements/APIKeyInput/index.js'
 export type { APIKeyInputProps } from '../../elements/APIKeyInput/index.js'
 export { Banner } from '../../elements/Banner/index.js'

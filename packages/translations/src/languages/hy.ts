@@ -646,6 +646,11 @@ export const hyTranslations: DefaultTranslationsObject = {
     addFile: 'Ավելացնել ֆայլ',
     addFiles: 'Ավելացնել ֆայլեր',
     bulkUpload: 'Զանգվածային վերբեռնում',
+    bulkUploadFailed: 'Չհաջողվեց վերբեռնել {{count}} {{label}}։',
+    bulkUploadPartiallySucceeded:
+      'Վերբեռնվել է {{count}}՝ {{total}} {{label}}-ից։ Ուղղեք մնացածը և նորից պահպանեք։',
+    bulkUploadPosition: '{{current}}՝ {{total}}-ից',
+    bulkUploadSucceeded: 'Վերբեռնվել է {{count}} {{label}}։',
     cancelUpload: 'Չեղարկել վերբեռնումը',
     copyLinkToFile: 'Պատճենել հղումը ֆայլին',
     copyURL: 'Պատճենել URL-ը',

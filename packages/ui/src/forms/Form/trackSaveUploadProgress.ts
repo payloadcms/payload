@@ -3,9 +3,9 @@ import type { TFunction } from '@payloadcms/translations'
 import type { UploadTransferProgress } from 'payload'
 
 import type { UploadProgress } from '../../providers/DocumentInfo/types.js'
+import type { createProgressToast } from '../../providers/UploadSessions/browser.js'
 
 import {
-  createProgressToast,
   getUploadPercent,
   getUploadProgressMessage,
 } from '../../providers/UploadSessions/browser.js'
@@ -17,19 +17,21 @@ import {
  */
 export const trackSaveUploadProgress = ({
   fileName,
+  formatMessage = (message) => message,
   onChange,
+  progressToast,
   t,
-  toastID,
   totalBytes,
 }: {
   fileName: string
-  onChange?: (progress: undefined | UploadProgress) => void
+  /** Adds context to the toast text, e.g. the file's position in a bulk upload. */
+  formatMessage?: (message: string) => string
+  onChange?: (progress: UploadProgress) => void
+  /** The toast that shows progress. Without it, only `onChange` is called. */
+  progressToast?: ReturnType<typeof createProgressToast>
   t: TFunction
-  toastID?: number | string
   totalBytes: number
 }) => {
-  const progressToast =
-    toastID === undefined ? undefined : createProgressToast({ id: String(toastID) })
   let lastProgress: UploadTransferProgress = { loadedBytes: 0, totalBytes }
   let lastPercent: number | undefined
   let isSettled = false
@@ -48,7 +50,7 @@ export const trackSaveUploadProgress = ({
       lastPercent = percent
       lastProgress = progress
       onChange?.({ ...progress, status: 'uploading' })
-      progressToast?.show(getUploadProgressMessage({ fileName, progress, t }))
+      progressToast?.show(formatMessage(getUploadProgressMessage({ fileName, progress, t })))
     },
     /** Ends the upload state. A failed save keeps the bytes sent so far. */
     settle: ({ isSuccessful }: { isSuccessful: boolean }) => {

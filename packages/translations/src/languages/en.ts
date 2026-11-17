@@ -641,6 +641,11 @@ export const enTranslations = {
     addFile: 'Add file',
     addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
+    bulkUploadFailed: 'Failed to upload {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Uploaded {{count}} of {{total}} {{label}}. Fix the others and save again.',
+    bulkUploadPosition: '{{current}} of {{total}}',
+    bulkUploadSucceeded: 'Uploaded {{count}} {{label}}.',
     cancelUpload: 'Cancel upload',
     copyLinkToFile: 'Copy link to file',
     copyURL: 'Copy URL',

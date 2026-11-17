@@ -637,6 +637,11 @@ export const etTranslations: DefaultTranslationsObject = {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
     bulkUpload: 'Massiüleslaadimine',
+    bulkUploadFailed: '{{count}} {{label}} üleslaadimine ebaõnnestus.',
+    bulkUploadPartiallySucceeded:
+      'Üles laaditud {{count}}/{{total}} {{label}}. Paranda ülejäänud ja salvesta uuesti.',
+    bulkUploadPosition: '{{current}}/{{total}}',
+    bulkUploadSucceeded: 'Üles laaditud {{count}} {{label}}.',
     cancelUpload: 'Tühista üleslaadimine',
     copyLinkToFile: 'Kopeeri faili link',
     copyURL: 'Kopeeri URL',

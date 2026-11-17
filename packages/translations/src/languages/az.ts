@@ -647,6 +647,11 @@ export const azTranslations: DefaultTranslationsObject = {
     addFile: 'Fayl əlavə et',
     addFiles: 'Faylları Əlavə Edin',
     bulkUpload: 'Kütləvi Yükləmə',
+    bulkUploadFailed: '{{count}} {{label}} yüklənə bilmədi.',
+    bulkUploadPartiallySucceeded:
+      '{{total}} {{label}} arasından {{count}} yükləndi. Qalanlarını düzəldin və yenidən yadda saxlayın.',
+    bulkUploadPosition: '{{current}} / {{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} yükləndi.',
     cancelUpload: 'Yükləməni ləğv et',
     copyLinkToFile: 'Fayla keçidi kopyalayın',
     copyURL: 'URL-ni kopyalayın',

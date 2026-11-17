@@ -640,6 +640,11 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
+    bulkUploadFailed: 'Neizdevās augšupielādēt {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Augšupielādēti {{count}} no {{total}} {{label}}. Izlabojiet pārējos un saglabājiet vēlreiz.',
+    bulkUploadPosition: '{{current}} no {{total}}',
+    bulkUploadSucceeded: 'Augšupielādēti {{count}} {{label}}.',
     cancelUpload: 'Atcelt augšupielādi',
     copyLinkToFile: 'Kopēt saiti uz failu',
     copyURL: 'Kopēt URL',

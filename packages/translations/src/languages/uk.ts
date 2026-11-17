@@ -637,6 +637,11 @@ export const ukTranslations: DefaultTranslationsObject = {
     addFile: 'Додати файл',
     addFiles: 'Додати файли',
     bulkUpload: 'Масове завантаження',
+    bulkUploadFailed: 'Не вдалося завантажити {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Завантажено {{count}} з {{total}} {{label}}. Виправте решту й збережіть знову.',
+    bulkUploadPosition: '{{current}} з {{total}}',
+    bulkUploadSucceeded: 'Завантажено {{count}} {{label}}.',
     cancelUpload: 'Скасувати завантаження',
     copyLinkToFile: 'Скопіювати посилання на файл',
     copyURL: 'Скопіювати URL',

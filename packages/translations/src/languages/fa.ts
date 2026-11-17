@@ -634,6 +634,11 @@ export const faTranslations: DefaultTranslationsObject = {
     addFile: 'افزودن فایل',
     addFiles: 'افزودن فایل‌ها',
     bulkUpload: 'آپلود گروهی',
+    bulkUploadFailed: 'بارگذاری {{count}} {{label}} ناموفق بود.',
+    bulkUploadPartiallySucceeded:
+      '{{count}} از {{total}} {{label}} بارگذاری شد. بقیه را اصلاح کنید و دوباره ذخیره کنید.',
+    bulkUploadPosition: '{{current}} از {{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} بارگذاری شد.',
     cancelUpload: 'لغو بارگذاری',
     copyLinkToFile: 'کپی پیوند به فایل',
     copyURL: 'کپی URL',

@@ -641,6 +641,11 @@ export const plTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj plik',
     addFiles: 'Dodaj pliki',
     bulkUpload: 'Załaduj masowo',
+    bulkUploadFailed: 'Nie udało się przesłać {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Przesłano {{count}} z {{total}} {{label}}. Popraw pozostałe i zapisz ponownie.',
+    bulkUploadPosition: '{{current}} z {{total}}',
+    bulkUploadSucceeded: 'Przesłano {{count}} {{label}}.',
     cancelUpload: 'Anuluj przesyłanie',
     copyLinkToFile: 'Kopiuj link do pliku',
     copyURL: 'Kopiuj URL',

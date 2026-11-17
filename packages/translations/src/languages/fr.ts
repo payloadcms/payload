@@ -656,6 +656,11 @@ export const frTranslations: DefaultTranslationsObject = {
     addFile: 'Ajouter un fichier',
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
+    bulkUploadFailed: 'Échec du téléversement de {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      '{{count}} {{label}} sur {{total}} téléversés. Corrigez les autres et enregistrez à nouveau.',
+    bulkUploadPosition: '{{current}} sur {{total}}',
+    bulkUploadSucceeded: '{{count}} {{label}} téléversés.',
     cancelUpload: 'Annuler le téléversement',
     copyLinkToFile: 'Copier le lien vers le fichier',
     copyURL: 'Copier l’URL',

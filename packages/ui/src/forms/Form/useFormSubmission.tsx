@@ -33,6 +33,7 @@ import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { createProgressToast } from '../../providers/UploadSessions/browser.js'
 import {
   UploadContinuesInBackgroundError,
   useOptionalUploadSessions,
@@ -494,8 +495,11 @@ export const useFormSubmission = ({
             saveUpload = trackSaveUploadProgress({
               fileName: uploadFile.name,
               onChange: setUploadProgress,
+              progressToast:
+                promiseToastID === undefined
+                  ? undefined
+                  : createProgressToast({ id: String(promiseToastID) }),
               t,
-              toastID: promiseToastID,
               totalBytes: uploadFile.size,
             })
           }

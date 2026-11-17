@@ -643,6 +643,11 @@ export const svTranslations: DefaultTranslationsObject = {
     addFile: 'Lägg till fil',
     addFiles: 'Lägg till filer',
     bulkUpload: 'Massuppladdning',
+    bulkUploadFailed: 'Det gick inte att ladda upp {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'Laddade upp {{count}} av {{total}} {{label}}. Åtgärda resten och spara igen.',
+    bulkUploadPosition: '{{current}} av {{total}}',
+    bulkUploadSucceeded: 'Laddade upp {{count}} {{label}}.',
     cancelUpload: 'Avbryt uppladdning',
     copyLinkToFile: 'Kopiera länk till fil',
     copyURL: 'Kopiera URL',

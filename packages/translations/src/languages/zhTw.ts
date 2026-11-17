@@ -610,6 +610,11 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     addFile: '新增檔案',
     addFiles: '新增多個檔案',
     bulkUpload: '大量上傳',
+    bulkUploadFailed: '{{count}} 個{{label}}上傳失敗。',
+    bulkUploadPartiallySucceeded:
+      '已上傳 {{count}}/{{total}} 個{{label}}。請修正其餘項目後再次儲存。',
+    bulkUploadPosition: '第 {{current}}/{{total}} 個',
+    bulkUploadSucceeded: '已上傳 {{count}} 個{{label}}。',
     cancelUpload: '取消上傳',
     copyLinkToFile: '複製檔案連結',
     copyURL: '複製 URL',

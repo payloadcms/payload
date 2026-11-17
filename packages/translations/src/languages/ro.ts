@@ -648,6 +648,11 @@ export const roTranslations: DefaultTranslationsObject = {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
+    bulkUploadFailed: 'Nu s-au putut încărca {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'S-au încărcat {{count}} din {{total}} {{label}}. Corectați-le pe celelalte și salvați din nou.',
+    bulkUploadPosition: '{{current}} din {{total}}',
+    bulkUploadSucceeded: 'S-au încărcat {{count}} {{label}}.',
     cancelUpload: 'Anulează încărcarea',
     copyLinkToFile: 'Copiați linkul către fișier',
     copyURL: 'Copiați URL-ul',

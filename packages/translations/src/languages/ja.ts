@@ -641,6 +641,11 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
     bulkUpload: '一括アップロード',
+    bulkUploadFailed: '{{count}} 件の{{label}}をアップロードできませんでした。',
+    bulkUploadPartiallySucceeded:
+      '{{total}} 件中 {{count}} 件の{{label}}をアップロードしました。残りを修正して再度保存してください。',
+    bulkUploadPosition: '{{total}} 件中 {{current}} 件目',
+    bulkUploadSucceeded: '{{count}} 件の{{label}}をアップロードしました。',
     cancelUpload: 'アップロードをキャンセル',
     copyLinkToFile: 'ファイルへのリンクをコピー',
     copyURL: 'URLをコピー',

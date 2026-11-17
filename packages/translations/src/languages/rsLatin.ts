@@ -641,6 +641,11 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj Datoteke',
     bulkUpload: 'Masovno otpremanje',
+    bulkUploadFailed: 'Otpremanje {{count}} {{label}} nije uspelo.',
+    bulkUploadPartiallySucceeded:
+      'Otpremljeno {{count}} od {{total}} {{label}}. Ispravite ostale i ponovo sačuvajte.',
+    bulkUploadPosition: '{{current}} od {{total}}',
+    bulkUploadSucceeded: 'Otpremljeno {{count}} {{label}}.',
     cancelUpload: 'Otkaži otpremanje',
     copyLinkToFile: 'Kopiraj link ka fajlu',
     copyURL: 'Kopiraj URL',

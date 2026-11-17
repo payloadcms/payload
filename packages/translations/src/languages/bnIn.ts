@@ -642,6 +642,11 @@ export const bnInTranslations: DefaultTranslationsObject = {
     addFile: 'ফাইল যোগ করুন',
     addFiles: 'ফাইলগুলি যোগ করুন',
     bulkUpload: 'বাল্ক আপলোড',
+    bulkUploadFailed: '{{count}}টি {{label}} আপলোড করা যায়নি।',
+    bulkUploadPartiallySucceeded:
+      '{{total}}টির মধ্যে {{count}}টি {{label}} আপলোড হয়েছে। বাকিগুলো ঠিক করে আবার সংরক্ষণ করুন।',
+    bulkUploadPosition: '{{total}}টির মধ্যে {{current}}টি',
+    bulkUploadSucceeded: '{{count}}টি {{label}} আপলোড হয়েছে।',
     cancelUpload: 'আপলোড বাতিল করুন',
     copyLinkToFile: 'ফাইলের লিঙ্ক অনুলিপি করুন',
     copyURL: 'URL অনুলিপি করুন',

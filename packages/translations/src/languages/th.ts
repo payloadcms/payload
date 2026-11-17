@@ -619,6 +619,11 @@ export const thTranslations: DefaultTranslationsObject = {
     addFile: 'เพิ่มไฟล์',
     addFiles: 'เพิ่มไฟล์',
     bulkUpload: 'อัปโหลดจำนวนมาก',
+    bulkUploadFailed: 'อัปโหลด {{label}} ไม่สำเร็จ {{count}} รายการ',
+    bulkUploadPartiallySucceeded:
+      'อัปโหลด {{label}} แล้ว {{count}} จาก {{total}} รายการ แก้ไขรายการที่เหลือแล้วบันทึกอีกครั้ง',
+    bulkUploadPosition: '{{current}} จาก {{total}}',
+    bulkUploadSucceeded: 'อัปโหลด {{label}} แล้ว {{count}} รายการ',
     cancelUpload: 'ยกเลิกการอัปโหลด',
     copyLinkToFile: 'คัดลอกลิงก์ไปยังไฟล์',
     copyURL: 'คัดลอก URL',

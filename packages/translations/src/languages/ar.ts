@@ -629,6 +629,11 @@ export const arTranslations: DefaultTranslationsObject = {
     addFile: 'إضافة ملف',
     addFiles: 'أضف ملفات',
     bulkUpload: 'تحميل بالجملة',
+    bulkUploadFailed: 'تعذّر رفع {{count}} {{label}}.',
+    bulkUploadPartiallySucceeded:
+      'تم رفع {{count}} من {{total}} {{label}}. أصلح الباقي واحفظ مرة أخرى.',
+    bulkUploadPosition: '{{current}} من {{total}}',
+    bulkUploadSucceeded: 'تم رفع {{count}} {{label}}.',
     cancelUpload: 'إلغاء الرفع',
     copyLinkToFile: 'نسخ الرابط إلى الملف',
     copyURL: 'نسخ عنوان URL',
