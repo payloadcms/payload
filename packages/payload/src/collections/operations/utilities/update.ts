@@ -141,6 +141,13 @@ export const updateDocument = async <
     publishAllLocales,
     unpublishAllLocales,
   })
+  const isExplicitPublish =
+    data?._status === 'published' ||
+    Boolean(publishAllLocalesArg) ||
+    (typeof data?._status === 'object' &&
+      data?._status !== null &&
+      Object.values(data._status).some((s) => s === 'published'))
+
   const isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
@@ -524,6 +531,7 @@ export const updateDocument = async <
         draft: isSavingDraft,
         operation: 'update',
         payload,
+        publish: isExplicitPublish,
         req,
         unpublish: shouldUnpublishAllLocales,
       })

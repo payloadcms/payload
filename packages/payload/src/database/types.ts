@@ -509,6 +509,7 @@ export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string
+  latest?: boolean
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
@@ -537,6 +538,7 @@ export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   createdAt: string
   globalSlug: GlobalSlug
+  latest?: boolean
   publishedLocale?: string
   req?: Partial<PayloadRequest>
   /**

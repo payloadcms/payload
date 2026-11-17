@@ -5,10 +5,16 @@ import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
-import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
+import {
+  getVersionsMax,
+  hasDraftsEnabled,
+  hasLocalizeStatusEnabled,
+} from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
+import { getLatestCollectionVersion } from './getLatestCollectionVersion.js'
+import { getLatestGlobalVersion } from './getLatestGlobalVersion.js'
 import { updateLatestVersion } from './updateLatestVersion.js'
 
 type Args<T extends JsonObject = JsonObject> = {
@@ -20,6 +26,7 @@ type Args<T extends JsonObject = JsonObject> = {
   id?: number | string
   operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
+  publish?: boolean
   req?: PayloadRequest
   returning?: boolean
   select?: SelectType
@@ -44,6 +51,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   global,
   operation,
   payload,
+  publish,
   req,
   returning,
   select,
@@ -99,11 +107,56 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     if (!result) {
       createdNewVersion = true
 
+      let latest = true
+
+      if (operation !== 'create' && !draft && !publish && entity && hasDraftsEnabled(entity)) {
+        if (collection && id !== undefined) {
+          const latestDoc = await getLatestCollectionVersion({
+            id,
+            config: collection,
+            payload,
+            query: { collection: collection.slug, where: { id: { equals: id } } },
+            req,
+          })
+          const latestStatus = latestDoc?._status
+          const hasPendingDraft =
+            typeof latestStatus === 'string'
+              ? latestStatus === 'draft'
+              : typeof latestStatus === 'object' && latestStatus !== null
+                ? Object.values(latestStatus).some((s) => s === 'draft')
+                : false
+
+          if (hasPendingDraft) {
+            latest = false
+          }
+        } else if (global) {
+          const { global: latestDoc } = await getLatestGlobalVersion({
+            slug: global.slug,
+            config: global,
+            payload,
+            req,
+            where: {},
+          })
+          const latestStatus = latestDoc?._status
+          const hasPendingDraft =
+            typeof latestStatus === 'string'
+              ? latestStatus === 'draft'
+              : typeof latestStatus === 'object' && latestStatus !== null
+                ? Object.values(latestStatus).some((s) => s === 'draft')
+                : false
+
+          if (hasPendingDraft) {
+            latest = false
+          }
+        }
+      }
+
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
+        latest,
         parent: collection ? id : undefined,
         req,
         returning,

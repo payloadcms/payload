@@ -213,14 +213,50 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const globalVersionResult = await getLatestGlobalVersion({
-      slug,
-      config: globalConfig,
-      locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
-      payload,
-      req,
-      where: query,
-    })
+    let globalVersionResult: { global: Document; globalExists: boolean } | undefined
+
+    const isExplicitPublish =
+      data?._status === 'published' ||
+      Boolean(publishAllLocalesArg) ||
+      (typeof data?._status === 'object' &&
+        data?._status !== null &&
+        Object.values(data._status).some((s) => s === 'published'))
+
+    const isNonDraftGlobalUpdate = !draftArg && !isExplicitPublish && hasDraftsEnabled(globalConfig)
+
+    if (isNonDraftGlobalUpdate) {
+      const mainGlobal = await payload.db.findGlobal({
+        slug,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        req,
+        where: query,
+      })
+
+      const isMainGlobalPublished =
+        typeof mainGlobal?._status === 'string'
+          ? mainGlobal._status === 'published'
+          : typeof mainGlobal?._status === 'object' && mainGlobal?._status !== null
+            ? Object.values(mainGlobal._status).some((s) => s === 'published')
+            : false
+
+      if (isMainGlobalPublished) {
+        globalVersionResult = {
+          global: mainGlobal!,
+          globalExists: Boolean(mainGlobal && Object.keys(mainGlobal).length > 0),
+        }
+      }
+    }
+
+    if (!globalVersionResult) {
+      globalVersionResult = await getLatestGlobalVersion({
+        slug,
+        config: globalConfig,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        payload,
+        req,
+        where: query,
+      })
+    }
     const { global, globalExists } = globalVersionResult || {}
 
     if (
@@ -544,6 +580,7 @@ export const updateOperation = async <
         global: globalConfig,
         operation: 'update',
         payload,
+        publish: isExplicitPublish,
         req,
         select,
         unpublish: shouldUnpublishAllLocales,

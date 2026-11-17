@@ -34,6 +34,7 @@ import {
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
+  draftWithMaxCollectionSlug,
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
   errorOnUnpublishSlug,
@@ -1529,6 +1530,355 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedPost.title).toBe(originalTitle)
         expect(draftPost.title.en).toBe(patchedTitle)
         expect(draftPost.title.es).toBe(spanishTitle)
+      })
+
+      test('issue #19670: should preserve published content and status when updating document by ID without draft: true while a pending draft exists', async ({
+        payload,
+      }) => {
+        const published = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'published desc',
+            title: 'published title 19670',
+          },
+          overrideAccess: true,
+        })
+
+        // Save a newer pending draft
+        await payload.update({
+          id: published.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'pending draft desc',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const before = await payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        expect(before._status).toBe('published')
+        expect(before.description).toBe('published desc')
+
+        // Update an unrelated field without draft: true
+        await payload.update({
+          id: published.id,
+          collection: draftCollectionSlug,
+          data: {
+            radio: 'test',
+          },
+          overrideAccess: true,
+        })
+
+        const publishedAfter = await payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toBe('published')
+        expect(publishedAfter.description).toBe('published desc')
+        expect(publishedAfter.radio).toBe('test')
+
+        // Query with published status filter should find the document
+        const publishedQuery = await payload.find({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: {
+            and: [{ id: { equals: published.id } }, { _status: { equals: 'published' } }],
+          },
+        })
+        expect(publishedQuery.totalDocs).toBe(1)
+
+        // The pending draft should remain available and not be published
+        const draftAfter = await payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftAfter._status).toBe('draft')
+        expect(draftAfter.description).toBe('pending draft desc')
+      })
+
+      test('issue #19670: should preserve published global content and status when updating global without draft: true while a pending draft exists', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            _status: 'published',
+            description: 'published global desc',
+            title: 'published global title',
+          },
+          overrideAccess: true,
+        })
+
+        // Save a newer pending draft on global
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'pending draft global title',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const before = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          overrideAccess: true,
+        })
+        expect(before._status).toBe('published')
+        expect(before.title).toBe('published global title')
+
+        // Update unrelated field without draft: true
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'updated global desc',
+          },
+          overrideAccess: true,
+        })
+
+        const publishedAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toBe('published')
+        expect(publishedAfter.title).toBe('published global title')
+        expect(publishedAfter.description).toBe('updated global desc')
+
+        // The pending draft should remain available
+        const draftAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftAfter._status).toBe('draft')
+        expect(draftAfter.title).toBe('pending draft global title')
+      })
+
+      test('issue #19670: should preserve published content and keep pending draft as latest when bulk updating without draft: true', async ({
+        payload,
+      }) => {
+        const published = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'published desc bulk',
+            title: 'published title bulk',
+          },
+          overrideAccess: true,
+        })
+
+        // Save a pending draft
+        await payload.update({
+          id: published.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'pending draft desc bulk',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Bulk update by where without draft: true
+        await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            radio: 'test',
+          },
+          overrideAccess: true,
+          where: {
+            id: { equals: published.id },
+          },
+        })
+
+        const publishedAfter = await payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toBe('published')
+        expect(publishedAfter.description).toBe('published desc bulk')
+        expect(publishedAfter.radio).toBe('test')
+
+        // The pending draft should remain the latest draft returned by draft: true read
+        const draftAfter = await payload.findByID({
+          id: published.id,
+          collection: draftCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftAfter._status).toBe('draft')
+        expect(draftAfter.description).toBe('pending draft desc bulk')
+      })
+
+      test('issue #19670: should preserve published content and status under maxPerDoc pruning when updating without draft: true', async ({
+        payload,
+      }) => {
+        // draftWithMaxCollectionSlug has maxPerDoc: 1
+        const published = await payload.create({
+          collection: draftWithMaxCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'published desc max',
+            title: 'published title max',
+          },
+          overrideAccess: true,
+        })
+
+        // Save 2 drafts to prune the original published version row from versions table
+        await payload.update({
+          id: published.id,
+          collection: draftWithMaxCollectionSlug,
+          data: {
+            description: 'draft 1 desc',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: published.id,
+          collection: draftWithMaxCollectionSlug,
+          data: {
+            description: 'draft 2 desc',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Verify published version row was pruned from versions table
+        const versions = await payload.findVersions({
+          collection: draftWithMaxCollectionSlug,
+          overrideAccess: true,
+          where: {
+            parent: { equals: published.id },
+          },
+        })
+        expect(versions.docs.length).toBeLessThanOrEqual(2)
+        const hasPublishedVersionRow = versions.docs.some(
+          (doc) => doc.version._status === 'published',
+        )
+        expect(hasPublishedVersionRow).toBe(false)
+
+        // Perform non-draft update
+        await payload.update({
+          id: published.id,
+          collection: draftWithMaxCollectionSlug,
+          data: {
+            radio: 'test',
+          },
+          overrideAccess: true,
+        })
+
+        const publishedAfter = await payload.findByID({
+          id: published.id,
+          collection: draftWithMaxCollectionSlug,
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toBe('published')
+        expect(publishedAfter.description).toBe('published desc max')
+        expect(publishedAfter.radio).toBe('test')
+      })
+
+      test('issue #19670: edge cases - draft: false, explicit publish, and no pending draft', async ({
+        payload,
+      }) => {
+        // 1. No pending draft: normal non-draft update should create version with latest: true
+        const publishedNoDraft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'initial desc',
+            title: 'no draft title 19670',
+          },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: publishedNoDraft.id,
+          collection: draftCollectionSlug,
+          data: {
+            radio: 'test',
+          },
+          overrideAccess: true,
+        })
+
+        const publishedNoDraftVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: {
+            parent: { equals: publishedNoDraft.id },
+          },
+        })
+        const latestVersionNoDraft = publishedNoDraftVersions.docs.find((v) => v.latest === true)
+        expect(latestVersionNoDraft).toBeDefined()
+        expect(latestVersionNoDraft?.version._status).toBe('published')
+
+        // 2. Explicit draft: false when pending draft exists
+        const publishedWithDraft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'published desc',
+            title: 'explicit draft false title 19670',
+          },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: publishedWithDraft.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'pending draft desc',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Update with explicit draft: false
+        await payload.update({
+          id: publishedWithDraft.id,
+          collection: draftCollectionSlug,
+          data: {
+            radio: 'test',
+          },
+          draft: false,
+          overrideAccess: true,
+        })
+
+        const draftAfterExplicitFalse = await payload.findByID({
+          id: publishedWithDraft.id,
+          collection: draftCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftAfterExplicitFalse._status).toBe('draft')
+        expect(draftAfterExplicitFalse.description).toBe('pending draft desc')
+
+        // 3. Explicit publishing with pending draft
+        await payload.update({
+          id: publishedWithDraft.id,
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+          },
+          overrideAccess: true,
+        })
+
+        const publishedAfterExplicitPublish = await payload.findByID({
+          id: publishedWithDraft.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        expect(publishedAfterExplicitPublish._status).toBe('published')
+        // When explicitly published, the pending draft content was published
+        expect(publishedAfterExplicitPublish.description).toBe('pending draft desc')
       })
 
       test('should have correct updatedAt timestamps when saving drafts', async ({ payload }) => {
