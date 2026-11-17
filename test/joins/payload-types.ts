@@ -376,7 +376,6 @@ export interface AccessJoinNote {
     | boolean
     | null;
   details_status?: string | null;
-  content?: Section[] | null;
   items?:
     | {
         heading?: string | null;
@@ -1602,17 +1601,6 @@ export interface AccessJoinNotesSelect<T extends boolean = true> {
   owner?: T;
   settings?: T;
   details_status?: T;
-  content?:
-    | T
-    | {
-        section?:
-          | T
-          | {
-              heading?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
   items?:
     | T
     | {

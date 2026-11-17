@@ -2953,6 +2953,16 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       payload,
     }) => {
       const { children, parent } = await createConstrainedJoinDocuments(payload)
+      await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          parent: parent.id,
+          title: 'Child with tags',
+          items: [{ tags: ['available'] }],
+        },
+        overrideAccess: true,
+      })
+
       const result = await payload.findByID({
         id: parent.id,
         collection: accessJoinParentsSlug,
