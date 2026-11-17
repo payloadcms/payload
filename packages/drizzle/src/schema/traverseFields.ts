@@ -21,8 +21,8 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
-import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { fitIdentifierLength } from '../utilities/fitIdentifierLength.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
@@ -203,18 +203,26 @@ export const traverseFields = ({
 
         const baseIndexes: Record<string, RawIndex> = {
           _orderIdx: {
-            name: buildIndexName({ name: `${arrayTableName}_order`, adapter }),
+            name: fitIdentifierLength({ name: `${arrayTableName}_order`, adapter, suffix: '_idx' }),
             on: ['_order'],
           },
           _parentIDIdx: {
-            name: buildIndexName({ name: `${arrayTableName}_parent_id`, adapter }),
+            name: fitIdentifierLength({
+              name: `${arrayTableName}_parent_id`,
+              adapter,
+              suffix: '_idx',
+            }),
             on: '_parentID',
           },
         }
 
         const baseForeignKeys: Record<string, RawForeignKey> = {
           _parentIDFk: {
-            name: buildForeignKeyName({ name: `${arrayTableName}_parent_id`, adapter }),
+            name: fitIdentifierLength({
+              name: `${arrayTableName}_parent_id`,
+              adapter,
+              suffix: '_fk',
+            }),
             columns: ['_parentID'],
             foreignColumns: [
               {
@@ -240,7 +248,11 @@ export const traverseFields = ({
           }
 
           baseIndexes._localeIdx = {
-            name: buildIndexName({ name: `${arrayTableName}_locale`, adapter }),
+            name: fitIdentifierLength({
+              name: `${arrayTableName}_locale`,
+              adapter,
+              suffix: '_idx',
+            }),
             on: '_locale',
           }
         }
@@ -442,22 +454,38 @@ export const traverseFields = ({
 
             const baseIndexes: Record<string, RawIndex> = {
               _orderIdx: {
-                name: buildIndexName({ name: `${blockTableName}_order`, adapter }),
+                name: fitIdentifierLength({
+                  name: `${blockTableName}_order`,
+                  adapter,
+                  suffix: '_idx',
+                }),
                 on: '_order',
               },
               _parentIDIdx: {
-                name: buildIndexName({ name: `${blockTableName}_parent_id`, adapter }),
+                name: fitIdentifierLength({
+                  name: `${blockTableName}_parent_id`,
+                  adapter,
+                  suffix: '_idx',
+                }),
                 on: ['_parentID'],
               },
               _pathIdx: {
-                name: buildIndexName({ name: `${blockTableName}_path`, adapter }),
+                name: fitIdentifierLength({
+                  name: `${blockTableName}_path`,
+                  adapter,
+                  suffix: '_idx',
+                }),
                 on: '_path',
               },
             }
 
             const baseForeignKeys: Record<string, RawForeignKey> = {
               _parentIdFk: {
-                name: buildForeignKeyName({ name: `${blockTableName}_parent_id`, adapter }),
+                name: fitIdentifierLength({
+                  name: `${blockTableName}_parent_id`,
+                  adapter,
+                  suffix: '_fk',
+                }),
                 columns: ['_parentID'],
                 foreignColumns: [
                   {
@@ -478,7 +506,11 @@ export const traverseFields = ({
               }
 
               baseIndexes._localeIdx = {
-                name: buildIndexName({ name: `${blockTableName}_locale`, adapter }),
+                name: fitIdentifierLength({
+                  name: `${blockTableName}_locale`,
+                  adapter,
+                  suffix: '_idx',
+                }),
                 on: '_locale',
               }
             }
@@ -824,18 +856,30 @@ export const traverseFields = ({
 
           const baseIndexes: Record<string, RawIndex> = {
             orderIdx: {
-              name: buildIndexName({ name: `${selectTableName}_order`, adapter }),
+              name: fitIdentifierLength({
+                name: `${selectTableName}_order`,
+                adapter,
+                suffix: '_idx',
+              }),
               on: 'order',
             },
             parentIdx: {
-              name: buildIndexName({ name: `${selectTableName}_parent`, adapter }),
+              name: fitIdentifierLength({
+                name: `${selectTableName}_parent`,
+                adapter,
+                suffix: '_idx',
+              }),
               on: 'parent',
             },
           }
 
           const baseForeignKeys: Record<string, RawForeignKey> = {
             parentFk: {
-              name: buildForeignKeyName({ name: `${selectTableName}_parent`, adapter }),
+              name: fitIdentifierLength({
+                name: `${selectTableName}_parent`,
+                adapter,
+                suffix: '_fk',
+              }),
               columns: ['parent'],
               foreignColumns: [
                 {
@@ -861,14 +905,22 @@ export const traverseFields = ({
             }
 
             baseIndexes.localeIdx = {
-              name: buildIndexName({ name: `${selectTableName}_locale`, adapter }),
+              name: fitIdentifierLength({
+                name: `${selectTableName}_locale`,
+                adapter,
+                suffix: '_idx',
+              }),
               on: 'locale',
             }
           }
 
           if (field.index) {
             baseIndexes.value = {
-              name: buildIndexName({ name: `${selectTableName}_value`, adapter }),
+              name: fitIdentifierLength({
+                name: `${selectTableName}_value`,
+                adapter,
+                suffix: '_idx',
+              }),
               on: 'value',
             }
           }
