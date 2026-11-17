@@ -92,6 +92,7 @@ export interface Config {
     'unique-fields': UniqueField;
     'select-has-many': SelectHasMany;
     'reserved-field-names': ReservedFieldName;
+    'reserved-field-name-clashes': ReservedFieldNameClash;
     'virtual-linked-tenants': VirtualLinkedTenant;
     'virtual-linked-roles': VirtualLinkedRole;
     'virtual-linked-projects': VirtualLinkedProject;
@@ -132,6 +133,7 @@ export interface Config {
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
     'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
     'reserved-field-names': ReservedFieldNamesSelect<false> | ReservedFieldNamesSelect<true>;
+    'reserved-field-name-clashes': ReservedFieldNameClashesSelect<false> | ReservedFieldNameClashesSelect<true>;
     'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
     'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
     'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
@@ -766,6 +768,12 @@ export interface SelectHasMany {
  */
 export interface ReservedFieldName {
   id: string;
+  locales?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   numbers?:
     | {
         drawPosition?: number | null;
@@ -784,6 +792,28 @@ export interface ReservedFieldName {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-name-clashes".
+ */
+export interface ReservedFieldNameClash {
+  id: string;
+  numbers?:
+    | {
+        drawPosition?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  numbersField?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  scores?: number[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -971,6 +1001,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reserved-field-names';
         value: string | ReservedFieldName;
+      } | null)
+    | ({
+        relationTo: 'reserved-field-name-clashes';
+        value: string | ReservedFieldNameClash;
       } | null)
     | ({
         relationTo: 'virtual-linked-tenants';
@@ -1545,6 +1579,12 @@ export interface SelectHasManySelect<T extends boolean = true> {
  * via the `definition` "reserved-field-names_select".
  */
 export interface ReservedFieldNamesSelect<T extends boolean = true> {
+  locales?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
   numbers?:
     | T
     | {
@@ -1563,6 +1603,27 @@ export interface ReservedFieldNamesSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-name-clashes_select".
+ */
+export interface ReservedFieldNameClashesSelect<T extends boolean = true> {
+  numbers?:
+    | T
+    | {
+        drawPosition?: T;
+        id?: T;
+      };
+  numbersField?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  scores?: T;
   updatedAt?: T;
   createdAt?: T;
 }

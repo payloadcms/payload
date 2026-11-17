@@ -1082,6 +1082,16 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'reserved-field-names',
       fields: [
         {
+          name: 'locales',
+          type: 'array',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+        {
           name: 'numbers',
           type: 'array',
           fields: [
@@ -1110,6 +1120,39 @@ export const getConfig: () => Partial<Config> = () => ({
               type: 'text',
             },
           ],
+        },
+      ],
+      versions: false,
+    },
+    {
+      // `numbers` clashes with the `_numbers` table of `scores`, and its usual replacement name is
+      // taken by the `numbersField` array, so it needs another one.
+      slug: 'reserved-field-name-clashes',
+      fields: [
+        {
+          name: 'numbers',
+          type: 'array',
+          fields: [
+            {
+              name: 'drawPosition',
+              type: 'number',
+            },
+          ],
+        },
+        {
+          name: 'numbersField',
+          type: 'array',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'scores',
+          type: 'number',
+          hasMany: true,
         },
       ],
       versions: false,
