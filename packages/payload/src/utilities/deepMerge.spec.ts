@@ -111,6 +111,57 @@ describe('deepMerge', () => {
 
     expect(({} as Record<string, unknown>).polluted).toBeUndefined()
   })
+
+  it('should not poison the prototype via a nested __proto__ key that only exists in the source', () => {
+    const source = JSON.parse('{"a": {"__proto__": {"isAdmin": true}}}')
+
+    const result = deepMerge<Record<string, any>>({}, source)
+
+    expect(Object.getPrototypeOf(result.a)).toBe(Object.prototype)
+    expect(result.a.isAdmin).toBeUndefined()
+  })
+
+  it('should not poison the prototype via a __proto__ key inside array items', () => {
+    const source = JSON.parse('{"list": [{"__proto__": {"isAdmin": true}}]}')
+
+    const result = deepMerge<Record<string, any>>({ list: [] }, source)
+
+    expect(Object.getPrototypeOf(result.list[0])).toBe(Object.prototype)
+    expect(result.list[0].isAdmin).toBeUndefined()
+  })
+
+  it('should not mutate the passed options object', () => {
+    const options: deepMerge.Options = { clone: true }
+
+    deepMerge({ a: [1] }, { a: [2] }, options)
+
+    expect(options).toStrictEqual({ clone: true })
+  })
+
+  it('should not clone React 18 or React 19 elements', () => {
+    const react18Element = { $$typeof: Symbol.for('react.element'), props: {} }
+    const react19Element = { $$typeof: Symbol.for('react.transitional.element'), props: {} }
+
+    const result = deepMerge<Record<string, unknown>>(
+      {},
+      { react18: react18Element, react19: react19Element },
+    )
+
+    expect(result.react18).toBe(react18Element)
+    expect(result.react19).toBe(react19Element)
+  })
+
+  it('should accept the signatures of the former deepmerge dependency', () => {
+    const isMergeableObject = (value: object) =>
+      Object.prototype.toString.call(value) === '[object Object]'
+    const options: deepMerge.Options = { isMergeableObject }
+
+    const merged: object = deepMerge.all([{ a: 1 }, { b: 'b' }], options)
+    const typed = deepMerge.all<{ a: number; b: string }>([{ a: 1 }, { b: 'b' }])
+
+    expect(merged).toStrictEqual({ a: 1, b: 'b' })
+    expect(typed.b).toBe('b')
+  })
 })
 
 describe('deepMergeWithSourceArrays', () => {

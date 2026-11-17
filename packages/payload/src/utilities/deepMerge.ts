@@ -2,7 +2,7 @@ import { isPlainObject } from './isPlainObject.js'
 
 export type DeepMergeArrayMergeOptions = {
   cloneUnlessOtherwiseSpecified: (value: unknown, options?: DeepMergeOptions) => any
-  isMergeableObject: (value: unknown) => boolean
+  isMergeableObject(value: object): boolean
 }
 
 export type DeepMergeOptions = {
@@ -22,16 +22,19 @@ export type DeepMergeOptions = {
   /**
    * Determines whether a value should be merged recursively or copied as-is.
    */
-  isMergeableObject?: (value: unknown) => boolean
+  isMergeableObject?(value: object): boolean
 }
 
 type ResolvedDeepMergeOptions = {
   arrayMerge: NonNullable<DeepMergeOptions['arrayMerge']>
-  isMergeableObject: NonNullable<DeepMergeOptions['isMergeableObject']>
+  isMergeableObject: (value: unknown) => boolean
 } & DeepMergeArrayMergeOptions &
   DeepMergeOptions
 
-const REACT_ELEMENT_TYPE = Symbol.for('react.element')
+const REACT_ELEMENT_TYPES = new Set<unknown>([
+  Symbol.for('react.element'),
+  Symbol.for('react.transitional.element'),
+])
 
 /**
  * Fully-featured deepMerge. Returns a new object and does not mutate its arguments.
@@ -48,12 +51,14 @@ export function deepMerge<T1, T2>(
   options?: DeepMergeOptions,
 ): T1 & T2
 export function deepMerge(target: any, source: any, options?: DeepMergeOptions): any {
-  const resolvedOptions = (options ?? {}) as ResolvedDeepMergeOptions
-
-  resolvedOptions.arrayMerge = resolvedOptions.arrayMerge || defaultArrayMerge
-  resolvedOptions.isMergeableObject = resolvedOptions.isMergeableObject || isMergeableObject
-  // Exposed on `options` so that custom `arrayMerge` implementations can use it.
-  resolvedOptions.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified as any
+  // Copied rather than mutated, so that a reused options object is left untouched.
+  const resolvedOptions = {
+    ...options,
+    arrayMerge: options?.arrayMerge || defaultArrayMerge,
+    // Exposed on `options` so that custom `arrayMerge` implementations can use it.
+    cloneUnlessOtherwiseSpecified: cloneUnlessOtherwiseSpecified as any,
+    isMergeableObject: options?.isMergeableObject || isMergeableObject,
+  } as ResolvedDeepMergeOptions
 
   const isSourceArray = Array.isArray(source)
   const isTargetArray = Array.isArray(target)
@@ -82,16 +87,17 @@ export declare namespace deepMerge {
 /**
  * Deep-merges all objects in the array, from left to right.
  */
-deepMerge.all = function deepMergeAll<T = object>(
-  objects: Partial<T>[],
-  options?: DeepMergeOptions,
-): T {
+function deepMergeAll<T = object>(objects: Partial<T>[], options?: DeepMergeOptions): T
+function deepMergeAll(objects: object[], options?: DeepMergeOptions): object
+function deepMergeAll(objects: object[], options?: DeepMergeOptions): object {
   if (!Array.isArray(objects)) {
     throw new Error('first argument should be an array')
   }
 
-  return objects.reduce<any>((previous, next) => deepMerge(previous, next, options), {}) as T
+  return objects.reduce<object>((previous, next) => deepMerge(previous, next, options), {})
 }
+
+deepMerge.all = deepMergeAll
 
 /**
  * Fully-featured deepMerge.
@@ -163,7 +169,7 @@ function isMergeableObject(value: unknown): boolean {
     return false
   }
 
-  return (value as { $$typeof?: unknown }).$$typeof !== REACT_ELEMENT_TYPE
+  return !REACT_ELEMENT_TYPES.has((value as { $$typeof?: unknown }).$$typeof)
 }
 
 function cloneUnlessOtherwiseSpecified(value: unknown, options: ResolvedDeepMergeOptions): any {
