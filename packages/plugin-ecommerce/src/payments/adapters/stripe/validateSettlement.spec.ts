@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getRelationshipID,
+  hashCartItems,
   normalizeCartItems,
   normalizeEmail,
   validateSettlement,
@@ -36,7 +37,7 @@ const createPaymentIntent = (overrides: Record<string, unknown> = {}) => ({
 
 const createAuthenticatedValidation = (overrides: Record<string, unknown> = {}) => ({
   canonicalCartID: 'cart-123',
-  cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 1 }],
+  cartItemsHash: hashCartItems([{ id: 'item-1', product: 'product-123', quantity: 1 }]),
   customerEmail: 'buyer@example.com',
   paymentIntent: createPaymentIntent(),
   paymentIntentID: 'pi_123',
@@ -228,14 +229,16 @@ describe('validateSettlement', () => {
   })
 
   it('should accept relationship objects and scalar IDs as equivalent item data', () => {
+    // Both sides normalise to the same hash when product/variant are populated objects vs IDs
+    const items = [{ id: 'item-1', product: 'product-123', quantity: 1, variant: '456' }]
     const transaction = createTransaction({
-      items: [{ id: 'item-1', product: { id: 123 }, quantity: 1, variant: { id: 456 } }],
+      items: [{ id: 'item-1', product: { id: 'product-123' }, quantity: 1, variant: { id: 456 } }],
     })
 
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: '123', quantity: 1, variant: '456' }],
+          cartItemsHash: hashCartItems(items),
           transaction,
         }),
       ),
@@ -243,47 +246,44 @@ describe('validateSettlement', () => {
   })
 
   it('should reject an item quantity mismatch', () => {
+    // Hash is built from quantity=2 but transaction still has quantity=1
+    const items = [{ id: 'item-1', product: 'product-123', quantity: 2 }]
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 2 }],
+          cartItemsHash: hashCartItems(items),
         }),
       ),
     ).toThrow('items')
   })
 
   it('should reject an item custom-property mismatch', () => {
+    // Hash includes a giftMessage the transaction does not have
+    const items = [{ giftMessage: 'surprise', id: 'item-1', product: 'product-123', quantity: 1 }]
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [
-            { giftMessage: 'surprise', id: 'item-1', product: 'product-123', quantity: 1 },
-          ],
+          cartItemsHash: hashCartItems(items),
         }),
       ),
     ).toThrow('items')
   })
 
   it('should treat a persisted null root variant as equivalent to an omitted snapshot variant', () => {
+    // normalizeCartItems drops null/undefined variant, so both sides hash equally
+    const transaction = createTransaction({
+      items: [{ id: 'item-1', product: 'product-123', quantity: 1, variant: null }],
+    })
+
     expect(() =>
       validateSettlement(
-        createAuthenticatedValidation({
-          transaction: createTransaction({
-            items: [{ id: 'item-1', product: 'product-123', quantity: 1, variant: null }],
-          }),
-        }),
+        createAuthenticatedValidation({ transaction }),
       ),
     ).not.toThrow()
   })
 
-  it('should reject a null root product', () => {
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: null, quantity: 1 }],
-        }),
-      ),
-    ).toThrow()
+  it('should reject a null root product when hashing', () => {
+    expect(() => hashCartItems([{ id: 'item-1', product: null, quantity: 1 }])).toThrow()
   })
 
   it.each([
@@ -291,79 +291,81 @@ describe('validateSettlement', () => {
     { label: 'blank scalar ID', variant: '' },
     { label: 'blank object ID', variant: { id: '' } },
     { label: 'nested object ID', variant: { id: { id: 'variant-123' } } },
-  ])('should reject a $label for a non-null root variant', ({ variant }) => {
+  ])('should reject a $label for a non-null root variant when hashing', ({ variant }) => {
     expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 1, variant }],
-        }),
-      ),
-    ).toThrow()
-  })
-
-  it('should reject equivalent empty scalar and object relationship IDs', () => {
-    expect(() =>
-      validateSettlement(
-        createAuthenticatedValidation({
-          cartItemsSnapshot: [{ id: 'item-1', product: 'product-123', quantity: 1, variant: '' }],
-          transaction: createTransaction({
-            items: [{ id: 'item-1', product: 'product-123', quantity: 1, variant: { id: '' } }],
-          }),
-        }),
-      ),
+      hashCartItems([{ id: 'item-1', product: 'product-123', quantity: 1, variant }]),
     ).toThrow()
   })
 
   it('should preserve nested custom variant null when comparing against a missing nested key', () => {
+    // { selection: { variant: null } } serialises differently from { selection: {} }
+    const itemsWithNull = [
+      {
+        id: 'item-1',
+        product: 'product-123',
+        quantity: 1,
+        selection: { variant: null },
+      },
+    ]
+    const transaction = createTransaction({
+      items: [{ id: 'item-1', product: 'product-123', quantity: 1, selection: {} }],
+    })
+
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [
-            {
-              id: 'item-1',
-              product: 'product-123',
-              quantity: 1,
-              selection: { variant: null },
-            },
-          ],
-          transaction: createTransaction({
-            items: [{ id: 'item-1', product: 'product-123', quantity: 1, selection: {} }],
-          }),
+          cartItemsHash: hashCartItems(itemsWithNull),
+          transaction,
         }),
       ),
     ).toThrow('items')
   })
 
   it('should preserve nested custom values while ignoring object key order', () => {
+    const items = [
+      {
+        id: 'item-1',
+        product: 'product-123',
+        quantity: 1,
+        selection: { color: 'blue', variant: null },
+      },
+    ]
+    const transaction = createTransaction({
+      items: [
+        {
+          id: 'item-1',
+          product: 'product-123',
+          quantity: 1,
+          selection: { variant: null, color: 'blue' },
+        },
+      ],
+    })
+
     expect(() =>
       validateSettlement(
         createAuthenticatedValidation({
-          cartItemsSnapshot: [
-            {
-              id: 'item-1',
-              product: 'product-123',
-              quantity: 1,
-              selection: { color: 'blue', variant: null },
-            },
-          ],
-          transaction: createTransaction({
-            items: [
-              {
-                id: 'item-1',
-                product: 'product-123',
-                quantity: 1,
-                selection: { variant: null, color: 'blue' },
-              },
-            ],
-          }),
+          cartItemsHash: hashCartItems(items),
+          transaction,
         }),
       ),
     ).not.toThrow()
   })
 
-  it('should reject malformed item metadata', () => {
+  it('should skip the hash comparison when cartItemsHash is undefined (upgrade compatibility)', () => {
+    // PaymentIntents created by the previous version have no hash; they must still confirm.
     expect(() =>
-      validateSettlement(createAuthenticatedValidation({ cartItemsSnapshot: { quantity: 1 } })),
+      validateSettlement(
+        createAuthenticatedValidation({ cartItemsHash: undefined }),
+      ),
+    ).not.toThrow()
+  })
+
+  it('should reject a mismatched cartItemsHash even when the amount matches', () => {
+    const differentItems = [{ id: 'item-99', product: 'product-999', quantity: 5 }]
+    expect(() =>
+      validateSettlement(
+        createAuthenticatedValidation({ cartItemsHash: hashCartItems(differentItems) }),
+      ),
     ).toThrow('items')
   })
 
@@ -375,5 +377,68 @@ describe('validateSettlement', () => {
         }),
       ),
     ).toThrow('completed')
+  })
+})
+
+describe('hashCartItems', () => {
+  it('should produce a 64-character hex string', () => {
+    const hash = hashCartItems([{ product: 'prod-1', quantity: 1 }])
+    expect(hash).toMatch(/^[0-9a-f]{64}$/)
+  })
+
+  it('should produce the same digest for equivalent relationship forms', () => {
+    const hashFromID = hashCartItems([{ product: 'prod-1', quantity: 1, variant: '456' }])
+    const hashFromObj = hashCartItems([
+      { product: { id: 'prod-1' }, quantity: 1, variant: { id: 456 } },
+    ])
+    expect(hashFromID).toBe(hashFromObj)
+  })
+
+  it('should produce a different digest when quantity differs', () => {
+    const a = hashCartItems([{ product: 'prod-1', quantity: 1 }])
+    const b = hashCartItems([{ product: 'prod-1', quantity: 2 }])
+    expect(a).not.toBe(b)
+  })
+
+  it('should produce a different digest when a custom property is added', () => {
+    const base = hashCartItems([{ product: 'prod-1', quantity: 1 }])
+    const extra = hashCartItems([{ deliveryOption: 'express', product: 'prod-1', quantity: 1 }])
+    expect(base).not.toBe(extra)
+  })
+
+  it('should treat null and omitted root variant as equivalent', () => {
+    const withNull = hashCartItems([{ product: 'prod-1', quantity: 1, variant: null }])
+    const withoutVariant = hashCartItems([{ product: 'prod-1', quantity: 1 }])
+    expect(withNull).toBe(withoutVariant)
+  })
+
+  it('should be order-independent for object keys', () => {
+    const a = hashCartItems([{ product: 'prod-1', quantity: 1, selection: { a: 1, b: 2 } }])
+    const b = hashCartItems([{ product: 'prod-1', quantity: 1, selection: { b: 2, a: 1 } }])
+    expect(a).toBe(b)
+  })
+
+  it('should produce a stable result for a realistic full cart', () => {
+    const items = [
+      {
+        id: 'item-1',
+        product: 'prod-abc',
+        quantity: 2,
+        variant: 'var-xyz',
+        deliveryOption: 'standard',
+      },
+    ]
+    const hash = hashCartItems(items)
+    // Digest must be stable across calls (deterministic)
+    expect(hash).toBe(hashCartItems(items))
+    expect(hash.length).toBe(64)
+  })
+
+  it('should fit within Stripe metadata value limit (500 chars)', () => {
+    // The hash is always 64 hex characters — far below the 500-character Stripe limit.
+    const hash = hashCartItems([
+      { id: 'item-1', product: 'prod-1', quantity: 10, variant: 'var-1', extra: 'custom' },
+    ])
+    expect(hash.length).toBeLessThanOrEqual(500)
   })
 })

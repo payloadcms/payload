@@ -3,6 +3,8 @@ import Stripe from 'stripe'
 import type { PaymentAdapter } from '../../../types/index.js'
 import type { InitiatePaymentReturnType, StripeAdapterArgs } from './index.js'
 
+import { hashCartItems } from './validateSettlement.js'
+
 type Props = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
@@ -86,7 +88,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         }
       })
 
-      const shippingAddressAsString = JSON.stringify(shippingAddressFromData)
+      const cartItemsHash = hashCartItems(flattenedCart)
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
@@ -97,8 +99,8 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         customer: customer.id,
         metadata: {
           cartID: cart.id,
-          cartItemsSnapshot: JSON.stringify(flattenedCart),
-          shippingAddress: shippingAddressAsString,
+          // 64-hex SHA-256 digest — well within Stripe's 500-character per-value limit.
+          cartItemsHash,
         },
       })
 
@@ -113,6 +115,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
           currency: paymentIntent.currency.toUpperCase(),
           items: flattenedCart,
           paymentMethod: 'stripe',
+          shippingAddress: shippingAddressFromData,
           status: 'pending',
           stripe: {
             customerID: customer.id,

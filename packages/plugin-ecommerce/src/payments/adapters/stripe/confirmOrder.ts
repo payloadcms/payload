@@ -52,14 +52,24 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         value: transaction.id,
       })
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
-      const cartItemsSnapshot = parseRequiredMetadata({
-        fieldName: 'cartItemsSnapshot',
-        value: paymentIntent.metadata.cartItemsSnapshot,
-      })
-      const shippingAddress = parseOptionalMetadata({
-        fieldName: 'shippingAddress',
-        value: paymentIntent.metadata.shippingAddress,
-      })
+
+      // cartItemsHash is present on PaymentIntents created by the current version.
+      // PaymentIntents without it (from the previous version) pass undefined so that
+      // validateSettlement skips the hash comparison and upgrading stays safe.
+      const cartItemsHash =
+        typeof paymentIntent.metadata.cartItemsHash === 'string' &&
+        paymentIntent.metadata.cartItemsHash
+          ? paymentIntent.metadata.cartItemsHash
+          : undefined
+
+      // shippingAddress is now persisted in the transaction, not in Stripe metadata.
+      // Fall back to metadata for PaymentIntents created by older versions.
+      const shippingAddress = isRecord(transaction.shippingAddress)
+        ? transaction.shippingAddress
+        : parseOptionalMetadata({
+            fieldName: 'shippingAddress',
+            value: paymentIntent.metadata.shippingAddress,
+          })
       const purchaser =
         req.user === null || req.user === undefined
           ? { customerEmail: normalizeEmail(data.customerEmail) }
@@ -72,7 +82,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       validateSettlement({
         canonicalCartID: data.cartID,
-        cartItemsSnapshot,
+        cartItemsHash,
         customerEmail: data.customerEmail,
         paymentIntent,
         paymentIntentID,
@@ -85,7 +95,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           amount: transaction.amount,
           currency: transaction.currency,
           ...purchaser,
-          items: cartItemsSnapshot,
+          items: transaction.items,
           shippingAddress,
           status: 'processing',
         },
