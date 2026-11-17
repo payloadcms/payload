@@ -11,6 +11,11 @@ import { fileURLToPath } from 'url'
 
 import { gotoAndWaitForForm } from '../../__helpers/e2e/helpers.js'
 import { isFormStateRequest } from '../../__helpers/e2e/isFormStateRequest.js'
+import {
+  getUploadPercents,
+  recordToastHistory,
+  throttleUploads,
+} from '../../__helpers/e2e/uploadProgress.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
@@ -230,6 +235,30 @@ test.describe('storage-s3 upload sessions E2E', () => {
     expect(log.sessionCalls).toContain('POST /api/payload-upload-sessions')
 
     await context.close()
+  })
+
+  test('should show progress as the parts of a picked file are sent', async ({ browser }) => {
+    const { page } = await openCreateForm({ browser })
+    const getToastHistory = await recordToastHistory({ page })
+    // 11 MiB at 2 MiB/s takes several seconds, so more than one part finishes on its own.
+    const stopThrottling = await throttleUploads({ bytesPerSecond: 2 * 1024 * 1024, page })
+    const progressPattern = new RegExp(`Uploading ${path.basename(filePath)}: (\\d+)%`)
+    const getPercents = async () =>
+      getUploadPercents({ history: await getToastHistory(), pattern: progressPattern })
+
+    try {
+      await pickFile(page)
+      await expect
+        .poll(async () => (await getPercents()).length, { timeout: TEST_TIMEOUT_LONG })
+        .toBeGreaterThan(1)
+    } finally {
+      await stopThrottling()
+    }
+
+    const percents = await getPercents()
+
+    expect(percents.length, `Toasts: ${(await getToastHistory()).join(' | ')}`).toBeGreaterThan(1)
+    expect(percents).toEqual([...percents].sort((a, b) => a - b))
   })
 
   test('should save a document after the upload finished', async ({ browser }) => {

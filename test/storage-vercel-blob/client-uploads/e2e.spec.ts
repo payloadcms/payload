@@ -6,10 +6,14 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 import { exactText, gotoAndWaitForForm, saveDocAndAssert } from '../../__helpers/e2e/helpers.js'
+import {
+  expectUploadProgressSequence,
+  recordToastHistory,
+} from '../../__helpers/e2e/uploadProgress.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
-import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 import { mediaSlug } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -70,6 +74,30 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await expect(page.locator('#field-filemanager-filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
+  })
+
+  test('should show upload progress while the file is sent to Vercel Blob', async () => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('image.png')
+
+    const getToastHistory = await recordToastHistory({ page })
+
+    // Small and not throttled: the Vercel Blob emulator ignores Range requests, which stalls the
+    // server's 1 MiB image header read for larger files. Unthrottled, the upload may finish after
+    // its first progress event, so one percentage is enough.
+    await page.click('#action-save')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully', {
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    expectUploadProgressSequence({
+      fileName: 'image.png',
+      history: await getToastHistory(),
+      isProcessingRequired: false,
+      minimumPercentCount: 1,
+    })
   })
 
   test('should upload file directly to Vercel Blob, not through the Payload server', async ({

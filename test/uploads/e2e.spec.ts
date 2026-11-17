@@ -25,6 +25,11 @@ import {
 } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import {
+  expectUploadProgressSequence,
+  recordToastHistory,
+  throttleUploads,
+} from '../__helpers/e2e/uploadProgress.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -1047,6 +1052,30 @@ describe('Uploads', () => {
     })
   })
 
+  test('should show upload progress, then processing, then the result when saving a file', async () => {
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './ios-image.jpeg'))
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('ios-image.jpeg')
+
+    const getToastHistory = await recordToastHistory({ page })
+    // 1.1 MB at 200 KB/s takes about 5 seconds to send.
+    const stopThrottling = await throttleUploads({ bytesPerSecond: 200 * 1024, page })
+
+    try {
+      await page.click('#action-save')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully created', {
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    } finally {
+      await stopThrottling()
+    }
+
+    expectUploadProgressSequence({
+      fileName: 'ios-image.jpeg',
+      history: await getToastHistory(),
+    })
+  })
+
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
@@ -1473,6 +1502,52 @@ describe('Uploads', () => {
   })
 
   describe('bulk uploads', () => {
+    test('should show the position and progress of each file in one toast', async () => {
+      await page.goto(mediaURL.list)
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ intervals: [500], timeout: 5000 })
+
+      await dropzoneInput.setInputFiles([
+        path.resolve(dirname, './ios-image.jpeg'),
+        path.resolve(dirname, './image.png'),
+      ])
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await expect(saveButton).toBeEnabled()
+      await closeAllToasts(page)
+
+      const getToastHistory = await recordToastHistory({ page })
+      const stopThrottling = await throttleUploads({ bytesPerSecond: 200 * 1024, page })
+
+      try {
+        await saveButton.click()
+        await waitForBulkUploadResult(page)
+      } finally {
+        await stopThrottling()
+      }
+
+      const history = await getToastHistory()
+      const firstFileIndex = history.findIndex((text) => text.startsWith('1 of 2 · '))
+      const secondFileIndex = history.findIndex((text) => text.startsWith('2 of 2 · '))
+
+      expectUploadProgressSequence({
+        fileName: 'ios-image.jpeg',
+        history,
+        prefix: '1 of 2 · ',
+      })
+      expect(secondFileIndex).toBeGreaterThan(firstFileIndex)
+      expect(history.at(-1)).toMatch(/^Uploaded 2 /)
+      // One toast for the batch: no second progress toast was stacked next to it.
+      await expect(page.locator('.payload-toast-container [data-sonner-toast]')).toHaveCount(1)
+    })
+
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
       await gotoAndWaitForForm(page, uploadsOne.create)
