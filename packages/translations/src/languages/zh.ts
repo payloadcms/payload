@@ -645,6 +645,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: '从剪贴板粘贴',
     pasteURL: '粘贴网址',
     previewSizes: '预览尺寸',
+    processingAndSavingFile: '正在处理并保存 {{filename}}…',
     renameFile: '重命名文件',
     replaceFile: '替换文件',
     resumingFile: '正在恢复 {{filename}}',

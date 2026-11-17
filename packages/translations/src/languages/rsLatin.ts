@@ -676,6 +676,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Nalepi iz klipborda',
     pasteURL: 'Nalepi URL',
     previewSizes: 'Veličine pregleda',
+    processingAndSavingFile: 'Obrada i čuvanje datoteke {{filename}}…',
     renameFile: 'Preimenujte fajl',
     replaceFile: 'Zamenite fajl',
     resumingFile: 'Nastavlja se {{filename}}',

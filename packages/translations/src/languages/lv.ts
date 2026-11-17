@@ -675,6 +675,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Ielīmēt no starpliktuves',
     pasteURL: 'Ielīmēt URL',
     previewSizes: 'Priekšskatījuma izmēri',
+    processingAndSavingFile: 'Apstrādā un saglabā {{filename}}…',
     renameFile: 'Pārsaukt failu',
     replaceFile: 'Aizstāt failu',
     resumingFile: 'Atsāk {{filename}}',

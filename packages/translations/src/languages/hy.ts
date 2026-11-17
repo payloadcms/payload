@@ -681,6 +681,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Տեղադրել սեղմատախտակից',
     pasteURL: 'Տեղադրել URL',
     previewSizes: 'Նախադիտման չափեր',
+    processingAndSavingFile: '{{filename}}-ի մշակում և պահպանում…',
     renameFile: 'Վերանվանել ֆայլը',
     replaceFile: 'Փոխարինել ֆայլը',
     resumingFile: '{{filename}}-ի վերսկսում',

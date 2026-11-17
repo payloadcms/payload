@@ -656,6 +656,7 @@ export const heTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'הדבק מלוח הגזירים',
     pasteURL: 'הדבק כתובת אתר',
     previewSizes: 'גדלי תצוגה מקדימה',
+    processingAndSavingFile: 'מעבד ושומר את {{filename}}…',
     renameFile: 'שנה את שם הקובץ',
     replaceFile: 'החלף קובץ',
     resumingFile: 'ממשיך את {{filename}}',

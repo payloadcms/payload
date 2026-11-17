@@ -13,7 +13,7 @@ import {
 } from '../../utilities/uploadWithSession.js'
 import { useConfig } from '../Config/index.js'
 import { useTranslation } from '../Translation/index.js'
-import { createProgressToast, pickFile } from './browser.js'
+import { createProgressToast, getUploadPercent, pickFile } from './browser.js'
 import { findSessionsHeldByOtherTabs } from './otherTabs.js'
 
 /**
@@ -29,7 +29,11 @@ export const useRecoverUploadSessions = ({
   trackToast,
   userID,
 }: {
-  finishInBackground: (args: { session: ClientUploadSession }) => Promise<void>
+  finishInBackground: (args: {
+    progress?: ReturnType<typeof createProgressToast>
+    session: ClientUploadSession
+    toastID?: string
+  }) => Promise<void>
   getErrorMessage: (args: { err: unknown }) => string
   /** Sessions this tab is resuming, reported to other tabs as held. */
   recoveringSessionIDsRef: React.RefObject<Set<string>>
@@ -100,7 +104,7 @@ export const useRecoverUploadSessions = ({
             progress.show(
               t('upload:uploadingFileProgress', {
                 filename: file.name,
-                percent: Math.floor((loaded / total) * 100),
+                percent: getUploadPercent({ progress: { loadedBytes: loaded, totalBytes: total } }),
               }),
             ),
           retries: getEntityConfig({ collectionSlug: session.collectionSlug })?.upload?.transfer
@@ -109,10 +113,7 @@ export const useRecoverUploadSessions = ({
           signal: controller.signal,
           ...requestArgs,
         })
-          .then(() => {
-            toast.dismiss(toastID)
-            return finishInBackground({ session })
-          })
+          .then(() => finishInBackground({ progress, session, toastID }))
           .catch((err: unknown) => {
             if (controller.signal.aborted) {
               return

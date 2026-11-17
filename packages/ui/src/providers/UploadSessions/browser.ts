@@ -1,5 +1,45 @@
 'use client'
+import type { TFunction } from '@payloadcms/translations'
+import type { UploadTransferProgress } from 'payload'
+
 import { toast } from 'sonner'
+
+/**
+ * The text of the upload progress toast. Draft presentation until the upload progress design is
+ * final: replace this and `createProgressToast` to change how progress looks.
+ *
+ * Without progress, e.g. from a client upload handler that does not report it, only the file name
+ * shows. Once every byte is sent the server is still processing and saving, so that is shown
+ * instead of 100%.
+ */
+export const getUploadProgressMessage = ({
+  fileName,
+  progress,
+  t,
+}: {
+  fileName: string
+  progress?: UploadTransferProgress
+  t: TFunction
+}): string => {
+  if (!progress) {
+    return t('upload:uploadingFile', { filename: fileName })
+  }
+
+  if (progress.loadedBytes >= progress.totalBytes) {
+    return t('upload:processingAndSavingFile', { filename: fileName })
+  }
+
+  return t('upload:uploadingFileProgress', {
+    filename: fileName,
+    percent: getUploadPercent({ progress }),
+  })
+}
+
+/** Whole percent sent, below 100 until every byte is sent. */
+export const getUploadPercent = ({ progress }: { progress: UploadTransferProgress }): number =>
+  progress.totalBytes > 0
+    ? Math.min(100, Math.floor((progress.loadedBytes / progress.totalBytes) * 100))
+    : 100
 
 /**
  * An auto-updating progress toast the user can hide (WCAG 2.2.2). Once closed it stays hidden

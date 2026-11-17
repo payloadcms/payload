@@ -683,6 +683,7 @@ export const roTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Lipește din clipboard',
     pasteURL: 'Lipește URL',
     previewSizes: 'Dimensiuni Previzualizare',
+    processingAndSavingFile: 'Se procesează și se salvează {{filename}}…',
     renameFile: 'Redenumiți fișierul',
     replaceFile: 'Înlocuiți fișierul',
     resumingFile: 'Se reia {{filename}}',

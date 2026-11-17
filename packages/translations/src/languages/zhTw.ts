@@ -643,6 +643,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: '從剪貼簿貼上',
     pasteURL: '貼上網址',
     previewSizes: '預覽尺寸',
+    processingAndSavingFile: '正在處理並儲存 {{filename}}…',
     renameFile: '重新命名檔案',
     replaceFile: '更換檔案',
     resumingFile: '正在繼續上傳 {{filename}}',

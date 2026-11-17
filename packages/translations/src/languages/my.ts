@@ -661,6 +661,7 @@ export const myTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'ကလစ်ဘုတ်မှ ကူးထည့်ပါ',
     pasteURL: 'URL ကို ကူးထည့်ပါ',
     previewSizes: 'အစမ်းကြည့်အရွယ်အစားများ',
+    processingAndSavingFile: '{{filename}} ကို စီမံဆောင်ရွက်ပြီး သိမ်းဆည်းနေသည်…',
     renameFile: 'ဖိုင်အမည်ပြောင်းရန်',
     replaceFile: 'ဖိုင်ကို ပြန်လည်အစားထိုးပါ',
     resumingFile: '{{filename}} ကို ဆက်လက်လုပ်ဆောင်နေသည်',

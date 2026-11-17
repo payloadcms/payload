@@ -679,6 +679,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Lim inn fra utklippstavle',
     pasteURL: 'Lim inn URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
+    processingAndSavingFile: 'Behandler og lagrer {{filename}}…',
     renameFile: 'Gi nytt navn til fil',
     replaceFile: 'Erstatt fil',
     resumingFile: 'Gjenopptar {{filename}}',

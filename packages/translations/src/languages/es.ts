@@ -685,6 +685,7 @@ export const esTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Pegar desde el portapapeles',
     pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
+    processingAndSavingFile: 'Procesando y guardando {{filename}}…',
     renameFile: 'Renombrar archivo',
     replaceFile: 'Reemplazar archivo',
     resumingFile: 'Reanudando {{filename}}',

@@ -544,6 +544,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:addFile',
   'upload:cancelUpload',
   'upload:finishSaving',
+  'upload:processingAndSavingFile',
   'upload:resumingFile',
   'upload:savingInBackground',
   'upload:uploadFileMismatch',

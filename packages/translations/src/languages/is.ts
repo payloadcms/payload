@@ -674,6 +674,7 @@ export const isTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Líma af klippispjaldi',
     pasteURL: 'Líma vefslóð',
     previewSizes: 'Forskoðunarstærðir',
+    processingAndSavingFile: 'Vinn úr og vista {{filename}}…',
     renameFile: 'Endurnefna skrá',
     replaceFile: 'Skipta út skrá',
     resumingFile: 'Held áfram með {{filename}}',

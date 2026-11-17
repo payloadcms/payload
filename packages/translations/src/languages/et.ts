@@ -671,6 +671,7 @@ export const etTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Kleebi lõikelaualt',
     pasteURL: 'Kleebi URL',
     previewSizes: 'Eelvaate suurused',
+    processingAndSavingFile: '{{filename}} töödeldakse ja salvestatakse…',
     renameFile: 'Faili ümbernimetamine',
     replaceFile: 'Asendage fail',
     resumingFile: 'Jätkatakse faili {{filename}}',

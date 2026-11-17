@@ -691,6 +691,7 @@ export const frTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Coller depuis le presse-papiers',
     pasteURL: "Coller l'URL",
     previewSizes: 'Tailles d’aperçu',
+    processingAndSavingFile: 'Traitement et enregistrement de {{filename}}…',
     renameFile: 'Renommer le fichier',
     replaceFile: 'Remplacer le fichier',
     resumingFile: 'Reprise de {{filename}}',

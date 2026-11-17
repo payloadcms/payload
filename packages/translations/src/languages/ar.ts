@@ -662,6 +662,7 @@ export const arTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'لصق من الحافظة',
     pasteURL: 'لصق الرابط',
     previewSizes: 'أحجام المعاينة',
+    processingAndSavingFile: 'جارٍ معالجة {{filename}} وحفظه…',
     renameFile: 'إعادة تسمية الملف',
     replaceFile: 'استبدل الملف',
     resumingFile: 'جارٍ استئناف {{filename}}',

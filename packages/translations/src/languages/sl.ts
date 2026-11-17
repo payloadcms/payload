@@ -675,6 +675,7 @@ export const slTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Prilepi iz odložišča',
     pasteURL: 'Prilepi URL',
     previewSizes: 'Velikosti predogleda',
+    processingAndSavingFile: 'Obdelava in shranjevanje datoteke {{filename}}…',
     renameFile: 'Preimenuj datoteko',
     replaceFile: 'Zamenjaj datoteko',
     resumingFile: 'Nadaljevanje {{filename}}',

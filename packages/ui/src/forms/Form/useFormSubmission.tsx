@@ -38,9 +38,11 @@ import {
   useOptionalUploadSessions,
 } from '../../providers/UploadSessions/index.js'
 import { requests } from '../../utilities/api.js'
+import { uploadRequest } from '../../utilities/uploadRequest.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
+import { trackSaveUploadProgress } from './trackSaveUploadProgress.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
@@ -91,8 +93,15 @@ export const useFormSubmission = ({
     waitForAutocomplete,
   } = props
 
-  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
-    useDocumentInfo()
+  const {
+    id,
+    collectionSlug,
+    docConfig,
+    docPermissions,
+    getDocPreferences,
+    globalSlug,
+    setUploadProgress,
+  } = useDocumentInfo()
   const locale = useLocale()?.code
   const operation = useOperation()
   const { getFormState } = useServerFunctions()
@@ -295,6 +304,7 @@ export const useFormSubmission = ({
       // create new toast promise which will resolve manually later
       let errorToast, successToast
       let promiseToastID: number | string | undefined
+      let saveUpload: ReturnType<typeof trackSaveUploadProgress> | undefined
       let preservePromiseToast = false
 
       const promise = new Promise((resolve, reject) => {
@@ -478,17 +488,48 @@ export const useFormSubmission = ({
             return
           }
 
+          const uploadFile = contextRef.current.fields?.file?.value
+
+          if (uploadFile instanceof File) {
+            saveUpload = trackSaveUploadProgress({
+              fileName: uploadFile.name,
+              onChange: setUploadProgress,
+              t,
+              toastID: promiseToastID,
+              totalBytes: uploadFile.size,
+            })
+          }
+
           const formData = await contextRef.current.createFormData(overrides, {
             action: typeof actionArg === 'string' ? actionArg : undefined,
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+            onUploadProgress: saveUpload?.report,
           })
 
           if (!requestContext.isCurrent()) {
             return
           }
 
-          if (typeof actionArg === 'string') {
+          const uploadMethod = methodToUse.toUpperCase()
+
+          if (
+            typeof actionArg === 'string' &&
+            formData.get('file') instanceof Blob &&
+            (uploadMethod === 'PATCH' || uploadMethod === 'POST' || uploadMethod === 'PUT')
+          ) {
+            // The file is in this request, so it reports how much of it is sent.
+            res = await uploadRequest({
+              body: formData,
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              method: uploadMethod,
+              onProgress: saveUpload?.report,
+              url: actionArg,
+              withCredentials: true,
+            })
+          } else if (typeof actionArg === 'string') {
             res = await requests[methodToUse.toLowerCase()](actionArg, {
               body: formData,
               headers: {
@@ -498,6 +539,8 @@ export const useFormSubmission = ({
           } else if (typeof action === 'function') {
             res = await action(formData)
           }
+
+          saveUpload?.settle({ isSuccessful: res?.status < 400 })
 
           if (requestContext.isCurrent()) {
             if (res.status < 400 && !isModifiedWhileProcessing.current) {
@@ -688,12 +731,15 @@ export const useFormSubmission = ({
       } catch (err) {
         // The form unmounted during a large upload; the upload coordinator finishes the save.
         if (err instanceof UploadContinuesInBackgroundError) {
+          saveUpload?.settle({ isSuccessful: true })
           preservePromiseToast = true
           successToast(t('upload:savingInBackground'))
           return
         }
 
         const isCurrentRequest = requestContext.isCurrent()
+
+        saveUpload?.settle({ isSuccessful: false })
 
         if (!preservePromiseToast && !isCurrentRequest) {
           return
@@ -726,6 +772,7 @@ export const useFormSubmission = ({
       applyFieldErrors,
       beforeSubmit,
       setIsBackgroundProcessing,
+      setUploadProgress,
       startRouteTransition,
       action,
       disableSuccessStatus,

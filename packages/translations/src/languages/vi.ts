@@ -677,6 +677,7 @@ export const viTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Dán từ khay nhớ tạm',
     pasteURL: 'Dán URL',
     previewSizes: 'Kích cỡ xem trước',
+    processingAndSavingFile: 'Đang xử lý và lưu {{filename}}…',
     renameFile: 'Đổi tên tệp',
     replaceFile: 'Thay thế tệp',
     resumingFile: 'Đang tiếp tục {{filename}}',

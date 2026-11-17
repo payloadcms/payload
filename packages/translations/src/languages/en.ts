@@ -676,6 +676,7 @@ export const enTranslations = {
     pasteFromClipboard: 'Paste from clipboard',
     pasteURL: 'Paste URL',
     previewSizes: 'Preview Sizes',
+    processingAndSavingFile: 'Processing and saving {{filename}}…',
     renameFile: 'Rename file',
     replaceFile: 'Replace file',
     resumingFile: 'Resuming {{filename}}',

@@ -682,6 +682,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Вставить из буфера обмена',
     pasteURL: 'Вставить URL',
     previewSizes: 'Предварительный просмотр размеров',
+    processingAndSavingFile: 'Обработка и сохранение {{filename}}…',
     renameFile: 'Переименовать файл',
     replaceFile: 'Заменить файл',
     resumingFile: 'Возобновление {{filename}}',

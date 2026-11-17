@@ -3,6 +3,7 @@ import type {
   Data,
   FormField,
   FormState,
+  OnUploadProgress,
   Row,
   SelectType,
   User,
@@ -164,6 +165,8 @@ export type CreateFormData = (
      */
     data?: Data
     mergeOverrideData?: boolean
+    /** Reports bytes sent when the file is uploaded to storage before the save request. */
+    onUploadProgress?: OnUploadProgress
   },
 ) => FormData | Promise<FormData>
 

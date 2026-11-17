@@ -151,7 +151,10 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const createFormData = useCallback<CreateFormData>(
-    async (overrides, { action, data: dataFromArgs, mergeOverrideData = true }) => {
+    async (
+      overrides,
+      { action, data: dataFromArgs, mergeOverrideData = true, onUploadProgress },
+    ) => {
       let data = dataFromArgs || getDataFromFormState(contextRef.current.fields, true)
 
       let file = data?.file
@@ -180,6 +183,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 draft: intentData?._status === 'draft',
                 options: getSaveOptions({ action }),
               },
+              onProgress: onUploadProgress,
               targetID: id,
             }),
           )

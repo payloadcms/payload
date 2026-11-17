@@ -685,6 +685,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Plakken vanuit klembord',
     pasteURL: 'URL plakken',
     previewSizes: 'Voorbeeldgroottes',
+    processingAndSavingFile: '{{filename}} verwerken en opslaan…',
     renameFile: 'Bestand hernoemen',
     replaceFile: 'Bestand vervangen',
     resumingFile: '{{filename}} hervatten',

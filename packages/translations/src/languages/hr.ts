@@ -676,6 +676,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Zalijepi iz međuspremnika',
     pasteURL: 'Zalijepi URL',
     previewSizes: 'Veličine pregleda',
+    processingAndSavingFile: 'Obrada i spremanje datoteke {{filename}}…',
     renameFile: 'Preimenujte datoteku',
     replaceFile: 'Zamijenite datoteku',
     resumingFile: 'Nastavljanje {{filename}}',

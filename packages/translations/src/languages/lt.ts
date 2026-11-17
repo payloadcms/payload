@@ -681,6 +681,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Įklijuokite iš iškarpinės',
     pasteURL: 'Įklijuokite URL',
     previewSizes: 'Peržiūros dydžiai',
+    processingAndSavingFile: 'Apdorojamas ir išsaugomas {{filename}}…',
     renameFile: 'Pervadinti failą',
     replaceFile: 'Pakeisti failą',
     resumingFile: 'Tęsiamas {{filename}}',

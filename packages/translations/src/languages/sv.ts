@@ -678,6 +678,7 @@ export const svTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Klistra in från urklipp',
     pasteURL: 'Klistra in URL',
     previewSizes: 'Förhandsgranska storlekar',
+    processingAndSavingFile: 'Bearbetar och sparar {{filename}}…',
     renameFile: 'Byt namn på fil',
     replaceFile: 'Ersätt fil',
     resumingFile: 'Återupptar {{filename}}',

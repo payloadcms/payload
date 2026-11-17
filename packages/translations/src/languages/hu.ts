@@ -685,6 +685,7 @@ export const huTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Beillesztés a vágólapról',
     pasteURL: 'URL beillesztése',
     previewSizes: 'Előnézeti méretek',
+    processingAndSavingFile: '{{filename}} feldolgozása és mentése…',
     renameFile: 'Fájl átnevezése',
     replaceFile: 'Fájl cseréje',
     resumingFile: '{{filename}} folytatása',

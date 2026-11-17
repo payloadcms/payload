@@ -692,6 +692,7 @@ export const deTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Aus der Zwischenablage einfügen',
     pasteURL: 'URL einfügen',
     previewSizes: 'Bildgrößen anzeigen',
+    processingAndSavingFile: '{{filename}} wird verarbeitet und gespeichert…',
     renameFile: 'Datei umbenennen',
     replaceFile: 'Datei ersetzen',
     resumingFile: '{{filename}} wird fortgesetzt',

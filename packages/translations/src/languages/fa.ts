@@ -668,6 +668,7 @@ export const faTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'جای‌گذاری از کلیپ‌بورد',
     pasteURL: 'جای‌گذاری URL',
     previewSizes: 'اندازه‌های پیش‌نمایش',
+    processingAndSavingFile: 'در حال پردازش و ذخیره {{filename}}…',
     renameFile: 'تغییر نام فایل',
     replaceFile: 'جایگزینی فایل',
     resumingFile: 'در حال ازسرگیری {{filename}}',

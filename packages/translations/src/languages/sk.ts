@@ -673,6 +673,7 @@ export const skTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Vložiť zo schránky',
     pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
+    processingAndSavingFile: 'Spracúva sa a ukladá {{filename}}…',
     renameFile: 'Premenovať súbor',
     replaceFile: 'Nahradiť súbor',
     resumingFile: 'Obnovuje sa {{filename}}',

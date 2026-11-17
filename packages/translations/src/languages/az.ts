@@ -682,6 +682,7 @@ export const azTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Mübadilə buferindən yapışdır',
     pasteURL: 'URL yapışdır',
     previewSizes: 'Öncədən baxış ölçüləri',
+    processingAndSavingFile: '{{filename}} emal olunur və saxlanılır…',
     renameFile: 'Fayl adını dəyişdirin',
     replaceFile: 'Faylı əvəz et',
     resumingFile: '{{filename}} bərpa olunur',

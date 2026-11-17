@@ -652,6 +652,7 @@ export const thTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'วางจากคลิปบอร์ด',
     pasteURL: 'วาง URL',
     previewSizes: 'ขนาดตัวอย่าง',
+    processingAndSavingFile: 'กำลังประมวลผลและบันทึก {{filename}}…',
     renameFile: 'เปลี่ยนชื่อไฟล์',
     replaceFile: 'แทนที่ไฟล์',
     resumingFile: 'กำลังอัปโหลด {{filename}} ต่อ',

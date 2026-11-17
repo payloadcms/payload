@@ -681,6 +681,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Colar da área de transferência',
     pasteURL: 'Colar URL',
     previewSizes: 'Tamanhos de Pré-visualização',
+    processingAndSavingFile: 'Processando e salvando {{filename}}…',
     renameFile: 'Renomear arquivo',
     replaceFile: 'Substituir arquivo',
     resumingFile: 'Retomando {{filename}}',

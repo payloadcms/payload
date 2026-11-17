@@ -677,6 +677,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Поставяне от клипборда',
     pasteURL: 'Поставяне на URL',
     previewSizes: 'Преглед на размери',
+    processingAndSavingFile: 'Обработване и запазване на {{filename}}…',
     renameFile: 'Преименувайте файл',
     replaceFile: 'Заменете файл',
     resumingFile: 'Възобновяване на {{filename}}',

@@ -676,6 +676,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'ক্লিপবোর্ড থেকে পেস্ট করুন',
     pasteURL: 'URL পেস্ট করুন',
     previewSizes: 'প্রিভিউ আকারগুলি',
+    processingAndSavingFile: '{{filename}} প্রক্রিয়া ও সংরক্ষণ করা হচ্ছে…',
     renameFile: 'ফাইলের নাম পরিবর্তন করুন',
     replaceFile: 'ফাইল পরিবর্তন করুন',
     resumingFile: '{{filename}} পুনরায় শুরু হচ্ছে',

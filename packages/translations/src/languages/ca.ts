@@ -681,6 +681,7 @@ export const caTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Enganxa des del porta-retalls',
     pasteURL: "Enganxa l'URL",
     previewSizes: 'Mides de la vista prèvia',
+    processingAndSavingFile: 'Processant i desant {{filename}}…',
     renameFile: 'Canviar el nom del fitxer',
     replaceFile: 'Reemplaça fitxer',
     resumingFile: 'Reprenent {{filename}}',

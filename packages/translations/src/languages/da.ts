@@ -676,6 +676,7 @@ export const daTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Indsæt fra udklipsholder',
     pasteURL: 'Indsæt URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
+    processingAndSavingFile: 'Behandler og gemmer {{filename}}…',
     renameFile: 'Omdøb fil',
     replaceFile: 'Erstat fil',
     resumingFile: 'Genoptager {{filename}}',

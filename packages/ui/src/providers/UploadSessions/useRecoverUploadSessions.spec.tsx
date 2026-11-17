@@ -26,7 +26,8 @@ vi.mock(import('../../utilities/uploadWithSession.js'), async (importOriginal) =
   resumeUploadSession: vi.fn(),
 }))
 
-vi.mock('./browser.js', () => ({
+vi.mock('./browser.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./browser.js')>()),
   createProgressToast: () => ({ show: vi.fn() }),
   pickFile: vi.fn(),
 }))

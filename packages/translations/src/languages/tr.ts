@@ -683,6 +683,7 @@ export const trTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Panodan yapıştır',
     pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
+    processingAndSavingFile: '{{filename}} işleniyor ve kaydediliyor…',
     renameFile: 'Dosyayı yeniden adlandır',
     replaceFile: 'Dosyayı değiştir',
     resumingFile: '{{filename}} sürdürülüyor',

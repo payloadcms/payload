@@ -675,6 +675,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Налепи из клипборда',
     pasteURL: 'Налепи URL',
     previewSizes: 'Величине прегледа',
+    processingAndSavingFile: 'Обрада и чување датотеке {{filename}}…',
     renameFile: 'Преименујте фајл',
     replaceFile: 'Замените датотеку',
     resumingFile: 'Наставља се {{filename}}',

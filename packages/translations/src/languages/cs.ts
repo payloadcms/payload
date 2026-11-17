@@ -673,6 +673,7 @@ export const csTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Vložit ze schránky',
     pasteURL: 'Vložit URL',
     previewSizes: 'Náhled velikostí',
+    processingAndSavingFile: 'Zpracování a ukládání {{filename}}…',
     renameFile: 'Přejmenovat soubor',
     replaceFile: 'Nahradit soubor',
     resumingFile: 'Obnovování {{filename}}',

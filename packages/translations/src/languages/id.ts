@@ -681,6 +681,7 @@ export const idTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Tempel dari papan klip',
     pasteURL: 'Tempel URL',
     previewSizes: 'Ukuran Pratinjau',
+    processingAndSavingFile: 'Memproses dan menyimpan {{filename}}…',
     renameFile: 'Ganti nama file',
     replaceFile: 'Ganti berkas',
     resumingFile: 'Melanjutkan {{filename}}',

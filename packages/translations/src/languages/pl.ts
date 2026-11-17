@@ -676,6 +676,7 @@ export const plTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Wklej ze schowka',
     pasteURL: 'Wklej URL',
     previewSizes: 'Rozmiary podglądu',
+    processingAndSavingFile: 'Przetwarzanie i zapisywanie {{filename}}…',
     renameFile: 'Zmień nazwę pliku',
     replaceFile: 'Zastąp plik',
     resumingFile: 'Wznawianie {{filename}}',

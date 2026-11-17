@@ -675,6 +675,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'クリップボードから貼り付け',
     pasteURL: 'URLを貼り付け',
     previewSizes: 'プレビューサイズ',
+    processingAndSavingFile: '{{filename}} を処理して保存中…',
     renameFile: 'ファイル名を変更',
     replaceFile: 'ファイルを差し替える',
     resumingFile: '{{filename}} を再開しています',

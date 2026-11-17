@@ -684,6 +684,7 @@ export const itTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Incolla dagli appunti',
     pasteURL: 'Incolla URL',
     previewSizes: 'Anteprime Dimensioni',
+    processingAndSavingFile: 'Elaborazione e salvataggio di {{filename}}…',
     renameFile: 'Rinomina file',
     replaceFile: 'Sostituisci file',
     resumingFile: 'Ripresa di {{filename}}',

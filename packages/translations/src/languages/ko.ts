@@ -671,6 +671,7 @@ export const koTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: '클립보드에서 붙여넣기',
     pasteURL: 'URL 붙여넣기',
     previewSizes: '미리보기 크기',
+    processingAndSavingFile: '{{filename}} 처리 및 저장 중…',
     renameFile: '파일 이름 변경',
     replaceFile: '파일 교체',
     resumingFile: '{{filename}} 재개 중',

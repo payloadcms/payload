@@ -669,6 +669,7 @@ export const taTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'பிடிப்புப் பலகையிலிருந்து ஒட்டுக',
     pasteURL: 'URL ஒட்டுக',
     previewSizes: 'முன்னோட்ட அளவுகள்',
+    processingAndSavingFile: '{{filename}} செயலாக்கப்பட்டுச் சேமிக்கப்படுகிறது…',
     renameFile: 'கோப்பை மறுபெயரிடு',
     replaceFile: 'கோப்பை மாற்றவும்',
     resumingFile: '{{filename}} மீண்டும் தொடங்குகிறது',

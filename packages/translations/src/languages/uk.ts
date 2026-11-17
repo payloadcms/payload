@@ -672,6 +672,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     pasteFromClipboard: 'Вставити з буфера обміну',
     pasteURL: 'Вставити URL',
     previewSizes: 'Попередній перегляд розмірів',
+    processingAndSavingFile: 'Обробка та збереження {{filename}}…',
     renameFile: 'Перейменувати файл',
     replaceFile: 'Замінити файл',
     resumingFile: 'Відновлення {{filename}}',
