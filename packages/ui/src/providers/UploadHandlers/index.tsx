@@ -1,11 +1,12 @@
 'use client'
-import type { UploadCollectionSlug, UploadInstructions } from 'payload'
+import type { OnUploadProgress, UploadCollectionSlug, UploadInstructions } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { UploadSessionIntentData } from '../../utilities/uploadWithSession.js'
 
+import { uploadRequest } from '../../utilities/uploadRequest.js'
 import { shouldUseUploadSession, uploadWithSession } from '../../utilities/uploadWithSession.js'
 import { useConfig } from '../Config/index.js'
 import { useOptionalUploadSessions } from '../UploadSessions/index.js'
@@ -15,6 +16,11 @@ type UploadHandler = (args: {
   file: File
   /** The document data being saved, kept with a running upload so the save survives navigation. */
   intent?: UploadSessionIntentData
+  /**
+   * Reports bytes sent to storage. Not called for an upload that was already running since the
+   * file was picked, or by client upload handlers that do not report progress.
+   */
+  onProgress?: OnUploadProgress
   /** The document whose file is replaced. Omitted when creating a document. */
   targetID?: number | string
 }) => Promise<UploadInstructions['file']>
@@ -45,7 +51,7 @@ export const UploadHandlersProvider = ({ children }) => {
       return null
     }
 
-    return async ({ docPrefix, file, intent, targetID }) => {
+    return async ({ docPrefix, file, intent, onProgress, targetID }) => {
       // The upload may already be running since the file was picked; the save waits for it.
       const runningUpload = uploadSessions?.getUploadedFile({ docPrefix, file, intent }) ?? null
 
@@ -59,6 +65,9 @@ export const UploadHandlersProvider = ({ children }) => {
           collectionSlug,
           docPrefix,
           file,
+          onProgress: onProgress
+            ? ({ loaded, total }) => onProgress({ loadedBytes: loaded, totalBytes: total })
+            : undefined,
           onSession: (session) => sessionIDsByFile.current.set(file, session.id),
           retries: collectionConfig.upload.transfer?.retries,
           reusableSessionID: sessionIDsByFile.current.get(file),
@@ -89,8 +98,9 @@ export const UploadHandlersProvider = ({ children }) => {
       let uploadedFile = instructions.file
 
       if (instructions.type === 'http') {
-        const { url, ...request } = instructions.request
-        const upload = await fetch(url, { body: file, ...request })
+        const { headers, method, url } = instructions.request
+        // No cross-origin cookies: the URL is signed for storage, not a Payload endpoint.
+        const upload = await uploadRequest({ body: file, headers, method, onProgress, url })
 
         if (!upload.ok) {
           throw new Error(`Upload failed with status ${upload.status}`)

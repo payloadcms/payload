@@ -410,6 +410,22 @@ export type UploadInstructions = {
     }
 )
 
+/**
+ * Bytes the browser has sent for one upload request: to Payload for regular uploads, or to the
+ * storage provider for client uploads. Server-side processing is not included.
+ * @experimental
+ */
+export type UploadTransferProgress = {
+  loadedBytes: number
+  totalBytes: number
+}
+
+/**
+ * Reports browser upload progress. Called with cumulative, never decreasing byte counts.
+ * @experimental
+ */
+export type OnUploadProgress = (progress: UploadTransferProgress) => void
+
 export type GenerateUploadInstructions = (
   args: { overrideAccess?: boolean; req: PayloadRequest } & UploadInstructionsRequest,
 ) => Promise<UploadInstructions> | UploadInstructions
