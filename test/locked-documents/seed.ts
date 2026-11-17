@@ -11,21 +11,23 @@ export const seed = async (_payload: Payload) => {
         _payload.create({
           collection: 'users',
           data: {
+            name: 'Admin',
             email: devUser.email,
             password: devUser.password,
-            name: 'Admin',
             roles: ['is_admin', 'is_user'],
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
           collection: 'users',
           data: {
+            name: 'Dev',
             email: regularUser.email,
             password: regularUser.password,
-            name: 'Dev',
             roles: ['is_user'],
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
@@ -33,6 +35,7 @@ export const seed = async (_payload: Payload) => {
           data: {
             text: 'example page',
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
@@ -40,6 +43,7 @@ export const seed = async (_payload: Payload) => {
           data: {
             text: 'example post',
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
@@ -48,6 +52,7 @@ export const seed = async (_payload: Payload) => {
             fieldA: 'Initial value A',
             fieldB: 'Initial value B',
           },
+          overrideAccess: true,
         }),
       () =>
         _payload.create({
@@ -56,6 +61,7 @@ export const seed = async (_payload: Payload) => {
             fieldA: 'Initial value A',
             fieldB: 'Initial value B',
           },
+          overrideAccess: true,
         }),
     ],
     false,

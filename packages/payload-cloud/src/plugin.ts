@@ -112,9 +112,15 @@ export const payloadCloudPlugin =
       ...(config.globals || []),
       {
         slug: 'payload-cloud-instance',
+        access: {
+          read: () => false,
+          readVersions: () => false,
+          update: () => false,
+        },
         admin: {
           hidden: true,
         },
+        authorship: false,
         fields: [
           {
             name: 'instance',
@@ -137,13 +143,10 @@ export const payloadCloudPlugin =
       if (process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
         const retrievedGlobal = await payload.findGlobal({
           slug: 'payload-cloud-instance',
+          overrideAccess: true,
         })
 
-        if (retrievedGlobal.instance === process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
-          return true
-        } else {
-          process.env.PAYLOAD_CLOUD_JOBS_INSTANCE = ''
-        }
+        return retrievedGlobal.instance === process.env.PAYLOAD_CLOUD_JOBS_INSTANCE
       }
 
       return false
@@ -163,6 +166,7 @@ export const payloadCloudPlugin =
         data: {
           instance,
         },
+        overrideAccess: true,
       })
 
       if (!hasExistingAutorun) {

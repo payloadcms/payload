@@ -85,15 +85,17 @@ describe('Radio', () => {
     ).toBeVisible()
   })
 
-  test('should portal the field-error tooltip next to the radio group when invalid', async () => {
+  test('should keep the radio error adjacent and focusable', async () => {
     await page.goto(url.create)
     await page.locator('#action-save').click({ delay: 100 })
 
     const tooltip = page.locator('.tooltip--show', { hasText: 'This field is required.' })
     await expect(tooltip).toBeVisible()
 
-    const isPortaledToBody = await tooltip.evaluate((el) => el.parentElement === document.body)
-    expect(isPortaledToBody).toBe(true)
+    expect(await tooltip.evaluate((element) => Boolean(element.closest('.field-type')))).toBe(true)
+    await expect(tooltip).toHaveAttribute('role', 'alert')
+    await tooltip.focus()
+    await expect(tooltip).toBeFocused()
 
     const tooltipBox = await tooltip.boundingBox()
     const radioGroupBox = await page.locator('#field-radio').boundingBox()

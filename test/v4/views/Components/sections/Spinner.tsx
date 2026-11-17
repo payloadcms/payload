@@ -1,6 +1,6 @@
 'use client'
 
-import { SpinnerIcon } from '@payloadcms/ui/icons/Spinner'
+import { SpinnerIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section, Variant } from '../shared.js'

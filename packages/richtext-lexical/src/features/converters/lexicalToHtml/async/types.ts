@@ -34,6 +34,10 @@ export type HTMLConverterAsync<
       parent: SerializedLexicalNodeWithParent
       populate?: HTMLPopulateFn
       providedCSSString: string
+      /**
+       * ` dir="ltr"` or ` dir="rtl"` when the node has an explicit direction, otherwise an empty string.
+       */
+      providedDirAttribute: string
       providedStyleTag: string
     }) => Promise<string> | string)
   | string

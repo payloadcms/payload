@@ -12,6 +12,24 @@ import type {
   SanitizedPermissions,
 } from '../auth/types.js'
 
+// Field names cannot contain a period. Keep this false value through sanitization,
+// then remove it after empty-object cleanup so a recursive boundary retains `fields: {}`.
+const recursiveBlockBoundaryKey = '\u0000payload.recursive-block-boundary'
+
+export const markRecursiveBlockBoundary = ({
+  fields,
+}: {
+  fields: FieldsPermissions
+}): FieldsPermissions => {
+  Object.defineProperty(fields, recursiveBlockBoundaryKey, {
+    configurable: true,
+    enumerable: true,
+    value: false,
+  })
+
+  return fields
+}
+
 function checkAndSanitizeFieldsPermssions(data: FieldsPermissions): boolean {
   let allFieldPermissionsTrue = true
   for (const key in data) {
@@ -51,6 +69,15 @@ function checkAndSanitizePermissions(
            */
           if (key === 'fields') {
             if (data.blocks[blockSlug].fields) {
+              const blockFields = data.blocks[blockSlug].fields
+              if (
+                typeof blockFields === 'object' &&
+                Object.keys(blockFields).length === 0 &&
+                Object.keys(data.blocks[blockSlug]).length === 1
+              ) {
+                markRecursiveBlockBoundary({ fields: blockFields })
+              }
+
               if (!checkAndSanitizeFieldsPermssions(data.blocks[blockSlug].fields)) {
                 blocksPermissions = false
               } else {
@@ -161,11 +188,21 @@ function isPermissionObject(data: unknown): boolean {
 /**
  * Recursively remove empty objects from an object.
  */
-function cleanEmptyObjects(obj: any): void {
+function cleanEmptyObjects({
+  obj,
+  recursiveBlockBoundaries,
+}: {
+  obj: any
+  recursiveBlockBoundaries: Record<string, unknown>[]
+}): Record<string, unknown> {
+  if (Object.hasOwn(obj, recursiveBlockBoundaryKey)) {
+    recursiveBlockBoundaries.push(obj)
+  }
+
   Object.keys(obj).forEach((key) => {
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       // Recursive call
-      cleanEmptyObjects(obj[key])
+      cleanEmptyObjects({ obj: obj[key], recursiveBlockBoundaries })
       if (Object.keys(obj[key]).length === 0) {
         // Delete the key if the object is empty
         delete obj[key]
@@ -174,6 +211,8 @@ function cleanEmptyObjects(obj: any): void {
       delete obj[key]
     }
   })
+
+  return obj
 }
 
 export function recursivelySanitizeCollections(obj: Permissions['collections']): void {
@@ -221,7 +260,11 @@ export function sanitizePermissions(
   }
 
   // Run clean up of empty objects at the end
-  cleanEmptyObjects(data)
+  const recursiveBlockBoundaries: Record<string, unknown>[] = []
+  cleanEmptyObjects({ obj: data, recursiveBlockBoundaries })
+  for (const fields of recursiveBlockBoundaries) {
+    delete fields[recursiveBlockBoundaryKey]
+  }
 
   return data as unknown as SanitizedPermissions
 }

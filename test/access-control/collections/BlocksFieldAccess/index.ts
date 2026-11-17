@@ -12,6 +12,29 @@ export const BlocksFieldAccess: CollectionConfig = {
   },
   fields: [
     {
+      name: 'rows',
+      type: 'array',
+      fields: [
+        {
+          name: 'children',
+          type: 'array',
+          fields: [
+            {
+              name: 'allowCodeChanges',
+              type: 'checkbox',
+              defaultValue: false,
+            },
+            {
+              name: 'code',
+              type: 'text',
+              access: { update: ({ siblingData }) => siblingData?.allowCodeChanges === true },
+              defaultValue: 'default',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,
@@ -35,6 +58,40 @@ export const BlocksFieldAccess: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'queryRestrictedBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'restrictedBlock',
+          fields: [
+            { name: 'title', type: 'text' },
+            { name: 'content', type: 'text', access: { read: () => false } },
+          ],
+        },
+        {
+          slug: 'summaryBlock',
+          fields: [
+            { name: 'details', type: 'group', fields: [{ name: 'summary', type: 'text' }] },
+            { name: 'shared', type: 'text' },
+          ],
+        },
+        {
+          slug: 'detailedBlock',
+          fields: [
+            { name: 'details', type: 'group', fields: [{ name: 'title', type: 'text' }] },
+            { name: 'shared', type: 'text', access: { read: () => false } },
+          ],
+        },
+      ],
+    },
+    { name: 'queryRestrictedBlockRefs', type: 'blocks', blocks: ['titleblock'] },
+    {
+      name: 'parentRestrictedBlockRefs',
+      type: 'blocks',
+      blocks: ['titleblock'],
+      access: { read: () => false },
     },
     // Block field with normal blocks - WITH access control (should be read-only)
     {
@@ -127,5 +184,5 @@ export const BlocksFieldAccess: CollectionConfig = {
       ],
     },
   ],
-  versions: false,
+  versions: { drafts: true },
 }

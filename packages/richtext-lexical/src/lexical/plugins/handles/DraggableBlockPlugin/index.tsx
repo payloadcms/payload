@@ -1,12 +1,12 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
-import type { DragEvent as ReactDragEvent } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { eventFiles } from '@lexical/rich-text'
+import { Popup, PopupList, useTranslation } from '@payloadcms/ui'
 import { $getNearestNodeFromDOMNode, $getNodeByKey, isHTMLElement } from 'lexical'
 import * as React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
@@ -18,7 +18,9 @@ import { isOnHandleElement } from '../utils/isOnHandleElement.js'
 import { setHandlePosition } from '../utils/setHandlePosition.js'
 import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
 import './index.css'
+import { $moveBlock } from './moveBlock.js'
 import { setTargetLine } from './setTargetLine.js'
+import { useKeyboardReordering } from './useKeyboardReordering.js'
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block'
@@ -69,8 +71,13 @@ function useDraggableBlockMenu(
   isEditable: boolean,
 ): React.ReactElement {
   const scrollerElem = anchorElem.parentElement
+  const instructionsID = useId()
+  const { t } = useTranslation()
 
-  const menuRef = useRef<HTMLButtonElement>(null)
+  useKeyboardReordering({ editor, instructionsID })
+
+  const menuRef = useRef<HTMLDivElement>(null)
+  const isMenuOpenRef = useRef(false)
   const targetLineRef = useRef<HTMLDivElement>(null)
   const debugHighlightRef = useRef<HTMLDivElement>(null)
   const isDraggingBlockRef = useRef<boolean>(false)
@@ -92,7 +99,7 @@ function useDraggableBlockMenu(
      */
     function onDocumentMouseMove(event: MouseEvent) {
       const target = event.target
-      if (!isHTMLElement(target)) {
+      if (isMenuOpenRef.current || !isHTMLElement(target)) {
         return
       }
 
@@ -147,10 +154,18 @@ function useDraggableBlockMenu(
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
     // to be able to detect when the mouse is outside the editor and respect a buffer around
     // the scrollerElem to avoid the draggableBlockElem disappearing too early.
+    const onDocumentPointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'touch' || event.pointerType === 'pen') {
+        onDocumentMouseMove(event)
+      }
+    }
+
     document?.addEventListener('mousemove', onDocumentMouseMove)
+    document?.addEventListener('pointerdown', onDocumentPointerDown)
 
     return () => {
       document?.removeEventListener('mousemove', onDocumentMouseMove)
+      document?.removeEventListener('pointerdown', onDocumentPointerDown)
     }
   }, [scrollerElem, anchorElem, editor, draggableBlockElem])
 
@@ -401,44 +416,143 @@ function useDraggableBlockMenu(
     editorConfig?.admin?.hideGutter,
   ])
 
-  function onDragStart(event: ReactDragEvent<HTMLButtonElement>): void {
-    const dataTransfer = event.dataTransfer
-    if (!dataTransfer || !draggableBlockElem) {
-      return
-    }
-    setDragImage(dataTransfer, draggableBlockElem)
-    dataTransfer.effectAllowed = 'move'
-    let nodeKey = ''
-    editor.update(() => {
-      const node = $getNearestNodeFromDOMNode(draggableBlockElem)
-      if (node) {
-        nodeKey = node.getKey()
+  const startDrag = useCallback(
+    ({
+      blockElem,
+      dataTransfer,
+    }: {
+      blockElem: HTMLElement | null
+      dataTransfer: DataTransfer | null
+    }) => {
+      if (!editor.isEditable() || !dataTransfer || !blockElem) {
+        return
       }
-    })
-    isDraggingBlockRef.current = true
-    dataTransfer.setData(DRAG_DATA_FORMAT, nodeKey)
-  }
 
-  function onDragEnd(): void {
+      setDragImage(dataTransfer, blockElem)
+      dataTransfer.effectAllowed = 'move'
+      editor.read(() => {
+        const node = $getNearestNodeFromDOMNode(blockElem)?.getTopLevelElement()
+
+        if (node) {
+          isDraggingBlockRef.current = true
+          dataTransfer.setData(DRAG_DATA_FORMAT, node.getKey())
+        }
+      })
+    },
+    [editor],
+  )
+
+  const onDragEnd = useCallback(() => {
     isDraggingBlockRef.current = false
     if (lastTargetBlock?.elem) {
-      hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+      hideTargetLine(targetLineRef.current, lastTargetBlock.elem)
     }
+  }, [lastTargetBlock])
+
+  useEffect(() => {
+    const onHeaderDragStart = (event: DragEvent) => {
+      const handle =
+        event.target instanceof HTMLElement
+          ? event.target.closest<HTMLElement>('.collapsible__drag[draggable="true"]')
+          : null
+
+      if (!handle || !editor.getRootElement()?.contains(handle)) {
+        return
+      }
+
+      const blockElem = editor.getElementByKey(handle.dataset.sortableId ?? '')
+
+      if (blockElem) {
+        setDraggableBlockElem(blockElem)
+        startDrag({ blockElem, dataTransfer: event.dataTransfer })
+      }
+    }
+
+    document.addEventListener('dragstart', onHeaderDragStart)
+    document.addEventListener('dragend', onDragEnd)
+    return () => {
+      document.removeEventListener('dragstart', onHeaderDragStart)
+      document.removeEventListener('dragend', onDragEnd)
+    }
+  }, [editor, startDrag, onDragEnd])
+
+  function moveBlock({ direction }: { direction: -1 | 1 }) {
+    if (!editor.isEditable() || !draggableBlockElem) {
+      return
+    }
+
+    editor.update(
+      () => {
+        const node = $getNearestNodeFromDOMNode(draggableBlockElem)?.getTopLevelElement()
+
+        if (node) {
+          $moveBlock({ direction, node })
+        }
+      },
+      {
+        onUpdate: () => {
+          if (menuRef.current) {
+            setHandlePosition(
+              draggableBlockElem,
+              menuRef.current,
+              anchorElem,
+              blockHandleHorizontalOffset,
+            )
+          }
+        },
+      },
+    )
   }
 
   return createPortal(
     <React.Fragment>
-      <button
-        aria-label="Drag to move"
-        className="icon draggable-block-menu"
-        draggable
-        onDragEnd={onDragEnd}
-        onDragStart={onDragStart}
-        ref={menuRef}
-        type="button"
-      >
-        <div className={isEditable ? 'icon' : ''} />
-      </button>
+      <span className="sr-only" id={instructionsID}>
+        {t('general:moveUp')}: Alt + Shift + ↑. {t('general:moveDown')}: Alt + Shift + ↓.
+      </span>
+      <div className="draggable-block-menu" ref={menuRef}>
+        <Popup
+          caret={false}
+          disabled={!isEditable}
+          onToggleClose={() => {
+            isMenuOpenRef.current = false
+          }}
+          onToggleOpen={() => {
+            isMenuOpenRef.current = true
+          }}
+          popupType="menu"
+          render={({ close }) => (
+            <PopupList.ButtonGroup>
+              {([-1, 1] as const).map((direction) => (
+                <PopupList.Button
+                  key={direction}
+                  onClick={() => {
+                    moveBlock({ direction })
+                    close()
+                  }}
+                >
+                  {t(direction === -1 ? 'general:moveUp' : 'general:moveDown')}
+                </PopupList.Button>
+              ))}
+            </PopupList.ButtonGroup>
+          )}
+          renderButton={({ active: _active, ...buttonProps }) => (
+            <button
+              {...buttonProps}
+              aria-label={t('general:dragToMove')}
+              className="draggable-block-menu__button"
+              disabled={!isEditable}
+              draggable={isEditable}
+              onDragEnd={onDragEnd}
+              onDragStart={(event) =>
+                startDrag({ blockElem: draggableBlockElem, dataTransfer: event.dataTransfer })
+              }
+              type="button"
+            >
+              <div className={isEditable ? 'icon' : ''} />
+            </button>
+          )}
+        />
+      </div>
       <div className="draggable-block-target-line" ref={targetLineRef} />
       <div className="debug-highlight" ref={debugHighlightRef} />
     </React.Fragment>,

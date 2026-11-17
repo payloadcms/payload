@@ -1,5 +1,10 @@
 'use client'
-import type { DOMConversionOutput, LexicalNode, SerializedLexicalNode } from 'lexical'
+import type {
+  DOMConversionMap,
+  DOMConversionOutput,
+  LexicalNode,
+  SerializedLexicalNode,
+} from 'lexical'
 
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
@@ -15,6 +20,24 @@ export class HorizontalRuleNode extends HorizontalRuleServerNode {
 
   static override getType(): string {
     return super.getType()
+  }
+
+  /**
+   * Defines what happens if you copy an hr element from another page and paste it into the lexical editor
+   *
+   * This also determines the behavior of lexical's internal HTML -> Lexical converter
+   *
+   * Overrides the server implementation so pasting an `<hr>` creates the client
+   * {@link HorizontalRuleNode} the editor registered, instead of the server-only
+   * `HorizontalRuleServerNode` (which fails lexical's node class identity check).
+   */
+  static override importDOM(): DOMConversionMap | null {
+    return {
+      hr: () => ({
+        conversion: $convertHorizontalRuleElement,
+        priority: 0,
+      }),
+    }
   }
 
   /**

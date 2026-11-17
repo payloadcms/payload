@@ -2,7 +2,7 @@ import type { RefreshArgs } from 'payload/auth'
 
 import { refresh as refreshFn } from 'payload/auth'
 
-import { tanstackServerAdapter } from '../utilities/serverAdapter.server.js'
+import { tanstackServerAdapter } from '../adapters/server.js'
 
 export async function refresh(
   args: Omit<RefreshArgs, 'serverAdapter'>,

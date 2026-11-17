@@ -15,7 +15,7 @@ const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-test.suite({ config: './config.ts' })('migrations CLI', () => {
+test.suite('migrations CLI', { config: './config.ts' }, () => {
   test.afterEach(() => {
     removeFiles(migrationDir)
   })
@@ -56,8 +56,9 @@ test.suite({ config: './config.ts' })('migrations CLI', () => {
     expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
+    { db: 'mongo' },
     async ({ cli }) => {
       // Tests: Path 1 in getPredefinedMigration.ts - @payloadcms/db-* prefix handling
       // These load directly from adapter's predefinedMigrations folder WITHOUT package.json exports

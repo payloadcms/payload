@@ -11,11 +11,11 @@ import { SearchIcon } from '../../icons/Search/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { matchesSearchQuery } from '../../utilities/matchesSearchQuery.js'
 import { Button } from '../Button/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
 import { Switch } from '../Switch/index.js'
-import { matchesColumnSearch } from './matchesColumnSearch.js'
 import './Popup.css'
 
 const baseClass = 'column-selector'
@@ -79,14 +79,21 @@ type ColumnItemProps = {
 
 const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle }) => {
   const { t } = useTranslation()
-  const { attributes, isDragging, isOver, isSorting, listeners, setNodeRef, transform } =
-    useDraggableSortable({
-      id,
-    })
+  const {
+    attributes,
+    isDragging,
+    isOver,
+    isSorting,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+  } = useDraggableSortable({
+    id,
+  })
 
   return (
     <div
-      aria-label={labelText}
       className={[
         `${baseClass}__item`,
         !active && `${baseClass}__item--inactive`,
@@ -101,11 +108,12 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
         transform: isDragging ? undefined : transform,
         ...attributes.style,
       }}
-      {...attributes}
     >
       <span
-        aria-label={t('general:dragToReorder')}
+        {...attributes}
+        aria-label={`${t('general:dragToReorder')}: ${labelText}`}
         className={`${baseClass}__drag-handle`}
+        ref={setActivatorNodeRef}
         {...listeners}
       >
         <AlignJustifiedIcon size={16} />
@@ -113,7 +121,7 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
       <span className={`${baseClass}__item-label`}>
         <NestedLabel label={labelText} />
       </span>
-      <Switch checked={active} onChange={onToggle} />
+      <Switch ariaLabel={labelText} checked={active} onChange={onToggle} />
     </div>
   )
 }
@@ -208,9 +216,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
 
     // Filter by search query
     const filtered = searchQuery
-      ? items.filter((item) =>
-          matchesColumnSearch({ labelText: item.labelText, query: searchQuery }),
-        )
+      ? items.filter((item) => matchesSearchQuery({ label: item.labelText, query: searchQuery }))
       : items
 
     return {
@@ -276,7 +282,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
       style={containerStyle}
     >
       <div className={`${baseClass}__header`}>
-        <span className={`${baseClass}__title`}>{t('general:editColumns')}</span>
+        <h2 className={`${baseClass}__title`}>{t('general:editColumns')}</h2>
         {onClose && (
           <Button
             aria-label={t('general:close')}
@@ -287,10 +293,14 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
           />
         )}
       </div>
+      <span className="sr-only" id={`${uuid}-search-description`}>
+        {t('general:searchAutomatically')}
+      </span>
       <div className={`${baseClass}__search`}>
         <div className={`${baseClass}__search-bar`}>
           <SearchIcon size={24} />
           <input
+            aria-describedby={`${uuid}-search-description`}
             aria-label={t('general:searchColumns')}
             className={`${baseClass}__search-input`}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -307,7 +317,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
           )}
           {columnItems.shown.length > 0 && (
             <div className={`${baseClass}__section`}>
-              <div className={`${baseClass}__section-header`}>{t('general:shownInTable')}</div>
+              <h3 className={`${baseClass}__section-header`}>{t('general:shownInTable')}</h3>
               {columnItems.shown.map((item) => (
                 <ColumnItem
                   active={item.active}
@@ -323,7 +333,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
           )}
           {columnItems.hidden.length > 0 && (
             <div className={`${baseClass}__section`}>
-              <div className={`${baseClass}__section-header`}>{t('general:notShownInTable')}</div>
+              <h3 className={`${baseClass}__section-header`}>{t('general:notShownInTable')}</h3>
               {columnItems.hidden.map((item) => (
                 <ColumnItem
                   active={item.active}

@@ -2,7 +2,7 @@ import type { MigrationResult } from 'payload'
 
 import {
   commitTransaction,
-  createLocalReq,
+  createPayloadRequest,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -35,7 +35,7 @@ export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationRes
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
   const migrated: string[] = []
   const rolledBack: string[] = []
 
@@ -62,6 +62,7 @@ export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationRes
       if (tableExists) {
         await payload.delete({
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
           where: {
             name: {
@@ -95,6 +96,7 @@ export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationRes
           name: migration.name,
           executed: true,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)

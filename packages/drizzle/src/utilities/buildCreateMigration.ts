@@ -29,7 +29,7 @@ export const buildCreateMigration = ({
       fs.mkdirSync(dir)
     }
 
-    const { generateDrizzleJson, generateMigration, upSnapshot } = this.requireDrizzleKit()
+    const { generateDrizzleJson, generateMigration, upSnapshot } = await this.requireDrizzleKit()
 
     const drizzleJsonAfter = await generateDrizzleJson(this.schema)
 

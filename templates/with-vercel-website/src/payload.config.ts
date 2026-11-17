@@ -1,11 +1,11 @@
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
-import sharp from 'sharp'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
-import { Media } from './collections/Media'
+import { Media, mediaSharpOptions } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
@@ -25,9 +25,25 @@ export default buildConfig({
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.
       beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
-      beforeDashboard: ['@/components/BeforeDashboard'],
+    },
+    dashboard: {
+      // The `GettingStarted` widget renders the onboarding steps below the welcome heading.
+      // Feel free to delete this at any time. Remove the widget and its `defaultLayout` entry.
+      widgets: [
+        {
+          slug: 'getting-started',
+          Component: '@/components/GettingStarted',
+          label: 'Getting Started',
+          minWidth: 'full',
+        },
+      ],
+      // Repeats the built-in default layout with `getting-started` inserted after `welcome`.
+      defaultLayout: [
+        { widgetSlug: 'welcome', width: 'full' },
+        { widgetSlug: 'getting-started', width: 'full' },
+        { widgetSlug: 'activity', width: 'full' },
+        { widgetSlug: 'collections', width: 'full' },
+      ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -86,12 +102,14 @@ export default buildConfig({
     Users,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  plugins: [...plugins],
   globals: [Header, Footer],
-  secret: process.env.PAYLOAD_SECRET,
-  sharp,
+  plugins,
+  secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  upload: {
+    transformers: [sharpTransformer({ collections: { media: mediaSharpOptions } })],
   },
   jobs: {
     access: {

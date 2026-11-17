@@ -114,9 +114,9 @@ function useAddBlockHandle(
   }, [scrollerElem, anchorElem, editor, hoveredElement])
 
   useEffect(() => {
-    if (menuRef.current && hoveredElement?.node) {
+    if (menuRef.current) {
       setHandlePosition(
-        hoveredElement?.elem,
+        hoveredElement?.elem ?? null,
         menuRef.current,
         anchorElem,
         blockHandleHorizontalOffset,

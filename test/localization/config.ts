@@ -13,6 +13,11 @@ import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import {
+  getLocaleValidationFields,
+  LocaleValidation,
+  LocaleValidationBlock,
+} from './collections/LocaleValidation/index.js'
 import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
@@ -30,10 +35,22 @@ import {
   globalWithDraftsSlug,
   hungarianLocale,
   localeRestrictedSlug,
+  localeValidationGlobalSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationAsyncFieldHookSlug,
+  publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSanitizeGlobalSlug,
+  publicationBeforeOperationSlug,
+  publicationFieldAccessGlobalSlug,
+  publicationFieldAccessSlug,
+  publicationHookGlobalSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -58,6 +75,18 @@ const openAccess: CollectionConfig['access'] = {
   update: () => true,
 }
 
+const preventPublicationStatusChange = ({ data }: { data?: Record<string, unknown> }) => {
+  return typeof data?._status === 'undefined'
+}
+
+const localizedPublicationFields: CollectionConfig['fields'] = [
+  {
+    name: 'title',
+    type: 'text',
+    localized: true,
+  },
+]
+
 export default buildConfigWithDefaults({
   suite: 'localization',
   config: {
@@ -66,6 +95,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
+    blocks: [LocaleValidationBlock],
     collections: [
       RichTextCollection,
       BlocksCollection,
@@ -74,6 +104,7 @@ export default buildConfigWithDefaults({
       LocalizedDrafts,
       LocalizedDateFields,
       AllFieldsLocalized,
+      LocaleValidation,
       {
         slug: 'users',
         admin: {
@@ -439,8 +470,180 @@ export default buildConfigWithDefaults({
       },
       LocalizedWithinLocalized,
       ArrayWithFallbackCollection,
+      {
+        slug: publicationAccessSlug,
+        access: {
+          create: preventPublicationStatusChange,
+          update: preventPublicationStatusChange,
+        },
+        fields: localizedPublicationFields,
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationFieldAccessSlug,
+        access: openAccess,
+        fields: [
+          ...localizedPublicationFields,
+          { name: 'sharedText', type: 'text' },
+          {
+            name: '_status',
+            access: {
+              create: () => false,
+              update: ({ data, doc, req }) =>
+                Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+            },
+            hooks: {
+              beforeValidate: [
+                ({ context, previousValue, value }) => {
+                  if (context.validatePublicationStatus && value !== previousValue) {
+                    throw new Error('Publication status validation is not allowed')
+                  }
+
+                  return value
+                },
+              ],
+            },
+            type: 'select',
+            options: [],
+          },
+        ],
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationBeforeOperationSlug,
+        access: openAccess,
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeOperation: [
+            ({ args }) => {
+              if (args.data?._status === 'published') {
+                throw new Error('Publication is not allowed in beforeOperation')
+              }
+
+              return args
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationAsyncFieldHookSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            hooks: {
+              beforeChange: [
+                async ({ context, siblingData }) => {
+                  if (context.removePublicationIntent) {
+                    await new Promise((resolve) => setTimeout(resolve, 25))
+                    delete siblingData._status
+                  }
+                },
+              ],
+            },
+            type: 'text',
+            localized: true,
+          },
+        ],
+        hooks: {
+          beforeOperation: [
+            ({ args, context }) => {
+              if (context.saveAsDraft) {
+                args.draft = true
+                args.publishAllLocales = false
+              }
+
+              return args
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationHookSlug,
+        access: openAccess,
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeChange: [
+            ({ context, data, operation, originalDoc }) => {
+              if (
+                !context.seedPublicationStatus &&
+                operation === 'update' &&
+                data?._status &&
+                data._status !== originalDoc?._status
+              ) {
+                throw new Error('Publication status changes are not allowed')
+              }
+
+              return data
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
     ],
     globals: [
+      {
+        slug: localizedStatusSharedGlobalSlug,
+        fields: [
+          {
+            name: 'localizedText',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'sharedText',
+            type: 'text',
+          },
+          {
+            name: 'hiddenSharedText',
+            type: 'text',
+            hidden: true,
+          },
+          {
+            name: 'sharedRows',
+            type: 'array',
+            fields: [
+              { name: 'localizedText', type: 'text', localized: true },
+              { name: 'sharedText', type: 'text' },
+            ],
+          },
+          {
+            name: 'sharedBlocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'sharedTextBlock',
+                fields: [
+                  { name: 'localizedText', type: 'text', localized: true },
+                  { name: 'sharedText', type: 'text' },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: {
+          drafts: {
+            localizeStatus: true,
+          },
+        },
+      },
+      {
+        slug: localeValidationGlobalSlug,
+        fields: getLocaleValidationFields(),
+        versions: false,
+      },
       {
         slug: 'global-array',
         fields: [
@@ -466,6 +669,13 @@ export default buildConfigWithDefaults({
             type: 'text',
             localized: true,
           },
+          {
+            name: 'localizedTextWithLength',
+            type: 'text',
+            localized: true,
+            maxLength: 20,
+            minLength: 5,
+          },
         ],
         versions: false,
       },
@@ -478,6 +688,118 @@ export default buildConfigWithDefaults({
             localized: true,
           },
         ],
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationAccessGlobalSlug,
+        access: {
+          update: preventPublicationStatusChange,
+        },
+        fields: localizedPublicationFields,
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationBeforeOperationGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeOperation: [
+            ({ args }) => {
+              if (args.data?._status === 'published') {
+                throw new Error('Publication is not allowed in beforeOperation')
+              }
+
+              return args
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationBeforeOperationSanitizeGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeOperation: [
+            ({ args, context }) => {
+              if (context.sanitizePublicationIntent && args.data?._status === 'published') {
+                delete args.data._status
+                args.publishAllLocales = false
+              }
+
+              return args
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationFieldAccessGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: [
+          ...localizedPublicationFields,
+          { name: 'sharedText', type: 'text' },
+          {
+            name: '_status',
+            access: {
+              create: () => false,
+              update: ({ data, doc, req }) =>
+                Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+            },
+            hooks: {
+              beforeValidate: [
+                ({ context, previousValue, value }) => {
+                  if (context.validatePublicationStatus && value !== previousValue) {
+                    throw new Error('Publication status validation is not allowed')
+                  }
+
+                  return value
+                },
+              ],
+            },
+            type: 'select',
+            options: [],
+          },
+        ],
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationHookGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeChange: [
+            ({ context, data, originalDoc }) => {
+              if (
+                !context.seedPublicationStatus &&
+                data?._status &&
+                data._status !== originalDoc?._status
+              ) {
+                throw new Error('Publication status changes are not allowed')
+              }
+
+              return data
+            },
+          ],
+        },
         versions: {
           drafts: {},
         },
@@ -567,6 +889,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     const localizedPost = await payload.create({
@@ -574,6 +897,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -582,6 +906,7 @@ export default buildConfigWithDefaults({
         date: new Date().toISOString(),
         localizedDate: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -591,6 +916,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         relation: localizedPost.id,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -600,6 +926,7 @@ export default buildConfigWithDefaults({
         title: spanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation = await payload.create({
@@ -607,6 +934,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -616,6 +944,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation2 = await payload.create({
@@ -623,6 +952,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle2,
       },
+      overrideAccess: true,
     })
     await payload.update({
       id: localizedPost.id,
@@ -631,6 +961,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle2,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -644,6 +975,7 @@ export default buildConfigWithDefaults({
         ],
         relationship: localizedRelation.id,
       },
+      overrideAccess: true,
     })
     const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
@@ -662,6 +994,7 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -671,6 +1004,7 @@ export default buildConfigWithDefaults({
         relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     const globalArray = await payload.updateGlobal({
@@ -685,6 +1019,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -696,6 +1031,7 @@ export default buildConfigWithDefaults({
         })),
       },
       locale: 'es',
+      overrideAccess: true,
     })
   },
 })

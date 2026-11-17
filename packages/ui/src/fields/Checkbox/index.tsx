@@ -1,9 +1,5 @@
 'use client'
-import type {
-  CheckboxFieldClientComponent,
-  CheckboxFieldClientProps,
-  CheckboxFieldValidation,
-} from 'payload'
+import type { CheckboxFieldClientProps, CheckboxFieldValidation } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -28,14 +24,14 @@ const baseClass = 'checkbox'
 
 export { CheckboxFieldClientProps, CheckboxInput, type CheckboxInputProps }
 
-const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
+const CheckboxFieldComponent: React.FC<CheckboxFieldClientProps> = (props) => {
   const {
     id,
     checked: checkedFromProps,
     disableFormData,
     field,
     field: {
-      admin: { className, description } = {} as CheckboxFieldClientProps['field']['admin'],
+      admin: { className, description } = {},
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],

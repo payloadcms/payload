@@ -70,6 +70,7 @@ describe('Radio', () => {
         uniqueRequiredText: 'text',
         uniqueText,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -79,6 +80,7 @@ describe('Radio', () => {
         localizedUniqueRequiredText: 'es text',
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     await gotoAndWaitForForm(page, url.create)

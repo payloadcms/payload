@@ -5,7 +5,11 @@ import type { Adapter, AllowList, PluginOptions } from './types.js'
 import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
+import { getNormalizeUploadPrefixHook } from './hooks/normalizeUploadPrefix.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
+import { getPublicOriginalURLHook } from './hooks/publicOriginalURL.js'
+import { createFileOperations } from './utilities/createFileOperations.js'
+import { getStorageLocationSelect } from './utilities/getStorageLocationSelect.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -19,56 +23,47 @@ import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
 export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    const {
-      alwaysInsertFields,
-      collections: allCollectionOptions,
-      enabled,
-      useCompositePrefixes,
-    } = pluginOptions
+    const { collections: allCollectionOptions, enabled, useCompositePrefixes } = pluginOptions
     const config = { ...incomingConfig }
 
-    // If disabled but alwaysInsertFields is true, only insert fields without full plugin functionality
+    // If disabled, only insert fields (e.g. prefix) without full plugin functionality,
+    // so the collection schema stays consistent across environments.
     if (enabled === false) {
-      if (alwaysInsertFields) {
-        return {
-          ...config,
-          collections: (config.collections || []).map((existingCollection) => {
-            const options = allCollectionOptions[existingCollection.slug]
+      return {
+        ...config,
+        collections: (config.collections || []).map((existingCollection) => {
+          const options = allCollectionOptions[existingCollection.slug]
 
-            if (options) {
-              // If adapter is provided, use it to get fields
-              const adapter = options.adapter
-                ? options.adapter({
-                    collection: existingCollection,
-                    prefix: options.prefix,
-                  })
-                : undefined
+          if (options) {
+            // If adapter is provided, use it to get fields
+            const adapter = options.adapter
+              ? options.adapter({
+                  collection: existingCollection,
+                  prefix: options.prefix,
+                })
+              : undefined
 
-              const fields = getFields({
-                adapter,
-                alwaysInsertFields: true,
-                collection: existingCollection,
-                disablePayloadAccessControl: options.disablePayloadAccessControl,
-                generateFileURL: options.generateFileURL,
-                prefix: options.prefix,
-                useCompositePrefixes,
-              })
+            const fields = getFields({
+              adapter,
+              collection: existingCollection,
+              disablePayloadAccessControl: options.disablePayloadAccessControl,
+              generateFileURL: options.generateFileURL,
+              prefix: options.prefix,
+              useCompositePrefixes,
+            })
 
-              return {
-                ...existingCollection,
-                fields,
-              }
+            return {
+              ...existingCollection,
+              fields,
             }
+          }
 
-            return existingCollection
-          }),
-        }
+          return existingCollection
+        }),
       }
-
-      return config
     }
 
-    const initFunctions: Array<() => void> = []
+    const initFunctions: Array<() => Promise<void> | void> = []
     const endpointPaths = new Map<Adapter, string>()
 
     const collections = (config.collections || []).map((existingCollection) => {
@@ -150,20 +145,16 @@ export const cloudStoragePlugin =
 
         if (!options.disablePayloadAccessControl) {
           handlers.push(adapter.staticHandler)
-          // Else if disablePayloadAccessControl: true and upload instructions are used
-          // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
-        } else if (uploadInstructions) {
+          // Public files still need a server path when Payload reads them for a transform.
+        } else {
           handlers.push((req, args) => {
-            if ('uploadReference' in args.params) {
+            if ('uploadReference' in args.params || args.params.operation === 'transform') {
               return adapter.staticHandler(req, args)
             }
           })
         }
 
         const getSkipSafeFetchSetting = (): AllowList | boolean => {
-          if (options.disablePayloadAccessControl) {
-            return true
-          }
           const isBooleanTrueSkipSafeFetch =
             typeof existingCollection.upload === 'object' &&
             existingCollection.upload.skipSafeFetch === true
@@ -208,20 +199,58 @@ export const cloudStoragePlugin =
             ...(existingCollection.hooks || {}),
             afterChange: [
               ...(existingCollection.hooks?.afterChange || []),
-              getAfterChangeHook({ adapter, collection: existingCollection }),
+              getAfterChangeHook({
+                adapter,
+                collection: existingCollection,
+                collectionPrefix: options.prefix,
+                disablePayloadAccessControl: options.disablePayloadAccessControl,
+                hasCustomFileURL: Boolean(options.generateFileURL),
+                useCompositePrefixes,
+              }),
             ],
             afterDelete: [
               ...(existingCollection.hooks?.afterDelete || []),
-              getAfterDeleteHook({ adapter, collection: existingCollection }),
+              getAfterDeleteHook({
+                adapter,
+                collection: existingCollection,
+                collectionPrefix: options.prefix,
+                useCompositePrefixes,
+              }),
+            ],
+            afterRead: [
+              ...(existingCollection.hooks?.afterRead || []),
+              ...(options.disablePayloadAccessControl &&
+              (options.generateFileURL || adapter.generateURL)
+                ? [
+                    getPublicOriginalURLHook({
+                      adapter,
+                      collection: existingCollection,
+                      generateFileURL: options.generateFileURL,
+                    }),
+                  ]
+                : []),
             ],
             beforeChange: [
               ...(existingCollection.hooks?.beforeChange || []),
+              getNormalizeUploadPrefixHook({
+                collectionPrefix: options.prefix,
+                useCompositePrefixes,
+              }),
               getPreserveFileDataHook(),
             ],
           },
+          select: getStorageLocationSelect({ select: existingCollection.select }),
           upload: {
             ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
             adapter: adapter.name,
+            fileOperations: createFileOperations({
+              adapter,
+              collection: existingCollection,
+              collectionPrefix: options.prefix,
+              disablePayloadAccessControl: options.disablePayloadAccessControl,
+              generateFileURL: options.generateFileURL,
+              useCompositePrefixes,
+            }),
             ...(uploadInstructions && {
               uploadInstructions,
             }),
@@ -240,7 +269,9 @@ export const cloudStoragePlugin =
       ...config,
       collections,
       onInit: async (payload) => {
-        initFunctions.forEach((fn) => fn())
+        // Await each init so a provisioning failure fails Payload startup
+        // instead of becoming an unhandled rejection.
+        await Promise.all(initFunctions.map((fn) => fn()))
         if (config.onInit) {
           await config.onInit(payload)
         }

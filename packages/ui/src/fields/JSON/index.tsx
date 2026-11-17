@@ -1,7 +1,8 @@
 'use client'
-import type { JSONFieldClientComponent, JsonObject } from 'payload'
+import type { JSONFieldClientProps, JsonObject } from 'payload'
 
 import { type OnMount } from '@monaco-editor/react'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -10,6 +11,7 @@ import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -19,7 +21,7 @@ import './index.css'
 
 const baseClass = 'json-field'
 
-const JSONFieldComponent: JSONFieldClientComponent = (props) => {
+const JSONFieldComponent: React.FC<JSONFieldClientProps> = (props) => {
   const {
     field,
     field: {
@@ -51,8 +53,15 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   )
 
   const [jsonError, setJsonError] = useState<string>()
+  const { i18n } = useTranslation()
+  const editorRef =
+    React.useRef<Parameters<NonNullable<React.ComponentProps<typeof CodeEditor>['onMount']>>[0]>(
+      null,
+    )
+
   const inputChangeFromRef = React.useRef<'formState' | 'internalEditor'>('formState')
-  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState<number | undefined>(Date.now())
+  // A counter that tells CodeEditor to recalculate its height
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState(0)
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -80,6 +89,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
+      editorRef.current = editor
       if (!jsonSchema) {
         return
       }
@@ -130,7 +140,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       const newStringValue = formatJSON(value ?? initialValue)
       if (newStringValue !== stringValueRef.current) {
         stringValueRef.current = newStringValue
-        setRecalculatedHeightAt(Date.now())
+        setRecalculatedHeightAt((count) => count + 1)
       }
     }
 
@@ -155,7 +165,15 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            as="span"
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            onClick={() => editorRef.current?.focus()}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -169,7 +187,11 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
-          options={editorOptions}
+          options={{
+            ariaLabel: getTranslation(label || '', i18n) || undefined,
+            ariaRequired: required,
+            ...(editorOptions || {}),
+          }}
           readOnly={readOnly || disabled}
           recalculatedHeightAt={recalculatedHeightAt}
           value={stringValueRef.current}

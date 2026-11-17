@@ -91,6 +91,7 @@ export {
   getBlocksToJsonMigrator,
 } from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
+export { buildDynamicPredefinedSizesToVariantsMigration } from './utilities/buildDynamicPredefinedSizesToVariantsMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'
@@ -98,13 +99,3 @@ export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'
-import { findMigrationDir as payloadFindMigrationDir } from 'payload'
-
-/**
- * @deprecated remove in 4.0
- * use
- * ```ts
- * import { findMigrationDir } from 'payload'
- * ```
- */
-export const findMigrationDir = payloadFindMigrationDir

@@ -8,12 +8,11 @@
 
   .iterable-diff__label {
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
+    font-size: var(--text-body-medium-bold-font-size);
     font-style: normal;
     font-weight: var(--font-weight-strong);
-    line-height: var(--text-body-medium-strong-line-height);
-    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
   }
 
   .iterable-diff__locale-label {

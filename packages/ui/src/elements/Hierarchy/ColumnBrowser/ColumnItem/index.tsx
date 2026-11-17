@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useId, useMemo } from 'react'
 
 import type { ColumnItemProps } from '../types.js'
 
@@ -21,6 +21,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
   onSelect,
 }) => {
   const { id, allowedCollections, hasChildren, title } = item
+  const titleId = useId()
 
   // Disable selection if:
   // 1. This item is in the disabledIds set (e.g., being moved)
@@ -29,7 +30,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
     if (disabled) {
       return true
     }
-    if (!filterByCollection || filterByCollection.length === 0) {
+    if (filterByCollection === undefined) {
       return false
     }
     return !isSuperset(allowedCollections, filterByCollection)
@@ -46,33 +47,26 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
     [id, isDisabled, onSelect],
   )
 
-  const handleRowClick = useCallback(
-    (e: React.MouseEvent) => {
-      // Don't expand when clicking the checkbox
-      if ((e.target as HTMLElement).closest(`.${baseClass}__checkbox`)) {
-        return
-      }
-      if (hasChildren) {
-        onExpand({ id })
-      }
-    },
-    [hasChildren, id, onExpand],
-  )
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        if (hasChildren) {
-          onExpand({ id })
-        }
-      }
-    },
-    [hasChildren, id, onExpand],
+  const content = (
+    <>
+      <span className={`${baseClass}__title`} id={titleId} title={title}>
+        {title}
+      </span>
+      {hasSelectedDescendants && !isSelected && (
+        <span className={`${baseClass}__descendant-indicator`} />
+      )}
+      {hasChildren && (
+        <span className={`${baseClass}__chevron`}>
+          <ChevronIcon direction="right" />
+        </span>
+      )}
+    </>
   )
 
   return (
     <div
+      aria-current={isSelected ? 'location' : undefined}
+      aria-disabled={isDisabled || undefined}
       className={[
         baseClass,
         isExpanded && `${baseClass}--expanded`,
@@ -81,33 +75,30 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       ]
         .filter(Boolean)
         .join(' ')}
-      onClick={isDisabled ? undefined : handleRowClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={isDisabled ? -1 : 0}
     >
+      {hasChildren ? (
+        <button
+          aria-expanded={isExpanded}
+          className={`${baseClass}__content`}
+          disabled={isDisabled}
+          onClick={() => onExpand({ id })}
+          type="button"
+        >
+          {content}
+        </button>
+      ) : (
+        <div className={`${baseClass}__content`}>{content}</div>
+      )}
+
       <div className={`${baseClass}__checkbox`}>
         <CheckboxInput
+          aria-labelledby={titleId}
           checked={isSelected}
           onToggle={handleCheckboxToggle}
           readOnly={isDisabled}
           variant="muted"
         />
       </div>
-
-      <span className={`${baseClass}__title`} title={title}>
-        {title}
-      </span>
-
-      {hasSelectedDescendants && !isSelected && (
-        <span className={`${baseClass}__descendant-indicator`} />
-      )}
-
-      {hasChildren && (
-        <span className={`${baseClass}__chevron`}>
-          <ChevronIcon direction="right" />
-        </span>
-      )}
     </div>
   )
 }

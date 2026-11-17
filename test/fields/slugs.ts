@@ -10,6 +10,7 @@ export const customIDNestedSlug = 'custom-id-nested'
 export const customRowIDSlug = 'custom-row-id'
 export const customTabIDSlug = 'custom-tab-id'
 export const dateFieldsSlug = 'date-fields'
+export const duplicateFieldsSlug = 'duplicate-fields'
 export const emailFieldsSlug = 'email-fields'
 export const groupFieldsSlug = 'group-fields'
 export const indexedFieldsSlug = 'indexed-fields'
@@ -45,6 +46,7 @@ export const collectionSlugs = [
   collapsibleFieldsSlug,
   conditionalLogicSlug,
   dateFieldsSlug,
+  duplicateFieldsSlug,
   groupFieldsSlug,
   indexedFieldsSlug,
   jsonFieldsSlug,
@@ -62,3 +64,10 @@ export const collectionSlugs = [
   uploads3Slug,
   uiSlug,
 ]
+
+export const slugLocalizedRequiredSlug = 'slug-localized-required'
+
+export const slugLocalizedRequiredSiblingSlug = 'slug-localized-required-siblings'
+
+export const slugLocalizedRequiredNestedGroupSlug = 'slug-localized-required-nested-group'
+export const slugLocalizedRequiredNestedTabSlug = 'slug-localized-required-nested-tab'

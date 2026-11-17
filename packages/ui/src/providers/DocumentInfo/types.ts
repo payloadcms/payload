@@ -72,12 +72,9 @@ export type DocumentInfoContext = {
   hasScheduledPublish: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
+  /** `true` once a form-state request finds the document was changed by someone else since it loaded. */
+  isStale: boolean
   preferencesKey?: string
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `data` instead.
-   */
-  savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<User>>
   setData: (data: Data) => void
   setDocFieldPreferences: (
@@ -87,6 +84,7 @@ export type DocumentInfoContext = {
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
   setHasScheduledPublish: React.Dispatch<React.SetStateAction<boolean>>
+  setIsStale: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
@@ -94,11 +92,6 @@ export type DocumentInfoContext = {
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docID: number | string, slug: string, user: User) => Promise<void>
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `setData` instead.
-   */
-  updateSavedDocumentData: (data: Data) => void
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps

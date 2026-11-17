@@ -1,8 +1,11 @@
 import { s3Storage } from '@payloadcms/storage-s3'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -76,9 +79,8 @@ export default buildConfigWithDefaults({
           region: process.env.S3_REGION,
         },
       }),
-      // Test alwaysInsertFields with enabled: false
+      // Plugin disabled: the prefix field should still be inserted by default
       s3Storage({
-        alwaysInsertFields: true,
         bucket: process.env.S3_BUCKET!,
         collections: {
           [mediaWithAlwaysInsertFieldsSlug]: {
@@ -104,6 +106,17 @@ export default buildConfigWithDefaults({
       limits: {
         fileSize: 1_000_000, // 1MB
       },
+      transformers: [
+        proveSourceHashTransformer,
+        sharpTransformer({
+          collections: {
+            [mediaSlug]: storageMediaSharpOptions,
+            [mediaWithDirectAccessSlug]: {
+              variants: [{ name: 'thumbnail', width: 400, height: 300, crop: 'center' }],
+            },
+          },
+        }),
+      ],
     },
   },
   seed: async (payload) => {
@@ -113,6 +126,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
 })

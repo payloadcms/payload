@@ -1,9 +1,9 @@
 'use client'
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 
 import { SelectField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelectFieldClient: SelectFieldClientComponent = (props) => {
+export const CustomSelectFieldClient: React.FC<SelectFieldClientProps> = (props) => {
   return <SelectField {...props} />
 }

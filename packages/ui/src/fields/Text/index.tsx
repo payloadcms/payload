@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -17,7 +17,7 @@ import './index.css'
 
 export { TextInput, TextInputProps }
 
-const TextFieldComponent: TextFieldClientComponent = (props) => {
+const TextFieldComponent: React.FC<TextFieldClientProps> = (props) => {
   const {
     field,
     field: {
@@ -147,7 +147,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       showError={showError}
       style={styles}
       value={(value as string) || ''}
-      valueToRender={valueToRender as Option[]}
+      valueToRender={valueToRender}
     />
   )
 }

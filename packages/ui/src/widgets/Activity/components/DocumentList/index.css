@@ -1,0 +1,61 @@
+@layer payload-default {
+  .activity-widget__content {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-content: start;
+  }
+
+  .card-grid.activity-widget__items {
+    min-height: 0;
+    padding: 0;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+
+  .activity-widget__item--empty {
+    grid-column: 1 / -1;
+  }
+
+  .activity-widget .document-card {
+    min-block-size: var(--activity-row-height);
+  }
+
+  .activity-widget .document-card__thumbnail {
+    height: var(--activity-thumbnail-height);
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .activity-widget .document-card__content {
+    padding: var(--spacer-2-5) var(--spacer-3);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .activity-widget__meta {
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @container (min-width: 800px) {
+    .activity-widget .document-card {
+      display: flex;
+      flex-direction: column;
+      block-size: var(--activity-row-height);
+    }
+
+    .activity-widget .document-card__thumbnail {
+      flex: 1;
+      height: 0;
+    }
+
+    .activity-widget .document-card__content {
+      flex-shrink: 0;
+    }
+  }
+}

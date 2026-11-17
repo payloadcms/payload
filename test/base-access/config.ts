@@ -42,6 +42,13 @@ const baseAccess: BaseAccess = {
 
       return true
     },
+    update: ({ slug, req }) => {
+      if (req.headers.get(denyHeader) === 'true' && slug === postsSlug) {
+        return false
+      }
+
+      return true
+    },
   },
   globals: {
     update: ({ slug, req }) => {
@@ -55,7 +62,6 @@ const baseAccess: BaseAccess = {
 }
 
 export default buildConfigWithDefaults({
-  suite: 'base-access',
   config: {
     baseAccess,
     collections: [
@@ -108,4 +114,5 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
+  suite: 'base-access',
 })
