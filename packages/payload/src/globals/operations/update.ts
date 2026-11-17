@@ -185,9 +185,13 @@ export const updateOperation = async <
       data._status = 'draft'
     }
 
-    const submittedTopLevelFieldNames = unpublishAllLocales
-      ? getTopLevelFieldNames(data)
-      : undefined
+    const isUnpublishingSingleLocale =
+      hasLocalizeStatusEnabled(globalConfig) &&
+      data?._status === 'draft' &&
+      Boolean(locale && locale !== 'all')
+
+    const submittedTopLevelFieldNames =
+      unpublishAllLocales || isUnpublishingSingleLocale ? getTopLevelFieldNames(data) : undefined
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access

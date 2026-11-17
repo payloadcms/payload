@@ -243,4 +243,77 @@ test.suite('Localized draft preservation', { config: './config.ts' }, () => {
       expect(draft._status!.es).toBe('published')
     })
   }
+
+  test('should allow unpublishing a single locale without validating unsubmitted fields when an unedited locale is invalid', async ({
+    payload,
+  }) => {
+    const collection = 'localized-unpublish-validation'
+
+    // 1. Create and publish in English with row 1
+    const doc = await payload.create({
+      collection,
+      data: {
+        _status: 'published',
+        items: [{ label: 'Row 1 EN' }],
+      },
+      locale: defaultLocale,
+      overrideAccess: true,
+    })
+
+    // 2. Publish in Spanish with row 1 translation
+    await payload.update({
+      collection,
+      id: doc.id,
+      data: {
+        _status: 'published',
+        items: [{ id: doc.items![0]!.id, label: 'Row 1 ES' }],
+      },
+      locale: spanishLocale,
+      overrideAccess: true,
+    })
+
+    // 3. Add row 2 and publish in English only (Spanish now lacks required label for row 2)
+    await payload.update({
+      collection,
+      id: doc.id,
+      data: {
+        _status: 'published',
+        items: [{ id: doc.items![0]!.id, label: 'Row 1 EN' }, { label: 'Row 2 EN' }],
+      },
+      locale: defaultLocale,
+      overrideAccess: true,
+    })
+
+    // 4. Spanish is currently published, but republishing Spanish fails validation
+    await expect(
+      payload.update({
+        collection,
+        id: doc.id,
+        data: { _status: 'published' },
+        locale: spanishLocale,
+        overrideAccess: true,
+      }),
+    ).rejects.toThrow()
+
+    // 5. Unpublishing Spanish must succeed without validating unsubmitted fields
+    const unpublished = await payload.update({
+      collection,
+      id: doc.id,
+      data: { _status: 'draft' },
+      locale: spanishLocale,
+      overrideAccess: true,
+    })
+
+    expect(unpublished._status).toBe('draft')
+
+    // 6. Verify that Spanish is now a draft, while English remains published
+    const stored = await payload.db.findOne({
+      collection,
+      locale: 'all',
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(stored._status.en).toBe('published')
+    expect(stored._status.es).toBe('draft')
+  })
 })
