@@ -1,31 +1,17 @@
 import { del } from '@vercel/blob'
 
-import { generateURL } from './generateURL.js'
+import { buildBlobUrl } from './generateURL.js'
 
 interface DeleteFileArgs {
   baseUrl: string
-  collectionPrefix?: string
-  docPrefix: string
-  filename: string
+  storageFilePath: string
   token: string
-  useCompositePrefixes?: boolean
 }
 
 export async function deleteFile({
   baseUrl,
-  collectionPrefix = '',
-  docPrefix,
-  filename,
+  storageFilePath,
   token,
-  useCompositePrefixes = false,
 }: DeleteFileArgs): Promise<void> {
-  const fileUrl = generateURL({
-    baseUrl,
-    collectionPrefix,
-    filename,
-    prefix: docPrefix,
-    useCompositePrefixes,
-  })
-
-  await del(fileUrl, { token })
+  await del(buildBlobUrl(baseUrl, storageFilePath), { token })
 }

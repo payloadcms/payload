@@ -39,8 +39,6 @@ let serverURL: string
 describe('Array', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
@@ -51,8 +49,6 @@ describe('Array', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -340,6 +336,7 @@ describe('Array', () => {
         ],
         title: 'for test 1',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -352,6 +349,7 @@ describe('Array', () => {
         ],
         title: 'for test 2',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -370,6 +368,7 @@ describe('Array', () => {
         ],
         title: 'for test 3',
       },
+      overrideAccess: true,
     })
 
     const bulkText = 'Bulk update text'
@@ -489,7 +488,7 @@ describe('Array', () => {
       )
       await arrayFieldPopupBtn.click()
       const disabledCopyBtn = page.locator(
-        '.popup__content div.popup-button-list__disabled:has-text("Copy Field")',
+        '.popup__content button.popup-button-list__disabled:has-text("Copy Field")',
       )
       await expect(disabledCopyBtn).toBeVisible()
     })
@@ -506,7 +505,7 @@ describe('Array', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content button.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })
@@ -523,21 +522,21 @@ describe('Array', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content button.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })
 
     test('should disable paste when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-items .popup.clipboard-action__popup button.popup-button')
         .first()
       await fieldPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Paste Field")'),
       ).toBeVisible()
       await page.keyboard.press('Escape')
 
@@ -546,23 +545,23 @@ describe('Array', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Replace Row")'),
       ).toBeVisible()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Below")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Paste Below")'),
       ).toBeVisible()
     })
 
     test('should enable paste after copying a compatible field', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-items .popup.clipboard-action__popup button.popup-button')
         .first()
       await fieldPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Paste Field")'),
       ).toBeVisible()
       await page.keyboard.press('Escape')
 
@@ -841,7 +840,7 @@ describe('Array', () => {
 
     test('should disable paste on a nested array row when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       await addArrayRow(page, { fieldName: 'items__0__subArray' })
 
@@ -850,7 +849,7 @@ describe('Array', () => {
         .first()
       await rowPopupBtn.click()
       await expect(
-        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+        page.locator('.popup__content button.popup-button-list__disabled:has-text("Replace Row")'),
       ).toBeVisible()
     })
 

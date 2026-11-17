@@ -26,10 +26,6 @@
     overflow: hidden;
   }
 
-  .bulk-upload--file-manager > .dialog__footer {
-    border-block-start: var(--stroke-width-small) solid var(--color-border);
-  }
-
   .bulk-upload--file-manager__editView {
     display: flex;
     flex-direction: column;
@@ -115,6 +111,7 @@
 
   /* Stack on mobile — the modal is full-screen and there is no room for two columns. The whole
      edit view scrolls as one column (no divider, no internal field scroll). */
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .bulk-upload--file-manager__body {
       flex-direction: column-reverse;
@@ -169,6 +166,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .bulk-upload--file-manager .document-fields__edit {
       padding-top: var(--spacer-3);

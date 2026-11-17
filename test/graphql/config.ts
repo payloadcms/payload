@@ -5,121 +5,145 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ContentBlock } from './blocks/ContentBlock.js'
+import { AllHidden, HiddenFields } from './collections/index.js'
+import { hiddenFields } from './fields.js'
+import { allHiddenGlobalSlug, hiddenGlobalSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  // ...extend config here
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'title',
-          label: 'Title',
-          type: 'text',
-        },
-        {
-          name: 'hyphenated-name',
-          type: 'text',
-        },
-        {
-          type: 'relationship',
-          relationTo: 'posts',
-          name: 'relationToSelf',
-          graphQL: {
-            complexity: 801,
+  suite: 'graphql',
+  config: {
+    // ...extend config here
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      HiddenFields,
+      AllHidden,
+      {
+        slug: 'posts',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            label: 'Title',
           },
-        },
-        {
-          name: 'contentBlockField',
-          type: 'blocks',
-          blocks: [ContentBlock],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'virtual-fields',
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'posts',
-          name: 'post',
-        },
-        {
-          // A required field that is NOT virtual - stays non-null in the GraphQL schema
-          name: 'requiredTitle',
-          type: 'text',
-          required: true,
-        },
-        {
-          // Required + virtual (computed by a hook) - must be nullable in the GraphQL schema
-          name: 'virtualComputed',
-          type: 'text',
-          required: true,
-          virtual: true,
-          hooks: {
-            afterRead: [({ data }) => `computed-${data?.requiredTitle ?? ''}`],
+          {
+            name: 'hyphenated-name',
+            type: 'text',
           },
-        },
-        {
-          // Required + virtual linked to a relationship path - must also be nullable
-          name: 'virtualFromRelation',
-          type: 'text',
-          required: true,
-          virtual: 'post.title',
-        },
-      ],
-      versions: false,
-    },
-  ],
-  globals: [
-    {
-      slug: 'home',
-      versions: { drafts: true },
-      fields: [
-        {
-          name: 'topPosts',
-          type: 'array',
-          required: true,
-          fields: [
-            {
-              name: 'post',
-              type: 'relationship',
-              relationTo: 'posts',
-              required: true,
+          {
+            name: 'relationToSelf',
+            type: 'relationship',
+            graphQL: {
+              complexity: 801,
             },
-            {
-              name: 'caption',
-              type: 'text',
+            relationTo: 'posts',
+          },
+          {
+            name: 'contentBlockField',
+            type: 'blocks',
+            blocks: [ContentBlock],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'virtual-fields',
+        fields: [
+          {
+            name: 'post',
+            type: 'relationship',
+            relationTo: 'posts',
+          },
+          {
+            // A required field that is NOT virtual - stays non-null in the GraphQL schema
+            name: 'requiredTitle',
+            type: 'text',
+            required: true,
+          },
+          {
+            // Required + virtual (computed by a hook) - must be nullable in the GraphQL schema
+            name: 'virtualComputed',
+            type: 'text',
+            hooks: {
+              afterRead: [({ data }) => `computed-${data?.requiredTitle ?? ''}`],
             },
-          ],
-        },
-      ],
+            required: true,
+            virtual: true,
+          },
+          {
+            // Required + virtual linked to a relationship path - must also be nullable
+            name: 'virtualFromRelation',
+            type: 'text',
+            required: true,
+            virtual: 'post.title',
+          },
+        ],
+        versions: false,
+      },
+    ],
+    globals: [
+      {
+        slug: hiddenGlobalSlug,
+        access: { read: () => true, update: () => true },
+        fields: hiddenFields,
+        graphQL: { name: 'HiddenGlobal' },
+        versions: false,
+      },
+      {
+        slug: allHiddenGlobalSlug,
+        authorship: false,
+        access: { read: () => true, update: () => true },
+        fields: [{ name: 'secret', type: 'text', hidden: true, defaultValue: 'internal' }],
+        graphQL: { name: 'AllHiddenGlobal' },
+        versions: false,
+      },
+      {
+        slug: 'home',
+        fields: [
+          {
+            name: 'topPosts',
+            type: 'array',
+            fields: [
+              {
+                name: 'post',
+                type: 'relationship',
+                relationTo: 'posts',
+                required: true,
+              },
+              {
+                name: 'caption',
+                type: 'text',
+              },
+            ],
+            required: true,
+          },
+        ],
+        versions: { drafts: true },
+      },
+    ],
+    graphQL: {
+      maxComplexity: 800,
+      validationRules: () => [NoIntrospection],
     },
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  graphQL: {
-    maxComplexity: 800,
-    validationRules: () => [NoIntrospection],
   },
 })
 

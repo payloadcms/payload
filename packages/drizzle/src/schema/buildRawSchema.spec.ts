@@ -170,6 +170,42 @@ describe('buildRawSchema', () => {
     expect(adapter.rawTables.posts_blocks_headline_2_locales).toBeUndefined()
   })
 
+  it('should lead the _locales unique index with _parent_id so parent-only lookups use it', async () => {
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              localized: true,
+            },
+          ],
+          versions: true,
+        },
+      ],
+      localization: {
+        defaultLocale: 'en',
+        locales: ['en', 'de'],
+      },
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const localesIndex = adapter.rawTables.posts_locales?.indexes._localeParent
+    expect(localesIndex).toBeDefined()
+    expect(localesIndex?.unique).toBe(true)
+    expect(localesIndex?.on).toEqual(['_parentID', '_locale'])
+
+    const versionLocalesIndex = adapter.rawTables._posts_versions_locales?.indexes._localeParent
+    expect(versionLocalesIndex).toBeDefined()
+    expect(versionLocalesIndex?.unique).toBe(true)
+    expect(versionLocalesIndex?.on).toEqual(['_parentID', '_locale'])
+  })
+
   it('should warn when a localized field pushes the _locales companion table past 63 chars', async () => {
     // Base table name (61 chars) is under the limit, but `${base}_locales` (69) overflows it.
     const longSlug = `localized_collection_${'x'.repeat(40)}`

@@ -20,8 +20,7 @@ export const th: GenericTranslationsObject = {
     missing: 'ขาดหายไป',
     noImage: 'ไม่มีภาพ',
     preview: 'ตัวอย่าง',
-    previewDescription:
-      'ผลลัพธ์การค้นหาที่แท้จริงอาจแตกต่างกันไปตามเนื้อหาและความเกี่ยวข้องของการค้นหา',
+    previewDescription: 'ผลลัพธ์การค้นหาที่แท้จริงอาจแตกต่างกันไปตามเนื้อหาและความเกี่ยวข้องของการค้นหา',
     tooLong: 'ยาวเกินไป',
     tooShort: 'สั้นเกินไป',
   },

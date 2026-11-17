@@ -39,11 +39,10 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
-    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
   }
 
   .doc-drawer__title-bar {
@@ -57,7 +56,6 @@
   .doc-drawer__title {
     margin: 0;
     color: var(--color-text);
-    font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
@@ -84,7 +82,6 @@
 
   .doc-drawer__updated-at {
     color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

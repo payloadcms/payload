@@ -39,7 +39,7 @@ export type RouterAdapterRouter = {
   /**
    * Replace the current path with a new one.
    */
-  replace: (path: string, options?: { scroll?: boolean }) => void
+  replace: (path: string, options?: { scroll?: boolean }) => Promise<void> | void
   /**
    * Use this property to standardize behaviors across different router implementations.
    * Set it up to sync client state to the URL without triggering a second server load.

@@ -104,7 +104,6 @@ export function mergeFormStateFromClipboard({
     ]
     formState[path].value = 1
     formState[path].initialValue = 1
-    formState[path].disableFormData = true
 
     for (const fieldPath in formState) {
       if (
@@ -240,7 +239,7 @@ export function insertRowFromClipboard({
   const formStateWithNewRow: FormState = {
     ...remainingFields,
     ...flattenRows(path, rows),
-    [path]: { ...formState[path], disableFormData: true, rows: newRows, value: rows.length },
+    [path]: { ...formState[path], rows: newRows, value: rows.length },
   }
 
   return mergeFormStateFromClipboard({

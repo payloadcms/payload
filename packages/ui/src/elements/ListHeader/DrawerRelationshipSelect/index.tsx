@@ -1,6 +1,7 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useId } from 'react'
 
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -13,6 +14,7 @@ const drawerBaseClass = 'list-drawer'
 
 export const DrawerRelationshipSelect = () => {
   const { i18n, t } = useTranslation()
+  const collectionInputID = useId()
   const {
     config: { collections },
     getEntityConfig,
@@ -26,13 +28,11 @@ export const DrawerRelationshipSelect = () => {
 
     return (
       <div className={`${drawerBaseClass}__select-collection-wrap`}>
-        <FieldLabel
-          htmlFor={`select-collection__${drawerBaseClass}`}
-          label={t('upload:selectCollectionToBrowse')}
-        />
+        <FieldLabel htmlFor={collectionInputID} label={t('upload:selectCollectionToBrowse')} />
         <ReactSelect
           className={`${listHeaderClass}__select-collection`}
           id={`select-collection__${drawerBaseClass}`}
+          inputId={collectionInputID}
           isClearable={false}
           onChange={setSelectedOption}
           options={enabledCollectionConfigs.map((coll) => ({

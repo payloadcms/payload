@@ -4,6 +4,10 @@ import { useState } from 'react'
 
 const serverURL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
+const ThrowClientSide = () => {
+  throw new Error('client side error')
+}
+
 export const TestErrors = () => {
   const [throwClientSide, setThrowClientSide] = useState(false)
 
@@ -63,10 +67,6 @@ export const TestErrors = () => {
       },
       method: 'POST',
     })
-  }
-
-  const ThrowClientSide = () => {
-    throw new Error('client side error')
   }
 
   return (

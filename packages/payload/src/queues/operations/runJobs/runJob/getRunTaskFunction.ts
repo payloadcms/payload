@@ -135,7 +135,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
               taskSlug,
             }),
             input,
-            job: job as unknown as Job<WorkflowSlug>,
+            job,
             req,
             tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob, {
               taskID,

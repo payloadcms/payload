@@ -1,0 +1,257 @@
+import type { AdvisoryHit, DirectDependency, PnpmAdvisory, PnpmAuditReport } from '../types'
+import type { PnpmResult } from './runPnpm'
+
+/**
+ * Parses `pnpm audit --json` stdout. Output that is not a report yields an empty
+ * report; `assertAuditCompleted` decides whether that empty report is a failure.
+ */
+export const parseAuditReport = (stdout: string): PnpmAuditReport => {
+  let data: unknown
+  try {
+    data = JSON.parse(stdout)
+  } catch {
+    return { advisories: {} }
+  }
+
+  if (!isRecord(data) || !isRecord(data.advisories)) {
+    return { advisories: {} }
+  }
+
+  const advisories: Record<string, PnpmAdvisory> = {}
+  for (const [key, value] of Object.entries(data.advisories)) {
+    const advisory = toAdvisory(value)
+    if (advisory) {
+      advisories[key] = advisory
+    }
+  }
+  return { advisories }
+}
+
+/**
+ * Throws when `pnpm audit` exits non-zero without reporting advisories. That exit is
+ * a tool or registry failure, and its empty report would otherwise read as a clean audit.
+ */
+export const assertAuditCompleted = ({
+  report,
+  result,
+  target,
+}: {
+  report: PnpmAuditReport
+  result: PnpmResult
+  target: string
+}): PnpmAuditReport => {
+  if (result.code === 0 || Object.keys(report.advisories).length > 0) {
+    return report
+  }
+  const output = result.stderr.trim() || result.stdout.trim()
+  throw new Error(
+    `pnpm audit failed for ${target} with exit code ${result.code}` +
+      (output ? `:\n${output}` : ''),
+  )
+}
+
+/** Turns an audit report into hits tagged with the originating package. */
+export const toHits = ({
+  report,
+  originPackage,
+}: {
+  originPackage: string | null
+  report: PnpmAuditReport
+}): AdvisoryHit[] =>
+  Object.values(report.advisories).map((advisory) => ({
+    advisory,
+    chainPackages: extractChainPackages(advisory),
+    directDeps: extractDirectDeps({ advisory, originPackage }),
+    originPackages: originPackage === null ? [] : [originPackage],
+    paths: extractPaths(advisory),
+  }))
+
+/** Dedupes hits by GHSA, unioning and sorting their origin packages, paths, and direct deps. */
+export const mergeHits = (hits: AdvisoryHit[]): AdvisoryHit[] => {
+  const byGhsa = new Map<string, AdvisoryHit>()
+
+  for (const hit of hits) {
+    const key = hit.advisory.github_advisory_id
+    const existing = byGhsa.get(key)
+    if (!existing) {
+      byGhsa.set(key, {
+        advisory: hit.advisory,
+        chainPackages: [...hit.chainPackages],
+        directDeps: [...hit.directDeps],
+        originPackages: [...hit.originPackages],
+        paths: [...hit.paths],
+      })
+      continue
+    }
+    unionInto(existing.chainPackages, hit.chainPackages)
+    unionInto(existing.originPackages, hit.originPackages)
+    unionInto(existing.paths, hit.paths)
+    unionDirectDeps(existing.directDeps, hit.directDeps)
+  }
+
+  for (const hit of byGhsa.values()) {
+    hit.chainPackages.sort()
+    hit.originPackages.sort()
+    hit.paths.sort()
+    hit.directDeps.sort(compareDirectDeps)
+  }
+  return [...byGhsa.values()]
+}
+
+/**
+ * Derives readable dependency chains that introduce the vulnerable module from
+ * `advisory.findings[].paths`. Drops the trailing module (already named in the
+ * finding), normalizes the workspace importer (`packages__ui` → `ui`, `.` → root),
+ * and dedupes.
+ */
+const extractPaths = (advisory: PnpmAdvisory): string[] => {
+  const chains = new Set<string>()
+  for (const finding of advisory.findings) {
+    for (const raw of finding.paths ?? []) {
+      const chain = formatDependencyPath(raw)
+      if (chain) {
+        chains.add(chain)
+      }
+    }
+  }
+  return [...chains].sort()
+}
+
+/**
+ * Derives the direct dependencies we declare that pull in the vulnerable module —
+ * the second segment of each path (the first is the workspace importer). Bumping
+ * these in our own manifests is the remediation, not a transitive override.
+ */
+const extractDirectDeps = ({
+  advisory,
+  originPackage,
+}: {
+  advisory: PnpmAdvisory
+  originPackage: null | string
+}): DirectDependency[] => {
+  const byKey = new Map<string, DirectDependency>()
+  for (const finding of advisory.findings) {
+    for (const raw of finding.paths ?? []) {
+      const direct = directDependencyFromPath({ originPackage, raw })
+      if (direct) {
+        byKey.set(`${direct.workspacePackage ?? ''}\0${direct.dependency}`, direct)
+      }
+    }
+  }
+  return [...byKey.values()].sort(compareDirectDeps)
+}
+
+/** Collects every package name on the introducing chains except the workspace importer root. */
+const extractChainPackages = (advisory: PnpmAdvisory): string[] => {
+  const names = new Set<string>()
+  for (const finding of advisory.findings) {
+    for (const raw of finding.paths ?? []) {
+      const segments = raw.split('>')
+      for (const segment of segments.slice(1)) {
+        names.add(segment)
+      }
+    }
+  }
+  return [...names].sort()
+}
+
+const directDependencyFromPath = ({
+  originPackage,
+  raw,
+}: {
+  originPackage: null | string
+  raw: string
+}): DirectDependency | null => {
+  const segments = raw.split('>')
+  if (segments.length < 2) {
+    return null
+  }
+  const [root, dependency] = segments
+  // Consumer-facing paths root at `.` (the temp resolve); their owner is the published package.
+  const workspacePackage = root === '.' ? originPackage : normalizeRoot(root)
+  return { dependency, workspacePackage }
+}
+
+const compareDirectDeps = (a: DirectDependency, b: DirectDependency): number =>
+  a.dependency.localeCompare(b.dependency) ||
+  (a.workspacePackage ?? '').localeCompare(b.workspacePackage ?? '')
+
+const unionDirectDeps = (target: DirectDependency[], additions: DirectDependency[]): void => {
+  const keys = new Set(target.map((dep) => `${dep.workspacePackage ?? ''}\0${dep.dependency}`))
+  for (const addition of additions) {
+    const key = `${addition.workspacePackage ?? ''}\0${addition.dependency}`
+    if (!keys.has(key)) {
+      keys.add(key)
+      target.push(addition)
+    }
+  }
+}
+
+export const formatDependencyPath = (raw: string): string => {
+  const segments = raw.split('>')
+  segments.pop() // trailing segment is the vulnerable module itself
+  const introducers = segments
+    .map((segment, index) => (index === 0 ? normalizeRoot(segment) : segment))
+    .filter((segment): segment is string => segment !== null)
+  return introducers.join(' > ')
+}
+
+/**
+ * The first path segment is the pnpm importer id: `.` is the audited root, and a
+ * workspace member is its path with `/` encoded as `__` (e.g. `templates__website`).
+ * Decode it back to the importer path so it matches the declared index keys.
+ */
+const normalizeRoot = (segment: string): null | string => {
+  if (segment === '.') {
+    return null
+  }
+  return segment.replaceAll('__', '/')
+}
+
+const unionInto = (target: string[], additions: string[]): void => {
+  for (const addition of additions) {
+    if (!target.includes(addition)) {
+      target.push(addition)
+    }
+  }
+}
+
+const toAdvisory = (value: unknown): null | PnpmAdvisory => {
+  if (
+    !isRecord(value) ||
+    typeof value.github_advisory_id !== 'string' ||
+    typeof value.module_name !== 'string' ||
+    typeof value.severity !== 'string' ||
+    (typeof value.patched_versions !== 'string' && value.patched_versions != null) ||
+    typeof value.vulnerable_versions !== 'string'
+  ) {
+    return null
+  }
+
+  return {
+    findings: Array.isArray(value.findings) ? value.findings : [],
+    github_advisory_id: value.github_advisory_id,
+    id: typeof value.id === 'number' ? value.id : 0,
+    module_name: value.module_name,
+    patched_versions: toPatchedVersions(value.patched_versions),
+    severity: value.severity,
+    title: typeof value.title === 'string' ? value.title : '',
+    url: typeof value.url === 'string' ? value.url : '',
+    vulnerable_versions: value.vulnerable_versions,
+  }
+}
+
+/**
+ * pnpm reports `null` when no patched version is published (unfixable), and omits the
+ * field when it cannot infer a patched range. An omitted range may still have a fix,
+ * so it stays fixable as `unknown` and surfaces for review instead of being hidden.
+ */
+const toPatchedVersions = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value
+  }
+  return value === null ? '<0.0.0' : 'unknown'
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null

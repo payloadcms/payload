@@ -21,6 +21,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
               data: {
                 title: input.message,
               },
+              overrideAccess: true,
             })
 
             const updatedJob = await req.payload.update({
@@ -37,6 +38,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
                 },
               },
               id: job.id,
+              overrideAccess: true,
             })
             job.input = updatedJob.input as any
 
@@ -64,6 +66,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
                 },
               },
               id: job.id,
+              overrideAccess: true,
             })
             job.input = updatedJob.input as any
 

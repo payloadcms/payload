@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9B9C404E".
+ * via the `definition` "LexicalNodes_B1AC347C".
  */
-export type LexicalNodes_9B9C404E =
+export type LexicalNodes_B1AC347C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9B9C404E>
+  | SerializedParagraphNode<LexicalNodes_B1AC347C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_9B9C404E>
+  | SerializedHeadingNode<LexicalNodes_B1AC347C>
   | {
       type: 'upload';
       /**
@@ -79,15 +79,17 @@ export type LexicalNodes_9B9C404E =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_9B9C404E>
-  | SerializedListNode<LexicalNodes_9B9C404E>
-  | SerializedListItemNode<LexicalNodes_9B9C404E>
-  | SerializedAutoLinkNode<LexicalNodes_9B9C404E, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_9B9C404E, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_B1AC347C>
+  | SerializedListNode<LexicalNodes_B1AC347C>
+  | SerializedListItemNode<LexicalNodes_B1AC347C>
+  | SerializedAutoLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
+      | 'write-input'
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
+      | 'draft-with-array'
       | 'simple-localized'
       | 'categories-custom-id'
       | 'posts'
@@ -124,9 +126,11 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'write-input': WriteInput;
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
+    'draft-with-array': DraftWithArray;
     'simple-localized': SimpleLocalized;
     'categories-custom-id': CategoriesCustomId;
     posts: Post;
@@ -162,9 +166,11 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'write-input': WriteInputSelect<false> | WriteInputSelect<true>;
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'draft-with-array': DraftWithArraySelect<false> | DraftWithArraySelect<true>;
     'simple-localized': SimpleLocalizedSelect<false> | SimpleLocalizedSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -195,7 +201,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
@@ -244,25 +250,114 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  items?:
+    | {
+        settings?: {
+          label?: string | null;
+        };
+        translations?: {
+          label?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "write-input".
+ */
+export interface WriteInput {
+  id: string;
+  title?: string | null;
+  layout?: Content[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "noTimeStamps".
  */
 export interface NoTimeStamp {
-  id: number;
+  id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   title?: string | null;
-  simple?: (number | null) | Simple;
+  simple?: (string | null) | Simple;
   hideout?: {
     camera1?: {
-      time1Image?: (number | null) | Post;
+      time1Image?: (string | null) | Post;
     };
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -272,7 +367,7 @@ export interface Category {
  * via the `definition` "simple".
  */
 export interface Simple {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -283,9 +378,9 @@ export interface Simple {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title: string;
-  category?: (number | null) | Category;
+  category?: (string | null) | Category;
   categoryID?:
     | {
         [k: string]: unknown;
@@ -297,16 +392,16 @@ export interface Post {
     | null;
   categoryTitle?: string | null;
   categorySimpleText?: string | null;
-  categories?: (number | Category)[] | null;
+  categories?: (string | Category)[] | null;
   categoriesCustomID?: (number | CategoriesCustomId)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
-    value: number | Category;
+    value: string | Category;
   } | null;
   categoryPolyMany?:
     | {
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       }[]
     | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
@@ -314,11 +409,11 @@ export interface Post {
     | (
         | {
             relationTo: 'categories';
-            value: number | Category;
+            value: string | Category;
           }
         | {
             relationTo: 'simple';
-            value: number | Simple;
+            value: string | Simple;
           }
       )[]
     | null;
@@ -326,11 +421,11 @@ export interface Post {
     | (
         | {
             relationTo: 'categories';
-            value: number | Category;
+            value: string | Category;
           }
         | {
             relationTo: 'simple';
-            value: number | Simple;
+            value: string | Simple;
           }
       )[]
     | null;
@@ -346,11 +441,11 @@ export interface Post {
       | (
           | {
               relationTo: 'categories';
-              value: number | Category;
+              value: string | Category;
             }
           | {
               relationTo: 'simple';
-              value: number | Simple;
+              value: string | Simple;
             }
         )[]
       | null;
@@ -396,6 +491,14 @@ export interface Post {
  */
 export interface CategoriesCustomId {
   id: number;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -432,12 +535,64 @@ export interface BlockFirst {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-array".
+ */
+export interface DraftWithArray {
+  id: string;
+  items?:
+    | {
+        text1?: string | null;
+        text2?: string | null;
+        text3?: string | null;
+        text4?: string | null;
+        text5?: string | null;
+        text6?: string | null;
+        text7?: string | null;
+        text8?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  itemsWithDefaults?:
+    | {
+        text1?: string | null;
+        text2?: string | null;
+        text3?: string | null;
+        text4?: string | null;
+        text5?: string | null;
+        text6?: string | null;
+        text7?: string | null;
+        text8?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-localized".
  */
 export interface SimpleLocalized {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -446,10 +601,18 @@ export interface SimpleLocalized {
  * via the `definition` "error-on-unnamed-fields".
  */
 export interface ErrorOnUnnamedField {
-  id: number;
+  id: string;
   groupWithinUnnamedTab: {
     text: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -458,7 +621,7 @@ export interface ErrorOnUnnamedField {
  * via the `definition` "default-values".
  */
 export interface DefaultValue {
-  id: number;
+  id: string;
   title?: string | null;
   defaultValue?: string | null;
   array?:
@@ -477,6 +640,14 @@ export interface DefaultValue {
    */
   point?: [number, number] | null;
   escape?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -485,9 +656,17 @@ export interface DefaultValue {
  * via the `definition` "relation-a".
  */
 export interface RelationA {
-  id: number;
+  id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_9B9C404E> | null;
+  richText?: LexicalRichText<LexicalNodes_B1AC347C> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -496,10 +675,18 @@ export interface RelationA {
  * via the `definition` "relation-b".
  */
 export interface RelationB {
-  id: number;
+  id: string;
   title?: string | null;
-  relationship?: (number | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_9B9C404E> | null;
+  relationship?: (string | null) | RelationA;
+  richText?: LexicalRichText<LexicalNodes_B1AC347C> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -508,14 +695,14 @@ export interface RelationB {
  * via the `definition` "pg-migrations".
  */
 export interface PgMigration {
-  id: number;
-  relation1?: (number | null) | RelationA;
+  id: string;
+  relation1?: (string | null) | RelationA;
   myArray?:
     | {
-        relation2?: (number | null) | RelationB;
+        relation2?: (string | null) | RelationB;
         mySubArray?:
           | {
-              relation3?: (number | null) | RelationB;
+              relation3?: (string | null) | RelationB;
               id?: string | null;
             }[]
           | null;
@@ -523,9 +710,17 @@ export interface PgMigration {
       }[]
     | null;
   myGroup?: {
-    relation4?: (number | null) | RelationB;
+    relation4?: (string | null) | RelationB;
   };
-  myBlocks?: MyBlock_446F4EED[] | null;
+  myBlocks?: MyBlock_0C4AEB7D[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -533,11 +728,11 @@ export interface PgMigration {
  * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlock_446F4EED".
+ * via the `definition` "MyBlock_0C4AEB7D".
  */
-export interface MyBlock_446F4EED {
-  relation5?: (number | null) | RelationA;
-  relation6?: (number | null) | RelationB;
+export interface MyBlock_0C4AEB7D {
+  relation5?: (string | null) | RelationA;
+  relation6?: (string | null) | RelationB;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock';
@@ -547,10 +742,10 @@ export interface MyBlock_446F4EED {
  * via the `definition` "custom-schema".
  */
 export interface CustomSchema {
-  id: number;
+  id: string;
   text?: string | null;
   localizedText?: string | null;
-  relationship?: (number | RelationA)[] | null;
+  relationship?: (string | RelationA)[] | null;
   select?: ('a' | 'b' | 'c')[] | null;
   radio?: ('a' | 'b' | 'c') | null;
   array?:
@@ -561,6 +756,14 @@ export interface CustomSchema {
       }[]
     | null;
   blocks?: BlockSecond[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -581,9 +784,17 @@ export interface BlockSecond {
  * via the `definition` "places".
  */
 export interface Place {
-  id: number;
+  id: string;
   country?: string | null;
   city?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -592,7 +803,7 @@ export interface Place {
  * via the `definition` "virtual-relations".
  */
 export interface VirtualRelation {
-  id: number;
+  id: string;
   postTitle?: string | null;
   postsTitles?: string[] | null;
   postCategoriesTitles?: string[] | null;
@@ -618,10 +829,18 @@ export interface VirtualRelation {
     | boolean
     | null;
   postLocalized?: string | null;
-  post?: (number | null) | Post;
-  posts?: (number | Post)[] | null;
+  post?: (string | null) | Post;
+  posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -633,6 +852,14 @@ export interface VirtualRelation {
 export interface CustomId {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -642,7 +869,7 @@ export interface CustomId {
  * via the `definition` "fields-persistance".
  */
 export interface FieldsPersistance {
-  id: number;
+  id: string;
   text?: string | null;
   textHooked?: string | null;
   array?:
@@ -654,6 +881,14 @@ export interface FieldsPersistance {
   textWithinCollapsible?: string | null;
   textWithinTabs?: string | null;
   blockWithVirtual?: BlockWithVirtual[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -673,7 +908,7 @@ export interface BlockWithVirtual {
  * via the `definition` "fake-custom-ids".
  */
 export interface FakeCustomId {
-  id: number;
+  id: string;
   title?: string | null;
   group?: {
     id?: string | null;
@@ -681,6 +916,14 @@ export interface FakeCustomId {
   myTab?: {
     id?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -689,11 +932,19 @@ export interface FakeCustomId {
  * via the `definition` "relationships-migration".
  */
 export interface RelationshipsMigration {
-  id: number;
-  relationship?: (number | null) | DefaultValue;
+  id: string;
+  relationship?: (string | null) | DefaultValue;
   relationship_2?: {
     relationTo: 'default-values';
-    value: number | DefaultValue;
+    value: string | DefaultValue;
+  } | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -703,13 +954,21 @@ export interface RelationshipsMigration {
  * via the `definition` "compound-indexes".
  */
 export interface CompoundIndex {
-  id: number;
+  id: string;
   one?: string | null;
   two?: string | null;
   three?: string | null;
   group?: {
     four?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -718,7 +977,7 @@ export interface CompoundIndex {
  * via the `definition` "aliases".
  */
 export interface Alias {
-  id: number;
+  id: string;
   thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
     | {
         nestedArray?:
@@ -730,6 +989,14 @@ export interface Alias {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -738,9 +1005,17 @@ export interface Alias {
  * via the `definition` "blocks-docs".
  */
 export interface BlocksDoc {
-  id: number;
+  id: string;
   testBlocksLocalized?: Cta[] | null;
   testBlocks?: Cta[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -759,8 +1034,16 @@ export interface Cta {
  * via the `definition` "unique-fields".
  */
 export interface UniqueField {
-  id: number;
+  id: string;
   slugField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -769,9 +1052,17 @@ export interface UniqueField {
  * via the `definition` "select-has-many".
  */
 export interface SelectHasMany {
-  id: number;
+  id: string;
   roles?: ('user' | 'admin' | 'editor')[] | null;
   food?: ('apple' | 'bananabread' | 'banana')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -780,8 +1071,16 @@ export interface SelectHasMany {
  * via the `definition` "virtual-linked-tenants".
  */
 export interface VirtualLinkedTenant {
-  id: number;
+  id: string;
   slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -790,10 +1089,18 @@ export interface VirtualLinkedTenant {
  * via the `definition` "virtual-linked-roles".
  */
 export interface VirtualLinkedRole {
-  id: number;
-  project: number | VirtualLinkedProject;
-  tenant: number | VirtualLinkedTenant;
+  id: string;
+  project: string | VirtualLinkedProject;
+  tenant: string | VirtualLinkedTenant;
   tenantSlug?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -802,12 +1109,20 @@ export interface VirtualLinkedRole {
  * via the `definition` "virtual-linked-projects".
  */
 export interface VirtualLinkedProject {
-  id: number;
+  id: string;
   roles?: {
-    docs?: (number | VirtualLinkedRole)[];
+    docs?: (string | VirtualLinkedRole)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -816,7 +1131,7 @@ export interface VirtualLinkedProject {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -830,51 +1145,34 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
+        relationTo: 'write-input';
+        value: string | WriteInput;
+      } | null)
+    | ({
         relationTo: 'noTimeStamps';
-        value: number | NoTimeStamp;
+        value: string | NoTimeStamp;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'simple';
-        value: number | Simple;
+        value: string | Simple;
+      } | null)
+    | ({
+        relationTo: 'draft-with-array';
+        value: string | DraftWithArray;
       } | null)
     | ({
         relationTo: 'simple-localized';
-        value: number | SimpleLocalized;
+        value: string | SimpleLocalized;
       } | null)
     | ({
         relationTo: 'categories-custom-id';
@@ -882,43 +1180,43 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'error-on-unnamed-fields';
-        value: number | ErrorOnUnnamedField;
+        value: string | ErrorOnUnnamedField;
       } | null)
     | ({
         relationTo: 'default-values';
-        value: number | DefaultValue;
+        value: string | DefaultValue;
       } | null)
     | ({
         relationTo: 'relation-a';
-        value: number | RelationA;
+        value: string | RelationA;
       } | null)
     | ({
         relationTo: 'relation-b';
-        value: number | RelationB;
+        value: string | RelationB;
       } | null)
     | ({
         relationTo: 'pg-migrations';
-        value: number | PgMigration;
+        value: string | PgMigration;
       } | null)
     | ({
         relationTo: 'custom-schema';
-        value: number | CustomSchema;
+        value: string | CustomSchema;
       } | null)
     | ({
         relationTo: 'places';
-        value: number | Place;
+        value: string | Place;
       } | null)
     | ({
         relationTo: 'virtual-relations';
-        value: number | VirtualRelation;
+        value: string | VirtualRelation;
       } | null)
     | ({
         relationTo: 'fields-persistance';
-        value: number | FieldsPersistance;
+        value: string | FieldsPersistance;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -926,52 +1224,52 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'fake-custom-ids';
-        value: number | FakeCustomId;
+        value: string | FakeCustomId;
       } | null)
     | ({
         relationTo: 'relationships-migration';
-        value: number | RelationshipsMigration;
+        value: string | RelationshipsMigration;
       } | null)
     | ({
         relationTo: 'compound-indexes';
-        value: number | CompoundIndex;
+        value: string | CompoundIndex;
       } | null)
     | ({
         relationTo: 'aliases';
-        value: number | Alias;
+        value: string | Alias;
       } | null)
     | ({
         relationTo: 'blocks-docs';
-        value: number | BlocksDoc;
+        value: string | BlocksDoc;
       } | null)
     | ({
         relationTo: 'unique-fields';
-        value: number | UniqueField;
+        value: string | UniqueField;
       } | null)
     | ({
         relationTo: 'select-has-many';
-        value: number | SelectHasMany;
+        value: string | SelectHasMany;
       } | null)
     | ({
         relationTo: 'virtual-linked-tenants';
-        value: number | VirtualLinkedTenant;
+        value: string | VirtualLinkedTenant;
       } | null)
     | ({
         relationTo: 'virtual-linked-roles';
-        value: number | VirtualLinkedRole;
+        value: string | VirtualLinkedRole;
       } | null)
     | ({
         relationTo: 'virtual-linked-projects';
-        value: number | VirtualLinkedProject;
+        value: string | VirtualLinkedProject;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -981,10 +1279,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -1004,7 +1302,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1012,10 +1310,48 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "write-input_select".
+ */
+export interface WriteInputSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    settings?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    translations?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "noTimeStamps_select".
  */
 export interface NoTimeStampsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1033,6 +1369,8 @@ export interface CategoriesSelect<T extends boolean = true> {
               time1Image?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1049,11 +1387,50 @@ export interface SimpleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-array_select".
+ */
+export interface DraftWithArraySelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        text1?: T;
+        text2?: T;
+        text3?: T;
+        text4?: T;
+        text5?: T;
+        text6?: T;
+        text7?: T;
+        text8?: T;
+        id?: T;
+      };
+  itemsWithDefaults?:
+    | T
+    | {
+        text1?: T;
+        text2?: T;
+        text3?: T;
+        text4?: T;
+        text5?: T;
+        text6?: T;
+        text7?: T;
+        text8?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-localized_select".
  */
 export interface SimpleLocalizedSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1063,6 +1440,8 @@ export interface SimpleLocalizedSelect<T extends boolean = true> {
  */
 export interface CategoriesCustomIdSelect<T extends boolean = true> {
   id?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1181,6 +1560,8 @@ export interface ErrorOnUnnamedFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1205,6 +1586,8 @@ export interface DefaultValuesSelect<T extends boolean = true> {
   select?: T;
   point?: T;
   escape?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1215,6 +1598,8 @@ export interface DefaultValuesSelect<T extends boolean = true> {
 export interface RelationASelect<T extends boolean = true> {
   title?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1226,6 +1611,8 @@ export interface RelationBSelect<T extends boolean = true> {
   title?: T;
   relationship?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1264,6 +1651,8 @@ export interface PgMigrationsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1296,6 +1685,8 @@ export interface CustomSchemaSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1307,6 +1698,8 @@ export interface CustomSchemaSelect<T extends boolean = true> {
 export interface PlacesSelect<T extends boolean = true> {
   country?: T;
   city?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1328,6 +1721,8 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   posts?: T;
   customID?: T;
   customIDValue?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1359,6 +1754,8 @@ export interface FieldsPersistanceSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1369,6 +1766,8 @@ export interface FieldsPersistanceSelect<T extends boolean = true> {
 export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1389,6 +1788,8 @@ export interface FakeCustomIdsSelect<T extends boolean = true> {
     | {
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1399,6 +1800,8 @@ export interface FakeCustomIdsSelect<T extends boolean = true> {
 export interface RelationshipsMigrationSelect<T extends boolean = true> {
   relationship?: T;
   relationship_2?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1415,6 +1818,8 @@ export interface CompoundIndexesSelect<T extends boolean = true> {
     | {
         four?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1434,6 +1839,8 @@ export interface AliasesSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1464,6 +1871,8 @@ export interface BlocksDocsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1473,6 +1882,8 @@ export interface BlocksDocsSelect<T extends boolean = true> {
  */
 export interface UniqueFieldsSelect<T extends boolean = true> {
   slugField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1483,6 +1894,8 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
 export interface SelectHasManySelect<T extends boolean = true> {
   roles?: T;
   food?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1492,6 +1905,8 @@ export interface SelectHasManySelect<T extends boolean = true> {
  */
 export interface VirtualLinkedTenantsSelect<T extends boolean = true> {
   slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1503,6 +1918,8 @@ export interface VirtualLinkedRolesSelect<T extends boolean = true> {
   project?: T;
   tenant?: T;
   tenantSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1512,6 +1929,8 @@ export interface VirtualLinkedRolesSelect<T extends boolean = true> {
  */
 export interface VirtualLinkedProjectsSelect<T extends boolean = true> {
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1528,6 +1947,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1535,6 +1956,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1582,7 +2004,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: number;
+  id: string;
   itemsLvl1?:
     | {
         label?: string | null;
@@ -1607,6 +2029,14 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1615,8 +2045,16 @@ export interface Header {
  * via the `definition` "global".
  */
 export interface Global {
-  id: number;
+  id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1625,8 +2063,16 @@ export interface Global {
  * via the `definition` "global-2".
  */
 export interface Global2 {
-  id: number;
+  id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1635,8 +2081,16 @@ export interface Global2 {
  * via the `definition` "global-3".
  */
 export interface Global3 {
-  id: number;
+  id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1645,9 +2099,17 @@ export interface Global3 {
  * via the `definition` "virtual-relation-global".
  */
 export interface VirtualRelationGlobal {
-  id: number;
+  id: string;
   postTitle?: string | null;
-  post?: (number | null) | Post;
+  post?: (string | null) | Post;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1680,6 +2142,8 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1690,6 +2154,8 @@ export interface HeaderSelect<T extends boolean = true> {
  */
 export interface GlobalSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1700,6 +2166,8 @@ export interface GlobalSelect<T extends boolean = true> {
  */
 export interface Global2Select<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1710,6 +2178,8 @@ export interface Global2Select<T extends boolean = true> {
  */
 export interface Global3Select<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1721,6 +2191,8 @@ export interface Global3Select<T extends boolean = true> {
 export interface VirtualRelationGlobalSelect<T extends boolean = true> {
   postTitle?: T;
   post?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1743,9 +2215,11 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
+      | 'write-input'
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
+      | 'draft-with-array'
       | 'simple-localized'
       | 'categories-custom-id'
       | 'posts'
@@ -1793,9 +2267,11 @@ export interface ActivityWidget {
   data?: {
     excludedCollections?:
       | (
+          | 'write-input'
           | 'noTimeStamps'
           | 'categories'
           | 'simple'
+          | 'draft-with-array'
           | 'simple-localized'
           | 'categories-custom-id'
           | 'posts'

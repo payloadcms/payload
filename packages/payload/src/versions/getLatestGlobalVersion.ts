@@ -2,13 +2,15 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
+import { hasWhereAccessResult } from '../auth/types.js'
+import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
   config: SanitizedGlobalConfig
   locale?: string
   payload: Payload
-  published?: boolean
   req?: PayloadRequest
   slug: string
   where: Where
@@ -19,15 +21,12 @@ export const getLatestGlobalVersion = async ({
   config,
   locale,
   payload,
-  published,
   req,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion: TypeWithVersion<Document> | undefined
 
-  const whereQuery = published
-    ? { 'version._status': { equals: 'published' } }
-    : { latest: { equals: true } }
+  const whereQuery: Where = { latest: { equals: true } }
 
   if (hasDraftsEnabled(config)) {
     latestVersion = (
@@ -37,7 +36,7 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: whereQuery as unknown as Where,
+        where: combineQueries(appendVersionToQueryKey(where), whereQuery),
       })
     ).docs[0]
   }
@@ -48,7 +47,14 @@ export const getLatestGlobalVersion = async ({
     req,
     where,
   })
-  const globalExists = Boolean(global)
+  const existingGlobal = hasWhereAccessResult(where)
+    ? await payload.db.findGlobal({
+        slug,
+        locale,
+        req,
+      })
+    : global
+  const globalExists = Boolean(existingGlobal && Object.keys(existingGlobal).length > 0)
 
   if (!latestVersion) {
     return {

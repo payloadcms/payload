@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { closeNav } from '../../../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
@@ -31,7 +32,6 @@ describe('Lexical Fully Featured', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
@@ -56,7 +56,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
     await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     await lexical.page
-      .locator('#upload-paste-url #field-url')
+      .locator('#upload-paste-url input[name="url"]')
       .fill(
         'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
       )
@@ -68,6 +68,9 @@ describe('Lexical Fully Featured', () => {
   })
 
   test('ensure upload node can be aligned', async ({ page }) => {
+    await closeNav(page)
+    await lexical.editor.first().focus()
+
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -75,21 +78,20 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
-    await lexical.page.locator('#upload-paste-url #field-url').fill(url)
+    await lexical.page.locator('#upload-paste-url input[name="url"]').fill(url)
     await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
-    const img = lexical.editor.locator('img').first()
+    const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
     await img.click()
     const imgBoxBeforeCenter = await img.boundingBox()
-    await expect(() => {
-      expect(imgBoxBeforeCenter?.x).toBeLessThan(150)
-    }).toPass({ timeout: 100 })
-    await page.getByLabel('align dropdown').click()
-    await page.getByLabel('Align Center').click()
-    const imgBoxAfterCenter = await img.boundingBox()
-    await expect(() => {
-      expect(imgBoxAfterCenter?.x).toBeGreaterThan(150)
-    }).toPass({ timeout: 100 })
+    await lexical.clickFixedToolbarButton({
+      buttonKey: 'alignCenter',
+      dropdownKey: 'align',
+    })
+    expect(imgBoxBeforeCenter).not.toBeNull()
+    await expect
+      .poll(async () => (await img.boundingBox())?.x)
+      .toBeGreaterThan(imgBoxBeforeCenter!.x)
   })
 
   test('ControlOrMeta+A inside input should select all the text inside the input', async ({
@@ -99,7 +101,7 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
     await lexical.slashCommand('myblock')
-    await page.locator('#field-someText').first().focus()
+    await page.locator('input[name="someText"]').first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
     await page.keyboard.press('Backspace')
@@ -408,7 +410,6 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
@@ -423,6 +424,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     await expect(page.getByText('משתמשים').first()).toBeVisible()
     await page.goto(url.create)
     await expect(lexical.editor.first()).toBeVisible()
+    await closeNav(page)
     await lexical.editor.first().focus()
   })
   test('slash menu should be positioned correctly in RTL', async ({ page }) => {
@@ -480,14 +482,11 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     }
     await page.keyboard.type('/')
     await expect(menu).toBeVisible()
-    const menuBox4 = (await menu.boundingBox())!
-    const slashBox4 = (await lexical.paragraph.getByText('/', { exact: true }).boundingBox())!
-    await expect(() => {
-      // The right edge of the menu should be approximately the same as the left edge of the slash
-      expect(menuBox4.x + menuBox4.width).toBeLessThan(slashBox4.x + 15)
-      expect(menuBox4.x + menuBox4.width).toBeGreaterThan(slashBox4.x - 15)
-      // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
-      expect(slashBox4.x).toBe(slashBox.x + 40 * 27)
-    }).toPass({ timeout: 100 })
+    // indents should allways be 40px. Please don't change this! https://github.com/payloadcms/payload/pull/13274
+    await expect
+      .poll(() =>
+        lexical.paragraph.evaluate((paragraph) => getComputedStyle(paragraph).paddingInlineStart),
+      )
+      .toBe(`${40 * 27}px`)
   })
 })

@@ -1,3 +1,5 @@
+import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
+
 type ReturnType = {
   ext: string
   mime: string
@@ -14,12 +16,13 @@ const extensionMap: {
   json: 'application/json',
   md: 'text/markdown',
   svg: 'image/svg+xml',
+  xhtml: 'application/xhtml+xml',
   xml: 'application/xml',
   yml: 'application/x-yaml',
 }
 
 export const getFileTypeFallback = (path: string): ReturnType => {
-  const ext = path.split('.').pop() || 'txt'
+  const ext = getFileExtension(getSanitizedUploadFilename(path)).toLowerCase() || 'txt'
 
   return {
     ext,

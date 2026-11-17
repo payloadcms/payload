@@ -54,6 +54,9 @@ export const DocumentLocked: React.FC<{
     } else {
       closeModal(modalSlug)
     }
+
+    // The modal provider keeps the modal open if this unmounts without closing it
+    return () => closeModal(modalSlug)
   }, [isActive, openModal, closeModal])
 
   return (

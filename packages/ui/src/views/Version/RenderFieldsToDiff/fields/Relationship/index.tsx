@@ -1,7 +1,7 @@
 import type {
   PayloadRequest,
   RelationshipField,
-  RelationshipFieldDiffServerComponent,
+  RelationshipFieldDiffServerProps,
   TypeWithID,
 } from 'payload'
 
@@ -19,15 +19,15 @@ export type RelationshipValue =
   | { relationTo: string; value: number | string | TypeWithID }
   | (number | string | TypeWithID)
 
-export const Relationship: RelationshipFieldDiffServerComponent = ({
-  comparisonValue: valueFrom,
+export const Relationship: React.FC<RelationshipFieldDiffServerProps> = ({
   field,
   i18n,
   locale,
   nestingLevel,
   parentIsLocalized,
   req,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const hasMany =
     ('hasMany' in field && field.hasMany) ||
@@ -166,6 +166,7 @@ export const SingleRelationshipDiff: React.FC<{
     const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : '<p></p>'
 
     const diff = getHTMLDiffComponents({
+      deletedLabel: i18n.t('general:deleted'),
       fromHTML,
       toHTML,
       tokenizeByCharacter: false,
@@ -281,6 +282,7 @@ const ManyRelationshipDiff: React.FC<{
     const toHTML = hasTo ? ReactDOMServer.renderToStaticMarkup(<>{toNodes}</>) : ''
 
     const diff = getHTMLDiffComponents({
+      deletedLabel: i18n.t('general:deleted'),
       fromHTML,
       toHTML,
       tokenizeByCharacter: false,

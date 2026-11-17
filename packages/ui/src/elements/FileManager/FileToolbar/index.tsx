@@ -50,13 +50,14 @@ export const FileToolbar: React.FC<Props> = ({
         ) : (
           <Popup
             button={
-              <span className={`${baseClass}__filename-btn`}>
+              <button className={`${baseClass}__filename-btn`} type="button">
                 <span className={`${baseClass}__filename-text`}>{filename}</span>
                 <ChevronIcon size={16} />
-              </span>
+              </button>
             }
             buttonType="custom"
             horizontalAlign="left"
+            popupType="menu"
             portalClassName={`${baseClass}__filename-popup`}
             size="fit-content"
             verticalAlign="bottom"

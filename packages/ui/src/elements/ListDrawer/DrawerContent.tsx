@@ -147,7 +147,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         onSelect({
           collectionSlug: selectedOption?.value,
           doc,
-          docID: doc.id,
         })
       }
 
@@ -159,7 +158,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const onQueryChange: ListDrawerContextProps['onQueryChange'] = useCallback(
     (query) => {
-      void refresh({ slug: selectedOption?.value, query })
+      return refresh({ slug: selectedOption?.value, query })
     },
     [refresh, selectedOption.value],
   )
@@ -193,20 +192,26 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       DocumentDrawerToggler={DocumentDrawerToggler}
       drawerSlug={drawerSlug}
       enabledCollections={collectionSlugs}
-      onBulkSelect={(selected) => onBulkSelect?.(selected, selectedOption.value)}
+      onBulkSelect={
+        typeof onBulkSelect === 'function'
+          ? (selected) => onBulkSelect(selected, selectedOption.value)
+          : undefined
+      }
       onQueryChange={onQueryChange}
       onSelect={onSelect}
       refresh={refreshSelf}
       selectedOption={selectedOption}
       setSelectedOption={setMySelectedOption}
     >
-      {!isLoading && (
-        <>
-          <div className="drawer__fade-in">{ListView}</div>
-          <DocumentDrawer onSave={onCreateNew} />
-        </>
-      )}
-      <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      <React.Suspense fallback={<LoadingOverlay animationDuration="200ms" overlayType="drawer" />}>
+        {!isLoading && (
+          <>
+            <div className="drawer__fade-in">{ListView}</div>
+            <DocumentDrawer onSave={onCreateNew} />
+          </>
+        )}
+        <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      </React.Suspense>
     </ListDrawerContextProvider>
   )
 }

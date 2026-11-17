@@ -9,6 +9,7 @@ export async function getFooter(): Promise<Footer> {
   try {
     const footer = await payload.findGlobal({
       slug: 'footer',
+      overrideAccess: true,
     })
 
     return footer

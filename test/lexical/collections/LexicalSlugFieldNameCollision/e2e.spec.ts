@@ -28,7 +28,6 @@ describe('Lexical: collection slug equals top-level field name', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const page = await browser.newPage()

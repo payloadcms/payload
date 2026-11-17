@@ -2,8 +2,8 @@
 import type { DOMConversionMap, EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import type { JSX } from 'react'
 
-import { $applyNodeReplacement } from 'lexical'
 import { generateObjectIdHex } from 'payload/shared'
+import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
 import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../../server/schema.js'
@@ -35,14 +35,6 @@ export class UploadNode extends UploadServerNode {
   }
 
   static override importJSON(serializedNode: SerializedUploadNode): UploadNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-    if (serializedNode.version === 2 && !serializedNode?.id) {
-      serializedNode.id = generateObjectIdHex()
-      serializedNode.version = 3
-    }
-
     const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,

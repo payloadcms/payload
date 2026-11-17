@@ -15,28 +15,27 @@ import { GlobalValidateDraftsOn } from './globals/ValidateDraftsOn/index.js'
 import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'field-error-states',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      ErrorFieldsCollection,
+      Uploads,
+      ValidateDraftsOn,
+      ValidateDraftsOff,
+      ValidateDraftsOnAndAutosave,
+      PrevValue,
+      PrevValueRelation,
+      TabErrorReset,
+    ],
+    globals: [GlobalValidateDraftsOn],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    ErrorFieldsCollection,
-    Uploads,
-    ValidateDraftsOn,
-    ValidateDraftsOff,
-    ValidateDraftsOnAndAutosave,
-    PrevValue,
-    PrevValueRelation,
-    TabErrorReset,
-  ],
-  globals: [GlobalValidateDraftsOn],
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

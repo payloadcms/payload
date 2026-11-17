@@ -20,7 +20,7 @@ export function withFeature(_options: WithFeatureOptions): Plugin {
         ...col,
         // TODO: conditionally add the feature field based on options.enabled
       })),
-    } as Config
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 'use client'
-import type { GroupFieldClientComponent } from 'payload'
+import type { GroupFieldClientProps } from 'payload'
+import type React from 'react'
 
 import { RichTextViewProvider } from '@payloadcms/richtext-lexical/client'
 import { GroupField } from '@payloadcms/ui'
@@ -10,7 +11,7 @@ import { GroupField } from '@payloadcms/ui'
  * Tests that explicit currentView inheritance works even when the value is "default".
  * The hasExplicitCurrentView flag should be true, hiding the ViewSelector in nested fields.
  */
-export const ViewProviderDefaultWrapper: GroupFieldClientComponent = (props) => {
+export const ViewProviderDefaultWrapper: React.FC<GroupFieldClientProps> = (props) => {
   return (
     <RichTextViewProvider currentView="default" inheritable={true}>
       <GroupField {...props} />

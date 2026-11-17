@@ -83,7 +83,7 @@ export class AdminUrlUtil {
 
     this.hierarchy = formatAdminURL({
       adminRoute: this.routes.admin,
-      path: `/collections/${this.entitySlug}/hierarchy`,
+      path: `/collections/${this.entitySlug}?view=hierarchy`,
       serverURL: this.serverURL,
     })
 

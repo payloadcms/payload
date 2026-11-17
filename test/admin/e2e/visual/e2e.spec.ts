@@ -5,6 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
+import { closeNav } from '../../../__helpers/e2e/toggleNav.js'
 import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -32,9 +33,17 @@ test.describe('Visual', () => {
 
   visual('renders the posts list view', async () => {
     await page.goto(url.list)
+    await closeNav(page)
 
     const textCell = page.locator('.row-1 .cell-title')
     await expect(textCell).toBeVisible()
+
+    await page.addStyleTag({
+      content: '.collection-list .table table { table-layout: fixed; }',
+    })
+
+    const listTable = page.locator('.collection-list .table table')
+    await expect(listTable).toHaveCSS('table-layout', 'fixed')
 
     await expectScreenshot({ name: 'posts-list-view.png', mask: [page.locator('.cell-id')], page })
   })
@@ -42,8 +51,7 @@ test.describe('Visual', () => {
   visual('renders the dashboard status badge', async () => {
     await page.goto(url.admin)
 
-    const badge = page.locator('.dashboard-status__badge')
-    await expect(badge).toBeVisible()
+    const badge = await prepareStatusBadge({ page })
 
     await expectScreenshot({ name: 'dashboard-status-badge.png', page, target: badge })
   })
@@ -68,8 +76,7 @@ test.describe('Visual', () => {
     async () => {
       await page.goto(url.admin)
 
-      const badge = page.locator('.dashboard-status__badge')
-      await expect(badge).toBeVisible()
+      const badge = await prepareStatusBadge({ page })
 
       await expect(
         expectScreenshot({ name: 'dashboard-status-badge-canary.png', page, target: badge }),
@@ -77,3 +84,19 @@ test.describe('Visual', () => {
     },
   )
 })
+
+async function prepareStatusBadge({ page }: { page: Page }) {
+  const badge = page.locator('.dashboard-status__badge')
+
+  await expect(badge).toBeVisible()
+  // Isolate this badge-style snapshot from fractional positions introduced by preceding widgets.
+  await page.addStyleTag({
+    content: `.dashboard-status__badge {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+    }`,
+  })
+
+  return badge
+}

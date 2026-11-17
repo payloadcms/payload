@@ -1,0 +1,40 @@
+@layer payload-default {
+  .document-fields .document-fields__edit:has(> .required-fields-info) {
+    position: relative;
+  }
+
+  .required-fields-info {
+    position: absolute;
+    inset-block-start: var(--spacer-2);
+    inset-inline-end: var(--gutter-h);
+    width: fit-content;
+  }
+
+  .document-fields__edit:has(> .required-fields-info):dir(ltr)
+    > .document-fields__fields
+    > .field-type:first-child
+    .field-error.tooltip--caret-right {
+    translate: max(calc(-1 * var(--spacer-5)), calc(var(--spacer-1) - var(--tooltip-x))) 0;
+  }
+
+  .document-fields__edit:has(> .required-fields-info):dir(rtl)
+    > .document-fields__fields
+    > .field-type:first-child
+    .field-error.tooltip--caret-left {
+    translate: min(var(--spacer-5), calc(100vw - var(--tooltip-x) - 100% - var(--spacer-1))) 0;
+  }
+
+  .required-fields-info__content {
+    position: fixed;
+    inset: auto;
+    margin: var(--spacer-0);
+    padding: var(--spacer-2-5);
+    max-inline-size: min(calc(var(--spacer-6) * 8), calc(100vw - var(--spacer-4)));
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--elevation-300-tooltip);
+    font: inherit;
+  }
+}

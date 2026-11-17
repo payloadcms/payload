@@ -8,8 +8,20 @@ type ParseDocumentIDArgs = {
   payload: Payload
 }
 
+export function parseDocumentID(
+  args: { id: number | string } & ParseDocumentIDArgs,
+): number | string
+export function parseDocumentID(args: ParseDocumentIDArgs): number | string | undefined
 export function parseDocumentID({ id, collectionSlug, payload }: ParseDocumentIDArgs) {
+  if (id === undefined) {
+    return undefined
+  }
+
   const idType = payload.collections[collectionSlug]?.customIDType ?? payload.db.defaultIDType
 
-  return id ? (idType === 'number' && isNumber(id) ? parseFloat(String(id)) : id) : undefined
+  if (idType === 'number') {
+    return isNumber(id) ? parseFloat(String(id)) : id
+  }
+
+  return String(id)
 }

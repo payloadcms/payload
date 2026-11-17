@@ -1,11 +1,11 @@
 'use client'
 
-import type { NumberFieldClientComponent } from 'payload'
+import type { NumberFieldClientProps } from 'payload'
 
 import { NumberField, useDocumentInfo, useField, useListQuery } from '@payloadcms/ui'
 import React, { useEffect, useRef } from 'react'
 
-export const LimitField: NumberFieldClientComponent = (props) => {
+export const LimitField: React.FC<NumberFieldClientProps> = (props) => {
   const { id } = useDocumentInfo()
   const { setValue, value } = useField<number>()
   const { query } = useListQuery()

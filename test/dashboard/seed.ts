@@ -9,6 +9,7 @@ export const seed = async (payload: BasePayload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   // Create some sample data
@@ -23,6 +24,7 @@ export const seed = async (payload: BasePayload) => {
           status: ['open', 'in-progress', 'closed'][Math.floor(Math.random() * 3)],
           title: `Support Ticket #${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -41,6 +43,7 @@ export const seed = async (payload: BasePayload) => {
             description: `Revenue entry ${i} for ${month}`,
             source: 'Sample data',
           },
+          overrideAccess: true,
         })
       }
     }
@@ -107,6 +110,7 @@ export const seed = async (payload: BasePayload) => {
           status: 'scheduled',
           title: `Dashboard Event ${index + 1}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -129,6 +133,7 @@ export const seed = async (payload: BasePayload) => {
           status: 'scheduled',
           title: `Nested Event ${index + 1}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -150,6 +155,7 @@ export const seed = async (payload: BasePayload) => {
           ],
           title: `Event ${i}`,
         },
+        overrideAccess: true,
       })
     }
   } catch (err) {

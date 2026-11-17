@@ -1,0 +1,138 @@
+/* eslint-disable no-console */
+import type { Command } from 'commander'
+
+import { Cron } from 'croner'
+
+import type { CLICommand, CLICommandResult, CLIHelp, CLIRuntime } from '../../config/types.js'
+
+import { getCommandInput } from './getCommandInput.js'
+import {
+  CLICommandError,
+  getCLIErrorOutput,
+  isJSONOutput,
+  withCLIOutputMode,
+  writeCLIJSON,
+} from './output.js'
+
+/**
+ * Runs a command through Payload's shared CLI behavior.
+ *
+ * For example, `payload jobs:run --limit 2 --json` goes through these steps:
+ *
+ * - reads arguments and options and merges them over the JSON value passed through `--input`
+ * - validates the input and includes the schema when reporting validation errors
+ * - passes the validated `args` and runtime helpers to the command handler
+ * - sends logs to stderr and writes a consistent JSON response to stdout in JSON mode
+ * - normalizes handler results, errors, and exit codes
+ * - runs the handler on a schedule when using `--cron`
+ *
+ * Binding the handler directly to `command.action()` would skip this shared behavior.
+ */
+export const invokeCLICommand = async ({
+  command,
+  definition,
+  help,
+  runtime,
+}: {
+  command: Command
+  definition: CLICommand
+  help: CLIHelp
+  runtime: CLIRuntime
+}): Promise<void> => {
+  const rawInput = await getCommandInput(command)
+  const validation = await definition.input['~standard'].validate(rawInput)
+
+  if (validation.issues) {
+    const issues = validation.issues.map((issue) => ({
+      message: issue.message,
+      path: issue.path?.map((part) => String(typeof part === 'object' ? part.key : part)).join('.'),
+    }))
+
+    throw new CLICommandError({
+      code: 'INVALID_INPUT',
+      command: command.name(),
+      inputSchema: definition.schema,
+      issues,
+      message: `Invalid command input:\n${issues
+        .map((issue) => `- ${issue.path ? `${issue.path}: ` : ''}${issue.message}`)
+        .join('\n')}`,
+    })
+  }
+
+  const callHandler = async (): Promise<void> => {
+    const isJSON = isJSONOutput(command)
+    let handlerResult: CLICommandResult | number | void
+
+    try {
+      handlerResult = await withCLIOutputMode({
+        isJSON,
+        run: () =>
+          definition.handler({
+            args: validation.value,
+            getConfig: runtime.getConfig,
+            getPayload: runtime.getPayload,
+            help,
+            isJSON,
+          }),
+      })
+    } catch (error) {
+      if (error instanceof CLICommandError) {
+        throw error
+      }
+
+      throw new CLICommandError({
+        cause: error,
+        code:
+          error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+            ? error.code
+            : undefined,
+        command: command.name(),
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+
+    const { exitCode, result } =
+      typeof handlerResult === 'number' ? { exitCode: handlerResult } : (handlerResult ?? {})
+
+    if (isJSON) {
+      writeCLIJSON({
+        command,
+        value: {
+          command: command.name(),
+          ...(exitCode ? { exitCode } : {}),
+          ...(result !== undefined ? { result } : {}),
+          success: !exitCode,
+        },
+      })
+    }
+
+    if (typeof exitCode === 'number') {
+      process.exitCode = exitCode
+    }
+  }
+
+  const { cron } = command.optsWithGlobals<{ cron?: string }>()
+
+  if (!cron) {
+    await callHandler()
+    return
+  }
+
+  runtime.markScheduled()
+  new Cron(
+    cron,
+    async () => {
+      try {
+        await callHandler()
+      } catch (error) {
+        if (isJSONOutput(command)) {
+          writeCLIJSON({ command, value: getCLIErrorOutput({ error }) })
+        } else {
+          console.error(error)
+        }
+      }
+    },
+    { protect: true },
+  )
+  process.stdin.resume()
+}

@@ -3,37 +3,45 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import nodemailer from 'nodemailer'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'email-nodemailer',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [],
+    // Integration tests run offline; local development keeps the Ethereal inbox.
+    email: nodemailerAdapter(
+      process.env.VITEST === 'true'
+        ? {
+            defaultFromAddress: 'test@example.com',
+            defaultFromName: 'Test',
+            skipVerify: true,
+            transport: nodemailer.createTransport({
+              jsonTransport: true,
+            }),
+          }
+        : undefined,
+    ),
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [],
-  email: nodemailerAdapter(),
-  onInit: async (payload) => {
-    if (process.env.SKIP_ON_INIT !== 'true') {
-      await payload.create({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-
-      const email = await payload.sendEmail({
-        subject: 'This was sent on init',
-        to: 'test@example.com',
-      })
-
-      payload.logger.info({ email, msg: 'Email sent' })
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  seed: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+      overrideAccess: true,
+    })
   },
 })

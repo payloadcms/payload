@@ -1,0 +1,21 @@
+@layer payload-default {
+  .skip-to-content {
+    position: fixed;
+    inset-block-start: var(--spacer-3);
+    inset-inline-start: var(--spacer-3);
+    z-index: var(--z-status);
+    padding-block: var(--spacer-2);
+    padding-inline: var(--spacer-3);
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    transform: translateY(calc(-100% - var(--spacer-5)));
+  }
+
+  .skip-to-content:focus {
+    transform: none;
+    outline: var(--stroke-width-medium) solid var(--color-text);
+    outline-offset: var(--stroke-width-medium);
+  }
+}

@@ -27,7 +27,6 @@ describe('Lexical Views Provider', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ payload: _payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const page = await browser.newPage()
@@ -139,6 +138,7 @@ describe('Lexical Views Provider', () => {
           },
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -155,14 +155,15 @@ describe('Lexical Views Provider', () => {
         const blockDecorator = editor.locator('[data-lexical-decorator="true"]').first()
         await expect(blockDecorator).toBeVisible()
 
-        // The default collapsible block UI has a "Toggle block" button — it should NOT be present
+        // The default collapsible block UI has a header toggle — it should NOT be present
         // when the custom Block component renders.
-        const toggleBlockButton = blockDecorator.getByRole('button', { name: 'Toggle block' })
+        const toggleBlockButton = blockDecorator.locator('.collapsible__toggle')
         await expect(toggleBlockButton).toHaveCount(0)
       } finally {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsProviderSlug,
+          overrideAccess: true,
         })
       }
     })

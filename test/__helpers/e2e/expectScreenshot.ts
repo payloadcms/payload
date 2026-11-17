@@ -24,6 +24,12 @@ import { expect, test } from '@playwright/test'
  * side/Slider comparison view by filename alone, regardless of pass/fail, so this is what makes
  * `pnpm test:visual:preview` show a comparison for every `@visual` test, not just failing ones.
  *
+ * A full-page screenshot (no `target`) always includes the global admin chrome, whose account
+ * menu's avatar defaults to a live, unmocked `gravatar.com` image fetch (see
+ * `packages/ui/src/graphics/Account/Gravatar/index.tsx`) that this function doesn't wait to
+ * resolve — visible avatars are masked, since there's no test for which that request's network timing
+ * is the thing under test. A `target` screenshot never includes the header, so this doesn't apply.
+ *
  * @example
  * ```typescript
  * test('renders the block field collapsed', { tag: '@visual' }, async ({ page }) => {
@@ -64,13 +70,23 @@ export async function expectScreenshot({
   })
 
   const screenshotTarget = target ?? page
+  const resolvedMask = target ? mask : [page.locator(ACCOUNT_AVATAR_SELECTOR), ...(mask ?? [])]
 
-  await expect(screenshotTarget).toHaveScreenshot(name, { mask })
+  await expect(screenshotTarget).toHaveScreenshot(name, { mask: resolvedMask })
 
   // Only reached on a match — toHaveScreenshot throws before this line on a mismatch, and by then
   // Playwright has already attached actual/expected/diff itself.
-  await attachMatchedComparison({ name, mask, screenshotTarget, testInfo: test.info() })
+  await attachMatchedComparison({
+    name,
+    mask: resolvedMask,
+    screenshotTarget,
+    testInfo: test.info(),
+  })
 }
+
+// Kept in sync with the class UserMenu's avatar renders in
+// packages/ui/src/elements/UserMenu/index.tsx.
+const ACCOUNT_AVATAR_SELECTOR = '.user-menu__avatar:visible'
 
 async function attachMatchedComparison({
   name,

@@ -1,7 +1,8 @@
 import type { GeneratedTypes, SanitizedConfig } from 'payload'
 
-import { REST_DELETE, REST_GET, REST_PATCH, REST_POST, REST_PUT } from '@payloadcms/next/routes'
 import { PayloadSDK } from '@payloadcms/sdk'
+
+import { createTestRequestHandler } from './createTestRequestHandler.js'
 
 export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
 
@@ -9,13 +10,7 @@ export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
  * SDK with a custom fetch to run the routes directly without an HTTP server.
  */
 export const getSDK = (config: SanitizedConfig) => {
-  const api = {
-    DELETE: REST_DELETE(config),
-    GET: REST_GET(config),
-    PATCH: REST_PATCH(config),
-    POST: REST_POST(config),
-    PUT: REST_PUT(config),
-  }
+  const handleRequest = createTestRequestHandler({ config })
 
   return new PayloadSDK<GeneratedTypes>({
     baseURL: ``,
@@ -31,13 +26,7 @@ export const getSDK = (config: SanitizedConfig) => {
       }
       const request = new Request(url, init)
 
-      const params = {
-        params: Promise.resolve({
-          slug: slugs.split('/'),
-        }),
-      }
-
-      return api[init.method.toUpperCase()](request, params)
+      return handleRequest({ request, slug: slugs.split('/') })
     },
   })
 }

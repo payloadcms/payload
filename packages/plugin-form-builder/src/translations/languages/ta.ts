@@ -89,8 +89,7 @@ export const taTranslations: PluginDefaultTranslationsObject = {
     title: 'தலைப்பு',
     token: 'டோக்கன்',
     uploadCollection: 'பதிவேற்ற சேகரிப்பு',
-    uploadCollectionDescription:
-      'கோப்புகளைச் சேமிக்க எந்தப் பதிவேற்றத் தொகுப்பைத் தேர்ந்தெடுக்கவும்',
+    uploadCollectionDescription: 'கோப்புகளைச் சேமிக்க எந்தப் பதிவேற்றத் தொகுப்பைத் தேர்ந்தெடுக்கவும்',
     uploadFieldPlural: 'புலங்களைப் பதிவேற்றவும்',
     uploadFieldSingular: 'பதிவேற்றவும்',
     urlToRedirectTo: 'திசைதிருப்ப வேண்டிய URL',

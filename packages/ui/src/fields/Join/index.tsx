@@ -4,7 +4,7 @@ import type {
   ClientConfig,
   ClientField,
   JoinFieldClient,
-  JoinFieldClientComponent,
+  JoinFieldClientProps,
   PaginatedDocs,
   Where,
 } from 'payload'
@@ -17,6 +17,7 @@ import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -120,7 +121,7 @@ const getInitialDrawerData = ({
   }
 }
 
-const JoinFieldComponent: JoinFieldClientComponent = (props) => {
+const JoinFieldComponent: React.FC<JoinFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { allowCreate, description } = {}, collection, label, localized, on, required },
@@ -128,6 +129,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   } = props
 
   const { id: docID, docConfig } = useDocumentInfo()
+  const { user } = useAuth()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -191,7 +193,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     })
   }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID, config])
 
-  if (!docConfig) {
+  if (!docConfig || !user) {
     return null
   }
 
