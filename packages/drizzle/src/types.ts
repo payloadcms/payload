@@ -507,7 +507,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
       resolve: () => Promise<void>
     }
   }
-  tableNameMap: Map<string, string>
   /**
    * Array and `hasMany` select table names that turned out to equal a companion table of their
    * parent (`_rels`, `_texts`, `_numbers`, `_locales`) while the schema was built. The schema is
@@ -515,6 +514,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * @internal
    */
   subTableNameClashes?: Set<string>
+  tableNameMap: Map<string, string>
   tables: Record<string, any>
   transactionOptions: unknown
   versionsSuffix?: string
