@@ -4,6 +4,7 @@ import { and, getTableName, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { type FlattenedField, type Operator, QueryError, type Where } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
+import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
 import type { DrizzleResolvedOperator } from '../queries/operatorMap.js'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type {
@@ -14,12 +15,14 @@ import type {
 
 import { buildOperatorConstraint } from '../queries/buildOperatorConstraint.js'
 import { sanitizeQueryValue } from '../queries/sanitizeQueryValue.js'
+import { buildNestedJoinWhere } from './buildNestedJoinWhere.js'
 
 const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in', 'like'])
 
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
+  joins?: BuildQueryJoinAliases
   locale?: string
   table: GenericTable
   where: Where
@@ -53,6 +56,7 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
+  joins = [],
   locale,
   table,
   where,
@@ -71,6 +75,7 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
+          joins,
           locale,
           table,
           where: nestedWhere,
@@ -83,6 +88,22 @@ export const buildPolymorphicJoinWhere = ({
         constraints.push(nestedCondition)
       }
 
+      continue
+    }
+
+    const pathPlan = wherePlan.get(key)
+
+    if (pathPlan?.type === 'nested' && pathPlan.fieldsByCollection.has(collection)) {
+      constraints.push(
+        buildNestedJoinWhere({
+          adapter,
+          collection,
+          joins,
+          locale,
+          table,
+          where: { [key]: where[key] },
+        }),
+      )
       continue
     }
 
@@ -286,6 +307,30 @@ const resolveWherePath = ({
         field: { name: 'relationTo', type: 'text' },
         isUUID: false,
       },
+    }
+  }
+
+  if (pathPlan.type === 'nested') {
+    const field = [...pathPlan.fieldsByCollection.values()][0]?.field
+
+    if (!field) {
+      return { type: 'invalid', pathPlan }
+    }
+
+    if (field.type === 'select' && field.hasMany) {
+      return {
+        type: 'hasManySelect',
+        fieldContext: field,
+        jsonExpression: adapter.name === 'postgres' ? `'[]'::jsonb` : `'[]'`,
+        pathPlan,
+      }
+    }
+
+    return {
+      type: 'scalar',
+      column: sql`null`,
+      pathPlan,
+      queryValueContext: { type: 'scalar', field, isUUID: false },
     }
   }
 
