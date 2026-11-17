@@ -20,6 +20,7 @@ const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
+  draftsEnabled?: boolean
   locale?: string
   table: GenericTable
   where: Where
@@ -53,6 +54,7 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
+  draftsEnabled,
   locale,
   table,
   where,
@@ -71,6 +73,7 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
+          draftsEnabled,
           locale,
           table,
           where: nestedWhere,
@@ -89,6 +92,7 @@ export const buildPolymorphicJoinWhere = ({
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
+      draftsEnabled,
       schemaPath: key,
       table,
       wherePlan,
@@ -260,6 +264,7 @@ export const buildPolymorphicJoinWhere = ({
 const resolveWherePath = ({
   adapter,
   collection,
+  draftsEnabled,
   schemaPath,
   table,
   wherePlan,
@@ -304,6 +309,7 @@ const resolveWherePath = ({
       jsonExpression: getHasManySelectExpression({
         adapter,
         collection,
+        draftsEnabled,
         pathPlan,
         table,
       }),
@@ -327,8 +333,10 @@ const resolveWherePath = ({
     type: 'scalar',
     column: fieldContext
       ? fieldContext.isLocalized
-        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][pathPlan.columnPath]
-        : table[pathPlan.columnPath]
+        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][
+            fieldContext.columnPath ?? pathPlan.columnPath
+          ]
+        : table[fieldContext.columnPath ?? pathPlan.columnPath]
       : sql`null`,
     fieldContext,
     pathPlan,
@@ -339,11 +347,13 @@ const resolveWherePath = ({
 const getHasManySelectExpression = ({
   adapter,
   collection,
+  draftsEnabled,
   pathPlan,
   table,
 }: {
   adapter: DrizzleAdapter
   collection: string
+  draftsEnabled?: boolean
   pathPlan: WherePathPlan
   table: GenericTable
 }): string => {
@@ -355,7 +365,11 @@ const getHasManySelectExpression = ({
     .split('.')
     .map((pathSegment) => toSnakeCase(pathSegment))
     .join('_')
-  const valuesTableName = adapter.tableNameMap.get(`${toSnakeCase(collection)}_${selectTablePath}`)
+  const valuesTableName = adapter.tableNameMap.get(
+    draftsEnabled
+      ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}_version_${selectTablePath}`
+      : `${toSnakeCase(collection)}_${selectTablePath}`,
+  )
 
   if (!valuesTableName) {
     throw new Error(

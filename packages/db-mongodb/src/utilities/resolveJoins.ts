@@ -22,6 +22,7 @@ export type ResolveJoinsArgs = {
   collectionSlug: string
   /** Array of documents to resolve joins for */
   docs: Record<string, unknown>[]
+  draftsEnabled?: boolean
   /** Join query specifications (which joins to resolve and how) */
   joins?: JoinQuery
   /** Optional locale for localized queries */
@@ -41,6 +42,7 @@ export async function resolveJoins({
   adapter,
   collectionSlug,
   docs,
+  draftsEnabled,
   joins,
   locale,
   projection,
@@ -119,7 +121,7 @@ export async function resolveJoins({
         return null
       }
 
-      const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
+      const useDrafts = (draftsEnabled || versions) && Boolean(targetConfig.versions?.drafts)
       let JoinModel
       if (useDrafts) {
         JoinModel = adapter.versions[targetConfig.slug]
@@ -266,7 +268,12 @@ export async function resolveJoins({
         count: dbCount,
         dbFieldName,
         results,
-        sort,
+        sort: Object.fromEntries(
+          Object.entries(sort).map(([path, direction]) => [
+            useDrafts ? path.replace(/^version\./, '') : path,
+            direction,
+          ]),
+        ),
         useDrafts,
       }
     })
@@ -331,7 +338,8 @@ export async function resolveJoins({
 
           // Always store the ObjectID reference in polymorphic format
           grouped[parentKey].docs.push({
-            ...result,
+            ...(useDrafts ? (result.version as Record<string, unknown>) : result),
+            id: result.id,
             __joinData: joinData,
           })
         }
@@ -342,8 +350,8 @@ export async function resolveJoins({
       results.docs.sort((a, b) => {
         for (const [fieldName, sortOrder] of Object.entries(results.sort)) {
           const sort = sortOrder === 'asc' ? 1 : -1
-          const aValue = a[fieldName] as Date | number | string
-          const bValue = b[fieldName] as Date | number | string
+          const aValue = getByPathWithArrays(a, fieldName)[0] as Date | number | string
+          const bValue = getByPathWithArrays(b, fieldName)[0] as Date | number | string
           if (aValue < bValue) {
             return -1 * sort
           }
