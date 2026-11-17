@@ -6,9 +6,9 @@ import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 
 import { addJoinTable } from '../queries/addJoinTable.js'
-import { buildQuery } from '../queries/buildQuery.js'
+import { parseParams } from '../queries/parseParams.js'
 
-export function buildNestedJoinWhere({
+export function buildCollectionFieldWhere({
   adapter,
   collection,
   joins,
@@ -23,19 +23,22 @@ export function buildNestedJoinWhere({
   table: GenericTable
   where: Where
 }) {
-  const nestedJoins: BuildQueryJoinAliases = []
-  const query = buildQuery({
+  const collectionJoins = [...joins]
+  const whereConstraint = parseParams({
     adapter,
+    context: { sort: undefined },
     fields: adapter.payload.collections[collection].config.flattenedFields,
-    joins: nestedJoins,
+    joins: collectionJoins,
     locale,
+    parentIsLocalized: false,
+    selectFields: { id: table['id'] },
     tableName: getTableName(table),
     where,
   })
 
-  for (const join of nestedJoins) {
+  for (const join of collectionJoins) {
     addJoinTable({ ...join, joins })
   }
 
-  return query.where
+  return whereConstraint
 }

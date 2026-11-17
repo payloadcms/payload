@@ -15,7 +15,7 @@ import type {
 
 import { buildOperatorConstraint } from '../queries/buildOperatorConstraint.js'
 import { sanitizeQueryValue } from '../queries/sanitizeQueryValue.js'
-import { buildNestedJoinWhere } from './buildNestedJoinWhere.js'
+import { buildCollectionFieldWhere } from './buildCollectionFieldWhere.js'
 
 const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in', 'like'])
 
@@ -93,9 +93,15 @@ export const buildPolymorphicJoinWhere = ({
 
     const pathPlan = wherePlan.get(key)
 
-    if (pathPlan?.type === 'nested' && pathPlan.fieldsByCollection.has(collection)) {
+    const collectionField = pathPlan?.fieldsByCollection.get(collection)
+
+    if (pathPlan?.type === 'collectionQuery' && collectionField) {
+      if (collectionField.field.type === 'select' && collectionField.field.hasMany) {
+        validateHasManySelectOperators({ operators: Object.keys(where[key]), path: key })
+      }
+
       constraints.push(
-        buildNestedJoinWhere({
+        buildCollectionFieldWhere({
           adapter,
           collection,
           joins,
@@ -115,6 +121,10 @@ export const buildPolymorphicJoinWhere = ({
       wherePlan,
     })
 
+    if (resolvedPath.type === 'hasManySelect') {
+      validateHasManySelectOperators({ operators: Object.keys(where[key]), path: key })
+    }
+
     for (let payloadOperator of Object.keys(where[key])) {
       const originalOperator = payloadOperator as Operator
       let value = where[key][payloadOperator]
@@ -124,10 +134,6 @@ export const buildPolymorphicJoinWhere = ({
       }
 
       if (resolvedPath.type === 'hasManySelect') {
-        if (!supportedJSONQueryOperators.has(payloadOperator)) {
-          throw new QueryError([{ path: `${key}.${payloadOperator}` }])
-        }
-
         const sanitizedQueryValue = sanitizeQueryValue({
           adapter,
           field: resolvedPath.fieldContext,
@@ -310,7 +316,7 @@ const resolveWherePath = ({
     }
   }
 
-  if (pathPlan.type === 'nested') {
+  if (pathPlan.type === 'collectionQuery') {
     const field = [...pathPlan.fieldsByCollection.values()][0]?.field
 
     if (!field) {
@@ -421,4 +427,18 @@ const getHasManySelectExpression = ({
   }
 
   return `(select json_group_array(${qualifiedValuesTableName}.value) from ${qualifiedValuesTableName} where ${qualifiedValuesTableName}.parent_id = ${parentTableName}.id)`
+}
+
+function validateHasManySelectOperators({
+  operators,
+  path,
+}: {
+  operators: string[]
+  path: string
+}) {
+  for (const operator of operators) {
+    if (!supportedJSONQueryOperators.has(operator)) {
+      throw new QueryError([{ path: `${path}.${operator}` }])
+    }
+  }
 }

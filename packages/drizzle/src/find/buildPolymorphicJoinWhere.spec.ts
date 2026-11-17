@@ -180,9 +180,11 @@ describe('buildPolymorphicJoinWhere', () => {
         'items.heading',
         {
           columnPath: 'items_heading',
-          fieldsByCollection: new Map([['articles', { type: 'nested', field: textField }]]),
+          fieldsByCollection: new Map([
+            ['articles', { type: 'collectionQuery', field: textField }],
+          ]),
           schemaPath: 'items.heading',
-          type: 'nested',
+          type: 'collectionQuery',
         },
       ],
     ])
@@ -306,6 +308,19 @@ describe('buildPolymorphicJoinWhere', () => {
 
     expect(query.sql).toContain(expectedSQL)
     expect(query.params).toEqual(expectedParams)
+  })
+
+  it('should reject negative comparisons on has-many selects inside arrays', () => {
+    const wherePlan = hasManySelectPlan(['articles'], 'items.tags')
+
+    wherePlan.get('items.tags')!.type = 'collectionQuery'
+
+    expect(() =>
+      renderWhere({
+        where: { 'items.tags': { not_equals: 'unavailable' } },
+        wherePlan,
+      }),
+    ).toThrow('The following path cannot be queried: items.tags.not_equals')
   })
 
   it('requires every word in a scalar like comparison', () => {

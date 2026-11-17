@@ -135,6 +135,9 @@ export const buildPolymorphicJoinQuery = ({
 
       return collectionField?.type === 'scalar' && collectionField.isLocalized
     })
+    const shouldDeduplicate =
+      joins.length > 0 || (hasLocalizedWhere && (!locale || locale === 'all'))
+
     if (hasLocalizedWhere) {
       const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
 
@@ -148,8 +151,6 @@ export const buildPolymorphicJoinQuery = ({
       })
     }
 
-    const shouldDeduplicate =
-      joins.length > 0 || (hasLocalizedWhere && (!locale || locale === 'all'))
     let collectionQuery = (
       shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
     )
