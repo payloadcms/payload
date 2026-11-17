@@ -637,6 +637,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addFile: 'Додати файл',
     addFiles: 'Додати файли',
     bulkUpload: 'Масове завантаження',
+    cancelUpload: 'Скасувати завантаження',
     copyLinkToFile: 'Скопіювати посилання на файл',
     copyURL: 'Скопіювати URL',
     crop: 'Обрізати',
@@ -658,6 +659,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     fileSize: 'Розмір файлу',
     filesToUpload: 'Файли для завантаження',
     fileToUpload: 'Файл для завантаження',
+    finishSaving: 'Завершити збереження',
     focalPoint: 'Точка фокусу',
     focalPointDescription:
       'Перетягніть точку фокусу безпосередньо на попередньому перегляді або налаштуйте значення нижче.',
@@ -672,12 +674,27 @@ export const ukTranslations: DefaultTranslationsObject = {
     previewSizes: 'Попередній перегляд розмірів',
     renameFile: 'Перейменувати файл',
     replaceFile: 'Замінити файл',
+    resumingFile: 'Відновлення {{filename}}',
+    savingInBackground:
+      'Завантаження завершиться у фоновому режимі, і тоді документ буде збережено.',
     selectCollectionToBrowse: 'Оберіть колекцію для перегляду',
     selectFile: 'Оберіть файл',
     setCropArea: 'Встановити область обрізки',
     setFocalPoint: 'Встановити точку фокусу',
     sizes: 'Розміри',
     sizesFor: 'Розміри для {{label}}',
+    uploadFileMismatch: 'Вибраний файл не відповідає перерваному завантаженню.',
+    uploadingFile: 'Завантаження {{filename}}',
+    uploadingFileProgress: 'Завантаження {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Завантаження ще триває. Якщо піти зараз, його буде перервано.',
+    uploadInterrupted: 'Завантаження {{filename}} було перервано.',
+    uploadInterruptedWillSave:
+      'Завантаження {{filename}} було перервано. Документ буде збережено після його завершення.',
+    uploadReadyToFinishSaving:
+      '{{filename}} завантажено. Відкрийте форму, щоб завершити збереження.',
+    uploadSavedInBackground: 'Завантаження завершено, документ збережено.',
+    uploadStorageRejectedSegments:
+      'Сховище не прийняло жодної частини завантаження. Перевірте політику CORS бакета.',
     width: 'Ширина',
   },
   validation: {

@@ -4,7 +4,7 @@ import type { HTMLConvertersAsync } from '../types.js'
 import { ALLOWED_HEADING_TAGS } from '../../../../heading/constants.js'
 
 export const HeadingHTMLConverterAsync: HTMLConvertersAsync<SerializedHeadingNode> = {
-  heading: async ({ node, nodesToHTML, providedStyleTag }) => {
+  heading: async ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = (
       await nodesToHTML({
         nodes: node.children,
@@ -13,6 +13,6 @@ export const HeadingHTMLConverterAsync: HTMLConvertersAsync<SerializedHeadingNod
 
     const tag = ALLOWED_HEADING_TAGS.has(node.tag) ? node.tag : 'h1'
 
-    return `<${tag}${providedStyleTag}>${children}</${tag}>`
+    return `<${tag}${providedDirAttribute}${providedStyleTag}>${children}</${tag}>`
   },
 }
