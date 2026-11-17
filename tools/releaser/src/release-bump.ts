@@ -6,7 +6,7 @@
  * build or publish — the pushed tag triggers the separate publish workflow.
  *
  * Usage:
- *   GITHUB_TOKEN=... pnpm release-bump --preid <canary|beta> \
+ *   GITHUB_TOKEN=... pnpm release-bump --preid beta \
  *     [--bump <auto|prerelease|prepatch|preminor|premajor>] \
  *     [--override-reason "<why>"] [--dry-run]
  *

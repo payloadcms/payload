@@ -10,19 +10,19 @@ import { isSafeCssColor } from '../../shared/cssColors.js'
 export const TableHTMLConverter: HTMLConverters<
   SerializedTableCellNode | SerializedTableNode | SerializedTableRowNode
 > = {
-  table: ({ node, nodesToHTML, providedStyleTag }) => {
+  table: ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
 
-    return `<div${providedStyleTag} class="lexical-table-container">
+    return `<div${providedDirAttribute}${providedStyleTag} class="lexical-table-container">
         <table class="lexical-table" style="border-collapse: collapse;">
           <tbody>${children}</tbody>
         </table>
       </div>`
   },
 
-  tablecell: ({ node, nodesToHTML, providedCSSString }) => {
+  tablecell: ({ node, nodesToHTML, providedCSSString, providedDirAttribute }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
@@ -42,7 +42,7 @@ export const TableHTMLConverter: HTMLConverters<
     const rowSpanAttr =
       typeof node.rowSpan === 'number' && node.rowSpan > 1 ? ` rowspan="${node.rowSpan}"` : ''
 
-    return `<${TagName}
+    return `<${TagName}${providedDirAttribute}
         class="lexical-table-cell ${headerStateClass}"
         ${colSpanAttr}
         ${rowSpanAttr}
@@ -53,12 +53,12 @@ export const TableHTMLConverter: HTMLConverters<
     `
   },
 
-  tablerow: ({ node, nodesToHTML, providedStyleTag }) => {
+  tablerow: ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
 
-    return `<tr${providedStyleTag} class="lexical-table-row">
+    return `<tr${providedDirAttribute}${providedStyleTag} class="lexical-table-row">
         ${children}
       </tr>`
   },

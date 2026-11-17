@@ -4,12 +4,15 @@ import type {
   GlobalUploadConfig,
   HandleTransformRequestResult,
   PayloadRequest,
+  TransformDefinition,
   TransformFileResult,
 } from 'payload'
 import type { generatePayloadFileURL as generatePayloadFileURLFromShared } from 'payload/shared'
 
 import { generatePayloadFileURL } from 'payload'
 import { describe, expect, test } from 'tstyche'
+
+import type { UploadTransforms } from './payload-types.js'
 
 describe('upload transformer contracts', () => {
   test('should require a file when a transformFile result is complete', () => {
@@ -38,5 +41,20 @@ describe('upload transformer contracts', () => {
     ) => ReturnType<SharpDependency>
 
     expect<ExistingSharpWrapper>().type.toBeAssignableTo<SharpDependency>()
+  })
+
+  test('should reject a draft-4 boolean required in a transform definition schema, which the runtime check ignores', () => {
+    type DraftFourRequiredSchema = {
+      properties: { text: { required: true; type: 'string' } }
+      type: 'object'
+    }
+
+    expect<DraftFourRequiredSchema>().type.not.toBeAssignableTo<TransformDefinition['schema']>()
+  })
+
+  test('should add a key from transformDefinitions to the generated UploadTransforms type', () => {
+    expect<NonNullable<UploadTransforms>['watermark']>().type.toBe<
+      { opacity?: number; text: string } | undefined
+    >()
   })
 })

@@ -86,7 +86,10 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     ).rejects.toMatchObject({
       data: {
         errors: [
-          expect.objectContaining({ message: expect.stringContaining(key), path: '_transforms' }),
+          expect.objectContaining({
+            message: expect.stringContaining(key),
+            path: `_transforms.${key.split('.')[0]}`,
+          }),
         ],
       },
     })
@@ -284,6 +287,34 @@ test.suite('File transform state', { config: './config.ts' }, () => {
 
     expect(restored).toMatchObject({ height: 600, width: 800 })
     expect(restored._transforms).toEqual({ crop: savedCrop })
+  })
+
+  test('should reject a crop outside the version original on a draft restore, which skips field validation', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: draftMediaSlug,
+      data: { _status: 'published', _transforms: { crop: savedCrop } },
+      file: { name: 'draft.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const [version] = (
+      await payload.findVersions({
+        collection: draftMediaSlug,
+        where: { parent: { equals: created.id } },
+      })
+    ).docs
+
+    // The version's crop no longer fits its original, for example after a manual data change.
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection: draftMediaSlug,
+      versionData: { version: { ...version!.version, _transforms: withCrop({ x: 1000 }) } },
+    })
+
+    await expect(
+      payload.restoreVersion({ id: version!.id, collection: draftMediaSlug, draft: true }),
+    ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] }, status: 400 })
   })
 
   test.options(

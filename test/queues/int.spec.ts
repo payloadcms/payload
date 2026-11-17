@@ -222,6 +222,36 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       expect(response.status).toBe(200)
     })
 
+    test('will accept cookie auth on jobs runner from a same-origin request', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET('/payload-jobs/run?silent=true', {
+        headers: {
+          Cookie: `payload-token=${token}`,
+          'Sec-Fetch-Site': 'same-origin',
+        },
+      })
+
+      expect(response.status).toBe(200)
+    })
+
+    for (const path of ['/payload-jobs/run?silent=true', '/payload-jobs/handle-schedules']) {
+      test(`will reject cookie auth on ${path} from a cross-site navigation`, async ({
+        restClient,
+      }) => {
+        const response = await restClient.GET(path, {
+          headers: {
+            Cookie: `payload-token=${token}`,
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+          },
+        })
+
+        expect(response.status).toBe(401)
+      })
+    }
+
     test('should fail access control on local api .queue by default', async ({ payload }) => {
       await expect(
         payload.jobs.queue({

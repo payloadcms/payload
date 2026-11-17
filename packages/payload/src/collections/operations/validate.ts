@@ -208,11 +208,12 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     overrideAccess,
     req,
     skipMutationHooks,
-    validateData: ({ data }) =>
+    validateData: ({ data, dataWithLocales }) =>
       validateUniqueConstraints({
         id,
         collection: collectionConfig,
         data,
+        dataWithLocales,
         req,
       }),
     validationOperation,
