@@ -29,6 +29,14 @@ const articlesTable = sqliteTable('join_articles', {
   title: text('title'),
 })
 
+const articleVersionsTable = sqliteTable('join_article_versions', {
+  id: integer('id').primaryKey(),
+  latest: integer('latest', { mode: 'boolean' }),
+  parent: integer('parent_id'),
+  version_parent: integer('version_parent_id'),
+  version_title: text('version_title'),
+})
+
 const notesTable = sqliteTable('join_notes', {
   id: integer('id').primaryKey(),
   parent: integer('parent_id'),
@@ -51,6 +59,7 @@ const db = drizzle(client, {
 type CollectionFixture = {
   fields: Field[]
   table: GenericTable
+  versionsTable?: GenericTable
 }
 
 const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdapter => {
@@ -72,9 +81,18 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
     }
     tableNameMap.set(toSnakeCase(slug), tableName)
     tables[tableName] = fixture.table
+
+    if (fixture.versionsTable) {
+      Object.assign(collections[slug].config, { versions: { drafts: {} } })
+      const versionsTableName = getTableName(fixture.versionsTable)
+
+      tableNameMap.set(`_${toSnakeCase(slug)}_v`, versionsTableName)
+      tables[versionsTableName] = fixture.versionsTable
+    }
   }
 
   return {
+    versionsSuffix: '_v',
     createJSONQuery,
     drizzle: db,
     idType: 'serial',
@@ -126,6 +144,7 @@ const joinField = {
 const buildQuery = ({
   adapter: adapterArg = adapter,
   field = joinField,
+  draftsEnabled,
   limit = 0,
   page,
   path = '',
@@ -135,6 +154,7 @@ const buildQuery = ({
 }: {
   adapter?: DrizzleAdapter
   field?: FlattenedJoinField
+  draftsEnabled?: boolean
   limit?: number
   page?: number
   path?: string
@@ -146,6 +166,7 @@ const buildQuery = ({
     adapter: adapterArg,
     currentTableName: getTableName(parentsTable),
     field,
+    draftsEnabled,
     limit,
     page,
     path,
@@ -167,6 +188,85 @@ const renderQuery = (query: ReturnType<typeof buildPolymorphicJoinQuery>) => {
 afterAll(() => client.close())
 
 describe('buildPolymorphicJoinQuery', () => {
+  it('selects latest version membership and original document IDs alongside unversioned targets', () => {
+    const draftAdapter = createAdapter({
+      articles: {
+        fields: [
+          { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+          { name: 'title', type: 'text' },
+        ],
+        table: articlesTable,
+        versionsTable: articleVersionsTable,
+      },
+      notes: {
+        fields: [
+          { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+          { name: 'title', type: 'text' },
+        ],
+        table: notesTable,
+      },
+    })
+    const query = renderQuery(
+      buildQuery({
+        adapter: draftAdapter,
+        draftsEnabled: true,
+        shouldCount: true,
+        sort: 'title',
+        where: { title: { equals: 'Draft title' } },
+      }),
+    )
+
+    expect(query.sql).toContain('from "join_article_versions"')
+    expect(query.sql).toContain('"version_parent_id" as "parent"')
+    expect(query.sql).toContain('"version_title" as "sortPath"')
+    expect(query.sql).toContain('"latest" = ?')
+    expect(query.sql).toContain('"version_title" = ?')
+    expect(query.sql).toContain('from "join_notes"')
+    expect(query.sql).not.toContain('from "join_articles"')
+    expect(query.sql).toContain('"parent_id" as "id"')
+  })
+
+  it('filters localized draft fields and versioned select values before counting', () => {
+    const versionLocalesTable = sqliteTable('join_article_versions_locales', {
+      _parentID: integer('_parent_id'),
+      _locale: text('_locale'),
+      version_localizedTitle: text('version_localized_title'),
+    })
+    const draftAdapter = createAdapter({
+      articles: {
+        fields: [
+          { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+          { localized: true, name: 'localizedTitle', type: 'text' },
+          { hasMany: true, name: 'tags', type: 'select', options: ['reviewed'] },
+        ],
+        table: articlesTable,
+        versionsTable: articleVersionsTable,
+      },
+    })
+
+    draftAdapter.localesSuffix = '_locales'
+    draftAdapter.tables.join_article_versions_locales = versionLocalesTable
+    draftAdapter.tableNameMap.set('_articles_v_version_tags', 'join_article_version_tags')
+
+    const query = renderQuery(
+      buildQuery({
+        adapter: draftAdapter,
+        draftsEnabled: true,
+        field: { ...joinField, collection: ['articles'] },
+        shouldCount: true,
+        where: {
+          and: [{ localizedTitle: { equals: 'Draft title' } }, { tags: { contains: 'reviewed' } }],
+        },
+      }),
+    )
+
+    expect(query.sql).toContain('left join "join_article_versions_locales"')
+    expect(query.sql).toContain('"version_localized_title" = ?')
+    expect(query.sql).toContain('from join_article_version_tags')
+    expect(query.sql).toContain('parent_id = join_article_versions.id')
+    expect(query.sql).toContain('"latest" = ?')
+  })
+
   it('combines every target into one fixed polymorphic document projection', () => {
     const result = buildQuery({ path: 'content.' })
     const query = renderQuery(result)

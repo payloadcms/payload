@@ -73,6 +73,7 @@ export const findOne: FindOne = async function findOne(
       adapter: this,
       collectionSlug,
       docs: [doc] as Record<string, unknown>[],
+      draftsEnabled,
       joins,
       locale,
     })

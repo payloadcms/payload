@@ -45,3 +45,9 @@ export const collectionSlugs = [
   restrictedPostsSlug,
   restrictedCategoriesSlug,
 ]
+
+export const draftJoinProjectsSlug = 'draft-join-projects'
+export const draftJoinArticlesSlug = 'draft-join-articles'
+export const draftJoinNotesSlug = 'draft-join-notes'
+
+export const draftJoinWorkspacesSlug = 'draft-join-workspaces'
