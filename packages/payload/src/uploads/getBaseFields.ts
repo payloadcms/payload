@@ -6,7 +6,7 @@ import type { SanitizedUploadConfig } from './types.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { shouldRequestOriginal } from './isOriginalFileRequest.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
-import { transformStateSchema } from './transformState/transformStateSchema.js'
+import { getTransformStateSchema } from './transformState/transformStateSchema.js'
 import { validateTransformState } from './transformState/validateTransformState.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
@@ -204,7 +204,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       interfaceName: 'UploadTransforms',
       jsonSchema: {
         fileMatch: ['payload://upload-transforms'],
-        schema: transformStateSchema,
+        schema: getTransformStateSchema({ transformers: config.upload?.transformers ?? [] }),
         uri: 'payload://upload-transforms',
       },
       label: 'Transforms',

@@ -40,6 +40,37 @@ export const isVersionPublished = async ({
   )
 }
 
+/**
+ * Reads one dist-tag of a package. A 404 (package not on npm) or an absent tag is
+ * `undefined`; any other failure throws.
+ */
+export const getDistTag = async ({
+  fetchImpl = fetch,
+  name,
+  sleep = defaultSleep,
+  tag,
+}: {
+  fetchImpl?: typeof fetch
+  name: string
+  sleep?: (ms: number) => Promise<void>
+  tag: string
+}): Promise<string | undefined> => {
+  const res = await fetchWithRetry({
+    fetchImpl,
+    sleep,
+    url: `https://registry.npmjs.org/-/package/${name}/dist-tags`,
+  })
+  if (res.status === 404) {
+    return undefined
+  }
+  if (!res.ok) {
+    throw new Error(`Failed to read ${name} dist-tags from npm: ${res.status} ${res.statusText}`)
+  }
+  const distTags: Record<string, unknown> = await res.json()
+  const version = distTags[tag]
+  return typeof version === 'string' ? version : undefined
+}
+
 export const getPackageRegistryVersions = async (): Promise<void> => {
   const packageDetails = await getPackageDetails(packagePublishList)
 
@@ -68,7 +99,7 @@ const baseBackoffMs = 1000
 /** Bounds a stalled registry connection; a timed-out attempt counts as a network error. */
 const attemptTimeoutMs = 15_000
 
-const defaultSleep = (ms: number): Promise<void> =>
+export const defaultSleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms))
 
 const isTransientStatus = (status: number): boolean => status === 429 || status >= 500
@@ -79,7 +110,7 @@ const isTransientStatus = (status: number): boolean => status === 429 || status 
  * run out, the last transient response is returned (so the caller throws on its status)
  * or the last network error is rethrown, so a persistent failure is never swallowed.
  */
-const fetchWithRetry = async ({
+export const fetchWithRetry = async ({
   fetchImpl,
   sleep,
   url,

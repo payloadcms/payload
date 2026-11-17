@@ -34,7 +34,7 @@ const runPipeline = (
     ...makeDocs(),
     getOptions: () => undefined,
     originalFile: new File(['original'], 'logo.png'),
-    req: {} as PayloadRequest,
+    req: { payload: { config: { upload: { transformers: [] } } } } as unknown as PayloadRequest,
     ...args,
   })
 

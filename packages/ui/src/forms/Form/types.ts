@@ -28,6 +28,8 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
+    /** Returns false after the form resets or unmounts, so callbacks can skip updates to the form. */
+    isCurrent?: () => boolean
   },
 ) => Promise<void> | void
 
@@ -123,6 +125,12 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    * @default false
    */
   skipValidation?: boolean
+  /**
+   * Ranks this submission in the form's request queue: `submit` before `autosave`.
+   * `autosave` also marks the form as processing in the background.
+   * @default 'submit'
+   */
+  submissionType?: 'autosave' | 'submit'
 }
 
 export type DispatchFields = React.Dispatch<any>
@@ -146,6 +154,11 @@ export type CreateFormData = (
    * @default true
    */
   options?: {
+    /**
+     * The URL the form data is sent to. Its locale and upload edits are kept with an upload that
+     * finishes the save in the background.
+     */
+    action?: string
     /**
      * If provided, will use this instead of of derived data from the current form state.
      */
