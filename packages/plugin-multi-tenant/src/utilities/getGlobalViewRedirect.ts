@@ -54,14 +54,15 @@ export async function getGlobalViewRedirect({
     return unauthorized()
   }
 
+  const hasAccessToAllTenants = userHasAccessToAllTenants(user)
   const tenantOptions = await getTenantOptions({
+    hasAccessToAllTenants,
     payload,
     tenantsArrayFieldName,
     tenantsArrayTenantFieldName,
     tenantsCollectionSlug,
     useAsTitle,
     user,
-    userHasAccessToAllTenants,
   })
   const tenant =
     tenantOptions.find(({ value }) => String(value) === String(selectedTenant))?.value ||

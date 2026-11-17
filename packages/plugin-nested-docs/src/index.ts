@@ -12,9 +12,8 @@ import { getParents } from './utilities/getParents.js'
 
 export { createBreadcrumbsField, createParentField, getParents }
 
-export const nestedDocsPlugin =
-  (pluginConfig: NestedDocsPluginConfig): Plugin =>
-  (config) => ({
+export const nestedDocsPlugin = (pluginConfig: NestedDocsPluginConfig): Plugin => {
+  const plugin: Plugin = (config) => ({
     ...config,
     collections: (config.collections || []).map((collection) => {
       if (pluginConfig.collections.indexOf(collection.slug) > -1) {
@@ -68,3 +67,6 @@ export const nestedDocsPlugin =
       return collection
     }),
   })
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-nested-docs' })
+}

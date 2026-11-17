@@ -9,9 +9,8 @@ import { translations } from './translations/index.js'
 
 export { redirectOptions, redirectTypes } from './redirectTypes.js'
 export { translations as redirectsTranslations } from './translations/index.js'
-export const redirectsPlugin =
-  (pluginConfig: RedirectsPluginConfig) =>
-  (incomingConfig: Config): Config => {
+export const redirectsPlugin = (pluginConfig: RedirectsPluginConfig) => {
+  const plugin = (incomingConfig: Config): Config => {
     // Merge translations FIRST (before building fields)
     if (!incomingConfig.i18n) {
       incomingConfig.i18n = {}
@@ -125,3 +124,6 @@ export const redirectsPlugin =
       collections: [...(incomingConfig?.collections || []), redirectsCollection],
     }
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-redirects' })
+}

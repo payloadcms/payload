@@ -20,9 +20,10 @@ import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.j
 import { combineFilters } from './utilities/combineFilters.js'
 import { miniChalk } from './utilities/miniChalk.js'
 
-export const multiTenantPlugin =
-  <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
-  (incomingConfig: Config): Config => {
+export const multiTenantPlugin = <ConfigType>(
+  pluginConfig: MultiTenantPluginConfig<ConfigType>,
+) => {
+  const plugin = (incomingConfig: Config): Config => {
     if (pluginConfig.enabled === false) {
       return incomingConfig
     }
@@ -585,3 +586,6 @@ export const multiTenantPlugin =
 
     return incomingConfig
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-multi-tenant' })
+}

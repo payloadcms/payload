@@ -2,6 +2,7 @@ import type { Endpoint } from '../../config/types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
 import { handleSchedules } from '../operations/handleSchedules/index.js'
+import { ignoreCrossSiteNavigationUser } from './ignoreCrossSiteNavigationUser.js'
 import { configHasJobs } from './run.js'
 
 /**
@@ -21,6 +22,8 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
         { status: 200 },
       )
     }
+
+    ignoreCrossSiteNavigationUser(req)
 
     const accessFn = jobsConfig.access?.run ?? defaultAccess
 

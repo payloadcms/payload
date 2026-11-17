@@ -1154,9 +1154,12 @@ export const getPayload = async (
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
+  options = { ...options }
+
+  const cacheKey = options.key ?? 'default'
   let alreadyCachedSameConfig = false
 
-  let cached = _cached.get(options.key ?? 'default')
+  let cached = _cached.get(cacheKey)
   if (!cached) {
     cached = {
       initializedCrons: Boolean(options.cron),
@@ -1165,7 +1168,7 @@ export const getPayload = async (
       reload: false,
       ws: null,
     }
-    _cached.set(options.key ?? 'default', cached)
+    _cached.set(cacheKey, cached)
   } else {
     alreadyCachedSameConfig = true
   }
@@ -1265,6 +1268,12 @@ export const getPayload = async (
     }
   } catch (e) {
     cached.promise = null
+
+    // A failed attempt must not cause the next initialization to skip onInit.
+    if (_cached.get(cacheKey) === cached) {
+      _cached.delete(cacheKey)
+    }
+
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
     ;(e as { payloadInitError?: boolean }).payloadInitError = true
     throw e

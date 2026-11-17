@@ -83,11 +83,9 @@ runs:
     - name: Start Supabase
       id: supabase
       if: inputs.database == 'supabase'
-      uses: supabase/setup-cli@v1
+      uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
       with:
-        # Pinned instead of `latest` to skip setup-cli's GitHub API release lookup,
-        # which flakes on shared CI runners with "rate limit exceeded" (unauthenticated
-        # 60 req/hr limit). A fixed version short-circuits that call entirely.
+        # Keep the CLI version stable when upgrading the setup action.
         version: 2.104.0
 
     - name: Initialize Supabase

@@ -24,9 +24,8 @@ import { OverviewField } from './fields/Overview/index.js'
 import { PreviewField } from './fields/Preview/index.js'
 import { translations } from './translations/index.js'
 
-export const seoPlugin =
-  (pluginConfig: SEOPluginConfig) =>
-  (config: Config): Config => {
+export const seoPlugin = (pluginConfig: SEOPluginConfig) => {
+  const plugin = (config: Config): Config => {
     const defaultFields: Field[] = [
       OverviewField({}),
       MetaTitleField({
@@ -413,6 +412,9 @@ export const seoPlugin =
       },
     }
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-seo' })
+}
 
 const hasSEOGenerationField = ({
   config,

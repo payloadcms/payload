@@ -8,9 +8,10 @@ import { generateSearchCollection } from './Search/index.js'
 
 type CollectionAfterChangeHookArgs = Parameters<CollectionAfterChangeHook>[0]
 
-export const searchPlugin =
-  <ConfigTypes = unknown>(incomingPluginConfig: SearchPluginConfig<ConfigTypes>) =>
-  (config: Config): Config => {
+export const searchPlugin = <ConfigTypes = unknown>(
+  incomingPluginConfig: SearchPluginConfig<ConfigTypes>,
+) => {
+  const plugin = (config: Config): Config => {
     const { collections } = config
 
     // If the user defines `localize` to either true or false, use that
@@ -82,3 +83,6 @@ export const searchPlugin =
 
     return config
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-search' })
+}
