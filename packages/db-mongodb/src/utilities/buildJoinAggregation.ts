@@ -235,9 +235,7 @@ export const buildJoinAggregation = async ({
 
     aggregate.push({
       $addFields: {
-        [`${as}.hasNextPage`]: {
-          $gt: [{ $size: `$${as}.docs` }, pageEnd || Number.MAX_VALUE],
-        },
+        [`${as}.hasNextPage`]: limitJoin > 0 ? { $gt: [{ $size: `$${as}.docs` }, pageEnd] } : false,
       },
     })
 
