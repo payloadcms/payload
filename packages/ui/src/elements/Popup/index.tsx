@@ -786,51 +786,44 @@ export const Popup: React.FC<PopupProps> = (props) => {
       </div>
 
       <PopupContext value={{ closePopupChain, popupRef, popupRole, submenuScope }}>
-        <div
-          {...pointerIntent.contentProps}
-          aria-label={popupAriaLabel}
-          className={
-            active
-              ? [
-                  `${baseClass}__content`,
-                  `${baseClass}--size-${size}`,
-                  resolvedSide
-                    ? `${baseClass}--side-${resolvedSide}`
-                    : isOnTop
-                      ? `${baseClass}--v-top`
-                      : `${baseClass}--v-bottom`,
-                  portalClassName,
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-              : // Do not share any class names between active and disabled popups, to make sure
-                // tests do not accidentally target inactive popups.
-                `${baseClass}__hidden-content`
-          }
-          data-popup-id={id || undefined}
-          data-theme={theme === 'auto' ? undefined : theme}
-          id={contentId}
-          popover="manual"
-          ref={popupRef}
-          role={popupRole}
-        >
+        <ThemeProvider targetRef={popupRef} theme={theme === 'auto' ? undefined : theme}>
           <div
-            className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+            {...pointerIntent.contentProps}
+            aria-label={popupAriaLabel}
+            className={
+              active
+                ? [
+                    `${baseClass}__content`,
+                    `${baseClass}--size-${size}`,
+                    resolvedSide
+                      ? `${baseClass}--side-${resolvedSide}`
+                      : isOnTop
+                        ? `${baseClass}--v-top`
+                        : `${baseClass}--v-bottom`,
+                    portalClassName,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                : // Do not share any class names between active and disabled popups, to make sure
+                  // tests do not accidentally target inactive popups.
+                  `${baseClass}__hidden-content`
+            }
+            data-popup-id={id || undefined}
+            data-theme={theme === 'auto' ? undefined : theme}
+            id={contentId}
+            popover="manual"
+            ref={popupRef}
+            role={popupRole}
           >
-            {theme === 'auto' ? (
-              <>
-                {render?.({ close })}
-                {children}
-              </>
-            ) : (
-              <ThemeProvider theme={theme}>
-                {render?.({ close })}
-                {children}
-              </ThemeProvider>
-            )}
+            <div
+              className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+            >
+              {render?.({ close })}
+              {children}
+            </div>
+            {caret && !resolvedSide && <div className={`${baseClass}__caret`} />}
           </div>
-          {caret && !resolvedSide && <div className={`${baseClass}__caret`} />}
-        </div>
+        </ThemeProvider>
       </PopupContext>
     </div>
   )

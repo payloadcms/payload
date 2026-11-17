@@ -3,12 +3,12 @@ import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { VariableColorIcon } from '../../../icons/VariableColor/index.js'
-import { useTheme } from '../../../providers/Theme/index.js'
+import { useRootTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 
 export const ThemeMenuContent: React.FC = () => {
-  const { autoMode, setTheme, theme } = useTheme()
+  const { autoMode, setTheme, theme } = useRootTheme()
   const { t } = useTranslation()
 
   const options: { label: string; value: 'auto' | 'dark' | 'light' }[] = [

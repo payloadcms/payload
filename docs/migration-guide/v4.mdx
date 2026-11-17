@@ -26,6 +26,40 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ## Breaking Changes
 
+### Theme context distinguishes local overrides from root preferences
+
+`useTheme` now reads and updates the nearest provider. Use `useRootTheme` for root preference controls and all `setTheme('auto')` calls:
+
+```diff
+-import { useTheme } from '@payloadcms/ui'
++import { useRootTheme } from '@payloadcms/ui'
+
+-const { autoMode, setTheme, theme } = useTheme()
++const { autoMode, setTheme, theme } = useRootTheme()
+```
+
+Theme setters no longer accept an options argument. Remove the second argument from both methods:
+
+```diff
+-setTheme('dark', { scoped: true })
++setTheme('dark')
+
+-setHighContrastMode(true, { scoped: true })
++setHighContrastMode(true)
+```
+
+`ThemeProvider` now manages only local overrides, including outside the Admin. The host supplies initial theme and contrast values and handles saved preferences. To use local setters, bind the provider to the themed element with `targetRef`:
+
+```tsx
+<ThemeProvider targetRef={targetRef} theme="dark">
+  <div data-theme="dark" ref={targetRef}>
+    {children}
+  </div>
+</ThemeProvider>
+```
+
+Without `targetRef`, control the theme through the provider's props. See [theme hooks](../admin/react-hooks#usetheme) for usage.
+
 ### Form-state data utilities are renamed
 
 The shared form-state utilities exported from `payload/shared` now explicitly name their source:
@@ -1333,11 +1367,11 @@ The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/d
 
 The minimum supported Node.js version is now **24.22.3** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
-### Minimum supported Next.js version is now 16.4.1 ([#16537](https://github.com/payloadcms/payload/pull/16537))
+### Minimum supported Next.js version is now 16.4.5 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
-Older versions of Next.js are no longer supported. Update Next.js to **16.4.1** or newer within the `16.x` release line.
+Older versions of Next.js are no longer supported. Update Next.js to **16.4.5** or newer within the `16.x` release line.
 
-React and React DOM must satisfy `^19.3.1`. TanStack Start applications also require `@vitejs/plugin-rsc` `^0.5.38`. These minimums include the fixes for [GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3) and its [Next.js advisory](https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr).
+React and React DOM must satisfy `^19.3.1`. TanStack Start applications also require `@vitejs/plugin-rsc` `^0.5.38`. These minimums include the fixes for [GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3) and its [Next.js advisory](https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr). The Next.js minimum also includes the fixes from the [November 2026 Next.js security release](https://nextjs.org/blog/november-2026-security-release).
 
 ### Minimum supported TypeScript version is now 6.0.3 ([#16692](https://github.com/payloadcms/payload/pull/16692))
 

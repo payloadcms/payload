@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "4.0.0-beta.9",
+  "version": "4.0.0-beta.10",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -160,7 +160,7 @@
     "@guidepup/guidepup": "0.36.4",
     "@guidepup/playwright": "0.20.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "16.4.2",
+    "@next/bundle-analyzer": "16.4.6",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@payloadcms/oxlint-config": "workspace:*",
@@ -200,7 +200,7 @@
     "minimist": "1.2.8",
     "monaco-editor": "0.57.0",
     "mongoose": "9.11.4",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "node-gyp": "12.3.0",
     "open": "^10.1.0",
     "oxfmt": "0.73.0",
