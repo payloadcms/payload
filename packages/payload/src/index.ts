@@ -164,6 +164,7 @@ export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sess
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
+export { defaultAdminPanelUserAccess } from './auth/defaultAdminPanelUserAccess.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
