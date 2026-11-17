@@ -82,6 +82,8 @@ export interface Config {
     users: User;
     'nested-articles': NestedArticle;
     'page-folders': PageFolder;
+    'content-libraries': ContentLibrary;
+    'custom-libraries': CustomLibrary;
     'nested-pages': NestedPage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -94,6 +96,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'nested-articles': NestedArticlesSelect<false> | NestedArticlesSelect<true>;
     'page-folders': PageFoldersSelect<false> | PageFoldersSelect<true>;
+    'content-libraries': ContentLibrariesSelect<false> | ContentLibrariesSelect<true>;
+    'custom-libraries': CustomLibrariesSelect<false> | CustomLibrariesSelect<true>;
     'nested-pages': NestedPagesSelect<false> | NestedPagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -194,6 +198,7 @@ export interface NestedArticle {
   ancestor?: (number | null) | NestedArticle;
   title?: string | null;
   '_h_page-folders'?: (number | null) | PageFolder;
+  shelfParent?: (number | null) | ContentLibrary;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -216,6 +221,50 @@ export interface PageFolder {
   id: number;
   '_h_page-folders'?: (number | null) | PageFolder;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-libraries".
+ */
+export interface ContentLibrary {
+  id: number;
+  shelfParent?: (number | null) | ContentLibrary;
+  name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  acceptedTypes?: 'nested-articles'[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-libraries".
+ */
+export interface CustomLibrary {
+  id: number;
+  customParent?: (number | null) | CustomLibrary;
+  name?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -288,6 +337,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'page-folders';
         value: number | PageFolder;
+      } | null)
+    | ({
+        relationTo: 'content-libraries';
+        value: number | ContentLibrary;
+      } | null)
+    | ({
+        relationTo: 'custom-libraries';
+        value: number | CustomLibrary;
       } | null)
     | ({
         relationTo: 'nested-pages';
@@ -395,6 +452,7 @@ export interface NestedArticlesSelect<T extends boolean = true> {
   ancestor?: T;
   title?: T;
   '_h_page-folders'?: T;
+  shelfParent?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -410,6 +468,36 @@ export interface NestedArticlesSelect<T extends boolean = true> {
 export interface PageFoldersSelect<T extends boolean = true> {
   '_h_page-folders'?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-libraries_select".
+ */
+export interface ContentLibrariesSelect<T extends boolean = true> {
+  shelfParent?: T;
+  name?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  acceptedTypes?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-libraries_select".
+ */
+export interface CustomLibrariesSelect<T extends boolean = true> {
+  customParent?: T;
+  name?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -517,7 +605,8 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'nested-articles' | 'page-folders' | 'nested-pages';
+    relatedCollection:
+      'users' | 'nested-articles' | 'page-folders' | 'content-libraries' | 'custom-libraries' | 'nested-pages';
     where?:
       | {
           [k: string]: unknown;
@@ -539,7 +628,9 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'nested-articles' | 'page-folders' | 'nested-pages')[] | null;
+    excludedCollections?:
+      | ('users' | 'nested-articles' | 'page-folders' | 'content-libraries' | 'custom-libraries' | 'nested-pages')[]
+      | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -639,6 +730,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

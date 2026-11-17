@@ -13,7 +13,7 @@ import type {
 import type React from 'react'
 
 import { parseDocumentID } from 'payload'
-import { formatAdminURL, isNumber } from 'payload/shared'
+import { formatAdminURL, isNumber, supportsHierarchyContents } from 'payload/shared'
 
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
@@ -203,9 +203,11 @@ export const getRouteData = ({
         routeParams.collection = collectionConfig.slug
 
         if (
-          collectionConfig.hierarchy &&
-          (searchParams.view === 'hierarchy' ||
-            (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy'))
+          (supportsHierarchyContents({ collection: collectionConfig }) &&
+            collectionConfig.admin.components?.views?.list?.Component === undefined) ||
+          (collectionConfig.hierarchy &&
+            (searchParams.view === 'hierarchy' ||
+              (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy')))
         ) {
           ViewToRender = {
             Component: HierarchyView,

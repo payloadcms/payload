@@ -101,6 +101,7 @@ export {
   getHierarchyFieldName,
 } from '../hierarchy/constants.js'
 
+export { supportsHierarchyContents } from '../hierarchy/supportsHierarchyContents.js'
 export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
 export { instructionsCollectionSlug } from '../llm-instructions/shared.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'

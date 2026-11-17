@@ -24,6 +24,7 @@ export type HierarchyListHeaderProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   /** Whether the current user can update the current item. Hides the edit action when false. */
+  hasContentsBrowser?: boolean
   hasUpdatePermission?: boolean
   /** Icon to display in the move drawer */
   HierarchyIcon?: React.ReactNode
@@ -38,6 +39,7 @@ export function HierarchyListHeader({
   Description,
   disableBulkDelete,
   disableBulkEdit,
+  hasContentsBrowser,
   hasUpdatePermission = false,
   HierarchyIcon,
   i18n,
@@ -60,6 +62,7 @@ export function HierarchyListHeader({
         <DefaultListViewTabs
           collectionConfig={collectionConfig}
           config={config}
+          hasContentsBrowser={hasContentsBrowser}
           key="default-list-actions"
           viewType={viewType}
         />,

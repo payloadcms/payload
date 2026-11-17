@@ -14,20 +14,26 @@ import { Pill } from '../../../elements/Pill/index.js'
 import { TreeItem } from '../../../elements/Tree/TreeItem/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import '../../../elements/Table/index.css'
 import { getHierarchyListURL } from '../getHierarchyListURL.js'
 import { ContentsAction } from './ContentsAction/index.js'
+import { ContentsSelectRow } from './ContentsSelectRow/index.js'
+import { ContentsTable } from './ContentsTable/index.js'
+import { getVisibleDocuments } from './getVisibleDocuments.js'
 import { allSourcesKey, branchKey, useHierarchyContentsTree } from './useHierarchyContentsTree.js'
 import './index.css'
 
 export function HierarchyContentsTree({
   collectionSlug,
+  enableRowSelections = true,
   initialContents,
   selectedTypes,
   SmallIcon,
 }: {
   collectionSlug: string
+  enableRowSelections?: boolean
   initialContents: HierarchyContents
   selectedTypes: string[]
   SmallIcon?: React.ReactNode
@@ -42,7 +48,40 @@ export function HierarchyContentsTree({
   const { branches, container, expanded, isGroupExpanded, loadMore, toggle, toggleGroup } =
     useHierarchyContentsTree({ collectionSlug, initialContents })
 
+  const { registerVisibleDocuments } = useDocumentSelection()
+  const ownConfig = getEntityConfig({ collectionSlug })
+  const collectionSpecificFieldName =
+    typeof ownConfig.hierarchy === 'object' && ownConfig.hierarchy.collectionSpecific
+      ? ownConfig.hierarchy.collectionSpecific.fieldName
+      : undefined
   const parentID = initialContents.parentID
+  const visibleDocuments = React.useMemo(
+    () =>
+      getVisibleDocuments({
+        branches,
+        collectionSlug,
+        collectionSpecificFieldName,
+        expanded,
+        isGroupExpanded,
+        parentID,
+        selectedTypes,
+      }),
+    [
+      branches,
+      collectionSlug,
+      collectionSpecificFieldName,
+      expanded,
+      isGroupExpanded,
+      parentID,
+      selectedTypes,
+    ],
+  )
+
+  React.useLayoutEffect(() => {
+    if (enableRowSelections) {
+      registerVisibleDocuments?.({ documents: visibleDocuments })
+    }
+  }, [enableRowSelections, registerVisibleDocuments, visibleDocuments])
   const headingID = React.useId()
   const containerIcon = SmallIcon === undefined ? <DocumentIcon size={16} /> : SmallIcon
 
@@ -107,6 +146,7 @@ export function HierarchyContentsTree({
           action={action}
           hasAction={Boolean(hasAction)}
           hasError={Boolean(hasError)}
+          hasRowSelections={enableRowSelections}
           isPending={isPending}
           isSummary={isSummary}
           key={`action-${key}`}
@@ -150,6 +190,7 @@ export function HierarchyContentsTree({
     if (!sources.some((source) => source.docs.length > 0 || source.hasNextPage)) {
       return (
         <tr>
+          {enableRowSelections && <td data-column="_select" />}
           <td className="cell--linked">
             <TreeItem position={position}>
               <span role="status">{t('general:noResultsFound')}</span>
@@ -171,6 +212,7 @@ export function HierarchyContentsTree({
           <React.Fragment key={source.collectionSlug}>
             {isDocumentGroup && (
               <tr className="hierarchy-contents-tree__type" data-parent-id={id ?? 'root'}>
+                {enableRowSelections && <td data-column="_select" />}
                 <td className="cell--linked">
                   <TreeItem
                     hasChildren
@@ -230,6 +272,15 @@ export function HierarchyContentsTree({
                 return (
                   <React.Fragment key={key}>
                     <tr data-id={key}>
+                      {enableRowSelections && (
+                        <td data-column="_select">
+                          <ContentsSelectRow
+                            collectionSlug={source.collectionSlug}
+                            id={doc.id}
+                            title={title}
+                          />
+                        </td>
+                      )}
                       <td className="cell--linked">
                         <TreeItem
                           hasChildren={canExpand}
@@ -300,39 +351,29 @@ export function HierarchyContentsTree({
   }
 
   const renderTable = ({ rootSection }: { rootSection?: 'containers' | 'unassigned' } = {}) => (
-    <div
-      className={`table table--nested-docs${rootSection === 'unassigned' ? ' hierarchy-contents-tree__unassigned' : ''}`}
+    <ContentsTable
+      documents={visibleDocuments}
+      hasRowSelections={enableRowSelections}
+      hasSelectAll={rootSection !== 'unassigned'}
+      label={
+        rootSection === 'unassigned' ? t('general:unassigned') : labelFor({ slug: collectionSlug })
+      }
     >
-      <table
-        aria-label={
-          rootSection === 'unassigned'
-            ? t('general:unassigned')
-            : labelFor({ slug: collectionSlug })
-        }
-        cellPadding="0"
-        cellSpacing="0"
-      >
-        <thead>
-          <tr>
-            <th scope="col">{t('general:name')}</th>
-            <th scope="col">{t('version:type')}</th>
-            <th scope="col">{t('general:updatedAt')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderBranch({
-            id: parentID,
-            ancestorIDs: parentID === null ? [] : [String(parentID)],
-            indent: 0,
-            rootSection,
-          })}
-        </tbody>
-      </table>
-    </div>
+      {renderBranch({
+        id: parentID,
+        ancestorIDs: parentID === null ? [] : [String(parentID)],
+        indent: 0,
+        rootSection,
+      })}
+    </ContentsTable>
   )
 
   return (
-    <div className="hierarchy-contents-tree" ref={container}>
+    <div
+      className="hierarchy-contents-tree"
+      data-row-selections={enableRowSelections}
+      ref={container}
+    >
       {parentID === null ? (
         <>
           <section

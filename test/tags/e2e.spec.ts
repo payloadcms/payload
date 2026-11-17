@@ -136,6 +136,18 @@ test.describe('Tags', () => {
     await page.unrouteAll()
   })
 
+  test('should retain the separate All and By Tag views for multi-assignment tags', async () => {
+    await page.goto(`${tagsURL.list}?view=all`)
+    await expect(page.getByRole('button', { name: 'All Tags', exact: true })).toBeDisabled()
+    await expect(page.locator('#hierarchy-view-pill')).toBeVisible()
+    await expect(page.getByRole('radio', { name: 'Tree', exact: true })).toHaveCount(0)
+    await page.locator('#hierarchy-view-pill').click()
+    await expect(page).toHaveURL(/view=hierarchy/)
+    await expect(page.locator('#hierarchy-view-pill')).toBeDisabled()
+    await expect(page.getByRole('radio', { name: 'Tree', exact: true })).toHaveCount(0)
+    await page.getByRole('button', { name: 'All Tags', exact: true }).click()
+  })
+
   test.describe('hierarchy relationship field', () => {
     test('should apply, cancel, reopen, and clear Tags field selections', async () => {
       const post = await payload.create({

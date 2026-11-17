@@ -68,6 +68,7 @@ export function DefaultListView(props: ListViewClientProps) {
     documentURLs,
     enableRowSelections,
     groupedData,
+    hasContentsBrowser,
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
@@ -444,6 +445,7 @@ export function DefaultListView(props: ListViewClientProps) {
               disableBulkDelete={disableBulkDelete}
               disableBulkEdit={disableBulkEdit}
               enableRowSelections={enableRowSelections}
+              hasContentsBrowser={hasContentsBrowser}
               hasCreatePermission={hasCreatePermission}
               hasDeletePermission={hasDeletePermission}
               hasTrashPermission={hasTrashPermission}

@@ -16,13 +16,19 @@ import type {
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { canReadNestedDocsTree, docAccessOperation, getNestedDocsTreeMetadata } from 'payload'
+import {
+  canReadNestedDocsTree,
+  docAccessOperation,
+  getNestedDocsTreeMetadata,
+  parseDocumentID,
+} from 'payload'
 import {
   appendDateTimezoneSelectFields,
   combineWhereConstraints,
   formatAdminURL,
   isNumber,
   mergeListSearchAndWhere,
+  supportsHierarchyContents,
   transformColumnsToPreferences,
   transformColumnsToSearchParams,
 } from 'payload/shared'
@@ -53,6 +59,7 @@ import { getPreferences, upsertPreferences } from '../../utilities/upsertPrefere
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
+import { normalizeHierarchyParentID } from './normalizeHierarchyParentID.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
@@ -150,6 +157,12 @@ export const renderListView = async (
 
   const hasTreeLayout =
     canReadNestedDocsTree({ collectionConfig }) && viewType === 'list' && !drawerSlug
+  const hasContentsBrowser =
+    supportsHierarchyContents({ collection: collectionConfig }) &&
+    !drawerSlug &&
+    !ComponentOverride &&
+    collectionConfig.admin.components?.views?.list?.Component === undefined
+  const hasHierarchyContentsTreeLayout = hasContentsBrowser && viewType === 'hierarchy'
   let query: ListQuery = { ...(queryFromArgs || queryFromReq) }
 
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
@@ -208,6 +221,10 @@ export const renderListView = async (
             ? 'grid'
             : 'table',
     }
+  }
+
+  if (hasHierarchyContentsTreeLayout && collectionPreferences.documentLayout === undefined) {
+    collectionPreferences = { ...collectionPreferences, documentLayout: 'tree' }
   }
 
   const shouldApplyPresetDefaults =
@@ -409,25 +426,16 @@ export const renderListView = async (
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
   const isHierarchyView = viewType === 'hierarchy'
-  const hasHierarchyContentsTreeLayout = Boolean(
-    isHierarchyCollection &&
-    isHierarchyView &&
-    !drawerSlug &&
-    typeof collectionConfig.hierarchy === 'object' &&
-    collectionConfig.hierarchy.allowHasMany === false,
-  )
+
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
-    const parentParam = searchParams?.[hierarchyParentFieldName]
-    if (parentParam === 'null' || parentParam === undefined) {
-      hierarchyParentId = null
-    } else if (typeof parentParam === 'string') {
-      hierarchyParentId =
-        payload.db.defaultIDType === 'number' && isNumber(parentParam)
-          ? Number(parentParam)
-          : parentParam
-    }
+    const parentParam = normalizeHierarchyParentID({
+      value: searchParams?.[hierarchyParentFieldName],
+    })
+
+    hierarchyParentId =
+      parentParam === null ? null : parseDocumentID({ id: parentParam, collectionSlug, payload })
   }
 
   let currentHierarchyItem: CurrentHierarchyItem | undefined
@@ -468,8 +476,13 @@ export const renderListView = async (
   let hierarchyData: HierarchyViewData | undefined
   let nestedDocRows: Record<string, NestedDocRow> | undefined
 
+  const shouldLoadHierarchyContents =
+    hasHierarchyContentsTreeLayout &&
+    collectionPreferences.documentLayout === 'tree' &&
+    !query?.search
+
   try {
-    if (query.groupBy) {
+    if (!shouldLoadHierarchyContents && query.groupBy) {
       ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
         clientConfig,
@@ -501,7 +514,7 @@ export const renderListView = async (
         data,
         req,
       })
-    } else {
+    } else if (!shouldLoadHierarchyContents) {
       data = await req.payload.find({
         collection: collectionSlug,
         depth: thumbnailFieldName ? 1 : 0,
@@ -616,10 +629,7 @@ export const renderListView = async (
       permissions,
       req,
       search: typeof query?.search === 'string' ? query.search : undefined,
-      shouldLoadHierarchyContents:
-        collectionPreferences?.documentLayout === 'tree' &&
-        hasHierarchyContentsTreeLayout &&
-        !query?.search,
+      shouldLoadHierarchyContents,
       typeFilter,
       user,
     })
@@ -748,6 +758,7 @@ export const renderListView = async (
       documentURLs,
       enableRowSelections,
       groupedData,
+      hasContentsBrowser,
       hasCreatePermission,
       hasDeletePermission,
       hasTrashPermission,

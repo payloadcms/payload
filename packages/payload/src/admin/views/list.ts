@@ -100,6 +100,7 @@ export type ListViewClientProps = {
   documentURLs?: Record<string, null | string>
   enableRowSelections?: boolean
   groupedData?: ListViewGroup[]
+  hasContentsBrowser?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean

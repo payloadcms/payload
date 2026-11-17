@@ -1491,6 +1491,138 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Hierarchy Tenant Filtering', () => {
+    test('should clear cached mixed-tree rows and selection when the selected tenant changes', async () => {
+      test.setTimeout(TEST_TIMEOUT_LONG)
+
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      const { docs: folders } = await payload.find({
+        collection: foldersSlug,
+        depth: 0,
+        overrideAccess: true,
+        where: { name: { in: ['Blue Dog Documents', 'Steel Cat Documents'] } },
+      })
+      const { docs: tenants } = await payload.find({
+        collection: tenantsSlug,
+        depth: 0,
+        overrideAccess: true,
+        where: { name: { in: ['Blue Dog', 'Steel Cat'] } },
+      })
+      const createdIDs: (number | string)[] = []
+
+      try {
+        for (const tenantName of ['Blue Dog', 'Steel Cat']) {
+          const folder = folders.find(({ name }) => name === `${tenantName} Documents`)!
+          const tenant = tenants.find(({ name }) => name === tenantName)!
+
+          for (let index = 1; index <= 11; index++) {
+            const doc = await payload.create({
+              collection: menuItemsSlug,
+              data: {
+                folder: folder.id,
+                name: `QA ${tenantName} ${String(index).padStart(2, '0')}`,
+                tenant: tenant.id,
+              },
+              overrideAccess: true,
+            })
+            createdIDs.push(doc.id)
+          }
+        }
+
+        const blueFolder = folders.find(({ name }) => name === 'Blue Dog Documents')!
+        const steelFolder = folders.find(({ name }) => name === 'Steel Cat Documents')!
+        const [blueItems, steelItems] = await Promise.all(
+          [blueFolder, steelFolder].map(({ id }) =>
+            payload.find({
+              collection: menuItemsSlug,
+              limit: 0,
+              overrideAccess: true,
+              where: { folder: { equals: id } },
+            }),
+          ),
+        )
+
+        await setTenantFilter({ page, tenant: 'Steel Cat', urlUtil: foldersURL })
+        await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+        const tree = page.locator('.hierarchy-contents-tree')
+
+        await expect(
+          tree.getByRole('link', { name: 'Steel Cat Documents', exact: true }),
+        ).toBeVisible()
+        await setTenantFilter({ page, tenant: 'Blue Dog' })
+        await expect(
+          tree.getByRole('link', { name: 'Blue Dog Documents', exact: true }),
+        ).toBeVisible()
+        await expect(
+          tree.getByRole('link', { name: 'Steel Cat Documents', exact: true }),
+        ).toHaveCount(0)
+        await tree.getByRole('button', { name: 'Expand: Blue Dog Documents', exact: true }).click()
+        await tree
+          .locator(`.hierarchy-contents-tree__type[data-parent-id="${blueFolder.id}"]`)
+          .getByRole('button', { name: 'Expand: Food Items', exact: true })
+          .click()
+        await expect(
+          tree.getByRole('status').filter({ hasText: `10 of ${blueItems.totalDocs} Food Items` }),
+        ).toBeVisible()
+        await tree
+          .getByRole('button', { name: 'Load more: Food Items (Blue Dog Documents)', exact: true })
+          .click()
+        await expect(
+          tree
+            .getByRole('status')
+            .filter({ hasText: `${blueItems.totalDocs} of ${blueItems.totalDocs} Food Items` }),
+        ).toBeVisible()
+        await tree
+          .getByRole('row')
+          .filter({ has: page.getByRole('link', { name: 'QA Blue Dog 01', exact: true }) })
+          .getByRole('checkbox')
+          .check()
+        await expect(page.locator('.list-selection__count')).toContainText(/1\s+selected/i)
+
+        await setTenantFilter({ page, tenant: 'Steel Cat' })
+        await expect(
+          tree.getByRole('link', { name: 'Steel Cat Documents', exact: true }),
+        ).toBeVisible()
+        await expect(
+          tree.getByRole('link', { name: 'Blue Dog Documents', exact: true }),
+        ).toHaveCount(0)
+        await expect(tree.getByRole('link', { name: /^QA Blue Dog/ })).toHaveCount(0)
+        await expect(page.locator('.list-selection__count')).toHaveCount(0)
+        await expect(
+          tree
+            .getByRole('status')
+            .filter({ hasText: `${blueItems.totalDocs} of ${blueItems.totalDocs} Food Items` }),
+        ).toHaveCount(0)
+
+        await tree.getByRole('button', { name: 'Expand: Steel Cat Documents', exact: true }).click()
+        await tree
+          .locator(`.hierarchy-contents-tree__type[data-parent-id="${steelFolder.id}"]`)
+          .getByRole('button', { name: 'Expand: Food Items', exact: true })
+          .click()
+        await expect(
+          tree.getByRole('status').filter({ hasText: `10 of ${steelItems.totalDocs} Food Items` }),
+        ).toBeVisible()
+        await tree
+          .getByRole('button', { name: 'Load more: Food Items (Steel Cat Documents)', exact: true })
+          .click()
+        await expect(tree.getByRole('link', { name: 'QA Steel Cat 11', exact: true })).toBeVisible()
+        await expect(
+          tree
+            .getByRole('status')
+            .filter({ hasText: `${steelItems.totalDocs} of ${steelItems.totalDocs} Food Items` }),
+        ).toBeVisible()
+        await expect(tree.getByRole('link', { name: /^QA Blue Dog/ })).toHaveCount(0)
+        await expect(page.locator('.list-selection__count')).toHaveCount(0)
+      } finally {
+        if (createdIDs.length > 0) {
+          await payload.delete({
+            collection: menuItemsSlug,
+            overrideAccess: true,
+            where: { id: { in: createdIDs } },
+          })
+        }
+      }
+    })
+
     test('should filter hierarchy sidebar tree by selected tenant', async () => {
       await loginClientSide({
         data: credentials.admin,
@@ -1533,8 +1665,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: foldersURL,
       })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       // The list table should only show Steel Cat folders
       await expect(
@@ -1568,8 +1699,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: foldersURL,
       })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       // Navigate into a Blue Dog folder by clicking the navigation link
       await page
@@ -1620,8 +1750,7 @@ test.describe('Multi Tenant', () => {
       await page.goto(foldersURL.list)
       await clearTenantFilter({ page })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       // The list table should show folders from all tenants
       await expect(
@@ -1655,8 +1784,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: foldersURL,
       })
 
-      // Switch to By Folder tab
-      await page.locator('#hierarchy-view-pill').click()
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
 
       await expect(
         page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {

@@ -3,8 +3,17 @@
 import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { supportsHierarchyContents } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
@@ -14,10 +23,13 @@ import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.
 import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { Dots } from '../../icons/Dots/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
@@ -28,6 +40,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getHierarchyListURL } from './getHierarchyListURL.js'
 import { HierarchyContentsTree } from './HierarchyContentsTree/index.js'
+import { useHierarchyContentsSelectionScope } from './HierarchyContentsTree/useHierarchyContentsSelectionScope.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
@@ -38,23 +51,45 @@ const baseClass = 'hierarchy-list'
 export function HierarchyListView(props: ListViewClientProps) {
   const {
     AfterList,
+    AfterListTable,
     baseFilter,
+    beforeActions,
     BeforeList,
+    BeforeListTable,
     collectionSlug,
     currentHierarchyItem,
     Description,
+    disableBulkDelete,
+    disableBulkEdit,
     documentLayout,
+    enableRowSelections,
+    hasContentsBrowser,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
     HierarchySmallIcon,
+    listMenuItems,
+    NoResults,
     viewType,
   } = props
 
   const router = useRouter()
   const { setPreference } = usePreferences()
+  const { user } = useAuth()
   const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
   const searchParams = useSearchParams()
+  const [isChangingLayout, startLayoutTransition] = useTransition()
+  const layoutOrigin = useMemo(() => ({}), [collectionSlug, searchParams])
+  const activeLayoutOrigin = useRef<null | object>(layoutOrigin)
+  activeLayoutOrigin.current = layoutOrigin
+  useEffect(() => {
+    activeLayoutOrigin.current = layoutOrigin
+    return () => {
+      if (activeLayoutOrigin.current === layoutOrigin) {
+        activeLayoutOrigin.current = null
+      }
+    }
+  }, [layoutOrigin])
   const { startRouteTransition } = useRouteTransition()
 
   const { allowCreate, isInDrawer } = useListDrawerContext()
@@ -79,7 +114,8 @@ export function HierarchyListView(props: ListViewClientProps) {
       ? collectionConfig.hierarchy
       : undefined
   const parentFieldName = hierarchyConfig?.parentFieldName
-  const hasTreeLayout = hierarchyConfig?.allowHasMany === false && !collectionConfig.nestedDocs
+  const hasTreeLayout =
+    hasContentsBrowser ?? supportsHierarchyContents({ collection: collectionConfig })
 
   const { i18n, t } = useTranslation()
   const collectionLabel = getTranslation(labels?.plural, i18n)
@@ -94,13 +130,18 @@ export function HierarchyListView(props: ListViewClientProps) {
     refreshTree(collectionSlug)
   }, [clearRouteCache, collectionSlug, refreshTree])
 
-  const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+  const handleLayoutChange = (nextLayout: DocumentLayout) => {
     setLayout(nextLayout)
-    await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
-      ...(preferences ?? {}),
-      documentLayout: nextLayout,
-    }))
-    router.refresh()
+    startLayoutTransition(async () => {
+      await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+        ...(preferences ?? {}),
+        documentLayout: nextLayout,
+      }))
+      if (activeLayoutOrigin.current !== layoutOrigin) {
+        return
+      }
+      startLayoutTransition(() => router.refresh())
+    })
   }
 
   // Get search from URL params
@@ -321,22 +362,54 @@ export function HierarchyListView(props: ListViewClientProps) {
       }))
   }, [hierarchyData?.relatedDocumentsByCollection, selectedTypes])
 
-  const collectionData = hierarchyData
-    ? {
-        [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-        ...Object.fromEntries(
-          Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
-            ([slug, related]) => [slug, { docs: related.result.docs }],
-          ),
-        ),
-      }
-    : {}
+  const isContentsTree =
+    layout === 'tree' && hasTreeLayout && !searchFromURL && Boolean(hierarchyData?.contents)
+
+  const hasNoResults =
+    parentId === null &&
+    Boolean(NoResults) &&
+    hierarchyData !== undefined &&
+    (isContentsTree && hierarchyData.contents
+      ? hierarchyData.contents.sources.every(
+          (source) => source.docs.length === 0 && !source.hasNextPage,
+        )
+      : hierarchyData.childrenData.docs.length === 0 &&
+        !hierarchyData.childrenData.hasNextPage &&
+        Object.values(hierarchyData.relatedDocumentsByCollection).every(
+          (source) => source.result.docs.length === 0 && !source.result.hasNextPage,
+        ))
+
+  const selectionScopeKey = useHierarchyContentsSelectionScope({
+    collectionSlug,
+    contents: hierarchyData?.contents,
+    isEnabled: isContentsTree && !hasNoResults && enableRowSelections !== false,
+    parentID: parentId,
+  })
+
+  const collectionData = useMemo(
+    () =>
+      hierarchyData
+        ? {
+            [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+            ...Object.fromEntries(
+              Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
+                ([slug, related]) => [slug, { docs: related.result.docs }],
+              ),
+            ),
+          }
+        : {},
+    [collectionSlug, hierarchyData],
+  )
 
   return (
     <Fragment>
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
-        <DocumentSelectionProvider collectionData={collectionData}>
+        <DocumentSelectionProvider
+          collectionData={collectionData}
+          currentUserId={user ? String(user.id) : undefined}
+          selectionScopeKey={selectionScopeKey}
+        >
           <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
@@ -366,6 +439,9 @@ export function HierarchyListView(props: ListViewClientProps) {
                   ) : null}
                 </React.Fragment>
               }
+              disableBulkDelete={disableBulkDelete}
+              disableBulkEdit={disableBulkEdit}
+              hasContentsBrowser={hasContentsBrowser}
               hasUpdatePermission={currentHierarchyItem?.hasUpdatePermission}
               HierarchyIcon={HierarchyIcon}
               i18n={i18n}
@@ -397,6 +473,22 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
+              {beforeActions}
+              {listMenuItems?.length ? (
+                <Popup
+                  button={<Dots ariaLabel={t('general:moreOptions')} />}
+                  horizontalAlign="right"
+                  id="hierarchy-list-menu"
+                  popupType="menu"
+                  verticalAlign="bottom"
+                >
+                  <PopupList.ButtonGroup>
+                    {listMenuItems.map((item, index) => (
+                      <Fragment key={`hierarchy-list-menu-${index}`}>{item}</Fragment>
+                    ))}
+                  </PopupList.ButtonGroup>
+                </Popup>
+              ) : null}
               {!isInDrawer && (
                 <LayoutToggle
                   hasTreeLayout={hasTreeLayout}
@@ -406,35 +498,42 @@ export function HierarchyListView(props: ListViewClientProps) {
               )}
             </ListControlsBar>
 
-            {layout === 'tree' && hasTreeLayout && !searchFromURL && hierarchyData?.contents ? (
-              <HierarchyContentsTree
-                collectionSlug={collectionSlug}
-                initialContents={hierarchyData.contents}
-                selectedTypes={selectedTypes}
-                SmallIcon={HierarchySmallIcon}
-              />
-            ) : (
-              <HierarchyTable
-                baseFilter={baseFilter}
-                childrenData={filteredChildrenData}
-                collections={collections}
-                collectionSlug={collectionSlug}
-                hasCreatePermission={hasCreatePermission}
-                HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
-                hierarchyLabel={collectionLabel}
-                key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
-                  hierarchyData?.relatedDocumentsByCollection || {},
-                )
-                  .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
-                  .join(',')}`}
-                layout={layout === 'tree' ? 'table' : layout}
-                parentFieldName={parentFieldName}
-                parentId={parentId}
-                relatedGroups={filteredRelatedGroups}
-                search={searchFromURL}
-                useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-              />
-            )}
+            <div aria-busy={isChangingLayout || undefined} inert={isChangingLayout}>
+              {BeforeListTable}
+              {hasNoResults ? (
+                NoResults
+              ) : isContentsTree && hierarchyData?.contents ? (
+                <HierarchyContentsTree
+                  collectionSlug={collectionSlug}
+                  enableRowSelections={enableRowSelections}
+                  initialContents={hierarchyData.contents}
+                  selectedTypes={selectedTypes}
+                  SmallIcon={HierarchySmallIcon}
+                />
+              ) : (
+                <HierarchyTable
+                  baseFilter={baseFilter}
+                  childrenData={filteredChildrenData}
+                  collections={collections}
+                  collectionSlug={collectionSlug}
+                  hasCreatePermission={hasCreatePermission}
+                  HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
+                  hierarchyLabel={collectionLabel}
+                  key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
+                    hierarchyData?.relatedDocumentsByCollection || {},
+                  )
+                    .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
+                    .join(',')}`}
+                  layout={layout === 'tree' ? 'table' : layout}
+                  parentFieldName={parentFieldName}
+                  parentId={parentId}
+                  relatedGroups={filteredRelatedGroups}
+                  search={searchFromURL}
+                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                />
+              )}
+              {AfterListTable}
+            </div>
           </div>
         </DocumentSelectionProvider>
         {AfterList}
