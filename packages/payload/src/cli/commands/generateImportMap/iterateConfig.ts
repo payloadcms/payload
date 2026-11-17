@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from '../../../config/types.js'
+import type { SanitizedConfig, WidgetControlNode } from '../../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './generateImportMap.js'
 
 import { isUserMenuSettingsGroup } from '../../../config/types.js'
@@ -109,7 +109,7 @@ export function iterateConfig({
         addToImportMap(dashboardWidget.preview.Component)
       }
       for (const control of dashboardWidget.controls ?? []) {
-        addToImportMap(control.Icon)
+        addWidgetControlToImportMap({ addToImportMap, control })
       }
       if (dashboardWidget.fields?.length) {
         genImportMapIterateFields({
@@ -157,4 +157,28 @@ export function iterateConfig({
       importMap,
     })
   }*/ // No need to do that here since in the sanitized editor config, this root editor is already added to the field editor - and we already process that in iterateFields
+}
+
+function addWidgetControlToImportMap({
+  addToImportMap,
+  control,
+}: {
+  addToImportMap: AddToImportMap
+  control: WidgetControlNode
+}) {
+  if ('Icon' in control) {
+    addToImportMap(control.Icon)
+  }
+  if ('options' in control) {
+    for (const option of control.options) {
+      if (typeof option !== 'string') {
+        addToImportMap(option.Icon)
+      }
+    }
+  }
+  if ('controls' in control) {
+    for (const child of control.controls) {
+      addWidgetControlToImportMap({ addToImportMap, control: child })
+    }
+  }
 }

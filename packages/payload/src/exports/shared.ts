@@ -40,7 +40,11 @@ export {
   generateNKeysBetween,
 } from '../config/orderable/fractional-indexing.js'
 export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
-export { createClientWidgetControls, getWidgetControlData } from '../config/widgetControls.js'
+export {
+  createClientWidgetControls,
+  getWidgetControlData,
+  getWidgetControlFields,
+} from '../config/widgetControls.js'
 export { combineQueries } from '../database/combineQueries.js'
 export { isNestedRelationshipQuery } from '../database/isNestedRelationshipQuery.js'
 
@@ -157,10 +161,10 @@ export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
 export { formatAdminURL, stripTrailingSlash } from '../utilities/formatAdminURL.js'
-
 export { formatErrors } from '../utilities/formatErrors.js'
 
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
+
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getBlockSelect } from '../utilities/getBlockSelect.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
@@ -173,13 +177,12 @@ export {
   isDateOnlyFilterValue,
 } from '../utilities/getDateOnlyComparison.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
-
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
+
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingDataFromFormState } from '../utilities/getSiblingDataFromFormState.js'
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
-
 export {
   getAutosaveInterval,
   getVersionsMax,
@@ -210,6 +213,8 @@ export {
   hoistQueryParamsToAnd,
   mergeListSearchAndWhere,
 } from '../utilities/mergeListSearchAndWhere.js'
+
+export { normalizeSliderValue } from '../utilities/normalizeSliderValue.js'
 
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
 

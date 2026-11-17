@@ -929,24 +929,105 @@ export type AfterErrorHook = (
 
 export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
 
+type WidgetControlBase = {
+  label?: LabelFunction | StaticLabel
+  /** The key in widgetData that this control reads and updates. */
+  name: string
+}
+
+export type WidgetControlOption =
+  | { Icon?: PayloadComponent; label: LabelFunction | StaticLabel; value: string }
+  | string
+
 export type WidgetSelectControl = {
   defaultValue?: string
   /** Optional decorative icon rendered before the selected value. */
   Icon?: PayloadComponent
-  label?: LabelFunction | StaticLabel
-  /** The key in widgetData that this control reads and updates. */
-  name: string
-  options: ({ label: LabelFunction | StaticLabel; value: string } | string)[]
+  options: WidgetControlOption[]
   type: 'select'
+} & WidgetControlBase
+
+export type WidgetTextControl = {
+  defaultValue?: string
+  placeholder?: LabelFunction | StaticLabel
+  type: 'text'
+} & WidgetControlBase
+
+export type WidgetNumberControl = {
+  defaultValue?: number
+  placeholder?: LabelFunction | StaticLabel
+  step?: number
+  type: 'number'
+} & (
+  | {
+      max: number
+      min: number
+      /** Add a range slider, or hint markers for a stepped slider. Uses the same step as the number input. */
+      slider: { hints: number[] } | true
+    }
+  | { max?: number; min?: number; slider?: false }
+) &
+  WidgetControlBase
+
+export type WidgetSwitchControl = {
+  defaultValue?: boolean
+  type: 'switch'
+} & WidgetControlBase
+
+export type WidgetChoiceControl = {
+  defaultValue?: string
+  options: WidgetControlOption[]
+} & ({ type: 'menu' } | { type: 'segment' }) &
+  WidgetControlBase
+
+export type WidgetLeafControl =
+  | WidgetChoiceControl
+  | WidgetNumberControl
+  | WidgetSelectControl
+  | WidgetSwitchControl
+  | WidgetTextControl
+
+/** A visual section; it does not introduce a nesting level in widgetData. */
+export type WidgetGroupControl = {
+  controls: WidgetLeafControl[]
+  label?: LabelFunction | StaticLabel
+  type: 'group'
 }
 
-export type WidgetControl = WidgetSelectControl
+export type WidgetPopoutControl = {
+  controls: (WidgetGroupControl | WidgetLeafControl)[]
+  Icon?: PayloadComponent
+  label: LabelFunction | StaticLabel
+  type: 'popout'
+}
 
-export type ClientWidgetControl = {
-  Icon?: React.ReactNode
-  label?: StaticLabel
-  options: ({ label: StaticLabel; value: string } | string)[]
-} & Omit<WidgetSelectControl, 'Icon' | 'label' | 'options'>
+export type WidgetControl = WidgetPopoutControl | WidgetSelectControl
+export type WidgetControlNode = WidgetControl | WidgetGroupControl | WidgetLeafControl
+
+export type ClientWidgetControlOption =
+  | { Icon?: React.ReactNode; label: StaticLabel; value: string }
+  | string
+
+type ClientWidgetControlType<T> = T extends WidgetControlNode
+  ? {
+      [K in keyof T]: K extends 'Icon'
+        ? React.ReactNode
+        : K extends 'label' | 'placeholder'
+          ? StaticLabel
+          : K extends 'controls'
+            ? T[K] extends (infer Child)[]
+              ? ClientWidgetControlType<Child>[]
+              : never
+            : K extends 'options'
+              ? ClientWidgetControlOption[]
+              : T[K]
+    }
+  : never
+
+export type ClientWidgetControl = ClientWidgetControlType<WidgetControl>
+export type ClientWidgetControlNode = ClientWidgetControlType<WidgetControlNode>
+export type ClientWidgetLeafControl = ClientWidgetControlType<WidgetLeafControl>
+export type ClientWidgetPopoutControl = ClientWidgetControlType<WidgetPopoutControl>
 
 export type Widget = {
   Component: PayloadComponent

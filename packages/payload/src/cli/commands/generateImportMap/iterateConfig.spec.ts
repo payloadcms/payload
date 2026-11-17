@@ -56,3 +56,50 @@ it('should register a custom widget preview component', () => {
 
   expect(addToImportMap).toHaveBeenCalledWith(Preview)
 })
+
+it('should register icons in popouts and nested segment options', () => {
+  const addToImportMap = vi.fn()
+
+  iterateConfig({
+    addToImportMap,
+    baseDir: '',
+    importMap: {},
+    imports: {},
+    config: {
+      admin: {
+        dashboard: {
+          widgets: [
+            {
+              slug: 'test',
+              Component: './Widget',
+              controls: [
+                {
+                  type: 'popout',
+                  label: 'Options',
+                  Icon: './OptionsIcon',
+                  controls: [
+                    {
+                      type: 'group',
+                      controls: [
+                        {
+                          type: 'segment',
+                          name: 'align',
+                          options: [{ Icon: './AlignLeft', label: 'Left', value: 'left' }],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      collections: [],
+      globals: [],
+    } as unknown as SanitizedConfig,
+  })
+
+  expect(addToImportMap).toHaveBeenCalledWith('./OptionsIcon')
+  expect(addToImportMap).toHaveBeenCalledWith('./AlignLeft')
+})

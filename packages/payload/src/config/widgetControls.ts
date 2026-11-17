@@ -5,10 +5,19 @@ import { getTranslation } from '@payloadcms/translations'
 import { createElement } from 'react'
 
 import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
-import type { ClientWidgetControl, WidgetControl } from './types.js'
+import type {
+  ClientWidgetControl,
+  ClientWidgetControlNode,
+  PayloadComponent,
+  WidgetControl,
+  WidgetControlNode,
+  WidgetLeafControl,
+  WidgetNumberControl,
+} from './types.js'
 
 import { getFromImportMap } from '../cli/commands/generateImportMap/utilities/getFromImportMap.js'
 import { isReactServerComponentOrFunction } from '../utilities/isReactComponent.js'
+import { normalizeSliderValue } from '../utilities/normalizeSliderValue.js'
 
 export function createClientWidgetControls({
   controls,
@@ -19,47 +28,109 @@ export function createClientWidgetControls({
   i18n: I18nClient
   importMap: ImportMap
 }): ClientWidgetControl[] | undefined {
-  return controls?.map(({ Icon, ...control }) => {
-    const ResolvedIcon = Icon
+  const resolveIcon = ({ Icon }: { Icon?: PayloadComponent }) => {
+    const Component = Icon
       ? getFromImportMap<React.ComponentType>({ importMap, PayloadComponent: Icon })
       : undefined
-    const iconProps =
+    const props =
       typeof Icon === 'object'
         ? {
-            ...(ResolvedIcon && isReactServerComponentOrFunction(ResolvedIcon)
-              ? Icon.serverProps
-              : {}),
+            ...(Component && isReactServerComponentOrFunction(Component) ? Icon.serverProps : {}),
             ...Icon.clientProps,
           }
         : {}
 
-    return {
+    return Component ? createElement(Component, props) : undefined
+  }
+  const resolveControl = (control: WidgetControlNode): ClientWidgetControlNode => {
+    const result = {
       ...control,
-      ...(ResolvedIcon ? { Icon: createElement(ResolvedIcon, iconProps) } : {}),
+      ...('Icon' in control ? { Icon: resolveIcon({ Icon: control.Icon }) } : {}),
       label: control.label === undefined ? undefined : getTranslation(control.label, i18n),
-      options: control.options.map((option) =>
-        typeof option === 'string'
-          ? option
-          : { ...option, label: getTranslation(option.label, i18n) },
-      ),
+      ...('placeholder' in control && control.placeholder !== undefined
+        ? { placeholder: getTranslation(control.placeholder, i18n) }
+        : {}),
+      ...('controls' in control ? { controls: control.controls.map(resolveControl) } : {}),
+      ...('options' in control
+        ? {
+            options: control.options.map((option) =>
+              typeof option === 'string'
+                ? option
+                : {
+                    ...option,
+                    ...('Icon' in option ? { Icon: resolveIcon({ Icon: option.Icon }) } : {}),
+                    label: getTranslation(option.label, i18n),
+                  },
+            ),
+          }
+        : {}),
     }
-  })
+
+    return result as ClientWidgetControlNode
+  }
+
+  return controls?.map(resolveControl) as ClientWidgetControl[] | undefined
+}
+
+/** Collect value-bearing controls; groups and popouts are presentation only. */
+export function getWidgetControlFields({
+  controls,
+}: {
+  controls?: WidgetControlNode[]
+}): WidgetLeafControl[] {
+  return (
+    controls?.flatMap((control) =>
+      'controls' in control ? getWidgetControlFields({ controls: control.controls }) : [control],
+    ) ?? []
+  )
+}
+
+type ControlDefaults = {
+  controls?: ControlDefaults[]
+  defaultValue?: boolean | number | string
+  max?: number
+  min?: number
+  name?: string
+  slider?: WidgetNumberControl['slider']
+  step?: number
 }
 
 export function getWidgetControlData({
   controls,
   data = {},
 }: {
-  controls?: Pick<WidgetControl, 'defaultValue' | 'name'>[]
+  controls?: ControlDefaults[]
   data?: Record<string, unknown>
 }): Record<string, unknown> {
   const result = { ...data }
-
-  for (const control of controls ?? []) {
-    if (result[control.name] === undefined && control.defaultValue !== undefined) {
-      result[control.name] = control.defaultValue
+  const applyDefaults = ({ controls }: { controls?: ControlDefaults[] }) => {
+    for (const control of controls ?? []) {
+      if (control.controls) {
+        applyDefaults({ controls: control.controls })
+      } else if (
+        control.name &&
+        result[control.name] === undefined &&
+        control.defaultValue !== undefined
+      ) {
+        result[control.name] = control.defaultValue
+      }
+      if (
+        control.name &&
+        control.slider &&
+        typeof result[control.name] === 'number' &&
+        control.min !== undefined &&
+        control.max !== undefined
+      ) {
+        result[control.name] = normalizeSliderValue({
+          max: control.max,
+          min: control.min,
+          step: control.step ?? 1,
+          value: result[control.name] as number,
+        })
+      }
     }
   }
 
+  applyDefaults({ controls })
   return result
 }

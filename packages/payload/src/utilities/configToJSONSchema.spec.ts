@@ -8,6 +8,64 @@ import { configToJSONSchema, entityToStandaloneJSONSchema } from './configToJSON
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
+  it('should generate flat widget data for all grouped popout controls', () => {
+    const config = sanitizeConfig({
+      admin: {
+        dashboard: {
+          widgets: [
+            {
+              slug: 'popout',
+              Component: './Widget',
+              controls: [
+                {
+                  type: 'popout',
+                  label: 'Options',
+                  controls: [
+                    {
+                      type: 'group',
+                      label: 'General',
+                      controls: [
+                        { type: 'switch', name: 'visible', defaultValue: true },
+                        { type: 'text', name: 'caption' },
+                        {
+                          type: 'number',
+                          name: 'limit',
+                          min: 0,
+                          max: 15,
+                          step: 5,
+                          slider: { hints: [0, 5, 10, 15] },
+                        },
+                        { type: 'segment', name: 'align', options: ['left', 'right'] },
+                        { type: 'select', name: 'period', options: ['week', 'month'] },
+                        { type: 'menu', name: 'mode', options: ['list', 'grid'] },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      collections: [],
+    } as unknown as Config)
+    const { jsonSchema } = configToJSONSchema(config, 'text')
+    const data = jsonSchema.$defs['popout_widget'].properties.data as JSONSchema4
+
+    expect(Object.keys(data.properties)).toEqual([
+      'visible',
+      'caption',
+      'limit',
+      'align',
+      'period',
+      'mode',
+    ])
+    expect(data.properties.visible).toMatchObject({ type: ['boolean', 'null'] })
+    expect(data.properties.limit).toMatchObject({ type: ['number', 'null'] })
+    expect(data.properties.align).toMatchObject({ enum: ['left', 'right'] })
+    expect(data.properties.mode).toMatchObject({ enum: ['list', 'grid'] })
+  })
+
   it.each([true, false])(
     'should generate toolbar control data types with drawer fields: %s',
     (hasDrawerFields) => {
