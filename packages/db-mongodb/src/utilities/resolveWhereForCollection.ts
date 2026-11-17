@@ -94,7 +94,7 @@ function hasConfiguredFieldPath({
   for (let index = 1; index < segments.length; index++) {
     const container = getFieldByPath({ fields, path: segments.slice(0, index).join('.') })?.field
 
-    // A scalar cannot own nested fields, even if a sibling has the requested name.
+    // Each parent in the path must contain nested fields; a matching sibling does not count.
     if (!container || !('flattenedFields' in container)) {
       return false
     }
