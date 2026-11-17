@@ -472,3 +472,44 @@ test('should position a nested menu beside its parent and offset its top by its 
     Math.round(colorElement!.getBoundingClientRect().top - 8),
   )
 })
+
+test('should not open submenu when disabled on hover, click, or keyboard', async () => {
+  const screen = await render(
+    <Popup button="Root" popupType="menu" theme="auto">
+      <PopupList.MenuItem>
+        <Popup
+          disabled
+          hoverSubmenu
+          popupAriaLabel="Disabled submenu"
+          popupType="menu"
+          render={() => (
+            <PopupList.MenuItem>
+              <PopupList.Button onClick={() => {}}>Hidden Item</PopupList.Button>
+            </PopupList.MenuItem>
+          )}
+          renderButton={(buttonProps) => (
+            <PopupList.SubmenuTrigger buttonProps={buttonProps}>Disabled Menu</PopupList.SubmenuTrigger>
+          )}
+          side="right"
+          theme="auto"
+        />
+      </PopupList.MenuItem>
+    </Popup>,
+  )
+
+  await screen.getByRole('button', { name: 'Root' }).click()
+  const trigger = screen.getByRole('menuitem', { name: 'Disabled Menu' })
+
+  expect(trigger.element()).toHaveAttribute('disabled')
+  expect(trigger.element().getAttribute('aria-expanded')).toBe('false')
+
+  // Hovering should not open the submenu
+  await trigger.hover()
+  expect(trigger.element().getAttribute('aria-expanded')).toBe('false')
+  expect(screen.getByRole('menuitem', { name: 'Hidden Item' }).query()).toBeNull()
+
+  // Clicking should not open the submenu (use force: true to bypass Playwright's disabled actionability check)
+  await trigger.click({ force: true })
+  expect(trigger.element().getAttribute('aria-expanded')).toBe('false')
+  expect(screen.getByRole('menuitem', { name: 'Hidden Item' }).query()).toBeNull()
+})

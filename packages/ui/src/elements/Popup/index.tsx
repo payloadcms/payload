@@ -56,7 +56,10 @@ const POPUP_CONTENT_SELECTOR = `.${baseClass}__content, .${baseClass}__hidden-co
 
 const getMenuItems = (popup: HTMLElement): HTMLElement[] =>
   Array.from(popup.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR)).filter(
-    (item) => item.closest(POPUP_CONTENT_SELECTOR) === popup,
+    (item) =>
+      item.closest(POPUP_CONTENT_SELECTOR) === popup &&
+      !item.hasAttribute('disabled') &&
+      item.getAttribute('aria-disabled') !== 'true',
   )
 
 export type PopupProps = {
@@ -208,6 +211,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const setActive = useCallback(
     (isActive: boolean, viaKeyboard = false, coordinateParent = true) => {
       if (isActive) {
+        if (disabled) {
+          return
+        }
         openedViaKeyboardRef.current = viaKeyboard
         if (coordinateParent && isSubmenu) {
           parentPopup.submenuScope.requestOpen({
@@ -224,7 +230,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       }
       setActiveInternal(isActive)
     },
-    [contentId, isSubmenu, onToggleClose, onToggleOpen, parentPopup, submenuScope],
+    [contentId, disabled, isSubmenu, onToggleClose, onToggleOpen, parentPopup, submenuScope],
   )
 
   const closePopup = useCallback(
@@ -253,8 +259,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
   )
 
   const openFromParent = useCallback(
-    (viaKeyboard: boolean) => setActive(true, viaKeyboard, false),
-    [setActive],
+    (viaKeyboard: boolean) => {
+      if (disabled) {
+        return
+      }
+      setActive(true, viaKeyboard, false)
+    },
+    [disabled, setActive],
   )
 
   const closeFromPointer = useCallback(() => {
@@ -270,13 +281,18 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const pointerIntent = useSubmenuPointerIntent({
     active,
     contentRef: popupRef,
-    enabled: isSubmenu && hoverSubmenu,
+    disabled,
+    enabled: isSubmenu && hoverSubmenu && !disabled,
     onClose: closeFromPointer,
-    onOpen: () =>
+    onOpen: () => {
+      if (disabled) {
+        return
+      }
       parentPopup?.submenuScope.requestOpen({
         id: contentId,
         viaPointer: true,
-      }),
+      })
+    },
     onSafeAreaExpire: ({ x, y }) => {
       const target = document.elementFromPoint(x, y)
       const parentContent = parentPopup?.popupRef.current
@@ -740,10 +756,18 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [active])
 
   useEffect(() => {
-    if (forceOpen !== undefined) {
-      setActive(forceOpen)
+    if (disabled && active) {
+      setActive(false)
     }
-  }, [forceOpen, setActive])
+  }, [active, disabled, setActive])
+
+  useEffect(() => {
+    if (forceOpen !== undefined) {
+      if (!disabled || !forceOpen) {
+        setActive(forceOpen)
+      }
+    }
+  }, [disabled, forceOpen, setActive])
 
   const Trigger = (
     <PopupTrigger
@@ -769,8 +793,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
         {showOnHover ? (
           <div
             className={`${baseClass}__on-hover-watch`}
-            onMouseEnter={() => setActive(true)}
-            onMouseLeave={() => setActive(false)}
+            onMouseEnter={() => !disabled && setActive(true)}
+            onMouseLeave={() => !disabled && setActive(false)}
             role="button"
             tabIndex={0}
           >
