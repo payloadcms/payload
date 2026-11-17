@@ -40,18 +40,8 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
 
   for (const field of fields) {
     switch (field.type) {
-      case 'text':
-      case 'number':
-      case 'textarea':
-        if (field.name === titleFieldName) {
-          return {
-            localized: Boolean(field.localized),
-            titleFieldName: field.name,
-          }
-        }
-        break
-      case 'row':
       case 'collapsible':
+      case 'row':
         {
           const result = iterateFields({ fields: field.fields, titleFieldName })
           if (result) {
@@ -64,6 +54,16 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
           const result = iterateFields({ fields: field.fields, titleFieldName })
           if (result) {
             titleField = result
+          }
+        }
+        break
+      case 'number':
+      case 'text':
+      case 'textarea':
+        if (field.name === titleFieldName) {
+          return {
+            localized: Boolean(field.localized),
+            titleFieldName: field.name,
           }
         }
         break
