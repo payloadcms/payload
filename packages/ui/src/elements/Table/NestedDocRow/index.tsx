@@ -17,8 +17,8 @@ import { TableRow } from '../TableRow/index.js'
 export function NestedDocRow({
   columns,
   documentsByID,
+  hasCellNavigation,
   hasRowSelection,
-  isGrid,
   isLastDocument,
   label,
   row,
@@ -50,8 +50,8 @@ export function NestedDocRow({
     <>
       <TableRow
         columns={columns}
+        hasCellNavigation={hasCellNavigation}
         hasRowSelection={hasRowSelection}
-        isGrid={isGrid}
         renderCell={({ column }) => {
           if (tree && column.accessor === '_select') {
             return (
@@ -93,7 +93,7 @@ export function NestedDocRow({
         return (
           <NestedDocsContinuationRow
             columns={columns}
-            isGrid={isGrid}
+            hasCellNavigation={hasCellNavigation}
             key={`load-${branchKey({ parentID })}`}
             label={parentLabel}
             parentID={parentID}
