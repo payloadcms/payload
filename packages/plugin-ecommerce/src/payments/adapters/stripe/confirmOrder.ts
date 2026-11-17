@@ -64,12 +64,20 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       // shippingAddress is now persisted in the transaction, not in Stripe metadata.
       // Fall back to metadata for PaymentIntents created by older versions.
-      const shippingAddress = isRecord(transaction.shippingAddress)
-        ? transaction.shippingAddress
-        : parseOptionalMetadata({
-            fieldName: 'shippingAddress',
-            value: paymentIntent.metadata.shippingAddress,
-          })
+      //
+      // Guard: SQL adapters can return an empty group object `{}` when no address was
+      // saved, which is still truthy for isRecord(). We therefore require at least one
+      // own key before treating the transaction field as a valid address. Without this
+      // check an empty `{}` would shadow the metadata fallback and swallow the address
+      // for anyone upgrading from the previous version that stored it in Stripe metadata.
+      const transactionShipping = transaction.shippingAddress
+      const shippingAddress =
+        isRecord(transactionShipping) && Object.keys(transactionShipping).length > 0
+          ? transactionShipping
+          : parseOptionalMetadata({
+              fieldName: 'shippingAddress',
+              value: paymentIntent.metadata.shippingAddress,
+            })
       const purchaser =
         req.user === null || req.user === undefined
           ? { customerEmail: normalizeEmail(data.customerEmail) }

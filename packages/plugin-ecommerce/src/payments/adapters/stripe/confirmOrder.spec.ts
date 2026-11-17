@@ -275,6 +275,84 @@ describe('confirmOrder', () => {
     )
   })
 
+  it('should fall back to metadata shippingAddress when SQL adapter returns an empty group object', async () => {
+    // SQL adapters initialise group fields with an empty object `{}` even when no
+    // address was saved. An empty object is truthy but carries no address data, so
+    // the fallback to Stripe metadata must still fire in that case.
+    const harness = createHarness({
+      transaction: createTransaction({ shippingAddress: {} }),
+    })
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({
+        metadata: {
+          cartID: 'cart-123',
+          cartItemsHash: hashCartItems(DEFAULT_ITEMS),
+          shippingAddress: JSON.stringify({ city: 'SQL Fallback City' }),
+        },
+      }),
+    )
+
+    await runConfirmation({ harness })
+
+    expect(harness.finalizeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderData: expect.objectContaining({ shippingAddress: { city: 'SQL Fallback City' } }),
+      }),
+    )
+  })
+
+  it('should save a shipping address exceeding 600 chars in the transaction and not in metadata', async () => {
+    // Verifies the end-to-end contract introduced by this PR:
+    //   • The full address object is forwarded to finalizeOrder (from the transaction)
+    //   • The Stripe PaymentIntent metadata does NOT carry shippingAddress
+    //   • Every metadata value stays within Stripe's 500-character limit
+    const longAddress = {
+      addressLine1: 'A'.repeat(100),
+      addressLine2: 'B'.repeat(100),
+      city: 'C'.repeat(80),
+      company: 'D'.repeat(80),
+      country: 'United Kingdom',
+      firstName: 'E'.repeat(60),
+      lastName: 'F'.repeat(60),
+      phone: '+44' + '9'.repeat(40),
+      postalCode: 'SW1A ' + '1'.repeat(50),
+      state: 'Greater London',
+      title: 'Dr.',
+    }
+
+    // Pre-condition: address JSON genuinely exceeds 600 characters
+    expect(JSON.stringify(longAddress).length).toBeGreaterThan(600)
+
+    const harness = createHarness({
+      transaction: createTransaction({ shippingAddress: longAddress }),
+    })
+    // PaymentIntent metadata has NO shippingAddress key — only cartID and cartItemsHash
+    const paymentIntentMeta = {
+      cartID: 'cart-123',
+      cartItemsHash: hashCartItems(DEFAULT_ITEMS),
+    }
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({ metadata: paymentIntentMeta }),
+    )
+
+    await runConfirmation({ harness })
+
+    // The full address must be passed to finalizeOrder from the transaction record
+    expect(harness.finalizeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderData: expect.objectContaining({ shippingAddress: longAddress }),
+      }),
+    )
+
+    // Every metadata value must be within Stripe's 500-character limit
+    for (const [key, value] of Object.entries(paymentIntentMeta)) {
+      expect(
+        value.length,
+        `Stripe metadata key "${key}" exceeds 500 characters`,
+      ).toBeLessThanOrEqual(500)
+    }
+  })
+
   it('should log and propagate finalization failures', async () => {
     const harness = createHarness()
     const error = new Error('inventory update failed')
