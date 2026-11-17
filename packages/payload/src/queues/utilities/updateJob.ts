@@ -6,7 +6,6 @@ import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
 import { getDataLoader } from '../../collections/dataloader.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
 import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
 import { getCurrentDate } from './getCurrentDate.js'
 import { clearJobClaim, registerJobClaim } from './jobClaim.js'
@@ -245,11 +244,10 @@ async function updateJobsInDatabase({
   sort?: Sort
   where?: Where
 } & Omit<BaseArgs, 'depth' | 'disableTransaction'>): Promise<Job[] | null> {
+  const transactionID =
+    req.payload.db.name !== 'mongoose' ? await req.payload.db.beginTransaction() : undefined
   const jobReq = isolateObjectProperty(req, 'transactionID')
-  jobReq.transactionID =
-    req.payload.db.name !== 'mongoose'
-      ? ((await req.payload.db.beginTransaction()) as string)
-      : undefined
+  jobReq.transactionID = transactionID ?? undefined
 
   if (typeof data.updatedAt === 'undefined') {
     // Ensure updatedAt date is always updated
@@ -273,14 +271,22 @@ async function updateJobsInDatabase({
       }
 
   let updatedJobs: Job[] | null
+
   try {
     updatedJobs = await req.payload.db.updateJobs(args)
 
-    if (jobReq.transactionID) {
-      await req.payload.db.commitTransaction(jobReq.transactionID)
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      await req.payload.db.commitTransaction(transactionID)
     }
   } catch (error) {
-    await killTransaction(jobReq)
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      try {
+        await req.payload.db.rollbackTransaction(transactionID)
+      } catch {
+        // Preserve the update or commit error that caused the rollback.
+      }
+    }
+
     throw error
   }
 

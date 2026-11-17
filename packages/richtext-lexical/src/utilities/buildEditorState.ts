@@ -50,7 +50,7 @@ export function buildEditorState<T extends SerializedLexicalNode>({
     root: {
       type: 'root',
       children: [],
-      direction: 'ltr',
+      direction: null,
       format: '',
       indent: 0,
       version: 1,
@@ -71,7 +71,7 @@ export function buildEditorState<T extends SerializedLexicalNode>({
           version: 1,
         },
       ],
-      direction: 'ltr',
+      direction: null,
       format: '',
       indent: 0,
       textFormat: 0,
