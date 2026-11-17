@@ -34,7 +34,10 @@ export function resolveWhereForCollection({
 
     // Collection identity can be resolved without inspecting any document fields.
     if (key === 'relationTo') {
-      const isMatchingCollection = matchesCollection({ collectionSlug, constraint: value })
+      const isMatchingCollection = matchesCollectionConstraint({
+        collectionSlug,
+        constraint: value,
+      })
 
       conditions.push({
         matches: isMatchingCollection ? 'all-documents' : 'no-documents',
@@ -82,7 +85,7 @@ function combineConditions({
   return { matches: 'documents-matching-where', where: { [operator]: filters } }
 }
 
-function matchesCollection({
+function matchesCollectionConstraint({
   collectionSlug,
   constraint,
 }: {
