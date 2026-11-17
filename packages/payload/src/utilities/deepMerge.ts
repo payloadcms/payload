@@ -1,7 +1,7 @@
 import { isPlainObject } from './isPlainObject.js'
 
 export type DeepMergeArrayMergeOptions = {
-  cloneUnlessOtherwiseSpecified: (value: unknown, options?: DeepMergeOptions) => any
+  cloneUnlessOtherwiseSpecified(value: object, options?: DeepMergeOptions): any
   isMergeableObject(value: object): boolean
 }
 
