@@ -14,7 +14,6 @@
 
   .edit-upload__content {
     --edit-upload-content-min-height: 480px;
-    --edit-upload-sidebar-width: 240px;
 
     display: flex;
     flex-direction: row;

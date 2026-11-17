@@ -31,7 +31,7 @@ jobs:
           client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Checkout tag
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ github.ref }}
           # Full history and tags are required to resolve the changelog base tag;
@@ -58,7 +58,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout tag
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ github.ref }}
           persist-credentials: false
@@ -85,7 +85,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout attach script
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ github.ref }}
           persist-credentials: false

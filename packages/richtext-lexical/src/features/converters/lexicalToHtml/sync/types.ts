@@ -23,6 +23,10 @@ export type HTMLConverter<
       }) => string[]
       parent: SerializedLexicalNodeWithParent
       providedCSSString: string
+      /**
+       * ` dir="ltr"` or ` dir="rtl"` when the node has an explicit direction, otherwise an empty string.
+       */
+      providedDirAttribute: string
       providedStyleTag: string
     }) => string)
   | string

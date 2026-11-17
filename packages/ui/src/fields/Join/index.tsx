@@ -18,6 +18,7 @@ import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -131,6 +132,7 @@ const JoinFieldComponent: React.FC<JoinFieldClientProps> = (props) => {
   } = props
 
   const { id: docID, docConfig } = useDocumentInfo()
+  const { user } = useAuth()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -194,7 +196,7 @@ const JoinFieldComponent: React.FC<JoinFieldClientProps> = (props) => {
     })
   }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID, config])
 
-  if (!docConfig) {
+  if (!docConfig || !user) {
     return null
   }
 

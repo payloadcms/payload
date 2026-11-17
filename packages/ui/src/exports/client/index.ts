@@ -21,6 +21,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 export { useQueue } from '../../hooks/useQueue.js'
+export type { QueueResult, Task, TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
@@ -460,6 +461,7 @@ export {
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
+export { PageLocaleProvider } from '../../providers/PageLocale/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export {
   FormErrorHandlerContext,

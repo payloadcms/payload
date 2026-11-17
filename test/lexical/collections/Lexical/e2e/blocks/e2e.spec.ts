@@ -8,12 +8,13 @@ import type {
   SerializedParagraphNode,
   SerializedTextNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { BrowserContext, Locator, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page, Route } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { currentFramework, test } from '__helpers/e2e/playwright.js'
 import path from 'path'
 import { wait } from 'payload/shared'
+import { fromJSON } from 'seroval'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
@@ -83,6 +84,138 @@ describe('lexicalBlocks', () => {
     }
     client = new RESTClient({ defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
+  })
+
+  test('should retain server validation errors for newly accessible block fields', async () => {
+    const { richTextField } = await navigateToLexicalFields()
+    const { newBlock } = await createBlock({ name: 'Block R S C', richTextField })
+
+    await newBlock.locator('.LexicalEditorTheme__block__actions-button').first().click()
+    await page.locator('.popup-button-list__button').getByText('Edit', { exact: true }).click()
+
+    const drawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first()
+
+    await expect(drawer).toBeVisible()
+    await expect(drawer.locator('input[name="showServerRequired"]')).toBeEnabled()
+
+    const skipBackgroundRefresh = async (route: Route) => {
+      if (route.request().postData()?.includes('"renderAllFields":false')) {
+        await route.abort()
+      } else {
+        await route.continue()
+      }
+    }
+
+    await page.route('**/*', skipBackgroundRefresh)
+
+    try {
+      await drawer.locator('input[name="showServerRequired"]').check()
+      await drawer.getByRole('button', { name: 'Save changes', exact: true }).click()
+      await expect(drawer.getByText('Server-required value missing', { exact: true })).toBeVisible()
+      await expect(drawer.locator('input[name="serverRequired"]')).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      )
+      await expect(drawer.locator('input[name="serverRequired"]')).toHaveAccessibleDescription(
+        'Server-required value missing',
+      )
+      await expect(drawer).toBeVisible()
+    } finally {
+      await page.unroute('**/*', skipBackgroundRefresh)
+    }
+
+    await drawer.locator('input[name="serverRequired"]').fill('Validated value')
+    await drawer.getByRole('button', { name: 'Save changes', exact: true }).click()
+    await expect(drawer).toBeHidden()
+  })
+
+  test('should discard stale block validation errors when their group is hidden', async () => {
+    const { richTextField } = await navigateToLexicalFields()
+    const { newBlock } = await createBlock({ name: 'Block R S C', richTextField })
+
+    const blockName = newBlock.locator('input[name="blockName"]')
+
+    await blockName.fill('Validation block')
+    await newBlock.locator('.LexicalEditorTheme__block__actions-button').first().click()
+    await page.locator('.popup-button-list__button').getByText('Edit', { exact: true }).click()
+
+    const drawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first()
+    const text = drawer.locator('input[name="requiredGroup.text"]')
+    const save = drawer.getByRole('button', { name: 'Save changes', exact: true })
+
+    await expect(drawer).toBeVisible()
+    await drawer.locator('input[name="showRequiredGroup"]').check()
+    await expect(text).toBeVisible()
+    await expect(text).toBeEnabled()
+    await save.click()
+    await expect(drawer.getByText('This field is required.', { exact: true })).toBeVisible()
+    await expect(text).toHaveAttribute('aria-invalid', 'true')
+
+    await drawer.locator('input[name="showRequiredGroup"]').uncheck()
+    await expect(text).toBeHidden()
+    await save.click()
+    await expect(drawer).toBeHidden()
+    await expect(blockName).toHaveValue('Validation block')
+  })
+
+  test('should submit a block drawer before its pending edit refresh', async () => {
+    const { richTextField } = await navigateToLexicalFields()
+    const { newBlock } = await createBlock({ name: 'Block R S C', richTextField })
+
+    await newBlock.locator('.LexicalEditorTheme__block__actions-button').first().click()
+    await page.locator('.popup-button-list__button').getByText('Edit', { exact: true }).click()
+
+    const drawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first()
+    let isValidationHeld = false
+    const releaseValidation = Promise.withResolvers<void>()
+    const holdValidation = async (route: Route) => {
+      const request = route.request()
+
+      if (request.method() === 'POST' && request.url().includes(formStateUrl)) {
+        const call =
+          currentFramework === 'tanstack-start'
+            ? fromJSON(request.postDataJSON()).data
+            : request.postDataJSON()[0]
+
+        if (
+          call?.name === 'form-state' &&
+          call.args.renderAllFields &&
+          call.args.schemaPath.endsWith('.BlockRSC.fields')
+        ) {
+          const response = await route.fetch()
+
+          isValidationHeld = true
+          await releaseValidation.promise
+          await route.fulfill({ response })
+          return
+        }
+      }
+
+      await route.continue()
+    }
+
+    await expect(drawer).toBeVisible()
+    await expect(drawer.locator('.rs__control').first()).toBeVisible()
+    await page.clock.install()
+    await page.route('**/*', holdValidation)
+
+    try {
+      await page.clock.pauseAt(Math.max(Date.now(), await page.evaluate(() => Date.now())) + 100)
+      await drawer.locator('.rs__control .value-container').first().click()
+      await getSelectMenu({ page }).getByText('value2', { exact: true }).click()
+      await drawer.getByRole('button', { name: 'Save changes', exact: true }).click()
+      await expect.poll(() => isValidationHeld).toBe(true)
+      await page.clock.runFor(300)
+      releaseValidation.resolve()
+      await page.clock.resume()
+
+      await expect(drawer).toBeHidden()
+      await expect(newBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
+    } finally {
+      releaseValidation.resolve()
+      await page.clock.resume()
+      await page.unroute('**/*', holdValidation)
+    }
   })
 
   test(

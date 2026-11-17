@@ -1541,6 +1541,67 @@ test.describe('Admin accessibility', () => {
       await expect(publish).toBeInViewport()
     })
   })
+
+  test.describe('MCP client sign-in', () => {
+    test('should let a user allow an MCP client using the keyboard', async ({ page }) => {
+      const redirectURI = `${serverURL}/mcp-callback`
+      const registration = await page.request.post(`${serverURL}/api/mcp/oauth/register`, {
+        data: { client_name: 'Test client', redirect_uris: [redirectURI] },
+      })
+
+      await expect(registration).toBeOK()
+      const { client_id } = await registration.json()
+      const query = qs.stringify(
+        {
+          client_id,
+          code_challenge: 'challenge',
+          code_challenge_method: 'S256',
+          redirect_uri: redirectURI,
+          response_type: 'code',
+        },
+        { addQueryPrefix: true },
+      )
+
+      await page.goto(`${serverURL}/api/mcp/oauth/authorize${query}`)
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Allow Test client to use your account?' }),
+      ).toBeVisible()
+      await expect(page).toHaveTitle(/Allow an MCP client/)
+      await scanA11y({ name: 'mcp authorize', page })
+      await page.setViewportSize({ height: 720, width: 320 })
+      await expectNoPageOverflow({ page })
+      const allow = page.getByRole('button', { name: 'Allow', exact: true })
+      const deny = page.getByRole('button', { name: 'Deny', exact: true })
+
+      await tabToSignInControl({ control: allow, page })
+      await page.keyboard.press('Tab')
+      await expect(deny).toBeFocused()
+      const unfocusedStyle = await getFocusIndicatorStyle(allow)
+
+      await page.keyboard.press('Shift+Tab')
+      await expect(allow).toBeFocused()
+      await expect
+        .poll(async () =>
+          hasRenderedFocusIndicator({
+            focusedStyle: await getFocusIndicatorStyle(allow),
+            unfocusedStyle,
+          }),
+        )
+        .toBe(true)
+      await page.keyboard.press('Enter')
+      await page.waitForURL((url) => url.pathname === '/mcp-callback')
+      expect(new URL(page.url()).searchParams.has('code')).toBe(true)
+    })
+
+    test('should explain an invalid MCP sign-in link', async ({ page }) => {
+      await page.goto(`${serverURL}/api/mcp/oauth/authorize?client_id=unknown`)
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'This sign-in link is invalid' }),
+      ).toBeVisible()
+      await expect(page.getByText('Start the sign-in again from your MCP client.')).toBeVisible()
+      await scanA11y({ name: 'mcp authorize invalid link', page })
+    })
+  })
 })
 
 async function expectSidebarTabFocus({ tab }: { tab: Locator }) {

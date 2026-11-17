@@ -16,8 +16,6 @@ export const devServerExternalPackages = [
   '@payloadcms/graphql',
   '@payloadcms/kv-redis',
   '@payloadcms/payload-cloud',
-  // Its `/client` entry has no exports, so the import map never loads anything from it.
-  '@payloadcms/plugin-mcp',
   '@payloadcms/plugin-nested-docs',
   '@payloadcms/plugin-redirects',
   '@payloadcms/transformer-sharp',

@@ -16,7 +16,7 @@ type Args = {
  * admin never validates JSON Schemas in the browser, and doesn't need to compile or download zod.
  */
 export const validateJSONSchema = async ({ jsonSchema, value }: Args): Promise<string | true> => {
-  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
+  const fetchSchema = ({ schema, uri }: { schema?: JSONSchema4; uri: string }) => {
     if (uri && schema) {
       return schema
     }
@@ -42,7 +42,7 @@ export const validateJSONSchema = async ({ jsonSchema, value }: Args): Promise<s
   }
 
   try {
-    jsonSchema.schema = fetchSchema(jsonSchema)
+    jsonSchema.schema = await fetchSchema(jsonSchema)
     const { schema } = jsonSchema
     const { fromJSONSchema } = await import('zod')
     // `JSONSchema4` allows any string for `$schema`, while zod narrows it to the three drafts it

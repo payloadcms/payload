@@ -4558,6 +4558,12 @@ export interface BlockRSC {
   id: string;
   blockType: 'BlockRSC';
   key?: ('value1' | 'value2' | 'value3') | null;
+  showServerRequired?: boolean | null;
+  serverRequired?: string | null;
+  showRequiredGroup?: boolean | null;
+  requiredGroup?: {
+    text: string;
+  };
   blockName?: string | null;
 }
 /**

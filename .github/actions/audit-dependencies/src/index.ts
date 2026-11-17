@@ -16,6 +16,7 @@ import { buildPlan } from './lib/plan'
 import { createRegistryClient } from './lib/registry'
 import {
   findStaleAllowlist,
+  listRegistryFailures,
   printAllowlistReview,
   printReport,
   toFinding,
@@ -86,7 +87,16 @@ const main = async (): Promise<number> => {
   const reviewed = await annotateFindings({ client, findings: allowlistFindings, index })
   printAllowlistReview(reviewed)
 
-  return reported.length > 0 ? 1 : 0
+  // Exit 0 means the audit is complete, with or without findings. Exit 1 means the result may
+  // be incomplete, so no step may act on it.
+  const registryFailures = listRegistryFailures(reported)
+  if (registryFailures.length > 0) {
+    console.error(
+      `Error: the registry did not answer, so the fix is unknown for ${registryFailures.join(', ')}`,
+    )
+    return 1
+  }
+  return 0
 }
 
 const audit = async ({

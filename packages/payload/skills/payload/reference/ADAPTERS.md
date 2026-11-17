@@ -34,6 +34,8 @@ export default buildConfig({
 
 ### SQLite
 
+Keep the default `transactionOptions: false` by omitting the option. SQLite transactions are not fully supported or recommended in Payload: enabling them can cause locking issues. Do not add `transactionOptions: {}` to generated configs or as a fix for nested hook operations.
+
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
@@ -42,30 +44,36 @@ export default buildConfig({
     client: {
       url: 'file:./payload.db',
     },
-    transactionOptions: {}, // Enable transactions (disabled by default)
   }),
 })
 ```
 
 ## Transactions
 
-Payload automatically uses transactions for all-or-nothing database operations. Pass `req` to include operations in the same transaction.
+MongoDB (with a replica set) and Postgres use transactions by default unless disabled with `transactionOptions: false`. When a Payload operation starts a transaction, its database changes are committed on success or rolled back on failure. Nested operations share that transaction when you pass `req`.
+
+SQLite leaves transactions disabled by default. With transactions disabled, passing `req` still preserves request context, but does not provide atomicity or rollback across operations. If a later operation fails, earlier writes can persist. Do not enable SQLite transactions to satisfy general transaction guidance.
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
 
 const afterChange: CollectionAfterChangeHook = async ({ req, doc }) => {
-  // This will be part of the same transaction
+  // Share the parent operation's transaction, if active
   await req.payload.create({
-    req, // Pass req to use same transaction
+    req, // Preserves request context even when transactions are disabled
     collection: 'audit-log',
     overrideAccess: true,
     data: { action: 'created', docId: doc.id },
   })
 }
 
-// Manual transaction control
+// Manual transaction control requires an adapter with transactions enabled
 const transactionID = await payload.db.beginTransaction()
+
+if (transactionID == null) {
+  throw new Error('This operation requires a database adapter with transactions enabled')
+}
+
 try {
   await payload.create({
     collection: 'orders',
@@ -87,11 +95,9 @@ try {
 }
 ```
 
-**Note**: MongoDB requires replicaset for transactions. SQLite requires `transactionOptions: {}` to enable.
-
 ### Threading req Through Operations
 
-**Critical**: When performing nested operations in hooks, always pass `req` to maintain transaction context. Failing to do so breaks atomicity and can cause partial updates.
+**Critical**: When performing nested operations in hooks, always pass `req` to preserve request context. When transactions are enabled, this also maintains transaction context; failing to do so breaks atomicity and can cause partial updates.
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
@@ -103,7 +109,7 @@ const resaveChildren: CollectionAfterChangeHook = async ({ collection, doc, req 
     collection: 'children',
     overrideAccess: true,
     where: { parent: { equals: doc.id } },
-    req, // Maintains transaction context
+    req, // Shares the active transaction, if any
   })
 
   // Update each child - pass req
@@ -113,12 +119,12 @@ const resaveChildren: CollectionAfterChangeHook = async ({ collection, doc, req 
       collection: 'children',
       overrideAccess: true,
       data: { updatedField: 'value' },
-      req, // Same transaction as parent operation
+      req, // Shares the active transaction, if any
     })
   }
 }
 
-// ❌ WRONG: Missing req breaks transaction
+// ❌ WRONG: Missing req loses request context and any active transaction
 const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) => {
   const children = await req.payload.find({
     collection: 'children',
@@ -141,23 +147,11 @@ const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) =
 
 **Why This Matters:**
 
-- **MongoDB (with replica sets)**: Creates atomic session across operations
-- **PostgreSQL**: All operations use same Drizzle transaction
-- **SQLite (with transactions enabled)**: Ensures rollback on errors
-- **Without req**: Each operation runs independently, breaking atomicity
+- **With an active transaction**: Passing `req` keeps nested operations in the parent operation's transaction. Omitting it can allow nested writes to persist if the parent operation fails.
+- **With transactions disabled**: Passing `req` does not create a transaction or provide rollback across operations. This is the default for SQLite.
+- **Request context**: Passing `req` also preserves `req.user`, `req.context`, and the current locale, regardless of transaction support.
 
-**When req is Required:**
-
-- All mutating operations in hooks (create, update, delete)
-- Operations that must succeed/fail together
-- When using MongoDB replica sets or Postgres
-- Any operation that relies on `req.context` or `req.user`
-
-**When req is Optional:**
-
-- Read-only lookups independent of current transaction
-- Operations with `disableTransaction: true`
-- Administrative operations with `overrideAccess: true`
+Pass `req` to nested reads and writes in hooks. Read-only operations can also need the active transaction to see uncommitted writes. Neither `disableTransaction: true` nor `overrideAccess: true` replaces the need to preserve request context.
 
 ## Storage Adapters
 

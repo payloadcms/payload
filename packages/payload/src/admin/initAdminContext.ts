@@ -140,7 +140,7 @@ export async function initAdminContext({
     }
 
     const resolveLocale = async (): Promise<Pick<AdminContext, 'locale'>> => ({
-      locale: await getRequestLocale({ req }),
+      locale: await getRequestLocale({ locale: optionsOverrides?.locale, req }),
     })
     const { locale } = cache?.getLocale
       ? await cache.getLocale(
@@ -149,6 +149,7 @@ export async function initAdminContext({
           req.user?.collection,
           req.user?.id,
           req.query.locale,
+          optionsOverrides?.locale,
         )
       : await resolveLocale()
 

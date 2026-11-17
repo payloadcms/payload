@@ -89,6 +89,8 @@
   }
 
   html[data-enhanced-contrast]
+    .section-title:has(.section-title__input:not([readonly]):not(:focus))::before,
+  :host([data-enhanced-contrast])
     .section-title:has(.section-title__input:not([readonly]):not(:focus))::before {
     border-color: var(--color-border-control);
   }

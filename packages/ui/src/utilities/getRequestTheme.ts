@@ -28,7 +28,7 @@ export const getRequestTheme = ({
     return { theme: config.admin.theme, themeSource: 'config' }
   }
 
-  const themeFromCookie = cookies.get(`${config.cookiePrefix || 'payload'}-theme`) as Theme
+  const themeFromCookie = cookies.get(`${config.cookiePrefix}-theme`) as Theme
 
   if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
     return { theme: themeFromCookie, themeSource: 'cookie' }
