@@ -30,11 +30,25 @@ export async function seed(payload: Payload) {
     data: { title: 'Contact', slug: 'contact', _status: 'published' },
   })
 
-  for (let i = 1; i <= 12; i++) {
+  const pageTitles = [
+    'Accessibility',
+    'Annual reports',
+    'Board of trustees',
+    'Community partnerships',
+    'Equality and inclusion',
+    'Governance',
+    'History',
+    'Impact and achievements',
+    'Locations',
+    'Media enquiries',
+    'Mission and values',
+    'Newsroom',
+  ]
+  for (const title of pageTitles) {
     await payload.create({
       collection: pagesSlug,
       data: {
-        title: `Department ${String(i).padStart(2, '0')}`,
+        title,
         parent: about.id,
         _status: 'published',
       },

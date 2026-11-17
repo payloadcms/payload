@@ -346,7 +346,7 @@ test.describe('Nested document tree', () => {
       .filter({ has: page.getByRole('link', { name: 'About us', exact: true }) })
     const child = page
       .getByRole('row')
-      .filter({ has: page.getByRole('link', { name: 'Department 01', exact: true }) })
+      .filter({ has: page.getByRole('link', { name: 'Accessibility', exact: true }) })
     await expect(child).toBeVisible()
     const connectorX = (row: typeof parent) =>
       row.locator('.tree-connectors__incoming').evaluate((line) => line.getBoundingClientRect().x)
@@ -362,7 +362,7 @@ test.describe('Nested document tree', () => {
     expect(childX - parentX).toBeGreaterThan(0)
     expect(childPadding - parentPadding).toBeCloseTo(childX - parentX, 0)
     const childTitleX = await child
-      .getByRole('link', { name: 'Department 01', exact: true })
+      .getByRole('link', { name: 'Accessibility', exact: true })
       .evaluate((link) => link.getBoundingClientRect().x)
     expect(childTitleX).toBeGreaterThan(childX)
   })
@@ -376,7 +376,7 @@ test.describe('Nested document tree', () => {
     )
     const followedChild = page
       .getByRole('row')
-      .filter({ has: page.getByRole('link', { name: 'Department 01', exact: true }) })
+      .filter({ has: page.getByRole('link', { name: 'Accessibility', exact: true }) })
 
     await expect(followedChild).toBeVisible()
     await expect(followedChild.locator('.tree-connectors__ancestor[data-level="0"]')).toHaveCount(1)
@@ -388,7 +388,7 @@ test.describe('Nested document tree', () => {
     )
     const terminalChild = page
       .getByRole('row')
-      .filter({ has: page.getByRole('link', { name: 'Department 12', exact: true }) })
+      .filter({ has: page.getByRole('link', { name: 'Newsroom', exact: true }) })
 
     await expect(terminalChild).toBeVisible()
     await expect(terminalChild.locator('.tree-connectors__ancestor[data-level="0"]')).toHaveCount(0)
@@ -468,7 +468,7 @@ test.describe('Nested document tree', () => {
     await page
       .getByRole('button', { name: 'Load more: About us', exact: true })
       .scrollIntoViewIfNeeded()
-    await expect(page.getByRole('link', { name: 'Department 01', exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Accessibility', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Expand: Our team', exact: true }).click()
     await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
     await expect(
@@ -575,7 +575,7 @@ test.describe('Nested document tree', () => {
     await expect(loadMore).toHaveText('Load more')
     await loadMore.focus()
     await loadMore.press('Enter')
-    await expect(page.getByRole('link', { name: 'Department 01', exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Accessibility', exact: true })).toBeVisible()
     await expect
       .poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.table'))))
       .toBe(true)
