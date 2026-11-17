@@ -180,3 +180,278 @@ export function MyCustomTabComponent(props: DocumentTabClientProps) {
   )
 }
 ```
+
+### Example: Find public sources for a draft
+
+A **Sources** tab can help editors find a public reference while they review a post. This example adds the tab to a `posts` collection and searches through a collection endpoint; see [Parallel MCP setup](https://docs.parallel.ai/integrations/mcp/quickstart). Enable it with `ENABLE_EDITORIAL_SOURCE_SEARCH=true` in the server environment. Search runs only on form submission. No Parallel key is needed at anonymous limits. Only submitted terms go to Parallel; draft fields stay in Payload. Results remain in the tab until navigation.
+
+Install `@modelcontextprotocol/client@2.4.0` and add the collection to your Payload config. The component path is relative to your [import map's base directory](./overview#component-paths). For an existing collection, merge in the view and endpoint.
+
+src/collections/Posts.ts
+
+```ts
+import type { CollectionConfig } from 'payload'
+import { canAccessAdmin } from 'payload'
+
+import { searchPublicSources } from './searchPublicSources'
+
+const isEnabled = process.env.ENABLE_EDITORIAL_SOURCE_SEARCH === 'true'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [{ name: 'title', type: 'text', required: true }],
+  admin: isEnabled
+    ? {
+        components: {
+          views: {
+            edit: {
+              sources: {
+                Component: '/components/SourceSearch',
+                path: '/sources',
+                tab: { href: '/sources', label: 'Sources' },
+              },
+            },
+          },
+        },
+      }
+    : {},
+  endpoints: isEnabled
+    ? [
+        {
+          path: '/:id/sources',
+          method: 'post',
+          handler: async (req) => {
+            if (!req.user) return new Response(null, { status: 401 })
+            await canAccessAdmin({ req })
+
+            const id = req.routeParams?.id
+            if (typeof id !== 'string')
+              return new Response(null, { status: 400 })
+
+            const post = await req.payload.findByID({
+              collection: 'posts',
+              id,
+              req,
+              overrideAccess: false,
+              disableErrors: true,
+              depth: 0,
+              draft: true,
+              select: { title: false },
+            })
+            if (!post) return new Response(null, { status: 404 })
+
+            const body = await req.json?.().catch(() => null)
+            const query =
+              typeof body?.query === 'string' ? body.query.trim() : ''
+            if (!query || query.length > 200) {
+              return Response.json(
+                { error: 'Enter up to 200 search characters.' },
+                { status: 400 },
+              )
+            }
+
+            try {
+              return Response.json(
+                { sources: await searchPublicSources({ query }) },
+                { headers: { 'Cache-Control': 'no-store' } },
+              )
+            } catch {
+              return Response.json(
+                { error: 'Source search is unavailable.' },
+                { status: 502 },
+              )
+            }
+          },
+        },
+      ]
+    : [],
+}
+```
+
+src/collections/searchPublicSources.ts
+
+```ts
+import {
+  Client,
+  StreamableHTTPClientTransport,
+} from '@modelcontextprotocol/client'
+
+export type Source = { title: string; url: string; excerpt: string }
+
+export async function searchPublicSources({
+  query,
+}: {
+  query: string
+}): Promise<Source[]> {
+  const client = new Client(
+    { name: 'Payload', version: '1.0.0' },
+    { versionNegotiation: { mode: 'legacy' } },
+  )
+  const transport = new StreamableHTTPClientTransport(
+    new URL('https://mcp.parallel.ai/mcp'),
+    {
+      fetch: (url, init) => {
+        const headers = new Headers(init?.headers)
+        headers.set('User-Agent', 'Payload')
+
+        return fetch(url, {
+          ...init,
+          headers,
+          cache: 'no-store',
+          redirect: 'error',
+          signal: AbortSignal.any([
+            AbortSignal.timeout(12_000),
+            ...(init?.signal ? [init.signal] : []),
+          ]),
+        })
+      },
+    },
+  )
+
+  try {
+    await client.connect(transport)
+    const result = await client.callTool({
+      name: 'web_search',
+      arguments: {
+        objective: 'Find public primary sources for these search terms.',
+        search_queries: [query],
+      },
+    })
+    if (result.isError) throw new Error('Source search failed')
+    const text = result.content?.find((item) => item.type === 'text')?.text
+    const data: { results?: unknown } =
+      result.structuredContent ?? JSON.parse(text ?? '{}')
+    if (!Array.isArray(data.results)) throw new Error('Missing search results')
+
+    return data.results
+      .flatMap((item: unknown) => {
+        if (!item || typeof item !== 'object') return []
+
+        const { title, url, excerpts } = item as Record<string, unknown>
+        if (typeof url !== 'string' || !Array.isArray(excerpts)) return []
+
+        const link = URL.parse(url)
+        const excerpt = excerpts.find(
+          (value) => typeof value === 'string' && value.trim(),
+        )
+        if (link?.protocol !== 'https:' || link.username || link.password)
+          return []
+        if (!excerpt) return []
+
+        return [
+          {
+            title: typeof title === 'string' && title ? title : link.hostname,
+            url,
+            excerpt,
+          },
+        ]
+      })
+      .slice(0, 5)
+  } finally {
+    if (transport.sessionId) await transport.terminateSession().catch(() => {})
+    await client.close()
+  }
+}
+```
+
+src/components/SourceSearch/index.tsx
+
+```tsx
+'use client'
+
+import type { FormEvent } from 'react'
+import { useConfig, useDocumentInfo } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
+import { useId, useState } from 'react'
+
+import type { Source } from '../../collections/searchPublicSources'
+
+export default function SourceSearch() {
+  const { config } = useConfig()
+  const { collectionSlug, id } = useDocumentInfo()
+  const inputId = useId()
+  const noticeId = useId()
+  const [sources, setSources] = useState<Source[]>([])
+  const [status, setStatus] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+
+  if (id == null || !collectionSlug)
+    return <p>Save the post to look up sources.</p>
+
+  const url = formatAdminURL({
+    apiRoute: config.routes.api,
+    path: `/${collectionSlug}/${encodeURIComponent(String(id))}/sources`,
+  })
+
+  async function search(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (isSearching) return
+
+    const query = String(
+      new FormData(event.currentTarget).get('query') ?? '',
+    ).trim()
+    if (!query) {
+      setStatus('Enter public search terms.')
+      return
+    }
+
+    setIsSearching(true)
+    setSources([])
+    setStatus('Searching for sources…')
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      })
+      if (!response.ok) throw new Error('Source search failed')
+      const { sources: matches }: { sources: Source[] } = await response.json()
+      setSources(matches)
+      setStatus(
+        matches.length
+          ? `Sources found: ${matches.length}`
+          : 'No sources found.',
+      )
+    } catch {
+      setStatus('Source search failed. Try again.')
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  return (
+    <>
+      <h2>Find public sources</h2>
+      <form aria-label="Find public sources" onSubmit={search}>
+        <p id={noticeId}>
+          Parallel receives the terms you submit. Use public information only.
+        </p>
+        <label htmlFor={inputId}>Public search terms</label>
+        <input
+          aria-describedby={noticeId}
+          id={inputId}
+          name="query"
+          maxLength={200}
+          required
+        />
+        <button aria-disabled={isSearching} type="submit">
+          Search sources
+        </button>
+      </form>
+      <p role="status">{status}</p>
+      <ul>
+        {sources.map(({ title, url, excerpt }, index) => (
+          <li key={`${url}-${index}`}>
+            <a href={url} referrerPolicy="no-referrer">
+              {title}
+            </a>
+            <p>{excerpt}</p>
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+```
+
+Set the environment variable and regenerate the import map with `pnpm payload generate:importmap`. Start the app, open a saved post and select **Sources**. Try `site:payloadcms.com/docs custom document views tabs` and open a result to check the excerpt in context.
