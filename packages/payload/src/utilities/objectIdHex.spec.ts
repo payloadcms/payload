@@ -1,10 +1,32 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { isValidID } from './isValidID.js'
 import { generateObjectIdHex, getObjectIdHex, isValidObjectIdHex } from './objectIdHex.js'
 
 describe('objectIdHex', () => {
   describe('generateObjectIdHex', () => {
+    it('should not generate random values until the first id is requested', async () => {
+      vi.resetModules()
+      const getRandomValuesSpy = vi.spyOn(globalThis.crypto, 'getRandomValues')
+
+      try {
+        const freshModule = await import('./objectIdHex.js')
+
+        expect(getRandomValuesSpy).not.toHaveBeenCalled()
+
+        const first = freshModule.generateObjectIdHex()
+        const callsAfterFirstId = getRandomValuesSpy.mock.calls.length
+        const second = freshModule.generateObjectIdHex()
+
+        expect(callsAfterFirstId).toBeGreaterThan(0)
+        expect(getRandomValuesSpy).toHaveBeenCalledTimes(callsAfterFirstId)
+        expect(second.slice(8, 18)).toBe(first.slice(8, 18))
+        expect(parseInt(second.slice(18), 16)).toBe((parseInt(first.slice(18), 16) + 1) & 0xffffff)
+      } finally {
+        getRandomValuesSpy.mockRestore()
+      }
+    })
+
     it('should produce a 24-character lowercase hex string', () => {
       const id = generateObjectIdHex()
       expect(id).toHaveLength(24)
