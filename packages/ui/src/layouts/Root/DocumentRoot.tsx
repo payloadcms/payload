@@ -56,7 +56,7 @@ export function DocumentRoot({
       suppressHydrationWarning={suppressHydrationWarning}
     >
       <head>
-        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
+        {themeSource === 'fallback' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
         {viewport}
         <style>{`@layer payload-default, payload;`}</style>
         {head}

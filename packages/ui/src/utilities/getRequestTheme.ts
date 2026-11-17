@@ -10,12 +10,15 @@ type GetRequestThemeArgs = {
   headers: Request['headers']
 }
 
-export type RequestThemeSource = 'config' | 'cookie' | 'default' | 'header'
+export type RequestThemeSource = 'config' | 'cookie' | 'fallback' | 'header'
 
 export type RequestThemeResult = {
   /** The request's resolved theme. */
   theme: Theme
-  /** The input used to resolve the theme. */
+  /**
+   * The input used to resolve the theme.
+   * `'fallback'` means no usable config, cookie, or client hint was available; the browser may still resolve the system preference.
+   */
   themeSource: RequestThemeSource
 }
 
@@ -43,5 +46,5 @@ export const getRequestTheme = ({
     return { theme: themeFromHeader, themeSource: 'header' }
   }
 
-  return { theme: defaultTheme, themeSource: 'default' }
+  return { theme: defaultTheme, themeSource: 'fallback' }
 }
