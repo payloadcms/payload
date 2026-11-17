@@ -5,9 +5,7 @@ import { sql } from 'drizzle-orm'
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
-
-import { test } from '../../__helpers/int/vitest.js'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,119 +20,120 @@ const selectName = `${'x'.repeat(48)}_sel`
 // `p_<group>_parent_p_id_fk` don't.
 const longGroupName = 'g'.repeat(45)
 
-test.suite(
-  'Long identifiers',
-  { db: (adapter) => ['postgres', 'postgres-custom-schema', 'postgres-uuid'].includes(adapter) },
-  () => {
-    let payload: Payload
+const describeToUse = ['postgres', 'postgres-custom-schema', 'postgres-uuid'].includes(
+  process.env.PAYLOAD_DATABASE ?? '',
+)
+  ? describe
+  : describe.skip
 
-    test.beforeAll(async () => {
-      const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
+describeToUse('Long identifiers', () => {
+  let payload: Payload
 
-      const init = databaseAdapter.init
+  beforeAll(async () => {
+    const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
 
-      databaseAdapter.init = (args) => {
-        const adapter = init(args)
-        adapter.push = true
-        return adapter
-      }
+    const init = databaseAdapter.init
 
-      const config = await buildConfig({
-        db: databaseAdapter,
-        secret: 'secret',
-        collections: [
-          {
-            slug: 'p',
-            fields: [
-              { name: `${prefix}_alpha`, type: 'array', fields: [{ name: 't', type: 'text' }] },
-              { name: `${prefix}_beta`, type: 'array', fields: [{ name: 't', type: 'text' }] },
-              {
-                name: selectName,
-                type: 'select',
-                hasMany: true,
-                index: true,
-                options: ['a', 'b'],
-              },
-              {
-                name: longGroupName,
-                type: 'group',
-                fields: [
-                  { name: 'author', type: 'relationship', relationTo: 'authors' },
-                  { name: 'parent', type: 'relationship', relationTo: 'p' },
-                ],
-              },
-            ],
-            versions: false,
-          },
-          {
-            slug: 'authors',
-            fields: [],
-            versions: false,
-          },
-        ],
-      })
+    databaseAdapter.init = (args) => {
+      const adapter = init(args)
+      adapter.push = true
+      return adapter
+    }
 
-      payload = await getPayload({ config })
+    const config = await buildConfig({
+      db: databaseAdapter,
+      secret: 'secret',
+      collections: [
+        {
+          slug: 'p',
+          fields: [
+            { name: `${prefix}_alpha`, type: 'array', fields: [{ name: 't', type: 'text' }] },
+            { name: `${prefix}_beta`, type: 'array', fields: [{ name: 't', type: 'text' }] },
+            {
+              name: selectName,
+              type: 'select',
+              hasMany: true,
+              index: true,
+              options: ['a', 'b'],
+            },
+            {
+              name: longGroupName,
+              type: 'group',
+              fields: [
+                { name: 'author', type: 'relationship', relationTo: 'authors' },
+                { name: 'parent', type: 'relationship', relationTo: 'p' },
+              ],
+            },
+          ],
+          versions: false,
+        },
+        {
+          slug: 'authors',
+          fields: [],
+          versions: false,
+        },
+      ],
     })
 
-    test.afterAll(async () => {
-      if (!payload) {
-        return
-      }
+    payload = await getPayload({ config })
+  })
 
-      await payload.db.dropDatabase({ adapter: payload.db as never })
-      await payload.destroy()
-    })
+  afterAll(async () => {
+    if (!payload) {
+      return
+    }
 
-    test('should store every generated index and foreign key name in full', async () => {
-      const adapter = payload.db as unknown as DrizzleAdapter
+    await payload.db.dropDatabase({ adapter: payload.db as never })
+    await payload.destroy()
+  })
 
-      const expected = Object.values(adapter.rawTables).flatMap((table) => [
-        ...Object.values(table.indexes ?? {}).map(({ name }) => name),
-        ...Object.values(table.foreignKeys ?? {}).map(({ name }) => name),
-      ])
+  it('should store every generated index and foreign key name in full', async () => {
+    const adapter = payload.db as unknown as DrizzleAdapter
 
-      const longNames = expected.filter(
-        (name) =>
-          name.includes(prefix) || name.includes(selectName) || name.includes(longGroupName),
-      )
+    const expected = Object.values(adapter.rawTables).flatMap((table) => [
+      ...Object.values(table.indexes ?? {}).map(({ name }) => name),
+      ...Object.values(table.foreignKeys ?? {}).map(({ name }) => name),
+    ])
 
-      expect(longNames.length).toBeGreaterThan(0)
+    const longNames = expected.filter(
+      (name) => name.includes(prefix) || name.includes(selectName) || name.includes(longGroupName),
+    )
 
-      for (const name of expected) {
-        expect(name.length).toBeLessThanOrEqual(63)
-      }
+    expect(longNames.length).toBeGreaterThan(0)
 
-      const { rows } = await adapter.drizzle.execute<{ name: string }>(sql`
+    for (const name of expected) {
+      expect(name.length).toBeLessThanOrEqual(63)
+    }
+
+    const { rows } = await adapter.drizzle.execute<{ name: string }>(sql`
         SELECT indexname AS name FROM pg_indexes
         UNION SELECT conname AS name FROM pg_constraint WHERE contype = 'f'
       `)
 
-      const stored = new Set(rows.map(({ name }) => name))
+    const stored = new Set(rows.map(({ name }) => name))
 
-      for (const name of longNames) {
-        expect(stored.has(name), `missing ${name}`).toBe(true)
-      }
-    })
+    for (const name of longNames) {
+      expect(stored.has(name), `missing ${name}`).toBe(true)
+    }
+  })
 
-    test('should not change anything when the same schema is pushed again', async () => {
-      const adapter = payload.db as unknown as DrizzleAdapter & { schemaName?: string }
+  it('should not change anything when the same schema is pushed again', async () => {
+    const adapter = payload.db as unknown as DrizzleAdapter & { schemaName?: string }
 
-      const { pushSchema } = await adapter.requireDrizzleKit()
+    const { pushSchema } = await adapter.requireDrizzleKit()
 
-      const result = (await pushSchema(
-        adapter.schema,
-        adapter.drizzle,
-        adapter.schemaName ? [adapter.schemaName] : undefined,
-      )) as { statementsToExecute: string[] }
+    const result = (await pushSchema(
+      adapter.schema,
+      adapter.drizzle,
+      adapter.schemaName ? [adapter.schemaName] : undefined,
+    )) as { statementsToExecute: string[] }
 
-      // Only this suite's tables. The default `users` collection has an unrelated
-      // `login_attempts` default that push always re-applies.
-      const statements = result.statementsToExecute.filter((statement) =>
-        /"(p|authors)(_[^"]*)?"/.test(statement),
-      )
+    // Only this suite's tables. The default `users` collection has an unrelated
+    // `login_attempts` default that push always re-applies.
+    const statements = result.statementsToExecute.filter((statement) =>
+      /"(p|authors)(_[^"]*)?"/.test(statement),
+    )
 
-      expect(statements).toEqual([])
-    })
-  },
-)
+    expect(statements).toEqual([])
+  })
+})

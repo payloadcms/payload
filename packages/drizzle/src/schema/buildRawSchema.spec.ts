@@ -307,12 +307,12 @@ describe('buildRawSchema', () => {
     expect(table.foreignKeys?.authorFk).toBeUndefined()
   })
 
-  it('should keep sub-table index and foreign key names of up to 63 chars unchanged', () => {
+  it('should keep sub-table index and foreign key names of up to 63 chars unchanged', async () => {
     // `p_` + 48 chars + `_parent_id_idx` is 64 chars, `_parent_id_fk` 63 and `_order_idx` 60.
     // Only the index over 63 chars is renamed; names Postgres already stores in full stay as they are.
     const arrayFieldName = 'a'.repeat(48)
 
-    const config = sanitizeConfig({
+    const config = await sanitizeConfig({
       collections: [
         {
           slug: 'p',
@@ -336,11 +336,11 @@ describe('buildRawSchema', () => {
     expect(arrayTable.indexes._parentIDIdx.name).toHaveLength(63)
   })
 
-  it('should not rename long sub-table identifiers on other tables when a sibling field is added', () => {
+  it('should not rename long sub-table identifiers on other tables when a sibling field is added', async () => {
     const prefix = 'x'.repeat(54)
 
-    const buildArrayTable = (fieldNames: string[]) => {
-      const config = sanitizeConfig({
+    const buildArrayTable = async (fieldNames: string[]) => {
+      const config = await sanitizeConfig({
         collections: [
           {
             slug: 'p',
@@ -367,17 +367,17 @@ describe('buildRawSchema', () => {
       }
     }
 
-    const before = buildArrayTable([`${prefix}_alpha`, `${prefix}_beta`])
-    const after = buildArrayTable([`${prefix}_aaa`, `${prefix}_alpha`, `${prefix}_beta`])
+    const before = await buildArrayTable([`${prefix}_alpha`, `${prefix}_beta`])
+    const after = await buildArrayTable([`${prefix}_aaa`, `${prefix}_alpha`, `${prefix}_beta`])
 
     expect(after).toEqual(before)
   })
 
-  it('should not rename identifiers or move foreign keys on non-Postgres adapters', () => {
+  it('should not rename identifiers or move foreign keys on non-Postgres adapters', async () => {
     const arrayFieldName = 'a'.repeat(58)
     const groupName = 'g'.repeat(40)
 
-    const config = sanitizeConfig({
+    const config = await sanitizeConfig({
       collections: [
         {
           slug: 'p',

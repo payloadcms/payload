@@ -22,8 +22,8 @@ const generateSchema = createSchemaGenerator({
   tableImport: 'pgTable',
 })
 
-const createAdapter = (config: Config): DrizzleAdapter => {
-  const sanitized = sanitizeConfig(config)
+const createAdapter = async (config: Config): Promise<DrizzleAdapter> => {
+  const sanitized = await sanitizeConfig(config)
 
   return {
     name: 'postgres',
@@ -74,7 +74,7 @@ const longGroupName = 'some_long_group_name_that_pushes_the_fk_over_the_limit'
 
 describe('createSchemaGenerator', () => {
   it('should type the extras callback when a promoted foreign key references its own table', async () => {
-    const adapter = createAdapter({
+    const adapter = await createAdapter({
       collections: [
         {
           slug: 'pages',
@@ -99,7 +99,7 @@ describe('createSchemaGenerator', () => {
   })
 
   it('should treat promoted foreign keys as edges when detecting circular references', async () => {
-    const adapter = createAdapter({
+    const adapter = await createAdapter({
       collections: [
         {
           slug: 'members',
@@ -133,7 +133,7 @@ describe('createSchemaGenerator', () => {
   })
 
   it('should leave the extras callback untyped when no foreign key points back at the table', async () => {
-    const adapter = createAdapter({
+    const adapter = await createAdapter({
       collections: [
         {
           slug: 'posts',
