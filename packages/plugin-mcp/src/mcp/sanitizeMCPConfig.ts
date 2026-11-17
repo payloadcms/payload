@@ -99,6 +99,7 @@ export const sanitizeMCPConfig = ({
   }
 
   return {
+    access: pluginConfig.access,
     disabled: pluginConfig.disabled,
     hooks: pluginConfig.hooks,
     items,

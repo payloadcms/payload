@@ -7,16 +7,16 @@ import type { HTMLConverters } from '../types.js'
 export const LinkHTMLConverter: (args: {
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
 }) => HTMLConverters<SerializedAutoLinkNode | SerializedLinkNode> = ({ internalDocToHref }) => ({
-  autolink: ({ node, nodesToHTML, providedStyleTag }) => {
+  autolink: ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
 
     const href = escapeHTML(sanitizeUrl(node.fields.url ?? ''))
 
-    return `<a${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
+    return `<a${providedDirAttribute}${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
   },
-  link: ({ node, nodesToHTML, providedStyleTag }) => {
+  link: ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
@@ -36,6 +36,6 @@ export const LinkHTMLConverter: (args: {
 
     const safeHref = escapeHTML(sanitizeUrl(href))
 
-    return `<a${providedStyleTag} href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
+    return `<a${providedDirAttribute}${providedStyleTag} href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
   },
 })
