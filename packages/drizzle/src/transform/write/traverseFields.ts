@@ -54,11 +54,6 @@ type Args = {
   fields: FlattenedField[]
   forcedLocale?: string
   /**
-   * Tracks whether the current traversion context is from an array. Prefix deletes are only
-   * registered by the outermost array, as its prefix already covers every nested path.
-   */
-  insideArray?: boolean
-  /**
    * Tracks whether the current traversion context is from array or block.
    */
   insideArrayOrBlock?: boolean
@@ -104,7 +99,6 @@ export const traverseFields = ({
   fieldPrefix,
   fields,
   forcedLocale,
-  insideArray = false,
   insideArrayOrBlock = false,
   locales,
   numbers,
@@ -170,7 +164,7 @@ export const traverseFields = ({
 
             if (Array.isArray(localeData)) {
               // A `$push` only appends rows, so existing path-keyed rows must be left alone
-              if (!push && !insideArray) {
+              if (!push && !insideArrayOrBlock) {
                 pathPrefixesToDelete.add(arrayPathPrefix)
               }
 
@@ -219,7 +213,7 @@ export const traverseFields = ({
         }
 
         // A `$push` only appends rows, so existing path-keyed rows must be left alone
-        if (!push && !insideArray) {
+        if (!push && !insideArrayOrBlock) {
           pathPrefixesToDelete.add(arrayPathPrefix)
         }
 
@@ -275,10 +269,19 @@ export const traverseFields = ({
         )
       })
 
+      // Block rows are replaced in full like array rows, so their path-keyed rows are cleared by
+      // prefix too. Only the outermost array or blocks field registers one, as it covers every
+      // nested path.
+      const blocksPathPrefix = `${path || ''}${field.name}.`
+
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!insideArrayOrBlock) {
+                pathPrefixesToDelete.add(blocksPathPrefix)
+              }
+
               transformBlocks({
                 adapter,
                 baseTableName,
@@ -286,7 +289,6 @@ export const traverseFields = ({
                 blocksToDelete,
                 data: localeData,
                 field,
-                insideArray,
                 locale: localeKey,
                 numbers,
                 numbersToDelete,
@@ -304,6 +306,10 @@ export const traverseFields = ({
           })
         }
       } else if (isArrayOfRows(fieldData)) {
+        if (!insideArrayOrBlock) {
+          pathPrefixesToDelete.add(blocksPathPrefix)
+        }
+
         transformBlocks({
           adapter,
           baseTableName,
@@ -311,7 +317,6 @@ export const traverseFields = ({
           blocksToDelete,
           data: fieldData,
           field,
-          insideArray,
           numbers,
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
@@ -350,7 +355,6 @@ export const traverseFields = ({
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
               forcedLocale: localeKey,
-              insideArray,
               insideArrayOrBlock,
               locales,
               numbers,
@@ -388,7 +392,6 @@ export const traverseFields = ({
             fieldPrefix: `${fieldName}_`,
             fields: field.flattenedFields,
             forcedLocale,
-            insideArray,
             insideArrayOrBlock,
             locales,
             numbers,
@@ -866,7 +869,6 @@ export const traverseFields = ({
           fieldPrefix,
           fields,
           forcedLocale,
-          insideArray,
           insideArrayOrBlock,
           locales,
           numbers,

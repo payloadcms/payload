@@ -24,10 +24,6 @@ type Args = {
   blocksToDelete: Set<string>
   data: Record<string, unknown>[]
   field: FlattenedBlocksField
-  /**
-   * Tracks whether these blocks are traversed within an array - see `traverseFields`.
-   */
-  insideArray?: boolean
   locale?: string
   numbers: Record<string, unknown>[]
   numbersToDelete: NumberToDelete[]
@@ -54,7 +50,6 @@ export const transformBlocks = ({
   blocksToDelete,
   data,
   field,
-  insideArray,
   locale,
   numbers,
   numbersToDelete,
@@ -134,7 +129,6 @@ export const transformBlocks = ({
       data: blockRow,
       fieldPrefix: '',
       fields: matchedBlock.flattenedFields,
-      insideArray,
       insideArrayOrBlock: true,
       locales: newRow.locales,
       numbers,

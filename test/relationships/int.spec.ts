@@ -2292,7 +2292,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       test.beforeEach(async ({ payload }) => {
         directors = await Promise.all(
           ['a', 'b', 'c'].map((name) =>
-            payload.create({ collection: 'directors', data: { name } }),
+            payload.create({ collection: 'directors', data: { name }, overrideAccess: true }),
           ),
         )
       })
@@ -2302,6 +2302,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       }) => {
         const movie = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: directors.map((director) => ({ director: [director.id] })),
           },
@@ -2311,6 +2312,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         await payload.update({
           id: movie.id,
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: [{ director: [directors[0].id] }, { director: [directors[2].id] }],
           },
@@ -2319,6 +2321,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         const result = await payload.update({
           id: movie.id,
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: [{ director: [directors[0].id] }, { director: [directors[2].id] }, {}],
           },
@@ -2334,6 +2337,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       }) => {
         const movie = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: [{ tags: ['a'] }, { tags: ['b'] }, { tags: ['c'] }],
           },
@@ -2342,6 +2346,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         await payload.update({
           id: movie.id,
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: [{ tags: ['a'] }, { tags: ['c'] }],
           },
@@ -2350,6 +2355,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         const result = await payload.update({
           id: movie.id,
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: [{ tags: ['a'] }, { tags: ['c'] }, {}],
           },
@@ -2363,6 +2369,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       }) => {
         const movie = await payload.create({
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: directors.map((director) => ({ director: [director.id] })),
           },
@@ -2371,6 +2378,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         const result = await payload.update({
           id: movie.id,
           collection: 'movies',
+          overrideAccess: true,
           data: {
             array: [{ director: [directors[0].id] }, { director: [directors[2].id] }],
           },
@@ -2380,6 +2388,113 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         expect(result.array).toHaveLength(2)
         expect(result.array[0].director).toStrictEqual([directors[0].id])
         expect(result.array[1].director).toStrictEqual([directors[2].id])
+      })
+    })
+
+    test.describe('With blocks that hold hasMany fields', () => {
+      let directors: Director[]
+
+      test.beforeEach(async ({ payload }) => {
+        directors = await Promise.all(
+          ['a', 'b'].map((name) =>
+            payload.create({ collection: 'directors', data: { name }, overrideAccess: true }),
+          ),
+        )
+      })
+
+      const twoBlocks = () =>
+        directors.map((director) => ({ blockType: 'some' as const, directors: [director.id] }))
+
+      test('should not let a block appended at a removed block index inherit its relationships', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'blocks',
+          data: { blocks: twoBlocks() },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [{ blockType: 'some', directors: [directors[0].id] }] },
+          overrideAccess: true,
+        })
+
+        const result = await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: {
+            blocks: [{ blockType: 'some', directors: [directors[0].id] }, { blockType: 'some' }],
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(result.blocks[0]?.directors).toStrictEqual([directors[0].id])
+        expect(result.blocks[1]?.directors ?? []).toStrictEqual([])
+      })
+
+      test('should not let blocks added after emptying the list inherit relationships', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'blocks',
+          data: { blocks: twoBlocks() },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [] },
+          overrideAccess: true,
+        })
+
+        const result = await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [{ blockType: 'some' }, { blockType: 'some' }] },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(result.blocks.map((block) => block.directors ?? [])).toStrictEqual([[], []])
+      })
+
+      test('should clear removed block relationships when writing through db.updateOne', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'blocks',
+          data: { blocks: twoBlocks() },
+          overrideAccess: true,
+        })
+
+        // The raw, locale-keyed document can be written straight back through the adapter, the
+        // same write `payload.update` reaches after hooks and validation.
+        const rawDoc = await payload.db.findOne({
+          collection: 'blocks',
+          where: { id: { equals: doc.id } },
+        })
+
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [rawDoc.blocks[0]] },
+        })
+
+        const result = await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: {
+            blocks: [{ blockType: 'some', directors: [directors[0].id] }, { blockType: 'some' }],
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(result.blocks[1]?.directors ?? []).toStrictEqual([])
       })
     })
   })
