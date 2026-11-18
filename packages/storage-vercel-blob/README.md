@@ -16,6 +16,7 @@ pnpm add @payloadcms/storage-vercel-blob
 - Ensure you have `BLOB_READ_WRITE_TOKEN` set in your Vercel environment variables. This is usually set by Vercel automatically after adding blob storage to your project.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
+- When `clientUploads` is disabled, import from `@payloadcms/storage-vercel-blob/server` instead. That entry omits client-upload code, keeping `@vercel/blob/client` and its `VERCEL_URL` read out of cached server functions.
 
 ```ts
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
