@@ -434,7 +434,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     loadMore: 'Meer laden',
     locale: 'Taal',
     locales: 'Talen',
-    lock: 'Slot',
+    lock: 'Vergrendelen',
     manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Meer opties',
