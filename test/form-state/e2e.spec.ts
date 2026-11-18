@@ -2993,6 +2993,12 @@ test.describe('Document submission outcomes', () => {
         hasCaptured = true
         captured.resolve()
         await released.promise
+        await route.fulfill({
+          response,
+          json: { ...(await response.json()), update: false },
+        })
+
+        return
       }
 
       await route.fulfill({ response })

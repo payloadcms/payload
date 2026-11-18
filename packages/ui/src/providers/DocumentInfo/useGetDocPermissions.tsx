@@ -34,31 +34,9 @@ export const useGetDocPermissions = ({
   setDocPermissions: React.Dispatch<React.SetStateAction<SanitizedDocumentPermissions>>
   setHasPublishPermission: React.Dispatch<React.SetStateAction<boolean>>
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
-}): GetDocPermissions => {
-  const { activateRequestScope, getDocPermissions } = React.useMemo(() => {
-    const requestScope = {
-      isActive: true,
-      latestRequest: null as null | symbol,
-    }
-    const getDocPermissions: GetDocPermissions = async (data, isCurrentRequest) => {
-      const request = Symbol()
-
-      requestScope.latestRequest = request
-
-      if (!requestScope.isActive) {
-        // Strict Mode replays descendant layout effects before reactivating this scope.
-        await Promise.resolve()
-      }
-
-      if (!requestScope.isActive || requestScope.latestRequest !== request) {
-        return
-      }
-
-      const isCurrent = () =>
-        requestScope.isActive &&
-        requestScope.latestRequest === request &&
-        isCurrentRequest?.() !== false
-
+}): GetDocPermissions =>
+  React.useCallback(
+    async (data: Data, isCurrentRequest?: () => boolean) => {
       const params = {
         locale: locale || undefined,
       }
@@ -114,7 +92,7 @@ export const useGetDocPermissions = ({
             },
           ).then((res) => res.json())
 
-          if (!isCurrent()) {
+          if (isCurrentRequest?.() === false) {
             return
           }
 
@@ -140,7 +118,7 @@ export const useGetDocPermissions = ({
           ? permissions?.collections?.[collectionSlug]
           : permissions?.globals?.[globalSlug]
 
-        if (!isCurrent()) {
+        if (isCurrentRequest?.() === false) {
           return
         }
 
@@ -157,33 +135,18 @@ export const useGetDocPermissions = ({
 
         return newDocPermissions
       }
-    }
-
-    const activateRequestScope = () => {
-      requestScope.isActive = true
-
-      return () => {
-        requestScope.isActive = false
-        requestScope.latestRequest = null
-      }
-    }
-
-    return { activateRequestScope, getDocPermissions }
-  }, [
-    locale,
-    id,
-    collectionSlug,
-    globalSlug,
-    api,
-    i18n.language,
-    setDocPermissions,
-    setHasSavePermission,
-    setHasPublishPermission,
-    permissions?.collections,
-    permissions?.globals,
-  ])
-
-  React.useLayoutEffect(activateRequestScope, [activateRequestScope])
-
-  return getDocPermissions
-}
+    },
+    [
+      locale,
+      id,
+      collectionSlug,
+      globalSlug,
+      api,
+      i18n.language,
+      setDocPermissions,
+      setHasSavePermission,
+      setHasPublishPermission,
+      permissions?.collections,
+      permissions?.globals,
+    ],
+  )
