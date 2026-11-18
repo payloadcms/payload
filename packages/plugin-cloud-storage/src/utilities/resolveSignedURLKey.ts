@@ -40,19 +40,24 @@ export async function resolveSignedURLKey({
   req,
   useCompositePrefixes = false,
 }: Args) {
-  // Sanitize with the same helper generateFileData uses for the DB filename so the storage key
-  // and doc.filename stay in sync (#16694).
-  const sanitizedFilename = await getSafeFileName({
-    collectionSlug,
-    desiredFilename: getSanitizedUploadFilename(filename),
-    req,
-  })
-
   const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
   const { sanitizedDocPrefix } = buildUploadPrefix({
     collectionPrefix,
     docPrefix: rawBaseDocPrefix,
     useCompositePrefixes,
+  })
+
+  const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+  const isFilenameUniquePerPrefix =
+    typeof uploadConfig === 'object' && uploadConfig.filenameCompoundIndex?.includes('prefix')
+
+  // Sanitize with the same helper generateFileData uses for the DB filename so the storage key
+  // and doc.filename stay in sync (#16694).
+  const sanitizedFilename = await getSafeFileName({
+    collectionSlug,
+    desiredFilename: getSanitizedUploadFilename(filename),
+    prefix: isFilenameUniquePerPrefix ? sanitizedDocPrefix : undefined,
+    req,
   })
 
   const _objectKey = randomUUID()
