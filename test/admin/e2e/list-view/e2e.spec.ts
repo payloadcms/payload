@@ -1867,7 +1867,7 @@ describe('List View', () => {
       })
 
       await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
-        '<No Some Text Field>',
+        '—No Some Text Field',
       )
 
       await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
@@ -1884,7 +1884,7 @@ describe('List View', () => {
       )
 
       await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
-        '<No Some Text Field>',
+        '—No Some Text Field',
       )
     })
 
@@ -1902,7 +1902,7 @@ describe('List View', () => {
       })
 
       await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
-        '<No Nested Text Field In Named Tab>',
+        '—No Nested Text Field In Named Tab',
       )
 
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
@@ -1919,7 +1919,7 @@ describe('List View', () => {
       )
 
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
-        '<No Nested Text Field In Named Tab>',
+        '—No Nested Text Field In Named Tab',
       )
     })
 
