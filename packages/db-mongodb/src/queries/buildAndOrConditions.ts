@@ -9,7 +9,6 @@ export async function buildAndOrConditions({
   locale,
   parentIsLocalized,
   payload,
-  rejectUntranslatablePredicates,
   where,
 }: {
   collectionSlug?: string
@@ -18,7 +17,6 @@ export async function buildAndOrConditions({
   locale?: string
   parentIsLocalized: boolean
   payload: Payload
-  rejectUntranslatablePredicates?: boolean
   where: Where[]
 }): Promise<Record<string, unknown>[]> {
   const completedConditions = []
@@ -35,7 +33,6 @@ export async function buildAndOrConditions({
         locale,
         parentIsLocalized,
         payload,
-        rejectUntranslatablePredicates,
         where: condition,
       })
       if (Object.keys(result).length > 0) {

@@ -13,7 +13,6 @@ export type BuildQueryArgs = {
   globalSlug?: string
   locale?: string
   payload: Payload
-  rejectUntranslatablePredicates?: boolean
   where: Where
 }
 
@@ -30,7 +29,6 @@ export const getBuildQueryPlugin = ({
       globalSlug,
       locale,
       payload,
-      rejectUntranslatablePredicates,
       where,
     }: BuildQueryArgs): Promise<Record<string, unknown>> {
       let fields: FlattenedField[] | null = null
@@ -69,7 +67,6 @@ export const getBuildQueryPlugin = ({
         locale,
         parentIsLocalized: false,
         payload,
-        rejectUntranslatablePredicates,
         where,
       })
 

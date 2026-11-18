@@ -161,7 +161,6 @@ export async function resolveJoins({
         ? await JoinModel.buildQuery({
             locale,
             payload: adapter.payload,
-            rejectUntranslatablePredicates: isPolymorphicJoin,
             where: combineQueries(appendVersionToQueryKey(whereQuery as Where), {
               latest: {
                 equals: true,
@@ -173,7 +172,6 @@ export async function resolveJoins({
             collectionSlug: joinCollectionSlug,
             fields: targetConfig.flattenedFields,
             locale,
-            rejectUntranslatablePredicates: isPolymorphicJoin,
             where: whereQuery as Where,
           })
 
