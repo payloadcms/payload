@@ -1159,7 +1159,11 @@ test.describe('Form State', () => {
           ? (request.postData() ?? '').includes('form-state')
           : Boolean(request.headers()['next-action']))
 
-      if (isFormStateRequest && !hasCapturedResponse) {
+      if (
+        isFormStateRequest &&
+        readFormStateRequest({ request })?.data?.title === 'ok Latest revision' &&
+        !hasCapturedResponse
+      ) {
         hasCapturedResponse = true
         const response = await route.fetch()
 
@@ -1176,6 +1180,7 @@ test.describe('Form State', () => {
 
       await titleField.fill('ok Latest revision')
       await responseCaptured.promise
+      expect(requestCount).toBe(1)
 
       await page.locator('#set-programmatic-value').click()
 
@@ -2408,12 +2413,17 @@ test.describe('Shared form request queue', () => {
     }) => {
       const doc = await createPost()
       const state = await queueAutosaveBehindFormState({ id: doc.id, page })
+      const requests: string[] = []
 
       await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
-        if (
-          route.request().method() === 'PATCH' &&
-          new URL(route.request().url()).searchParams.get('autosave') !== 'true'
-        ) {
+        const request = route.request()
+
+        if (request.method() !== 'PATCH') {
+          return route.fallback()
+        }
+
+        if (new URL(request.url()).searchParams.get('autosave') !== 'true') {
+          requests.push('rejected publish')
           return route.fulfill({
             contentType: 'application/json',
             json: { message: 'Publish rejected for regression test' },
@@ -2421,7 +2431,14 @@ test.describe('Shared form request queue', () => {
           })
         }
 
-        return route.fallback()
+        const data = readSubmittedData({ body: request.postData() ?? '' })
+
+        requests.push(`autosave: ${data.title}`)
+
+        const response = await route.fetch()
+
+        expect(response.ok()).toBe(true)
+        await route.fulfill({ response })
       })
 
       await page.locator('#field-title').fill('ok Draft survives a rejected publish')
@@ -2444,6 +2461,10 @@ test.describe('Shared form request queue', () => {
         .poll(async () => (await readPost({ id: doc.id })).title)
         .toBe('ok Draft survives a rejected publish')
       expect((await readPost({ id: doc.id }))._status).toBe('draft')
+      expect(requests).toEqual([
+        'rejected publish',
+        'autosave: ok Draft survives a rejected publish',
+      ])
     })
 
     test('should recover conditional fields after an autosave failure displaces their refresh', async ({
@@ -2621,6 +2642,9 @@ async function holdResponse({
       captured.resolve()
       await release.promise
       await route.fulfill({ response })
+    } catch (error) {
+      captured.reject(error)
+      await route.abort()
     } finally {
       finished.resolve()
     }
@@ -2715,12 +2739,14 @@ test.describe('Block form-state regressions', () => {
           const rows = docs[0]?.layout ?? []
 
           return {
+            hasAssignedIDs: rows.every(({ id }) => typeof id === 'string' && id.length > 0),
             originalIDs: rows.slice(0, 2).map(({ id }) => id),
             titles: rows.map(({ title }) => title),
             uniqueIDs: new Set(rows.map(({ id }) => id)).size,
           }
         })
         .toEqual({
+          hasAssignedIDs: true,
           originalIDs: doc.layout!.map(({ id }) => id),
           titles: ['Edited first section', 'Edited second section', 'Added third section'],
           uniqueIDs: 3,
@@ -2791,12 +2817,14 @@ test.describe('Block form-state regressions', () => {
           const blocks = docs[0]?.blocks ?? []
 
           return {
+            hasAssignedIDs: blocks.every(({ id }) => typeof id === 'string' && id.length > 0),
             existingIDs: blocks.slice(0, 2).map(({ id }) => id),
             texts: blocks.map(({ text }) => text),
             uniqueIDs: new Set(blocks.map(({ id }) => id)).size,
           }
         })
         .toEqual({
+          hasAssignedIDs: true,
           existingIDs: [doc.blocks![1]!.id, doc.blocks![0]!.id],
           texts: ['Edited second block', 'Edited first block', 'New third block'],
           uniqueIDs: 3,
@@ -2899,7 +2927,14 @@ test.describe('Block form-state regressions', () => {
       )
 
       await page.locator('#field-content').fill('Trigger the next autosave')
-      await saved
+
+      const response = await saved
+      const data = readSubmittedData({ body: response.request().postData() ?? '' })
+
+      expect(response.ok()).toBe(true)
+      expect(data.blocks).toEqual([
+        expect.objectContaining({ id: doc.blocks![1]!.id, text: 'Keep this block' }),
+      ])
       await expect
         .poll(async () => {
           const response = await page.request.get(

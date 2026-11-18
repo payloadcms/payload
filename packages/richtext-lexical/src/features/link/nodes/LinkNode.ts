@@ -201,7 +201,13 @@ export class LinkNode extends ElementNode {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
     if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
-      anchor.href = url
+      try {
+        const parsedURL = new URL(url, anchor.ownerDocument.baseURI)
+
+        anchor.href = SUPPORTED_URL_PROTOCOLS.has(parsedURL.protocol) ? url : 'about:blank'
+      } catch {
+        anchor.href = 'about:blank'
+      }
     }
     if (this.__fields?.linkType === 'internal' && prevNode.__fields?.linkType === 'custom') {
       anchor.removeAttribute('href')

@@ -111,11 +111,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           })) as RenderListServerFnReturnType
 
           // Keep the current list visible while streamed server components finish loading.
-          startTransition(() => setListView(result?.List || null))
+          startTransition(() => {
+            setListView(result?.List || null)
+            setIsLoading(false)
+          })
         } else {
           setListView(null)
+          setIsLoading(false)
         }
-        setIsLoading(false)
       } catch (_err) {
         console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
 
