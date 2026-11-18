@@ -178,13 +178,7 @@
 
       &__content {
         width: 100%;
-        overflow: auto;
         padding-inline: base(2);
-        // this container has a fixed height
-        // this means the scrollbar (when present) overlaps the content
-        &::-webkit-scrollbar {
-          display: none;
-        }
       }
 
       &__popup {
@@ -196,6 +190,9 @@
       &__meta {
         width: auto;
         gap: calc(var(--base) / 2);
+        // Wrap the date metadata instead of scrolling it: a hidden scrollbar
+        // makes the region keyboard-inaccessible (WCAG 2.1.1)
+        flex-wrap: wrap;
 
         &::after {
           content: '';
