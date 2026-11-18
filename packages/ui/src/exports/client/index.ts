@@ -93,7 +93,13 @@ export { useDraggableSortable } from '../../elements/DraggableSortable/useDragga
 export { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 export { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 export { DocumentFields } from '../../elements/DocumentFields/index.js'
-export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/index.js'
+export {
+  Drawer,
+  DrawerToggler,
+  drawerZBase,
+  formatDrawerSlug,
+  useDrawerDepth,
+} from '../../elements/Drawer/index.js'
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 export { EditMany } from '../../elements/EditMany/index.js'
 export { ErrorPill } from '../../elements/ErrorPill/index.js'
