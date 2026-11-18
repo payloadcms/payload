@@ -10,6 +10,7 @@ export const buildQuery = async ({
   fields,
   globalSlug,
   locale,
+  rejectUntranslatablePredicates,
   where,
 }: {
   adapter: MongooseAdapter
@@ -17,6 +18,7 @@ export const buildQuery = async ({
   fields: FlattenedField[]
   globalSlug?: string
   locale?: string
+  rejectUntranslatablePredicates?: boolean
   where: Where
 }) => {
   const result = await parseParams({
@@ -26,6 +28,7 @@ export const buildQuery = async ({
     locale,
     parentIsLocalized: false,
     payload: adapter.payload,
+    rejectUntranslatablePredicates,
     where,
   })
 

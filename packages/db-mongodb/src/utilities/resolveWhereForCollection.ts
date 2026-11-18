@@ -1,6 +1,7 @@
 import type { Where } from 'payload'
 
-import { QueryError } from 'payload'
+import { Types } from 'mongoose'
+import { createArrayFromCommaDelineated, QueryError } from 'payload'
 
 type ResolvedCollectionCondition =
   | { matches: 'all-documents' }
@@ -10,10 +11,12 @@ type ResolvedCollectionCondition =
 export function resolveWhereForCollection({
   collectionSlug,
   fieldNames,
+  usesObjectIDs,
   where,
 }: {
   collectionSlug: string
   fieldNames: Set<string>
+  usesObjectIDs: boolean
   where: Where
 }): ResolvedCollectionCondition {
   const conditions: ResolvedCollectionCondition[] = []
@@ -26,7 +29,12 @@ export function resolveWhereForCollection({
       conditions.push(
         combineConditions({
           conditions: value.map((nestedWhere) =>
-            resolveWhereForCollection({ collectionSlug, fieldNames, where: nestedWhere }),
+            resolveWhereForCollection({
+              collectionSlug,
+              fieldNames,
+              usesObjectIDs,
+              where: nestedWhere,
+            }),
           ),
           operator,
         }),
@@ -50,6 +58,18 @@ export function resolveWhereForCollection({
     // Preserve the fallback reader's treatment of unavailable fields as nonmatching.
     if (key !== 'id' && !fieldNames.has(key)) {
       return { matches: 'no-documents' }
+    }
+
+    if (key === 'id' && usesObjectIDs && value && !Array.isArray(value)) {
+      const ids = typeof value.in === 'string' ? createArrayFromCommaDelineated(value.in) : value.in
+
+      if (Array.isArray(ids)) {
+        conditions.push({
+          matches: 'documents-matching-where',
+          where: { id: { ...value, in: ids.filter((id) => Types.ObjectId.isValid(id)) } },
+        })
+        continue
+      }
     }
 
     conditions.push({ matches: 'documents-matching-where', where: { [key]: value } })

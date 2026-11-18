@@ -1,7 +1,7 @@
 import type { QueryFilter } from 'mongoose'
 import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
-import { deepMergeWithCombinedArrays } from 'payload'
+import { deepMergeWithCombinedArrays, QueryError } from 'payload'
 import { validOperatorSet } from 'payload/shared'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
@@ -14,6 +14,7 @@ export async function parseParams({
   locale,
   parentIsLocalized,
   payload,
+  rejectUntranslatablePredicates,
   where,
 }: {
   collectionSlug?: string
@@ -22,6 +23,7 @@ export async function parseParams({
   locale?: string
   parentIsLocalized: boolean
   payload: Payload
+  rejectUntranslatablePredicates?: boolean
   where: Where
 }): Promise<Record<string, unknown>> {
   let result = {} as QueryFilter<any>
@@ -44,6 +46,7 @@ export async function parseParams({
           locale,
           parentIsLocalized,
           payload,
+          rejectUntranslatablePredicates,
           where: condition,
         })
         if (builtConditions.length > 0 && conditionOperator !== null) {
@@ -71,6 +74,16 @@ export async function parseParams({
               payload,
               val: (pathOperators as Record<string, Where>)[operator],
             })
+
+            if (
+              rejectUntranslatablePredicates &&
+              (!searchParam?.value ||
+                (typeof searchParam.value === 'object' &&
+                  (Object.keys(searchParam.value).length === 0 ||
+                    Object.values(searchParam.value).includes(undefined))))
+            ) {
+              throw new QueryError([{ path: `${relationOrPath}.${operator}` }])
+            }
 
             if (searchParam?.value && searchParam?.path) {
               if (validOperators.length > 1) {

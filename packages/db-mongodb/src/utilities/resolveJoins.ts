@@ -140,6 +140,7 @@ export async function resolveJoins({
         const condition = resolveWhereForCollection({
           collectionSlug: joinCollectionSlug,
           fieldNames: new Set(targetConfig.flattenedFields.map(({ name }) => name)),
+          usesObjectIDs: !adapter.payload.collections[joinCollectionSlug]?.customIDType,
           where: joinQuery.where || {},
         })
 
@@ -160,6 +161,7 @@ export async function resolveJoins({
         ? await JoinModel.buildQuery({
             locale,
             payload: adapter.payload,
+            rejectUntranslatablePredicates: isPolymorphicJoin,
             where: combineQueries(appendVersionToQueryKey(whereQuery as Where), {
               latest: {
                 equals: true,
@@ -171,6 +173,7 @@ export async function resolveJoins({
             collectionSlug: joinCollectionSlug,
             fields: targetConfig.flattenedFields,
             locale,
+            rejectUntranslatablePredicates: isPolymorphicJoin,
             where: whereQuery as Where,
           })
 
