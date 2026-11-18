@@ -19,6 +19,8 @@ import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServ
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
+import { hasRowPathChanged } from '../../packages/ui/src/forms/Form/rowHelpers.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildNullifyLocaleFieldUpdate } from '../../packages/ui/src/forms/NullifyField/index.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { reduceFieldsToValuesWithValidation } from '../../packages/ui/src/utilities/reduceFieldsToValuesWithValidation.js'
@@ -1031,6 +1033,73 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(state.items?.value).toBe(0)
     expect(state.items?.disableFormData).toBeUndefined()
     expect(state['items.0.text']).toBeUndefined()
+  })
+
+  test('should discard cached components when authoritative state hides a field', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        title: {
+          customComponents: { Field: DummyReactComponent },
+          lastRenderedPath: 'title',
+          value: 'Hidden title',
+        },
+      },
+      incomingState: { title: { passesCondition: false, value: 'Hidden title' } },
+    })
+
+    expect(state.title.customComponents).toBeUndefined()
+    expect(state.title.lastRenderedPath).toBeUndefined()
+    expect(state.title.value).toBe('Hidden title')
+  })
+
+  test.for([
+    { path: 'title', changed: false },
+    { path: 'blocks', changed: false },
+    { path: 'blocks.0', changed: true },
+    { path: 'blocks.0.title', changed: true },
+    { path: 'blocks.2', changed: false },
+    { path: 'blocks.2.title', changed: false },
+    { path: 'blocks.0.items.0.title', changed: true },
+    { path: 'blocks.2.items.0', changed: true },
+    { path: 'blocks.2.items.0.title', changed: true },
+    { path: 'blocks.2.items.2.title', changed: false },
+    { path: 'array.0.title', changed: false },
+    { path: 'removed.0.title', changed: true },
+    { path: 'replaced.0.title', changed: true },
+    { path: 'group.2026.title', changed: false },
+  ])('should identify whether row ownership changed at $path', ({ changed, path }) => {
+    const formState: FormState = {
+      blocks: {
+        rows: [
+          { id: 'first', blockType: 'two' },
+          { id: 'second', blockType: 'two' },
+          { id: 'kept', blockType: 'one' },
+        ],
+      },
+      'blocks.0.items': { rows: [{ id: 'shared-child' }] },
+      'blocks.2.items': { rows: [{ id: 'child-1' }, { id: 'child-2' }, { id: 'child-kept' }] },
+      array: { rows: [{ id: 'array-row' }] },
+      removed: { rows: [{ id: 'removed' }] },
+      replaced: { rows: [{ id: 'same', blockType: 'one' }] },
+    }
+    const data = {
+      blocks: [
+        { id: 'second', blockType: 'two', items: [{ id: 'shared-child' }] },
+        { id: 'first', blockType: 'two' },
+        {
+          id: 'kept',
+          blockType: 'one',
+          items: [{ id: 'child-2' }, { id: 'child-1' }, { id: 'child-kept' }],
+        },
+      ],
+      array: [{ id: 'array-row', blockType: 'ordinary array data' }],
+      removed: [],
+      replaced: [{ id: 'same', blockType: 'two' }],
+      group: { 2026: { title: 'Numeric field name' } },
+    }
+
+    expect(hasRowPathChanged({ data, formState, path })).toBe(changed)
   })
 
   test('should remove old fields when the server changes a block type', () => {
