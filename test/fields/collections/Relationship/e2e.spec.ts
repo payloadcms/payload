@@ -704,6 +704,83 @@ describe('relationship', () => {
     await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
 
+  describe('list view relationship batches', () => {
+    let releaseHeldBatch: () => void = () => {}
+
+    test.afterEach(async () => {
+      releaseHeldBatch()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+    })
+
+    test('should not request related documents again while their batch is pending', async () => {
+      // a row related to a second collection, so the list view loads two batches
+      const {
+        docs: [arrayDoc],
+      } = await payload.find({ collection: 'array-fields', overrideAccess: true })
+      await createRelationshipFieldDoc({ relationTo: 'array-fields', value: arrayDoc!.id })
+
+      const requestedIDs: string[] = []
+      let heldSlug: string | undefined
+      const heldBatch = new Promise<void>((resolve) => {
+        releaseHeldBatch = resolve
+      })
+
+      // The list view's relationship cells load their documents in one batch per collection
+      // (`?where[id][in]=...`). Hold the first collection's batch while the other ones answer: the
+      // documents in the held batch must not be requested a second time in the meantime.
+      await page.route(
+        (requestURL) => requestURL.searchParams.has('where[id][in]'),
+        async (route) => {
+          const requestURL = new URL(route.request().url())
+          const slug = requestURL.pathname.split('/').pop()
+
+          for (const id of (requestURL.searchParams.get('where[id][in]') ?? '').split(',')) {
+            requestedIDs.push(`${slug}:${id}`)
+          }
+
+          heldSlug ??= slug
+
+          if (slug === heldSlug) {
+            await heldBatch
+          }
+
+          await route.continue()
+        },
+      )
+
+      const otherBatchResponse = page.waitForResponse((response) => {
+        const responseURL = new URL(response.url())
+        return (
+          heldSlug !== undefined &&
+          responseURL.searchParams.has('where[id][in]') &&
+          !responseURL.pathname.endsWith(`/${heldSlug}`)
+        )
+      })
+
+      await page.goto(url.list)
+      await expect(page.locator(tableRowLocator).first()).toBeVisible()
+
+      // another collection's batch has answered while the held one is pending, and the provider's
+      // debounced loader (100 ms) has run again
+      await otherBatchResponse
+      await wait(500)
+
+      const heldBatchResponse = page.waitForResponse((response) => {
+        const responseURL = new URL(response.url())
+        return (
+          responseURL.pathname.endsWith(`/${heldSlug}`) &&
+          responseURL.searchParams.has('where[id][in]')
+        )
+      })
+
+      releaseHeldBatch()
+      await heldBatchResponse
+      await wait(500)
+
+      expect(requestedIDs).toHaveLength(new Set(requestedIDs).size)
+    })
+  })
+
   test('should allow filtering by relationship field / equals', async () => {
     const textDoc = await createTextFieldDoc()
     await createRelationshipFieldDoc({ relationTo: 'text-fields', value: textDoc.id })
