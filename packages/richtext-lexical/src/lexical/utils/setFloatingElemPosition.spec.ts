@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { setHandlePosition } from '../plugins/handles/utils/setHandlePosition.js'
 import { setFloatingElemPosition } from './setFloatingElemPosition.js'
@@ -9,10 +9,15 @@ const rect = (o: Partial<DOMRect> = {}) =>
 
 const el = (r: DOMRect = rect()) =>
   ({
+    classList: { contains: () => false },
+    firstElementChild: null,
     getBoundingClientRect: () => r,
+    offsetHeight: 20,
+    offsetWidth: 100,
     parentElement: { getBoundingClientRect: () => rect({ left: 0, right: 1000, top: 0 }) },
     scrollWidth: 100,
     style: {} as Record<string, string>,
+    tagName: 'BUTTON',
   }) as unknown as HTMLElement
 
 describe('hidden floating elements do not translate off-screen', () => {
@@ -51,5 +56,21 @@ describe('hidden floating elements do not translate off-screen', () => {
     expect(handleElem.style.opacity).toBe('0')
     expect(handleElem.style.visibility).toBe('hidden')
     expect(handleElem.style.transform).toBe('none')
+  })
+
+  it('should restore handle visibility when a target appears', () => {
+    const handleElem = el()
+
+    vi.stubGlobal('window', { getComputedStyle: () => ({ lineHeight: '20px' }) })
+    try {
+      setHandlePosition(null, handleElem, el())
+      setHandlePosition(el(), handleElem, el())
+
+      expect(handleElem.style.opacity).toBe('1')
+      expect(handleElem.style.visibility).toBe('visible')
+      expect(handleElem.style.transform).toMatch(/^translate\(0px, -?\d+(\.\d+)?px\)$/)
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })

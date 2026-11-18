@@ -8,6 +8,7 @@ export function setHandlePosition(
   leftOffset: number = 0, // SPACE
 ) {
   if (!targetElem) {
+    handleElem.style.visibility = 'hidden'
     handleElem.style.opacity = '0'
     // Not translated off-screen: in an RTL document that overflow widens the page by 10000px
     handleElem.style.transform = 'none'
@@ -46,5 +47,6 @@ export function setHandlePosition(
   const left = leftOffset
 
   handleElem.style.opacity = '1'
+  handleElem.style.visibility = 'visible'
   handleElem.style.transform = `translate(${left}px, ${top}px)`
 }

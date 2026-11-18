@@ -373,7 +373,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" ref={editorRef}>
+      <div
+        className="link-editor"
+        hidden={!isLink}
+        ref={editorRef}
+        style={{ display: isLink ? undefined : 'none' }}
+      >
         <div className="link-input">
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
