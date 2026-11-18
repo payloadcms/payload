@@ -33,7 +33,7 @@ export async function getGeneratedColumnType({
   sql: any
   tableName: string
 }): Promise<any> {
-  const column = getRawColumn({ columnName, db, tableName })
+  const column = getRawColumn({ columnName, payload, tableName })
 
   if (!column) {
     return sql.raw(fallbackType)
@@ -75,23 +75,28 @@ export async function getGeneratedColumnType({
   return enumType
 }
 
+/**
+ * Reads the generator's raw schema from the adapter. The `db` a migration receives is a Drizzle
+ * transaction handle, which does not carry `rawTables`.
+ */
 export const getRawTable = ({
-  db,
+  payload,
   tableName,
 }: {
-  db: any
+  payload: Payload
   tableName: string
-}): RawTable | undefined => db.rawTables?.[tableName]
+}): RawTable | undefined =>
+  (payload.db as unknown as { rawTables?: Record<string, RawTable> }).rawTables?.[tableName]
 
 const getRawColumn = ({
   columnName,
-  db,
+  payload,
   tableName,
 }: {
   columnName: string
-  db: any
+  payload: Payload
   tableName: string
 }): RawColumn | undefined =>
-  Object.values(getRawTable({ db, tableName })?.columns ?? {}).find(
+  Object.values(getRawTable({ payload, tableName })?.columns ?? {}).find(
     (column) => column.name === columnName,
   )

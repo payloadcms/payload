@@ -148,7 +148,7 @@ export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): P
       sql,
       tableName: localesTable,
     })
-    const rawLocalesTable = getRawTable({ db, tableName: localesTable })
+    const rawLocalesTable = getRawTable({ payload, tableName: localesTable })
     const parentForeignKeyName =
       rawLocalesTable?.foreignKeys?._parentIdFk?.name ?? `${localesTable}_parent_id_fk`
     const localeParentIndexName =
