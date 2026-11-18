@@ -126,7 +126,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     async ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
       const existingCondition = conditions[orIndex].and[andIndex]
 
-      if (typeof existingCondition === 'object' && field.value) {
+      if (typeof existingCondition === 'object' && field?.value) {
         const { validOperator } = getValidFieldOperators({
           field: field.field,
           operator: incomingOperator,
