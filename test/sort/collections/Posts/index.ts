@@ -21,6 +21,21 @@ export const PostsCollection: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'number',
+          type: 'number',
+        },
+      ],
+    },
+    {
+      name: 'hasManyNumber',
+      type: 'number',
+      hasMany: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
