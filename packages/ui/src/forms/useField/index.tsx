@@ -145,14 +145,13 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
         let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
-        const data = getData()
         const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
                 blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
                 collectionSlug,
-                data: documentForm?.getData ? documentForm.getData() : data,
+                data: documentForm?.getData ? documentForm.getData() : getData(),
                 event: 'onChange',
                 operation,
                 path: pathSegments,
