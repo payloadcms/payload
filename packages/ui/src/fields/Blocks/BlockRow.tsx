@@ -46,7 +46,7 @@ type BlocksFieldProps = {
   rowCount: number
   rowIndex: number
   schemaPath: string
-  setCollapse: (id: string, collapsed: boolean) => void
+  setCollapse: (id: string, collapsed: boolean) => Promise<void> | void
 } & UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlocksFieldProps> = ({

@@ -72,7 +72,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
 
   const minRows = minRowsProp ?? (required ? 1 : 0)
 
-  const { setDocFieldPreferences } = useDocumentInfo()
+  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const {
     addFieldRow,
     dispatchFields,
@@ -198,19 +198,28 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
   )
 
   const toggleCollapseAll = useCallback(
-    (collapsed: boolean) => {
+    async (collapsed: boolean) => {
       const { collapsedIDs, updatedRows } = toggleAllRows({
         collapsed,
         rows,
       })
-      setDocFieldPreferences(path, { collapsed: collapsedIDs })
+
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
+
+      // Preserve collapsed state from other locales by keeping IDs that don't
+      // belong to the current locale's rows (they come from other locales).
+      const currentRowIDs = new Set(rows.map((row) => row.id))
+      const docPreferences = await getDocPreferences()
+      const previousCollapsed = docPreferences?.fields?.[path]?.collapsed ?? []
+      const otherLocaleIDs = previousCollapsed.filter((id) => !currentRowIDs.has(id))
+
+      void setDocFieldPreferences(path, { collapsed: [...otherLocaleIDs, ...collapsedIDs] })
     },
-    [dispatchFields, path, rows, setDocFieldPreferences],
+    [dispatchFields, getDocPreferences, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
-    (rowID: string, collapsed: boolean) => {
+    async (rowID: string, collapsed: boolean) => {
       const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
         collapsed,
         rowID,
@@ -218,9 +227,17 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
       })
 
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
-      setDocFieldPreferences(path, { collapsed: collapsedIDs })
+
+      // Preserve collapsed state from other locales by keeping IDs that don't
+      // belong to the current locale's rows (they come from other locales).
+      const currentRowIDs = new Set(rows.map((row) => row.id))
+      const docPreferences = await getDocPreferences()
+      const previousCollapsed = docPreferences?.fields?.[path]?.collapsed ?? []
+      const otherLocaleIDs = previousCollapsed.filter((id) => !currentRowIDs.has(id))
+
+      void setDocFieldPreferences(path, { collapsed: [...otherLocaleIDs, ...collapsedIDs] })
     },
-    [dispatchFields, path, rows, setDocFieldPreferences],
+    [dispatchFields, getDocPreferences, path, rows, setDocFieldPreferences],
   )
 
   const copyRow = useCallback(

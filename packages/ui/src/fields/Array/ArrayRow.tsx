@@ -49,7 +49,7 @@ type ArrayRowProps = {
   readonly rowIndex: number
   readonly schemaPath: string
   readonly scrollIdPrefix: string
-  readonly setCollapse: (rowID: string, collapsed: boolean) => void
+  readonly setCollapse: (rowID: string, collapsed: boolean) => Promise<void> | void
 } & Pick<ClientComponentProps, 'forceRender'> &
   UseDraggableSortableReturn
 
