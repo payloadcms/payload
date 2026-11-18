@@ -283,7 +283,30 @@ export async function updatePackageJSON(args: {
 }
 
 /**
- * Recursively updates a JSON object to replace all instances of `workspace:` with the latest version pinned.
+ * Packages that are only published on the v4 line, so a v3 version of them does not exist.
+ * `@payloadcms/transformer-sharp` is a v4-only package (#18988); `@payloadcms/tanstack-start`
+ * follows the same rule.
+ */
+const V4_ONLY_PACKAGES = ['@payloadcms/tanstack-start', '@payloadcms/transformer-sharp']
+
+/**
+ * Packages published outside the monorepo release line, which must keep their own version.
+ * Mirrors the `DO_NOT_BUMP` list in `tools/scripts/src/generate-template-variations.ts`.
+ */
+const DO_NOT_BUMP = ['@payloadcms/eslint-config', '@payloadcms/eslint-plugin']
+
+function isPayloadPackage(packageName: string): boolean {
+  return packageName === 'payload' || packageName.startsWith('@payloadcms')
+}
+
+/**
+ * Updates a JSON object in place so every Payload package follows the latest version:
+ * - `workspace:` entries in `dependencies` and `devDependencies` become the pinned version.
+ * - `payload` and `@payloadcms/*` entries in `dependencies` and `devDependencies` become the pinned version.
+ * - `payload` and `@payloadcms/*` entries in `peerDependencies` get a caret range on the pinned version.
+ *
+ * Templates pin Payload in either dependency group (the `plugin` starter pins it in `devDependencies`),
+ * so both groups must be rewritten for the scaffolded project to follow the resolved version.
  *
  * Does not return and instead modifies the `packageJson` object in place.
  */
@@ -292,19 +315,59 @@ export function updatePackageJSONDependencies(args: {
   packageJson: Record<string, unknown>
 }): void {
   const { latestVersion, packageJson } = args
+  const resolvedMajor = latestVersion.split('.')[0]
 
-  const updatedDependencies = Object.entries(packageJson.dependencies || {}).reduce(
-    (acc, [key, value]) => {
-      if (typeof value === 'string' && value.startsWith('workspace:')) {
-        acc[key] = `${latestVersion}`
-      } else if (key === 'payload' || key.startsWith('@payloadcms')) {
-        acc[key] = `${latestVersion}`
-      } else {
-        acc[key] = value
-      }
-      return acc
-    },
-    {} as Record<string, string>,
-  )
-  packageJson.dependencies = updatedDependencies
+  // A v4-only package has no v3 release to pin to when a v3 version is resolved, for example when a
+  // v4 template is scaffolded with `--branch main` on a stable CLI. Keep the template's own pin
+  // instead of pointing at a version that was never published.
+  const isV4OnlyOffLine = (packageName: string): boolean =>
+    V4_ONLY_PACKAGES.includes(packageName) && resolvedMajor !== '4'
+
+  const pinVersion = (packageName: string, value: unknown): unknown => {
+    // A `workspace:` placeholder is always replaced, whatever the package: leaving it in the
+    // scaffolded package.json makes the install fail with `EUNSUPPORTEDPROTOCOL` (the `blank`,
+    // `website` and `blank-tanstack` starters carry v4-only packages as `workspace:*`).
+    if (typeof value === 'string' && value.startsWith('workspace:')) {
+      return latestVersion
+    }
+    if (
+      isPayloadPackage(packageName) &&
+      !DO_NOT_BUMP.includes(packageName) &&
+      !isV4OnlyOffLine(packageName)
+    ) {
+      return latestVersion
+    }
+    return value
+  }
+
+  for (const field of ['dependencies', 'devDependencies'] as const) {
+    const dependencies = packageJson[field]
+    if (!dependencies || typeof dependencies !== 'object') {
+      continue
+    }
+
+    packageJson[field] = Object.entries(dependencies as Record<string, unknown>).reduce(
+      (acc, [key, value]) => {
+        acc[key] = pinVersion(key, value)
+        return acc
+      },
+      {} as Record<string, unknown>,
+    )
+  }
+
+  const peerDependencies = packageJson.peerDependencies
+  if (peerDependencies && typeof peerDependencies === 'object') {
+    packageJson.peerDependencies = Object.entries(
+      peerDependencies as Record<string, unknown>,
+    ).reduce(
+      (acc, [key, value]) => {
+        acc[key] =
+          isPayloadPackage(key) && !DO_NOT_BUMP.includes(key) && !isV4OnlyOffLine(key)
+            ? `^${latestVersion}`
+            : value
+        return acc
+      },
+      {} as Record<string, unknown>,
+    )
+  }
 }
