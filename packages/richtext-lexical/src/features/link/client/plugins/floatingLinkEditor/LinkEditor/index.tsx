@@ -96,7 +96,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setIsLink(false)
     if (editorRef && editorRef.current) {
       editorRef.current.style.opacity = '0'
-      editorRef.current.style.transform = 'translate(-10000px, -10000px)'
+      editorRef.current.style.pointerEvents = 'none'
+      editorRef.current.style.transform = 'none'
     }
     setIsAutoLink(false)
     // Nested fields can temporarily move selection away from the editor. Keep the backing form

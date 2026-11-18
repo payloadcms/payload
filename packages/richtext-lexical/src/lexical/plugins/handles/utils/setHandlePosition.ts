@@ -9,7 +9,8 @@ export function setHandlePosition(
 ) {
   if (!targetElem) {
     handleElem.style.opacity = '0'
-    handleElem.style.transform = 'translate(-10000px, -10000px)'
+    // Not translated off-screen: in an RTL document that overflow widens the page by 10000px
+    handleElem.style.transform = 'none'
     return
   }
 
