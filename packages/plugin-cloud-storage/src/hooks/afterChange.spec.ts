@@ -57,3 +57,35 @@ describe('upload replacement cleanup', () => {
     },
   )
 })
+
+describe('adapter metadata persistence', () => {
+  it('should not pass consumed upload edits to the nested metadata update', async () => {
+    let queryDuringUpdate: Record<string, unknown> | undefined
+    const update = vi.fn(({ req }) => {
+      queryDuringUpdate = { ...req.query }
+      return Promise.resolve({ id: 1, filename: 'file-abc123.png' })
+    })
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleUpload: vi.fn().mockResolvedValue({ filename: 'file-abc123.png' }),
+        handleDelete: vi.fn(),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    const uploadEdits = { focalPoint: { x: '37', y: '60' } }
+    const req = {
+      context: {},
+      file: { data: Buffer.from('file'), name: 'file.png', size: 4 },
+      payload: { logger: { error: vi.fn() }, update },
+      query: { locale: 'en', uploadEdits },
+    }
+    const doc = { id: 1, filename: 'file.png', mimeType: 'image/png' }
+
+    await hook({ data: doc, doc, operation: 'create', req } as never)
+
+    expect(update).toHaveBeenCalledTimes(1)
+    expect(queryDuringUpdate).toEqual({ locale: 'en' })
+    expect(req.query).toEqual({ locale: 'en', uploadEdits })
+  })
+})

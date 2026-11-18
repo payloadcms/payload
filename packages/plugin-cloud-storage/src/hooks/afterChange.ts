@@ -154,6 +154,11 @@ export const getAfterChangeHook =
           // Clear to prevent re-processing
           req.file = undefined
           req.payloadUploadSizes = undefined
+          // Upload edits were already applied; re-reading them in the nested update would
+          // trigger a re-upload from the previous (now stale) file URL.
+          const originalQuery = req.query
+          req.query = { ...req.query }
+          delete req.query.uploadEdits
 
           try {
             const updatedDoc = await req.payload.update({
@@ -170,6 +175,7 @@ export const getAfterChangeHook =
             // Persist all adapter metadata, but do not add unselected fields to the response.
             docWithMetadata = select ? { ...doc, ...updatedDoc } : { ...doc, ...uploadMetadata }
           } finally {
+            req.query = originalQuery
             delete req.context.skipCloudStorage
           }
         }
