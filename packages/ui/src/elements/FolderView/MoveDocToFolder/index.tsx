@@ -189,8 +189,8 @@ export const MoveDocToFolderButton = ({
                   }),
                 )
               }
-            } catch (_) {
-              // todo: add error toast?
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : t('error:unknown'))
             }
           }
 
