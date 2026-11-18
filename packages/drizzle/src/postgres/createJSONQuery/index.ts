@@ -1,3 +1,4 @@
+import { getTableName } from 'drizzle-orm'
 import { APIError } from 'payload'
 
 import type { CreateJSONQueryArgs } from '../../types.js'
@@ -40,7 +41,8 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
 }
 
 export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
-  const columnName = typeof column === 'object' ? column.name : column
+  const columnName =
+    typeof column === 'object' ? `"${getTableName(column.table)}"."${column.name}"` : column
   const jsonPaths = pathSegments
     .slice(1)
     .map((key) => {
