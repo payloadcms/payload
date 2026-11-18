@@ -32,8 +32,10 @@ export function setFloatingElemPosition(args: {
   const scrollerElem = anchorElem.parentElement
 
   if (targetRect === null || scrollerElem == null) {
+    // Not translated off-screen: in an RTL document that overflow widens the page by 10000px
     floatingElem.style.opacity = '0'
-    floatingElem.style.transform = 'translate(-10000px, -10000px)'
+    floatingElem.style.pointerEvents = 'none'
+    floatingElem.style.transform = 'none'
     return
   }
 
@@ -71,6 +73,8 @@ export function setFloatingElemPosition(args: {
   left -= anchorElementRect.left
 
   floatingElem.style.opacity = '1'
+
+  floatingElem.style.pointerEvents = ''
 
   if (specialHandlingForCaret && anchorFlippedOffset !== 0) {
     // Floating select toolbar was flipped (positioned below text rather than above). Thus, the caret now needs to be positioned
