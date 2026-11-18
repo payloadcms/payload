@@ -176,7 +176,6 @@ export const baseConfig: Partial<Config> = {
         },
       },
     },
-    constrainWidth: true,
     importMap: {
       baseDir: path.resolve(dirname),
     },
