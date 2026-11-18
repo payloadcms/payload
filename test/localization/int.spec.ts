@@ -5383,6 +5383,35 @@ describe('Localization', () => {
           expect(esDoc._status).toContain('published')
           expect(allLocalesDoc._status.xx).not.toBe('published')
         })
+
+        it('should duplicate as draft in every locale', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              text: 'Localized Metadata EN',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+            publishAllLocales: true,
+          })
+
+          const duplicate = await payload.duplicate({
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDuplicate = await payload.findByID({
+            id: duplicate.id,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDuplicate._status[defaultLocale]).toBe('draft')
+          expect(allLocalesDuplicate._status[spanishLocale]).toBe('draft')
+        })
       })
 
       describe('querying', () => {
