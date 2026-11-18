@@ -29,7 +29,7 @@ import { RouteCache } from '../../providers/RouteCache/index.js'
 import { RouteTransitionProvider } from '../../providers/RouteTransition/index.js'
 import { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 import { ServerFunctionsProvider } from '../../providers/ServerFunctions/index.js'
-import { ThemeProvider } from '../../providers/Theme/index.js'
+import { RootThemeProvider } from '../../providers/Theme/RootThemeProvider/index.js'
 import { ToastContainer } from '../../providers/ToastContainer/index.js'
 import { TranslationProvider } from '../../providers/Translation/index.js'
 import { UploadHandlersProvider } from '../../providers/UploadHandlers/index.js'
@@ -106,7 +106,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                 <AuthProvider permissions={permissions} user={user}>
                                   <PreferencesProvider>
                                     <HierarchyProvider>
-                                      <ThemeProvider
+                                      <RootThemeProvider
                                         highContrastMode={highContrastMode}
                                         theme={theme}
                                       >
@@ -134,7 +134,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                             </StepNavProvider>
                                           </LocaleProvider>
                                         </EmbedProvider>
-                                      </ThemeProvider>
+                                      </RootThemeProvider>
                                     </HierarchyProvider>
                                   </PreferencesProvider>
                                   <ModalContainer />
