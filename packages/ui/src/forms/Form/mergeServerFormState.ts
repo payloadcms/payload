@@ -203,6 +203,11 @@ export const mergeServerFormState = ({
       ...sanitizedIncomingField,
     }
 
+    if (acceptValues === true && incomingField.passesCondition === false) {
+      delete newState[path].customComponents
+      delete newState[path].lastRenderedPath
+    }
+
     if (
       currentState[path] &&
       'errorPaths' in currentState[path] &&

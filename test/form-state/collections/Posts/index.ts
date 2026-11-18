@@ -169,7 +169,16 @@ export const PostsCollection: CollectionConfig = {
       blocks: ['one', 'two', 'three'].map<Block>((slug) => ({
         slug,
         fields: [
-          { name: 'title', type: 'text' },
+          {
+            name: 'title',
+            type: 'text',
+            admin: {
+              condition: (_, siblingData) => siblingData.order !== -1,
+              components: {
+                Field: './collections/Posts/PathBoundTextField/index.js#PathBoundTextField',
+              },
+            },
+          },
           { name: 'order', type: 'number' },
           slug === 'one'
             ? { name: 'content', type: 'group', fields: [{ name: 'text', type: 'text' }] }

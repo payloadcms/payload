@@ -29,10 +29,11 @@ import { RouteCache } from '../../providers/RouteCache/index.js'
 import { RouteTransitionProvider } from '../../providers/RouteTransition/index.js'
 import { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 import { ServerFunctionsProvider } from '../../providers/ServerFunctions/index.js'
-import { ThemeProvider } from '../../providers/Theme/index.js'
+import { RootThemeProvider } from '../../providers/Theme/RootThemeProvider/index.js'
 import { ToastContainer } from '../../providers/ToastContainer/index.js'
 import { TranslationProvider } from '../../providers/Translation/index.js'
 import { UploadHandlersProvider } from '../../providers/UploadHandlers/index.js'
+import { UploadSessionsProvider } from '../../providers/UploadSessions/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 
 export type RootProviderProps = {
@@ -105,7 +106,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                 <AuthProvider permissions={permissions} user={user}>
                                   <PreferencesProvider>
                                     <HierarchyProvider>
-                                      <ThemeProvider
+                                      <RootThemeProvider
                                         highContrastMode={highContrastMode}
                                         theme={theme}
                                       >
@@ -115,23 +116,25 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                               <LoadingOverlayProvider>
                                                 <DocumentEventsProvider>
                                                   <NavProvider initialIsOpen={isNavOpen}>
-                                                    <UploadHandlersProvider>
-                                                      <DndContext
-                                                        collisionDetection={pointerWithin}
-                                                        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                        id={dndContextID}
-                                                      >
-                                                        <ProgressBar />
-                                                        {children}
-                                                      </DndContext>
-                                                    </UploadHandlersProvider>
+                                                    <UploadSessionsProvider>
+                                                      <UploadHandlersProvider>
+                                                        <DndContext
+                                                          collisionDetection={pointerWithin}
+                                                          // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                          id={dndContextID}
+                                                        >
+                                                          <ProgressBar />
+                                                          {children}
+                                                        </DndContext>
+                                                      </UploadHandlersProvider>
+                                                    </UploadSessionsProvider>
                                                   </NavProvider>
                                                 </DocumentEventsProvider>
                                               </LoadingOverlayProvider>
                                             </StepNavProvider>
                                           </LocaleProvider>
                                         </EmbedProvider>
-                                      </ThemeProvider>
+                                      </RootThemeProvider>
                                     </HierarchyProvider>
                                   </PreferencesProvider>
                                   <ModalContainer />

@@ -103,13 +103,14 @@ export async function convertLexicalNodesToHTMLAsync({
   let i = -1
   for (const node of nodes) {
     i++
-    const { converterForNode, providedCSSString, providedStyleTag } = findConverterForNode({
-      converters,
-      disableIndent,
-      disableTextAlign,
-      node,
-      unknownConverter,
-    })
+    const { converterForNode, providedCSSString, providedDirAttribute, providedStyleTag } =
+      findConverterForNode({
+        converters,
+        disableIndent,
+        disableTextAlign,
+        node,
+        unknownConverter,
+      })
 
     try {
       let nodeHTML: string
@@ -138,6 +139,7 @@ export async function convertLexicalNodesToHTMLAsync({
                 },
                 parent,
                 providedCSSString,
+                providedDirAttribute,
                 providedStyleTag,
               })
             : converterForNode

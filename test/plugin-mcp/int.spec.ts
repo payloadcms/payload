@@ -1,5 +1,5 @@
 import type { JsonSchemaType, OAuthClientProvider } from '@modelcontextprotocol/client'
-import type { MCPOAuthConfig } from '@payloadcms/plugin-mcp'
+import type { MCPOAuthConfig, SanitizedMCPPluginConfig } from '@payloadcms/plugin-mcp'
 import type { Payload, PayloadRequest, UploadInstructions } from 'payload'
 
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
@@ -116,6 +116,24 @@ const enableOAuth = (
   plugin.sanitizedOptions.oauth = oauth
   onTestFinished(() => {
     delete plugin.sanitizedOptions.oauth
+  })
+}
+/** Sets a plugin option that the test config leaves unset, for the current test only. */
+const setPluginOption = <TKey extends 'access' | 'overrideGetAuthorizedMCP'>({
+  key,
+  payload,
+  value,
+}: {
+  key: TKey
+  payload: Payload
+  value: SanitizedMCPPluginConfig[TKey]
+}) => {
+  const plugin = payload.config.plugins?.find(
+    (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+  ) as any
+  plugin.sanitizedOptions[key] = value
+  onTestFinished(() => {
+    delete plugin.sanitizedOptions[key]
   })
 }
 const getLoginToken = async (restClient: RESTClient): Promise<string> => {
@@ -415,6 +433,93 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         )
       })
     })
+    test.describe('Plugin access', () => {
+      const initializeBody = {
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'initialize',
+        params: {
+          capabilities: {},
+          clientInfo: { name: 'plugin-access-test', version: '1.0.0' },
+          protocolVersion: '2025-11-25',
+        },
+      }
+
+      it('should only let users the plugin access allows use MCP', async ({
+        getApiKey,
+        getLimitedApiKey,
+        mcp,
+        payload,
+      }) => {
+        setPluginOption({
+          key: 'access',
+          payload,
+          value: ({ req }) => req.user?.email === devUser.email,
+        })
+
+        const denied = await mcp.rawPost({ apiKey: await getLimitedApiKey(), body: initializeBody })
+        const allowed = await mcp.rawPost({ apiKey: await getApiKey(), body: initializeBody })
+
+        expect(denied.status).toBe(403)
+        await expect(denied.json()).resolves.toMatchObject({
+          errors: [{ message: 'You are not allowed to perform this action.' }],
+        })
+        expect(allowed.status).toBe(200)
+      })
+      it('should give the plugin access the user and their permissions', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        const access = vi.fn(() => true)
+        setPluginOption({ key: 'access', payload, value: access })
+
+        await mcp.rawPost({ apiKey: await getApiKey(), body: initializeBody })
+
+        expect(access).toHaveBeenCalledWith({
+          permissions: expect.objectContaining({ canAccessAdmin: true }),
+          req: expect.objectContaining({
+            user: expect.objectContaining({ email: devUser.email }),
+          }),
+        })
+      })
+      it('should skip the plugin access when overrideAccess is enabled', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        const access = vi.fn(() => false)
+        setPluginOption({ key: 'access', payload, value: access })
+        vi.stubEnv('NODE_ENV', 'development')
+
+        const client = await mcp.connect(await getApiKey(), { overrideAccess: true })
+        const { tools } = await client.listTools()
+
+        expect(tools.length).toBeGreaterThan(0)
+        expect(access).not.toHaveBeenCalled()
+      })
+      it('should let overrideGetAuthorizedMCP replace the plugin access', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        const access = vi.fn(() => false)
+        setPluginOption({ key: 'access', payload, value: access })
+        setPluginOption({
+          key: 'overrideGetAuthorizedMCP',
+          payload,
+          value: ({ overrideAccess, pluginConfig, req }) => {
+            req.user = null
+            return { items: pluginConfig.items, overrideAccess }
+          },
+        })
+
+        const response = await mcp.rawPost({ apiKey: await getApiKey(), body: initializeBody })
+
+        expect(response.status).toBe(200)
+        expect(access).not.toHaveBeenCalled()
+      })
+    })
     test.describe('OAuth', () => {
       it('should challenge requests without an authenticated user', async ({
         payload,
@@ -512,6 +617,19 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         })
 
         expect(response.status).toBe(401)
+      })
+      it('should challenge signed-out requests before running the plugin access', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload)
+        const access = vi.fn(() => false)
+        setPluginOption({ key: 'access', payload, value: access })
+
+        const response = await postInitialize({ restClient })
+
+        expect(response.status).toBe(401)
+        expect(access).not.toHaveBeenCalled()
       })
       it('should tell clients which scopes to request', async ({ payload, restClient }) => {
         enableOAuth(payload, {
@@ -4778,6 +4896,51 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
       expect(metadata.authorization_servers).toEqual(['https://mcp.example.com/api/mcp/oauth'])
       expect(discovery.issuer).toBe('https://mcp.example.com/api/mcp/oauth')
+    })
+
+    test('should not ask users the plugin access denies to allow MCP clients', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      setPluginOption({ key: 'access', payload, value: () => false })
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        code_challenge: 'challenge',
+        code_challenge_method: 'S256',
+        redirect_uri: redirectURI,
+        response_type: 'code',
+      })}`
+
+      const response = await restClient.GET(`/mcp/oauth/authorize${query}`, {
+        auth: false,
+        headers: await getBrowserHeaders(restClient),
+      })
+
+      expect(response.headers.get('Location')).toBe('/admin/mcp/authorize?error=forbidden')
+    })
+
+    test('should not issue tokens to users who lost access after the Allow page was shown', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        code_challenge: 'challenge',
+        code_challenge_method: 'S256',
+        redirect_uri: redirectURI,
+        response_type: 'code',
+      })}`
+      const headers = await getBrowserHeaders(restClient)
+      const consent = await getConsent({ headers, query, restClient })
+      setPluginOption({ key: 'access', payload, value: () => false })
+
+      const response = await allow({ consent, headers, restClient })
+
+      expect(response.headers.get('Location')).toBe('/admin/mcp/authorize?error=forbidden')
     })
 
     test('should send users who are not logged in to the admin login', async ({

@@ -31,8 +31,10 @@ const createContainerBlock = (slug: string): Block => ({
 const createAdapter = (
   config: SanitizedConfig,
   warn: (...args: any[]) => void = () => {},
+  name: 'postgres' | 'sqlite' = 'postgres',
 ): DrizzleAdapter =>
   ({
+    name,
     blocksAsJSON: false,
     fieldConstraints: {},
     idType: 'serial',
@@ -277,9 +279,7 @@ describe('buildRawSchema', () => {
     expect(warn).not.toHaveBeenCalled()
   })
 
-  it('should warn about raw inline sub-table index and foreign key names that exceed 63 chars', async () => {
-    // Array sub-tables assign structural index/FK names inline (not via buildIndexName/
-    // buildForeignKeyName), so a long-but-valid array table name still overflows them.
+  it('should keep array sub-table index and foreign key names within 63 chars', async () => {
     const arrayFieldName = 'a'.repeat(58)
 
     const config = sanitizeConfig({
@@ -304,16 +304,212 @@ describe('buildRawSchema', () => {
 
     buildRawSchema({ adapter, setColumnID })
 
-    const arrayTable = `p_${arrayFieldName}`
+    const arrayTable = adapter.rawTables[`p_${arrayFieldName}`]
+
+    expect(arrayTable).toBeDefined()
+
+    const names = [
+      arrayTable.indexes._orderIdx.name,
+      arrayTable.indexes._parentIDIdx.name,
+      arrayTable.foreignKeys._parentIDFk.name,
+    ]
+
+    for (const name of names) {
+      expect(name.length).toBeLessThanOrEqual(63)
+      expect(name).toMatch(/_[\da-f]{8}_(idx|fk)$/)
+    }
+
+    expect(new Set(names).size).toBe(names.length)
 
     checkTruncatedIdentifiers({ adapter, logWarnings: true })
 
-    expect(arrayTable.length).toBeLessThanOrEqual(63)
-    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn).not.toHaveBeenCalled()
+  })
 
-    const message: string = warn.mock.calls[0][0]
+  it('should move a relationship foreign key past 63 chars to a named table-level foreign key', async () => {
+    const groupName = 'g'.repeat(40)
 
-    expect(message).toContain(`${arrayTable}_order_idx`)
-    expect(message).toContain(`${arrayTable}_parent_id_fk`)
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'p',
+          fields: [
+            {
+              name: groupName,
+              type: 'group',
+              fields: [{ name: 'author', type: 'relationship', relationTo: 'authors' }],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+        {
+          slug: 'authors',
+          fields: [],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const table = adapter.rawTables.p
+    const columnKey = `${groupName}_author`
+
+    expect(table.columns[columnKey].reference).toBeUndefined()
+
+    const foreignKey = table.foreignKeys?.[`${columnKey}Fk`]
+
+    expect(foreignKey).toBeDefined()
+    expect(foreignKey?.name.length).toBeLessThanOrEqual(63)
+    expect(foreignKey?.name.endsWith('_fk')).toBe(true)
+    expect(foreignKey?.columns).toEqual([columnKey])
+    expect(foreignKey?.foreignColumns).toEqual([{ name: 'id', table: 'authors' }])
+    expect(foreignKey?.onDelete).toBe('set null')
+  })
+
+  it('should keep the inline reference for a relationship foreign key within 63 chars', async () => {
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'author', type: 'relationship', relationTo: 'authors' }],
+          timestamps: false,
+          versions: false,
+        },
+        {
+          slug: 'authors',
+          fields: [],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const table = adapter.rawTables.posts
+
+    expect(table.columns.author.reference).toEqual({
+      name: 'id',
+      onDelete: 'set null',
+      table: 'authors',
+    })
+    expect(table.foreignKeys?.authorFk).toBeUndefined()
+  })
+
+  it('should keep sub-table index and foreign key names of up to 63 chars unchanged', () => {
+    // `p_` + 48 chars + `_parent_id_idx` is 64 chars, `_parent_id_fk` 63 and `_order_idx` 60.
+    // Only the index over 63 chars is renamed; names Postgres already stores in full stay as they are.
+    const arrayFieldName = 'a'.repeat(48)
+
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'p',
+          fields: [{ name: arrayFieldName, type: 'array', fields: [{ name: 't', type: 'text' }] }],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const tableName = `p_${arrayFieldName}`
+    const arrayTable = adapter.rawTables[tableName]
+
+    expect(arrayTable.indexes._orderIdx.name).toBe(`${tableName}_order_idx`)
+    expect(arrayTable.foreignKeys._parentIDFk.name).toBe(`${tableName}_parent_id_fk`)
+    expect(arrayTable.indexes._parentIDIdx.name).not.toBe(`${tableName}_parent_id_idx`)
+    expect(arrayTable.indexes._parentIDIdx.name).toHaveLength(63)
+  })
+
+  it('should not rename long sub-table identifiers on other tables when a sibling field is added', () => {
+    const prefix = 'x'.repeat(54)
+
+    const buildArrayTable = (fieldNames: string[]) => {
+      const config = sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: fieldNames.map((name) => ({
+              name,
+              type: 'array' as const,
+              fields: [{ name: 't', type: 'text' as const }],
+            })),
+            timestamps: false,
+            versions: false,
+          },
+        ],
+      } as Config)
+
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      const table = adapter.rawTables[`p_${prefix}_beta`]
+
+      return {
+        foreignKeys: Object.values(table.foreignKeys).map(({ name }) => name),
+        indexes: Object.values(table.indexes).map(({ name }) => name),
+      }
+    }
+
+    const before = buildArrayTable([`${prefix}_alpha`, `${prefix}_beta`])
+    const after = buildArrayTable([`${prefix}_aaa`, `${prefix}_alpha`, `${prefix}_beta`])
+
+    expect(after).toEqual(before)
+  })
+
+  it('should not rename identifiers or move foreign keys on non-Postgres adapters', () => {
+    const arrayFieldName = 'a'.repeat(58)
+    const groupName = 'g'.repeat(40)
+
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'p',
+          fields: [
+            { name: arrayFieldName, type: 'array', fields: [{ name: 't', type: 'text' }] },
+            {
+              name: groupName,
+              type: 'group',
+              fields: [{ name: 'author', type: 'relationship', relationTo: 'authors' }],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+        { slug: 'authors', fields: [], timestamps: false, versions: false },
+      ],
+    } as Config)
+
+    const adapter = createAdapter(config, undefined, 'sqlite')
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const arrayTableName = `p_${arrayFieldName}`
+    const arrayTable = adapter.rawTables[arrayTableName]
+
+    expect(arrayTable.indexes._orderIdx.name).toBe(`${arrayTableName}_order_idx`)
+    expect(arrayTable.indexes._parentIDIdx.name).toBe(`${arrayTableName}_parent_id_idx`)
+    expect(arrayTable.foreignKeys._parentIDFk.name).toBe(`${arrayTableName}_parent_id_fk`)
+
+    const columnKey = `${groupName}_author`
+
+    expect(adapter.rawTables.p.columns[columnKey].reference).toEqual({
+      name: 'id',
+      onDelete: 'set null',
+      table: 'authors',
+    })
+    expect(adapter.rawTables.p.foreignKeys?.[`${columnKey}Fk`]).toBeUndefined()
   })
 })
