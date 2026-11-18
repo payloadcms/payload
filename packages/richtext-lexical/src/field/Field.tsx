@@ -31,8 +31,8 @@ import './index.css'
 
 import type { LexicalRichTextFieldProps } from '../types/index.js'
 
-import { updateLinkFields } from '../features/link/client/updateLinkFields.js'
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import { UPDATE_EDITOR_STATE_COMMAND } from '../lexical/updateEditorState.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
 import { useRichTextView } from './RichTextViewProvider.js'
 import { ViewSelector } from './ViewSelector.js'
@@ -193,7 +193,7 @@ const RichTextComponent: React.FC<
         if (
           editorRef.current?.getRootElement() &&
           value?.root &&
-          updateLinkFields({ editor: editorRef.current, value })
+          editorRef.current.dispatchCommand(UPDATE_EDITOR_STATE_COMMAND, value)
         ) {
           return
         }

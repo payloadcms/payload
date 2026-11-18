@@ -367,14 +367,16 @@ describe('Lexical Link Feature', () => {
     for (const [url, expected] of [
       ['javascript:alert(1)', 'about:blank'],
       ['data:text/html,test', 'about:blank'],
+      ['http://[', 'about:blank'],
       ['https://example.com/updated', 'https://example.com/updated'],
       ['http://example.com/updated', 'http://example.com/updated'],
       ['mailto:test@example.com', 'mailto:test@example.com'],
       ['tel:+15555555555', 'tel:+15555555555'],
       ['sms:+15555555555', 'sms:+15555555555'],
       ['/relative/path', '/relative/path'],
+      ['//example.com/path', '//example.com/path'],
       ['#section', '#section'],
-    ]) {
+    ] as const) {
       await link.dispatchEvent('mouseover')
       await page.getByRole('button', { name: 'Edit link', exact: true }).click()
       await drawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(url)

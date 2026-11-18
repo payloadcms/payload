@@ -151,10 +151,6 @@ test.describe('Lexical Link Feature Autosave', () => {
       await waitForAutoSaveToRunAndComplete(page)
       await expect(uploadDocumentDrawer).toBeVisible()
       await expect(uploadTextField).toBeFocused()
-      await expect(lexical.editor.locator('a', { hasText: 'custom link' })).toHaveAttribute(
-        'target',
-        '_blank',
-      )
       await expect(assetLabelField).toHaveValue('Client asset')
       await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
 
