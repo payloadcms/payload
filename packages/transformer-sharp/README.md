@@ -1,6 +1,6 @@
 # Sharp Transformer for Payload
 
-Payload's official [file transformer](https://payloadcms.com/docs/upload/transformers) for Sharp-based image processing: upload-time resizing/format conversion (the same behavior Payload has always provided) plus opt-in request-time dynamic resizing.
+Payload's official [file transformer](https://payloadcms.com/docs/beta/upload/transformers) for Sharp-based image processing: upload-time resizing/format conversion (the same behavior Payload has always provided) plus opt-in request-time dynamic resizing.
 
 ## Installation
 
@@ -82,7 +82,7 @@ sharpTransformer({
 })
 ```
 
-Resized output is not cached, and anyone who can read a file can request it at any size within these limits. Before enabling dynamic resizing on a public collection, see [Securing dynamic resizing](https://payloadcms.com/docs/upload/transformers#securing-dynamic-resizing) for how to restrict it with access control, tighten the limits, and cache the output.
+Resized output is not cached, and anyone who can read a file can request it at any size within these limits. Before enabling dynamic resizing on a public collection, see [Securing dynamic resizing](https://payloadcms.com/docs/beta/upload/transformers) for how to restrict it with access control, tighten the limits, and cache the output.
 
 ### Injecting a custom Sharp build
 
@@ -92,7 +92,7 @@ import customSharp from 'sharp'
 sharpTransformer({ sharp: customSharp })
 ```
 
-See the [File Transformers](https://payloadcms.com/docs/upload/transformers) docs for the full transformer contract, access-control lifecycle, and non-goals (no caching, no CDN integration, no jobs queue).
+See the [File Transformers](https://payloadcms.com/docs/beta/upload/transformers) docs for the full transformer contract, access-control lifecycle, and non-goals (no caching, no CDN integration, no jobs queue).
 
 ## Migrating from Payload 3.x
 
@@ -102,4 +102,4 @@ If you previously configured `sharp`/`resizeOptions`/`imageSizes`/etc. directly 
 npx @payloadcms/codemod --transform migrate-sharp-to-transformer
 ```
 
-See the [v4 migration guide](https://payloadcms.com/docs/migration-guide/v4#sharp-moved-out-of-core-into-payloadcmstransformer-sharp) for details.
+See the [v4 migration guide](https://payloadcms.com/docs/beta/migration-guide/v4) for details.

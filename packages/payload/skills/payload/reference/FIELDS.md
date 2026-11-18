@@ -43,7 +43,7 @@ source field; there is no `'title'` default). Defaults to `required`, `unique`,
 { name: 'slug', type: 'slug', useAsSlug: 'title' }
 ```
 
-Full prop reference: <https://payloadcms.com/docs/fields/slug>
+Full prop reference: <https://payloadcms.com/docs/fields/text>
 
 ## Rich Text (Lexical)
 
