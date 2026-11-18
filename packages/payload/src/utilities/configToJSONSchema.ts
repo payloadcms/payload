@@ -16,12 +16,12 @@ import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 import { optionsAreEqual } from './optionsAreEqual.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
+  const isMarkedRequired = 'required' in field && field.required === true
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
-  if (isConditional) {
+  if (isConditional && !isMarkedRequired) {
     return false
   }
 
-  const isMarkedRequired = 'required' in field && field.required === true
   if (fieldAffectsData(field) && isMarkedRequired) {
     return true
   }
@@ -864,7 +864,7 @@ export function fieldsToJSONSchema(
         }
 
         if (fieldSchema! && fieldAffectsData(field)) {
-          if (isRequired && fieldSchema.required !== false) {
+          if ((isRequired || fieldSchema.required === true) && fieldSchema.required !== false) {
             requiredFieldNames.add(field.name)
           }
           fieldSchemas.set(field.name, fieldSchema)
