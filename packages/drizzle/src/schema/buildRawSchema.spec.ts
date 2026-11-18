@@ -586,6 +586,33 @@ describe('buildRawSchema', () => {
       expect(adapter.rawTables.p_items_locales_field.columns.label).toBeDefined()
     })
 
+    it('should rename an array table that takes the dbName of a collection built after it', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [{ name: 'items', type: 'array', fields: [{ name: 'label', type: 'text' }] }],
+            timestamps: false,
+            versions: false,
+          },
+          {
+            slug: 'q',
+            dbName: 'p_items',
+            fields: [{ name: 'title', type: 'text' }],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(adapter.tableNameMap.get('p_items')).toBe('p_items_field')
+      expect(adapter.rawTables.p_items.columns.title).toBeDefined()
+      expect(adapter.rawTables.p_items_field.columns.label).toBeDefined()
+    })
+
     it('should keep the replacement name within the identifier length limit', async () => {
       const slug = 'a'.repeat(51)
       const config = await sanitizeConfig({
@@ -673,6 +700,38 @@ describe('buildRawSchema', () => {
 
       expect(warn).toHaveBeenCalledTimes(1)
       expect(warn.mock.calls[0][0]).toContain('p_numbers -> p_numbers_field')
+    })
+
+    it('should warn with the name a nested table had before its parent was renamed', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'numbers',
+                type: 'array',
+                fields: [
+                  { name: 'title', type: 'text', localized: true },
+                  { name: 'locales', type: 'array', fields: [{ name: 'code', type: 'text' }] },
+                ],
+              },
+              { name: 'scores', type: 'number', hasMany: true },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'de'] },
+      } as Config)
+      const adapter = createAdapter(config)
+      const warn = vi.fn()
+
+      buildRawSchema({ adapter, setColumnID })
+      warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn.mock.calls[0][0]).toContain('p_numbers_locales -> p_numbers_field_locales_field')
+      expect(warn.mock.calls[0][0]).not.toContain('p_numbers_field_locales ->')
     })
 
     it('should not warn when no table was renamed', async () => {

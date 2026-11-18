@@ -3477,6 +3477,12 @@ describe('database', () => {
       })
 
       expect(found.localizedScores?.map((row) => row.values)).toStrictEqual([[1, 2]])
+
+      await payload.delete({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
     })
   })
 
