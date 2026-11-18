@@ -10,6 +10,7 @@ import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { maxIdentifierLength } from '../utilities/validateIdentifierLength.js'
 import { buildTable } from './build.js'
 
 type Args = {
@@ -44,8 +45,15 @@ export const buildRawSchema = ({ adapter, setColumnID }: Args) => {
       )
     }
 
-    for (const tableName of Object.keys(adapter.rawTables)) {
+    for (const [tableName, table] of Object.entries(adapter.rawTables)) {
       seenTableNames.add(tableName)
+
+      // Postgres enums share the namespace with tables, so a table can't take an enum's name.
+      for (const column of Object.values(table.columns)) {
+        if (column.type === 'enum' && column.enumName) {
+          seenTableNames.add(column.enumName)
+        }
+      }
     }
 
     addSubTableNameReplacements({
@@ -63,8 +71,9 @@ const MAX_BUILD_PASSES = 10
 
 /**
  * Picks a replacement for each clashing sub-table name: `<name>_field`, or `<name>_field_2`,
- * `<name>_field_3`... when that is taken. A candidate is taken when a table seen in any build has
- * that name or starts with it, since the renamed table's own nested tables are prefixed with it.
+ * `<name>_field_3`... when that is taken. A candidate is taken when a table or enum seen in any
+ * build has that name or starts with it, since the renamed table's own nested tables are prefixed
+ * with it. The name is cut short to keep the suffix within the identifier length limit.
  */
 const addSubTableNameReplacements = ({
   clashes,
@@ -78,12 +87,14 @@ const addSubTableNameReplacements = ({
   const isNameTaken = (candidate: string) =>
     [...seenTableNames].some((name) => name === candidate || name.startsWith(`${candidate}_`))
 
-  for (const clash of [...clashes].sort()) {
-    const base = `${clash}_field`
-    let candidate = base
+  const withSuffix = (name: string, suffix: string) =>
+    `${name.slice(0, maxIdentifierLength - suffix.length)}${suffix}`
 
-    for (let suffix = 2; isNameTaken(candidate); suffix++) {
-      candidate = `${base}_${suffix}`
+  for (const clash of [...clashes].sort()) {
+    let candidate = withSuffix(clash, '_field')
+
+    for (let index = 2; isNameTaken(candidate); index++) {
+      candidate = withSuffix(clash, `_field_${index}`)
     }
 
     replacements.set(clash, candidate)

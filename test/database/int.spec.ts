@@ -3460,6 +3460,24 @@ describe('database', () => {
         overrideAccess: true,
       })
     })
+
+    it('should read an array whose only localized field is a hasMany number', async () => {
+      const created = await payload.create({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        data: {
+          localizedScores: [{ values: [1, 2] }],
+        },
+      })
+
+      const found = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      expect(found.localizedScores?.map((row) => row.values)).toStrictEqual([[1, 2]])
+    })
   })
 
   describe('Schema generation', { db: 'drizzle' }, () => {

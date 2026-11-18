@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { setColumnID } from '../postgres/schema/setColumnID.js'
 import type { DrizzleAdapter } from '../types.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
+import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
 import { warnRenamedSubTables } from '../utilities/warnRenamedSubTables.js'
 import { buildRawSchema } from './buildRawSchema.js'
 
@@ -554,6 +555,111 @@ describe('buildRawSchema', () => {
       expect(adapter.rawTables.p_numbers.columns.drawPosition).toBeDefined()
       expect(adapter.rawTables.p_texts.columns.value).toBeDefined()
       expect(adapter.rawTables.p_numbers_field).toBeUndefined()
+    })
+
+    it('should rename an array table that takes the name of a companion table built before it', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'items',
+                type: 'array',
+                fields: [{ name: 'title', type: 'text', localized: true }],
+              },
+              { name: 'itemsLocales', type: 'array', fields: [{ name: 'label', type: 'text' }] },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(adapter.tableNameMap.get('p_items_locales')).toBe('p_items_locales_field')
+      expect(adapter.rawTables.p_items_locales.columns.title).toBeDefined()
+      expect(adapter.rawTables.p_items_locales.columns.label).toBeUndefined()
+      expect(adapter.rawTables.p_items_locales_field.columns.label).toBeDefined()
+    })
+
+    it('should keep the replacement name within the identifier length limit', async () => {
+      const slug = 'a'.repeat(51)
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug,
+            fields: [
+              {
+                name: 'numbers',
+                type: 'array',
+                fields: [{ name: 'drawPosition', type: 'number' }],
+              },
+              { name: 'scores', type: 'number', hasMany: true },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      const replacement = adapter.tableNameMap.get(`${slug}_numbers`)
+
+      expect(replacement).toHaveLength(63)
+      expect(replacement?.endsWith('_field')).toBe(true)
+      expect(adapter.rawTables[replacement!].columns.drawPosition).toBeDefined()
+    })
+
+    it('should not rename a table to the name of an enum', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'scores', type: 'number', hasMany: true },
+        { name: 'status', type: 'select', enumName: 'p_numbers_field', options: ['a', 'b'] },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field_2')
+      expect(adapter.rawTables.p_numbers_field).toBeUndefined()
+    })
+
+    it('should not report a locales table for an array whose only localized field is a hasMany number', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'items',
+                type: 'array',
+                fields: [{ name: 'scores', type: 'number', hasMany: true, localized: true }],
+              },
+              {
+                name: 'withTitle',
+                type: 'array',
+                fields: [{ name: 'title', type: 'text', localized: true }],
+              },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(hasCompanionRelation({ adapter, relation: '_locales', tableName: 'p_items' })).toBe(
+        false,
+      )
+      expect(
+        hasCompanionRelation({ adapter, relation: '_locales', tableName: 'p_with_title' }),
+      ).toBe(true)
     })
 
     it('should warn about renamed tables', async () => {
