@@ -1,5 +1,6 @@
 import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
+import type { Payload } from '../index.js'
 import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
@@ -8,19 +9,52 @@ export const lockedDocumentsCollectionSlug = 'payload-locked-documents'
 
 type Operation = 'read' | 'update'
 
-const hasDocumentTarget = (
+const normalizeDocumentTarget = (
   document: unknown,
-): document is { relationTo: string; value: number | string } => {
-  if (!document || typeof document !== 'object') {
-    return false
+  payload?: Payload,
+): null | { rawValue: number | string; relationTo: string; targetId: number | string } => {
+  if (!document || typeof document !== 'object' || Array.isArray(document)) {
+    return null
   }
+
   const { relationTo, value } = document as { relationTo?: unknown; value?: unknown }
-  return (
-    typeof relationTo === 'string' &&
-    relationTo.length > 0 &&
-    value !== undefined &&
-    value !== null
-  )
+  if (typeof relationTo !== 'string' || relationTo.length === 0) {
+    return null
+  }
+
+  const candidateId =
+    typeof value === 'object' && value !== null && !Array.isArray(value) && 'id' in value
+      ? (value as { id?: unknown }).id
+      : value
+
+  if (
+    !(
+      (typeof candidateId === 'string' && candidateId.length > 0) ||
+      (typeof candidateId === 'number' && Number.isFinite(candidateId))
+    )
+  ) {
+    return null
+  }
+
+  let targetId: number | string = candidateId
+  const relatedFields = payload?.collections?.[relationTo]?.config?.fields
+  if (typeof candidateId === 'string' && Array.isArray(relatedFields)) {
+    const idField = relatedFields.find(
+      (field) => Boolean(field && typeof field === 'object' && 'name' in field && field.name === 'id'),
+    )
+    if (idField && 'type' in idField && idField.type === 'number') {
+      const parsed = parseFloat(candidateId)
+      if (!Number.isFinite(parsed)) {
+        return null
+      }
+      targetId = parsed
+    }
+  }
+
+  const rawValue: number | string =
+    typeof value === 'string' || typeof value === 'number' ? value : targetId
+
+  return { rawValue, relationTo, targetId }
 }
 
 /**
@@ -60,16 +94,21 @@ const getAccessibleLocks = async (
     }
 
     if (hasGlobal) {
-      validLocks.push(lock)
-      globalSlugs.add(lock.globalSlug)
-    } else if (hasDocumentTarget(lock.document)) {
-      validLocks.push(lock)
-      let ids = idsByCollection.get(lock.document.relationTo)
-      if (!ids) {
-        ids = new Set()
-        idsByCollection.set(lock.document.relationTo, ids)
+      if (typeof lock.globalSlug === 'string') {
+        validLocks.push(lock)
+        globalSlugs.add(lock.globalSlug)
       }
-      ids.add(lock.document.value)
+    } else {
+      const normalized = normalizeDocumentTarget(lock.document, payload)
+      if (normalized) {
+        validLocks.push(lock)
+        let ids = idsByCollection.get(normalized.relationTo)
+        if (!ids) {
+          ids = new Set()
+          idsByCollection.set(normalized.relationTo, ids)
+        }
+        ids.add(normalized.targetId)
+      }
     }
   }
 
@@ -151,11 +190,12 @@ const getAccessibleLocks = async (
 
   return validLocks.filter((lock) => {
     if (lock.globalSlug) {
-      return allowedGlobals.has(lock.globalSlug)
+      return typeof lock.globalSlug === 'string' && allowedGlobals.has(lock.globalSlug)
     }
-    if (lock.document?.relationTo) {
+    const normalized = normalizeDocumentTarget(lock.document, payload)
+    if (normalized) {
       return Boolean(
-        allowedTargetIdsByCollection.get(lock.document.relationTo)?.has(String(lock.document.value)),
+        allowedTargetIdsByCollection.get(normalized.relationTo)?.has(String(normalized.targetId)),
       )
     }
     return false
@@ -163,22 +203,58 @@ const getAccessibleLocks = async (
 }
 
 /**
- * Converts accessible lock rows into a `Where` selecting them by ID
+ * Converts accessible lock rows into a `Where` binding each lock ID to its authorized target
  * (`{ id: { exists: false } }` when authenticated with zero accessible locks so list queries
  * return an empty result set rather than 403, and `false` when unauthenticated).
  */
-const locksToWhere = (locks: (JsonObject & TypeWithID)[] | null): boolean | Where => {
+const locksToWhere = (
+  locks: (JsonObject & TypeWithID)[] | null,
+  payload?: Payload,
+): boolean | Where => {
   if (!locks) {
     return false
   }
-  return locks.length ? { id: { in: locks.map((lock) => lock.id) } } : { id: { exists: false } }
+
+  const clauses: Where[] = []
+  for (const lock of locks) {
+    if (typeof lock.globalSlug === 'string' && lock.globalSlug.length > 0) {
+      clauses.push({
+        and: [
+          { id: { equals: lock.id } },
+          { globalSlug: { equals: lock.globalSlug } },
+          { document: { exists: false } },
+        ],
+      })
+      continue
+    }
+
+    const normalized = normalizeDocumentTarget(lock.document, payload)
+    if (normalized) {
+      clauses.push({
+        and: [
+          { id: { equals: lock.id } },
+          { 'document.relationTo': { equals: normalized.relationTo } },
+          { 'document.value': { equals: normalized.rawValue } },
+          {
+            or: [{ globalSlug: { exists: false } }, { globalSlug: { equals: '' } }],
+          },
+        ],
+      })
+    }
+  }
+
+  if (!clauses.length) {
+    return { id: { exists: false } }
+  }
+
+  return clauses.length === 1 ? clauses[0]! : { or: clauses }
 }
 
 const getAccessibleLocksWhere = async (
   req: PayloadRequest,
   operation: Operation,
   id?: number | string,
-): Promise<boolean | Where> => locksToWhere(await getAccessibleLocks(req, operation, id))
+): Promise<boolean | Where> => locksToWhere(await getAccessibleLocks(req, operation, id), req.payload)
 
 /**
  * Locking a document or global needs the same access as editing it.
@@ -191,8 +267,8 @@ const canCreateLock: Access = async ({ data, req }) => {
 
   const { payload } = req
   const { document, globalSlug } = data as {
-    document?: { relationTo?: string; value?: number | string } | null
-    globalSlug?: string | null
+    document?: unknown
+    globalSlug?: unknown
   }
 
   const hasGlobal = Boolean(globalSlug)
@@ -202,7 +278,11 @@ const canCreateLock: Access = async ({ data, req }) => {
     return false
   }
 
-  if (globalSlug) {
+  if (hasGlobal) {
+    if (typeof globalSlug !== 'string') {
+      return false
+    }
+
     const globalConfig = payload.config.globals.find((global) => global.slug === globalSlug)
 
     if (!globalConfig) {
@@ -227,18 +307,19 @@ const canCreateLock: Access = async ({ data, req }) => {
     return Boolean(globalDoc && Object.keys(globalDoc).length > 0)
   }
 
-  if (!hasDocumentTarget(document)) {
+  const normalized = normalizeDocumentTarget(document, payload)
+  if (!normalized) {
     return false
   }
 
-  const config = payload.collections[document.relationTo]?.config
+  const config = payload.collections[normalized.relationTo]?.config
 
   if (!config) {
     return false
   }
 
   const result = await executeAccess(
-    { id: document.value, disableErrors: true, req, slug: document.relationTo },
+    { id: normalized.targetId, disableErrors: true, req, slug: normalized.relationTo },
     config.access.update as Access,
   )
 
@@ -247,9 +328,9 @@ const canCreateLock: Access = async ({ data, req }) => {
   }
 
   const { totalDocs } = await payload.db.count({
-    collection: document.relationTo,
+    collection: normalized.relationTo,
     req,
-    where: { and: [{ id: { equals: document.value } }, result] },
+    where: { and: [{ id: { equals: normalized.targetId } }, result] },
   })
 
   return totalDocs > 0
@@ -314,7 +395,10 @@ const canUpdateLock: Access = async ({ id, data, req }) => {
     if (hasNextGlobal && hasNextDoc) {
       return false
     }
-    if (!hasNextGlobal && !hasDocumentTarget(nextDocument)) {
+    if (hasNextGlobal && typeof nextGlobal !== 'string') {
+      return false
+    }
+    if (!hasNextGlobal && !normalizeDocumentTarget(nextDocument, req.payload)) {
       return false
     }
     return true
@@ -324,7 +408,7 @@ const canUpdateLock: Access = async ({ id, data, req }) => {
     return false
   }
 
-  return locksToWhere(compatibleLocks)
+  return locksToWhere(compatibleLocks, req.payload)
 }
 
 export const getLockedDocumentsCollection = (config: Config): CollectionConfig | null => {

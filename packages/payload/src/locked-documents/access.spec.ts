@@ -334,6 +334,55 @@ describe('payload-locked-documents access', () => {
     expect(await create({})).toBe(false)
   })
 
+  it('normalizes populated relationship objects and rejects unsupported target value shapes', async () => {
+    const { access, reqFor } = build({
+      pagesUpdate: ({ id }: any) => String(id) !== '2',
+    })
+    const req = reqFor(user)
+    expect(
+      await access.create!({
+        data: { document: { relationTo: 'pages', value: { id: 1 } } },
+        req,
+      } as any),
+    ).toBe(true)
+    expect(
+      await access.create!({
+        data: { document: { relationTo: 'pages', value: { id: 2 } } },
+        req,
+      } as any),
+    ).toBe(false)
+    expect(
+      await access.update!({
+        id: 10,
+        data: { document: { relationTo: 'pages', value: { id: 2 } } },
+        req,
+      } as any),
+    ).toBe(false)
+    for (const badValue of [{}, { foo: 1 }, [], '', NaN]) {
+      expect(
+        await access.create!({
+          data: { document: { relationTo: 'pages', value: badValue } },
+          req,
+        } as any),
+      ).toBe(false)
+    }
+  })
+
+  it('binds returned Where filters to each lock target so concurrent retargeting stops matching', async () => {
+    const mutableLocks = locks.map((lock) => ({
+      ...lock,
+      ...(lock.document ? { document: { ...lock.document } } : {}),
+    }))
+    const { access, reqFor } = build({ dbLocks: mutableLocks })
+    const where = await access.read!({ req: reqFor(user) } as any)
+    expect(await visible(where, mutableLocks)).toEqual([10, 12])
+
+    // Retargeting lock 10 to unauthorized page 2 or lock 12 to unauthorized global 'private'
+    mutableLocks[0]!.document!.value = 2
+    mutableLocks[2]!.globalSlug = 'private'
+    expect(await visible(where, mutableLocks)).toEqual([])
+  })
+
   it('create: globals follow the global update access', async () => {
     const { access, reqFor } = build()
     const create = (data: object) => access.create!({ data, req: reqFor(user) } as any)
