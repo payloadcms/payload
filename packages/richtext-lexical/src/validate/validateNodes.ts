@@ -3,6 +3,8 @@ import type { RichTextField, ValidateOptions } from 'payload'
 
 import type { NodeValidation } from '../features/typesServer.js'
 
+import { getChildNodes } from '../utilities/getChildNodes.js'
+
 export async function validateNodes({
   nodes,
   nodeValidations,
@@ -31,10 +33,11 @@ export async function validateNodes({
       }
     }
 
-    // Validate node's children
-    if ('children' in node && node?.children) {
+    // Validate node's children, including nodes stored in named slots ($slots)
+    const childNodes = getChildNodes(node)
+    if (childNodes.length) {
       const childrenValidationResult = await validateNodes({
-        nodes: node.children as SerializedLexicalNode[],
+        nodes: childNodes,
         nodeValidations,
         validation: validationFromProps,
       })
