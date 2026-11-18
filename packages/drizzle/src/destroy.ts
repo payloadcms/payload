@@ -16,4 +16,6 @@ export const destroy: Destroy = async function destroy(this: DrizzleAdapter) {
     this.resolveInitializing = res
     this.rejectInitializing = rej
   })
+  // As where the adapter first creates it: `connect` throws its own error when it fails.
+  void this.initializing.catch(() => {})
 }
