@@ -255,6 +255,11 @@ export default buildConfigWithDefaults({
               type: 'relationship',
               relationTo: ['directors'],
             },
+            {
+              name: 'tags',
+              type: 'text',
+              hasMany: true,
+            },
           ],
         },
       ],
