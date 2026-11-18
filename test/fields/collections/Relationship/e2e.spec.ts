@@ -5,9 +5,11 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadCollection } from '../../../__helpers/e2e/adminPageModel/index.js'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
+import { createPayloadAdmin } from '../../../__helpers/e2e/adminPageModel/index.js'
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import { openCreateDocDrawer } from '../../../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
@@ -32,6 +34,7 @@ import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2E
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { adminPageModel } from '../../admin-page-model.generated.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -42,6 +45,7 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let page: Page
+let relationshipFields: PayloadCollection<typeof adminPageModel, 'relationship-fields'>
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
@@ -54,6 +58,9 @@ describe('relationship', () => {
 
     const context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
+    relationshipFields = createPayloadAdmin({ model: adminPageModel, page, serverURL }).collection(
+      'relationship-fields',
+    )
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -96,6 +103,42 @@ describe('relationship', () => {
     ).toContainText(textValue)
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should create nested text data in a relationship drawer', async () => {
+    await relationshipFields.create.goto()
+
+    const textDrawer = await relationshipFields.fields.relationship.createInDrawer('text-fields')
+    await textDrawer.fields.text.fill('Drawer nested text')
+    await textDrawer.fields.text.expectValue('Drawer nested text')
+
+    const arrayRow = await textDrawer.fields.array.addRow()
+    await arrayRow.fields.texts.addValue('Drawer array text')
+
+    const blockRow = await textDrawer.fields.blocks.addBlock('blockWithText')
+    await blockRow.fields.texts.addValue('Drawer block text')
+
+    await textDrawer.save()
+    await textDrawer.close()
+
+    await expect(
+      relationshipFields.fields.relationship.wrapper.locator('.relationship--single-value__text'),
+    ).toContainText('Drawer nested text')
+
+    await relationshipFields.save()
+
+    const result = await payload.find({
+      collection: textFieldsSlug,
+      where: {
+        text: {
+          equals: 'Drawer nested text',
+        },
+      },
+    })
+    const textDocument = result.docs[0]
+
+    expect(textDocument?.array?.[0]?.texts).toEqual(['Drawer array text'])
+    expect(textDocument?.blocks?.[0]?.texts).toEqual(['Drawer block text'])
   })
 
   test('should save correct relationTo when creating doc in second collection (bug #14728)', async () => {
