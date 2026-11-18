@@ -343,6 +343,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     export: 'エクスポート',
     fallbackToDefaultLocale: 'デフォルトロケールへのフォールバック',
     false: 'false',
+    field: 'フィールド',
     filter: '絞り込み',
     filters: '絞り込み',
     filterWhere: '{{label}} の絞り込み',

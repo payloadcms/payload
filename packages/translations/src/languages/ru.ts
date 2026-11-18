@@ -343,6 +343,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     export: 'Экспорт',
     fallbackToDefaultLocale: 'Возврат к локали по умолчанию',
     false: 'Ложь',
+    field: 'Field',
     filter: 'Фильтр',
     filters: 'Фильтры',
     filterWhere: 'Где фильтровать',
