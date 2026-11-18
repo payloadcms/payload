@@ -578,7 +578,10 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           data: { title: 'Cascade A Updated', _status: 'published' },
           overrideAccess: true,
         }),
-      ).rejects.toThrow()
+      ).rejects.toMatchObject({
+        message: 'Could not publish or save changes: One or more children are invalid.',
+        status: 400,
+      })
 
       const stored = await payload.findByID({
         id: grandparent.id,
@@ -614,7 +617,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           data: { title: 'Infra A Updated', _status: 'published' },
           overrideAccess: true,
         }),
-      ).rejects.toThrow()
+      ).rejects.toThrow('Simulated database failure while re-saving a child.')
 
       const stored = await payload.findByID({
         id: parent.id,
