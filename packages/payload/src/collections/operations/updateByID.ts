@@ -100,7 +100,7 @@ export const updateByIDOperation = async <
       args = {
         ...args,
         data:
-          typeof data === 'object' && data !== null
+          typeof data === 'object' && data !== null && !Array.isArray(data)
             ? {
                 ...data,
                 ...(prefix !== undefined ? { prefix } : {}),
@@ -214,9 +214,11 @@ export const updateByIDOperation = async <
         )
       : true
 
-    assertDataIsObject(data, req)
-
     const hasWherePolicy = hasWhereAccessResult(accessResults)
+
+    if (!hasWherePolicy) {
+      assertDataIsObject(data, req, Boolean(collectionConfig.upload))
+    }
 
     // /////////////////////////////////////
     // Retrieve document
@@ -274,6 +276,10 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales) {
       throw new NotFound(req.t)
+    }
+
+    if (hasWherePolicy) {
+      assertDataIsObject(data, req, Boolean(collectionConfig.upload))
     }
 
     const storedDocWithLocales = docWithLocales

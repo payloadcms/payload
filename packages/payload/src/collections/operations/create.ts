@@ -121,7 +121,9 @@ export const createOperation = async <
       args = {
         ...args,
         data:
-          typeof sanitizedData === 'object' && sanitizedData !== null
+          typeof sanitizedData === 'object' &&
+          sanitizedData !== null &&
+          !Array.isArray(sanitizedData)
             ? {
                 ...sanitizedData,
                 ...(prefix !== undefined ? { prefix } : {}),
@@ -218,7 +220,7 @@ export const createOperation = async <
     }
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
-    if (isSavingDraft && data && typeof data === 'object') {
+    if (isSavingDraft && data && typeof data === 'object' && !Array.isArray(data)) {
       data._status = 'draft'
     }
 
@@ -259,7 +261,7 @@ export const createOperation = async <
       )
     }
 
-    assertDataIsObject(data, req)
+    assertDataIsObject(data, req, Boolean(collectionConfig.upload))
 
     // /////////////////////////////////////
     // Generate data for all files and sizes
