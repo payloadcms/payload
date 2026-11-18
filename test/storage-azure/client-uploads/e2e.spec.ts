@@ -10,10 +10,15 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../__helpers/shared/sdk/index.js'
 
 import { gotoAndWaitForForm, saveDocAndAssert } from '../../__helpers/e2e/helpers.js'
+import {
+  expectUploadProgressSequence,
+  recordToastHistory,
+  throttleUploads,
+} from '../../__helpers/e2e/uploadProgress.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
-import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -62,6 +67,39 @@ test.describe('storage-azure client uploads E2E', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test('should show upload progress while the file is sent to Azure', async () => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+    await gotoAndWaitForForm(page, mediaWithDocPrefixURL.create)
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, '../../uploads/ios-image.jpeg'),
+    )
+
+    const getToastHistory = await recordToastHistory({ page })
+    // 1.1 MB at 200 KB/s takes several seconds to send.
+    const stopThrottling = await throttleUploads({ bytesPerSecond: 200 * 1024, page })
+
+    // Throttle only the transfer to storage; the document request that follows is not slowed.
+    try {
+      await page.click('#action-save')
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Processing and saving ios-image.jpeg',
+        { timeout: POLL_TOPASS_TIMEOUT },
+      )
+    } finally {
+      await stopThrottling()
+    }
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully', {
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    expectUploadProgressSequence({
+      fileName: 'ios-image.jpeg',
+      history: await getToastHistory(),
+    })
   })
 
   /**
