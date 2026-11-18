@@ -50,7 +50,7 @@ export const buildRawSchema = ({ adapter, setColumnID }: Args) => {
 
       // Postgres enums share the namespace with tables, so a table can't take an enum's name.
       for (const column of Object.values(table.columns)) {
-        if (column.type === 'enum' && column.enumName) {
+        if (column.type === 'enum' && 'enumName' in column) {
           seenTableNames.add(column.enumName)
         }
       }

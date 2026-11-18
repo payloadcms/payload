@@ -186,11 +186,10 @@ export const buildTable = ({
     indexes,
   }
 
-  if (!isRoot) {
-    // A companion table built earlier, such as the `_locales` table of a sibling array called
-    // `items` next to an array called `itemsLocales`, can already use this name.
-    trackSubTableNameClash({ adapter, tableName })
-  }
+  // A table built earlier can already use this name: the `_locales` table of an array called
+  // `items` next to an array called `itemsLocales`, or an array table of another collection whose
+  // name matches this collection's `dbName`.
+  trackSubTableNameClash({ adapter, tableName })
 
   adapter.rawTables[tableName] = promoteLongInlineForeignKeys({ adapter, table })
 
