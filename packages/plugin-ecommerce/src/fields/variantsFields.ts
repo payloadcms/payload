@@ -1,6 +1,15 @@
 import type { Field } from 'payload'
 
+import { defaultInventoryFieldName } from '../utilities/inventory.js'
+
 type Props = {
+  /**
+   * The field used to track inventory levels in the variants list view.
+   * Pass `false` to omit the column when inventory tracking is disabled.
+   *
+   * Defaults to 'inventory'.
+   */
+  inventoryFieldName?: false | string
   /**
    * Slug of the variants collection, defaults to 'variants'.
    */
@@ -12,6 +21,7 @@ type Props = {
 }
 
 export const variantsFields: (props: Props) => Field[] = ({
+  inventoryFieldName = defaultInventoryFieldName,
   variantsSlug = 'variants',
   variantTypesSlug = 'variantTypes',
 }) => {
@@ -45,7 +55,13 @@ export const variantsFields: (props: Props) => Field[] = ({
 
           return enabledVariants && hasManyVariantTypes
         },
-        defaultColumns: ['title', 'options', 'inventory', 'prices', '_status'],
+        defaultColumns: [
+          'title',
+          'options',
+          ...(inventoryFieldName ? [inventoryFieldName] : []),
+          'prices',
+          '_status',
+        ],
         disabled: { column: true },
       },
       collection: variantsSlug,

@@ -420,4 +420,96 @@ describe('defaultProductsValidation', () => {
       }).not.toThrow()
     })
   })
+
+  describe('configurable inventory field name', () => {
+    it('should read the product inventory from the configured field', () => {
+      const product = {
+        id: 'product-1',
+        priceInUSD: 1000,
+        stock: 0,
+      }
+
+      expect(() => {
+        defaultProductsValidation({
+          currenciesConfig,
+          currency: 'usd',
+          inventoryFieldName: 'stock',
+          product: product as any,
+          quantity: 1,
+        })
+      }).toThrow('Product is out of stock or does not have enough inventory.')
+    })
+
+    it('should read the variant inventory from the configured field', () => {
+      const variant = {
+        id: 'variant-1',
+        priceInUSD: 1000,
+        stock: 1,
+      }
+
+      expect(() => {
+        defaultProductsValidation({
+          currenciesConfig,
+          currency: 'usd',
+          inventoryFieldName: 'stock',
+          product: { id: 'product-1', priceInUSD: 1000 } as any,
+          quantity: 2,
+          variant: variant as any,
+        })
+      }).toThrow('Variant with ID variant-1 is out of stock or does not have enough inventory.')
+    })
+
+    it('should ignore the default field once another field name is configured', () => {
+      const product = {
+        id: 'product-1',
+        inventory: 0,
+        priceInUSD: 1000,
+        stock: 10,
+      }
+
+      expect(() => {
+        defaultProductsValidation({
+          currenciesConfig,
+          currency: 'usd',
+          inventoryFieldName: 'stock',
+          product: product as any,
+          quantity: 1,
+        })
+      }).not.toThrow()
+    })
+
+    it('should skip the stock check when inventory tracking is disabled', () => {
+      const product = {
+        id: 'product-1',
+        inventory: 0,
+        priceInUSD: 1000,
+      }
+
+      expect(() => {
+        defaultProductsValidation({
+          currenciesConfig,
+          currency: 'usd',
+          inventoryFieldName: false,
+          product: product as any,
+          quantity: 5,
+        })
+      }).not.toThrow()
+    })
+
+    it('should still validate the price when inventory tracking is disabled', () => {
+      const product = {
+        id: 'product-1',
+      }
+
+      expect(() => {
+        defaultProductsValidation({
+          currenciesConfig,
+          currency: 'usd',
+          inventoryFieldName: false,
+          product: product as any,
+          quantity: 1,
+        })
+      }).toThrow('Product does not have a price in.')
+    })
+  })
 })

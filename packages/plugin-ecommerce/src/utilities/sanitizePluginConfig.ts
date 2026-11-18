@@ -2,6 +2,7 @@ import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from '../t
 
 import { defaultAddressFields } from '../collections/addresses/defaultAddressFields.js'
 import { USD } from '../currencies/index.js'
+import { defaultInventoryFieldName } from './inventory.js'
 
 type Props = {
   pluginConfig: EcommercePluginConfig
@@ -48,11 +49,11 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
   }
 
   if (
-    typeof config.inventory === 'undefined' ||
-    (typeof config.inventory === 'boolean' && config.inventory === true)
+    typeof pluginConfig.inventory === 'undefined' ||
+    (typeof pluginConfig.inventory === 'boolean' && pluginConfig.inventory === true)
   ) {
     config.inventory = {
-      fieldName: 'inventory',
+      fieldName: defaultInventoryFieldName,
     }
   }
 
