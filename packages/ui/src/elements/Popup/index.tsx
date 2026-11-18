@@ -270,7 +270,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const pointerIntent = useSubmenuPointerIntent({
     active,
     contentRef: popupRef,
-    enabled: isSubmenu && hoverSubmenu,
+    enabled: isSubmenu && hoverSubmenu && !disabled,
     onClose: closeFromPointer,
     onOpen: () =>
       parentPopup?.submenuScope.requestOpen({
@@ -287,8 +287,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
           ?.querySelector<HTMLElement>('[aria-haspopup="menu"][aria-controls]')
         const siblingId = trigger?.getAttribute('aria-controls')
 
-        if (siblingId && trigger?.getAttribute('aria-disabled') !== 'true') {
+        if (
+          siblingId &&
+          trigger?.getAttribute('aria-disabled') !== 'true' &&
           parentPopup?.submenuScope.requestOpen({ id: siblingId })
+        ) {
           return
         }
       }
@@ -306,7 +309,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [closeFromPointer, openFromParent])
 
   useEffect(() => {
-    if (!isSubmenu || !parentSubmenuScope) {
+    if (!isSubmenu || !parentSubmenuScope || disabled) {
       return
     }
 
@@ -316,7 +319,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
       isPointerProtected: pointerIntent.isProtected,
       open: (viaKeyboard) => submenuCallbacks.current.openFromParent(viaKeyboard),
     })
-  }, [contentId, isSubmenu, parentSubmenuScope, pointerIntent.isProtected])
+  }, [contentId, disabled, isSubmenu, parentSubmenuScope, pointerIntent.isProtected])
+
+  useEffect(() => {
+    if (isSubmenu && disabled && active) {
+      submenuCallbacks.current.closeFromPointer()
+    }
+  }, [active, disabled, isSubmenu])
 
   // /////////////////////////////////////
   // Position Calculation

@@ -10,7 +10,7 @@ export type SubmenuScope = {
   closeActiveBranch: () => void
   register: (node: SubmenuNode) => () => void
   release: (id: string) => void
-  requestOpen: (args: { id: string; viaKeyboard?: boolean; viaPointer?: boolean }) => void
+  requestOpen: (args: { id: string; viaKeyboard?: boolean; viaPointer?: boolean }) => boolean
 }
 
 export const createSubmenuScope = (): SubmenuScope => {
@@ -41,17 +41,18 @@ export const createSubmenuScope = (): SubmenuScope => {
     },
     requestOpen: ({ id, viaKeyboard = false, viaPointer = false }) => {
       if (activeChildId === id) {
-        return
+        return true
       }
       const node = nodes.get(id)
       const activeNode = nodes.get(activeChildId ?? '')
 
       if (!node || (viaPointer && activeNode?.isPointerProtected?.())) {
-        return
+        return false
       }
       activeNode?.closeBranch()
       activeChildId = id
       node.open(viaKeyboard)
+      return true
     },
   }
 }
