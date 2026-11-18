@@ -347,6 +347,60 @@ export function parseParams({
                   break
                 }
 
+                if (
+                  operator === 'not_like' &&
+                  (field.type === 'number' ||
+                    field.type === 'relationship' ||
+                    field.type === 'upload' ||
+                    table[columnName].columnType === 'PgUUID')
+                ) {
+                  operator = 'not_equals'
+                }
+
+                // Negation of `like`, matching the MongoDB adapter: none of the words may be present.
+                // Documents without a value are included, as `NOT LIKE` on NULL never matches.
+                // Non-string values keep the generic path below, as the MongoDB adapter does.
+                if (operator === 'not_like' && typeof val === 'string') {
+                  // Fields stored in another table (hasMany, arrays, blocks, relationships) can have
+                  // several rows per document, and every one of them has to be checked.
+                  if (getNameFromDrizzleTable(table) !== tableName) {
+                    constraints.push(
+                      buildJoinedNotLikeCondition({
+                        adapter,
+                        aliasTable,
+                        fields,
+                        locale,
+                        parentIsLocalized,
+                        path: relationOrPath,
+                        tableName,
+                        words: val.split(' '),
+                      }),
+                    )
+                    break
+                  }
+
+                  constraints.push(
+                    or(
+                      isNull(table[columnName]),
+                      and(
+                        ...val.split(' ').map((word) =>
+                          buildOperatorConstraint({
+                            adapter,
+                            column: table[columnName],
+                            field,
+                            locale,
+                            originalOperator,
+                            path: relationOrPath,
+                            resolvedOperator: 'not_like',
+                            value: `%${word}%`,
+                          }),
+                        ),
+                      ),
+                    ),
+                  )
+                  break
+                }
+
                 const sanitizedQueryValue = sanitizeQueryValue({
                   adapter,
                   columns,
@@ -812,4 +866,72 @@ function buildHasManyRelationshipCondition({
     case 'not_equals':
       return notExists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
   }
+}
+
+/**
+ * Builds `not_like` for a field stored outside the parent row, such as a hasMany text field or a
+ * field inside an array. Checking each joined row on its own would let a document pass through a
+ * row that does not match while another row does, so this excludes the document when any of its
+ * rows contains any of the words.
+ *
+ * @example
+ * ```ts
+ * // Excludes a document with `tags: ['cat', 'dog']`, which a per-row check would return.
+ * const where = { tags: { not_like: 'cat' } }
+ * ```
+ */
+function buildJoinedNotLikeCondition({
+  adapter,
+  aliasTable,
+  fields,
+  locale,
+  parentIsLocalized,
+  path,
+  tableName,
+  words,
+}: {
+  adapter: DrizzleAdapter
+  aliasTable?: Table
+  fields: FlattenedField[]
+  locale?: string
+  parentIsLocalized: boolean
+  path: string
+  tableName: string
+  words: string[]
+}): SQL {
+  const { newAliasTable: documentTable } = getTableAlias({ adapter, tableName })
+
+  // Resolve the path again from a fresh alias of the parent table, so its joins stay inside the
+  // subquery.
+  const nestedJoins: BuildQueryJoinAliases = []
+  const anyWordMatches = parseParams({
+    adapter,
+    aliasTable: documentTable,
+    context: { sort: undefined },
+    fields,
+    joins: nestedJoins,
+    locale,
+    parentIsLocalized,
+    selectFields: {},
+    tableName,
+    where: { or: words.map((word) => ({ [path]: { like: word } })) },
+  })
+
+  const outerTable = aliasTable ?? aliasedTable(adapter.tables[tableName], tableName)
+
+  let matchingDocumentSubquery = (adapter.drizzle as any)
+    .select({ id: documentTable.id })
+    .from(documentTable)
+    .$dynamic()
+
+  for (const join of nestedJoins) {
+    matchingDocumentSubquery = matchingDocumentSubquery[join.type ?? 'leftJoin'](
+      join.table,
+      join.condition,
+    )
+  }
+
+  return notExists(
+    matchingDocumentSubquery.where(and(eq(documentTable.id, outerTable.id), anyWordMatches)),
+  )
 }
