@@ -236,6 +236,12 @@ You will be warned if any changes that you make will entail data loss while in d
 
 Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload Config.
 
+## Renamed array and select tables
+
+Payload stores some data in extra tables named after the collection or global: `_locales` for localized fields, `_rels` for relationships, `_texts` for `hasMany` text fields and `_numbers` for `hasMany` number fields. An `array` field or `hasMany` `select` field with the same name, such as an array called `numbers`, gets a `_field` suffix instead. For example, the table is `posts_numbers_field` rather than `posts_numbers`.
+
+This can also happen after a field is added. If a `posts` collection already has a `numbers` array and you add a `hasMany` number field, the array table moves from `posts_numbers` to `posts_numbers_field`. Payload logs a warning in development that lists each renamed table. To keep the existing rows, rename the table in your migration before the new schema is applied, or set `dbName` on the field to choose a name that is free.
+
 ## Migration workflows
 
 In Postgres, migrations are a fundamental aspect of working with Payload and you should become familiar with how they work.
