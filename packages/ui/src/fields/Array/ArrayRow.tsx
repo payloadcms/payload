@@ -167,7 +167,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
-        isCollapsed={row.collapsed}
+        isCollapsed={row.collapsed ?? Boolean(row.isLoading)}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         {isLoading ? (
