@@ -14,8 +14,27 @@ export type AdminLoad = (opts: {
   signal?: AbortSignal
 }) => Promise<any>
 
-const searchToRecord = (searchStr: string): Record<string, string | string[]> =>
-  Object.fromEntries(new URLSearchParams(searchStr))
+// `searchStr` is qs-serialized (see `payloadStringifySearch`), so top-level arrays
+// arrive as indexed keys (`operation[0]=update&operation[1]=delete`) and repeated
+// plain keys stay repeated. Group both back into arrays so custom views receive the
+// same `Record<string, string | string[]>` shape the Next.js adapter passes.
+// Nested bracket keys (`filter[op]`, `filter[op][0]`) stay flat, as they do on Next.js.
+const searchToRecord = (searchStr: string): Record<string, string | string[]> => {
+  const search: Record<string, string | string[]> = {}
+
+  for (const [key, value] of new URLSearchParams(searchStr)) {
+    const baseKey = /^([^\[\]]+)\[\d+\]$/.exec(key)?.[1] ?? key
+    const existing = search[baseKey]
+
+    if (existing === undefined) {
+      search[baseKey] = value
+    } else {
+      search[baseKey] = Array.isArray(existing) ? [...existing, value] : [existing, value]
+    }
+  }
+
+  return search
+}
 
 const runLoader = async ({
   load,
