@@ -309,6 +309,67 @@ describe('email-resend', () => {
     })
   })
 
+  describe('getIdempotencyKey', () => {
+    it('should send the key in the Idempotency-Key request header', async () => {
+      const fetchMock = mockFetch({ id: 'test-id' })
+
+      await resendAdapter({
+        apiKey,
+        defaultFromAddress,
+        defaultFromName,
+        getIdempotencyKey: (message) => message.messageId,
+      })({ payload: mockPayload }).sendEmail({
+        from,
+        messageId: 'welcome-42',
+        subject,
+        text,
+        to,
+      })
+
+      expect(fetchMock.mock.calls[0][1].headers['Idempotency-Key']).toStrictEqual('welcome-42')
+      expect(getRequestBody()).not.toHaveProperty('messageId')
+    })
+
+    it('should not send the header when the function returns undefined', async () => {
+      const fetchMock = mockFetch({ id: 'test-id' })
+
+      await resendAdapter({
+        apiKey,
+        defaultFromAddress,
+        defaultFromName,
+        getIdempotencyKey: () => undefined,
+      })({ payload: mockPayload }).sendEmail({ from, subject, text, to })
+
+      expect(fetchMock.mock.calls[0][1].headers).not.toHaveProperty('Idempotency-Key')
+    })
+
+    it.each(['', '   '])(
+      'should throw without sending when the function returns the empty key "%s"',
+      async (key) => {
+        const fetchMock = mockFetch({ id: 'test-id' })
+
+        await expect(() =>
+          resendAdapter({
+            apiKey,
+            defaultFromAddress,
+            defaultFromName,
+            getIdempotencyKey: () => key,
+          })({ payload: mockPayload }).sendEmail({ from, subject, text, to }),
+        ).rejects.toThrow(/empty key/)
+
+        expect(fetchMock).not.toHaveBeenCalled()
+      },
+    )
+
+    it('should not send the header without the option', async () => {
+      const fetchMock = mockFetch({ id: 'test-id' })
+
+      await adapter().sendEmail({ from, messageId: 'welcome-42', subject, text, to })
+
+      expect(fetchMock.mock.calls[0][1].headers).not.toHaveProperty('Idempotency-Key')
+    })
+  })
+
   describe('error handling', () => {
     it('should throw a formatted error for a structured JSON error response', async () => {
       const errorResponse = {
