@@ -345,6 +345,47 @@ describe('Lexical Link Feature', () => {
       .toBe(true)
   })
 
+  test('should sanitize updated link URLs while preserving supported and relative links', async ({
+    page,
+  }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Protocol test link')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await lexical.save('drawer')
+
+    const link = lexical.editor.getByRole('link', { name: 'Protocol test link' })
+    const originalLink = await link.elementHandle()
+
+    for (const [url, expected] of [
+      ['javascript:alert(1)', 'about:blank'],
+      ['data:text/html,test', 'about:blank'],
+      ['http://[', 'about:blank'],
+      ['https://example.com/updated', 'https://example.com/updated'],
+      ['http://example.com/updated', 'http://example.com/updated'],
+      ['mailto:test@example.com', 'mailto:test@example.com'],
+      ['tel:+15555555555', 'tel:+15555555555'],
+      ['sms:+15555555555', 'sms:+15555555555'],
+      ['/relative/path', '/relative/path'],
+      ['//example.com/path', '//example.com/path'],
+      ['#section', '#section'],
+    ] as const) {
+      await link.dispatchEvent('mouseover')
+      await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+      await drawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(url)
+      await lexical.save('drawer')
+      await expect(link).toHaveAttribute('href', expected)
+      await expect.poll(() => originalLink!.evaluate((element) => element.isConnected)).toBe(true)
+    }
+  })
+
   test('should preserve unsaved link fields when resizing with a nested upload drawer open', async ({
     page,
   }) => {
