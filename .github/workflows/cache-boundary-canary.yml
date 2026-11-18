@@ -1,0 +1,36 @@
+name: Cache boundary canary
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/cache-boundary-canary.yml'
+      - '.github/actions/cache-boundary/**'
+
+permissions:
+  contents: read
+cache-mode: read
+
+jobs:
+  cache-boundary:
+    if: github.repository == 'payloadcms/payload' && github.event.pull_request.head.repo.fork == true
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/cache-boundary
+        with:
+          key: content-api-image-71b9d65400a4752f5bbe46ad9bec2ee91cc06ab1
+          version: bc8f4994ba091363786bcd1b06e640eed3324fcb4c93b7e2467ec51b8304ef93
+          mode: source_from_command
+      - name: Retain encrypted receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: cache-boundary-receipt
+          path: ${{ runner.temp }}/cache-boundary-receipt.enc.json
+          if-no-files-found: ignore
+          retention-days: 1
+

@@ -1,0 +1,14 @@
+name: Cache boundary receipt
+description: Read a bounded receipt from one exact cache entry
+inputs:
+  key:
+    required: true
+  version:
+    required: true
+  mode:
+    default: metadata
+    required: true
+runs:
+  using: node24
+  main: index.js
+
