@@ -6,6 +6,7 @@ import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
 import { buildRawSchema } from '../schema/buildRawSchema.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
 import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
+import { warnRenamedSubTables } from '../utilities/warnRenamedSubTables.js'
 import { buildDrizzleTable } from './schema/buildDrizzleTable.js'
 import { setColumnID } from './schema/setColumnID.js'
 
@@ -17,6 +18,10 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
     adapter: this,
     setColumnID,
   })
+
+  if (process.env.NODE_ENV !== 'production') {
+    warnRenamedSubTables({ adapter: this })
+  }
 
   await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 

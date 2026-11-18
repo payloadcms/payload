@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { setColumnID } from '../postgres/schema/setColumnID.js'
 import type { DrizzleAdapter } from '../types.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
+import { warnRenamedSubTables } from '../utilities/warnRenamedSubTables.js'
 import { buildRawSchema } from './buildRawSchema.js'
 
 const headlineBlock: Block = {
@@ -553,6 +554,30 @@ describe('buildRawSchema', () => {
       expect(adapter.rawTables.p_numbers.columns.drawPosition).toBeDefined()
       expect(adapter.rawTables.p_texts.columns.value).toBeDefined()
       expect(adapter.rawTables.p_numbers_field).toBeUndefined()
+    })
+
+    it('should warn about renamed tables', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+      const warn = vi.fn()
+
+      warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn).toHaveBeenCalledTimes(1)
+      expect(warn.mock.calls[0][0]).toContain('p_numbers -> p_numbers_field')
+    })
+
+    it('should not warn when no table was renamed', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+      ])
+      const warn = vi.fn()
+
+      warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn).not.toHaveBeenCalled()
     })
   })
 })

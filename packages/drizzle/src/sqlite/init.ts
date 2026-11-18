@@ -6,6 +6,7 @@ import type { BaseSQLiteAdapter } from './types.js'
 import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
 import { buildRawSchema } from '../schema/buildRawSchema.js'
 import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
+import { warnRenamedSubTables } from '../utilities/warnRenamedSubTables.js'
 import { buildDrizzleTable } from './schema/buildDrizzleTable.js'
 import { setColumnID } from './schema/setColumnID.js'
 
@@ -25,6 +26,10 @@ export const init: Init = async function init(this: BaseSQLiteAdapter) {
     adapter,
     setColumnID,
   })
+
+  if (process.env.NODE_ENV !== 'production') {
+    warnRenamedSubTables({ adapter })
+  }
 
   await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 
