@@ -6,12 +6,17 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ContractMedia } from './collections/ContractMedia/index.js'
 import { OutsideFitMedia } from './collections/OutsideFitMedia/index.js'
+import { RequestVariantsMedia } from './collections/RequestVariantsMedia/index.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
 import { VariantMedia } from './collections/VariantMedia/index.js'
 import { contractTransformers } from './contractFixtures.js'
 import { outsideFitMediaSlug, resizePreviewMediaSlug, variantMediaSlug } from './shared.js'
-import { countingDynamicOnlySharp, testTransformers } from './transformerFixtures.js'
+import {
+  countingDynamicOnlySharp,
+  requestVariantsTransformer,
+  testTransformers,
+} from './transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -29,6 +34,7 @@ export default buildConfigWithDefaults({
       ResizePreviewMedia,
       OutsideFitMedia,
       VariantMedia,
+      RequestVariantsMedia,
       ContractMedia,
     ],
     typescript: {
@@ -50,6 +56,7 @@ export default buildConfigWithDefaults({
             [variantMediaSlug]: { variants: [{ name: 'thumbnail', height: 100, width: 100 }] },
           },
         }),
+        requestVariantsTransformer,
         ...testTransformers,
         ...contractTransformers,
       ],

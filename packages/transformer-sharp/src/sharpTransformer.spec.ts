@@ -1,4 +1,4 @@
-import type { Config, UploadCollectionSlug } from 'payload'
+import type { CanTransformArgs, Config, PayloadRequest, UploadCollectionSlug } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
@@ -17,9 +17,34 @@ describe('sharpTransformer', () => {
   })
 
   it('should claim crop and focalPoint at upload time', async () => {
-    const args = { collectionSlug: 'media', mimeType: 'image/png', operation: 'upload' } as const
+    const args = getUploadArgs({})
 
-    expect(await sharpTransformer().canTransform!(args as never)).toEqual({
+    expect(await sharpTransformer().canTransform!(args)).toEqual({
+      canTransform: true,
+      handledTransformKeys: ['crop', 'focalPoint'],
+    })
+  })
+
+  it('should skip an upload to a collection whose variants another transformer registered', async () => {
+    const args = getUploadArgs({ variantsTransformerSlug: 'figma' })
+
+    expect(await sharpTransformer().canTransform!(args)).toBe(false)
+  })
+
+  it('should claim an upload to a collection whose variants it registered', async () => {
+    const args = getUploadArgs({ variantsTransformerSlug: 'sharp' })
+
+    expect(await sharpTransformer().canTransform!(args)).toEqual({
+      canTransform: true,
+      handledTransformKeys: ['crop', 'focalPoint'],
+    })
+  })
+
+  it('should claim an upload to a collection it has settings for, even when another transformer registered its variants', async () => {
+    const args = getUploadArgs({ variantsTransformerSlug: 'figma' })
+    const transformer = sharpTransformer({ collections: { media: { crop: true } } })
+
+    expect(await transformer.canTransform!(args)).toEqual({
       canTransform: true,
       handledTransformKeys: ['crop', 'focalPoint'],
     })
@@ -82,6 +107,25 @@ describe('sharpTransformer', () => {
     expect(() => second.init!(config)).not.toThrow()
   })
 })
+
+function getUploadArgs({
+  variantsTransformerSlug,
+}: {
+  variantsTransformerSlug?: string
+}): CanTransformArgs {
+  const req = {
+    payload: { collections: { media: { config: { upload: { variantsTransformerSlug } } } } },
+  } as unknown as PayloadRequest
+
+  return {
+    collectionSlug: 'media',
+    doc: {},
+    mimeType: 'image/png',
+    operation: 'upload',
+    originalDoc: {},
+    req,
+  }
+}
 
 describe('resolveSharpDynamicDefaults', () => {
   it('should default to fit=cover, position=center, maxWidth=4096, maxHeight=4096, maxPixels=16_777_216, withoutEnlargement=false', () => {

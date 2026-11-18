@@ -14,6 +14,7 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   outsideFitMediaSlug,
+  requestVariantsMediaSlug,
   resizePreviewMediaSlug,
   transformerMediaSlug,
   usersSlug,
@@ -458,6 +459,26 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
       await uploadFixture({ collection: variantMediaSlug, fixture: 'image.png' })
 
       expect(transformerCallCounts.dynamicOnlySharp).toBe(0)
+    })
+
+    test('should store only the original when another transformer registered the collection variants', async () => {
+      const crop = { height: 20, width: 30, x: 0, y: 0 }
+
+      const doc = (await payload.create({
+        collection: requestVariantsMediaSlug,
+        data: { _transforms: { crop } },
+        file: await getFileByPath(path.resolve(dirname, 'image.png')),
+        overrideAccess: true,
+      })) as unknown as {
+        filename: string
+        height: number
+        original?: { filename?: string }
+        width: number
+      }
+
+      expect(transformerCallCounts.dynamicOnlySharp).toBe(0)
+      expect(doc.filename).toBe(doc.original?.filename)
+      expect(doc).toMatchObject({ height: crop.height, width: crop.width })
     })
   })
 })

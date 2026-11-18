@@ -545,6 +545,8 @@ At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` 
 
 You can register more than one `sharpTransformer` (each with its own `slug`), for example to give different collections different dynamic-resize defaults. Each upload is processed by the instance whose `collections` lists that collection. A collection listed in the `collections` of more than one instance throws at startup.
 
+Sharp skips uploads to a collection whose variants another transformer registered, such as a CDN transformer that builds the crop and each size when the file is requested. That transformer then owns the collection's files, and only the original is stored. To process those uploads with Sharp anyway, list the collection in `sharpTransformer({ collections })`.
+
 See [Variants](./overview#variants) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 
 ### Dynamic (request-time) resizing
