@@ -53,10 +53,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
-  /**
-   * @todo make required in v4.0
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   populate?: PopulateType
@@ -154,7 +151,7 @@ export const promise = async ({
 
   const shouldLocalizeField = fieldShouldBeLocalized({
     field,
-    parentIsLocalized: parentIsLocalized!,
+    parentIsLocalized,
   })
 
   const shouldHoistLocalizedValue: boolean = Boolean(
@@ -430,7 +427,7 @@ export const promise = async ({
           field,
           locale,
           overrideAccess,
-          parentIsLocalized: parentIsLocalized!,
+          parentIsLocalized,
           populate,
           req,
           showHiddenFields,
@@ -473,7 +470,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentIsLocalized: parentIsLocalized || field.localized,
+            parentIsLocalized: parentIsLocalized || Boolean(field.localized),
             parentPath: path + '.' + rowIndex,
             parentSchemaPath: schemaPath,
             populate,
@@ -509,7 +506,7 @@ export const promise = async ({
                 locale,
                 overrideAccess,
                 parentIndexPath: '',
-                parentIsLocalized: parentIsLocalized || field.localized,
+                parentIsLocalized: parentIsLocalized || Boolean(field.localized),
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath,
                 populate,
@@ -573,7 +570,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath + '.' + block.slug,
               populate,
@@ -621,7 +618,7 @@ export const promise = async ({
                   locale,
                   overrideAccess,
                   parentIndexPath: '',
-                  parentIsLocalized: parentIsLocalized || field.localized,
+                  parentIsLocalized: parentIsLocalized || Boolean(field.localized),
                   parentPath: path + '.' + rowIndex,
                   parentSchemaPath: schemaPath + '.' + block.slug,
                   populate,
@@ -709,7 +706,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path,
               parentSchemaPath: schemaPath,
               populate,
@@ -742,7 +739,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentIsLocalized: parentIsLocalized || field.localized,
+            parentIsLocalized: parentIsLocalized || Boolean(field.localized),
             parentPath: path,
             parentSchemaPath: schemaPath,
             populate,
@@ -829,7 +826,7 @@ export const promise = async ({
                   operation: 'read',
                   originalDoc: doc,
                   overrideAccess,
-                  parentIsLocalized: parentIsLocalized!,
+                  parentIsLocalized,
                   path: pathSegments,
                   populate,
                   populationPromises,
@@ -866,7 +863,7 @@ export const promise = async ({
               operation: 'read',
               originalDoc: doc,
               overrideAccess,
-              parentIsLocalized: parentIsLocalized!,
+              parentIsLocalized,
               path: pathSegments,
               populate,
               populationPromises,
@@ -918,7 +915,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentIsLocalized: parentIsLocalized || field.localized,
+              parentIsLocalized: parentIsLocalized || Boolean(field.localized),
               parentPath: path,
               parentSchemaPath: schemaPath,
               populate,
@@ -951,7 +948,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentIsLocalized: parentIsLocalized || field.localized,
+            parentIsLocalized: parentIsLocalized || Boolean(field.localized),
             parentPath: path,
             parentSchemaPath: schemaPath,
             populate,
@@ -984,7 +981,7 @@ export const promise = async ({
           locale,
           overrideAccess,
           parentIndexPath: isNamedTab ? '' : indexPath,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          parentIsLocalized: parentIsLocalized || Boolean(field.localized),
           parentPath: isNamedTab ? path : parentPath,
           parentSchemaPath: schemaPath,
           populate,

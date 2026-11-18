@@ -39,10 +39,7 @@ type Args = {
   operation: FieldOperation
   overrideAccess: boolean
   parentIndexPath: string
-  /**
-   * @todo make required in v4.0
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -120,7 +117,7 @@ export const traverseFields = async ({
         operation,
         overrideAccess,
         parentIndexPath,
-        parentIsLocalized: parentIsLocalized!,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,

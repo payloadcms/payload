@@ -7,10 +7,7 @@ export const hasLocalesTable = ({
   parentIsLocalized,
 }: {
   fields: Field[]
-  /**
-   * @todo make required in v4.0. Usually you'd wanna pass this in
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
 }): boolean => {
   return fields.some((field) => {
     // arrays always get a separate table
@@ -23,14 +20,14 @@ export const hasLocalesTable = ({
     if (fieldHasSubFields(field)) {
       return hasLocalesTable({
         fields: field.fields,
-        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
+        parentIsLocalized: parentIsLocalized || ('localized' in field && Boolean(field.localized)),
       })
     }
     if (field.type === 'tabs') {
       return field.tabs.some((tab) =>
         hasLocalesTable({
           fields: tab.fields,
-          parentIsLocalized: parentIsLocalized || tab.localized,
+          parentIsLocalized: parentIsLocalized || Boolean(tab.localized),
         }),
       )
     }
