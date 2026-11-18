@@ -32,6 +32,7 @@ import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite
 import {
   checkDocumentLockStatus,
   deleteDocumentLocks,
+  deleteUserDocumentLocks,
   getLockedDocumentIds,
 } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -232,6 +233,25 @@ export const deleteOperation = async <
       })
     }
 
+    /**
+     * Must run before the documents are deleted: SQL adapters cascade the user relationship rows
+     * away with the user, so preferences and locks can no longer be matched by user afterwards.
+     */
+    const deleteOwnedPreferencesAndLocks = async (ids: (number | string)[]): Promise<void> => {
+      await deleteUserPreferences({
+        collectionConfig,
+        ids,
+        payload,
+        req,
+      })
+
+      await deleteUserDocumentLocks({
+        collectionSlug: collectionConfig.slug,
+        ids,
+        req,
+      })
+    }
+
     // /////////////////////////////////////
     // afterRead - Fields, afterRead - Collection, afterDelete - Collection
     // /////////////////////////////////////
@@ -330,6 +350,8 @@ export const deleteOperation = async <
             req,
           })
         }
+
+        await deleteOwnedPreferencesAndLocks([doc.id])
 
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
@@ -457,6 +479,12 @@ export const deleteOperation = async <
       }
 
       // /////////////////////////////////////
+      // Delete preferences and locks owned by the documents
+      // /////////////////////////////////////
+
+      await deleteOwnedPreferencesAndLocks(ids)
+
+      // /////////////////////////////////////
       // Delete documents
       // /////////////////////////////////////
 
@@ -523,19 +551,6 @@ export const deleteOperation = async <
       }
     } else {
       awaitedDocs = await deleteDocumentsInBulk()
-    }
-
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    if (!didBatchDeleteFail) {
-      await deleteUserPreferences({
-        collectionConfig,
-        ids: docs.map(({ id }) => id),
-        payload,
-        req,
-      })
     }
 
     let result = {
