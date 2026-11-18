@@ -70,4 +70,27 @@ describe('Radio', () => {
     await expect(uiField).toBeVisible()
     await expect(uiField).toContainText('client-side-configuration')
   })
+
+  test(
+    'should render custom server Cell component in list view',
+    async () => {
+      await page.goto(url.list)
+
+      await expect(page.locator('.ui-custom-server-cell').first()).toHaveText('cell: text')
+    },
+  )
+
+  test('should not render custom Cell component in edit view', async () => {
+    const {
+      docs: [existingDoc],
+    } = await payload.find({
+      collection: uiSlug,
+      overrideAccess: true,
+    })
+
+    const response = await page.goto(url.edit(existingDoc!.id))
+
+    await expect(page.locator('#field-text')).toHaveValue('text')
+    expect(await response?.text()).not.toContain('ui-custom-server-cell')
+  })
 })
