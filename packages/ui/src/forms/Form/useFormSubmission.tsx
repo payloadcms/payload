@@ -516,6 +516,10 @@ export const useFormSubmission = ({
         } finally {
           const isSuccessfulResponse = res?.status < 400
 
+          if (isSuccessfulResponse && requestContext.isCurrent()) {
+            submissionErrorsRef.current = undefined
+          }
+
           if (requestContext.isCurrent() && (hasFormSubmitAction || !didRefreshFormState)) {
             try {
               // Refresh before applying save errors so the refresh cannot erase them.

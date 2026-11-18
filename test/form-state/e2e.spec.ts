@@ -2719,6 +2719,7 @@ test.describe('Document submission outcomes', () => {
     await saveDraft.click()
     await saved
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('#document-info-state')).toHaveAttribute('data-title-valid', 'true')
 
     await expect
       .poll(async () => {
