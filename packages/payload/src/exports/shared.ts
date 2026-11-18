@@ -114,7 +114,12 @@ export {
   isDateOnlyFilterValue,
 } from '../utilities/getDateOnlyComparison.js'
 
-export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+export {
+  getFieldPermissions,
+  INHERITED_PERMISSIONS_KEY,
+  isSparseFieldPermissions,
+  resolveFieldPermissions,
+} from '../utilities/getFieldPermissions.js'
 
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 

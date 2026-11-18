@@ -1,5 +1,4 @@
 import type {
-  CollectionPermission,
   CollectionSlug,
   DataFromCollectionSlug,
   Payload,
@@ -16,7 +15,11 @@ import {
   QueryError,
 } from 'payload'
 import { getEntityPermissions, sanitizePermissions } from 'payload/internal'
-import { getFieldPermissions } from 'payload/shared'
+import {
+  getFieldPermissions,
+  INHERITED_PERMISSIONS_KEY,
+  resolveFieldPermissions,
+} from 'payload/shared'
 import { fileURLToPath } from 'url'
 import {
   afterAll,
@@ -64,6 +67,23 @@ import {
 
 let payload: Payload
 let restClient: NextRESTClient
+
+/**
+ * Resolves a path in sparse field permissions. A `#slug` segment selects a block of the previous
+ * field, any other segment a field.
+ */
+const resolvePermissionPath = (fields: unknown, path: string[]): any =>
+  path.reduce<any>((node, segment, index) => {
+    if (node === true) {
+      return true
+    }
+
+    if (segment.startsWith('#')) {
+      return resolveFieldPermissions(node?.blocks, segment.slice(1))
+    }
+
+    return resolveFieldPermissions(index === 0 ? node : node?.fields, segment)
+  }, fields)
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 describe('Access Control', () => {
@@ -241,12 +261,12 @@ describe('Access Control', () => {
           req,
         })
 
-        expect(permissions.fields.first?.blocks?.shared?.fields.title?.read?.permission).toBe(true)
-        expect(permissions.fields.second?.blocks?.shared?.fields.title?.read?.permission).toBe(true)
+        expect(resolvePermissionPath(permissions.fields, ['first', '#shared', 'title'])).toBe(true)
+        expect(resolvePermissionPath(permissions.fields, ['second', '#shared', 'title'])).toBe(true)
+        expect(
+          resolvePermissionPath(permissions.fields, ['second', '#shared', 'private']).read,
+        ).toBe(false)
         expect(evaluations).toBe(1)
-        expect(permissions.fields.first?.blocks?.shared).not.toBe(
-          permissions.fields.second?.blocks?.shared,
-        )
         const sanitized = sanitizePermissions({ collections: { [entity.slug]: permissions } })
         expect(sanitized.collections[entity.slug].fields.first).not.toBe(true)
         expect(sanitized.collections[entity.slug].fields.second).not.toBe(true)
@@ -305,13 +325,13 @@ describe('Access Control', () => {
           req: cyclicReq,
         })
 
-        expect(permissions.fields.restricted?.blocks?.self?.fields.label?.read?.permission).toBe(
-          false,
-        )
-        expect(permissions.fields.allowed?.blocks?.self?.fields.label?.read?.permission).toBe(true)
         expect(
-          permissions.fields.allowed?.blocks?.self?.fields.children?.blocks?.self?.read,
-        ).toEqual({ permission: false })
+          resolvePermissionPath(permissions.fields, ['restricted', '#self', 'label']).read,
+        ).toBe(false)
+        expect(resolvePermissionPath(permissions.fields, ['allowed', '#self', 'label'])).toBe(true)
+        expect(
+          resolvePermissionPath(permissions.fields, ['allowed', '#self', 'children', '#self']).read,
+        ).toBe(false)
         expect(() => JSON.stringify(permissions)).not.toThrow()
 
         const originalFields = collection.fields
@@ -349,14 +369,25 @@ describe('Access Control', () => {
         )
         expect(serialized).not.toContain('payload.recursive-block-boundary')
         const sanitized = JSON.parse(serialized)
-        expect(sanitized.collections.cyclic.fields.allowed.read).toBe(true)
-        const repeatedSelf =
-          sanitized.collections.cyclic.fields.allowed.blocks.self.fields.children.blocks.self
-        expect(repeatedSelf).toEqual({ fields: {} })
+        const sanitizedFields = sanitized.collections.cyclic.fields
+        expect(resolvePermissionPath(sanitizedFields, ['allowed']).read).toBe(true)
+        const repeatedSelf = resolvePermissionPath(sanitizedFields, [
+          'allowed',
+          '#self',
+          'children',
+          '#self',
+        ])
+        expect(repeatedSelf.read).toBe(false)
         expect(
-          sanitized.collections.cyclic.fields.paired.blocks.first.fields.children.blocks.second
-            .fields.children.blocks.first,
-        ).toEqual({ fields: {} })
+          resolvePermissionPath(sanitizedFields, [
+            'paired',
+            '#first',
+            'children',
+            '#second',
+            'children',
+            '#first',
+          ]).read,
+        ).toBe(false)
         expect(
           getFieldPermissions({
             field: { name: 'label', type: 'text' },
@@ -698,7 +729,7 @@ describe('Access Control', () => {
           req,
         })
 
-        expect(permissions.fields?.password).toBe(true)
+        expect(resolveFieldPermissions(permissions.fields, 'password')).toBe(true)
       })
 
       it('should preserve credentials when password update access is denied', async () => {
@@ -2250,37 +2281,12 @@ describe('Access Control', () => {
         req,
       })
 
+      // Every field inherits the collection's results, so only the inherited values are sent.
       expect(permissions).toEqual({
-        fields: {
-          title: { read: { permission: true }, update: { permission: true } },
-          parentField: {
-            read: { permission: true },
-            update: { permission: true },
-            fields: {
-              childField1: { read: { permission: true }, update: { permission: true } },
-              childField2: { read: { permission: true }, update: { permission: true } },
-              nestedGroup: {
-                read: { permission: true },
-                update: { permission: true },
-                fields: {
-                  deepChild1: {
-                    read: { permission: true },
-                    update: { permission: true },
-                  },
-                  deepChild2: {
-                    read: { permission: true },
-                    update: { permission: true },
-                  },
-                },
-              },
-            },
-          },
-          updatedAt: { read: { permission: true }, update: { permission: true } },
-          createdAt: { read: { permission: true }, update: { permission: true } },
-        },
+        fields: { [INHERITED_PERMISSIONS_KEY]: { read: true, update: true } },
         read: { permission: true },
         update: { permission: true },
-      } satisfies CollectionPermission)
+      })
     })
 
     it('should correctly deny access when async parent denies (non-admin user)', async () => {
@@ -2316,37 +2322,19 @@ describe('Access Control', () => {
         req: nonAdminReq,
       })
 
+      // Only the denied group is sent; its children inherit the denial.
       expect(permissions).toEqual({
         fields: {
-          title: { read: { permission: true }, update: { permission: true } },
-          parentField: {
-            read: { permission: false },
-            update: { permission: false },
-            fields: {
-              childField1: { read: { permission: false }, update: { permission: false } },
-              childField2: { read: { permission: false }, update: { permission: false } },
-              nestedGroup: {
-                read: { permission: false },
-                update: { permission: false },
-                fields: {
-                  deepChild1: {
-                    read: { permission: false },
-                    update: { permission: false },
-                  },
-                  deepChild2: {
-                    read: { permission: false },
-                    update: { permission: false },
-                  },
-                },
-              },
-            },
-          },
-          updatedAt: { read: { permission: true }, update: { permission: true } },
-          createdAt: { read: { permission: true }, update: { permission: true } },
+          [INHERITED_PERMISSIONS_KEY]: { read: true, update: true },
+          parentField: { read: false, update: false },
         },
         read: { permission: true },
         update: { permission: true },
-      } satisfies CollectionPermission)
+      })
+      expect(resolvePermissionPath(permissions.fields, ['title'])).toBe(true)
+      expect(
+        resolvePermissionPath(permissions.fields, ['parentField', 'nestedGroup', 'deepChild1']),
+      ).toMatchObject({ read: false, update: false })
     })
   })
 })

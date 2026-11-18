@@ -3,7 +3,6 @@ import { isDeepStrictEqual } from 'util'
 import type {
   BlockPermissions,
   CollectionPermission,
-  FieldsPermissions,
   GlobalPermission,
   Permission,
 } from '../../auth/types.js'
@@ -130,16 +129,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   const collectionConfig =
     entityType === 'collection' ? (entity as SanitizedCollectionConfig) : undefined
 
-  const fieldsPermissions: FieldsPermissions = {}
-  // A permission tree is reusable only within this entity calculation. The caller's
-  // cache can be shared across collections and globals with different access rules.
-  const blockPermissionCache = new WeakMap<object, Map<string, BlockPermissions>>()
-
-  const entityPermissions: ReturnType<TEntityType> = {
-    fields: fieldsPermissions,
-  } as ReturnType<TEntityType>
-
-  const promises: Promise<void>[] = []
+  const entityPermissions = {} as ReturnType<TEntityType>
 
   // Phase 1: Resolve all access functions to get where queries
   const accessResults: {
@@ -210,35 +200,14 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   // Await all where query DB calls in parallel
   await Promise.all(wherePromises)
 
-  populateFieldPermissions({
+  entityPermissions.fields = await populateFieldPermissions({
     id,
-    blockPermissionCache,
     data,
+    entityPermissions,
     fields: entity.fields,
     operations,
-    parentPermissionsObject: entityPermissions,
-    permissionsObject: fieldsPermissions,
-    promises,
     req,
   })
-
-  /**
-   * Await all promises in parallel.
-   * A promise can add more promises to the promises array (group of fields calls populateFieldPermissions again in their own promise), which will not be
-   * awaited in the first run.
-   * This is why we need to loop again to process the new promises, until there are no more promises left.
-   */
-  let iterations = 0
-  while (promises.length > 0) {
-    const currentPromises = promises.splice(0, promises.length)
-
-    await Promise.all(currentPromises)
-
-    iterations++
-    if (iterations >= 100) {
-      throw new Error('Infinite getEntityPermissions promise loop detected.')
-    }
-  }
 
   return entityPermissions
 }

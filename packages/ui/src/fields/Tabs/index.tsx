@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getFieldPaths, toKebabCase } from 'payload/shared'
+import { getFieldPaths, resolveFieldPermissions, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
@@ -29,6 +29,11 @@ import { TabComponent } from './Tab/index.js'
 import './index.scss'
 
 const baseClass = 'tabs-field'
+
+const getTabFieldsPermissions = (tabPermissions: SanitizedFieldPermissions | undefined) =>
+  tabPermissions && typeof tabPermissions === 'object' && 'fields' in tabPermissions
+    ? tabPermissions.fields
+    : tabPermissions
 
 export { TabsProvider }
 
@@ -204,11 +209,9 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
               path={path}
               permissions={
                 permissions && typeof permissions === 'object' && 'name' in activeTabConfig
-                  ? permissions[activeTabConfig.name] &&
-                    typeof permissions[activeTabConfig.name] === 'object' &&
-                    'fields' in permissions[activeTabConfig.name]
-                    ? permissions[activeTabConfig.name].fields
-                    : permissions[activeTabConfig.name]
+                  ? getTabFieldsPermissions(
+                      resolveFieldPermissions(permissions, activeTabConfig.name),
+                    )
                   : permissions
               }
               readOnly={readOnly}

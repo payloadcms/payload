@@ -5,7 +5,18 @@ import type {
   SanitizedFieldsPermissions,
 } from 'payload'
 
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  resolveFieldPermissions,
+} from 'payload/shared'
+
+const getChildPermissions = (permissions: unknown, name: string): any => {
+  const permission: any = resolveFieldPermissions(permissions, name)
+
+  return permission === true ? true : permission?.fields || permission
+}
 
 const shouldSkipField = (field: ClientField | Field): boolean =>
   (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
@@ -34,7 +45,7 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field = Clie
               typeof fieldPermissions === 'boolean'
                 ? fieldPermissions
                 : 'name' in tab && tab.name
-                  ? fieldPermissions[tab.name]?.fields || fieldPermissions[tab.name]
+                  ? getChildPermissions(fieldPermissions, tab.name)
                   : fieldPermissions,
             fields: tab.fields,
           }),
@@ -53,7 +64,7 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field = Clie
             typeof fieldPermissions === 'boolean'
               ? fieldPermissions
               : 'name' in field && field.name
-                ? fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name]
+                ? getChildPermissions(fieldPermissions, field.name)
                 : fieldPermissions,
           fields: field.fields,
         }),
@@ -68,7 +79,7 @@ export const filterFieldsWithPermissions = <T extends ClientField | Field = Clie
     }
 
     if (fieldAffectsData(field)) {
-      const fieldPermission = fieldPermissions?.[field.name]
+      const fieldPermission = resolveFieldPermissions(fieldPermissions, field.name)
       // Always allow ID fields, or if explicitly granted (true or { read: true })
       // undefined means field is not in permissions object = denied
       if (fieldIsID(field) || fieldPermission === true || fieldPermission?.read === true) {

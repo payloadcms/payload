@@ -7,6 +7,94 @@ import type {
 import type { ClientField, Field } from '../fields/config/types.js'
 import type { Operation } from '../types/index.js'
 
+type SparseOperationResults = Partial<Record<'create' | 'read' | 'update', boolean>>
+
+/**
+ * Key of the inherited create/read/update results in a sparse `fields` or `blocks` level.
+ * Field names cannot start with `$` (MongoDB), so this key never collides with a field.
+ */
+export const INHERITED_PERMISSIONS_KEY = '$inherit'
+
+export const isSparseFieldPermissions = (
+  permissions: unknown,
+): permissions is {
+  [INHERITED_PERMISSIONS_KEY]: SparseOperationResults
+} & SanitizedFieldsPermissions =>
+  typeof permissions === 'object' &&
+  permissions !== null &&
+  INHERITED_PERMISSIONS_KEY in permissions
+
+// Readers resolve the same keys on every render; caching per level keeps resolved nodes
+// referentially stable.
+const resolvedByLevel = new WeakMap<object, Map<string, SanitizedFieldPermissions>>()
+
+const resolveSparse = (level: any, key: string): SanitizedFieldPermissions => {
+  const own = level[key]
+
+  if (own === true) {
+    return true
+  }
+
+  const inherited: SparseOperationResults = level[INHERITED_PERMISSIONS_KEY]
+  const effective: SparseOperationResults = {}
+  let allAllowed = true
+  let overridden = false
+
+  for (const operation in inherited) {
+    const op = operation as keyof SparseOperationResults
+
+    effective[op] = own && op in own ? own[op] : inherited[op]
+    allAllowed &&= Boolean(effective[op])
+    overridden ||= effective[op] !== inherited[op]
+  }
+
+  if (allAllowed && !own?.fields && !own?.blocks) {
+    return true
+  }
+
+  const values = overridden ? effective : inherited
+  const childLevel = (overrides: any) =>
+    overrides === true ? true : { ...overrides, [INHERITED_PERMISSIONS_KEY]: values }
+
+  return {
+    ...values,
+    blocks: childLevel(own?.blocks),
+    fields: childLevel(own?.fields),
+  } as SanitizedFieldPermissions
+}
+
+/**
+ * Resolves `key` inside a `fields` or `blocks` permissions level. In a sparse level an operation
+ * missing on the entry inherits the level's value. Returns `true` when every operation is allowed
+ * and nothing below overrides it, otherwise a node whose `fields` and `blocks` levels carry the
+ * resolved values for their own children. Levels without INHERITED_PERMISSIONS_KEY keep the plain
+ * lookup.
+ */
+export const resolveFieldPermissions = (
+  level: unknown,
+  key: string,
+): SanitizedFieldPermissions | undefined => {
+  if (!isSparseFieldPermissions(level)) {
+    return level === true ? true : (level as any)?.[key]
+  }
+
+  let resolved = resolvedByLevel.get(level)
+
+  if (!resolved) {
+    resolved = new Map()
+    resolvedByLevel.set(level, resolved)
+  }
+
+  let node = resolved.get(key)
+
+  if (node === undefined) {
+    node = resolveSparse(level, key)
+    resolved.set(key, node)
+  }
+
+  return node
+}
+
 /**
  * Gets read and operation-level permissions for a given field based on cascading field permissions.
  * @returns An object with the following properties:
@@ -35,6 +123,18 @@ export const getFieldPermissions = ({
   permissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
   read: boolean
 } => {
+  if (isSparseFieldPermissions(permissions)) {
+    const node: any =
+      'name' in field && field.name ? resolveFieldPermissions(permissions, field.name) : permissions
+    const effective = node === true ? true : (node[INHERITED_PERMISSIONS_KEY] ?? node)
+
+    return {
+      operation: effective === true || Boolean(effective[operation]),
+      permissions: node,
+      read: effective === true || Boolean(effective.read),
+    }
+  }
+
   // First, calculate permissions using the existing logic
   const fieldOperation =
     permissions === true ||
