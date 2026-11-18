@@ -16,10 +16,11 @@
     --spacing-field: var(--spacer-4);
     --spacing-view-bottom: var(--gutter-h);
 
-    /* Sidebar widths */
+    /* Layout widths */
     --nav-width: 275px;
     --doc-sidebar-width: 325px;
     --edit-upload-sidebar-width: 240px;
+    --drawer-width: clamp(600px, 40vw, 1080px);
 
     /* Breakpoints */
     --breakpoint-xs-width: 400px;
