@@ -288,7 +288,14 @@ export const resumeUploadSession = async ({
   let stalledWindows = 0
   // A retried segment starts its bytes again, so the reported total keeps its highest value.
   let reportedBytes: number | undefined
+  // Set once this attempt fails. Parts still in flight must not report after that, or a late
+  // update would replace the retry offer the caller shows for the failure.
+  let hasFailed = false
   const reportProgress = ({ loaded }: { loaded: number }) => {
+    if (hasFailed) {
+      return
+    }
+
     const nextBytes = Math.min(file.size, Math.max(reportedBytes ?? 0, loaded))
 
     if (reportedBytes === undefined || nextBytes > reportedBytes) {
@@ -297,91 +304,96 @@ export const resumeUploadSession = async ({
     }
   }
 
-  while (true) {
-    const { requests, session: currentSession } = await requestSession<{
-      requests: UploadSegmentRequest[]
-      session: ClientUploadSession
-    }>({ apiRoute, path: `${sessionPath}/instructions`, serverURL, signal })
+  try {
+    while (true) {
+      const { requests, session: currentSession } = await requestSession<{
+        requests: UploadSegmentRequest[]
+        session: ClientUploadSession
+      }>({ apiRoute, path: `${sessionPath}/instructions`, serverURL, signal })
 
-    const confirmedBytes = currentSession.completedSegments.reduce((total, number) => {
-      const segment = segments.get(number)
-      return segment ? total + segment.end - segment.start : total
-    }, 0)
+      const confirmedBytes = currentSession.completedSegments.reduce((total, number) => {
+        const segment = segments.get(number)
+        return segment ? total + segment.end - segment.start : total
+      }, 0)
 
-    if (!requests.length) {
-      reportProgress({ loaded: currentSession.isStorageComplete ? file.size : confirmedBytes })
-      break
-    }
-
-    let windowBytes = 0
-    const queue = [...requests]
-    /** Bytes sent so far of each segment still uploading, so progress moves within a segment. */
-    const inFlightBytes = new Map<number, number>()
-    const reportWindowProgress = () =>
-      reportProgress({
-        loaded:
-          confirmedBytes +
-          windowBytes +
-          [...inFlightBytes.values()].reduce((total, bytes) => total + bytes, 0),
-      })
-
-    const sendNext = async (): Promise<void> => {
-      const request = queue.shift()
-
-      if (!request) {
-        return
+      if (!requests.length) {
+        reportProgress({ loaded: currentSession.isStorageComplete ? file.size : confirmedBytes })
+        break
       }
 
-      const segment = segments.get(request.number)
-      const result = await sendSegment({
-        body: file.slice(segment.start, segment.end),
-        onBytesSent: (bytes) => {
-          inFlightBytes.set(request.number, bytes)
+      let windowBytes = 0
+      const queue = [...requests]
+      /** Bytes sent so far of each segment still uploading, so progress moves within a segment. */
+      const inFlightBytes = new Map<number, number>()
+      const reportWindowProgress = () =>
+        reportProgress({
+          loaded:
+            confirmedBytes +
+            windowBytes +
+            [...inFlightBytes.values()].reduce((total, bytes) => total + bytes, 0),
+        })
+
+      const sendNext = async (): Promise<void> => {
+        const request = queue.shift()
+
+        if (!request) {
+          return
+        }
+
+        const segment = segments.get(request.number)
+        const result = await sendSegment({
+          body: file.slice(segment.start, segment.end),
+          onBytesSent: (bytes) => {
+            inFlightBytes.set(request.number, bytes)
+            reportWindowProgress()
+          },
+          request,
+          retries,
+          signal,
+        }).finally(() => inFlightBytes.delete(request.number))
+
+        if (result === 'throttled') {
+          concurrency = Math.max(1, Math.floor(concurrency / 2))
+        }
+
+        if (result === 'sent') {
+          windowBytes += segment.end - segment.start
           reportWindowProgress()
-        },
-        request,
-        retries,
-        signal,
-      }).finally(() => inFlightBytes.delete(request.number))
+        }
 
-      if (result === 'throttled') {
-        concurrency = Math.max(1, Math.floor(concurrency / 2))
+        // Expired or throttled segments are picked up again by the next instructions request.
+        if (result === 'sent') {
+          await sendNext()
+        }
       }
 
-      if (result === 'sent') {
-        windowBytes += segment.end - segment.start
-        reportWindowProgress()
+      await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, sendNext))
+
+      // A window where nothing was accepted (e.g. a CORS or permission problem) must not loop forever.
+      stalledWindows = windowBytes ? 0 : stalledWindows + 1
+
+      if (stalledWindows > retries) {
+        throw new UploadSessionClientError({ code: 'storageRejectedSegments' })
       }
 
-      // Expired or throttled segments are picked up again by the next instructions request.
-      if (result === 'sent') {
-        await sendNext()
+      // Throttled segments come back right away, so give storage time to recover first.
+      if (stalledWindows) {
+        await wait({ ms: getRetryDelay({ attempt: stalledWindows - 1 }), signal })
       }
     }
 
-    await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, sendNext))
+    const { file: uploadedFile } = await requestSession<{ file: UploadInstructions['file'] }>({
+      apiRoute,
+      path: `${sessionPath}/storage`,
+      serverURL,
+      signal,
+    })
 
-    // A window where nothing was accepted (e.g. a CORS or permission problem) must not loop forever.
-    stalledWindows = windowBytes ? 0 : stalledWindows + 1
-
-    if (stalledWindows > retries) {
-      throw new UploadSessionClientError({ code: 'storageRejectedSegments' })
-    }
-
-    // Throttled segments come back right away, so give storage time to recover first.
-    if (stalledWindows) {
-      await wait({ ms: getRetryDelay({ attempt: stalledWindows - 1 }), signal })
-    }
+    return uploadedFile
+  } catch (err) {
+    hasFailed = true
+    throw err
   }
-
-  const { file: uploadedFile } = await requestSession<{ file: UploadInstructions['file'] }>({
-    apiRoute,
-    path: `${sessionPath}/storage`,
-    serverURL,
-    signal,
-  })
-
-  return uploadedFile
 }
 
 /** Cancels a session and releases its provider storage. */
