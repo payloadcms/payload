@@ -17,6 +17,7 @@ import React, {
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useModalFocus } from '../../providers/ModalFocus/index.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
+import { getActiveElement } from '../../utilities/getActiveElement.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
 import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
@@ -258,7 +259,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   )
 
   const closeFromPointer = useCallback(() => {
-    const hasFocus = popupRef.current?.contains(document.activeElement)
+    const hasFocus = popupRef.current?.matches(':focus-within')
     const trigger = triggerRef.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')
 
     closePopup({ restoreFocus: false })
@@ -278,8 +279,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
         viaPointer: true,
       }),
     onSafeAreaExpire: ({ x, y }) => {
-      const target = document.elementFromPoint(x, y)
       const parentContent = parentPopup?.popupRef.current
+      const root = parentContent?.getRootNode() as
+        | ({ elementFromPoint?: Document['elementFromPoint'] } & Node)
+        | undefined
+      const target =
+        typeof root?.elementFromPoint === 'function'
+          ? root.elementFromPoint(x, y)
+          : parentContent?.ownerDocument.elementFromPoint(x, y)
 
       if (parentContent && target?.closest(POPUP_CONTENT_SELECTOR) === parentContent) {
         const trigger = target
@@ -496,12 +503,15 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // /////////////////////////////////////
 
   const handleClickOutside = useEffectEvent((e: MouseEvent) => {
-    const target = e.target as Node
-    const isOutsidePopup = !popupRef.current?.contains(target)
-    const isOutsideTrigger = !triggerRef.current?.contains(target)
+    const path = e.composedPath()
+    const isOutsidePopup = !path.some((target) => target === popupRef.current)
+    const isOutsideTrigger = !path.some((target) => target === triggerRef.current)
 
     // Check if click is inside a popup portal
-    const clickedPopupContent = (target as Element).closest?.('.popup__content')
+    const clickedPopupContent = path.find(
+      (target): target is Element =>
+        target instanceof Element && target.classList.contains('popup__content'),
+    )
 
     // If the clicked popup contains this popup's trigger, it's a parent popup
     // and we should close. If it doesn't contain our trigger, it's a child popup
@@ -529,7 +539,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
-    const activePopup = document.activeElement?.closest(`.${baseClass}__content`)
+    const activeElement = getActiveElement({ element: popup })
+    const activePopup = activeElement?.closest(`.${baseClass}__content`)
     if (activePopup && activePopup !== popup) {
       return
     }
@@ -542,9 +553,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     if (e.key === 'ArrowRight' && popupRole === 'menu') {
-      const trigger = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>(
-        `.${baseClass}__trigger-wrap`,
-      )
+      const trigger = activeElement?.closest<HTMLElement>(`.${baseClass}__trigger-wrap`)
       const nestedTrigger = trigger?.querySelector<HTMLElement>('button, [role="menuitem"]')
       if (nestedTrigger) {
         e.preventDefault()
@@ -575,7 +584,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       if (menuItems.length > 0) {
         e.preventDefault()
 
-        const currentIndex = menuItems.findIndex((item) => item === document.activeElement)
+        const currentIndex = menuItems.findIndex((item) => item === activeElement)
         const nextIndex =
           e.key === 'Home'
             ? 0
@@ -605,7 +614,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
       e.preventDefault()
 
-      const currentIndex = focusable.findIndex((el) => el === document.activeElement)
+      const currentIndex = focusable.findIndex((el) => el === activeElement)
       const goBackward = e.key === 'ArrowUp'
 
       let nextIndex: number
@@ -720,17 +729,27 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // - keydown: handle keyboard navigation
     // /////////////////////////////////////
 
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
-    document.addEventListener('mousedown', handleClickOutside)
+    const ownerDocument = popup.ownerDocument
+    const ownerWindow = ownerDocument.defaultView
+    const root = popup.getRootNode()
+
+    ownerWindow?.addEventListener('resize', updatePosition)
+    ownerWindow?.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+    if (root !== ownerDocument) {
+      root.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+    }
+    ownerDocument.addEventListener('mousedown', handleClickOutside)
     popup.addEventListener('keydown', handleKeyDown)
     popup.addEventListener('click', handleActionableClick)
 
     return () => {
       cancelAnimationFrame(rafId)
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, { capture: true })
-      document.removeEventListener('mousedown', handleClickOutside)
+      ownerWindow?.removeEventListener('resize', updatePosition)
+      ownerWindow?.removeEventListener('scroll', updatePosition, { capture: true })
+      if (root !== ownerDocument) {
+        root.removeEventListener('scroll', updatePosition, { capture: true })
+      }
+      ownerDocument.removeEventListener('mousedown', handleClickOutside)
       popup.removeEventListener('keydown', handleKeyDown)
       popup.removeEventListener('click', handleActionableClick)
       if (popup.matches(':popover-open')) {

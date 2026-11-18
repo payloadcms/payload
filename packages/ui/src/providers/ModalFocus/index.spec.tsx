@@ -1,10 +1,45 @@
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 
+import {
+  expectFocus,
+  PopupTestRoot,
+} from '../../../../../test/__helpers/components/PopupTestRoot/index.js'
 import { Modal } from '../../elements/Modal/index.js'
 import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { ModalFocusProvider, useModalFocus } from './index.js'
+
+test.each([false, true])('should capture shadow-root popup openers: %s', async (isShadowRoot) => {
+  let targets: readonly HTMLElement[] = []
+  const screen = await render(
+    <PopupTestRoot isShadowRoot={isShadowRoot}>
+      <ModalFocusProvider>
+        <PopupFixture
+          onCapture={({ captured }) => {
+            targets = captured
+          }}
+        />
+      </ModalFocusProvider>
+    </PopupTestRoot>,
+  )
+  const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+  trigger.element().focus()
+  await userEvent.keyboard('{Enter}')
+  const nested = screen.getByRole('menuitem', { name: 'More actions', exact: true })
+
+  await expectFocus({ locator: nested })
+  await userEvent.keyboard('{Enter}')
+  const opener = screen.getByRole('menuitem', { name: 'Open modal', exact: true })
+
+  await expectFocus({ locator: opener })
+  const expectedTargets = [opener.element(), nested.element(), trigger.element()]
+
+  await userEvent.keyboard('{Enter}')
+  expect(targets).toEqual(expectedTargets)
+})
 
 test.each([false, true])(
   'should capture popup ancestors with styling classes removed: %s',

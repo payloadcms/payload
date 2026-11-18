@@ -6,8 +6,290 @@ import { expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
+import {
+  expectFocus,
+  PopupTestRoot,
+} from '../../../../../test/__helpers/components/PopupTestRoot/index.js'
 import { useTheme } from '../../providers/Theme/index.js'
 import { Popup, PopupList } from './index.js'
+
+test.each([false, true])(
+  'should restore focus when pointer-closing a nested shadow control: %s',
+  async (isShadowRoot) => {
+    const screen = await render(
+      <PopupTestRoot isShadowRoot={isShadowRoot}>
+        <Popup button="Actions" popupType="menu">
+          <PopupList.MenuItem>
+            <Popup button="More actions" hoverSubmenu popupType="menu">
+              <div data-popup-prevent-close>
+                <PopupTestRoot isShadowRoot>
+                  <input aria-label="Nested draft" />
+                </PopupTestRoot>
+              </div>
+            </Popup>
+            <PopupList.Button onClick={() => {}}>Sibling action</PopupList.Button>
+          </PopupList.MenuItem>
+        </Popup>
+      </PopupTestRoot>,
+    )
+
+    await screen.getByRole('button', { name: 'Actions', exact: true }).click()
+    const nested = screen.getByRole('menuitem', { name: 'More actions', exact: true })
+
+    await nested.hover()
+    await screen.getByRole('textbox', { name: 'Nested draft' }).fill('Unsaved draft')
+    await screen.getByRole('menuitem', { name: 'Sibling action', exact: true }).hover()
+    await expect.element(nested).toHaveAttribute('aria-expanded', 'false')
+    await expectFocus({ locator: nested })
+  },
+)
+
+test.each([false, true])(
+  'should preserve controls inside a nested shadow root: %s',
+  async (isShadowRoot) => {
+    const onSelect = vi.fn()
+    const screen = await render(
+      <PopupTestRoot isShadowRoot={isShadowRoot}>
+        <Popup button="Controls" popupType="dialog">
+          <div data-popup-prevent-close>
+            <PopupTestRoot isShadowRoot>
+              <button onClick={onSelect} type="button">
+                Nested control
+              </button>
+              <input aria-label="Nested draft" />
+            </PopupTestRoot>
+          </div>
+        </Popup>
+      </PopupTestRoot>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Controls', exact: true })
+
+    await trigger.click()
+    await screen.getByRole('button', { name: 'Nested control', exact: true }).click()
+    expect(onSelect).toHaveBeenCalledOnce()
+    await screen.getByRole('textbox', { name: 'Nested draft' }).fill('Unsaved draft')
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(screen.getByRole('textbox', { name: 'Nested draft' }))
+      .toHaveValue('Unsaved draft')
+  },
+)
+
+test.each([false, true])(
+  'should activate a menu action in a shadow root: %s',
+  async (isShadowRoot) => {
+    const onSelect = vi.fn()
+    const screen = await render(
+      <PopupTestRoot isShadowRoot={isShadowRoot}>
+        <Popup button="Actions" popupType="menu">
+          <PopupList.Button onClick={onSelect}>Select</PopupList.Button>
+        </Popup>
+        <button type="button">Outside menu</button>
+      </PopupTestRoot>,
+    )
+
+    await screen.getByRole('button', { name: 'Actions', exact: true }).click()
+    await screen.getByRole('menuitem', { name: 'Select', exact: true }).click()
+
+    expect(onSelect).toHaveBeenCalledOnce()
+  },
+)
+
+test.each([false, true])(
+  'should navigate menu items in a shadow root: %s',
+  async (isShadowRoot) => {
+    const screen = await render(
+      <PopupTestRoot isShadowRoot={isShadowRoot}>
+        <Popup button="Actions" popupType="menu">
+          <PopupList.ButtonGroup>
+            {['First', 'Second', 'Third'].map((label) => (
+              <PopupList.Button key={label} onClick={() => {}}>
+                {label}
+              </PopupList.Button>
+            ))}
+          </PopupList.ButtonGroup>
+        </Popup>
+      </PopupTestRoot>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    trigger.element().focus()
+    await userEvent.keyboard('{Enter}')
+    await expectFocus({ locator: screen.getByRole('menuitem', { name: 'First' }) })
+    await userEvent.keyboard('{ArrowDown}')
+    await expectFocus({ locator: screen.getByRole('menuitem', { name: 'Second' }) })
+    await userEvent.keyboard('{End}')
+    await expectFocus({ locator: screen.getByRole('menuitem', { name: 'Third' }) })
+    await userEvent.keyboard('{Home}{ArrowUp}')
+    await expectFocus({ locator: screen.getByRole('menuitem', { name: 'Third' }) })
+    await userEvent.keyboard('{Escape}')
+    await expectFocus({ locator: trigger })
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
+  },
+)
+
+test.each([false, true])(
+  'should restore nested menu focus in a shadow root: %s',
+  async (isShadowRoot) => {
+    const screen = await render(
+      <PopupTestRoot isShadowRoot={isShadowRoot}>
+        <Popup button="Actions" popupType="menu">
+          <Popup button="More actions" popupType="menu">
+            <PopupList.Button onClick={() => {}}>Nested action</PopupList.Button>
+          </Popup>
+        </Popup>
+      </PopupTestRoot>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    trigger.element().focus()
+    await userEvent.keyboard('{Enter}')
+    const nested = screen.getByRole('menuitem', { name: 'More actions', exact: true })
+
+    await expectFocus({ locator: nested })
+    await userEvent.keyboard('{ArrowRight}')
+    await expectFocus({ locator: screen.getByRole('menuitem', { name: 'Nested action' }) })
+    await userEvent.keyboard('{Escape}')
+    await expectFocus({ locator: nested })
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(nested).toHaveAttribute('aria-expanded', 'false')
+  },
+)
+
+test('should dismiss a shadow-root popup from both sides of the shadow boundary', async () => {
+  const screen = await render(
+    <>
+      <PopupTestRoot isShadowRoot>
+        <Popup button="Actions" popupType="menu">
+          <PopupList.Button onClick={() => {}}>Select</PopupList.Button>
+        </Popup>
+        <button style={{ position: 'fixed', right: 16, top: 16 }} type="button">
+          Inside shadow
+        </button>
+      </PopupTestRoot>
+      <button style={{ position: 'fixed', right: 16, top: 64 }} type="button">
+        Outside shadow
+      </button>
+    </>,
+  )
+  const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+  for (const name of ['Inside shadow', 'Outside shadow']) {
+    await trigger.click()
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+    await screen.getByRole('button', { name, exact: true }).click()
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
+  }
+})
+
+test.each([false, true])(
+  'should follow scrolling within a shadow root: %s',
+  async (isShadowRoot) => {
+    const screen = await render(
+      <PopupTestRoot isShadowRoot={isShadowRoot}>
+        <div data-testid="scroll-container" style={{ height: 240, overflow: 'auto' }}>
+          <div style={{ height: 800, padding: 64 }}>
+            <div style={{ display: 'flex', height: 24 }}>
+              <Popup button="Actions" popupAriaLabel="Actions menu" popupType="menu">
+                <PopupList.Button onClick={() => {}}>Select</PopupList.Button>
+              </Popup>
+            </div>
+          </div>
+        </div>
+      </PopupTestRoot>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    const menu = screen.getByRole('menu', { name: 'Actions menu' })
+    const getGap = () =>
+      Math.round(
+        menu.element().getBoundingClientRect().top -
+          trigger.element().getBoundingClientRect().bottom,
+      )
+
+    await expect.poll(getGap).toBe(8)
+    screen.getByTestId('scroll-container').element().scrollTop = 32
+    await expect.poll(getGap).toBe(8)
+  },
+)
+
+test.each([false, true])(
+  'should preserve hover intent with shadow-root hit testing available: %s',
+  async (hasRootHitTesting) => {
+    await page.viewport(1000, 720)
+    const screen = await render(
+      <PopupTestRoot isShadowRoot>
+        <div
+          data-testid="pointer-surface"
+          style={{ inset: 0, padding: '64px 300px', position: 'fixed' }}
+        >
+          <Popup button="Actions" popupType="menu" size="large">
+            <PopupList.MenuItem>
+              {['Theme', 'Language'].map((label) => (
+                <Popup
+                  hoverSubmenu
+                  key={label}
+                  popupAriaLabel={`${label} menu`}
+                  popupType="menu"
+                  renderButton={(buttonProps) => (
+                    <PopupList.SubmenuTrigger buttonProps={buttonProps}>
+                      {label}
+                    </PopupList.SubmenuTrigger>
+                  )}
+                  size="large"
+                >
+                  <PopupList.ButtonGroup>
+                    {[1, 2, 3].map((option) => (
+                      <PopupList.Button
+                        key={option}
+                        onClick={() => {}}
+                      >{`${label} option ${option}`}</PopupList.Button>
+                    ))}
+                  </PopupList.ButtonGroup>
+                </Popup>
+              ))}
+            </PopupList.MenuItem>
+          </Popup>
+        </div>
+      </PopupTestRoot>,
+    )
+    const root = screen.getByTestId('shadow-host').element().shadowRoot!
+
+    if (!hasRootHitTesting) {
+      Object.defineProperty(root, 'elementFromPoint', { value: undefined })
+    }
+
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    const theme = screen.getByRole('menuitem', { name: 'Theme', exact: true })
+    const language = screen.getByRole('menuitem', { name: 'Language', exact: true })
+
+    await theme.hover()
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+    const triggerBox = theme.element().getBoundingClientRect()
+    const siblingBox = language.element().getBoundingClientRect()
+    const menuBox = screen
+      .getByRole('menu', { name: 'Theme menu' })
+      .element()
+      .getBoundingClientRect()
+    const startX = triggerBox.left + triggerBox.width / 2
+    const startY = triggerBox.top + triggerBox.height / 2
+    const targetX = startX + (menuBox.left - startX) * 0.85
+    const targetY = siblingBox.top + siblingBox.height / 2
+    await userEvent.hover(screen.getByTestId('pointer-surface'), {
+      force: true,
+      position: { x: targetX, y: targetY },
+    })
+
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(language).toHaveAttribute('aria-expanded', 'false')
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'false')
+    await expect.element(language).toHaveAttribute('aria-expanded', String(hasRootHitTesting))
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+  },
+)
 
 test.each([
   { direction: 'left', side: 'left', width: 1000 },
