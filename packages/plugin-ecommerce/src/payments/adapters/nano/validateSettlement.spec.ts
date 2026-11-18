@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { bindingRepresentative, xnoToRaw } from './nano.js'
-import { validateNanoSettlement } from './validateSettlement.js'
+import { validateNanoSettlement, validateNanoSettlementIdentity } from './validateSettlement.js'
 
 const ACCOUNT = 'nano_3t6k35gi95xu6tergt6p69ck76ogmitsa8mnijtpxm9fkcm736xtoncuohr3'
 const BLOCK_HASH = 'AB'.repeat(32)
@@ -74,5 +74,15 @@ describe('Nano settlement validation', () => {
         createArgs({ nano: { amountRaw: '0.5', payTo: ACCOUNT, reference: REFERENCE } }),
       ),
     ).toThrow('Raw amount')
+  })
+
+  it('should check only identity, not pending status or payment, for a settled retry', () => {
+    const args = createArgs({ status: 'succeeded' })
+
+    expect(() => validateNanoSettlement(args)).toThrow('not pending')
+    expect(validateNanoSettlementIdentity(args).reference).toBe(REFERENCE)
+    expect(() =>
+      validateNanoSettlementIdentity(createArgs({ status: 'succeeded' }, { canonicalCartID: 'x' })),
+    ).toThrow('Canonical cart')
   })
 })

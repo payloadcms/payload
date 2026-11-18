@@ -51,8 +51,17 @@ const createBlock = (overrides: Record<string, unknown> = {}) => ({
 const createHarness = ({
   block = createBlock() as Record<string, unknown>,
   claimedBy = [] as Record<string, unknown>[],
+  claimResult = 'match' as 'match' | 'none',
+  storedAfterClaim,
   transaction = createTransaction() as Record<string, unknown>,
   user = { id: 'user-123' } as null | Record<string, unknown>,
+}: {
+  block?: Record<string, unknown>
+  claimedBy?: Record<string, unknown>[]
+  claimResult?: 'match' | 'none'
+  storedAfterClaim?: string
+  transaction?: Record<string, unknown>
+  user?: null | Record<string, unknown>
 } = {}) => {
   const find = vi.fn(({ where }: { where: Record<string, unknown> }) =>
     Promise.resolve(
@@ -62,6 +71,21 @@ const createHarness = ({
     ),
   )
   const update = vi.fn().mockResolvedValue({})
+  let stored = transaction
+  const updateOne = vi.fn(
+    ({ data }: { data: Record<string, unknown>; where: { and: unknown[] } }) => {
+      if (claimResult === 'none') {
+        return Promise.resolve(null)
+      }
+      const nano = data.nano as Record<string, unknown>
+      stored = {
+        ...transaction,
+        nano: { ...nano, blockHash: storedAfterClaim ?? nano.blockHash },
+      }
+      return Promise.resolve(stored)
+    },
+  )
+  const findByID = vi.fn(() => Promise.resolve(stored))
   const loggerError = vi.fn()
   const finalizeOrder = vi.fn().mockResolvedValue({ accessToken: 'access-123', id: 'order-123' })
   const fetchImpl = vi.fn().mockResolvedValue({
@@ -70,11 +94,11 @@ const createHarness = ({
     status: 200,
   })
   const req = {
-    payload: { find, logger: { error: loggerError }, update },
+    payload: { db: { updateOne }, find, findByID, logger: { error: loggerError }, update },
     user,
   } as unknown as ConfirmOrderArgs['req']
 
-  return { fetchImpl, finalizeOrder, find, req, update }
+  return { fetchImpl, finalizeOrder, find, findByID, req, update, updateOne }
 }
 
 const run = ({
@@ -112,8 +136,16 @@ describe('Nano confirmOrder', () => {
     expect(result.orderID).toBe('order-123')
     expect(result.transactionID).toBe('txn-123')
     expect(harness.fetchImpl).toHaveBeenCalledTimes(1)
-    expect(harness.update).toHaveBeenCalledTimes(1)
-    expect(harness.update.mock.calls[0][0].data.nano.blockHash).toBe(BLOCK_HASH)
+    expect(harness.updateOne).toHaveBeenCalledTimes(1)
+    expect(harness.updateOne.mock.calls[0][0].data.nano.blockHash).toBe(BLOCK_HASH)
+    expect(harness.updateOne.mock.calls[0][0].where).toEqual({
+      and: [
+        { id: { equals: 'txn-123' } },
+        { status: { equals: 'pending' } },
+        { 'nano.blockHash': { exists: false } },
+      ],
+    })
+    expect(harness.update).not.toHaveBeenCalled()
     expect(harness.finalizeOrder).toHaveBeenCalledTimes(1)
     expect(harness.finalizeOrder.mock.calls[0][0].orderData.shippingAddress).toEqual({
       city: 'Test City',
@@ -135,7 +167,95 @@ describe('Nano confirmOrder', () => {
     })
 
     await expect(run({ harness })).rejects.toThrow('another Nano block')
+    expect(harness.updateOne).not.toHaveBeenCalled()
+    expect(harness.finalizeOrder).not.toHaveBeenCalled()
+  })
+
+  it('should not overwrite a block hash claimed concurrently by another confirmation', async () => {
+    // The pre-check saw an empty hash, but a concurrent request claimed first, so the
+    // conditional write matches no document.
+    const harness = createHarness({ claimResult: 'none' })
+
+    await expect(run({ harness })).rejects.toThrow('another Nano block')
+    expect(harness.updateOne).toHaveBeenCalledTimes(1)
+    expect(harness.finalizeOrder).not.toHaveBeenCalled()
+  })
+
+  it('should refuse to finalize when the re-read claim is not this block', async () => {
+    const harness = createHarness({ storedAfterClaim: 'CD'.repeat(32) })
+
+    await expect(run({ harness })).rejects.toThrow('another Nano block')
+    expect(harness.findByID).toHaveBeenCalledTimes(1)
+    expect(harness.finalizeOrder).not.toHaveBeenCalled()
+  })
+
+  it('should re-claim with a guarded write when a pending transaction already holds this block', async () => {
+    const transaction = createTransaction()
+    const harness = createHarness({
+      transaction: { ...transaction, nano: { ...transaction.nano, blockHash: BLOCK_HASH } },
+    })
+
+    const result = await run({ harness })
+
+    expect(result.orderID).toBe('order-123')
+    expect(harness.updateOne.mock.calls[0][0].where.and[2]).toEqual({
+      'nano.blockHash': { equals: BLOCK_HASH },
+    })
+  })
+
+  it('should return the existing order when retrying an already-settled confirmation', async () => {
+    const transaction = createTransaction()
+    const harness = createHarness({
+      // Block is now older than maxAgeSeconds; a retry must still recover the order.
+      block: createBlock({ local_timestamp: String(NOW - 10 * 86400) }),
+      transaction: {
+        ...transaction,
+        nano: { ...transaction.nano, blockHash: BLOCK_HASH.toLowerCase() },
+        order: 'order-123',
+        status: 'succeeded',
+      },
+    })
+
+    const result = await run({ harness })
+
+    expect(result.orderID).toBe('order-123')
+    expect(result.transactionID).toBe('txn-123')
+    expect(harness.fetchImpl).not.toHaveBeenCalled()
+    expect(harness.updateOne).not.toHaveBeenCalled()
     expect(harness.update).not.toHaveBeenCalled()
+    expect(harness.finalizeOrder).toHaveBeenCalledTimes(1)
+    expect(harness.finalizeOrder.mock.calls[0][0].transactionID).toBe('txn-123')
+  })
+
+  it('should still check identity when retrying an already-settled confirmation', async () => {
+    const transaction = createTransaction()
+    const harness = createHarness({
+      transaction: {
+        ...transaction,
+        nano: { ...transaction.nano, blockHash: BLOCK_HASH },
+        order: 'order-123',
+        status: 'succeeded',
+      },
+      user: { id: 'user-999' },
+    })
+
+    await expect(run({ harness })).rejects.toThrow('Authenticated customer')
+    expect(harness.finalizeOrder).not.toHaveBeenCalled()
+  })
+
+  it('should refuse a settled transaction presented with a different block', async () => {
+    const transaction = createTransaction()
+    const harness = createHarness({
+      transaction: {
+        ...transaction,
+        nano: { ...transaction.nano, blockHash: 'CD'.repeat(32) },
+        order: 'order-123',
+        status: 'succeeded',
+      },
+    })
+
+    await expect(run({ harness })).rejects.toThrow('not pending')
+    expect(harness.updateOne).not.toHaveBeenCalled()
     expect(harness.finalizeOrder).not.toHaveBeenCalled()
   })
 
@@ -143,7 +263,7 @@ describe('Nano confirmOrder', () => {
     const harness = createHarness({ block: createBlock({ amount: (PRICE_RAW - 1n).toString() }) })
 
     await expect(run({ harness })).rejects.toThrow('amount')
-    expect(harness.update).not.toHaveBeenCalled()
+    expect(harness.updateOne).not.toHaveBeenCalled()
     expect(harness.finalizeOrder).not.toHaveBeenCalled()
   })
 
@@ -163,7 +283,7 @@ describe('Nano confirmOrder', () => {
     expect(harness.finalizeOrder).not.toHaveBeenCalled()
   })
 
-  it('should refuse a transaction that is no longer pending', async () => {
+  it('should refuse a non-pending transaction that this block has not claimed', async () => {
     const harness = createHarness({ transaction: createTransaction({ status: 'succeeded' }) })
 
     await expect(run({ harness })).rejects.toThrow('not pending')

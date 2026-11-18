@@ -4,7 +4,7 @@ import type { PaymentAdapter } from '../../../types/index.js'
 
 import { isBlockHash } from './nano.js'
 import { fetchBlockInfo } from './nodeClient.js'
-import { validateNanoSettlement } from './validateSettlement.js'
+import { validateNanoSettlement, validateNanoSettlementIdentity } from './validateSettlement.js'
 
 type Props = {
   account: string
@@ -65,30 +65,41 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         throw new Error('This Nano block has already settled another transaction')
       }
 
-      const block = await fetchBlockInfo({ fetchImpl, hash, headers: nodeHeaders, nodeURL })
+      const storedHash = getStoredBlockHash(transaction)
 
-      validateNanoSettlement({
-        account,
-        block,
-        blockHash: hash,
-        canonicalCartID: data.cartID,
-        customerEmail: data.customerEmail,
-        maxAgeSeconds,
-        now: now(),
-        reference,
-        transaction,
-        user: req.user,
-      })
+      // Retry of a confirmation whose settlement already committed (for example the response was
+      // lost) or is still committing. The payment was verified when the block was claimed, so
+      // only the request identity is re-checked; the core finalizer then returns the existing
+      // order instead of creating one. `nano.blockHash` is not rewritten.
+      if (
+        storedHash === hash &&
+        (transaction.status === 'succeeded' || transaction.status === 'processing')
+      ) {
+        validateNanoSettlementIdentity({
+          canonicalCartID: data.cartID,
+          customerEmail: data.customerEmail,
+          reference,
+          transaction,
+          user: req.user,
+        })
+      } else {
+        const block = await fetchBlockInfo({ fetchImpl, hash, headers: nodeHeaders, nodeURL })
 
-      // Claim the block before the order exists. `nano.blockHash` is unique, so a second
-      // transaction presenting the same block fails here, also after a restart.
-      await req.payload.update({
-        id: transactionID,
-        collection: transactionsSlug,
-        data: { nano: { ...(transaction.nano as RecordValue), blockHash: hash } },
-        overrideAccess: true,
-        req,
-      })
+        validateNanoSettlement({
+          account,
+          block,
+          blockHash: hash,
+          canonicalCartID: data.cartID,
+          customerEmail: data.customerEmail,
+          maxAgeSeconds,
+          now: now(),
+          reference,
+          transaction,
+          user: req.user,
+        })
+
+        await claimBlock({ hash, req, transaction, transactionID, transactionsSlug })
+      }
 
       const nano = transaction.nano as RecordValue
       const purchaser =
@@ -121,6 +132,69 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
     }
   }
 
+type Req = Parameters<NonNullable<PaymentAdapter>['confirmOrder']>[0]['req']
+
+const getStoredBlockHash = (transaction: RecordValue): string | undefined => {
+  const nano = transaction.nano as RecordValue | undefined
+  const stored = nano?.blockHash
+
+  return typeof stored === 'string' && stored ? stored.toUpperCase() : undefined
+}
+
+/**
+ * Claims the block for this transaction before the order exists. The write is conditional: it
+ * only matches while the transaction is still pending and its `nano.blockHash` is empty or
+ * already this hash, so two concurrent confirmations cannot overwrite each other's claim. The
+ * unique index on `nano.blockHash` additionally stops one block settling two transactions.
+ */
+const claimBlock = async ({
+  hash,
+  req,
+  transaction,
+  transactionID,
+  transactionsSlug,
+}: {
+  hash: string
+  req: Req
+  transaction: RecordValue
+  transactionID: DefaultDocumentIDType
+  transactionsSlug: string
+}): Promise<void> => {
+  const storedHash = getStoredBlockHash(transaction)
+  const claimed = await req.payload.db.updateOne({
+    collection: transactionsSlug,
+    data: { nano: { ...(transaction.nano as RecordValue), blockHash: hash } },
+    options: { atomic: true },
+    req,
+    where: {
+      and: [
+        { id: { equals: transactionID } },
+        { status: { equals: 'pending' } },
+        storedHash === undefined
+          ? { 'nano.blockHash': { exists: false } }
+          : { 'nano.blockHash': { equals: storedHash } },
+      ],
+    },
+  })
+
+  if (!claimed) {
+    throw new Error('Transaction is already settled by another Nano block')
+  }
+
+  // Re-read and confirm the stored claim is ours before any order is created.
+  const current = await req.payload.findByID({
+    id: transactionID,
+    collection: transactionsSlug,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+
+  if (!current || getStoredBlockHash(current as RecordValue) !== hash) {
+    throw new Error('Transaction is already settled by another Nano block')
+  }
+}
+
 const findOne = async ({
   errorMessage,
   req,
@@ -128,7 +202,7 @@ const findOne = async ({
   where,
 }: {
   errorMessage: string
-  req: Parameters<NonNullable<PaymentAdapter>['confirmOrder']>[0]['req']
+  req: Req
   transactionsSlug: string
   where: Where
 }): Promise<RecordValue> => {

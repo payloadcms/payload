@@ -21,38 +21,27 @@ type NanoSettlementArgs = {
 const isRecord = (value: unknown): value is RecordValue =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+type NanoIdentityArgs = Pick<
+  NanoSettlementArgs,
+  'canonicalCartID' | 'customerEmail' | 'reference' | 'transaction' | 'user'
+>
+
 /**
- * Checks that a Nano send block pays exactly this pending transaction. Pure: the block is read
- * by the caller, and the one-block-one-transaction rule is enforced by the unique `nano.blockHash`.
+ * Checks that the confirmation request belongs to this Nano transaction: reference, cart and
+ * purchaser. Used on its own for retries of an already-settled transaction, where the payment
+ * checks have already passed and the block may be older than `maxAgeSeconds`.
  */
-export const validateNanoSettlement = ({
-  account,
-  block,
-  blockHash,
+export const validateNanoSettlementIdentity = ({
   canonicalCartID,
   customerEmail,
-  maxAgeSeconds,
-  now,
   reference,
   transaction,
   user,
-}: NanoSettlementArgs): { priceRaw: bigint } => {
+}: NanoIdentityArgs): RecordValue => {
   const nano = isRecord(transaction.nano) ? transaction.nano : undefined
 
   if (transaction.paymentMethod !== 'nano' || !nano || nano.reference !== reference) {
     throw new Error('Nano reference does not match the transaction')
-  }
-
-  if (transaction.status !== 'pending') {
-    throw new Error('Transaction is not pending')
-  }
-
-  if (
-    typeof nano.blockHash === 'string' &&
-    nano.blockHash &&
-    nano.blockHash.toUpperCase() !== blockHash.toUpperCase()
-  ) {
-    throw new Error('Transaction is already settled by another Nano block')
   }
 
   const normalizedCartID = getRelationshipID(canonicalCartID)
@@ -82,6 +71,46 @@ export const validateNanoSettlement = ({
     ) {
       throw new Error('Guest email does not match the transaction email')
     }
+  }
+
+  return nano
+}
+
+/**
+ * Checks that a Nano send block pays exactly this pending transaction. Pure: the block is read
+ * by the caller, and the one-block-one-transaction rule is enforced by the conditional claim on
+ * `nano.blockHash` (backed by its unique index).
+ */
+export const validateNanoSettlement = ({
+  account,
+  block,
+  blockHash,
+  canonicalCartID,
+  customerEmail,
+  maxAgeSeconds,
+  now,
+  reference,
+  transaction,
+  user,
+}: NanoSettlementArgs): { priceRaw: bigint } => {
+  const nano = validateNanoSettlementIdentity({
+    canonicalCartID,
+    customerEmail,
+    reference,
+    transaction,
+    user,
+  })
+
+  if (transaction.status !== 'pending') {
+    throw new Error('Transaction is not pending')
+  }
+
+  if (
+    typeof nano.blockHash === 'string' &&
+    nano.blockHash &&
+    nano.blockHash.toUpperCase() !== blockHash.toUpperCase()
+  ) {
+    throw new Error('Transaction is already settled by another Nano block')
   }
 
   // The receiving account is the one configured now, so a transaction created before the
