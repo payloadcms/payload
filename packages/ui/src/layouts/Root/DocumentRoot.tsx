@@ -23,8 +23,6 @@ export type DocumentRootProps = {
   htmlProps?: HtmlHTMLAttributes<HTMLHtmlElement>
   languageCode?: string
   suppressHydrationWarning?: boolean
-  /** Optional viewport tag; adapters with router-managed metadata supply it through `head`. */
-  viewport?: ReactNode
 } & Partial<RequestThemeResult>
 
 export function DocumentRoot({
@@ -38,7 +36,6 @@ export function DocumentRoot({
   suppressHydrationWarning = false,
   theme,
   themeSource,
-  viewport,
 }: DocumentRootProps) {
   const fontClassNames = fonts.map((font) => font.variable ?? font.className).filter(Boolean)
 
@@ -54,7 +51,6 @@ export function DocumentRoot({
     >
       <head>
         {themeSource === 'fallback' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
-        {viewport}
         <style>{`@layer payload-default, payload;`}</style>
         {head}
       </head>
