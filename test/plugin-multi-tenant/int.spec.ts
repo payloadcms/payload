@@ -47,6 +47,284 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     await payload.destroy()
   })
 
+  describe('locked document access across tenants', () => {
+    const createdIDs: { collection: string; id: DefaultDocumentIDType }[] = []
+    let tenantAID: DefaultDocumentIDType
+    let tenantAUser: Awaited<ReturnType<typeof payload.findByID>>
+    let tenantBUser: Awaited<ReturnType<typeof payload.findByID>>
+    let tenantAPage: Awaited<ReturnType<typeof payload.findByID>>
+    let tenantBPage: Awaited<ReturnType<typeof payload.findByID>>
+    let tenantBLock: Awaited<ReturnType<typeof payload.findByID>>
+
+    beforeEach(async () => {
+      const tenantA = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Lock Tenant A', domain: 'lock-a.test' },
+      })
+      const tenantB = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Lock Tenant B', domain: 'lock-b.test' },
+      })
+      createdIDs.push({ collection: tenantsSlug, id: tenantA.id })
+      createdIDs.push({ collection: tenantsSlug, id: tenantB.id })
+      tenantAID = tenantA.id
+
+      tenantAUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'lock-tenant-a@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantA.id }],
+        },
+      })
+      tenantBUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'lock-tenant-b@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantB.id }],
+        },
+      })
+      createdIDs.push({ collection: usersSlug, id: tenantAUser.id })
+      createdIDs.push({ collection: usersSlug, id: tenantBUser.id })
+
+      tenantAPage = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A lock target' },
+      })
+      tenantBPage = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantB.id, title: 'Tenant B lock target' },
+      })
+      createdIDs.push({ collection: relationshipsSlug, id: tenantAPage.id })
+      createdIDs.push({ collection: relationshipsSlug, id: tenantBPage.id })
+
+      tenantBLock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: relationshipsSlug, value: tenantBPage.id },
+          user: { relationTo: usersSlug, value: tenantBUser.id },
+        },
+      })
+      createdIDs.push({ collection: 'payload-locked-documents', id: tenantBLock.id })
+    })
+
+    afterEach(async () => {
+      vi.restoreAllMocks()
+      for (const { collection, id } of createdIDs.reverse()) {
+        await payload.delete({ collection, id, overrideAccess: true })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should hide another tenant’s lock rows when the target document is hidden', async () => {
+      const pages = await payload.find({
+        collection: relationshipsSlug,
+        overrideAccess: false,
+        user: tenantAUser,
+        where: { id: { equals: tenantBPage.id } },
+      })
+      const locks = await payload.find({
+        collection: 'payload-locked-documents',
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+
+      expect(pages.docs).toHaveLength(0)
+      expect(locks.docs).toHaveLength(0)
+    })
+
+    it('should evaluate document ID access separately for each lock target', async () => {
+      const secondPage = await payload.create({
+        collection: relationshipsSlug,
+        data: {
+          tenant: tenantAID,
+          title: 'Another tenant A lock target',
+        },
+      })
+      createdIDs.push({ collection: relationshipsSlug, id: secondPage.id })
+
+      const firstLock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: relationshipsSlug, value: tenantAPage.id },
+          user: { relationTo: usersSlug, value: tenantAUser.id },
+        },
+      })
+      const secondLock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: relationshipsSlug, value: secondPage.id },
+          user: { relationTo: usersSlug, value: tenantAUser.id },
+        },
+      })
+      createdIDs.push({ collection: 'payload-locked-documents', id: firstLock.id })
+      createdIDs.push({ collection: 'payload-locked-documents', id: secondLock.id })
+
+      const access = payload.collections[relationshipsSlug].config.access.read
+      vi.spyOn(payload.collections[relationshipsSlug].config.access, 'read').mockImplementation(
+        (args) => (args.id === tenantAPage.id ? access(args) : false),
+      )
+
+      const locks = await payload.find({
+        collection: 'payload-locked-documents',
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+
+      expect(locks.docs.map(({ id }) => id)).toEqual([firstLock.id])
+    })
+
+    it('should prevent a user from creating a lock on another tenant’s document', async () => {
+      await expect(
+        payload.create({
+          collection: 'payload-locked-documents',
+          data: {
+            document: { relationTo: relationshipsSlug, value: tenantBPage.id },
+            user: { relationTo: usersSlug, value: tenantAUser.id },
+          },
+          overrideAccess: false,
+          user: tenantAUser,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should prevent a user from changing or deleting another tenant’s lock', async () => {
+      await expect(
+        payload.update({
+          collection: 'payload-locked-documents',
+          id: tenantBLock.id,
+          data: { user: { relationTo: usersSlug, value: tenantAUser.id } },
+          overrideAccess: false,
+          user: tenantAUser,
+        }),
+      ).rejects.toThrow()
+
+      await expect(
+        payload.delete({
+          collection: 'payload-locked-documents',
+          id: tenantBLock.id,
+          overrideAccess: false,
+          user: tenantAUser,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should prevent moving an accessible lock to another tenant’s document', async () => {
+      const lock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: relationshipsSlug, value: tenantAPage.id },
+          user: { relationTo: usersSlug, value: tenantAUser.id },
+        },
+      })
+      createdIDs.push({ collection: 'payload-locked-documents', id: lock.id })
+
+      await expect(
+        payload.update({
+          collection: 'payload-locked-documents',
+          id: lock.id,
+          data: { document: { relationTo: relationshipsSlug, value: tenantBPage.id } },
+          overrideAccess: false,
+          user: tenantAUser,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should reject a lock row with both a document and a global target', async () => {
+      await expect(
+        payload.create({
+          collection: 'payload-locked-documents',
+          data: {
+            document: { relationTo: relationshipsSlug, value: tenantBPage.id },
+            globalSlug: 'some-global',
+            user: { relationTo: usersSlug, value: tenantAUser.id },
+          },
+          overrideAccess: false,
+          user: tenantAUser,
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should allow an editor to manage locks on their own tenant’s document', async () => {
+      const lock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: relationshipsSlug, value: tenantAPage.id },
+          user: { relationTo: usersSlug, value: tenantAUser.id },
+        },
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+      createdIDs.push({ collection: 'payload-locked-documents', id: lock.id })
+
+      const locks = await payload.find({
+        collection: 'payload-locked-documents',
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+
+      expect(locks.docs.map(({ id }) => id)).toEqual([lock.id])
+
+      await payload.update({
+        collection: 'payload-locked-documents',
+        id: lock.id,
+        data: { user: { relationTo: usersSlug, value: tenantAUser.id } },
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+      await payload.delete({
+        collection: 'payload-locked-documents',
+        id: lock.id,
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+      createdIDs.pop()
+    })
+
+    it('should allow an editor to take over another user’s lock on an editable document', async () => {
+      const otherEditor = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'lock-tenant-a-other@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantAID }],
+        },
+      })
+      createdIDs.push({ collection: usersSlug, id: otherEditor.id })
+
+      const lock = await payload.create({
+        collection: 'payload-locked-documents',
+        data: {
+          document: { relationTo: relationshipsSlug, value: tenantAPage.id },
+          user: { relationTo: usersSlug, value: otherEditor.id },
+        },
+      })
+      createdIDs.push({ collection: 'payload-locked-documents', id: lock.id })
+
+      const takenOver = await payload.update({
+        collection: 'payload-locked-documents',
+        id: lock.id,
+        data: { user: { relationTo: usersSlug, value: tenantAUser.id } },
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+
+      expect((takenOver.user.value as { id: number | string }).id).toBe(tenantAUser.id)
+
+      await payload.delete({
+        collection: 'payload-locked-documents',
+        id: lock.id,
+        overrideAccess: false,
+        user: tenantAUser,
+      })
+      createdIDs.pop()
+    })
+  })
+
   describe('tenants', () => {
     it('should create a tenant', async () => {
       const tenant1 = await payload.create({
