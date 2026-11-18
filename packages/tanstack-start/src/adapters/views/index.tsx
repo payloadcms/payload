@@ -39,7 +39,7 @@ const runLoader = async ({
 
   try {
     data = await load({
-      data: { _splat: splat, search: await routerHistoryToSearchParams({ searchStr }) },
+      data: { _splat: splat, search: routerHistoryToSearchParams({ searchStr }) },
       signal: loadController.signal,
     })
   } finally {

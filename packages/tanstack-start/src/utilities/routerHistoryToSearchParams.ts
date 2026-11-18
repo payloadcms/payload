@@ -14,21 +14,46 @@ export type ViewSearchParams = Record<string, string | string[]>
  * string as written (on the server, the request URL's), so it is read from
  * there whenever it belongs to the location being loaded. A preload loads a
  * location the history hasn't moved to yet, so it falls back to
- * `location.searchStr`, which is the query string that navigation writes.
+ * `location.searchStr`, which is the query string that navigation writes. So
+ * does a loader that runs without a router instance, e.g. outside the Start
+ * server runtime.
+ *
+ * Synchronous on purpose: the loader must call `load` in the same tick so the
+ * router's abort signal is forwarded to the page load from the start.
  */
-export const routerHistoryToSearchParams = async ({
+export const routerHistoryToSearchParams = ({
   searchStr,
 }: {
   /** The loader's `location.searchStr`. */
   searchStr: string
-}): Promise<ViewSearchParams> => {
-  const router = await getRouterInstance()
+}): ViewSearchParams => {
+  const router = getRouterSync()
+
+  if (!router) {
+    return searchStringToRecord({ searchStr })
+  }
+
   const historySearchStr = router.history.location.search
 
   const isHistoryAtLocation =
     router.options.stringifySearch(router.options.parseSearch(historySearchStr)) === searchStr
 
   return searchStringToRecord({ searchStr: isHistoryAtLocation ? historySearchStr : searchStr })
+}
+
+/**
+ * `getRouterInstance` reads `window.__TSR_ROUTER__` on the client and the Start
+ * request context on the server, both synchronously, but is typed `Awaitable`
+ * and throws when there is no Start context.
+ */
+const getRouterSync = () => {
+  try {
+    const router = getRouterInstance()
+
+    return router instanceof Promise ? undefined : router
+  } catch {
+    return undefined
+  }
 }
 
 const searchStringToRecord = ({ searchStr }: { searchStr: string }): ViewSearchParams => {
