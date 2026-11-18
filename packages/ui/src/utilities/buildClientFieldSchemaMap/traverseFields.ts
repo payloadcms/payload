@@ -10,7 +10,10 @@ import type {
 } from 'payload'
 
 import { createClientBlocks, createClientFields } from 'payload'
+
 import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
+
+import { LazySchemaMap } from './LazySchemaMap.js'
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
@@ -128,6 +131,11 @@ export const traverseFields = ({
       }
 
       case 'richText': {
+        if (clientSchemaMap instanceof LazySchemaMap) {
+          clientSchemaMap.defer(schemaPath)
+          break
+        }
+
         // richText sub-fields are not part of the ClientConfig or the Config.
         // They only exist in the field schema map.
         // Thus, we need to
