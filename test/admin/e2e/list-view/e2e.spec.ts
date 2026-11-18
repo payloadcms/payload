@@ -1866,9 +1866,7 @@ describe('List View', () => {
         targetState: 'asc',
       })
 
-      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
-        '<No Some Text Field>',
-      )
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText('—No value')
 
       await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
@@ -1883,9 +1881,7 @@ describe('List View', () => {
         'nested group text field',
       )
 
-      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
-        '<No Some Text Field>',
-      )
+      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText('—No value')
     })
 
     test('should allow sorting by nested field within tab in separate column', async () => {
@@ -1902,7 +1898,7 @@ describe('List View', () => {
       })
 
       await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
-        '<No Nested Text Field In Named Tab>',
+        '—No value',
       )
 
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
@@ -1919,7 +1915,7 @@ describe('List View', () => {
       )
 
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
-        '<No Nested Text Field In Named Tab>',
+        '—No value',
       )
     })
 

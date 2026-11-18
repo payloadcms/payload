@@ -2696,10 +2696,10 @@ describe('Uploads', () => {
     const firstRow = page.locator('.row-1')
 
     const imageUploadCell = firstRow.locator('.cell-imageUpload .relationship-cell')
-    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+    await expect(imageUploadCell).toHaveText('—No value')
 
     const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
-    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+    await expect(imageRelationshipCell).toHaveText('—No value')
 
     // Navigate to page 2 using the right arrow
     const nextPageButton = page.locator('.clickable-arrow--right')
@@ -2715,8 +2715,8 @@ describe('Uploads', () => {
     await expect(prevPageButton).toBeVisible()
     await prevPageButton.click()
 
-    await expect(imageUploadCell).toHaveText('<No Image Upload>')
-    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+    await expect(imageUploadCell).toHaveText('—No value')
+    await expect(imageRelationshipCell).toHaveText('—No value')
   })
 
   test('should respect Sharp constructorOptions', async () => {
