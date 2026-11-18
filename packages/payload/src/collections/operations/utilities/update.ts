@@ -177,6 +177,7 @@ export const updateDocument = async <
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
   const isUnpublishingSingleLocale =
     hasLocalizeStatusEnabled(collectionConfig) &&
+    !isSavingDraft &&
     data?._status === 'draft' &&
     Boolean(locale && locale !== 'all')
   const shouldLimitValidationToSubmittedFields =
@@ -307,7 +308,7 @@ export const updateDocument = async <
     data: { ...data, id },
     doc: publicationHookDoc,
     docWithLocales,
-    fieldsToValidate: submittedTopLevelFieldNames,
+    fieldsToValidate: data._status === 'published' ? undefined : submittedTopLevelFieldNames,
     global: null,
     operation: 'update',
     overrideAccess,

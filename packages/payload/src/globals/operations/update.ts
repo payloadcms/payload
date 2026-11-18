@@ -187,6 +187,7 @@ export const updateOperation = async <
 
     const isUnpublishingSingleLocale =
       hasLocalizeStatusEnabled(globalConfig) &&
+      !isSavingDraft &&
       data?._status === 'draft' &&
       Boolean(locale && locale !== 'all')
 
@@ -358,7 +359,7 @@ export const updateOperation = async <
       data,
       doc: publicationHookDoc,
       docWithLocales: globalJSON,
-      fieldsToValidate: submittedTopLevelFieldNames,
+      fieldsToValidate: data._status === 'published' ? undefined : submittedTopLevelFieldNames,
       global: globalConfig,
       operation: 'update',
       req,
