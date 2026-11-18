@@ -476,6 +476,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       setIsUploading(true)
 
+      let stoppedAtIndex = currentForms.length
+
       for (let i = 0; i < currentForms.length; i++) {
         try {
           const form = currentForms[i]
@@ -504,6 +506,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             credentials: 'include',
             method: 'POST',
           })
+
+          if (req.status === 401 || req.status === 403) {
+            stoppedAtIndex = i
+            currentForms[i] = { ...currentForms[i], errorCount: 1 }
+          }
 
           const json = await req.json()
 
@@ -581,6 +588,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         } catch (_) {
           // swallow
         }
+
+        if (i === stoppedAtIndex) {
+          break
+        }
       }
 
       setHasSubmitted(true)
@@ -590,7 +601,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       const remainingForms = []
 
       currentForms.forEach(({ errorCount }, i) => {
-        if (errorCount) {
+        if (errorCount || i > stoppedAtIndex) {
           remainingForms.push(currentForms[i])
         }
       })
