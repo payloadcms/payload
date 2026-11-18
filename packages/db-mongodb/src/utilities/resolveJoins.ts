@@ -208,13 +208,17 @@ export async function resolveJoins({
         ? Array.isArray(joinDef.targetField.relationTo)
         : false
 
-      if (isPolymorphic) {
-        // For polymorphic relationships, we need to match both relationTo and value
-        whereQuery[`${dbFieldName}.relationTo`] = collectionSlug
-        whereQuery[`${dbFieldName}.value`] = { $in: parentIDs }
+      const parentRestriction = isPolymorphic
+        ? {
+            [`${dbFieldName}.relationTo`]: collectionSlug,
+            [`${dbFieldName}.value`]: { $in: parentIDs },
+          }
+        : { [dbFieldName]: { $in: parentIDs } }
+
+      if (Object.keys(parentRestriction).some((path) => Object.hasOwn(whereQuery, path))) {
+        whereQuery = { $and: [whereQuery, parentRestriction] }
       } else {
-        // For regular relationships and polymorphic collection joins
-        whereQuery[dbFieldName] = { $in: parentIDs }
+        whereQuery = { ...whereQuery, ...parentRestriction }
       }
 
       // Build the sort parameters for the query

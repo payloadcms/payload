@@ -48,7 +48,7 @@ export function resolveWhereForCollection({
     }
 
     // Preserve the fallback reader's treatment of unavailable fields as nonmatching.
-    if (!fieldNames.has(key)) {
+    if (key !== 'id' && !fieldNames.has(key)) {
       return { matches: 'no-documents' }
     }
 

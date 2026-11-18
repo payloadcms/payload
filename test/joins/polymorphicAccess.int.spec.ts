@@ -253,6 +253,66 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           }
         })
 
+        test('should intersect read access on the join field with the parent restriction', async ({
+          payload,
+        }) => {
+          const {
+            docs: [user],
+          } = await payload.find({ collection: 'users', overrideAccess: true })
+          const allowedParent = await payload.create({
+            collection: accessJoinParentsSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const otherParent = await payload.create({
+            collection: accessJoinParentsSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const allowedArticle = await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: allowedParent.id, title: 'Allowed article' },
+            overrideAccess: true,
+          })
+
+          await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: otherParent.id, title: 'Other article' },
+            overrideAccess: true,
+          })
+
+          const articleAccess = payload.collections[accessJoinArticlesSlug].config.access
+          const noteAccess = payload.collections[accessJoinNotesSlug].config.access
+          const originalArticleRead = articleAccess.read
+          const originalNoteRead = noteAccess.read
+          articleAccess.read = () => ({ parent: { equals: allowedParent.id } })
+          noteAccess.read = () => false
+
+          const readParent = ({ id }: { id: typeof allowedParent.id }) =>
+            payload.findByID({
+              collection: accessJoinParentsSlug,
+              id,
+              depth: 0,
+              overrideAccess: false,
+              user,
+              joins: { children: { count: true } },
+            })
+
+          try {
+            expect((await readParent({ id: allowedParent.id })).children).toMatchObject({
+              docs: [{ relationTo: accessJoinArticlesSlug, value: allowedArticle.id }],
+              totalDocs: 1,
+            })
+            expect((await readParent({ id: otherParent.id })).children).toMatchObject({
+              docs: [],
+              totalDocs: 0,
+            })
+          } finally {
+            articleAccess.read = originalArticleRead
+            noteAccess.read = originalNoteRead
+          }
+        })
+
         test('should scope each target access constraint before counting and pagination', async ({
           payload,
         }) => {
@@ -291,7 +351,7 @@ test.suite('Polymorphic join collection access', { config: './config.ts' }, () =
           const noteAccess = payload.collections[accessJoinNotesSlug].config.access
           const originalArticleRead = articleAccess.read
           const originalNoteRead = noteAccess.read
-          articleAccess.read = () => ({ title: { equals: accessJoinArticlesSlug } })
+          articleAccess.read = () => ({ id: { in: [expected[0].value] } })
           noteAccess.read = () => ({ title: { equals: accessJoinNotesSlug } })
 
           try {
