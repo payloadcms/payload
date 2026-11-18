@@ -360,6 +360,8 @@ In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply t
 
 Register sizes from the transformer's `init` with `registerUploadVariants`. Each collection must have uploads enabled, and each size needs a unique name that does not conflict with a built-in upload field or contain path separators. Only one transformer can register sizes on a collection. Pass its configured `slug` as `transformerSlug`; Payload uses this to identify the owner when planning request-time sizes.
 
+The transformer that registers a collection's sizes owns that collection's files. Payload saves its slug as the collection's `upload.variantsTransformerSlug`. An upload-time transformer that does not own the collection can read this value and skip the upload. The main file and the sizes then come from the same transformer, so they match. `sharpTransformer` does this.
+
 ```ts
 import type { UploadTransformer } from 'payload'
 
@@ -545,7 +547,7 @@ At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` 
 
 You can register more than one `sharpTransformer` (each with its own `slug`), for example to give different collections different dynamic-resize defaults. Each upload is processed by the instance whose `collections` lists that collection. A collection listed in the `collections` of more than one instance throws at startup.
 
-Sharp skips uploads to a collection whose variants another transformer registered, such as a CDN transformer that builds the crop and each size when the file is requested. That transformer then owns the collection's files, and only the original is stored. To process those uploads with Sharp anyway, list the collection in `sharpTransformer({ collections })`.
+Sharp skips uploads to a collection whose sizes another transformer registered, because that transformer owns the collection's files. See [Sizes with no stored file](#sizes-with-no-stored-file). Do not list that collection in `sharpTransformer({ collections })`: Sharp then processes its uploads, and the main file can differ from the other transformer's sizes.
 
 See [Variants](./overview#variants) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 
