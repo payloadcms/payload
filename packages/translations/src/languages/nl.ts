@@ -519,10 +519,15 @@ export const nlTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
+    aspectRatio: 'Beeldverhouding',
+    aspectRatioCustom: 'Aangepast',
+    aspectRatioFreeform: 'Vrij',
+    aspectRatioOriginal: 'Originele afbeelding',
     bulkUpload: 'Bulk Upload',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
+    customAspectRatio: 'Aangepaste verhouding',
     download: 'Downloaden',
     dragAndDrop: 'Sleep een bestand',
     dragAndDropHere: 'of sleep een bestand naar hier',
@@ -535,6 +540,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Sleep het focuspunt rechtstreeks op de voorvertoning of pas de waarden hieronder aan.',
     height: 'Hoogte',
+    invalidAspectRatio: 'Voer een verhouding in als breedte:hoogte, bijvoorbeeld 16:9.',
     lessInfo: 'Minder info',
     moreInfo: 'Meer info',
     noFile: 'Geen bestand',

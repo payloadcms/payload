@@ -516,10 +516,15 @@ export const roTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
+    aspectRatio: 'Raport de aspect',
+    aspectRatioCustom: 'Personalizat',
+    aspectRatioFreeform: 'Liber',
+    aspectRatioOriginal: 'Imagine originală',
     bulkUpload: 'Încărcare în masă',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',
+    customAspectRatio: 'Raport personalizat',
     download: 'Descărcare',
     dragAndDrop: 'Trageți și plasați un fișier',
     dragAndDropHere: 'sau trageți și plasați un fișier aici',
@@ -532,6 +537,7 @@ export const roTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Trageți punctul focal direct pe previzualizare sau ajustați valorile de mai jos.',
     height: 'Înălțime',
+    invalidAspectRatio: 'Introduceți un raport sub forma lățime:înălțime, de exemplu 16:9.',
     lessInfo: 'Mai puține informații',
     moreInfo: 'Mai multe informații',
     noFile: 'Niciun fișier',

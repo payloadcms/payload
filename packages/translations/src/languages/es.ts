@@ -516,10 +516,15 @@ export const esTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Añadir archivo',
     addFiles: 'Añadir archivos',
+    aspectRatio: 'Relación de aspecto',
+    aspectRatioCustom: 'Personalizada',
+    aspectRatioFreeform: 'Libre',
+    aspectRatioOriginal: 'Imagen original',
     bulkUpload: 'Subida en lotes',
     crop: 'Recortar',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',
+    customAspectRatio: 'Relación personalizada',
     download: 'Descargar',
     dragAndDrop: 'Arrastra y suelta un archivo',
     dragAndDropHere: 'o arrastra un archivo aquí',
@@ -532,6 +537,7 @@ export const esTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Arrastra el punto focal directamente en la vista previa o ajusta los valores a continuación.',
     height: 'Alto',
+    invalidAspectRatio: 'Introduce una relación como ancho:alto, por ejemplo 16:9.',
     lessInfo: 'Menos info',
     moreInfo: 'Más info',
     noFile: 'Ningún archivo',

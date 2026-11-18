@@ -510,10 +510,15 @@ export const daTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Tilføj fil',
     addFiles: 'Tilføj Filer',
+    aspectRatio: 'Størrelsesforhold',
+    aspectRatioCustom: 'Brugerdefineret',
+    aspectRatioFreeform: 'Fri',
+    aspectRatioOriginal: 'Originalt billede',
     bulkUpload: 'Masseupload',
     crop: 'Beskær',
     cropToolDescription:
       'Træk i hjørnerne af det valgte område, tegn et nyt område eller juster værdierne nedenfor.',
+    customAspectRatio: 'Brugerdefineret forhold',
     download: 'Download',
     dragAndDrop: 'Træk og slip en fil',
     dragAndDropHere: 'Eller træk og slip en fil her',
@@ -526,6 +531,7 @@ export const daTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Træk fokuspunktet direkte på forhåndsvisningen eller juster værdierne nedenfor.',
     height: 'Højde',
+    invalidAspectRatio: 'Angiv et forhold som bredde:højde, f.eks. 16:9.',
     lessInfo: 'Mindre info',
     moreInfo: 'Mere info',
     noFile: 'Ingen fil',
