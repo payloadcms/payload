@@ -21,9 +21,44 @@ const NULL_BODY_STATUSES = new Set([101, 204, 205, 304])
  * Sends an upload with `XMLHttpRequest`, because `fetch` cannot report upload progress, and
  * resolves to a standard `Response` so callers handle it like any other request. Non-2xx responses
  * resolve; only network errors and aborts reject.
+ *
+ * Where `XMLHttpRequest` does not exist, e.g. in Node, it sends with `fetch` and reports progress
+ * only once the upload succeeds.
  * @experimental
  */
-export const uploadRequest = ({
+export const uploadRequest = (args: UploadRequestArgs): Promise<Response> =>
+  typeof XMLHttpRequest === 'undefined' ? uploadWithFetch(args) : uploadWithXHR(args)
+
+const uploadWithFetch = async ({
+  body,
+  headers,
+  method,
+  onProgress,
+  signal,
+  url,
+  withCredentials = false,
+}: UploadRequestArgs): Promise<Response> => {
+  const response = await fetch(url, {
+    body,
+    credentials: withCredentials ? 'include' : 'same-origin',
+    headers,
+    method,
+    signal,
+  })
+
+  if (response.ok && onProgress) {
+    const progress = createProgressReporter({
+      bodySize: body instanceof Blob ? body.size : undefined,
+      onProgress,
+    })
+
+    progress.complete()
+  }
+
+  return response
+}
+
+const uploadWithXHR = ({
   body,
   headers,
   method,

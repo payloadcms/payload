@@ -251,4 +251,27 @@ describe('uploadRequest', () => {
     await expect(request).resolves.toMatchObject({ status: 200 })
     expect(() => vi.runOnlyPendingTimers()).toThrow('observer failed')
   })
+
+  it('should send with fetch where XMLHttpRequest does not exist', async () => {
+    const events: UploadTransferProgress[] = []
+    const fetchMock = vi.fn(() => Promise.resolve(new Response('{}', { status: 201 })))
+
+    vi.stubGlobal('XMLHttpRequest', undefined)
+    vi.stubGlobal('fetch', fetchMock)
+
+    const body = new Blob(['0123456789'])
+    const response = await uploadRequest({
+      body,
+      method: 'PUT',
+      onProgress: (progress) => events.push(progress),
+      url: 'https://bucket.example.com/upload',
+    })
+
+    expect(response.status).toBe(201)
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://bucket.example.com/upload',
+      expect.objectContaining({ body, credentials: 'same-origin', method: 'PUT' }),
+    )
+    expect(events).toEqual([{ loadedBytes: 10, totalBytes: 10 }])
+  })
 })
