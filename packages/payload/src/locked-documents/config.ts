@@ -210,6 +210,7 @@ const getAccessibleLocks = async (
 const locksToWhere = (
   locks: (JsonObject & TypeWithID)[] | null,
   payload?: Payload,
+  hasDocumentField = true,
 ): boolean | Where => {
   if (!locks) {
     return false
@@ -222,9 +223,13 @@ const locksToWhere = (
         and: [
           { id: { equals: lock.id } },
           { globalSlug: { equals: lock.globalSlug } },
-          { document: { exists: false } },
+          ...(hasDocumentField ? [{ document: { exists: false } }] : []),
         ],
       })
+      continue
+    }
+
+    if (!hasDocumentField) {
       continue
     }
 
@@ -254,7 +259,9 @@ const getAccessibleLocksWhere = async (
   req: PayloadRequest,
   operation: Operation,
   id?: number | string,
-): Promise<boolean | Where> => locksToWhere(await getAccessibleLocks(req, operation, id), req.payload)
+  hasDocumentField = true,
+): Promise<boolean | Where> =>
+  locksToWhere(await getAccessibleLocks(req, operation, id), req.payload, hasDocumentField)
 
 /**
  * Locking a document or global needs the same access as editing it.
@@ -340,7 +347,10 @@ const canCreateLock: Access = async ({ data, req }) => {
  * Updating a lock must authorize both the existing target and any modified destination
  * `document` or `globalSlug`, while keeping each row bound to a single valid target.
  */
-const canUpdateLock: Access = async ({ id, data, req }) => {
+const canUpdateLock = async (
+  { id, data, req }: Parameters<Access>[0],
+  hasDocumentField = true,
+): Promise<boolean | Where> => {
   if (!req.user) {
     return false
   }
@@ -356,7 +366,11 @@ const canUpdateLock: Access = async ({ id, data, req }) => {
   const modifiesGlobal = hasData && typedData?.globalSlug !== undefined
 
   if (!modifiesDocument && !modifiesGlobal) {
-    return getAccessibleLocksWhere(req, 'update', id)
+    return getAccessibleLocksWhere(req, 'update', id, hasDocumentField)
+  }
+
+  if (modifiesDocument && !hasDocumentField && typedData?.document !== null) {
+    return false
   }
 
   if (modifiesDocument && modifiesGlobal) {
@@ -364,7 +378,7 @@ const canUpdateLock: Access = async ({ id, data, req }) => {
     if (!allowed) {
       return false
     }
-    return getAccessibleLocksWhere(req, 'update', id)
+    return getAccessibleLocksWhere(req, 'update', id, hasDocumentField)
   }
 
   if (modifiesDocument && typedData?.document !== null) {
@@ -408,13 +422,14 @@ const canUpdateLock: Access = async ({ id, data, req }) => {
     return false
   }
 
-  return locksToWhere(compatibleLocks, req.payload)
+  return locksToWhere(compatibleLocks, req.payload, hasDocumentField)
 }
 
 export const getLockedDocumentsCollection = (config: Config): CollectionConfig | null => {
   const lockableCollections = config
     .collections!.filter((collectionConfig) => collectionConfig.lockDocuments !== false)
     .map((collectionConfig) => collectionConfig.slug)
+  const hasDocumentField = lockableCollections.length > 0
 
   const lockableGlobals = config.globals
     ? config.globals.filter((globalConfig) => globalConfig.lockDocuments !== false)
@@ -467,10 +482,16 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
   return {
     slug: lockedDocumentsCollectionSlug,
     access: {
-      create: canCreateLock,
-      delete: ({ id, req }) => getAccessibleLocksWhere(req, 'update', id),
-      read: ({ id, req }) => getAccessibleLocksWhere(req, 'read', id),
-      update: canUpdateLock,
+      create: (args) => {
+        const doc = (args.data as { document?: unknown } | undefined)?.document
+        if (!hasDocumentField && doc !== undefined && doc !== null) {
+          return false
+        }
+        return canCreateLock(args)
+      },
+      delete: ({ id, req }) => getAccessibleLocksWhere(req, 'update', id, hasDocumentField),
+      read: ({ id, req }) => getAccessibleLocksWhere(req, 'read', id, hasDocumentField),
+      update: (args) => canUpdateLock(args, hasDocumentField),
     },
     admin: {
       hidden: true,

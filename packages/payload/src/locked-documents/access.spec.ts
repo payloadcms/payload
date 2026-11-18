@@ -383,6 +383,33 @@ describe('payload-locked-documents access', () => {
     expect(await visible(where, mutableLocks)).toEqual([])
   })
 
+  it('omits document predicates from global-lock Where clauses when no collection is lockable', async () => {
+    const globalsOnlyConfig = {
+      collections: [
+        { slug: 'users', auth: true, fields: [], lockDocuments: false },
+        { slug: 'pages', fields: [], lockDocuments: false },
+      ],
+      globals: [{ slug: 'settings', fields: [] }],
+    } as unknown as Config
+    const collection = getLockedDocumentsCollection(globalsOnlyConfig)!
+    expect(collection.fields.some((f) => 'name' in f && f.name === 'document')).toBe(false)
+
+    const globalLocks = [{ id: 12, globalSlug: 'settings', user: { relationTo: 'users', value: 2 } }]
+    const payload: any = {
+      collections: {},
+      config: {
+        globals: [{ slug: 'settings', access: { read: () => true, update: () => true } }],
+      },
+      db: {
+        find: async () => ({ docs: globalLocks }),
+      },
+    }
+    const req = { payload, user } as unknown as PayloadRequest
+    const where = await collection.access!.read!({ req } as any)
+    expect(JSON.stringify(where)).not.toContain('"document"')
+    expect(await visible(where, globalLocks as any)).toEqual([12])
+  })
+
   it('create: globals follow the global update access', async () => {
     const { access, reqFor } = build()
     const create = (data: object) => access.create!({ data, req: reqFor(user) } as any)
