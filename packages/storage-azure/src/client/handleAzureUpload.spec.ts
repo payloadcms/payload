@@ -53,12 +53,75 @@ describe('handleAzureUpload', () => {
       expect(blockBlobClientMock).not.toHaveBeenCalled()
     })
 
-    it('should pass progress reporting to the request', async () => {
+    it('should report the request progress to the caller', async () => {
       const onProgress = vi.fn()
+
+      uploadRequestMock.mockImplementationOnce(({ onProgress: report }) => {
+        report({ loadedBytes: 1, totalBytes: 3 })
+        return Promise.resolve(new Response(null, { status: 201 }))
+      })
 
       await handleAzureUpload({ data: { url: signedURL }, file: createFile(), onProgress })
 
-      expect(uploadRequestMock).toHaveBeenCalledWith(expect.objectContaining({ onProgress }))
+      expect(onProgress).toHaveBeenCalledWith({ loadedBytes: 1, totalBytes: 3 })
+    })
+
+    it('should retry a temporary failure and keep progress from going backwards', async () => {
+      vi.useFakeTimers()
+
+      const onProgress = vi.fn()
+
+      uploadRequestMock
+        .mockImplementationOnce(({ onProgress: report }) => {
+          report({ loadedBytes: 2, totalBytes: 3 })
+          return Promise.resolve(new Response(null, { status: 503 }))
+        })
+        .mockImplementationOnce(({ onProgress: report }) => {
+          report({ loadedBytes: 1, totalBytes: 3 })
+          report({ loadedBytes: 3, totalBytes: 3 })
+          return Promise.resolve(new Response(null, { status: 201 }))
+        })
+
+      const upload = handleAzureUpload({ data: { url: signedURL }, file: createFile(), onProgress })
+
+      await vi.runAllTimersAsync()
+      await upload
+      vi.useRealTimers()
+
+      expect(uploadRequestMock).toHaveBeenCalledTimes(2)
+      expect(onProgress.mock.calls.map(([progress]) => progress.loadedBytes)).toEqual([2, 2, 3])
+    })
+
+    it('should retry a network failure', async () => {
+      vi.useFakeTimers()
+
+      uploadRequestMock
+        .mockRejectedValueOnce(new Error('The upload failed because of a network error.'))
+        .mockResolvedValueOnce(new Response(null, { status: 201 }))
+
+      const upload = handleAzureUpload({ data: { url: signedURL }, file: createFile() })
+
+      await vi.runAllTimersAsync()
+      await upload
+      vi.useRealTimers()
+
+      expect(uploadRequestMock).toHaveBeenCalledTimes(2)
+    })
+
+    it('should give up after repeated temporary failures', async () => {
+      vi.useFakeTimers()
+
+      uploadRequestMock.mockResolvedValue(new Response(null, { status: 503 }))
+
+      const upload = handleAzureUpload({ data: { url: signedURL }, file: createFile() }).catch(
+        (err: unknown) => err,
+      )
+
+      await vi.runAllTimersAsync()
+      vi.useRealTimers()
+
+      expect(await upload).toMatchObject({ message: expect.stringContaining('status 503') })
+      expect(uploadRequestMock).toHaveBeenCalledTimes(4)
     })
 
     it('should fail when Azure rejects the upload', async () => {
@@ -67,6 +130,7 @@ describe('handleAzureUpload', () => {
       await expect(
         handleAzureUpload({ data: { url: signedURL }, file: createFile() }),
       ).rejects.toThrow('status 403')
+      expect(uploadRequestMock).toHaveBeenCalledTimes(1)
     })
   })
 
