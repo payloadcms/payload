@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { getAfterChangeHook } from './afterChange.js'
+import { getPreserveFileDataHook } from './preserveFileData.js'
 
 describe('upload replacement cleanup', () => {
   it.each([
@@ -56,4 +57,75 @@ describe('upload replacement cleanup', () => {
       }
     },
   )
+})
+
+describe('reused request context', () => {
+  const uploadDoc = { id: 1, filename: 'file.png', mimeType: 'image/png' }
+
+  // `createLocalReq` returns the caller's `context` object as-is while it is
+  // empty and replaces `req.context` with a spread copy once it is not.
+  const buildReq = (context: Record<string, unknown>) => {
+    const req: Record<string, unknown> = {
+      context,
+      payload: {
+        logger: { error: vi.fn() },
+        update: vi.fn(),
+      },
+    }
+
+    ;(req.payload as { update: ReturnType<typeof vi.fn> }).update.mockImplementation(async () => {
+      req.context = { ...(req.context as Record<string, unknown>) }
+      return uploadDoc
+    })
+
+    return req
+  }
+
+  it('should not leave its private keys on a context object owned by the caller', async () => {
+    const callerContext: Record<string, unknown> = { disableRevalidate: true }
+    const req = buildReq(callerContext)
+    req.file = { data: Buffer.from('first'), size: 5 }
+
+    const hook = getAfterChangeHook({
+      adapter: {
+        handleDelete: vi.fn(),
+        handleUpload: vi.fn(async () => ({ filesize: 5 })),
+      } as never,
+      collection: { slug: 'media' } as never,
+    })
+
+    getPreserveFileDataHook()({ req } as never)
+    await hook({ data: uploadDoc, doc: uploadDoc, operation: 'create', req } as never)
+
+    expect((req.payload as { update: ReturnType<typeof vi.fn> }).update).toHaveBeenCalled()
+    expect(callerContext.skipCloudStorage).toBeUndefined()
+    expect(callerContext._payloadCloudStorage).toBeUndefined()
+    // untouched
+    expect(callerContext.disableRevalidate).toBe(true)
+  })
+
+  it('should upload every file when one context object is reused across local API calls', async () => {
+    const callerContext: Record<string, unknown> = { disableRevalidate: true }
+    const handleUpload = vi.fn(async () => ({ filesize: 5 }))
+    const hook = getAfterChangeHook({
+      adapter: { handleDelete: vi.fn(), handleUpload } as never,
+      collection: { slug: 'media' } as never,
+    })
+    const preserveFileData = getPreserveFileDataHook()
+
+    for (const contents of ['first', 'second']) {
+      const req = buildReq(callerContext)
+      req.file = { data: Buffer.from(contents), size: contents.length }
+
+      preserveFileData({ req } as never)
+      await hook({ data: uploadDoc, doc: uploadDoc, operation: 'create', req } as never)
+    }
+
+    expect(handleUpload).toHaveBeenCalledTimes(2)
+    expect(
+      handleUpload.mock.calls.map(([args]) =>
+        (args as { file: { buffer: Buffer } }).file.buffer.toString(),
+      ),
+    ).toEqual(['first', 'second'])
+  })
 })
