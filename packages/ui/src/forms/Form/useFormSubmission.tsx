@@ -84,7 +84,7 @@ export const useFormSubmission = ({
   refreshFormState,
   resetSequenceRef,
   setIsValid,
-  setModified,
+  setModified: setIsModified,
   submissionErrorsRef,
   validateForm,
 }: Args) => {
@@ -125,7 +125,7 @@ export const useFormSubmission = ({
    * Determines whether the form is processing asynchronously in the background, e.g. autosave is running.
    * Useful to determine whether to disable the form or queue other processes while in flight, e.g. disable manual submits while an autosave is running.
    */
-  const [isBackgroundProcessing, _setIsBackgroundProcessing] = useState(false)
+  const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false)
 
   const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
   /**
@@ -203,9 +203,6 @@ export const useFormSubmission = ({
     },
     [contextRef],
   )
-
-  const setIsModified = setModified
-  const setIsBackgroundProcessing = _setIsBackgroundProcessing
 
   useEffect(() => {
     if (isProcessing) {
@@ -645,10 +642,6 @@ export const useFormSubmission = ({
           const successSequence = getFormSequence()
           const successResetSequence = resetSequenceRef.current
 
-          if (requestContext.isQueueReset()) {
-            return
-          }
-
           if (typeof onSuccess === 'function') {
             try {
               await onSuccess(json, {
@@ -656,7 +649,6 @@ export const useFormSubmission = ({
                 formState: serializableFormState,
                 isCurrent: requestContext.isCurrent,
                 isQueueReset: requestContext.isQueueReset,
-                submissionType,
               })
             } catch (err) {
               if (requestContext.isCurrent()) {
@@ -684,7 +676,6 @@ export const useFormSubmission = ({
           }
 
           preservePromiseToast = true
-          submissionErrorsRef.current = undefined
 
           setIsModified(false)
           setIsSubmitted(false)

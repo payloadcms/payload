@@ -39,8 +39,6 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * Field value changes alone leave this `false`.
      */
     isQueueReset?: () => boolean
-    /** Identifies background autosaves; omitted values represent explicit submissions. */
-    submissionType?: SubmitOptions['submissionType']
   },
 ) => Promise<void> | void
 

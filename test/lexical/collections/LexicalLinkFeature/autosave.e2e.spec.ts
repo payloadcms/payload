@@ -1,3 +1,5 @@
+import type { Page } from '@playwright/test'
+
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
@@ -20,6 +22,11 @@ const { serverURL } = await initPayloadE2ENoConfig({ dirname })
 // This spec owns and cleans up its persisted documents without resetting shared suite data.
 test.describe('Lexical Link Feature Autosave', () => {
   const createdAutosaveDocIDs: Array<number | string> = []
+  const collectionURL = formatAdminURL({
+    apiRoute: '/api',
+    path: `/${lexicalLinkFeatureAutosaveSlug}`,
+    serverURL,
+  })
 
   test.afterEach(async ({ page }) => {
     for (const id of createdAutosaveDocIDs) {
@@ -58,24 +65,12 @@ test.describe('Lexical Link Feature Autosave', () => {
   }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
 
-    const collectionURL = formatAdminURL({
-      apiRoute: '/api',
-      path: `/${lexicalLinkFeatureAutosaveSlug}`,
-      serverURL,
-    })
-    const response = await page.request.post(collectionURL, { data: { _status: 'published' } })
+    const { id, editURL } = await createAutosaveDoc({ page })
 
-    await expect(response).toBeOK()
-
-    const {
-      doc: { id },
-    } = await response.json()
     let releaseAutosave: () => void = () => {}
     const autosaveReady = new Promise<void>((resolve) => {
       releaseAutosave = resolve
     })
-
-    createdAutosaveDocIDs.push(id)
 
     await page.route(`${collectionURL}/${id}?**`, async (route) => {
       if (new URL(route.request().url()).searchParams.get('autosave') === 'true') {
@@ -86,7 +81,7 @@ test.describe('Lexical Link Feature Autosave', () => {
     })
 
     try {
-      await page.goto(new AdminUrlUtil(serverURL, lexicalLinkFeatureAutosaveSlug).edit(id))
+      await page.goto(editURL)
       await waitForFormReady(page)
 
       const { uploadListDrawer } = await openUploadListDrawer({
@@ -122,23 +117,7 @@ test.describe('Lexical Link Feature Autosave', () => {
   }) => {
     test.setTimeout(TEST_TIMEOUT_LONG)
 
-    const collectionURL = formatAdminURL({
-      apiRoute: '/api',
-      path: `/${lexicalLinkFeatureAutosaveSlug}`,
-      serverURL,
-    })
-    const createResponse = await page.request.post(collectionURL, {
-      data: { _status: 'published' },
-    })
-
-    await expect(createResponse).toBeOK()
-
-    const {
-      doc: { id },
-    } = await createResponse.json()
-    const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureAutosaveSlug)
-
-    createdAutosaveDocIDs.push(id)
+    const { id, editURL } = await createAutosaveDoc({ page })
 
     let releaseAutosave: () => void = () => {}
     const autosaveReady = new Promise<void>((resolve) => {
@@ -155,7 +134,7 @@ test.describe('Lexical Link Feature Autosave', () => {
     })
 
     try {
-      await page.goto(url.edit(id))
+      await page.goto(editURL)
       await waitForFormReady(page)
 
       const finalizedURL = 'https://example.com/autosave-finalized'
@@ -191,4 +170,18 @@ test.describe('Lexical Link Feature Autosave', () => {
       await page.unrouteAll({ behavior: 'wait' })
     }
   })
+
+  async function createAutosaveDoc({ page }: { page: Page }) {
+    const response = await page.request.post(collectionURL, { data: { _status: 'published' } })
+
+    await expect(response).toBeOK()
+
+    const {
+      doc: { id },
+    } = await response.json()
+
+    createdAutosaveDocIDs.push(id)
+
+    return { id, editURL: new AdminUrlUtil(serverURL, lexicalLinkFeatureAutosaveSlug).edit(id) }
+  }
 })
