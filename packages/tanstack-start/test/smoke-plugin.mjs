@@ -14,7 +14,7 @@ import {
   payloadRscOptions,
   payloadTanstackStartOptions,
   withPayload,
-} from '../dist/exports/vite.js'
+} from '../dist/withPayload/index.js'
 
 const factory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
@@ -78,6 +78,21 @@ if (!config.optimizeDeps.exclude.includes('@payloadcms/ui')) {
   errors.push("optimizeDeps.exclude missing '@payloadcms/ui'")
 }
 
+// `devServerExternalPackages` joins `ssr.external` on dev serve only — the prod
+// build must keep bundling them, since Rollup handles CJS correctly and a bare
+// specifier in the output wouldn't resolve.
+const cjsFactory = withPayload(undefined, {
+  devServerExternalPackages: ['xml2js'],
+  payloadConfigPath: '/tmp/fake-payload.config.ts',
+})
+
+if (!cjsFactory({ command: 'serve', mode: 'development' }).ssr.external.includes('xml2js')) {
+  errors.push('devServerExternalPackages missing from ssr.external on serve')
+}
+if (cjsFactory({ command: 'build', mode: 'production' }).ssr.external.includes('xml2js')) {
+  errors.push('devServerExternalPackages must not apply to ssr.external on build')
+}
+
 // The `vite` override must be merged on top of the defaults: arrays appended,
 // objects deep-merged, and the Payload base preserved.
 const mergedFactory = withPayload(undefined, {
@@ -109,20 +124,6 @@ if (rscOptions.serverHandler !== false) {
 const tsOptions = payloadTanstackStartOptions()
 if (tsOptions.rsc?.enabled !== true) {
   errors.push('payloadTanstackStartOptions missing rsc.enabled')
-}
-// Admin routes are eager (splitBehavior returns []); host routes keep splitting
-// (undefined → TanStack default).
-const splitBehavior = tsOptions.router?.codeSplittingOptions?.splitBehavior
-if (typeof splitBehavior !== 'function') {
-  errors.push('payloadTanstackStartOptions missing router.codeSplittingOptions.splitBehavior')
-} else {
-  const adminGroupings = splitBehavior({ routeId: '/_payload/admin/$' })
-  if (!Array.isArray(adminGroupings) || adminGroupings.length !== 0) {
-    errors.push('splitBehavior must return [] for admin routes (eager, no split)')
-  }
-  if (splitBehavior({ routeId: '/' }) !== undefined) {
-    errors.push('splitBehavior must return undefined for host routes (keep default splitting)')
-  }
 }
 // The `.client.*` SSR denial stays on (host files keep it); Payload's own
 // `.client.*` are exempted by excluding `node_modules` rather than disabling it.

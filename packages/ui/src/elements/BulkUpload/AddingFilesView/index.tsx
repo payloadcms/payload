@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 import React from 'react'
 
 import { PlusIcon } from '../../../icons/Plus/index.js'
@@ -57,8 +57,11 @@ export function AddingFilesView({ modalSlug }: Props) {
 
   const handleAddFiles = React.useCallback(
     (filelist: FileList) => {
-      void addFiles(filelist)
-      closeModal(addMoreFilesModalSlug)
+      void addFiles(filelist).then((didAddFiles) => {
+        if (didAddFiles) {
+          closeModal(addMoreFilesModalSlug)
+        }
+      })
     },
     [addFiles, closeModal],
   )
@@ -83,7 +86,7 @@ export function AddingFilesView({ modalSlug }: Props) {
             </div>
           }
         >
-          {canAddMoreFiles ? (
+          {canAddMoreFiles && !isInitializing ? (
             <Button
               buttonStyle="secondary"
               icon={<PlusIcon size={24} />}
@@ -101,7 +104,7 @@ export function AddingFilesView({ modalSlug }: Props) {
           <FileSidebar />
 
           <div className={`${baseClass}__editView`}>
-            {activeForm ? (
+            {activeForm && !isInitializing ? (
               <DocumentInfoProvider
                 collectionSlug={collectionSlug}
                 currentEditor={user}
@@ -110,10 +113,10 @@ export function AddingFilesView({ modalSlug }: Props) {
                 hasPublishPermission={hasPublishPermission}
                 hasSavePermission={hasSavePermission}
                 id={null}
-                initialData={reduceFieldsToValues(activeForm.formState, true)}
+                initialData={getDataFromFormState(activeForm.formState, true)}
                 initialState={activeForm.formState}
                 isLocked={false}
-                key={`${activeIndex}-${forms.length}`}
+                key={`${collectionSlug}-${activeIndex}-${forms.length}`}
                 lastUpdateTime={0}
                 mostRecentVersionIsAutosaved={false}
                 unpublishedVersionCount={0}
@@ -134,7 +137,11 @@ export function AddingFilesView({ modalSlug }: Props) {
         <ActionsBar />
 
         {/* Nested Modals */}
-        <AddFilesView modalSlug={addMoreFilesModalSlug} onDrop={handleAddFiles} />
+        <AddFilesView
+          acceptMimeTypes={collectionConfig?.upload?.mimeTypes?.join(', ')}
+          modalSlug={addMoreFilesModalSlug}
+          onDrop={handleAddFiles}
+        />
         <DiscardWithoutSaving />
       </DialogModal>
     </>

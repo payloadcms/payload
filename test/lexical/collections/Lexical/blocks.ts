@@ -4,6 +4,8 @@ import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/r
 
 import { textFieldsSlug } from '../../slugs.js'
 
+// The long delay is intentional: "ensure async hooks are awaited properly" relies on it to catch
+// afterRead hook promises that are not awaited, which a short delay could resolve in time by luck.
 async function asyncFunction(param: string) {
   return new Promise((resolve) => {
     setTimeout(() => {

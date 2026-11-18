@@ -7,8 +7,10 @@ import fse from 'fs-extra'
 import path from 'path'
 import semver from 'semver'
 
+import type { Preid } from './preids.js'
 import type { PublishResult } from './runPublishSequence.js'
 
+import { getCanaryVersion } from './canaryVersion.js'
 import { getPackageDetails } from './getPackageDetails.js'
 import { isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
@@ -17,6 +19,8 @@ import { runPublishSequence } from './runPublishSequence.js'
 const cwd = PROJECT_ROOT
 
 const execaOpts: execa.Options = { stdio: 'inherit', cwd }
+
+const publishAttempts = 2
 
 type PackageDetails = {
   /** Name in package.json / npm registry */
@@ -33,12 +37,18 @@ type PackageReleaseType = 'canary' | 'internal' | 'internal-debug' | ReleaseType
 
 type PublishOpts = {
   dryRun?: boolean
-  tag?: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
+  tag: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
+}
+
+type BumpVersionOpts = {
+  /** Canary date; defaults to now. */
+  date?: Date
+  preid?: Preid
 }
 
 export type Workspace = {
   version: () => Promise<string>
-  bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
+  bumpVersion: (type: PackageReleaseType, opts?: BumpVersionOpts) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
   publish: (opts: PublishOpts) => Promise<void>
 }
@@ -57,7 +67,7 @@ export const getWorkspace = (): Workspace => {
   }
 
   // Publish one package at a time, fail-fast at the first failure.
-  const publish: Workspace['publish'] = async ({ dryRun, tag = 'canary' }) => {
+  const publish: Workspace['publish'] = async ({ dryRun, tag }) => {
     const packageDetails = await getPackageDetails(packagePublishList)
     await runPublishSequence({
       packages: packageDetails,
@@ -83,10 +93,10 @@ export const getWorkspace = (): Workspace => {
 
   const bumpVersion = async (
     bumpType: PackageReleaseType,
-    opts?: { preid?: 'beta' | 'canary' },
+    opts?: BumpVersionOpts,
   ): Promise<string> => {
     const { version: monorepoVersion, packages: packageDetails } = await getCurrentPackageState()
-    const { preid } = opts ?? {}
+    const { date, preid } = opts ?? {}
 
     let nextReleaseVersion
     if (bumpType === 'internal') {
@@ -103,36 +113,7 @@ export const getWorkspace = (): Workspace => {
     ) {
       nextReleaseVersion = semver.inc(monorepoVersion, bumpType, undefined, preid)
     } else if (bumpType === 'canary') {
-      const minorCandidateBaseVersion = semver.inc(monorepoVersion, 'minor')
-
-      if (!minorCandidateBaseVersion) {
-        throw new Error(`Could not determine minor candidate version from ${monorepoVersion}`)
-      }
-
-      // Get latest canary version from registry
-      const json = await fetch(`https://registry.npmjs.org/payload`).then((res) => res.json())
-      const { canary: latestCanaryVersion } = (json['dist-tags'] ?? {}) as {
-        canary?: string | undefined
-      }
-
-      console.log(`Latest canary version: ${latestCanaryVersion}`)
-
-      if (
-        latestCanaryVersion?.startsWith(minorCandidateBaseVersion) &&
-        latestCanaryVersion.includes('-canary.')
-      ) {
-        const canaryIteration = Number(latestCanaryVersion.split('-canary.')[1])
-        if (isNaN(canaryIteration)) {
-          console.log(`Latest canary version is not a valid canary version, starting from 0`)
-          nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
-        } else {
-          console.log(`Incrementing canary version from ${latestCanaryVersion}`)
-          nextReleaseVersion = `${minorCandidateBaseVersion}-canary.${canaryIteration + 1}`
-        }
-      } else {
-        console.log(`Latest canary does not match minor candidate, incrementing minor`)
-        nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
-      }
+      nextReleaseVersion = getCanaryVersion({ date: date ?? new Date(), monorepoVersion })
     } else {
       throw new Error(
         `Invalid bump type: ${bumpType}. Supported types: internal, internal-debug, canary, premajor, preminor, prepatch, prerelease.`,
@@ -179,7 +160,7 @@ export async function publishSinglePackage(
   pkg: PackageDetails,
   opts: PublishOpts,
 ): Promise<PublishResult> {
-  const { dryRun, tag = 'canary' } = opts
+  const { dryRun, tag } = opts
 
   try {
     // The pre-check is an optimization to skip already-published packages. A
@@ -208,33 +189,29 @@ export async function publishSinglePackage(
       cmdArgs.push('--dry-run')
     }
 
-    const { exitCode, output } = await runPnpm(cmdArgs)
+    let lastExitCode = 0
 
-    if (exitCode === 0) {
-      console.log(`✅ ${pkg.name} published`)
-      return { name: pkg.name, success: true }
-    }
+    for (let attempt = 1; attempt <= publishAttempts; attempt++) {
+      const { exitCode, output } = await runPnpm(cmdArgs)
+      lastExitCode = exitCode
 
-    // An already-published conflict means a prior run landed this version; treat
-    // the re-run as an idempotent success rather than retrying (a retry would
-    // just conflict again). This is authoritative, unlike the CDN-cached read.
-    if (isAlreadyPublishedError(output)) {
-      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
-      return { name: pkg.name, success: true }
-    }
+      // pnpm's streamed output already reports the successful publish
+      if (exitCode === 0) {
+        return { name: pkg.name, success: true }
+      }
 
-    console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed (exit code ${exitCode})`)
-    console.log(`\nRetrying publish for ${pkg.name}...`)
-    const { exitCode: retryExitCode, output: retryOutput } = await runPnpm(cmdArgs)
+      // An already-published conflict means a prior run landed this version; treat
+      // the re-run as an idempotent success rather than retrying (a retry would
+      // just conflict again). This is authoritative, unlike the CDN-cached read.
+      if (isAlreadyPublishedError(output)) {
+        console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+        return { name: pkg.name, success: true }
+      }
 
-    if (retryExitCode === 0) {
-      console.log(`✅ ${pkg.name} published (on retry)`)
-      return { name: pkg.name, success: true }
-    }
-
-    if (isAlreadyPublishedError(retryOutput)) {
-      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
-      return { name: pkg.name, success: true }
+      if (attempt < publishAttempts) {
+        console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed (exit code ${exitCode})`)
+        console.log(`\nRetrying publish for ${pkg.name}...`)
+      }
     }
 
     // Publish can report failure even though the version actually landed (e.g. a
@@ -247,7 +224,7 @@ export async function publishSinglePackage(
     return {
       name: pkg.name,
       success: false,
-      details: `pnpm publish failed for ${pkg.name} (exit code ${retryExitCode})`,
+      details: `pnpm publish failed for ${pkg.name} (exit code ${lastExitCode})`,
     }
   } catch (err: unknown) {
     console.error(err)

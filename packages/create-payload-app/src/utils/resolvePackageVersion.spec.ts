@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { DEFAULT_PAYLOAD_VERSION_TAG, resolvePackageVersion } from './resolvePackageVersion.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolveDefaultPayloadTag,
+  resolvePackageVersion,
+} from './resolvePackageVersion.js'
 
 const mockRegistry = ({
   distTags,
@@ -60,8 +65,21 @@ describe('resolvePackageVersion', () => {
   })
 })
 
-describe('DEFAULT_PAYLOAD_VERSION_TAG', () => {
-  it('should export DEFAULT_PAYLOAD_VERSION_TAG as "canary"', () => {
-    expect(DEFAULT_PAYLOAD_VERSION_TAG).toBe('canary')
+describe('resolveDefaultPayloadTag', () => {
+  it.each([
+    { version: '4.0.0-beta.3', expected: 'beta' },
+    { version: '4.0.0-canary.39', expected: 'canary' },
+    { version: '4.0.0', expected: 'latest' },
+    { version: 'not-a-version', expected: 'latest' },
+  ])('should resolve $version to $expected', ({ version, expected }) => {
+    expect(resolveDefaultPayloadTag(version)).toBe(expected)
+  })
+
+  it('should derive DEFAULT_PAYLOAD_VERSION_TAG from the package version', () => {
+    const { version } = JSON.parse(
+      readFileSync(new URL('../../package.json', import.meta.url), 'utf8'),
+    ) as { version: string }
+
+    expect(DEFAULT_PAYLOAD_VERSION_TAG).toBe(resolveDefaultPayloadTag(version))
   })
 })

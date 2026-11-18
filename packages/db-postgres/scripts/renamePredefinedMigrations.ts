@@ -2,7 +2,9 @@ import fs from 'fs'
 import path from 'path'
 
 /**
- * Changes built .js files to .mjs to for ESM imports
+ * Adds an .mjs copy of each built .js file for ESM imports of predefined migrations. The .js file
+ * is kept, since `exports/migration-utils` imports helpers from this folder (e.g.
+ * `migrateLocalizeStatus.js`) by their .js name.
  */
 const rename = () => {
   fs.readdirSync(path.resolve('./dist/predefinedMigrations'))
@@ -11,7 +13,7 @@ const rename = () => {
     })
     .forEach((file) => {
       const newPath = path.join('./dist/predefinedMigrations', file)
-      fs.renameSync(newPath, newPath.replace('.js', '.mjs'))
+      fs.copyFileSync(newPath, newPath.replace('.js', '.mjs'))
     })
   console.log('done')
 }

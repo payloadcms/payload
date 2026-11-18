@@ -4,6 +4,13 @@ import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { withBaseAccess } from '../../auth/withBaseAccess.js'
+import {
+  createCreatedByField,
+  createUpdatedByField,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -12,6 +19,7 @@ import { toWords } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { appendGlobalVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { defaultGlobalEndpoints } from '../endpoints/index.js'
 export const sanitizeGlobal = (
   config: Config,
@@ -45,12 +53,17 @@ export const sanitizeGlobal = (
     global.admin = {}
   }
 
-  if (!global.access.read) {
-    global.access.read = defaultAccess
-  }
+  const read = global.access.read ?? defaultAccess
+  const configuredReadVersions = global.access.readVersions
+
+  global.access.read = read
 
   if (!global.access.update) {
     global.access.update = defaultAccess
+  }
+
+  if (!global.access.validate) {
+    global.access.validate = global.access.update
   }
 
   if (!global.hooks.beforeValidate) {
@@ -73,8 +86,59 @@ export const sanitizeGlobal = (
     global.hooks.afterRead = []
   }
 
+  if (!global.hooks.beforeOperation) {
+    global.hooks.beforeOperation = []
+  }
+
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
+
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
+  const authorship = sanitizeAuthorship(global.authorship)
+  global.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = (config.collections ?? [])
+      .filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    global.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+
+        // A user may spread `getAuthorshipFields` into their `fields` to customize these
+        // without knowing the auth collections; backfill the polymorphic relationTo here.
+        if (
+          (field.name === 'createdBy' || field.name === 'updatedBy') &&
+          field.type === 'relationship' &&
+          (!field.relationTo || (Array.isArray(field.relationTo) && field.relationTo.length === 0))
+        ) {
+          field.relationTo = authCollections
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    if (authCollections.length > 0) {
+      if (authorship.createdBy && !hasCreatedBy) {
+        global.fields.push(createCreatedByField({ authCollections }))
+      }
+
+      if (authorship.updatedBy && !hasUpdatedBy) {
+        global.fields.push(createUpdatedByField({ authCollections }))
+      }
+    }
+  }
 
   global.fields = sanitizeFields({
     config,
@@ -182,6 +246,35 @@ export const sanitizeGlobal = (
       },
       label: ({ t }) => t('general:createdAt'),
     })
+  }
+
+  for (const operation of ['read', 'update', 'validate'] as const) {
+    global.access[operation] = withBaseAccess({
+      slug: global.slug,
+      access: global.access[operation],
+      entityType: 'global',
+      operation,
+    })
+  }
+
+  const effectiveRead = global.access.read
+  const readVersions =
+    configuredReadVersions ??
+    (async (args) => {
+      const result = await effectiveRead({ ...args, id: undefined })
+
+      return hasWhereAccessResult(result) ? appendGlobalVersionToQueryKey(result) : result
+    })
+
+  if (global.versions) {
+    global.access.readVersions = withBaseAccess({
+      slug: global.slug,
+      access: readVersions,
+      entityType: 'global',
+      operation: 'readVersions',
+    })
+  } else {
+    global.access.readVersions = readVersions
   }
 
   ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })

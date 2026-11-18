@@ -19,6 +19,24 @@ export const AutosavePostsCollection: CollectionConfig = {
         beforeChange: [({ data }) => data?.title],
       },
     },
+    {
+      name: 'restrictedValue',
+      type: 'text',
+      access: {
+        create: () => false,
+      },
+    },
+    {
+      name: 'showConditionalField',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalField',
+      type: 'text',
+      admin: {
+        condition: (data) => data?.showConditionalField === true,
+      },
+    },
   ],
   versions: {
     drafts: {

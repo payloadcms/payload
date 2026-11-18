@@ -8,6 +8,14 @@ import { flattenRows, separateRows } from '../../forms/Form/rows.js'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
+// Strict path-prefix check: matches `prefix` exactly, or any descendant path (`prefix.`).
+// Required because numeric row indices share digit prefixes (`.1` vs `.10`/`.11`), and
+// field names can also share textual prefixes (`children` vs `childrenOther`). A loose
+// `startsWith(prefix)` leaks unrelated keys into clipboard / cleanup operations.
+function isStrictPathPrefix(key: string, prefix: string): boolean {
+  return key === prefix || key.startsWith(`${prefix}.`)
+}
+
 export function reduceFormStateByPath({
   formState,
   path,
@@ -21,7 +29,7 @@ export function reduceFormStateByPath({
   const prefix = typeof rowIndex !== 'number' ? path : `${path}.${rowIndex}`
 
   for (const key in formState) {
-    if (!key.startsWith(prefix)) {
+    if (!isStrictPathPrefix(key, prefix)) {
       continue
     }
 
@@ -99,13 +107,12 @@ export function mergeFormStateFromClipboard({
     ]
     formState[path].value = 1
     formState[path].initialValue = 1
-    formState[path].disableFormData = true
 
     for (const fieldPath in formState) {
       if (
         fieldPath !== path &&
-        !fieldPath.startsWith(lastRenderedPath) &&
-        fieldPath.startsWith(path)
+        !isStrictPathPrefix(fieldPath, lastRenderedPath) &&
+        isStrictPathPrefix(fieldPath, path)
       ) {
         delete formState[fieldPath]
       }
@@ -121,7 +128,7 @@ export function mergeFormStateFromClipboard({
     // still be processed so they get regenerated below, preventing server-side duplication.
     if (
       (!pasteIntoField && clipboardPath === `${pathToReplace}.id`) ||
-      !clipboardPath.startsWith(pathToReplace)
+      !isStrictPathPrefix(clipboardPath, pathToReplace)
     ) {
       continue
     }
@@ -235,7 +242,7 @@ export function insertRowFromClipboard({
   const formStateWithNewRow: FormState = {
     ...remainingFields,
     ...flattenRows(path, rows),
-    [path]: { ...formState[path], disableFormData: true, rows: newRows, value: rows.length },
+    [path]: { ...formState[path], rows: newRows, value: rows.length },
   }
 
   return mergeFormStateFromClipboard({

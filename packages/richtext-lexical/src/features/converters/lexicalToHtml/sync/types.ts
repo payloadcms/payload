@@ -7,24 +7,29 @@ import type {
 } from '../../../../types/nodeTypes.js'
 import type { SerializedLexicalNodeWithParent } from '../shared/types.js'
 
-export type HTMLConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
-
-    | ((args: {
-        childIndex: number
-        converters: HTMLConverters
-        node: T
-        nodesToHTML: (args: {
-          converters?: HTMLConverters
-          disableIndent?: boolean | string[]
-          disableTextAlign?: boolean | string[]
-          nodes: SerializedLexicalNode[]
-          parent?: SerializedLexicalNodeWithParent
-        }) => string[]
-        parent: SerializedLexicalNodeWithParent
-        providedCSSString: string
-        providedStyleTag: string
-      }) => string)
-    | string
+export type HTMLConverter<
+  T extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> =
+  | ((args: {
+      childIndex: number
+      converters: HTMLConverters
+      node: T
+      nodesToHTML: (args: {
+        converters?: HTMLConverters
+        disableIndent?: boolean | string[]
+        disableTextAlign?: boolean | string[]
+        nodes: SerializedLexicalNode[]
+        parent?: SerializedLexicalNodeWithParent
+      }) => string[]
+      parent: SerializedLexicalNodeWithParent
+      providedCSSString: string
+      /**
+       * ` dir="ltr"` or ` dir="rtl"` when the node has an explicit direction, otherwise an empty string.
+       */
+      providedDirAttribute: string
+      providedStyleTag: string
+    }) => string)
+  | string
 
 export type HTMLConverters<
   T extends { [key: string]: any; type?: string } =

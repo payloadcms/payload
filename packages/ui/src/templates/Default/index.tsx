@@ -14,6 +14,10 @@ import './index.css'
 
 import React from 'react'
 
+import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
+
+import { DefaultNav } from '../../elements/Nav/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {
   ActionsProvider,
@@ -24,10 +28,6 @@ import {
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
-import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
-
-import { DefaultNav } from '../../elements/Nav/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 const baseClass = 'template-default'
 
@@ -40,6 +40,7 @@ export type DefaultTemplateProps = {
   globalSlug?: string
   req?: PayloadRequest
   viewActions?: CustomComponent[]
+  viewKey?: string
   viewType?: ViewTypes
   visibleEntities: VisibleEntities
 } & Omit<ServerProps, 'server'>
@@ -60,6 +61,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   searchParams,
   user,
   viewActions,
+  viewKey,
   viewType,
   visibleEntities,
 }) => {
@@ -178,14 +180,33 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Component: CustomNav,
     Fallback: DefaultNav,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      ...serverProps,
+      CustomAvatar:
+        avatar !== 'gravatar' && avatar !== 'default'
+          ? RenderServerComponent({
+              Component: avatar.Component,
+              importMap: payload.importMap,
+              serverProps,
+            })
+          : undefined,
+      CustomLogoutButton: components?.logout?.Button
+        ? RenderServerComponent({
+            clientProps,
+            Component: components.logout.Button,
+            importMap: payload.importMap,
+            serverProps,
+          })
+        : undefined,
+      settingsItemGroups,
+    },
   })
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <CommandPalette />
       <BulkUploadProvider modalSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions}>
+        <ActionsProvider Actions={Actions} viewKey={viewKey}>
           {RenderServerComponent({
             clientProps,
             Component: CustomHeader,
@@ -196,28 +217,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             <Wrapper baseClass={baseClass} className={className}>
               {NavComponent}
               <div className={`${baseClass}__wrap`}>
-                <AppHeader
-                  CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default'
-                      ? RenderServerComponent({
-                          Component: avatar.Component,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  CustomLogoutButton={
-                    components?.logout?.Button
-                      ? RenderServerComponent({
-                          clientProps,
-                          Component: components.logout.Button,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  settingsItemGroups={settingsItemGroups}
-                />
+                <AppHeader />
+                <span className="sr-only" id="payload-main-content" tabIndex={-1} />
                 {children}
               </div>
             </Wrapper>

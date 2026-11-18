@@ -51,8 +51,9 @@ const authSessionUsers: CollectionConfig = {
   },
 }
 
-export default buildConfigWithDefaults(
-  {
+export default buildConfigWithDefaults({
+  suite: 'auth-session',
+  config: {
     admin: {
       autoRefresh: false,
       components: {
@@ -67,26 +68,28 @@ export default buildConfigWithDefaults(
     },
     collections: [authSessionUsers],
     endpoints: authSessionTestEndpoints,
-    onInit: async (payload) => {
-      const existingUsers = await payload.find({
-        collection: authSessionUsersSlug,
-        limit: 1,
-      })
-
-      if (existingUsers.docs.length === 0) {
-        await payload.create({
-          collection: authSessionUsersSlug,
-          data: {
-            name: 'Session Test User',
-          },
-        })
-      }
-
-      testOAuthSessionStore.resetToRealTime()
-    },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  { disableAutoLogin: true },
-)
+  seed: async (payload) => {
+    const existingUsers = await payload.find({
+      collection: authSessionUsersSlug,
+      limit: 1,
+      overrideAccess: true,
+    })
+
+    if (existingUsers.docs.length === 0) {
+      await payload.create({
+        collection: authSessionUsersSlug,
+        data: {
+          name: 'Session Test User',
+        },
+        overrideAccess: true,
+      })
+    }
+
+    testOAuthSessionStore.resetToRealTime()
+  },
+  disableAutoLogin: true,
+})

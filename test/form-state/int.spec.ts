@@ -1,42 +1,62 @@
-import type { FieldState, FormState, Payload, User } from 'payload'
-import type React from 'react'
+import type { Data, FieldState, FormState, PayloadRequest, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import path from 'path'
-import { createLocalReq } from 'payload'
+import { createPayloadRequest, getAccessResults } from 'payload'
+import { getDataByPath, getDataFromFormState } from 'payload/shared'
+import React from 'react'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { hasRowPathChanged } from '../../packages/ui/src/forms/Form/rowHelpers.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { buildNullifyLocaleFieldUpdate } from '../../packages/ui/src/forms/NullifyField/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { reduceFieldsToValuesWithValidation } from '../../packages/ui/src/utilities/reduceFieldsToValuesWithValidation.js'
+import { test } from '../__helpers/int/vitest.js'
 
-let payload: Payload
-let restClient: NextRESTClient
 let user: User
 
 const { email, password } = devUser
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 const DummyReactComponent: React.ReactNode = {
   // @ts-expect-error - can ignore, needs to satisfy `typeof value.$$typeof === 'symbol'`
-  $$typeof: Symbol.for('react.element'),
   type: 'div',
-  props: {},
+  $$typeof: Symbol.for('react.element'),
   key: null,
+  props: {},
 }
 
-describe('Form State', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true))
+const rowFieldCases: { path: 'array' | 'blocks'; rows: Data[] }[] = [
+  {
+    path: 'array',
+    rows: [
+      { id: 'row-1', customTextField: 'First', defaultTextField: 'First' },
+      { id: 'row-2', customTextField: 'Second', defaultTextField: 'Second' },
+    ],
+  },
+  {
+    path: 'blocks',
+    rows: [
+      { id: 'row-1', blockType: 'text', text: 'First' },
+      { id: 'row-2', blockType: 'text', text: 'Second' },
+    ],
+  },
+]
 
+test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -49,22 +69,72 @@ describe('Form State', () => {
     user = data.user
   })
 
-  afterAll(async () => {
-    await payload.destroy()
+  test.afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
-  it('should build entire form state', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should respect field create access when initializing an autosave draft', async ({
+    payload,
+  }) => {
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'editor@example.com',
+        password: 'test-password',
+      },
+      overrideAccess: true,
+    })
+
+    const req = await createPayloadRequest({ payload, user: editor })
+    const permissions = await getAccessResults({ req })
+    const restrictedValue = 'client supplied'
+    const title = 'Access filtered autosave'
+    vi.stubGlobal('React', React)
+
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
+
+    const { docs } = await payload.find({
+      collection: autosavePostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: {
+        title: {
+          equals: title,
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).not.toHaveProperty('restrictedValue', restrictedValue)
+  })
+
+  test('should build entire form state', async ({ payload }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
       data: {
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -80,6 +150,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -87,40 +158,42 @@ describe('Form State', () => {
     })
 
     expect(state).toMatchObject({
-      title: {
-        value: postData.title,
-        initialValue: postData.title,
-      },
-      updatedAt: {
-        value: postData.updatedAt,
-        initialValue: postData.updatedAt,
-      },
-      createdAt: {
-        value: postData.createdAt,
-        initialValue: postData.createdAt,
-      },
-      renderTracker: {},
-      validateUsingEvent: {},
       blocks: {
         initialValue: 0,
         rows: [],
         value: 0,
       },
+      createdAt: {
+        initialValue: postData.createdAt,
+        value: postData.createdAt,
+      },
+      renderTracker: {},
+      title: {
+        initialValue: postData.title,
+        value: postData.title,
+      },
+      updatedAt: {
+        initialValue: postData.updatedAt,
+        value: postData.updatedAt,
+      },
+      validateUsingEvent: {},
     })
   })
 
-  it('should use `select` to build partial form state with only specified fields', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should use `select` to build partial form state with only specified fields', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
       data: {
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -129,6 +202,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -146,20 +220,26 @@ describe('Form State', () => {
         disableFormData: true,
       },
       title: {
-        value: postData.title,
+        addedByServer: true,
         initialValue: postData.title,
         lastRenderedPath: 'title',
-        addedByServer: true,
+        value: postData.title,
       },
     })
   })
 
-  it('should not render custom components when `lastRenderedPath` exists', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should not render custom components when `lastRenderedPath` exists', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const { state: stateWithRow } = await buildFormState({
-      mockRSCs: true,
       collectionSlug: postsSlug,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
       formState: {
         array: {
           rows: [
@@ -169,15 +249,11 @@ describe('Form State', () => {
           ],
         },
         'array.0.id': {
-          value: '123',
           initialValue: '123',
+          value: '123',
         },
       },
-      docPermissions: undefined,
-      docPreferences: {
-        fields: {},
-      },
-      documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -191,8 +267,12 @@ describe('Form State', () => {
     expect(stateWithRow?.['array.0.customTextField']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWithTitle } = await buildFormState({
-      mockRSCs: true,
       collectionSlug: postsSlug,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
       formState: {
         array: {
           rows: [
@@ -204,27 +284,23 @@ describe('Form State', () => {
             },
           ],
         },
-        'array.0.id': {
-          value: '123',
-          initialValue: '123',
-        },
         'array.0.customTextField': {
           lastRenderedPath: 'array.0.customTextField',
         },
+        'array.0.id': {
+          initialValue: '123',
+          value: '123',
+        },
         'array.1.id': {
-          value: '456',
           initialValue: '456',
+          value: '456',
         },
       },
-      docPermissions: undefined,
-      docPreferences: {
-        fields: {},
-      },
-      documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
-      schemaPath: postsSlug,
       req,
+      schemaPath: postsSlug,
     })
 
     // Ensure that row 1 _DOES NOT_ return with rendered components
@@ -237,18 +313,20 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
-  it('should not render custom Field components for fields hidden by admin.condition', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should not render custom Field components for fields hidden by admin.condition', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
       data: {
         showField: false,
       },
+      overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
-      mockRSCs: true,
       id: hiddenDoc.id,
       collectionSlug: conditionsSlug,
       data: hiddenDoc,
@@ -257,6 +335,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -273,10 +352,10 @@ describe('Form State', () => {
       data: {
         showField: true,
       },
+      overrideAccess: true,
     })
 
     const { state: stateVisible } = await buildFormState({
-      mockRSCs: true,
       id: visibleDoc.id,
       collectionSlug: conditionsSlug,
       data: visibleDoc,
@@ -285,6 +364,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -295,23 +375,25 @@ describe('Form State', () => {
     expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
     expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
-    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
+    await payload.delete({ id: hiddenDoc.id, collection: conditionsSlug, overrideAccess: true })
+    await payload.delete({ id: visibleDoc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
-  it('should preserve values of fields nested inside a row hidden by admin.condition', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should preserve values of fields nested inside a row hidden by admin.condition', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
       data: {
-        showField: false,
         conditionalRowField: 'value in db',
+        showField: false,
       },
+      overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
-      mockRSCs: true,
       id: hiddenDoc.id,
       collectionSlug: conditionsSlug,
       data: hiddenDoc,
@@ -320,6 +402,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -333,22 +416,24 @@ describe('Form State', () => {
     // `withCondition` (rather than rendering an empty, visible row).
     expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ id: hiddenDoc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
-  it('should preserve values of fields nested inside a collapsible hidden by admin.condition', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should preserve values of fields nested inside a collapsible hidden by admin.condition', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
       data: {
-        showField: false,
         conditionalCollapsibleField: 'collapsible db value',
+        showField: false,
       },
+      overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
-      mockRSCs: true,
       id: hiddenDoc.id,
       collectionSlug: conditionsSlug,
       data: hiddenDoc,
@@ -357,6 +442,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -367,21 +453,23 @@ describe('Form State', () => {
     // nested field's value must survive even though the collapsible is hidden.
     expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ id: hiddenDoc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
-  it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should render custom Field component when admin.condition flips from false to true via onChange', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const doc = await payload.create({
       collection: conditionsSlug,
       data: {
         showField: false,
       },
+      overrideAccess: true,
     })
 
     const { state: initialState } = await buildFormState({
-      mockRSCs: true,
       id: doc.id,
       collectionSlug: conditionsSlug,
       data: doc,
@@ -390,6 +478,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -403,15 +492,15 @@ describe('Form State', () => {
     initialState.showField!.value = true
 
     const { state: flippedState } = await buildFormState({
-      mockRSCs: true,
       id: doc.id,
       collectionSlug: conditionsSlug,
-      formState: initialState,
       docPermissions: undefined,
       docPreferences: {
         fields: {},
       },
       documentFormState: undefined,
+      formState: initialState,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -422,27 +511,29 @@ describe('Form State', () => {
     expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
     expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: doc.id })
+    await payload.delete({ id: doc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
-  it('should add `addedByServer` flag to fields that originate on the server', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should add `addedByServer` flag to fields that originate on the server', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Test Post',
         blocks: [
           {
             blockType: 'text',
             text: 'Test block',
           },
         ],
+        title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -451,6 +542,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -469,7 +561,7 @@ describe('Form State', () => {
     expect(newState.title?.addedByServer).toBeUndefined()
   })
 
-  it('should not omit value and initialValue from fields added by the server', () => {
+  test('should not omit value and initialValue from fields added by the server', () => {
     const currentState: FormState = {
       array: {
         rows: [
@@ -488,14 +580,14 @@ describe('Form State', () => {
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
     }
 
@@ -505,14 +597,14 @@ describe('Form State', () => {
     })
 
     expect(newState['array.0.customTextField']).toStrictEqual({
+      initialValue: 'Test',
       passesCondition: true,
       valid: true,
       value: 'Test',
-      initialValue: 'Test',
     })
   })
 
-  it('should merge array rows without losing rows added to local state', () => {
+  test('should merge array rows without losing rows added to local state', () => {
     const currentState: FormState = {
       array: {
         errorPaths: [],
@@ -528,12 +620,12 @@ describe('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
         initialValue: '1',
+        value: '1',
       },
       'array.1.id': {
-        value: '2',
         initialValue: '2',
+        value: '2',
       },
     }
 
@@ -546,14 +638,14 @@ describe('Form State', () => {
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
     }
 
@@ -567,7 +659,6 @@ describe('Form State', () => {
       array: {
         errorPaths: [],
         passesCondition: true,
-        valid: true,
         rows: [
           {
             id: '1',
@@ -578,27 +669,28 @@ describe('Form State', () => {
             isLoading: true,
           },
         ],
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        passesCondition: true,
         valid: true,
       },
       'array.0.customTextField': {
-        value: 'Test',
         initialValue: 'Test',
         passesCondition: true,
         valid: true,
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
       },
       'array.1.id': {
-        value: '2',
         initialValue: '2',
+        value: '2',
       },
     })
   })
 
-  it('should merge array rows without bringing back rows deleted from local state', () => {
+  test('should merge array rows without bringing back rows deleted from local state', () => {
     const currentState: FormState = {
       array: {
         rows: [
@@ -609,8 +701,8 @@ describe('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
         initialValue: '1',
+        value: '1',
       },
     }
 
@@ -627,22 +719,22 @@ describe('Form State', () => {
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
       },
-      'array.1.id': {
-        value: '2',
-        initialValue: '2',
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
       'array.1.customTextField': {
-        value: 'Test',
         initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.1.id': {
+        initialValue: '2',
+        value: '2',
       },
     }
 
@@ -655,30 +747,30 @@ describe('Form State', () => {
     expect(newState).toStrictEqual({
       array: {
         passesCondition: true,
-        valid: true,
         rows: [
           {
             id: '1',
             lastRenderedPath: 'array.0.customTextField',
           },
         ],
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        passesCondition: true,
         valid: true,
       },
       'array.0.customTextField': {
-        value: 'Test',
         initialValue: 'Test',
         passesCondition: true,
         valid: true,
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
       },
     })
   })
 
-  it('should merge new fields returned from the server that do not yet exist in local state', () => {
+  test('should merge new fields returned from the server that do not yet exist in local state', () => {
     const currentState: FormState = {
       array: {
         rows: [
@@ -689,8 +781,8 @@ describe('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
         initialValue: '1',
+        value: '1',
       },
     }
 
@@ -699,19 +791,19 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.customTextField',
             isLoading: false,
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
     }
 
@@ -723,37 +815,37 @@ describe('Form State', () => {
     expect(newState).toStrictEqual({
       array: {
         passesCondition: true,
-        valid: true,
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.customTextField',
             isLoading: false,
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
-      },
-      'array.0.id': {
-        passesCondition: true,
         valid: true,
-        value: '1',
-        initialValue: '1',
       },
       'array.0.customTextField': {
+        initialValue: 'Test',
         passesCondition: true,
         valid: true,
         value: 'Test',
-        initialValue: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
       },
     })
   })
 
-  it('should return the same object reference when only modifying a value', () => {
+  test('should return the same object reference when only modifying a value', () => {
     const currentState = {
       title: {
-        value: 'Test Post',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post',
       },
     }
 
@@ -761,10 +853,10 @@ describe('Form State', () => {
       currentState,
       incomingState: {
         title: {
-          value: 'Test Post (modified)',
           initialValue: 'Test Post',
-          valid: true,
           passesCondition: true,
+          valid: true,
+          value: 'Test Post (modified)',
         },
       },
     })
@@ -772,26 +864,17 @@ describe('Form State', () => {
     expect(newState === currentState).toBe(true)
   })
 
-  it('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
+  test('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
     const title: FieldState = {
-      value: 'Test Post (modified on the client)',
       initialValue: 'Test Post',
-      valid: true,
       passesCondition: true,
+      valid: true,
+      value: 'Test Post (modified on the client)',
     }
 
     const currentState: Record<string, FieldState> = {
-      title: {
-        ...title,
-        isModified: true, // This is critical, this is what we're testing
-      },
-      computedTitle: {
-        value: 'Test Post (computed on the client)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
       array: {
+        passesCondition: true,
         rows: [
           {
             id: '1',
@@ -802,36 +885,34 @@ describe('Form State', () => {
           },
         ],
         valid: true,
-        passesCondition: true,
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        valid: true,
-        passesCondition: true,
       },
       'array.0.customTextField': {
-        value: 'Test Post (modified on the client)',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the client)',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
+      },
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (computed on the client)',
+      },
+      title: {
+        ...title,
+        isModified: true, // This is critical, this is what we're testing
       },
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-      computedTitle: {
-        value: 'Test Post (computed on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
       array: {
+        passesCondition: true,
         rows: [
           {
             id: '1',
@@ -839,20 +920,31 @@ describe('Form State', () => {
             // Omit `customComponents` because the server did not re-render this row
           },
         ],
-        passesCondition: true,
         valid: true,
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        valid: true,
-        passesCondition: true,
       },
       'array.0.customTextField': {
-        value: 'Test Post (modified on the client)',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the client)',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
+      },
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (computed on the server)',
+      },
+      title: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
       },
     }
 
@@ -864,50 +956,50 @@ describe('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...incomingStateFromServer,
-      title: {
-        ...incomingStateFromServer.title,
-        isModified: true,
-      },
       array: {
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
       },
+      title: {
+        ...incomingStateFromServer.title,
+        isModified: true,
+      },
     })
   })
 
-  it('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
+  test('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
     const title: FieldState = {
-      value: 'Test Post (modified on the client 1)',
       initialValue: 'Test Post',
-      valid: true,
       passesCondition: true,
+      valid: true,
+      value: 'Test Post (modified on the client 1)',
     }
 
     const currentState: Record<string, FieldState> = {
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post',
+      },
       title: {
         ...title,
         isModified: true,
       },
-      computedTitle: {
-        value: 'Test Post',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
       computedTitle: {
-        value: 'Test Post (modified on the server)',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
+      },
+      title: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
       },
     }
 
@@ -919,15 +1011,227 @@ describe('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...currentState,
+      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
       title: {
         ...currentState.title,
         isModified: true,
       },
-      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
   })
 
-  it('should preserve client row data after reorder and delete during autosave', () => {
+  test('should remove descendants when the server clears an array', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        items: { rows: [{ id: 'first' }], value: 1 },
+        'items.0.text': { value: 'Removed on the server' },
+      },
+      incomingState: { items: { rows: [], value: 0 } },
+    })
+
+    expect(state.items?.rows).toEqual([])
+    expect(state.items?.value).toBe(0)
+    expect(state.items?.disableFormData).toBeUndefined()
+    expect(state['items.0.text']).toBeUndefined()
+  })
+
+  test('should discard cached components when authoritative state hides a field', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        title: {
+          customComponents: { Field: DummyReactComponent },
+          lastRenderedPath: 'title',
+          value: 'Hidden title',
+        },
+      },
+      incomingState: { title: { passesCondition: false, value: 'Hidden title' } },
+    })
+
+    expect(state.title.customComponents).toBeUndefined()
+    expect(state.title.lastRenderedPath).toBeUndefined()
+    expect(state.title.value).toBe('Hidden title')
+  })
+
+  test.for([
+    { path: 'title', changed: false },
+    { path: 'blocks', changed: false },
+    { path: 'blocks.0', changed: true },
+    { path: 'blocks.0.title', changed: true },
+    { path: 'blocks.2', changed: false },
+    { path: 'blocks.2.title', changed: false },
+    { path: 'blocks.0.items.0.title', changed: true },
+    { path: 'blocks.2.items.0', changed: true },
+    { path: 'blocks.2.items.0.title', changed: true },
+    { path: 'blocks.2.items.2.title', changed: false },
+    { path: 'array.0.title', changed: false },
+    { path: 'removed.0.title', changed: true },
+    { path: 'replaced.0.title', changed: true },
+    { path: 'group.2026.title', changed: false },
+  ])('should identify whether row ownership changed at $path', ({ changed, path }) => {
+    const formState: FormState = {
+      blocks: {
+        rows: [
+          { id: 'first', blockType: 'two' },
+          { id: 'second', blockType: 'two' },
+          { id: 'kept', blockType: 'one' },
+        ],
+      },
+      'blocks.0.items': { rows: [{ id: 'shared-child' }] },
+      'blocks.2.items': { rows: [{ id: 'child-1' }, { id: 'child-2' }, { id: 'child-kept' }] },
+      array: { rows: [{ id: 'array-row' }] },
+      removed: { rows: [{ id: 'removed' }] },
+      replaced: { rows: [{ id: 'same', blockType: 'one' }] },
+    }
+    const data = {
+      blocks: [
+        { id: 'second', blockType: 'two', items: [{ id: 'shared-child' }] },
+        { id: 'first', blockType: 'two' },
+        {
+          id: 'kept',
+          blockType: 'one',
+          items: [{ id: 'child-2' }, { id: 'child-1' }, { id: 'child-kept' }],
+        },
+      ],
+      array: [{ id: 'array-row', blockType: 'ordinary array data' }],
+      removed: [],
+      replaced: [{ id: 'same', blockType: 'two' }],
+      group: { 2026: { title: 'Numeric field name' } },
+    }
+
+    expect(hasRowPathChanged({ data, formState, path })).toBe(changed)
+  })
+
+  test('should remove old fields when the server changes a block type', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        blocks: { rows: [{ blockType: 'text', id: 'block' }], value: 1 },
+        'blocks.0.text': { value: 'Old block content' },
+      },
+      incomingState: {
+        blocks: { rows: [{ blockType: 'number', id: 'block' }], value: 1 },
+        'blocks.0.number': { addedByServer: true, value: 42 },
+      },
+    })
+
+    expect(state.blocks?.rows).toEqual([{ blockType: 'number', id: 'block' }])
+    expect(state['blocks.0.text']).toBeUndefined()
+    expect(state['blocks.0.number']?.value).toBe(42)
+  })
+
+  test('should keep local fields and collapsed state with surviving nested row IDs', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        groups: {
+          rows: [
+            { id: 'removed-group', collapsed: true },
+            { id: 'kept-group', collapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.0.localState': { disableFormData: true, value: 'Removed' },
+        'groups.1.items': {
+          rows: [
+            { id: 'removed-item', collapsed: true },
+            { id: 'kept-item', collapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.1.items.1.localState': { disableFormData: true, value: 'Kept' },
+      },
+      incomingState: {
+        groups: { rows: [{ id: 'kept-group' }], value: 1 },
+        // Moving the parent can make the server reapply initCollapsed at the new nested path.
+        'groups.0.items': {
+          addedByServer: true,
+          rows: [{ id: 'kept-item', collapsed: true }],
+          value: 1,
+        },
+      },
+    })
+
+    expect(state.groups?.rows).toEqual([{ id: 'kept-group', collapsed: false }])
+    expect(state['groups.0.items']?.rows).toEqual([{ id: 'kept-item', collapsed: false }])
+    expect(state['groups.0.items.0.localState']).toEqual({ disableFormData: true, value: 'Kept' })
+    expect(state['groups.0.localState']).toBeUndefined()
+    expect(Object.keys(state).some((path) => path.startsWith('groups.1.'))).toBe(false)
+  })
+
+  test.for([
+    { acceptValues: undefined, mode: 'background' },
+    { acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
+  ])(
+    'should return empty array data for an undefined row field during $mode merges',
+    ({ acceptValues }) => {
+      const currentState: FormState = {
+        // @ts-expect-error - Exercise the undefined runtime entry from the regression.
+        items: undefined,
+      }
+
+      const state = mergeServerFormState({
+        acceptValues,
+        currentState,
+        incomingState: { items: { rows: [], value: 0 } },
+      })
+
+      expect(getDataFromFormState(state, true)).toStrictEqual({ items: [] })
+    },
+  )
+
+  test.describe('empty row values', () => {
+    const rowValueCases = [
+      { currentValue: null, incomingValue: null },
+      { currentValue: null, incomingValue: 0 },
+      { currentValue: 0, incomingValue: null },
+      { currentValue: 0, incomingValue: 0 },
+    ]
+
+    test.for(
+      rowValueCases.flatMap((values) => [
+        { ...values, acceptValues: undefined, mode: 'background' },
+        { ...values, acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
+      ]),
+    )(
+      'should preserve client row value $currentValue during $mode merges receiving $incomingValue',
+      ({ acceptValues, currentValue, incomingValue }) => {
+        const state = mergeServerFormState({
+          acceptValues,
+          currentState: { array: { rows: [], value: currentValue } },
+          incomingState: { array: { rows: [], value: incomingValue } },
+        })
+
+        expect(state.array.value).toBe(currentValue)
+      },
+    )
+
+    test.for(rowValueCases)(
+      'should accept server row value $incomingValue over client value $currentValue on explicit save',
+      ({ currentValue, incomingValue }) => {
+        const state = mergeServerFormState({
+          acceptValues: true,
+          currentState: { array: { rows: [], value: currentValue } },
+          incomingState: { array: { rows: [], value: incomingValue } },
+        })
+
+        expect(state.array.value).toBe(incomingValue)
+      },
+    )
+  })
+
+  test('should preserve a first client row when autosave returns a null array', () => {
+    const state = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState: { array: { disableFormData: true, rows: [{ id: 'A' }], value: 1 } },
+      incomingState: { array: { rows: [], value: null } },
+    })
+
+    expect(state.array.value).toBe(1)
+    expect(state.array.rows).toEqual([{ id: 'A' }])
+  })
+
+  test('should preserve client row data after reorder and delete during autosave', () => {
     /**
      * Regression test for the "ghost item" bug.
      * User reorders [A, B, C] → [C, A, B], autosave fires, then user deletes A.
@@ -936,21 +1240,21 @@ describe('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'C' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'C text', initialValue: 'C text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'C text', value: 'C text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 3,
         rows: [{ id: 'C' }, { id: 'A' }, { id: 'B' }],
+        value: 3,
       },
-      'array.0.text': { value: 'C text', initialValue: 'C text' },
-      'array.1.text': { value: 'A text', initialValue: 'A text' },
-      'array.2.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'C text', value: 'C text' },
+      'array.1.text': { initialValue: 'A text', value: 'A text' },
+      'array.2.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -967,27 +1271,27 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('B text')
   })
 
-  it('should preserve client row data after reorder during autosave', () => {
+  test('should preserve client row data after reorder during autosave', () => {
     /**
      * User reorders [A, B] → [B, A] during autosave.
      * Server responds with stale [A, B]. Field values should remain with correct rows.
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'B' }, { id: 'A' }],
+        value: 2,
       },
-      'array.0.text': { value: 'B text', initialValue: 'B text' },
-      'array.1.text': { value: 'A text', initialValue: 'A text' },
+      'array.0.text': { initialValue: 'B text', value: 'B text' },
+      'array.1.text': { initialValue: 'A text', value: 'A text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1003,7 +1307,7 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('A text')
   })
 
-  it('should preserve nested array row data after reorder during autosave', () => {
+  test('should preserve nested array row data after reorder during autosave', () => {
     /**
      * User reorders nested array blocks[0].items from [A, B] → [B, A] during autosave.
      * Outer block unchanged. Server responds with stale inner array [A, B].
@@ -1011,28 +1315,28 @@ describe('Form State', () => {
      */
     const currentState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'B' }, { id: 'A' }],
+        value: 2,
       },
-      'blocks.0.items.0.text': { value: 'B text', initialValue: 'B text' },
-      'blocks.0.items.1.text': { value: 'A text', initialValue: 'A text' },
+      'blocks.0.items.0.text': { initialValue: 'B text', value: 'B text' },
+      'blocks.0.items.1.text': { initialValue: 'A text', value: 'A text' },
     }
 
     const serverState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'blocks.0.items.0.text': { value: 'A text', initialValue: 'A text' },
-      'blocks.0.items.1.text': { value: 'B text', initialValue: 'B text' },
+      'blocks.0.items.0.text': { initialValue: 'A text', value: 'A text' },
+      'blocks.0.items.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1050,7 +1354,7 @@ describe('Form State', () => {
     expect(newState['blocks.0.items.1.text']?.value).toBe('A text')
   })
 
-  it('should preserve nested array row data after reorder and delete during autosave', () => {
+  test('should preserve nested array row data after reorder and delete during autosave', () => {
     /**
      * User reorders nested array blocks[0].items from [A, B, C] → [C, A, B], then deletes A.
      * Outer block unchanged. Server responds with stale inner array [C, A, B].
@@ -1058,29 +1362,29 @@ describe('Form State', () => {
      */
     const currentState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'C' }, { id: 'B' }],
+        value: 2,
       },
-      'blocks.0.items.0.text': { value: 'C text', initialValue: 'C text' },
-      'blocks.0.items.1.text': { value: 'B text', initialValue: 'B text' },
+      'blocks.0.items.0.text': { initialValue: 'C text', value: 'C text' },
+      'blocks.0.items.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const serverState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 3,
         rows: [{ id: 'C' }, { id: 'A' }, { id: 'B' }],
+        value: 3,
       },
-      'blocks.0.items.0.text': { value: 'C text', initialValue: 'C text' },
-      'blocks.0.items.1.text': { value: 'A text', initialValue: 'A text' },
-      'blocks.0.items.2.text': { value: 'B text', initialValue: 'B text' },
+      'blocks.0.items.0.text': { initialValue: 'C text', value: 'C text' },
+      'blocks.0.items.1.text': { initialValue: 'A text', value: 'A text' },
+      'blocks.0.items.2.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1099,7 +1403,7 @@ describe('Form State', () => {
     expect(newState['blocks.0.items.1.text']?.value).toBe('B text')
   })
 
-  it('should accept server values on explicit save without row ID guard', () => {
+  test('should accept server values on explicit save without row ID guard', () => {
     /**
      * On explicit save (acceptValues: true), server values should be accepted
      * without the row ID guard interfering. This test ensures the guard is
@@ -1112,20 +1416,20 @@ describe('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'B' }, { id: 'A' }],
+        value: 2,
       },
-      'array.0.text': { value: 'B text modified locally', initialValue: 'B text' },
-      'array.1.text': { value: 'A text modified locally', initialValue: 'A text' },
+      'array.0.text': { initialValue: 'B text', value: 'B text modified locally' },
+      'array.1.text': { initialValue: 'A text', value: 'A text modified locally' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text from server', initialValue: 'A text' },
-      'array.1.text': { value: 'B text from server', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text from server' },
+      'array.1.text': { initialValue: 'B text', value: 'B text from server' },
     }
 
     const newState = mergeServerFormState({
@@ -1142,30 +1446,30 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('B text from server')
   })
 
-  it('should preserve client-added row during autosave', () => {
+  test('should preserve client-added row during autosave', () => {
     /**
      * Client adds row D during autosave. Server responds with stale [A, B, C].
      * Row D should be preserved with its client value.
      */
     const currentState: FormState = {
       array: {
-        value: 4,
         rows: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }],
+        value: 4,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
-      'array.2.text': { value: 'C text', initialValue: 'C text' },
-      'array.3.text': { value: 'D text', initialValue: 'D text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
+      'array.2.text': { initialValue: 'C text', value: 'C text' },
+      'array.3.text': { initialValue: 'D text', value: 'D text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 3,
         rows: [{ id: 'A' }, { id: 'B' }, { id: 'C' }],
+        value: 3,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
-      'array.2.text': { value: 'C text', initialValue: 'C text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
+      'array.2.text': { initialValue: 'C text', value: 'C text' },
     }
 
     const newState = mergeServerFormState({
@@ -1180,28 +1484,28 @@ describe('Form State', () => {
     expect(newState['array.3.text']?.value).toBe('D text')
   })
 
-  it('should append server-added row with addedByServer flag', () => {
+  test('should append server-added row with addedByServer flag', () => {
     /**
      * Server adds a new row via hook with addedByServer: true.
      * Row should be appended and not blocked by row ID guard.
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 3,
         rows: [{ id: 'A' }, { id: 'B' }, { id: 'C', addedByServer: true }],
+        value: 3,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
-      'array.2.text': { value: 'C text', initialValue: 'C text', addedByServer: true },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
+      'array.2.text': { addedByServer: true, initialValue: 'C text', value: 'C text' },
     }
 
     const newState = mergeServerFormState({
@@ -1218,25 +1522,26 @@ describe('Form State', () => {
     expect(newState['array.2.text']).not.toHaveProperty('addedByServer')
   })
 
-  it('should preserve empty client array when server has rows', () => {
+  test('should preserve empty client array when server has rows', () => {
     /**
      * Client deleted all rows during autosave. Server responds with [A, B].
      * Client should stay empty.
      */
     const currentState: FormState = {
       array: {
-        value: 0,
+        disableFormData: false,
         rows: [],
+        value: 0,
       },
     }
 
     const serverState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1247,47 +1552,48 @@ describe('Form State', () => {
 
     expect(newState.array?.rows).toHaveLength(0)
     expect(newState.array?.value).toBe(0)
+    expect(getDataFromFormState(newState, true)).toEqual({ array: [] })
     expect(newState['array.0.text']).toBeUndefined()
     expect(newState['array.1.text']).toBeUndefined()
   })
 
-  it('should handle 3-level nested array reordering', () => {
+  test('should handle 3-level nested array reordering', () => {
     /**
      * Verify parseArrayFieldPath works at depth 3+.
      * blocks.0.items.1.subItems reordered from [X, Y] → [Y, X].
      */
     const currentState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'item-1' }, { id: 'item-2' }],
+        value: 2,
       },
       'blocks.0.items.1.subItems': {
-        value: 2,
         rows: [{ id: 'Y' }, { id: 'X' }],
+        value: 2,
       },
-      'blocks.0.items.1.subItems.0.text': { value: 'Y text', initialValue: 'Y text' },
-      'blocks.0.items.1.subItems.1.text': { value: 'X text', initialValue: 'X text' },
+      'blocks.0.items.1.subItems.0.text': { initialValue: 'Y text', value: 'Y text' },
+      'blocks.0.items.1.subItems.1.text': { initialValue: 'X text', value: 'X text' },
     }
 
     const serverState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'item-1' }, { id: 'item-2' }],
+        value: 2,
       },
       'blocks.0.items.1.subItems': {
-        value: 2,
         rows: [{ id: 'X' }, { id: 'Y' }],
+        value: 2,
       },
-      'blocks.0.items.1.subItems.0.text': { value: 'X text', initialValue: 'X text' },
-      'blocks.0.items.1.subItems.1.text': { value: 'Y text', initialValue: 'Y text' },
+      'blocks.0.items.1.subItems.0.text': { initialValue: 'X text', value: 'X text' },
+      'blocks.0.items.1.subItems.1.text': { initialValue: 'Y text', value: 'Y text' },
     }
 
     const newState = mergeServerFormState({
@@ -1303,57 +1609,400 @@ describe('Form State', () => {
     expect(newState['blocks.0.items.1.subItems.1.text']?.value).toBe('X text')
   })
 
-  it('should set rows to empty array for empty array fields', async () => {
-    const req = await createLocalReq({ user }, payload)
-
-    // Create a document with an empty array
-    const postData = await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Test Post',
-        array: [], // Empty array - this should result in rows: [] in form state
-      },
+  test('should preserve empty arrays and unset values when converting form state to data', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            initialValue: 0,
+            rows: [],
+            value: 0,
+          },
+          sections: {
+            initialValue: 1,
+            rows: [{ id: 'section-1' }],
+            value: 1,
+          },
+          'sections.0.id': { initialValue: 'section-1', value: 'section-1' },
+          'sections.0.items': {
+            initialValue: 0,
+            rows: [],
+            value: 0,
+          },
+          title: { initialValue: undefined, value: undefined },
+        },
+        true,
+      ),
+    ).toStrictEqual({
+      items: [],
+      sections: [{ id: 'section-1', items: [] }],
+      title: undefined,
     })
-
-    const { state } = await buildFormState({
-      mockRSCs: true,
-      id: postData.id,
-      collectionSlug: postsSlug,
-      data: postData,
-      docPermissions: {
-        create: true,
-        delete: true,
-        fields: true,
-        read: true,
-        readVersions: true,
-        update: true,
-      },
-      docPreferences: {
-        fields: {},
-      },
-      documentFormState: undefined,
-      operation: 'update',
-      renderAllFields: false,
-      req,
-      schemaPath: postsSlug,
-    })
-
-    expect(state.array).toBeDefined()
-    expect(state?.array?.rows).toEqual([]) // should be [] not undefined
   })
 
-  it('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async () => {
-    const req = await createLocalReq({ user }, payload)
+  test('should reconstruct populated row fields without including their counts', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: { rows: [{ id: 'row-1' }], value: 1 },
+          'items.0.id': { value: 'row-1' },
+          'items.0.label': { value: 'First' },
+          count: { value: 42 },
+        },
+        true,
+      ),
+    ).toEqual({ items: [{ id: 'row-1', label: 'First' }], count: 42 })
+  })
+
+  test('should preserve raw row counts when requested', () => {
+    const fields: FormState = {
+      items: { rows: [{ id: 'row-1' }], value: 1 },
+      'items.0.id': { value: 'row-1' },
+    }
+
+    expect(getDataFromFormState(fields)).toEqual({ items: 1, 'items.0.id': 'row-1' })
+    expect(getDataFromFormState(fields, true, true)).toEqual({ items: 1 })
+  })
+
+  test('should use shared row serialization when reading data by path', () => {
+    const fields: FormState = {
+      'group.items': { rows: [{ id: 'row-1' }], value: 1 },
+      'group.items.0.id': { value: 'row-1' },
+      'group.empty': { rows: [], value: 0 },
+      'group.fallback': { rows: [], value: null },
+    }
+
+    expect(getDataByPath(fields, 'group.items')).toEqual([{ id: 'row-1' }])
+    expect(getDataByPath(fields, 'group.empty')).toEqual([])
+    expect(getDataByPath(fields, 'group.fallback')).toBeNull()
+  })
+
+  test('should use shared row serialization when reducing values with validation', () => {
+    expect(
+      reduceFieldsToValuesWithValidation(
+        {
+          items: { rows: [{ id: 'row-1' }], valid: true, value: 1 },
+          'items.0.id': { valid: true, value: 'row-1' },
+          hidden: { disableFormData: true, valid: false, value: 'Hidden' },
+        },
+        true,
+      ),
+    ).toEqual({ data: { items: [{ id: 'row-1' }] }, valid: true })
+  })
+
+  test('should respect explicit form-data exclusions', () => {
+    expect(
+      getDataFromFormState(
+        {
+          hidden: { disableFormData: true, value: 'Hidden' },
+          items: { disableFormData: true, rows: [], value: 0 },
+          group: { disableFormData: true },
+          'group.label': { value: 'Keep' },
+        },
+        true,
+      ),
+    ).toEqual({ group: { label: 'Keep' } })
+  })
+
+  test('should ignore stale descendants of empty arrays when converting form state to data', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: { rows: [], value: 0 },
+          'items.0.title': { value: 'Stale top-level row' },
+          sections: {
+            disableFormData: true,
+            rows: [{ id: 'section-1' }],
+            value: 1,
+          },
+          'sections.0.id': { value: 'section-1' },
+          'sections.0.items': { rows: [], value: 0 },
+          'sections.0.items.0.title': { value: 'Stale nested row' },
+        },
+        true,
+      ),
+    ).toEqual({ items: [], sections: [{ id: 'section-1', items: [] }] })
+  })
+
+  test('should preserve a null array when converting form state to data', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            initialValue: null,
+            rows: [],
+            value: null,
+          },
+        },
+        true,
+      ),
+    ).toEqual({ items: null })
+  })
+
+  test('should allow a null array to be changed to an empty array', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            initialValue: null,
+            isModified: true,
+            rows: [],
+            value: 0,
+          },
+        },
+        true,
+      ),
+    ).toEqual({ items: [] })
+  })
+
+  test('should keep a null-to-empty array change after a sibling field changes', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            disableFormData: false,
+            initialValue: null,
+            rows: [],
+            value: 0,
+          },
+          title: {
+            isModified: true,
+            value: 'After',
+          },
+        },
+        true,
+      ),
+    ).toEqual({ items: [], title: 'After' })
+  })
+
+  test.describe('row data round trips', () => {
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { kind: 'null', value: null },
+          { kind: 'empty', value: [] },
+          { kind: 'populated', value: testCase.rows },
+        ].map((input) => ({ ...testCase, ...input })),
+      ),
+    )('should round-trip $kind $path data', async ({ path, value }, { payload }) => {
+      const req = await createPayloadRequest({ payload, user })
+      const data = { [path]: value }
+      const currentState = await buildRowFormState({ data, path, req })
+      const incomingState = await buildRowFormState({ data, formState: currentState, path, req })
+      const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+      expect(getDataFromFormState(state, true)).toEqual(data)
+    })
+
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { acceptValues: undefined, mode: 'background' },
+          { acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
+        ].map((mode) => ({ ...testCase, ...mode })),
+      ),
+    )(
+      'should retain client-cleared $path data after a stale $mode response',
+      async ({ acceptValues, path, rows }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: [rows[0]] }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(initialState, { type: 'REMOVE_ROW', path, rowIndex: 0 })
+        const state = mergeServerFormState({ acceptValues, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [] })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain a client-added $path row after a stale autosave response',
+      async ({ path, rows }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const initialState = await buildRowFormState({ data: { [path]: null }, path, req })
+        const incomingState = await buildRowFormState({
+          data: { [path]: null },
+          formState: initialState,
+          path,
+          req,
+        })
+        const addedRowState = await buildRowFormState({ data: { [path]: [rows[0]] }, path, req })
+        const prefix = `${path}.0.`
+        const subFieldState = Object.fromEntries(
+          Object.entries(addedRowState)
+            .filter(([fieldPath]) => fieldPath.startsWith(prefix))
+            .map(([fieldPath, field]) => [fieldPath.slice(prefix.length), field]),
+        )
+        const currentState = fieldReducer(initialState, {
+          type: 'ADD_ROW',
+          blockType: rows[0].blockType,
+          path,
+          subFieldState,
+        })
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [rows[0]] })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain client-reordered $path data after a stale autosave response',
+      async ({ path, rows }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: rows }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(initialState, {
+          type: 'MOVE_ROW',
+          moveFromIndex: 0,
+          moveToIndex: 1,
+          path,
+        })
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [rows[1], rows[0]] })
+      },
+    )
+
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { kind: 'null', value: null },
+          { kind: 'empty', value: [] },
+        ].map((input) => ({ ...testCase, ...input })),
+      ),
+    )(
+      'should accept server-cleared $kind $path data on explicit save',
+      async ({ path, rows, value }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const currentState = await buildRowFormState({ data: { [path]: rows }, path, req })
+        const data = { [path]: value }
+        const incomingState = await buildRowFormState({ data, formState: currentState, path, req })
+        const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual(data)
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain a null-to-empty $path change after a sibling edit and stale response',
+      async ({ path }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: null, title: 'Before' }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const withoutFallback = fieldReducer(
+          initialState,
+          buildNullifyLocaleFieldUpdate({ fieldValue: null, path, useFallback: false }),
+        )
+        const currentState = fieldReducer(withoutFallback, {
+          type: 'UPDATE',
+          path: 'title',
+          value: 'After',
+        })
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [], title: 'After' })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain an empty-to-null $path change after a stale response',
+      async ({ path }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: [] }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(
+          initialState,
+          buildNullifyLocaleFieldUpdate({ fieldValue: 0, path, useFallback: true }),
+        )
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: null })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain an explicit $path submission opt-out after a merge',
+      async ({ path }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: [] }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(initialState, {
+          type: 'UPDATE',
+          disableFormData: true,
+          path,
+          value: 0,
+        })
+        const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual({})
+      },
+    )
+
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { kind: 'null', value: null },
+          { kind: 'empty', value: [] },
+        ].map((input) => ({ ...testCase, ...input })),
+      ),
+    )(
+      'should omit stale children when an opted-out $path is cleared to $kind',
+      async ({ path, rows, value }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const initialState = await buildRowFormState({ data: { [path]: rows }, path, req })
+        const currentState = fieldReducer(initialState, {
+          type: 'UPDATE',
+          disableFormData: true,
+          path,
+          value: rows.length,
+        })
+        const incomingState = await buildRowFormState({
+          data: { [path]: value },
+          formState: initialState,
+          path,
+          req,
+        })
+        const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual({})
+      },
+    )
+  })
+
+  test('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
       data: {
         title: 'Test Post',
       },
+      overrideAccess: true,
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -1362,6 +2011,7 @@ describe('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -1370,6 +2020,34 @@ describe('Form State', () => {
 
     expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
 
-    await payload.delete({ collection: postsSlug, id: postData.id })
+    await payload.delete({ id: postData.id, collection: postsSlug, overrideAccess: true })
   })
 })
+
+async function buildRowFormState({
+  data,
+  formState,
+  path,
+  req,
+}: {
+  data: Data
+  formState?: FormState
+  path: 'array' | 'blocks'
+  req: PayloadRequest
+}): Promise<FormState> {
+  const { state } = await buildFormState({
+    collectionSlug: postsSlug,
+    data: structuredClone(data),
+    docPermissions: { fields: true },
+    docPreferences: { fields: {} },
+    formState,
+    mockRSCs: true,
+    operation: 'update',
+    renderAllFields: false,
+    req,
+    schemaPath: postsSlug,
+    select: { [path]: true, title: true },
+  })
+
+  return state
+}

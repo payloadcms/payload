@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { getPayload as getPayloadInstance } from 'payload'
 import ts from 'typescript'
 import { expect as vitestExpect } from 'vitest'
 
@@ -19,6 +20,7 @@ import type {
   TokenUsage,
 } from './types.js'
 
+import { runInit } from '../runInit.js'
 import { parseConfig } from './assertions/parseConfig.js'
 import { buildEvalConfig, missingEvalConfig, unwrapEvalConfigValue } from './evalConfig.js'
 import { createMCPEvalDatabase, setMCPEvalDatabaseEnvironment } from './mcpDatabase.js'
@@ -466,12 +468,15 @@ function createLazyPayload({
         }
 
         try {
-          const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
-          payload = (
-            await initPayloadInt(configDir, suiteName, undefined, configFile, {
-              payloadKey: configFile,
-            })
-          ).payload
+          await runInit(suiteName, false, true, configFile)
+          const { default: configPromise } = (await import(pathToFileURL(configFilePath).href)) as {
+            default: Promise<import('payload').SanitizedConfig>
+          }
+          payload = await getPayloadInstance({
+            config: await configPromise,
+            cron: true,
+            key: configFile,
+          })
           return payload
         } finally {
           if (restoreMCPEnvironment) {

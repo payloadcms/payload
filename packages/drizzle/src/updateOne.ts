@@ -1,15 +1,21 @@
+import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
+import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from './types.js'
+import type { DrizzleAdapter, PostgresDB } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
+import { transform } from './transform/read/index.js'
+import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
+import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
 import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
@@ -29,6 +35,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   let idToUpdate = id
+  let whereToUpdate: SQL<unknown> | undefined
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
@@ -40,6 +47,66 @@ export const updateOne: UpdateOne = async function updateOne(
       tableName,
       where: whereArg,
     })
+    // A `where` that needs joins cannot be applied to the UPDATE statement itself, so those
+    // queries keep resolving a matching id first and then update that row unconditionally
+    whereToUpdate = joins.length === 0 ? where : undefined
+
+    if (options.atomic === true) {
+      if (joins.length > 0) {
+        throw new Error('Atomic where updates do not support predicates that require joins')
+      }
+
+      if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
+        throw new Error('Atomic where updates only support fields stored on the main table')
+      }
+
+      const { arraysToPush, row } = transformForWrite({
+        adapter: this,
+        data,
+        enableAtomicWrites: true,
+        fields: collection.flattenedFields,
+        tableName,
+      })
+
+      if (arraysToPush && Object.keys(arraysToPush).length) {
+        throw new Error('Atomic where updates do not support array operations')
+      }
+
+      const table = this.tables[tableName]
+      const matchingRowQuery = (db as PostgresDB)
+        .select({ id: table.id })
+        .from(table)
+        .where(where)
+        .limit(1)
+
+      // PostgreSQL must lock the candidate before applying LIMIT so a waiting caller can
+      // continue to another match if a concurrent update makes the first row ineligible.
+      // NO KEY UPDATE permits concurrent foreign-key checks on the candidate.
+      // SQLite serializes writers and does not support SELECT ... FOR UPDATE.
+      const matchingRow =
+        this.name === 'postgres' ? matchingRowQuery.for('no key update') : matchingRowQuery
+
+      markWrite(this)
+
+      const docs = await (db as LibSQLDatabase)
+        .update(table)
+        .set(row)
+        .where(eq(table.id, matchingRow))
+        .returning()
+
+      if (!docs[0]) {
+        return null
+      }
+
+      return transform({
+        adapter: this,
+        config: this.payload.config,
+        data: docs[0],
+        fields: collection.flattenedFields,
+        joinQuery: false,
+        tableName,
+      })
+    }
 
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({
@@ -89,6 +156,7 @@ export const updateOne: UpdateOne = async function updateOne(
     req,
     select,
     tableName,
+    where: whereToUpdate,
   })
 
   if (returning === false) {

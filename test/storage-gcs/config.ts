@@ -1,18 +1,36 @@
 import { gcsStorage } from '@payloadcms/storage-gcs'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithAlwaysInsertFields } from './collections/MediaWithAlwaysInsertFields.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
+  mediaWithPrefixSlug,
+  prefix,
+} from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let uploadOptions
+const uploadOptions = {
+  transformers: [
+    proveSourceHashTransformer,
+    sharpTransformer({
+      collections: {
+        [mediaSlug]: storageMediaSharpOptions,
+      },
+    }),
+  ],
+}
 
 // Load config to work with emulated services
 dotenv.config({
@@ -20,38 +38,56 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-gcs',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
+    collections: [Media, MediaWithAlwaysInsertFields, MediaWithPrefix, Users],
+    storage: [
+      gcsStorage({
+        bucket: process.env.GCS_BUCKET,
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        options: {
+          apiEndpoint: process.env.GCS_ENDPOINT,
+          projectId: process.env.GCS_PROJECT_ID,
+        },
+      }),
+      // Plugin disabled: the prefix field should still be inserted by default
+      gcsStorage({
+        bucket: process.env.GCS_BUCKET,
+        collections: {
+          [mediaWithAlwaysInsertFieldsSlug]: {
+            prefix: '',
+          },
+        },
+        enabled: false,
+        options: {
+          apiEndpoint: process.env.GCS_ENDPOINT,
+          projectId: process.env.GCS_PROJECT_ID,
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: uploadOptions,
   },
-  collections: [Media, MediaWithPrefix, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  storage: [
-    gcsStorage({
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      bucket: process.env.GCS_BUCKET,
-      options: {
-        apiEndpoint: process.env.GCS_ENDPOINT,
-        projectId: process.env.GCS_PROJECT_ID,
-      },
-    }),
-  ],
-  upload: uploadOptions,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

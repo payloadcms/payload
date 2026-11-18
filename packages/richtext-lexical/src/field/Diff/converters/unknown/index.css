@@ -8,7 +8,6 @@
     border-radius: var(--radius-medium);
     border: var(--stroke-width-small) solid var(--color-border);
     position: relative;
-    font-family: var(--font-body);
     margin-block: calc(var(--spacer-1) * 2.5);
     max-height: calc(var(--spacer-5) * 2.5);
     padding: calc(var(--spacer-1) * 1.25);

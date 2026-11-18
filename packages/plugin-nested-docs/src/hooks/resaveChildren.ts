@@ -22,6 +22,7 @@ export const resaveChildren =
       draft: true,
       limit: 0,
       locale: req.locale,
+      overrideAccess: true,
       req,
       where: {
         [parentSlug]: {
@@ -38,6 +39,7 @@ export const resaveChildren =
       draft: false,
       limit: 0,
       locale: req.locale,
+      overrideAccess: true,
       req,
       where: {
         [parentSlug]: {
@@ -82,6 +84,7 @@ export const resaveChildren =
             depth: 0,
             draft: isDraft,
             locale: req.locale,
+            overrideAccess: true,
             req,
           })
         }

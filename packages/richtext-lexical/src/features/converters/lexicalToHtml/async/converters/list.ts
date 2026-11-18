@@ -1,15 +1,17 @@
+import escapeHTML from 'escape-html'
 import { v4 as uuidv4 } from 'uuid'
 
 import type { SerializedListItemNode, SerializedListNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
-const ALLOWED_LIST_TAGS = new Set(['ol', 'ul'])
+import { ALLOWED_LIST_TAGS } from '../../../../lists/shared/constants.js'
+
 const ALLOWED_LIST_TYPES = new Set(['bullet', 'check', 'number'])
 
 export const ListHTMLConverterAsync: HTMLConvertersAsync<
   SerializedListItemNode | SerializedListNode
 > = {
-  list: async ({ node, nodesToHTML, providedStyleTag }) => {
+  list: async ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = (
       await nodesToHTML({
         nodes: node.children,
@@ -19,9 +21,9 @@ export const ListHTMLConverterAsync: HTMLConvertersAsync<
     const tag = ALLOWED_LIST_TAGS.has(node.tag) ? node.tag : 'ul'
     const listType = ALLOWED_LIST_TYPES.has(node.listType) ? node.listType : 'bullet'
 
-    return `<${tag}${providedStyleTag} class="list-${listType}">${children}</${tag}>`
+    return `<${tag}${providedDirAttribute}${providedStyleTag} class="list-${listType}">${children}</${tag}>`
   },
-  listitem: async ({ node, nodesToHTML, parent, providedCSSString }) => {
+  listitem: async ({ node, nodesToHTML, parent, providedCSSString, providedDirAttribute }) => {
     const hasSubLists = node.children.some((child) => child.type === 'list')
 
     const children = (
@@ -32,13 +34,13 @@ export const ListHTMLConverterAsync: HTMLConvertersAsync<
 
     if ('listType' in parent && parent?.listType === 'check') {
       const uuid = uuidv4()
-      return `<li
+      return `<li${providedDirAttribute}
           aria-checked="${node.checked ? 'true' : 'false'}"
           class="list-item-checkbox${node.checked ? ' list-item-checkbox-checked' : ' list-item-checkbox-unchecked'}${hasSubLists ? ' nestedListItem' : ''}"
           role="checkbox"
           style="list-style-type: none;${providedCSSString}"
           tabIndex="-1"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
         >
           ${
             hasSubLists
@@ -49,10 +51,10 @@ export const ListHTMLConverterAsync: HTMLConvertersAsync<
           }
         </li>`
     } else {
-      return `<li
+      return `<li${providedDirAttribute}
           class="${hasSubLists ? 'nestedListItem' : ''}"
           style="${hasSubLists ? `list-style-type: none;${providedCSSString}` : providedCSSString}"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
         >${children}</li>`
     }
   },

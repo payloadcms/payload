@@ -1,7 +1,8 @@
 @layer payload-default {
   .dropzone {
     position: relative;
-    display: flex;
+    display: block;
+    text-align: center;
     align-items: flex-start;
     background-color: var(--color-bg-secondary);
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
@@ -17,6 +18,11 @@
       background: var(--color-bg-hover);
     }
 
+    &:focus {
+      outline: var(--accessibility-outline);
+      outline-offset: calc(-2 * var(--accessibility-outline-offset));
+    }
+
     &.dragging {
       background: var(--color-bg-brand-tertiary);
 
@@ -25,9 +31,9 @@
       }
     }
 
-    @media (max-width: 768px) {
-      display: block;
-      text-align: center;
+    @media (min-width: 768px) {
+      display: flex;
+      text-align: start;
     }
 
     &.dropzone--style-default {

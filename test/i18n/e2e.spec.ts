@@ -15,10 +15,11 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { getColumnSelectorItem } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 let payload: PayloadTestSDK<Config>
@@ -36,8 +37,6 @@ describe('i18n', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -46,15 +45,11 @@ describe('i18n', () => {
     collection1URL = new AdminUrlUtil(serverURL, 'collection1')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'i18nTests',
     })
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -208,6 +203,7 @@ describe('i18n', () => {
         data: {
           i18nFieldLabel: 'Test',
         },
+        overrideAccess: true,
       })
 
       // set language to Spanish
@@ -225,6 +221,29 @@ describe('i18n', () => {
         page.locator('#heading-i18nFieldLabel .sort-column__label', { hasText: 'es-label' }),
       ).toBeVisible()
       await expect(page.locator('#search-filter-input')).toHaveAttribute('placeholder', 'Buscar')
+    })
+
+    test('should show translated field label in the sort button labels', async () => {
+      await payload.create({
+        collection: 'collection1',
+        data: {
+          i18nFieldLabel: 'Test',
+        },
+        overrideAccess: true,
+      })
+
+      await setUserLanguage('en')
+
+      await page.goto(collection1URL.list)
+
+      await expect(page.locator('#heading-i18nFieldLabel .sort-column__asc')).toHaveAttribute(
+        'aria-label',
+        'Sort by en-label Ascending',
+      )
+      await expect(page.locator('#heading-i18nFieldLabel .sort-column__desc')).toHaveAttribute(
+        'aria-label',
+        'Sort by en-label Descending',
+      )
     })
 
     test('should display translated collections and globals config options', async () => {

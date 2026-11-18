@@ -7,6 +7,7 @@ export const RestrictedTabsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  authorship: false,
   fields: [
     {
       name: 'title',

@@ -94,6 +94,12 @@ services:
       - ./__helpers/shared/db/mongodb/keyfile:/etc/mongodb/keyfile:ro
       - ./__helpers/shared/db/mongodb/docker-compose-entrypoint.sh:/docker-compose-entrypoint.sh:ro
     entrypoint: ['/bin/bash', '/docker-compose-entrypoint.sh']
+    # Gate on a writable PRIMARY, not just `ping`. `ping` succeeds as soon as mongod
+    # accepts connections — including during the replica-set election gap after the
+    # entrypoint's auth restart — so `up -d --wait` (and compose `service_healthy`)
+    # would report ready while transactions are still rejected with "Only servers in a
+    # sharded cluster can start a new transaction". `quit(1)` on a non-primary keeps the
+    # container unhealthy until an election completes.
     healthcheck:
       test:
         [
@@ -106,7 +112,7 @@ services:
           '--authenticationDatabase',
           'admin',
           '--eval',
-          "db.adminCommand('ping')",
+          'db.hello().isWritablePrimary || quit(1)',
         ]
       interval: 2s
       timeout: 5s

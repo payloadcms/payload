@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 
 import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
 
@@ -33,6 +33,8 @@ export type CollapsibleProps = {
    */
   disableToggleIndicator?: boolean
   dragHandleProps?: DragHandleProps
+  /** Opt into a region named by the rendered header for significant sections, not individual rows. */
+  hasContentRegion?: boolean
   header?: React.ReactNode
   initCollapsed?: boolean
   isCollapsed?: boolean
@@ -48,11 +50,17 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   disableHeaderToggle = false,
   disableToggleIndicator = false,
   dragHandleProps,
+  hasContentRegion = false,
   header,
   initCollapsed,
   isCollapsed: collapsedFromProps,
   onToggle,
 }) => {
+  const id = useId()
+  const dragLabelID = `${id}-drag-label`
+  const headerID = `${id}-header`
+  const toggleLabelID = `${id}-toggle-label`
+  const contentID = `${id}-content`
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed))
   const [hoveringToggle, setHoveringToggle] = useState(false)
   const { isWithinCollapsible } = useCollapsible()
@@ -89,6 +97,9 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
         >
           {!disableHeaderToggle && (
             <button
+              aria-controls={contentID}
+              aria-expanded={!isCollapsed}
+              aria-labelledby={header ? `${headerID} ${toggleLabelID}` : undefined}
               className={[
                 `${baseClass}__toggle`,
                 `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
@@ -98,19 +109,26 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               onClick={toggleCollapsible}
               type="button"
             >
-              <span>{t('fields:toggleBlock')}</span>
+              <span id={toggleLabelID}>{t('fields:toggleBlock')}</span>
             </button>
           )}
 
           {dragHandleProps && (
-            <div
+            <button
               className={`${baseClass}__drag`}
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
-              aria-label={t('general:dragToReorder')}
+              aria-labelledby={header ? `${dragLabelID} ${headerID}` : dragLabelID}
+              data-sortable-id={dragHandleProps.id}
+              draggable={dragHandleProps.draggable}
+              ref={dragHandleProps.setActivatorNodeRef}
+              type="button"
             >
+              <span className="sr-only" id={dragLabelID}>
+                {t('general:dragToReorder')}
+              </span>
               <AlignJustifiedIcon />
-            </div>
+            </button>
           )}
           {header ? (
             <div
@@ -120,6 +138,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               ]
                 .filter(Boolean)
                 .join(' ')}
+              id={headerID}
             >
               {header}
             </div>
@@ -128,6 +147,9 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
             {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
             {!disableToggleIndicator && (
               <button
+                aria-controls={contentID}
+                aria-describedby={header ? headerID : undefined}
+                aria-expanded={!isCollapsed}
                 aria-label={t(isCollapsed ? 'general:expand' : 'general:collapse')}
                 className={`${baseClass}__indicator`}
                 onClick={toggleCollapsible}
@@ -140,7 +162,14 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           </div>
         </div>
         <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
-          <div className={`${baseClass}__content`}>{children}</div>
+          <div
+            aria-labelledby={hasContentRegion && header ? headerID : undefined}
+            className={`${baseClass}__content`}
+            id={contentID}
+            role={hasContentRegion && header ? 'region' : undefined}
+          >
+            {children}
+          </div>
         </AnimateHeight>
         {AfterCollapsible}
       </CollapsibleProvider>

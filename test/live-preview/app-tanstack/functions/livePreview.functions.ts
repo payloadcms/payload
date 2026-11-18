@@ -9,14 +9,15 @@ export const getLivePreviewDoc = createServerFn({ method: 'GET' })
 
     try {
       const { docs } = await payload.find({
-        collection: collection as any,
+        collection,
         depth: 2,
         draft: true,
+        overrideAccess: true,
         trash: true,
         where: { slug: { equals: slug } },
       })
 
-      return (docs[0] ?? null) as null | Record<string, unknown>
+      return docs[0] ?? null
     } catch {
       return null
     }

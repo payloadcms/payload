@@ -2,7 +2,6 @@ import escapeHTML from 'escape-html'
 import React, { Fragment } from 'react'
 import { Text } from 'slate'
 
- 
 type Children = Leaf[]
 
 type Leaf = {

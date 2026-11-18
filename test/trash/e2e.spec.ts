@@ -8,15 +8,12 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import {
-  changeLocale,
-  closeAllToasts,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-} from '../__helpers/e2e/helpers.js'
+import { changeLocale, closeAllToasts } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -45,53 +42,43 @@ describe('Trash', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
     usersUrl = new AdminUrlUtil(serverURL, usersSlug)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
-  beforeEach(async ({ page, context }) => {
+  beforeEach(async ({ context, page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'trash',
     })
     pagesDocOneID = (
       await payload.find({
         collection: 'pages',
-        limit: 1,
         depth: 0,
+        limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]!.id
     postsDocOneID = (
-      await payload.find({
+      await payload.create({
         collection: 'posts',
-        limit: 1,
-        depth: 0,
-        pagination: false,
-        where: {
-          title: {
-            equals: 'Post 1',
-          },
+        data: {
+          _status: 'published',
+          title: 'Post 1',
         },
+        overrideAccess: true,
       })
-    ).docs[0]!.id
+    ).id
     postsDocTwoID = (
-      await payload.find({
+      await payload.create({
         collection: 'posts',
-        limit: 1,
-        depth: 0,
-        pagination: false,
-        where: {
-          title: {
-            equals: 'Post 2',
-          },
+        data: {
+          _status: 'published',
+          title: 'Post 2',
         },
+        overrideAccess: true,
       })
-    ).docs[0]!.id
-    initPageConsoleErrorCatch(page)
+    ).id
+    await initPage({ page, serverURL })
     //await throttleTest({ page, context, delay: 'Slow 4G' })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Collection view', () => {
@@ -311,9 +298,10 @@ describe('Trash', () => {
         await expect(page.locator('.list-selection__button[aria-label="Delete"]')).toBeVisible()
 
         await payload.delete({
-          collection: postsSlug,
           id: trashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -390,6 +378,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -402,6 +391,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.every((doc) => doc._status === 'draft')
           })
@@ -414,6 +404,7 @@ describe('Trash', () => {
               equals: 'Ready for restore',
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -465,6 +456,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -477,6 +469,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.every((doc) => doc._status === 'published')
           })
@@ -489,6 +482,7 @@ describe('Trash', () => {
               equals: 'Ready for restore',
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -548,6 +542,7 @@ describe('Trash', () => {
                   },
                 ],
               },
+              overrideAccess: true,
             })
             return deletedPosts.docs.length
           })
@@ -576,9 +571,9 @@ describe('Trash', () => {
         await page.goto(postsUrl.trash)
 
         await addListFilter({
-          page,
           fieldLabel: 'Title',
           operatorLabel: 'is like',
+          page,
           value: 'Test',
         })
 
@@ -588,9 +583,10 @@ describe('Trash', () => {
         // Cleanup: permanently delete the created docs
         await mapAsync(createdDocs, async (doc) => {
           await payload.delete({
-            collection: postsSlug,
             id: doc.id,
+            collection: postsSlug,
             trash: true, // Force permanent delete
+            overrideAccess: true,
           })
         })
       })
@@ -633,7 +629,11 @@ describe('Trash', () => {
       test('Should collapse breadcrumbs into a popup menu when they do not fit the available width', async ({
         page,
       }) => {
-        await page.setViewportSize({ width: 400, height: 800 })
+        // 320px (not 400px) puts the breadcrumbs unambiguously past the available
+        // width. At 400px the expanded breadcrumbs measure within ~1px of the
+        // available space, making the collapse decision a coin-flip in slower CI
+        // environments (e.g. tanstack-start).
+        await page.setViewportSize({ width: 320, height: 800 })
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
@@ -688,6 +688,12 @@ describe('Trash', () => {
         await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
           'Trashed Post',
         )
+        // That re-run also creates a new ResizeObserver, which measures once more on the next frame.
+        // Let it, so it doesn't measure the inflated measurer below before fonts finish loading.
+        await page.evaluate(
+          () =>
+            new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        )
 
         await page.addStyleTag({ content: '.step-nav__measurer { padding-right: 5000px; }' })
         await expect(collapsedToggle).toBeHidden()
@@ -713,6 +719,22 @@ describe('Trash', () => {
         const statusBlock = page.locator('.doc-controls__status')
         await expect(statusBlock).toBeVisible()
         await expect(statusBlock).toContainText('Previously Published')
+      })
+
+      test('Should render rich text fields as read-only, including inside tabs', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        for (const fieldPath of ['richText', 'richTextInTab']) {
+          const editor = page.locator(
+            `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
+          )
+
+          await expect(editor).toBeVisible()
+          await expect(editor).toHaveAttribute('contenteditable', 'false')
+          await expect(editor).toHaveAttribute('aria-readonly', 'true')
+        }
       })
 
       test('Should render Permanently Delete and Restore buttons in doc controls', async ({
@@ -774,6 +796,7 @@ describe('Trash', () => {
                   },
                 ],
               },
+              overrideAccess: true,
             })
             return deletedPost.docs.length
           })
@@ -809,6 +832,7 @@ describe('Trash', () => {
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -821,6 +845,7 @@ describe('Trash', () => {
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
+              overrideAccess: true,
             })
             return docs[0]?._status === 'draft'
           })
@@ -839,8 +864,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -881,9 +906,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -891,8 +917,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -938,9 +964,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -948,8 +975,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -997,16 +1024,17 @@ describe('Trash', () => {
           .toMatch(/\w+ \d{1,2}(st|nd|rd|th) \d{4}, \d{1,2}:\d{2} [AP]M/)
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
       test('Should allow viewing of the API tab view from trash edit view', async ({ page }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -1046,9 +1074,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -1056,8 +1085,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -1102,9 +1131,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1114,11 +1144,12 @@ describe('Trash', () => {
       // Ensure Dev user exists and store its ID
       const { docs } = await payload.find({
         collection: usersSlug,
-        limit: 1,
-        where: { name: { equals: 'Dev' } },
-        trash: true,
         depth: 0,
+        limit: 1,
         pagination: false,
+        trash: true,
+        where: { name: { equals: 'Dev' } },
+        overrideAccess: true,
       })
       if (docs.length === 0) {
         throw new Error('Dev user not found! Ensure test seed data includes a Dev user.')
@@ -1129,19 +1160,21 @@ describe('Trash', () => {
     async function ensureDevUserTrashed() {
       const { docs } = await payload.find({
         collection: usersSlug,
+        limit: 1,
+        trash: true,
         where: {
           and: [{ name: { equals: 'Dev' } }, { deletedAt: { exists: true } }],
         },
-        limit: 1,
-        trash: true,
+        overrideAccess: true,
       })
 
       if (docs.length === 0) {
         // Trash the user if it's not already trashed
         await payload.update({
-          collection: usersSlug,
           id: devUserID,
+          collection: usersSlug,
           data: { deletedAt: new Date().toISOString() },
+          overrideAccess: true,
         })
       }
     }
@@ -1183,10 +1216,10 @@ describe('Trash', () => {
       const linkURL = await nameLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
     })
 
     test('Should properly disable auth fields in the trashed user edit view', async ({ page }) => {
@@ -1199,10 +1232,10 @@ describe('Trash', () => {
       const linkURL = await cellLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
 
       await expect(page.locator('input[name="email"]')).toBeDisabled()
       await expect(page.locator('#change-password')).toBeDisabled()
@@ -1222,10 +1255,10 @@ describe('Trash', () => {
       const linkURLRestore = await nameLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURLRestore}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
 
       await page.locator('.doc-controls__controls #action-restore').click()
 
@@ -1253,31 +1286,34 @@ describe('Trash', () => {
     const draftPost = await payload.create({
       collection: postsSlug,
       data: {
+        _status: 'draft',
         title: 'Draft with Localized Field',
-        _status: 'draft',
       },
+      overrideAccess: true,
     })
 
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'en',
+      collection: postsSlug,
       data: {
+        _status: 'draft',
         localizedField: localizedFieldValueEN,
-        _status: 'draft',
       },
       draft: true,
+      locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'es',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueES,
         _status: 'draft',
+        localizedField: localizedFieldValueES,
       },
       draft: true,
+      locale: 'es',
+      overrideAccess: true,
     })
 
     await page.goto(postsUrl.edit(draftPost.id))
@@ -1316,34 +1352,37 @@ describe('Trash', () => {
     const draftPost = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Draft with Localized Field',
         _status: 'draft',
+        title: 'Draft with Localized Field',
       },
+      overrideAccess: true,
     })
 
     // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
     // storing localized data only in the versions table
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'en',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueEN,
         _status: 'draft',
+        localizedField: localizedFieldValueEN,
       },
       draft: true,
+      locale: 'en',
+      overrideAccess: true,
     })
 
     // Update es locale as draft
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'es',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueES,
         _status: 'draft',
+        localizedField: localizedFieldValueES,
       },
       draft: true,
+      locale: 'es',
+      overrideAccess: true,
     })
 
     await page.goto(postsUrl.list)
@@ -1397,7 +1436,8 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
   return payload.create({
     collection: postsSlug,
     data,
-  }) as unknown as Promise<Post>
+    overrideAccess: true,
+  })
 }
 
 async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
@@ -1408,5 +1448,6 @@ async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'
       _status: 'published',
       deletedAt: new Date().toISOString(), // Set the post as trashed
     },
-  }) as unknown as Promise<Post>
+    overrideAccess: true,
+  })
 }

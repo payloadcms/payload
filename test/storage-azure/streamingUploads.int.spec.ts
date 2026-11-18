@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionSlug, Payload } from 'payload'
 
@@ -5,30 +6,20 @@ import { BlobServiceClient } from '@azure/storage-blob'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { getStoredUploadKeys } from '../__helpers/int/storedUploadKeys.js'
+import { test } from '../__helpers/int/vitest.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let restClient: NextRESTClient
-let payload: Payload
-
-describe('@payloadcms/storage-azure streamingUploads', () => {
+test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts' }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(
-      dirname,
-      undefined,
-      undefined,
-      path.resolve(dirname, 'streamingUploads.config.ts'),
-    ))
+  test.beforeEach(async () => {
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -40,15 +31,11 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     await clearContainer()
   }, 90000)
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async () => {
     await clearContainer()
   })
 
-  it('preserves mime type when uploaded via rest endpoint', async () => {
+  test('preserves mime type when uploaded via rest endpoint', async ({ restClient }) => {
     const fileBuffer = await readFile(path.resolve(dirname, '../uploads/image.png'))
 
     const data = new FormData()
@@ -62,37 +49,42 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     expect(response.headers.get('content-type')).toEqual('image/png')
   })
 
-  it('can upload', async () => {
+  test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
-    await verifyUploads({ collectionSlug: mediaSlug, uploadId: upload.id })
+    await verifyUploads({ payload }, { collectionSlug: mediaSlug, uploadId: upload.id })
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
-  it('can upload with prefix', async () => {
+  test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
-    await verifyUploads({
-      collectionSlug: mediaWithPrefixSlug,
-      uploadId: upload.id,
-      prefix,
-    })
+    await verifyUploads(
+      { payload },
+      {
+        collectionSlug: mediaWithPrefixSlug,
+        prefix,
+        uploadId: upload.id,
+      },
+    )
     expect(upload.url).toEqual(
-      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${encodeURIComponent(prefix)}`,
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
     )
   })
 
-  it('returns 404 for non-existing file', async () => {
+  test('returns 404 for non-existing file', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/nonexistent.png`)
     expect(response.status).toBe(404)
   })
@@ -103,28 +95,42 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
     }
   }
 
-  async function verifyUploads({
-    collectionSlug,
-    uploadId,
-    prefix = '',
-  }: {
-    collectionSlug: CollectionSlug
-    prefix?: string
-    uploadId: number | string
-  }) {
-    const uploadData = (await payload.findByID({
+  async function verifyUploads(
+    { payload }: { payload: Payload },
+    {
+      collectionSlug,
+      prefix = '',
+      uploadId,
+    }: {
+      collectionSlug: CollectionSlug
+      prefix?: string
+      uploadId: number | string
+    },
+  ) {
+    const uploadData = (await payload.db.findOne({
       collection: collectionSlug,
-      id: uploadId,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+      where: { id: { equals: uploadId } },
+    })) as unknown as {
+      filename: string
+      original?: { filename?: string }
+      variants: Record<string, { filename: string }>
+    }
+    const fileKeys = getStoredUploadKeys({ collectionSlug, doc: uploadData, payload })
+    const filenames = [
+      uploadData.filename,
+      uploadData.original?.filename,
+      ...Object.values(uploadData.variants || {}).map(({ filename }) => filename),
+    ].filter((filename): filename is string => Boolean(filename))
 
-    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
-      return prefix ? `${prefix}/${rawFilename}` : rawFilename
-    })
-
-    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+    expect(fileKeys.length).toBeGreaterThan(0)
+    for (const filename of filenames) {
+      expect(fileKeys.some((key) => path.basename(key) === filename)).toBe(true)
+    }
 
     for (const key of fileKeys) {
+      if (prefix) {
+        expect(key.startsWith(`${prefix}/`)).toBe(true)
+      }
       const blobClient = client.getBlobClient(key)
       try {
         const props = await blobClient.getProperties()

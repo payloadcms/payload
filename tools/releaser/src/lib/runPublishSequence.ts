@@ -6,21 +6,6 @@ export type PublishResult = {
   success: boolean
 }
 
-const printSummary = (results: PublishResult[]): void => {
-  console.log(`\n\nResults:\n`)
-  console.log(
-    results
-      .map((result) => {
-        if (!result.success) {
-          console.error(result.details)
-          return `  ❌ ${result.name}`
-        }
-        return `  ✅ ${result.name}`
-      })
-      .join('\n') + '\n',
-  )
-}
-
 /**
  * Publishes packages sequentially and stops at the first failure (fail-fast).
  * Combined with a topological publish order, a partial publish always leaves a
@@ -51,4 +36,19 @@ export const runPublishSequence = async ({
 
   printSummary(results)
   return results
+}
+
+const printSummary = (results: PublishResult[]): void => {
+  console.log(`\n\nResults:\n`)
+  console.log(
+    results
+      .map((result) => {
+        if (!result.success) {
+          console.error(result.details)
+          return `  ❌ ${result.name}`
+        }
+        return `  ✅ ${result.name}`
+      })
+      .join('\n') + '\n',
+  )
 }

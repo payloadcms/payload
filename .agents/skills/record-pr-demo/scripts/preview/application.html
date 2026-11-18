@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sample collection list</title>
+  </head>
+  <body>
+    <style>
+      body {
+        color-scheme: light dark;
+        --bg: light-dark(#fff, #191919);
+        --ink: light-dark(#171717, #eee);
+        --sub: light-dark(#666, #aaa);
+        --line: light-dark(#ddd, #383838);
+        --soft: light-dark(#f6f6f6, #232323);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        display: block;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+      }
+      .app {
+        display: flex;
+        height: 720px;
+      }
+      .nav {
+        width: 205px;
+        border-right: 1px solid var(--line);
+        padding: 30px 20px;
+        flex-shrink: 0;
+      }
+      .brand {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 42px;
+      }
+      .nav-item {
+        padding: 10px 12px;
+        color: var(--sub);
+        margin-bottom: 4px;
+      }
+      .active {
+        background: var(--soft);
+        color: var(--ink);
+        border-radius: 5px;
+      }
+      .nav-label {
+        font-size: 12px;
+        color: var(--sub);
+        padding: 10px 12px;
+      }
+      .main {
+        padding: 28px 40px;
+        flex: 1;
+        min-width: 0;
+      }
+      .crumb {
+        font-size: 13px;
+        color: var(--sub);
+        margin-bottom: 38px;
+      }
+      .heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 26px;
+      }
+      h1 {
+        font-size: 32px;
+        font-weight: 500;
+        margin: 0;
+        letter-spacing: -1px;
+      }
+      .create {
+        background: var(--ink);
+        color: var(--bg);
+        padding: 9px 16px;
+        border-radius: 5px;
+        white-space: nowrap;
+        font-size: 14px;
+      }
+      .search {
+        border: 1px solid var(--line);
+        padding: 12px;
+        border-radius: 5px;
+        color: var(--sub);
+        margin-bottom: 24px;
+        font-size: 14px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 120px 125px;
+        gap: 12px;
+        padding: 18px 12px;
+        border-bottom: 1px solid var(--line);
+        align-items: center;
+      }
+      .thead {
+        font-size: 13px;
+        color: var(--sub);
+        padding-block: 12px;
+      }
+      .status {
+        font-size: 13px;
+      }
+      .date {
+        color: var(--sub);
+        font-size: 13px;
+      }
+      .footer {
+        font-size: 13px;
+        color: var(--sub);
+        margin-top: 28px;
+      }
+      .menu {
+        display: none;
+      }
+      .title {
+        overflow-wrap: anywhere;
+      }
+      @media (max-width: 900px) {
+        .nav {
+          width: 170px;
+        }
+        .main {
+          padding: 28px 24px;
+        }
+        .row {
+          grid-template-columns: minmax(0, 1fr) 90px;
+        }
+        .date {
+          display: none;
+        }
+      }
+      @media (max-width: 600px) {
+        .nav {
+          display: none;
+        }
+        .main {
+          padding: 22px;
+        }
+        .menu {
+          display: inline;
+          margin-right: 14px;
+        }
+        .crumb {
+          margin-bottom: 32px;
+        }
+        .row {
+          grid-template-columns: minmax(0, 1fr) 76px;
+          padding-inline: 0;
+          gap: 8px;
+        }
+        h1 {
+          font-size: 29px;
+        }
+        .create {
+          padding: 8px 12px;
+        }
+        .search {
+          margin-bottom: 18px;
+        }
+      }
+    </style>
+    <div class="app">
+      <aside class="nav">
+        <div class="brand">◧ Payload</div>
+        <div class="nav-label">COLLECTIONS</div>
+        <div class="nav-item active">Posts</div>
+        <div class="nav-item">Media</div>
+        <div class="nav-item">Users</div>
+        <div class="nav-label" style="margin-top: 24px">GLOBALS</div>
+        <div class="nav-item">Navigation</div>
+        <div class="nav-item">Settings</div>
+      </aside>
+      <main class="main">
+        <div class="crumb"><span class="menu">☰</span>Dashboard / Posts</div>
+        <div class="heading">
+          <h1>Posts</h1>
+          <span class="create">Create new</span>
+        </div>
+        <div class="search">Search by title</div>
+        <div class="row thead">
+          <span>Title</span><span>Status</span><span class="date">Updated</span>
+        </div>
+        <div class="row">
+          <span class="title">Building with Payload</span><span class="status">Published</span
+          ><span class="date">Oct 15, 2026</span>
+        </div>
+        <div class="row">
+          <span class="title">A better editing experience</span><span class="status">Draft</span
+          ><span class="date">Oct 14, 2026</span>
+        </div>
+        <div class="row">
+          <span class="title">Introducing our new website</span><span class="status">Published</span
+          ><span class="date">Oct 12, 2026</span>
+        </div>
+        <div class="row">
+          <span class="title">What's coming next</span><span class="status">Draft</span
+          ><span class="date">Oct 10, 2026</span>
+        </div>
+        <div class="footer">1–4 of 4 posts</div>
+      </main>
+    </div>
+  </body>
+</html>

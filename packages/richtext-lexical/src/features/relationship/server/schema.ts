@@ -8,10 +8,9 @@ import type {
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
-import type { RelationshipFeatureProps } from './index.js'
+import type { RelationshipFeatureServerProps } from './index.js'
 
 import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
-import { filterEnabledRelationshipCollections } from '../shared/filterEnabledRelationshipCollections.js'
 
 export type RelationshipData = {
   [TCollectionSlug in CollectionSlug]: {
@@ -37,6 +36,7 @@ export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUpload
 }[TSlugs] & {
   format: LexicalElementFormat
   type: 'relationship'
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number
 }
 
@@ -44,6 +44,7 @@ export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUpload
 const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -56,6 +57,7 @@ const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<
 const SERIALIZED_RELATIONSHIP_NODE_INPUT_TS = `export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -65,22 +67,15 @@ const SERIALIZED_RELATIONSHIP_NODE_INPUT_TS = `export type SerializedRelationshi
 }[TSlugs];`
 
 export const createRelationshipNodeJSONSchema =
-  (props: RelationshipFeatureProps | undefined): JSONSchemaFn =>
-  ({ collectionIDFieldTypes, config, typeStringDefinitions, variant }) => {
+  (props: RelationshipFeatureServerProps): JSONSchemaFn =>
+  ({ collectionIDFieldTypes, typeStringDefinitions, variant }) => {
     const isInput = variant === 'input'
     typeStringDefinitions.add(
       isInput ? SERIALIZED_RELATIONSHIP_NODE_INPUT_TS : SERIALIZED_RELATIONSHIP_NODE_TS,
     )
-    const enabledCollections = config?.collections
-      ? filterEnabledRelationshipCollections(config.collections, {
-          disabledCollections: props?.disabledCollections,
-          enabledCollections: props?.enabledCollections,
-          uploads: false,
-        })
-      : []
+    const { enabledCollectionSlugs } = props
 
-    const variants: JSONSchema4[] = enabledCollections.map((collection) => {
-      const slug = collection.slug
+    const variants: JSONSchema4[] = enabledCollectionSlugs.map((slug) => {
       const idType: 'number' | 'string' = collectionIDFieldTypes[slug] ?? 'string'
       return {
         type: 'object',
@@ -98,7 +93,7 @@ export const createRelationshipNodeJSONSchema =
               },
           version: versionSchema,
         },
-        required: ['format', 'relationTo', 'type', 'value', 'version'],
+        required: ['format', 'relationTo', 'type', 'value'],
       }
     })
 
@@ -111,10 +106,10 @@ export const createRelationshipNodeJSONSchema =
           type: { type: 'string', const: 'relationship' },
           version: versionSchema,
         },
-        required: ['type', 'version'],
+        required: ['type'],
       }
     } else {
-      const slugUnion = enabledCollections.map((c) => `'${c.slug}'`).join(' | ')
+      const slugUnion = enabledCollectionSlugs.map((slug) => `'${slug}'`).join(' | ')
       const baseSchema: JSONSchema4 = variants.length === 1 ? variants[0]! : { oneOf: variants }
       const tsName = isInput ? 'SerializedRelationshipNodeInput' : 'SerializedRelationshipNode'
       schema = { ...baseSchema, tsType: `${tsName}<${slugUnion}>` }

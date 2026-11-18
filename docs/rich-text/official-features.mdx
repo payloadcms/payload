@@ -439,8 +439,7 @@ type StateValues = {
 
 type StyleObject = {
   [K in keyof PropertiesHyphenFallback]?:
-    | Extract<PropertiesHyphenFallback[K], string>
-    | undefined
+    Extract<PropertiesHyphenFallback[K], string> | undefined
 }
 ```
 
@@ -537,7 +536,7 @@ import { textStateConfig } from '@/fields/textStateConfig'
 
 **Step 2 — Add a custom text converter**
 
-When using [`RichText` from `@payloadcms/richtext-lexical/react`](/docs/rich-text/lexical#rendering-lexical-content-in-react), override the default `text` converter to read the `"$"` key and apply the corresponding CSS as inline styles:
+When using [`RichText` from `@payloadcms/richtext-lexical/react`](/docs/rich-text/converting-jsx#richtext-to-jsx), override the default `text` converter to read the `"$"` key and apply the corresponding CSS as inline styles:
 
 ```tsx
 // src/components/RichText/index.tsx
@@ -569,8 +568,7 @@ const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
 
     // Apply TextStateFeature styles from the "$" key in the serialized node
     const nodeState = (node as any)[NODE_STATE_KEY] as
-      | Record<string, string>
-      | undefined
+      Record<string, string> | undefined
     if (nodeState) {
       const styles: React.CSSProperties = {}
       for (const [stateKey, stateValue] of Object.entries(nodeState)) {

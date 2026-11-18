@@ -18,8 +18,8 @@ import type {
 import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { exceedsIdentifierLength, fitIdentifierLength } from '../utilities/fitIdentifierLength.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
-import { validateIdentifierLength } from '../utilities/validateIdentifierLength.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -186,10 +186,10 @@ export const buildTable = ({
     indexes,
   }
 
-  adapter.rawTables[tableName] = table
+  adapter.rawTables[tableName] = promoteLongInlineForeignKeys({ adapter, table })
 
   if (hasLocalizedField || localizedRelations.size) {
-    const localeTableName = validateIdentifierLength(`${tableName}${adapter.localesSuffix}`)
+    const localeTableName = `${tableName}${adapter.localesSuffix}`
     adapter.rawTables[localeTableName] = localesTable
 
     localesColumns.id = {
@@ -213,11 +213,11 @@ export const buildTable = ({
 
     localesIndexes._localeParent = {
       name: buildIndexName({
-        name: `${localeTableName}_locale_parent_id_unique`,
+        name: `${localeTableName}_parent_id_locale_unique`,
         adapter,
         appendSuffix: false,
       }),
-      on: ['_locale', '_parentID'],
+      on: ['_parentID', '_locale'],
       unique: true,
     }
 
@@ -240,7 +240,10 @@ export const buildTable = ({
       indexes: localesIndexes,
     }
 
-    adapter.rawTables[localeTableName] = localesTable
+    adapter.rawTables[localeTableName] = promoteLongInlineForeignKeys({
+      adapter,
+      table: localesTable,
+    })
 
     const localeRelations: Record<string, RawRelation> = {
       _parentID: {
@@ -340,7 +343,7 @@ export const buildTable = ({
 
   if (isRoot) {
     if (hasManyTextField) {
-      const textsTableName = validateIdentifierLength(`${rootTableName}_texts`)
+      const textsTableName = `${rootTableName}_texts`
       adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
@@ -446,7 +449,7 @@ export const buildTable = ({
     }
 
     if (hasManyNumberField) {
-      const numbersTableName = validateIdentifierLength(`${rootTableName}_numbers`)
+      const numbersTableName = `${rootTableName}_numbers`
       adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
@@ -576,9 +579,7 @@ export const buildTable = ({
         }
       }
 
-      const relationshipsTableName = validateIdentifierLength(
-        `${tableName}${adapter.relationshipsSuffix}`,
-      )
+      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
@@ -798,4 +799,45 @@ export const buildTable = ({
     hasManyTextField,
     relationsToBuild,
   }
+}
+
+/**
+ * Single-relation relationship/upload columns use Drizzle's inline `.references()`, which names
+ * the foreign key `<table>_<column>_<target>_<targetColumn>_fk` with no way to override it.
+ * When that name exceeds the Postgres identifier limit, Postgres stores a truncated name, so push
+ * never matches it and drops and re-adds the foreign key on every run, which can fail with
+ * "already exists". Those foreign keys are moved to explicitly named table-level foreign keys
+ * instead. Names that fit, and every foreign key on non-Postgres adapters, keep `.references()`.
+ */
+const promoteLongInlineForeignKeys = ({
+  adapter,
+  table,
+}: {
+  adapter: DrizzleAdapter
+  table: RawTable
+}): RawTable => {
+  for (const [columnKey, column] of Object.entries(table.columns)) {
+    if (!column.reference) {
+      continue
+    }
+
+    const { name: targetColumnName, onDelete, table: targetTableName } = column.reference
+    const drizzleForeignKeyName = `${table.name}_${column.name}_${targetTableName}_${targetColumnName}`
+
+    if (!exceedsIdentifierLength({ adapter, identifier: `${drizzleForeignKeyName}_fk` })) {
+      continue
+    }
+
+    table.foreignKeys ??= {}
+    table.foreignKeys[`${columnKey}Fk`] = {
+      name: fitIdentifierLength({ name: drizzleForeignKeyName, adapter, suffix: '_fk' }),
+      columns: [columnKey],
+      foreignColumns: [{ name: targetColumnName, table: targetTableName }],
+      onDelete,
+    }
+
+    delete column.reference
+  }
+
+  return table
 }

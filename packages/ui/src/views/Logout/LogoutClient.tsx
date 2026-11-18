@@ -75,7 +75,7 @@ export const LogoutClient: React.FC<{
       navigatingToLoginRef.current = true
       await logOut()
       toast(t('authentication:loggedOutSuccessfully'))
-      startRouteTransition(() => router.push(loginRoute))
+      void startRouteTransition(() => router.push(loginRoute))
       return
     }
   }, [logOut, loginRoute, router, startRouteTransition, t])
@@ -85,7 +85,7 @@ export const LogoutClient: React.FC<{
       void handleLogOut()
     } else if (!inactivity && !navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
-      startRouteTransition(() => router.push(loginRoute))
+      void startRouteTransition(() => router.push(loginRoute))
     }
   }, [handleLogOut, isLoggedIn, loginRoute, router, startRouteTransition, inactivity])
 

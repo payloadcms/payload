@@ -137,7 +137,7 @@ const IndexedFields: CollectionConfig = {
         },
       ],
     },
-  ]
+  ],
 }
 
 export default IndexedFields

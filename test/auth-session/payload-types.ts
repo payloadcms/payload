@@ -124,6 +124,14 @@ export interface AuthSessionUserAuthOperations {
 export interface AuthSessionUser {
   id: string;
   name: string;
+  createdBy?: {
+    relationTo: 'auth-session-users';
+    value: string | AuthSessionUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'auth-session-users';
+    value: string | AuthSessionUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
   collection: 'auth-session-users';
@@ -203,6 +211,8 @@ export interface PayloadMigration {
  */
 export interface AuthSessionUsersSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -299,6 +309,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
