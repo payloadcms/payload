@@ -67,6 +67,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
 
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
+      i18n,
       search: searchParams.get('search'),
     })
 
@@ -91,7 +92,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale, where])
+  }, [collection, i18n, searchParams, selectAll, ids, locale, where])
 
   const handleUnpublish = useCallback(async () => {
     const url = formatAdminURL({

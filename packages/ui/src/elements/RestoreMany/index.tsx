@@ -88,6 +88,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
           trash: true, // Ensure trashed docs are returned
           where: mergeListSearchAndWhere({
             collectionConfig,
+            i18n,
             search: parseSearchParams(searchParams)?.search as string,
             where: whereConstraint,
           }),
