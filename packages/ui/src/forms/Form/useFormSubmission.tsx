@@ -13,6 +13,7 @@ import {
 } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type {
@@ -497,7 +498,7 @@ export const useFormSubmission = ({
 
           if (uploadFile instanceof File) {
             if (promiseToastID === undefined) {
-              uploadToast = createProgressToast({ id: `save-upload-${crypto.randomUUID()}` })
+              uploadToast = createProgressToast({ id: `save-upload-${uuidv4()}` })
             }
 
             saveUpload = trackSaveUploadProgress({

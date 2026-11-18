@@ -16,6 +16,7 @@ import { formatAdminURL, parseErrorResponse, validateMimeType } from 'payload/sh
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import type { UploadProgress } from '../../../providers/DocumentInfo/types.js'
 import type { State } from './reducer.js'
@@ -488,7 +489,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       const total = currentForms.length
       // One toast for the whole batch, updated as files are sent.
-      const batchToastID = `bulk-upload-${crypto.randomUUID()}`
+      const batchToastID = `bulk-upload-${uuidv4()}`
       const batchToast = createProgressToast({ id: batchToastID })
       let completed = 0
 

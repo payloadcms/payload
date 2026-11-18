@@ -5,6 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import type { UploadSessionIntentData } from '../../utilities/uploadWithSession.js'
 
@@ -303,7 +304,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       }
 
       const controller = new AbortController()
-      const toastID = trackToast({ id: `upload-session-${crypto.randomUUID()}` })
+      const toastID = trackToast({ id: `upload-session-${uuidv4()}` })
       let detach: UploadEntry['detach'] = () => {}
       const detached = new Promise<never>((_, reject) => {
         detach = reject
