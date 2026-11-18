@@ -40,8 +40,12 @@ export const detectHighContrastMode = ({ cookieKey }: { cookieKey: string }): bo
     ? true
     : fromCookie === 'false'
       ? false
-      : !!(window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches)
+      : getHighContrastModeFromSystem()
 }
+
+/** Reads the system contrast preference, falling back to false when matchMedia is unavailable. @internal */
+export const getHighContrastModeFromSystem = (): boolean =>
+  !!window.matchMedia?.('(prefers-contrast: more)').matches
 
 /** Reads the system color-scheme preference, falling back to the default theme when matchMedia is unavailable. @internal */
 export const getThemeFromSystem = (): Theme =>

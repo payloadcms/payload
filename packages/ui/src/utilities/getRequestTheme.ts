@@ -10,7 +10,11 @@ type GetRequestThemeArgs = {
   headers: Request['headers']
 }
 
-export type RequestThemeSource = 'config' | 'cookie' | 'default' | 'header'
+/**
+ * The request input used to resolve the theme.
+ * `'fallback'` means no usable config, cookie, or client hint was available; the browser may still resolve the system preference.
+ */
+export type RequestThemeSource = 'fallback' | keyof GetRequestThemeArgs
 
 export type RequestThemeResult = {
   /** The request's resolved theme. */
@@ -34,14 +38,14 @@ export const getRequestTheme = ({
   const themeFromCookie = cookies.get(`${config.cookiePrefix}${themeCookieSuffix}`) as Theme
 
   if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
-    return { theme: themeFromCookie, themeSource: 'cookie' }
+    return { theme: themeFromCookie, themeSource: 'cookies' }
   }
 
   const themeFromHeader = headers.get('Sec-CH-Prefers-Color-Scheme') as Theme
 
   if (themeFromHeader && acceptedThemes.includes(themeFromHeader)) {
-    return { theme: themeFromHeader, themeSource: 'header' }
+    return { theme: themeFromHeader, themeSource: 'headers' }
   }
 
-  return { theme: defaultTheme, themeSource: 'default' }
+  return { theme: defaultTheme, themeSource: 'fallback' }
 }
