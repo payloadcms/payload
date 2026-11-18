@@ -13,7 +13,13 @@ import { renameFileOperation } from '../../packages/payload/src/collections/oper
 import { test } from '../__helpers/int/vitest.js'
 import { versionedCloudFiles } from '../plugin-cloud-storage/versionedCloudStorage.js'
 import { sourceReadCalls } from './collections/DynamicMedia.js'
-import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
+import {
+  dynamicMediaDir,
+  dynamicMediaSlug,
+  publicCloudMediaSlug,
+  restrictedDynamicMediaDir,
+  restrictedDynamicMediaSlug,
+} from './shared.js'
 import { requestCropCalls, signedImagePlans } from './transformers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -29,6 +35,7 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     // The cloud collection keeps its files in this shared in-memory store.
     versionedCloudFiles.clear()
     await rm(dynamicMediaDir, { force: true, recursive: true })
+    await rm(restrictedDynamicMediaDir, { force: true, recursive: true })
   })
 
   const createImage = async ({
@@ -40,7 +47,10 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     prefix,
   }: {
     _transforms?: null | Record<string, unknown>
-    collection?: typeof dynamicMediaSlug | typeof publicCloudMediaSlug
+    collection?:
+      | typeof dynamicMediaSlug
+      | typeof publicCloudMediaSlug
+      | typeof restrictedDynamicMediaSlug
     context?: RequestContext
     name?: string
     payload: Payload
@@ -83,6 +93,14 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
       width: 800,
     })
     expect(created.original).toMatchObject({ height: 1600, mimeType: 'image/png', width: 1600 })
+  })
+
+  test('should save a request-time variant when the collection restricts MIME types', async ({
+    payload,
+  }) => {
+    const created = await createImage({ collection: restrictedDynamicMediaSlug, payload })
+
+    expect(created.variants?.card).toMatchObject({ _stored: false, mimeType: null })
   })
 
   test('should apply the saved crop on the plain URL and serve the original with ?original=true', async ({

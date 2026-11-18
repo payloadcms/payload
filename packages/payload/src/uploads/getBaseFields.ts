@@ -364,6 +364,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                 ...mimeType.admin,
                 ...disabledFromImageSize(size.admin),
               },
+              // `upload.mimeTypes` limits the files a user can upload. A variant is a transformer's
+              // output: it may use another format, and a variant built on request has no MIME type yet.
+              validate: undefined,
             },
             {
               ...filesize,
