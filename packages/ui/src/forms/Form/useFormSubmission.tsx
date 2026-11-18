@@ -524,7 +524,9 @@ export const useFormSubmission = ({
             return
           }
 
-          const uploadMethod = methodToUse.toUpperCase()
+          // Only a URL action has a method; a function action may have none.
+          const uploadMethod =
+            typeof actionArg === 'string' ? methodToUse?.toUpperCase() : undefined
 
           if (
             typeof actionArg === 'string' &&
