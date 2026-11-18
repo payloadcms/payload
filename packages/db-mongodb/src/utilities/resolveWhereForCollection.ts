@@ -60,19 +60,24 @@ export function resolveWhereForCollection({
       return { matches: 'no-documents' }
     }
 
-    if (key === 'id' && usesObjectIDs && value && !Array.isArray(value)) {
-      const ids = typeof value.in === 'string' ? createArrayFromCommaDelineated(value.in) : value.in
+    let constraint = value
 
-      if (Array.isArray(ids)) {
-        conditions.push({
-          matches: 'documents-matching-where',
-          where: { id: { ...value, in: ids.filter((id) => Types.ObjectId.isValid(id)) } },
-        })
-        continue
+    if (key === 'id' && usesObjectIDs && value && !Array.isArray(value)) {
+      const idConstraint = { ...value }
+
+      for (const operator of ['in', 'not_in'] as const) {
+        const operand = value[operator]
+        const ids = typeof operand === 'string' ? createArrayFromCommaDelineated(operand) : operand
+
+        if (Array.isArray(ids)) {
+          idConstraint[operator] = ids.filter((id) => Types.ObjectId.isValid(id))
+        }
       }
+
+      constraint = idConstraint
     }
 
-    conditions.push({ matches: 'documents-matching-where', where: { [key]: value } })
+    conditions.push({ matches: 'documents-matching-where', where: { [key]: constraint } })
   }
 
   return combineConditions({ conditions, operator: 'and' })
