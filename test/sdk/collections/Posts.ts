@@ -36,5 +36,5 @@ export const PostsCollection: CollectionConfig = {
       ],
     },
   ],
-  trash: true
+  trash: true,
 }

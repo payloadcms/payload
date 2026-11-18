@@ -78,7 +78,7 @@ export function cloneValidationRequest({
     })
   }
 
-  return clonedRequest as Partial<PayloadRequest>
+  return clonedRequest
 }
 
 export function cloneValidationUser({

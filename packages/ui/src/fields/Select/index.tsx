@@ -28,13 +28,7 @@ const SelectFieldComponent: React.FC<SelectFieldClientProps> = (props) => {
     field,
     field: {
       name,
-      admin: {
-        className,
-        description,
-        isClearable = true,
-        isSortable = true,
-        placeholder,
-      } = {} as SelectFieldClientProps['field']['admin'],
+      admin: { className, description, isClearable = true, isSortable = true, placeholder } = {},
       hasMany = false,
       label,
       localized,

@@ -26,10 +26,10 @@ export const hasDraftsEnabled = (config: EntityConfig): boolean => {
 export const hasLocalizeStatusEnabled = (config: EntityConfig): boolean => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      (config.versions.drafts as SanitizedDrafts).localizeStatus,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    (config.versions.drafts as SanitizedDrafts).localizeStatus,
   )
 }
 
@@ -45,10 +45,10 @@ export const hasAutosaveEnabled = (
 } & EntityConfig => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.autosave,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.autosave,
   )
 }
 
@@ -58,10 +58,10 @@ export const hasAutosaveEnabled = (
 export const hasDraftValidationEnabled = (config: EntityConfig): boolean => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.validate,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.validate,
   )
 }
 
@@ -74,10 +74,10 @@ export const hasScheduledPublishEnabled = (
 } & EntityConfig => {
   return Boolean(
     config?.versions &&
-      typeof config.versions === 'object' &&
-      config.versions.drafts &&
-      typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.schedulePublish,
+    typeof config.versions === 'object' &&
+    config.versions.drafts &&
+    typeof config.versions.drafts === 'object' &&
+    config.versions.drafts.schedulePublish,
   )
 }
 

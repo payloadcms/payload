@@ -41,6 +41,7 @@ export const isXmlMimeType = (mimeType?: null | string): boolean => {
   return (
     mimeTypeEssence === 'application/xml' ||
     mimeTypeEssence === 'text/xml' ||
+    mimeTypeEssence === 'text/xsl' ||
     mimeTypeEssence.endsWith('+xml')
   )
 }
@@ -62,8 +63,9 @@ export const isXmlUpload = ({
   filename: string
   mimeType?: null | string
 }): boolean =>
-  getFileExtension(getSanitizedUploadFilename(filename)).toLowerCase() === 'xml' ||
-  isXmlMimeType(mimeType)
+  ['xml', 'xsl', 'xslt'].includes(
+    getFileExtension(getSanitizedUploadFilename(filename)).toLowerCase(),
+  ) || isXmlMimeType(mimeType)
 
 export const uploadRequiresServerValidation = (upload: {
   allowRestrictedFileTypes?: boolean

@@ -52,7 +52,7 @@ export const renderDocumentSlots: (args: {
     user,
   } = args
 
-  const components: DocumentSlots = {} as DocumentSlots
+  const components: DocumentSlots = {}
 
   const unsavedDraftWithValidations = undefined
 
@@ -271,7 +271,7 @@ export const renderDocumentSlots: (args: {
           height: doc?.height,
           mimeType,
           width: doc?.width,
-        } as UploadFilePreviewClientProps,
+        },
         Component: filePreviewComponent,
         importMap: req.payload.importMap,
         serverProps,
@@ -318,7 +318,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
         width: true,
       },
     })
-    doc = result as Record<string, unknown>
+    doc = result
   }
 
   return renderDocumentSlots({

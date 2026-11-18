@@ -11,7 +11,7 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, validateMimeType } from 'payload/shared'
+import { formatAdminURL, parseErrorResponse, validateMimeType } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -517,33 +517,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             })
           }
 
-          // should expose some sort of helper for this
-          const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
-            ([fieldErrs, nonFieldErrs], err) => {
-              const newFieldErrs: any[] = []
-              const newNonFieldErrs: any[] = []
-
-              if (err?.message) {
-                newNonFieldErrs.push(err)
-              }
-
-              if (Array.isArray(err?.data?.errors)) {
-                err.data?.errors.forEach((dataError) => {
-                  if (dataError?.path) {
-                    newFieldErrs.push(dataError)
-                  } else {
-                    newNonFieldErrs.push(dataError)
-                  }
-                })
-              }
-
-              return [
-                [...fieldErrs, ...newFieldErrs],
-                [...nonFieldErrs, ...newNonFieldErrs],
-              ]
-            },
-            [[], []],
-          )
+          const { fieldErrors, nonFieldErrors } = parseErrorResponse({ body: json })
 
           const missingFile = !fileValue && req.status === 400
           const exceedsLimit = fileValue && req.status === 413
@@ -556,33 +530,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           if (missingFile || exceedsLimit || missingFilename) {
             currentForms[i].formState.file.valid = false
 
-            // File/Blob objects cannot be serialized via the RSC flight protocol,
-            // so replace with a plain object before calling the server function.
-            const originalFileValue = currentForms[i].formState.file?.value
-            const formStateForServer = { ...currentForms[i].formState }
-            if (originalFileValue instanceof File) {
-              formStateForServer.file = {
-                ...formStateForServer.file,
-                value: { name: originalFileValue.name },
-              }
-            }
-
             // Need to get the field state to extract count since field errors
             // are not returned when file is missing or exceeds limit
             const { state: newState } = await getFormState({
               collectionSlug,
               docPermissions,
               docPreferences: null,
-              formState: formStateForServer,
+              formState: currentForms[i].formState,
               operation: 'update',
               schemaPath: collectionSlug,
             })
 
             if (newState) {
-              if (originalFileValue instanceof File && newState.file) {
-                newState.file = { ...newState.file, value: originalFileValue }
-              }
-
               currentForms[i] = {
                 errorCount: Object.values(newState).reduce(
                   (acc, value) => (value?.valid === false ? acc + 1 : acc),
@@ -714,14 +673,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         }
 
         if (hasSubmitted) {
-          // File/Blob objects cannot be serialized across the server-function
-          // boundary (RSC flight / TanStack seroval), so the `file` value is
-          // dropped during the `getFormState` round-trip. Capture it first and
-          // re-attach it afterwards so the file survives — mirroring the
-          // save-retry path below; without this the next save omits the file
-          // entirely and the server responds "No files were uploaded".
-          const originalFileValue = forms[i].formState.file?.value
-
           const { state } = await getFormState({
             collectionSlug,
             docPermissions,
@@ -730,10 +681,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             operation: 'create',
             schemaPath: collectionSlug,
           })
-
-          if (originalFileValue instanceof File && state.file) {
-            state.file = { ...state.file, value: originalFileValue }
-          }
 
           const newFormErrorCount = Object.values(state).reduce(
             (acc, value) => (value?.valid === false ? acc + 1 : acc),

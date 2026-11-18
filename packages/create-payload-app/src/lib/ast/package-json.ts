@@ -3,7 +3,11 @@ import * as fs from 'fs'
 import type { DatabaseAdapter, StorageAdapter } from './types.js'
 
 import { debug } from '../../utils/log.js'
-import { getDbPackageName, getStoragePackageName } from './adapter-config.js'
+import {
+  getDbPackageName,
+  getStoragePackageName,
+  SHARP_TRANSFORMER_PACKAGE,
+} from './adapter-config.js'
 import { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './types.js'
 
 type PackageJsonTransformOptions = {
@@ -128,11 +132,13 @@ function transformPackageJson(
   // Remove sharp
   if (options.removeSharp && transformed.dependencies) {
     transformed.dependencies = { ...transformed.dependencies }
-    if (transformed.dependencies.sharp) {
-      delete transformed.dependencies.sharp
-      debug('[AST] Removed sharp dependency')
-    } else {
-      debug('[AST] Sharp dependency not found (already absent)')
+    for (const sharpPackage of ['sharp', SHARP_TRANSFORMER_PACKAGE]) {
+      if (transformed.dependencies[sharpPackage]) {
+        delete transformed.dependencies[sharpPackage]
+        debug(`[AST] Removed ${sharpPackage} dependency`)
+      } else {
+        debug(`[AST] ${sharpPackage} dependency not found (already absent)`)
+      }
     }
   }
 

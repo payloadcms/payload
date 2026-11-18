@@ -295,6 +295,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     and: 'И',
     anotherUser: 'Друг потребител',
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
+    apiResponse: 'API отговор',
     applyChanges: 'Приложи промените',
     ascending: 'Възходящ',
     auto: 'Автоматично',
@@ -366,6 +367,13 @@ export const bgTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Този документ беше наскоро обновен от друг потребител. Вашият изглед е неактуален.',
     documents: 'Документи',
+    dragCancelled: 'Плъзгането на {{label}} е отменено.',
+    dragDropped: '{{label}} е пуснат. Позиция {{position}} от {{count}}.',
+    dragInstructions:
+      'Натиснете Space или Enter, за да вдигнете ред. Използвайте стрелките, за да го преместите. С VoiceOver изключете Quick Nav и използвайте Command + стрелките. Натиснете Space или Enter, за да пуснете, или Escape, за да отмените.',
+    dragMoved: '{{label}}: {{direction}}. Позиция {{position}} от {{count}}.',
+    dragPickedUp: '{{label}} е вдигнат. Позиция {{position}} от {{count}}.',
+    dragToMove: 'Плъзнете за преместване',
     dragToReorder: 'Плъзнете, за да пренаредите',
     duplicate: 'Дупликирай',
     duplicateWithoutSaving: 'Дупликирай без да запазваш промените',
@@ -480,6 +488,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Преиндексиране на всички {{collections}}.',
     reloadDocument: 'Презареди документ',
     remove: 'Премахни',
+    removeFilter: 'Премахване на филтъра',
     rename: 'Преименувайте',
     replaceRow: 'Заменете ред',
     requiredFields: 'Полетата, отбелязани с *, са задължителни.',
@@ -572,6 +581,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Местоположение на папката',
     goTo: 'Отидете на "{{name}}"',
     itemsMovedTo: '{{title}} беше преместен в {{destination}}',
     itemsMovedToRoot: '{{title}} преместен към корена',
@@ -632,6 +642,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
     bulkUpload: 'Масово Качване',
+    cancelUpload: 'Отказ на качването',
     copyLinkToFile: 'Копиране на връзка към файла',
     copyURL: 'Копиране на URL',
     crop: 'Изрязване',
@@ -653,6 +664,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     fileSize: 'Големина на файла',
     filesToUpload: 'Файлове за качване',
     fileToUpload: 'Файл за качване',
+    finishSaving: 'Довършване на запазването',
     focalPoint: 'Фокусна точка',
     focalPointDescription:
       'Премести фокусната точка директно върху визуализацията или регулирай стойностите по-долу.',
@@ -667,12 +679,27 @@ export const bgTranslations: DefaultTranslationsObject = {
     previewSizes: 'Преглед на размери',
     renameFile: 'Преименувайте файл',
     replaceFile: 'Заменете файл',
+    resumingFile: 'Възобновяване на {{filename}}',
+    savingInBackground: 'Качването ще завърши във фонов режим и тогава документът ще бъде запазен.',
     selectCollectionToBrowse: 'Избери колекция, която да разгледаш',
     selectFile: 'Избери файл',
     setCropArea: 'Задай област за изрязване',
     setFocalPoint: 'Задай фокусна точка',
     sizes: 'Големини',
     sizesFor: 'Размери за {{label}}',
+    uploadFileMismatch: 'Избраният файл не съвпада с прекъснатото качване.',
+    uploadingFile: 'Качване на {{filename}}',
+    uploadingFileProgress: 'Качване на {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Все още има качване в процес. Ако напуснете сега, то ще бъде прекъснато.',
+    uploadInterrupted: 'Качването на {{filename}} беше прекъснато.',
+    uploadInterruptedWillSave:
+      'Качването на {{filename}} беше прекъснато. Документът ще бъде запазен, когато завърши.',
+    uploadReadyToFinishSaving:
+      '{{filename}} е качен. Отворете формуляра, за да довършите запазването.',
+    uploadSavedInBackground: 'Качването завърши и документът беше запазен.',
+    uploadStorageRejectedSegments:
+      'Хранилището не прие нито една част от качването. Проверете CORS политиката на bucket-а.',
     width: 'Ширина',
   },
   validation: {
@@ -709,6 +736,10 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'На път си да публикуваш всички избрани {{label}}. Сигурен ли си?',
     aboutToRestore:
       'На път си да възстановиш този {{label}} документ до състоянието му от {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Възстановете съдържанието от {{versionDate}} като чернова. Публикуваното съдържание ще остане непроменено, докато не публикувате от редактора.',
+    aboutToRestoreAsDraftAllLocales:
+      'Възстановете съдържанието от {{versionDate}} като чернова за всички езици. Публикуваното съдържание ще остане непроменено, докато не публикувате от редактора.',
     aboutToRestoreGlobal:
       'На път си да възстановиш глобалния документ {{label}} до състоянието му от {{versionDate}}.',
     aboutToRevertToPublished:

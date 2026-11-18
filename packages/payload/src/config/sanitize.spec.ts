@@ -2,6 +2,7 @@ import type { Config } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
+import { InvalidConfiguration } from '../errors/InvalidConfiguration.js'
 import { sanitizeConfig } from './sanitize.js'
 
 const configDefaults: Config = {
@@ -14,6 +15,37 @@ const configDefaults: Config = {
 }
 
 describe('sanitizeConfig', () => {
+  it.each([
+    { cookiePrefix: undefined, expected: 'payload' },
+    { cookiePrefix: '', expected: 'payload' },
+    { cookiePrefix: 'payload', expected: 'payload' },
+    { cookiePrefix: 'my-app', expected: 'my-app' },
+    { cookiePrefix: 'My_app.123', expected: 'My_app.123' },
+    { cookiePrefix: "!#$%&'*+-.^_`|~", expected: "!#$%&'*+-.^_`|~" },
+  ])('should sanitize cookiePrefix $cookiePrefix to $expected', ({ cookiePrefix, expected }) => {
+    const sanitizedConfig = sanitizeConfig({ ...configDefaults, cookiePrefix })
+
+    expect(sanitizedConfig.cookiePrefix).toBe(expected)
+  })
+
+  it.each([
+    ' ',
+    '\t',
+    '\n',
+    ' my-app',
+    'my-app ',
+    'my app',
+    'my-app\n',
+    'my;app',
+    'my=app',
+    'my/app',
+    'my\u0000app',
+    'my\u007Fapp',
+    'caf\u00E9',
+  ])('should reject invalid cookiePrefix %j', (cookiePrefix) => {
+    expect(() => sanitizeConfig({ ...configDefaults, cookiePrefix })).toThrow(InvalidConfiguration)
+  })
+
   it('should populate sanitized root config defaults for a minimal config', () => {
     const config: Config = {
       ...configDefaults,
@@ -21,6 +53,7 @@ describe('sanitizeConfig', () => {
 
     const sanitizedConfig = sanitizeConfig(config)
 
+    expect(sanitizedConfig.cookiePrefix).toBe('payload')
     expect(sanitizedConfig.admin).toMatchObject({
       avatar: 'gravatar',
       components: {},
@@ -75,6 +108,16 @@ describe('sanitizeConfig', () => {
       graphQL: '/graphql',
       graphQLPlayground: '/graphql-playground',
     })
+  })
+
+  it('should throw for unsupported password hash iterations', () => {
+    expect(() =>
+      sanitizeConfig({
+        ...configDefaults,
+        // @ts-expect-error unsupported value from an untyped config
+        auth: { passwordHashIterations: 200000 },
+      }),
+    ).toThrow(InvalidConfiguration)
   })
 
   it('should populate a nested default when the property is explicitly undefined', () => {

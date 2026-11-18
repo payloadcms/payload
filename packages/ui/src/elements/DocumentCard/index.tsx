@@ -9,7 +9,12 @@ import './index.css'
 
 const baseClass = 'document-card'
 
-export type DocumentCardThumbnail = { alt?: string; src: string }
+export type DocumentCardThumbnail = {
+  alt?: string
+  /** Use `lazy` for cards that may be hidden on load, so their image is only downloaded once shown. */
+  loading?: 'eager' | 'lazy'
+  src: string
+}
 export type DocumentCardProps = {
   readonly children?: React.ReactNode
   readonly href?: null | string
@@ -107,7 +112,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         .join(' ')}
     >
       {thumbnail ? (
-        <img alt={thumbnail.alt || ''} className={`${baseClass}__thumbnail`} src={thumbnail.src} />
+        <img
+          alt={thumbnail.alt || ''}
+          className={`${baseClass}__thumbnail`}
+          decoding="async"
+          loading={thumbnail.loading}
+          src={thumbnail.src}
+        />
       ) : (
         <div
           aria-hidden="true"

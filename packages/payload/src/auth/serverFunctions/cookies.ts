@@ -65,7 +65,7 @@ export async function setAuthCookie({
     cookiePrefix,
     returnCookieAsObject: true,
     token,
-  }) as GeneratedCookie
+  })
 
   await applyAuthCookie({ cookie, serverAdapter })
 }
@@ -84,7 +84,7 @@ export async function clearAuthCookie({
     collectionAuthConfig: authConfig,
     cookiePrefix,
     returnCookieAsObject: true,
-  }) as GeneratedCookie
+  })
 
   await serverAdapter.setCookie(cookie.name, '', toCookieOptions(cookie))
 }
@@ -97,12 +97,13 @@ export async function getExistingAuthToken({
   cookiePrefix: string
   serverAdapter: ServerAdapter
 }): Promise<{ name: string; value: string } | undefined> {
+  const cookieName = `${cookiePrefix}-token`
   const store = await serverAdapter.getCookies()
   const allCookies = store.getAll?.()
 
   if (allCookies) {
-    return allCookies.find((cookie) => cookie.name.startsWith(cookiePrefix))
+    return allCookies.find((cookie) => cookie.name === cookieName)
   }
 
-  return store.get(`${cookiePrefix}-token`) ?? undefined
+  return store.get(cookieName) ?? undefined
 }

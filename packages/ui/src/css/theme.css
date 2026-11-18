@@ -1,14 +1,6 @@
-/**
- * Component-level theme tokens.
- *
- * Override any of these in your own :root block to restyle
- * all matching components at once — no !important needed.
- * User overrides win automatically since plain :root rules
- * beat @layer rules without needing !important.
- */
-
 @layer payload-default {
-  :root {
+  :root,
+  :host {
     /* Fields — controls text inputs, selects, date pickers, code editors, etc. */
     --field-min-height-large: var(--spacer-5);
     --field-min-height-medium: var(--spacer-4);
@@ -29,5 +21,15 @@
     /* Stroke widths */
     --stroke-width-small: 1px;
     --stroke-width-medium: 2px;
+
+    /* Focus outlines */
+    --accessibility-outline-offset: 1px;
+    --accessibility-outline-inset: calc(-1 * var(--stroke-width-small));
+  }
+
+  :root,
+  :host,
+  [data-theme] {
+    --accessibility-outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
   }
 }

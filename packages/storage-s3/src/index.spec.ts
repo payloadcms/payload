@@ -6,14 +6,11 @@ import { s3Storage } from './index.js'
 
 describe('s3Storage', () => {
   it('should not add Admin providers for many client-upload collections', async () => {
-    const uploadCollections = Array.from(
-      { length: 50 },
-      (_, index): CollectionConfig => ({
-        fields: [],
-        slug: `upload-${index}`,
-        upload: true,
-      }),
-    )
+    const uploadCollections = Array.from({ length: 50 }, (_, index): CollectionConfig => ({
+      fields: [],
+      slug: `upload-${index}`,
+      upload: true,
+    }))
     const storageCollections = Object.fromEntries(
       uploadCollections.map(({ slug }) => [slug, true] as const),
     )

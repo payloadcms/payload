@@ -2,6 +2,8 @@ import type { SanitizedConfig } from 'payload'
 
 import { handleEndpoints } from 'payload'
 
+import '../../utilities/devConfigReload.server.js'
+
 /**
  * Routes a TanStack Start API request to Payload's endpoint handler. The framework adapter
  * wires this into the app's API route and supplies the resolved `config`.

@@ -57,6 +57,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   onToggle,
 }) => {
   const id = useId()
+  const dragLabelID = `${id}-drag-label`
   const headerID = `${id}-header`
   const toggleLabelID = `${id}-toggle-label`
   const contentID = `${id}-content`
@@ -113,14 +114,21 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           )}
 
           {dragHandleProps && (
-            <div
+            <button
               className={`${baseClass}__drag`}
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
-              aria-label={t('general:dragToReorder')}
+              aria-labelledby={header ? `${dragLabelID} ${headerID}` : dragLabelID}
+              data-sortable-id={dragHandleProps.id}
+              draggable={dragHandleProps.draggable}
+              ref={dragHandleProps.setActivatorNodeRef}
+              type="button"
             >
+              <span className="sr-only" id={dragLabelID}>
+                {t('general:dragToReorder')}
+              </span>
               <AlignJustifiedIcon />
-            </div>
+            </button>
           )}
           {header ? (
             <div

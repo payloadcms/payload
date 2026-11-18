@@ -15,6 +15,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useFileFieldUploadSession } from '../../providers/UploadSessions/useFileFieldUploadSession.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -24,6 +25,7 @@ import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { getEditorFileSrc } from './getEditorFileSrc.js'
+import { getInitialCrop } from './getInitialCrop.js'
 import { pasteURLDrawerSlug, UploadFromURLModal } from './UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from './usePasteFromClipboard.js'
 import { useUploadFromUrl } from './useUploadFromUrl.js'
@@ -175,12 +177,21 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const { hasUploadSession, onFileChange: onSessionFileChange } = useFileFieldUploadSession({
+    collectionSlug,
+    hasStoredFile: Boolean(data?.filename),
+    setFilename,
+    setRemovedFile,
+    setValue,
+  })
+
   const handleFileChange = useCallback(
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
       if (isNewFile && file instanceof File) {
         setFileSrc(URL.createObjectURL(file))
       }
 
+      onSessionFileChange({ file })
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
@@ -190,7 +201,14 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
         onChange(file)
       }
     },
-    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
+    [
+      onChange,
+      onSessionFileChange,
+      setValue,
+      setUploadControlFile,
+      setUploadControlFileName,
+      setUploadControlFileUrl,
+    ],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -331,11 +349,13 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
             fileName={value?.name || data?.filename}
             fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={uploadEdits?.crop ?? undefined}
+            initialCrop={getInitialCrop({ data, hasSelectedFile: Boolean(value), uploadEdits })}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
               y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
             }}
+            // The editor keeps its crop in state, so it starts again for each new file.
+            key={value ? `${value.name}-${value.lastModified}` : data?.filename}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
@@ -366,7 +386,8 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
-      {data && data.filename && !removedFile && (
+      {/* A selected replacement hides the stored file, also after a failed save resets `removedFile`. */}
+      {data && data.filename && !removedFile && !value && (
         <FileDetails
           collectionSlug={collectionSlug}
           customUploadActions={customActions}
@@ -379,7 +400,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           uploadConfig={uploadConfig}
         />
       )}
-      {((!uploadConfig.hideFileInputOnCreate && !data?.filename) || removedFile) && (
+      {((!uploadConfig.hideFileInputOnCreate && !data?.filename) || removedFile || value) && (
         <div className={`${baseClass}__upload`}>
           {!value && (
             <Dropzone onChange={handleFileSelection}>
@@ -411,6 +432,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                   />
                   <span className={`${baseClass}__orText`}>{t('general:or')}</span>
                   <Button
+                    aria-label={t('upload:pasteURL')}
                     buttonStyle="pill"
                     className={`${baseClass}__pasteFromClipboard`}
                     icon="clipboard"
@@ -427,9 +449,10 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
               </div>
             </Dropzone>
           )}
-          {value && fileSrc && (
+          {value && (
             <React.Fragment>
               <Button
+                aria-label={t('general:cancel')}
                 buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
@@ -448,6 +471,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                   label={t('upload:fileName')}
                   onChange={handleFileNameChange}
                   path="filename"
+                  readOnly={hasUploadSession}
                   value={filename || value.name}
                 />
                 <UploadActions

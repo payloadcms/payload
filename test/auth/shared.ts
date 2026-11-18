@@ -6,6 +6,10 @@ export const publicUsersSlug = 'public-users'
 
 export const apiKeysSlug = 'api-keys'
 
+export const passwordMinLengthSlug = 'password-min-length'
+
+export const passwordCustomValidateSlug = 'password-custom-validate'
+
 export const rotateSecretSlug = 'rotate-secret'
 
 export const rotateSecretLoginSlug = 'rotate-secret-login'

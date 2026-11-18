@@ -1,0 +1,110 @@
+name: dismiss-stale-community-approvals
+
+on:
+  pull_request_target:
+    types:
+      - synchronize
+      - reopened
+      - edited
+
+permissions:
+  pull-requests: write
+
+jobs:
+  dismiss:
+    name: dismiss-stale-community-approvals
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    if: github.event.action != 'edited' || github.event.changes.base
+    steps:
+      # Never check out the PR code here: pull_request_target runs with a write token
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          retries: 3
+          script: |
+            const { owner, repo } = context.repo
+            const { action, pull_request, sender } = context.payload
+            const pull_number = pull_request.number
+            const isReopened = action === 'reopened'
+
+            // A reopened PR may include commits pushed while it was closed, by anyone,
+            // so the sender's access doesn't matter there
+            if (!isReopened) {
+              let permission = 'none'
+              try {
+                const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner,
+                  repo,
+                  username: sender.login,
+                })
+                permission = data.permission
+              } catch (err) {
+                core.warning(
+                  `Could not look up permission for @${sender.login} (${err.status ?? 'no status'}: ${err.message}), treating as untrusted`,
+                )
+              }
+
+              if (['admin', 'write'].includes(permission)) {
+                core.info(`@${sender.login} has ${permission} access, keeping approvals`)
+                return
+              }
+            }
+
+            const reason = {
+              edited: `The base branch was changed by @${sender.login}`,
+              reopened: 'The pull request was reopened with commits that were not approved',
+              synchronize: `New commits were pushed by @${sender.login}`,
+            }[action]
+
+            const { data: livePullRequest } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number,
+            })
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number,
+            })
+
+            // Approvals on the live head already cover every pushed commit, but a base change
+            // makes even those stale
+            const staleApprovals = reviews.filter(
+              (review) =>
+                review.state === 'APPROVED' &&
+                (action === 'edited' || review.commit_id !== livePullRequest.head.sha),
+            )
+
+            const failedReviewIds = []
+            for (const review of staleApprovals) {
+              const reviewer = review.user?.login ?? 'ghost'
+              try {
+                await github.rest.pulls.dismissReview({
+                  owner,
+                  repo,
+                  pull_number,
+                  review_id: review.id,
+                  message: `${reason}. Please re-review.`,
+                })
+                core.info(`Dismissed approval ${review.id} from @${reviewer}`)
+              } catch (err) {
+                // A run for an earlier push may have dismissed it in the meantime
+                const currentState = await github.rest.pulls
+                  .getReview({ owner, repo, pull_number, review_id: review.id })
+                  .then(({ data }) => data.state)
+                  .catch(() => 'UNKNOWN')
+
+                if (currentState === 'DISMISSED') {
+                  core.info(`Approval ${review.id} from @${reviewer} was already dismissed`)
+                  continue
+                }
+
+                failedReviewIds.push(review.id)
+                core.error(`Could not dismiss approval ${review.id}: ${err.message}`)
+              }
+            }
+
+            if (failedReviewIds.length > 0) {
+              core.setFailed(`Approvals still active: ${failedReviewIds.join(', ')}`)
+            }

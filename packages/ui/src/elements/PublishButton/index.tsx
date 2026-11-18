@@ -80,10 +80,10 @@ export function PublishButton({
     () =>
       Boolean(
         entityConfig?.fields &&
-          traverseForLocalizedFields({
-            blocksMap,
-            fields: entityConfig.fields,
-          }),
+        traverseForLocalizedFields({
+          blocksMap,
+          fields: entityConfig.fields,
+        }),
       ),
     [blocksMap, entityConfig?.fields],
   )
@@ -326,6 +326,7 @@ export function PublishButton({
         disabled={!canPublish || isValidatingLocales}
         loading={isValidatingLocales}
         onClick={isSpecificLocalePublishEnabled ? () => publishLocale(activeLocale.code) : publish}
+        popupAriaLabel={`${t('general:moreOptions')}: ${t('version:publish')}`}
         size="medium"
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled

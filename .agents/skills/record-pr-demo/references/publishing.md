@@ -11,7 +11,7 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs verify \
   --manifest /tmp/payload-pr-demo-feature.json
 ```
 
-This recomputes the SHA-256 digest and file size for the manifest's MP4. If verification fails, do not upload. Show the changed file and request approval again.
+This recomputes the SHA-256 digest and file size for the manifest's MP4 and checks the saved scenario snapshot against its recorded hash. If verification fails, do not upload. Show the changed file and request approval again.
 
 Confirm `gh auth status` succeeds and that the installed GitHub CLI command supports `--attach`. If it does not, use available browser automation to attach the approved local file through GitHub's PR description editor. Use the comment editor only when the user explicitly requests a comment. If the environment cannot select a local file, give the approved MP4 to the user for manual drag-and-drop into the same destination; do not commit it or substitute a release, LFS, or repository URL.
 
@@ -55,4 +55,4 @@ gh pr comment <number-or-url> \
 
 Re-read the PR description and confirm the saved existing body is intact and the final `## Preview` section contains the uploaded attachment in its own paragraph. Open the PR and confirm the inline player renders at the bottom of the description. For an explicitly requested comment, verify its player in that comment instead. Do not treat a successful command exit as sufficient proof.
 
-After verification, remove temporary body snapshots, combined body/comment files, scenario, plan, raw WebM, and recording-only fixtures. Preserve the approved MP4 until the upload and rendering are confirmed; remove it afterward only if the user does not want to keep it. Check `git status --short` and confirm no recording artifacts or temporary config changes remain.
+After verification, remove temporary body snapshots, combined body/comment files, scenario, plan, raw WebM, and recording-only fixtures. Preserve the approved MP4 and its take-specific `.scenario.mjs` snapshot until the upload and rendering are confirmed; keep the script available alongside any retained video. Remove these review artifacts afterward only if the user does not want to keep them. Check `git status --short` and confirm no recording artifacts or temporary config changes remain.

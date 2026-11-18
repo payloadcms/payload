@@ -1,68 +1,33 @@
 export type SubmenuNode = {
   closeBranch: () => void
   id: string
+  isPointerProtected?: () => boolean
   open: (viaKeyboard: boolean) => void
 }
 
 export type SubmenuScope = {
   activeChildId: null | string
-  cancelPending: (id?: string) => void
   closeActiveBranch: () => void
   register: (node: SubmenuNode) => () => void
   release: (id: string) => void
-  requestOpen: (args: { delay: boolean; id: string; viaKeyboard?: boolean }) => void
+  requestOpen: (args: { id: string; viaKeyboard?: boolean; viaPointer?: boolean }) => void
 }
 
-const DEFAULT_HOVER_DELAY = 150
-
-export const createSubmenuScope = ({
-  hoverDelay = DEFAULT_HOVER_DELAY,
-}: { hoverDelay?: number } = {}): SubmenuScope => {
+export const createSubmenuScope = (): SubmenuScope => {
   const nodes = new Map<string, SubmenuNode>()
   let activeChildId: null | string = null
-  let pendingChildId: null | string = null
-  let pendingTimer: ReturnType<typeof setTimeout> | undefined
-
-  const cancelPending = (id?: string) => {
-    if (id && pendingChildId !== id) {
-      return
-    }
-
-    if (pendingTimer) {
-      clearTimeout(pendingTimer)
-    }
-    pendingTimer = undefined
-    pendingChildId = null
-  }
-
-  const activate = ({ id, viaKeyboard = false }: { id: string; viaKeyboard?: boolean }) => {
-    cancelPending()
-    const node = nodes.get(id)
-    if (!node) {
-      return
-    }
-
-    if (activeChildId !== id) {
-      nodes.get(activeChildId ?? '')?.closeBranch()
-      activeChildId = id
-    }
-    node.open(viaKeyboard)
-  }
 
   return {
     get activeChildId() {
       return activeChildId
     },
-    cancelPending,
     closeActiveBranch: () => {
-      cancelPending()
       nodes.get(activeChildId ?? '')?.closeBranch()
       activeChildId = null
     },
     register: (node) => {
       nodes.set(node.id, node)
       return () => {
-        cancelPending(node.id)
         if (activeChildId === node.id) {
           activeChildId = null
         }
@@ -70,29 +35,23 @@ export const createSubmenuScope = ({
       }
     },
     release: (id) => {
-      cancelPending(id)
       if (activeChildId === id) {
         activeChildId = null
       }
     },
-    requestOpen: ({ id, delay, viaKeyboard = false }) => {
-      if (!delay) {
-        activate({ id, viaKeyboard })
-        return
-      }
-
+    requestOpen: ({ id, viaKeyboard = false, viaPointer = false }) => {
       if (activeChildId === id) {
-        cancelPending()
         return
       }
+      const node = nodes.get(id)
+      const activeNode = nodes.get(activeChildId ?? '')
 
-      cancelPending()
-      pendingChildId = id
-      pendingTimer = setTimeout(() => {
-        pendingTimer = undefined
-        pendingChildId = null
-        activate({ id, viaKeyboard })
-      }, hoverDelay)
+      if (!node || (viaPointer && activeNode?.isPointerProtected?.())) {
+        return
+      }
+      activeNode?.closeBranch()
+      activeChildId = id
+      node.open(viaKeyboard)
     },
   }
 }

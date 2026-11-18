@@ -200,7 +200,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (!permissions) {
         return
       }
-      queueTask(async () => {
+
+      const task = async () => {
         const lastFullyLoadedRelationToUse =
           typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
 
@@ -354,6 +355,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             onSuccess()
           }
         }
+      }
+
+      void queueTask({ task }).catch((error) => {
+        console.error('Error in queued function:', error) // eslint-disable-line no-console
       })
     },
     [
@@ -373,6 +378,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       t,
     ],
   )
+
+  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
+    return updateResults(args)
+  })
 
   const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
@@ -692,10 +701,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     },
     [config.routes.admin, serverURL],
   )
-
-  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
-    return updateResults(args)
-  })
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run

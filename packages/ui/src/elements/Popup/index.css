@@ -49,6 +49,21 @@
     color: var(--popup-text, var(--color-text-ontooltip));
   }
 
+  .popup__content[data-submenu-safe-area] {
+    overflow: visible;
+  }
+
+  .popup__content[data-submenu-safe-area]::before {
+    /* Debug safe area: uncomment to show the protected path.
+    background-color: color-mix(in srgb, var(--color-bg-assistive) 35%, transparent);
+    */
+    content: '';
+    position: fixed;
+    inset: 0;
+    clip-path: var(--popup-safe-area);
+    pointer-events: none;
+  }
+
   .popup__content.popup--size-small {
     min-width: 80px;
   }

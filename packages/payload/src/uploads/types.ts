@@ -3,6 +3,8 @@ import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { StagedObject } from './fileVersioning/fileOperationManager.js'
+import type { StoredFileRole } from './fileVersioning/types.js'
+import type { SegmentedUploadCapability, UploadSessionTransferConfig } from './sessions/types.js'
 
 export type OriginalFileData = {
   _objectKey?: string
@@ -17,6 +19,8 @@ export type OriginalFileData = {
 
 export type FileSize = {
   _objectKey?: string
+  /** `false` when the size has no stored file, because it is built when it is requested. */
+  _stored?: false | null
   filename: null | string
   filesize: null | number
   height: null | number
@@ -32,6 +36,8 @@ export type FileSizes = {
 
 export type FileData = {
   _objectKey?: string
+  /** `false` when no default file is stored, because it is built when it is requested. */
+  _stored?: false | null
   filename: string
   filesize: number
   focalX?: number
@@ -294,6 +300,11 @@ export type UploadConfig = {
       params: {
         collection: string
         filename: string
+        /**
+         * True when the request asks for the original with `?original=true`. The original and
+         * the main file can share a filename, so the filename alone does not say which to serve.
+         */
+        isOriginal?: boolean
         /** @default 'read' */
         operation?: FileHandlerOperation
         prefix?: string
@@ -352,6 +363,11 @@ export type UploadConfig = {
    */
   staticDir?: string
   /**
+   * Per-collection transfer preferences for segmented browser uploads.
+   * @experimental
+   */
+  transfer?: UploadSessionTransferConfig
+  /**
    * Adapter-provided upload instructions.
    * @internal
    */
@@ -401,8 +417,17 @@ export type GenerateUploadInstructions = (
 export type UploadInstructionsCapability = {
   /** Generates upload instructions. The generator or supporting endpoint must check access. */
   generate: GenerateUploadInstructions
-  /** Require a signed server-issued reference before invoking upload handlers. @internal */
+  /**
+   * Require a receipt signed by `resolveSignedURLKey` before invoking upload handlers. Client
+   * uploads keep an `original` and file history only when a receipt is verified.
+   * @see https://payloadcms.com/docs/upload/storage-adapters#custom-upload-receipts
+   */
   requiresUploadReceipt?: boolean
+  /**
+   * Native multipart or resumable transfer used by durable upload sessions.
+   * @experimental
+   */
+  segmented?: SegmentedUploadCapability
   /**
    * Whether the Admin panel should use these instructions before saving a document.
    * This can still be useful when upload chunks pass through Payload.
@@ -425,6 +450,8 @@ export type SanitizedUploadConfig = {
    * only — not authored on the collection.
    */
   variants?: ImageSize[]
+  /** The `slug` of the transformer that registered `variants` with `registerUploadVariants`. */
+  variantsTransformerSlug?: string
 } & UploadConfig
 
 export type File = {
@@ -450,7 +477,13 @@ export type File = {
   tempFilePath?: string
 }
 
-export type FileToSave =
+export type FileToSave = {
+  /**
+   * Which document field describes this file. Storage uses it to find the file's location,
+   * because the main file and the original can share a filename.
+   */
+  role?: StoredFileRole
+} & (
   | {
       /**
        * The buffer of the file.
@@ -472,8 +505,9 @@ export type FileToSave =
        */
       sourcePath: string
     }
+)
 
-type Crop = {
+export type Crop = {
   height: number
   unit: '%' | 'px'
   width: number

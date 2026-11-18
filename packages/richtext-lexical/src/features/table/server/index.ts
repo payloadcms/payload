@@ -7,6 +7,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { PAYLOAD_TABLE } from '../markdownTransformer.js'
 import { tableCellNodeJSONSchema, tableNodeJSONSchema, tableRowNodeJSONSchema } from './schema.js'
+import { tableCellValidation } from './validate.js'
 
 export type {
   SerializedTableCellNode,
@@ -60,6 +61,7 @@ export const TableFeature = createServerFeature({
         createNode({
           jsonSchema: tableCellNodeJSONSchema,
           node: TableCellNode,
+          validations: [tableCellValidation],
         }),
         createNode({
           jsonSchema: tableRowNodeJSONSchema,

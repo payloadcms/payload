@@ -88,7 +88,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     }
   }
   config.collections = config.collections ?? []
-  config.cookiePrefix = config.cookiePrefix ?? 'payload'
+  config.cookiePrefix = config.cookiePrefix || 'payload'
   config.cors = config.cors ?? []
   config.csrf = config.csrf ?? []
   config.custom = config.custom ?? {}
@@ -150,6 +150,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     ...(config.auth || {}),
     jwtOrder: config.auth?.jwtOrder ?? ['JWT', 'Bearer', 'cookie'],
+    passwordHashIterations: config.auth?.passwordHashIterations ?? 600000,
   }
 
   config.kv = config.kv ?? databaseKVAdapter()

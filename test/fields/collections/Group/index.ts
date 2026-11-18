@@ -357,7 +357,7 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-  ]
+  ],
 }
 
 export default GroupFields

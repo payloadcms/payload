@@ -218,13 +218,13 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       })
 
       expect(upload.id).toBeTruthy()
-      expect(upload.filename).toBe('image with spaces-original.png')
+      expect(upload.filename).toBe('image with spaces.png')
 
       // When disablePayloadAccessControl is true, URL should point directly to S3
       // and the filename should be URL-encoded
       expect(upload.url).toContain(process.env.S3_ENDPOINT)
       expect(upload.url).toContain(getTestBucketName())
-      expect(upload.url).toContain('image%20with%20spaces-original.png')
+      expect(upload.url).toContain('image%20with%20spaces.png')
 
       // Verify the file can be fetched using the URL
       const response = await fetch(upload.url)
@@ -303,7 +303,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       // URL should point directly to S3
       expect(upload.url).toContain(process.env.S3_ENDPOINT)
       expect(upload.url).toContain(getTestBucketName())
-      expect(upload.url).toContain('image-original.png')
+      expect(upload.url).toContain('image.png')
 
       const [response, originalResponse] = await Promise.all([
         fetch(upload.url),
@@ -378,8 +378,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image-original.png')
-      expect(upload2.filename).toBe('image-original-1.png')
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image-1.png')
       expect(upload1.prefix).toBe(prefix)
       expect(upload2.prefix).toBe(prefix)
     })
@@ -431,8 +431,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image-original.png')
-      expect(upload2.filename).toBe('image-original.png') // Should NOT increment
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image.png') // Should NOT increment
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
       // New uploads store the document prefix beneath the collection prefix.
       expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
@@ -464,8 +464,8 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       })
 
       // Both should keep original filename
-      expect(tenantAUpload.filename).toBe('image-original.png')
-      expect(tenantBUpload.filename).toBe('image-original.png')
+      expect(tenantAUpload.filename).toBe('image.png')
+      expect(tenantBUpload.filename).toBe('image.png')
       expect(tenantAUpload.prefix).toBe('tenant-a')
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })

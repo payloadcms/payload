@@ -6,6 +6,8 @@ import path from 'path'
 
 import type { ColumnToCodeConverter, DrizzleAdapter } from '../types.js'
 
+import { formatGeneratedFile } from './formatGeneratedFile.js'
+
 /**
  * @example
  * console.log(sanitizeObjectKey("oneTwo"));   // oneTwo
@@ -123,7 +125,18 @@ export const createSchemaGenerator = ({
           fkGraph[tableName].add(col.reference.table)
         }
       }
+
+      for (const fkKey in table.foreignKeys ?? {}) {
+        for (const foreignColumn of table.foreignKeys![fkKey].foreignColumns) {
+          if (foreignColumn.table !== tableName) {
+            fkGraph[tableName].add(foreignColumn.table)
+          }
+        }
+      }
     }
+
+    const extraConfigType =
+      corePackageSuffix === 'pg-core' ? 'PgTableExtraConfigValue' : 'SQLiteTableExtraConfigValue'
 
     const canReach = (from: string, target: string, visited: Set<string>): boolean => {
       if (from === target) {
@@ -159,6 +172,23 @@ export const createSchemaGenerator = ({
       const table = this.rawTables[tableName]
 
       const extrasDeclarations: string[] = []
+
+      /**
+       * A table-level foreign key to its own table, or to a table that points back at it, makes
+       * TypeScript infer the table's type from its own initializer (TS7022). An explicit return
+       * type on the extras callback breaks that cycle, like `AnyPgColumn` does for `.references()`.
+       */
+      const extrasNeedReturnType = Object.values(table.foreignKeys ?? {}).some((foreignKey) =>
+        foreignKey.foreignColumns.some(
+          (foreignColumn) =>
+            foreignColumn.table === tableName ||
+            circularEdges.has(`${tableName}:${foreignColumn.table}`),
+        ),
+      )
+
+      if (extrasNeedReturnType) {
+        addImport(corePackage, `type ${extraConfigType}`)
+      }
 
       if (table.indexes) {
         for (const key in table.indexes) {
@@ -212,7 +242,7 @@ ${Object.entries(table.columns)
   .join('\n')}
 }${
         extrasDeclarations.length
-          ? `, (columns) => [
+          ? `, (columns)${extrasNeedReturnType ? `: ${extraConfigType}[]` : ''} => [
     ${extrasDeclarations.join(' ')}
 ]`
           : ''
@@ -315,7 +345,7 @@ declare module '${this.packageName}' {
 
     const importTypes = `import type {} from '${this.packageName}'`
 
-    let code = [
+    const code = [
       warning,
       importTypes,
       ...importDeclarationsSanitized,
@@ -340,18 +370,11 @@ declare module '${this.packageName}' {
       }
     }
 
-    if (prettify) {
-      try {
-        const prettier = await eval('import("prettier")')
-        const configPath = await prettier.resolveConfigFile()
-        const config = configPath ? await prettier.resolveConfig(configPath) : {}
-        code = await prettier.format(code, { ...config, parser: 'typescript' })
-      } catch {
-        /* empty */
-      }
-    }
-
     await writeFile(outputFile, code, 'utf-8')
+
+    if (prettify) {
+      await formatGeneratedFile({ filePath: outputFile, logger: this.payload.logger })
+    }
 
     if (log) {
       this.payload.logger.info(`Written ${outputFile}`)

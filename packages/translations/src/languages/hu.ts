@@ -300,6 +300,7 @@ export const huTranslations: DefaultTranslationsObject = {
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
+    apiResponse: 'API-válasz',
     applyChanges: 'Változtatások alkalmazása',
     ascending: 'Növekvő',
     auto: 'Automatikus',
@@ -372,6 +373,13 @@ export const huTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ezt a dokumentumot nemrégiben frissítette egy másik felhasználó. A megtekintése elavult.',
     documents: 'Dokumentumok',
+    dragCancelled: '{{label}} húzása megszakítva.',
+    dragDropped: '{{label}} elhelyezve. Pozíció: {{position}} / {{count}}.',
+    dragInstructions:
+      'Egy sor felvételéhez nyomja meg a Space vagy Enter billentyűt. A mozgatáshoz használja a nyílbillentyűket. VoiceOver használatakor kapcsolja ki a Quick Nav funkciót, és használja a Command + nyílbillentyűket. Az elhelyezéshez nyomja meg a Space vagy Enter, a megszakításhoz az Escape billentyűt.',
+    dragMoved: '{{label}}: {{direction}}. Pozíció: {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} felvéve. Pozíció: {{position}} / {{count}}.',
+    dragToMove: 'Húzza az áthelyezéshez',
     dragToReorder: 'Húzza át a rendezéshez',
     duplicate: 'Duplikálás',
     duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',
@@ -486,6 +494,7 @@ export const huTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',
     reloadDocument: 'Dokumentum újratöltése',
     remove: 'Törlés',
+    removeFilter: 'Szűrő eltávolítása',
     rename: 'Átnevez',
     replaceRow: 'Sor cseréje',
     requiredFields: 'A *-gal jelölt mezők kitöltése kötelező.',
@@ -580,6 +589,7 @@ export const huTranslations: DefaultTranslationsObject = {
     yes: 'Igen',
   },
   hierarchy: {
+    folderLocation: 'Mappa helye',
     goTo: 'Ugrás ide: "{{name}}"',
     itemsMovedTo: '{{title}} átkerült ide: {{destination}}',
     itemsMovedToRoot: '{{title}} áthelyezve a gyökérbe',
@@ -640,6 +650,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    cancelUpload: 'Feltöltés megszakítása',
     copyLinkToFile: 'Hivatkozás másolása a fájlhoz',
     copyURL: 'URL másolása',
     crop: 'Termés',
@@ -661,6 +672,7 @@ export const huTranslations: DefaultTranslationsObject = {
     fileSize: 'Fájl mérete',
     filesToUpload: 'Feltöltendő fájlok',
     fileToUpload: 'Feltöltendő fájl',
+    finishSaving: 'Mentés befejezése',
     focalPoint: 'Fókuszpont',
     focalPointDescription:
       'Húzza az érdekes pontot közvetlenül az előnézetre, vagy állítsa be az alábbi értékeket.',
@@ -675,12 +687,27 @@ export const huTranslations: DefaultTranslationsObject = {
     previewSizes: 'Előnézeti méretek',
     renameFile: 'Fájl átnevezése',
     replaceFile: 'Fájl cseréje',
+    resumingFile: '{{filename}} folytatása',
+    savingInBackground:
+      'A feltöltés a háttérben fejeződik be, és a dokumentum akkor kerül mentésre.',
     selectCollectionToBrowse: 'Válassza ki a böngészni kívánt gyűjteményt',
     selectFile: 'Válasszon ki egy fájlt',
     setCropArea: 'Állítsa be a vágási területet',
     setFocalPoint: 'Állítsa be a fókuszpontot',
     sizes: 'Méretek',
     sizesFor: 'Méretek a {{címke}} számára',
+    uploadFileMismatch: 'A kiválasztott fájl nem egyezik a megszakított feltöltéssel.',
+    uploadingFile: '{{filename}} feltöltése',
+    uploadingFileProgress: '{{filename}} feltöltése: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Egy feltöltés még folyamatban van. Ha most kilép, megszakad.',
+    uploadInterrupted: 'A(z) {{filename}} feltöltése megszakadt.',
+    uploadInterruptedWillSave:
+      'A(z) {{filename}} feltöltése megszakadt. A dokumentum a feltöltés befejezésekor kerül mentésre.',
+    uploadReadyToFinishSaving:
+      'A(z) {{filename}} feltöltése befejeződött. Nyissa meg az űrlapot a mentés befejezéséhez.',
+    uploadSavedInBackground: 'A feltöltés befejeződött, és a dokumentum mentésre került.',
+    uploadStorageRejectedSegments:
+      'A tárhely egyetlen feltöltési részt sem fogadott el. Ellenőrizze a bucket CORS-szabályzatát.',
     width: 'Szélesség',
   },
   validation: {
@@ -719,6 +746,10 @@ export const huTranslations: DefaultTranslationsObject = {
       'Arra készül, hogy az összes {{label}} elemet közzétegye a kijelölésben. biztos vagy ebben?',
     aboutToRestore:
       'Arra készül, hogy visszaállítsa ezt a {{label}} dokumentumot arra az állapotra, amelyben {{versionDate}}  napon volt.',
+    aboutToRestoreAsDraft:
+      'Állítsa vissza a {{versionDate}} időpontban mentett tartalmat piszkozatként. A közzétett tartalom változatlan marad, amíg nem teszi közzé a szerkesztőből.',
+    aboutToRestoreAsDraftAllLocales:
+      'Állítsa vissza a {{versionDate}} időpontban mentett tartalmat piszkozatként minden nyelvi változatban. A közzétett tartalom változatlan marad, amíg nem teszi közzé a szerkesztőből.',
     aboutToRestoreGlobal:
       'Arra készül, hogy visszaállítsa a {{label}} arra az állapotra, amelyben {{versionDate}} napon volt.',
     aboutToRevertToPublished:

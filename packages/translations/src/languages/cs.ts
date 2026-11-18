@@ -292,6 +292,7 @@ export const csTranslations: DefaultTranslationsObject = {
     and: 'a',
     anotherUser: 'Jiný uživatel',
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
+    apiResponse: 'Odpověď API',
     applyChanges: 'Použít změny',
     ascending: 'Vzestupně',
     auto: 'Automaticky',
@@ -362,6 +363,13 @@ export const csTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tento dokument byl nedávno aktualizován jiným uživatelem. Váš pohled je zastaralý.',
     documents: 'Dokumenty',
+    dragCancelled: 'Přetahování {{label}} bylo zrušeno.',
+    dragDropped: '{{label}} byl puštěn. Pozice {{position}} z {{count}}.',
+    dragInstructions:
+      'Stisknutím Space nebo Enter uchopíte řádek. Pomocí šipek jej přesunete. S VoiceOver vypněte Quick Nav a použijte Command + šipky. Stisknutím Space nebo Enter jej pustíte, Escape akci zruší.',
+    dragMoved: '{{label}}: {{direction}}. Pozice {{position}} z {{count}}.',
+    dragPickedUp: '{{label}} byl uchopen. Pozice {{position}} z {{count}}.',
+    dragToMove: 'Přetažením přesunout',
     dragToReorder: 'Přetáhněte pro změnu pořadí',
     duplicate: 'Duplikovat',
     duplicateWithoutSaving: 'Duplikovat bez uložení změn',
@@ -476,6 +484,7 @@ export const csTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Přeindexování všech {{collections}}.',
     reloadDocument: 'Obnovit dokument',
     remove: 'Odstranit',
+    removeFilter: 'Odstranit filtr',
     rename: 'Přejmenovat',
     replaceRow: 'Nahradit řádek',
     requiredFields: 'Pole označená * jsou povinná.',
@@ -568,6 +577,7 @@ export const csTranslations: DefaultTranslationsObject = {
     yes: 'Ano',
   },
   hierarchy: {
+    folderLocation: 'Umístění složky',
     goTo: 'Přejděte na "{{name}}"',
     itemsMovedTo: '{{title}} byl přesunut do {{destination}}',
     itemsMovedToRoot: '{{title}} přesunuto do kořenové složky',
@@ -628,6 +638,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addFile: 'Přidat soubor',
     addFiles: 'Přidat soubory',
     bulkUpload: 'Hromadné nahrání',
+    cancelUpload: 'Zrušit nahrávání',
     copyLinkToFile: 'Zkopírovat odkaz na soubor',
     copyURL: 'Zkopírovat URL',
     crop: 'Ořez',
@@ -649,6 +660,7 @@ export const csTranslations: DefaultTranslationsObject = {
     fileSize: 'Velikost souboru',
     filesToUpload: 'Soubory k nahrání',
     fileToUpload: 'Soubor k nahrání',
+    finishSaving: 'Dokončit ukládání',
     focalPoint: 'Středobod',
     focalPointDescription:
       'Přetáhněte bod zaměření přímo na náhled nebo upravte níže uvedené hodnoty.',
@@ -663,12 +675,25 @@ export const csTranslations: DefaultTranslationsObject = {
     previewSizes: 'Náhled velikostí',
     renameFile: 'Přejmenovat soubor',
     replaceFile: 'Nahradit soubor',
+    resumingFile: 'Obnovování {{filename}}',
+    savingInBackground: 'Nahrávání se dokončí na pozadí a dokument se poté uloží.',
     selectCollectionToBrowse: 'Vyberte kolekci pro procházení',
     selectFile: 'Vyberte soubor',
     setCropArea: 'Nastavit oblast ořezu',
     setFocalPoint: 'Nastavit středobod',
     sizes: 'Velikosti',
     sizesFor: 'Velikosti pro {{label}}',
+    uploadFileMismatch: 'Vybraný soubor neodpovídá přerušenému nahrávání.',
+    uploadingFile: 'Nahrávání {{filename}}',
+    uploadingFileProgress: 'Nahrávání {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Nahrávání stále probíhá. Pokud nyní odejdete, bude přerušeno.',
+    uploadInterrupted: 'Nahrávání {{filename}} bylo přerušeno.',
+    uploadInterruptedWillSave:
+      'Nahrávání {{filename}} bylo přerušeno. Dokument se uloží, až se dokončí.',
+    uploadReadyToFinishSaving: '{{filename}} byl nahrán. Otevřete formulář a dokončete ukládání.',
+    uploadSavedInBackground: 'Nahrávání bylo dokončeno a dokument byl uložen.',
+    uploadStorageRejectedSegments:
+      'Úložiště nepřijalo žádnou část nahrávání. Zkontrolujte zásady CORS bucketu.',
     width: 'Šířka',
   },
   validation: {
@@ -703,6 +728,10 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Chystáte se publikovat všechny {{label}} ve výběru. Jsi si jistá?',
     aboutToRestore:
       'Chystáte se obnovit tento {{label}} dokument do stavu, v jakém byl {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Obnovte obsah z {{versionDate}} jako koncept. Publikovaný obsah zůstane beze změny, dokud jej nepublikujete z editoru.',
+    aboutToRestoreAsDraftAllLocales:
+      'Obnovte obsah z {{versionDate}} jako koncept ve všech jazykových verzích. Publikovaný obsah zůstane beze změny, dokud jej nepublikujete z editoru.',
     aboutToRestoreGlobal:
       'Chystáte se obnovit globální {{label}} do stavu, v jakém byl {{versionDate}}.',
     aboutToRevertToPublished:

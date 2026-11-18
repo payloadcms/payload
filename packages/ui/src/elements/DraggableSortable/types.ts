@@ -3,6 +3,7 @@ import type { SortingStrategy } from '@dnd-kit/sortable'
 import type { Ref } from 'react'
 
 export type Props = {
+  announceRows?: boolean
   children: React.ReactNode
   className?: string
   droppableRef?: Ref<HTMLElement>

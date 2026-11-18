@@ -4,6 +4,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { v4 as uuid } from 'uuid'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefaultLayoutServerFn.js'
@@ -122,7 +123,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         return
       }
 
-      const widgetId = `${widgetSlug}-${Date.now()}`
+      const widgetId = `${widgetSlug}-${uuid().replaceAll('-', '')}`
       const widget = widgets.find((widget) => widget.slug === widgetSlug)
 
       // Create a new widget instance using RenderWidget

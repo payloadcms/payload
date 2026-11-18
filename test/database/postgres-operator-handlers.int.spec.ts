@@ -112,12 +112,12 @@ const runOperatorHandlerConfigSuite = (
             name: 'handler-a',
             operators: ['contains'],
             build: ({ column }) => column as any,
-          } as PostgresOperatorHandler,
+          },
           {
             name: 'handler-b',
             operators: ['contains'],
             build: ({ column }) => column as any,
-          } as PostgresOperatorHandler,
+          },
         ])
 
         let thrown: unknown
@@ -282,7 +282,11 @@ test.suite(
       )
       activePayloads.push(payload)
 
-      await payload.create({ collection: 'accent-items', data: { title: 'Ácido' }, overrideAccess: true })
+      await payload.create({
+        collection: 'accent-items',
+        data: { title: 'Ácido' },
+        overrideAccess: true,
+      })
 
       const result = await payload.find({
         collection: 'accent-items',
@@ -584,7 +588,11 @@ test.suite(
         )
         activePayloads.push(payload)
 
-        const doc = await payload.create({ collection: 'accent-items', data: { title: 'Ácido' }, overrideAccess: true })
+        const doc = await payload.create({
+          collection: 'accent-items',
+          data: { title: 'Ácido' },
+          overrideAccess: true,
+        })
 
         // Postgres cannot ILIKE a native `uuid` column at all - a pre-existing limitation
         // unrelated to this feature. The PgUUID guard means a `contains` query against the id
@@ -637,7 +645,11 @@ test.suite(
       )
       activePayloads.push(payload)
 
-      await payload.create({ collection: 'accent-items', data: { title: 'HELLO' }, overrideAccess: true })
+      await payload.create({
+        collection: 'accent-items',
+        data: { title: 'HELLO' },
+        overrideAccess: true,
+      })
 
       const result = await payload.find({
         collection: 'accent-items',
@@ -686,7 +698,11 @@ test.suite(
 
       process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
 
-      await payload.create({ collection: 'accent-items', data: { title: 'hello world' }, overrideAccess: true })
+      await payload.create({
+        collection: 'accent-items',
+        data: { title: 'hello world' },
+        overrideAccess: true,
+      })
 
       const result = await payload.find({
         collection: 'accent-items',
@@ -731,7 +747,11 @@ test.suite(
         data: { title: 'hello' },
         overrideAccess: true,
       })
-      const withoutTitle = await payload.create({ collection: 'accent-items', data: {}, overrideAccess: true })
+      const withoutTitle = await payload.create({
+        collection: 'accent-items',
+        data: {},
+        overrideAccess: true,
+      })
 
       const result = await payload.find({
         collection: 'accent-items',

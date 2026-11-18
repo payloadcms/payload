@@ -298,6 +298,7 @@ export const caTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
+    apiResponse: 'Resposta de l’API',
     applyChanges: 'Apica els canvis',
     ascending: 'Ascendent',
     auto: 'Automàtic',
@@ -369,6 +370,13 @@ export const caTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Aquest document ha estat actualitzat recentment per un altre usuari. La seva vista està desactualitzada.',
     documents: 'Documents',
+    dragCancelled: 'S’ha cancel·lat l’arrossegament de {{label}}.',
+    dragDropped: 'S’ha deixat anar {{label}}. Posició {{position}} de {{count}}.',
+    dragInstructions:
+      'Premeu Space o Enter per agafar una fila. Utilitzeu les fletxes per moure-la. Amb VoiceOver, desactiveu Quick Nav i utilitzeu Command + les fletxes. Premeu Space o Enter per deixar-la anar, o Escape per cancel·lar.',
+    dragMoved: '{{label}}: {{direction}}. Posició {{position}} de {{count}}.',
+    dragPickedUp: 'S’ha agafat {{label}}. Posició {{position}} de {{count}}.',
+    dragToMove: 'Arrossegueu per moure',
     dragToReorder: 'Arrossegueu per reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
@@ -484,6 +492,7 @@ export const caTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexa tots el {{collections}}.',
     reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
+    removeFilter: 'Elimina el filtre',
     rename: 'Canvia el nom',
     replaceRow: 'Reemplaça fila',
     requiredFields: 'Els camps marcats amb * són obligatoris.',
@@ -576,6 +585,7 @@ export const caTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    folderLocation: 'Ubicació de la carpeta',
     goTo: 'Vés a "{{name}}"',
     itemsMovedTo: "{{title}} s'ha traslladat a {{destination}}",
     itemsMovedToRoot: "{{title}} s'ha traslladat a l'arrel",
@@ -636,6 +646,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
+    cancelUpload: 'Cancel·la la càrrega',
     copyLinkToFile: "Copia l'enllaç al fitxer",
     copyURL: 'Copia l’URL',
     crop: 'Retallar',
@@ -657,6 +668,7 @@ export const caTranslations: DefaultTranslationsObject = {
     fileSize: 'Mida del fitxer',
     filesToUpload: 'Fitxers a carregar',
     fileToUpload: 'Fitxer a carregar',
+    finishSaving: 'Acaba de desar',
     focalPoint: 'Punt focal',
     focalPointDescription:
       'Arrossega el punt focal directament sobre la vista prèvia o ajusta els valors a continuació.',
@@ -671,12 +683,26 @@ export const caTranslations: DefaultTranslationsObject = {
     previewSizes: 'Mides de la vista prèvia',
     renameFile: 'Canviar el nom del fitxer',
     replaceFile: 'Reemplaça fitxer',
+    resumingFile: 'Reprenent {{filename}}',
+    savingInBackground: 'La càrrega acabarà en segon pla i llavors es desarà el document.',
     selectCollectionToBrowse: 'Selecciona una col·lecció per explorar',
     selectFile: 'Selecciona un fitxer',
     setCropArea: "Estableix l'àrea de retall",
     setFocalPoint: 'Estableix el punt focal',
     sizes: 'Mides',
     sizesFor: 'Mides per a {{label}}',
+    uploadFileMismatch: 'El fitxer seleccionat no coincideix amb la càrrega interrompuda.',
+    uploadingFile: 'Carregant {{filename}}',
+    uploadingFileProgress: 'Carregant {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: "Encara hi ha una càrrega en curs. Si surts ara, s'interromprà.",
+    uploadInterrupted: "S'ha interromput la càrrega de {{filename}}.",
+    uploadInterruptedWillSave:
+      "S'ha interromput la càrrega de {{filename}}. El document es desarà quan acabi.",
+    uploadReadyToFinishSaving:
+      "{{filename}} s'ha acabat de carregar. Obre el formulari per acabar de desar.",
+    uploadSavedInBackground: "La càrrega ha acabat i s'ha desat el document.",
+    uploadStorageRejectedSegments:
+      "L'emmagatzematge no ha acceptat cap segment de la càrrega. Comprova la política CORS del bucket.",
     width: 'Amplada',
   },
   validation: {
@@ -714,6 +740,10 @@ export const caTranslations: DefaultTranslationsObject = {
       'Estàs a punt de publicar tots els {{label}} de la selecció. Estàs segur?',
     aboutToRestore:
       "Estàs a punt de restaurar aquest document {{label}} a l'estat en què es trobava el {{versionDate}}.",
+    aboutToRestoreAsDraft:
+      'Restaureu el contingut de {{versionDate}} com a esborrany. El contingut publicat no canviarà fins que publiqueu des de l’editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaureu el contingut de {{versionDate}} com a esborrany en totes les configuracions regionals. El contingut publicat no canviarà fins que publiqueu des de l’editor.',
     aboutToRestoreGlobal:
       "Estàs a punt de restaurar el {{label}} global a l'estat en què es trobava el {{versionDate}}.",
     aboutToRevertToPublished:

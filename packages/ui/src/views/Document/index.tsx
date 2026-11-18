@@ -363,7 +363,8 @@ export const renderDocument = async ({
       fallbackLocale: false,
       locale: locale?.code,
       overrideAccess: false,
-      req,
+      // Navigation renders concurrently and must not join this create transaction.
+      req: req.transactionID ? req : isolateObjectProperty(req, 'transactionID'),
       user,
     })
 
@@ -387,7 +388,7 @@ export const renderDocument = async ({
   const documentSlots = await renderDocumentSlots({
     id,
     collectionConfig,
-    doc: doc as Record<string, unknown>,
+    doc,
     globalConfig,
     hasSavePermission,
     locale,

@@ -293,6 +293,7 @@ export const etTranslations: DefaultTranslationsObject = {
     and: 'Ja',
     anotherUser: 'Teine kasutaja',
     anotherUserTakenOver: 'Teine kasutaja on võtnud selle dokumendi muutmise üle.',
+    apiResponse: 'API vastus',
     applyChanges: 'Rakenda muudatused',
     ascending: 'Kasvav',
     auto: 'Auto',
@@ -363,6 +364,13 @@ export const etTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Seda dokumenti on hiljuti värskendanud teine kasutaja. Teie vaade on aegunud.',
     documents: 'Dokumendid',
+    dragCancelled: '{{label}} lohistamine tühistati.',
+    dragDropped: '{{label}} on maha pandud. Asukoht {{position}} / {{count}}.',
+    dragInstructions:
+      'Rea ülesvõtmiseks vajutage Space või Enter. Liigutamiseks kasutage nooleklahve. VoiceOveriga lülitage Quick Nav välja ning kasutage Command + nooleklahve. Mahapanekuks vajutage Space või Enter, tühistamiseks Escape.',
+    dragMoved: '{{label}}: {{direction}}. Asukoht {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} on üles võetud. Asukoht {{position}} / {{count}}.',
+    dragToMove: 'Lohista liigutamiseks',
     dragToReorder: 'Lohistage, et ümber järjestada',
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
@@ -476,6 +484,7 @@ export const etTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',
     reloadDocument: 'Laadige dokument uuesti',
     remove: 'Eemalda',
+    removeFilter: 'Eemalda filter',
     rename: 'Nimeta ümber',
     replaceRow: 'Asenda rida',
     requiredFields: 'Tärniga * tähistatud väljad on kohustuslikud.',
@@ -567,6 +576,7 @@ export const etTranslations: DefaultTranslationsObject = {
     yes: 'Jah',
   },
   hierarchy: {
+    folderLocation: 'Kausta asukoht',
     goTo: 'Mine "{{name}}" juurde',
     itemsMovedTo: '{{title}} viidi üle {{destination}}',
     itemsMovedToRoot: '{{title}} liigutatud juurikasse',
@@ -627,6 +637,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
     bulkUpload: 'Massiüleslaadimine',
+    cancelUpload: 'Tühista üleslaadimine',
     copyLinkToFile: 'Kopeeri faili link',
     copyURL: 'Kopeeri URL',
     crop: 'Kärbi',
@@ -648,6 +659,7 @@ export const etTranslations: DefaultTranslationsObject = {
     fileSize: 'Failisuurus',
     filesToUpload: 'Üleslaetavad failid',
     fileToUpload: 'Üleslaetav fail',
+    finishSaving: 'Lõpeta salvestamine',
     focalPoint: 'Fookuspunkt',
     focalPointDescription: 'Lohista fookuspunkti otse eelvaatel või kohanda väärtusi allpool.',
     fromURL: 'Laadi fail üles URL-i kaudu',
@@ -661,12 +673,27 @@ export const etTranslations: DefaultTranslationsObject = {
     previewSizes: 'Eelvaate suurused',
     renameFile: 'Faili ümbernimetamine',
     replaceFile: 'Asendage fail',
+    resumingFile: 'Jätkatakse faili {{filename}}',
+    savingInBackground: 'Üleslaadimine lõpeb taustal ja dokument salvestatakse siis.',
     selectCollectionToBrowse: 'Vali kollektsioon sirvimiseks',
     selectFile: 'Vali fail',
     setCropArea: 'Määra kärpeala',
     setFocalPoint: 'Määra fookuspunkt',
     sizes: 'Suurused',
     sizesFor: 'Suurused {{label}} jaoks',
+    uploadFileMismatch: 'Valitud fail ei vasta katkestatud üleslaadimisele.',
+    uploadingFile: 'Laaditakse üles {{filename}}',
+    uploadingFileProgress: 'Laaditakse üles {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Üleslaadimine on veel pooleli. Kui lahkute praegu, see katkestatakse.',
+    uploadInterrupted: 'Faili {{filename}} üleslaadimine katkestati.',
+    uploadInterruptedWillSave:
+      'Faili {{filename}} üleslaadimine katkestati. Dokument salvestatakse, kui see lõpeb.',
+    uploadReadyToFinishSaving:
+      '{{filename}} on üles laaditud. Salvestamise lõpetamiseks avage vorm.',
+    uploadSavedInBackground: 'Üleslaadimine lõppes ja dokument salvestati.',
+    uploadStorageRejectedSegments:
+      'Salvestusruum ei võtnud vastu ühtegi üleslaadimise osa. Kontrollige bucketi CORS-poliitikat.',
     width: 'Laius',
   },
   validation: {
@@ -701,6 +728,10 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Olete avaldamas kõiki valitud {{label}}. Olete kindel?',
     aboutToRestore:
       'Olete taastamas seda {{label}} dokumenti seisundisse, milles see oli {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Taasta kuupäeva {{versionDate}} sisu mustandina. Avaldatud sisu jääb muutumatuks, kuni avaldad selle redaktoris.',
+    aboutToRestoreAsDraftAllLocales:
+      'Taasta kuupäeva {{versionDate}} sisu mustandina kõigis keeltes. Avaldatud sisu jääb muutumatuks, kuni avaldad selle redaktoris.',
     aboutToRestoreGlobal:
       'Olete taastamas globaalset {{label}} seisundisse, milles see oli {{versionDate}}.',
     aboutToRevertToPublished:

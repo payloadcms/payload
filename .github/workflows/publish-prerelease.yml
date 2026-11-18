@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - name: Setup
         uses: ./.github/actions/setup
       - name: Load npm token
@@ -36,7 +36,7 @@ jobs:
 
       - name: Determine release type and debug flag
         id: determine_release_type
-        # Canary releases use the tag-driven release-bump workflow.
+        # Canary releases use publish-canary.yml.
         run: |
           if [[ "${{ inputs.debug_build }}" == "true" ]]; then
             echo "release_type=internal-debug" >> $GITHUB_OUTPUT

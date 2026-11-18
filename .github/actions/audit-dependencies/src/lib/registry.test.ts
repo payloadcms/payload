@@ -45,6 +45,27 @@ describe('createRegistryClient', () => {
     expect(fetchImpl).toHaveBeenCalledWith('https://reg.test/@scope%2Fname', expect.anything())
   })
 
+  it('bounds each request with an abort signal', async () => {
+    const fetchImpl = vi.fn<FetchLike>(() => ok({ 'dist-tags': {}, versions: {} }))
+    const client = createRegistryClient({ fetchImpl })
+
+    await client.fetchPackument('example')
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    )
+  })
+
+  it('returns null when a request times out', async () => {
+    const fetchImpl = vi.fn<FetchLike>(() =>
+      Promise.reject(new DOMException('The operation was aborted due to timeout', 'TimeoutError')),
+    )
+    const client = createRegistryClient({ fetchImpl })
+
+    expect(await client.fetchPackument('slow')).toBeNull()
+  })
+
   it('returns null on a non-ok response without throwing', async () => {
     const fetchImpl = vi.fn<FetchLike>(() =>
       Promise.resolve({ json: () => Promise.resolve({}), ok: false }),

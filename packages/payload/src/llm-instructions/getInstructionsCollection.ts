@@ -93,6 +93,8 @@ export const getInstructionsCollection = ({
     },
     admin: {
       defaultColumns: ['title', 'updatedAt', 'entityType', 'additionalInstructions'],
+      enableRichTextLink: false,
+      enableRichTextRelationship: false,
       group: false,
       listSearchableFields: ['entitySlug'],
       useAsTitle: 'entitySlug',

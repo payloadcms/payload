@@ -6,11 +6,12 @@ import type { PackageManager } from '../types.js'
 /*
  * Build scripts pnpm v11 must be allowed to run for the projects create-payload-app scaffolds;
  * otherwise the install fails with ERR_PNPM_IGNORED_BUILDS. esbuild/sharp/unrs-resolver cover the
- * default templates; workerd is required by with-cloudflare-d1.
+ * default templates; workerd is required by with-cloudflare-d1; bufferutil comes in with the
+ * vercel-postgres adapter.
  * TODO(follow-up): the CI drift guard only verifies the blank template — extend it across every
  * getValidTemplates() entry so this single list can't drift per-template.
  */
-const ALLOWED_BUILDS = ['esbuild', 'sharp', 'unrs-resolver', 'workerd']
+const ALLOWED_BUILDS = ['esbuild', 'sharp', 'unrs-resolver', 'workerd', 'bufferutil']
 
 /**
  * pnpm v11 fails installs that have unapproved dependency build scripts, reading approvals only from

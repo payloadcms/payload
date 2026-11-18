@@ -1,8 +1,11 @@
 'use client'
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 
 import type { PopupProps } from '../Popup/index.js'
 
+import { SearchIcon } from '../../icons/Search/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { matchesSearchQuery } from '../../utilities/matchesSearchQuery.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.css'
 
@@ -25,10 +28,26 @@ export type ComboboxProps = {
   /** Accessible label for the list of entries */
   'aria-label'?: string
   entries: ComboboxEntry[]
+  /**
+   * Pinned below the entries, outside the scroll area and unaffected by search.
+   * For actions that belong to the list as a whole, such as "create new".
+   */
+  footer?: (args: { close: () => void }) => React.ReactNode
+  /**
+   * Pinned above the search, outside the scroll area and unaffected by it. For
+   * the one entry the list is about, such as the item already selected.
+   */
+  header?: (args: { close: () => void }) => React.ReactNode
   /** Minimum number of entries required to show search */
   minEntriesForSearch?: number
   onSelect?: (entry: ComboboxEntry) => void
   searchPlaceholder?: string
+  /**
+   * Whether to say so when a search matches nothing.
+   *
+   * Only shown for a nonempty query against a nonempty list.
+   */
+  showEmptyMessage?: boolean
 } & Omit<PopupProps, 'children' | 'render'>
 
 /**
@@ -41,29 +60,34 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
   const {
     'aria-label': ariaLabel,
     entries,
+    footer,
+    header,
     minEntriesForSearch = 8,
     onSelect,
     onToggleClose,
     onToggleOpen,
     searchPlaceholder = 'Search...',
+    showEmptyMessage = true,
     ...popupProps
   } = props
+
+  const { t } = useTranslation()
   const [searchValue, setSearchValue] = useState('')
   const isOpenRef = useRef(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
-  const filteredEntries = useMemo(() => {
-    if (!searchValue) {
-      return entries
-    }
-    const search = searchValue.toLowerCase()
-    return entries.filter((entry) => entry.name.toLowerCase().includes(search))
-  }, [entries, searchValue])
+  const filteredEntries = useMemo(
+    () => entries.filter((entry) => matchesSearchQuery({ label: entry.name, query: searchValue })),
+    [entries, searchValue],
+  )
 
   const showSearch = entries.length >= minEntriesForSearch
   const hasResults = filteredEntries.length > 0
 
-  const handleToggleOpen = React.useCallback(
+  const [lockedWidth, setLockedWidth] = useState<null | number>(null)
+
+  const handleToggleOpen = useCallback(
     (active: boolean) => {
       isOpenRef.current = active
       if (active && showSearch) {
@@ -76,9 +100,10 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
     [showSearch, onToggleOpen],
   )
 
-  const handleToggleClose = React.useCallback(() => {
+  const handleToggleClose = useCallback(() => {
     isOpenRef.current = false
     setSearchValue('')
+    setLockedWidth(null)
     onToggleClose?.()
   }, [onToggleClose])
 
@@ -91,53 +116,83 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
       popupAriaLabel={ariaLabel || searchPlaceholder}
       popupType="dialog"
       render={({ close }) => (
-        <div className={`${baseClass}__content`}>
+        <div
+          className={`${baseClass}__content`}
+          data-width-locked={lockedWidth ? 'true' : undefined}
+          ref={contentRef}
+          style={
+            lockedWidth
+              ? ({ '--combobox-locked-width': `${lockedWidth}px` } as React.CSSProperties)
+              : undefined
+          }
+        >
+          {header && <div className={`${baseClass}__header`}>{header({ close })}</div>}
           {showSearch && (
-            <div
-              className={`${baseClass}__search-wrapper${!hasResults ? ` ${baseClass}__search-wrapper--no-results` : ''}`}
-            >
-              <input
-                aria-label={searchPlaceholder}
-                className={`${baseClass}__search-input`}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder={searchPlaceholder}
-                ref={searchInputRef}
-                type="text"
-                value={searchValue}
-              />
+            <div className={`${baseClass}__search`}>
+              <div className={`${baseClass}__search-bar`}>
+                <SearchIcon size={24} />
+                <input
+                  aria-label={searchPlaceholder}
+                  className={`${baseClass}__search-input`}
+                  onChange={(e) => {
+                    // Measure before filtering removes the entries that determine the width.
+                    if (e.target.value && lockedWidth === null) {
+                      setLockedWidth(contentRef.current?.offsetWidth ?? null)
+                    } else if (!e.target.value) {
+                      setLockedWidth(null)
+                    }
+                    setSearchValue(e.target.value)
+                  }}
+                  placeholder={searchPlaceholder}
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchValue}
+                />
+              </div>
             </div>
           )}
-          <PopupList.ButtonGroup>
-            <div aria-label={ariaLabel} role="menu">
-              {filteredEntries.map((entry, index) => {
-                const handleClick = () => {
-                  if (onSelect) {
-                    onSelect(entry)
+          {hasResults ? (
+            <PopupList.ButtonGroup className={`${baseClass}__entries`}>
+              <div aria-label={ariaLabel} role="menu">
+                {filteredEntries.map((entry, index) => {
+                  const handleClick = () => {
+                    if (onSelect) {
+                      onSelect(entry)
+                    }
+                    close()
                   }
-                  close()
-                }
 
-                return (
-                  <div
-                    className={`${baseClass}__entry`}
-                    data-popup-prevent-close
-                    key={`${entry.name}-${index}`}
-                    onClick={handleClick}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleClick()
-                      }
-                    }}
-                    role="menuitem"
-                    tabIndex={0}
-                  >
-                    {entry.Component}
-                  </div>
-                )
-              })}
-            </div>
-          </PopupList.ButtonGroup>
+                  return (
+                    <div
+                      className={`${baseClass}__entry`}
+                      data-popup-prevent-close
+                      key={`${entry.name}-${index}`}
+                      onClick={handleClick}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleClick()
+                        }
+                      }}
+                      role="menuitem"
+                      tabIndex={0}
+                    >
+                      {entry.Component}
+                    </div>
+                  )
+                })}
+              </div>
+            </PopupList.ButtonGroup>
+          ) : (
+            showEmptyMessage &&
+            entries.length > 0 &&
+            searchValue.trim() !== '' && (
+              <div className={`${baseClass}__no-results`} role="status">
+                {t('general:noMatchesFound')}
+              </div>
+            )
+          )}
+          {footer && <div className={`${baseClass}__footer`}>{footer({ close })}</div>}
         </div>
       )}
     />

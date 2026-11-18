@@ -12,6 +12,7 @@ type Args = {
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
   blockData?: JsonObject
+  blockFields?: Field[]
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -70,6 +71,7 @@ type Args = {
 export const traverseFields = async ({
   id,
   blockData,
+  blockFields,
   collection,
   context,
   data,
@@ -102,6 +104,7 @@ export const traverseFields = async ({
       promise({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,

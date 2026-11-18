@@ -42,6 +42,7 @@
 
   .sort-column__button {
     margin: 0;
+    padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -50,22 +51,65 @@
     cursor: pointer;
     border-radius: var(--button-radius);
     color: var(--color-icon-tertiary);
+    position: relative;
+    isolation: isolate;
+    flex-shrink: 0;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+
+    /* Expand targets outward so the arrows retain their spacing without overlapping targets. */
+    &:first-child {
+      margin-inline-start: calc(var(--spacer-2) * -1);
+      justify-content: flex-end;
+
+      &::before {
+        inset-inline-start: auto;
+      }
+    }
+
+    &:last-child {
+      margin-inline-end: calc(var(--spacer-2) * -1);
+      justify-content: flex-start;
+
+      &::before {
+        inset-inline-end: auto;
+      }
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline: 0;
+      margin: auto;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+      border-radius: inherit;
+      z-index: -1;
+    }
 
     &.sort-column--active {
       color: var(--color-icon);
-      background: var(--color-bg-secondary);
+      &::before {
+        background: var(--color-bg-secondary);
+      }
     }
 
     &:hover {
       color: var(--color-icon);
-      background: var(--color-bg-secondary);
+      &::before {
+        background: var(--color-bg-secondary);
+      }
     }
 
     &:focus-visible {
-      outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      outline-offset: var(--accessibility-outline-offset);
-      border-radius: var(--button-radius);
+      outline: none;
       color: var(--color-icon);
+
+      &::before {
+        outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+        outline-offset: var(--accessibility-outline-offset);
+      }
     }
   }
 

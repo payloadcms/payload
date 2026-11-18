@@ -390,9 +390,7 @@ Separate jobs by priority to ensure critical tasks run quickly:
 ```ts
 export default buildConfig({
   jobs: {
-    tasks: [
-      /* ... */
-    ],
+    tasks: [/* ... */],
     autoRun: [
       {
         cron: '* * * * *', // Every minute
@@ -449,9 +447,7 @@ Only run jobs on specific servers:
 ```ts
 export default buildConfig({
   jobs: {
-    tasks: [
-      /* ... */
-    ],
+    tasks: [/* ... */],
     shouldAutoRun: async (payload) => {
       // Only run jobs if this env var is set
       return process.env.ENABLE_JOB_WORKERS === 'true'

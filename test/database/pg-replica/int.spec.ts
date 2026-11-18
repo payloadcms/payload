@@ -73,7 +73,7 @@ test.suite(
       })
 
       payload = await new BasePayload().init({ config })
-      adapter = payload.db as unknown as DrizzleAdapter
+      adapter = payload.db
     })
 
     test.afterAll(async () => {
@@ -89,7 +89,11 @@ test.suite(
       test('should set lastWriteTimestamp after a create', async () => {
         adapter.lastWriteTimestamp = undefined
 
-        await payload.create({ collection: 'posts', data: { title: 'write-tracking' }, overrideAccess: true })
+        await payload.create({
+          collection: 'posts',
+          data: { title: 'write-tracking' },
+          overrideAccess: true,
+        })
 
         expect(adapter.lastWriteTimestamp).toBeDefined()
         expect(typeof adapter.lastWriteTimestamp).toBe('number')
@@ -97,16 +101,29 @@ test.suite(
       })
 
       test('should set lastWriteTimestamp after an update', async () => {
-        const doc = await payload.create({ collection: 'posts', data: { title: 'before-update' }, overrideAccess: true })
+        const doc = await payload.create({
+          collection: 'posts',
+          data: { title: 'before-update' },
+          overrideAccess: true,
+        })
         adapter.lastWriteTimestamp = undefined
 
-        await payload.update({ collection: 'posts', id: doc.id, data: { title: 'after-update' }, overrideAccess: true })
+        await payload.update({
+          collection: 'posts',
+          id: doc.id,
+          data: { title: 'after-update' },
+          overrideAccess: true,
+        })
 
         expect(adapter.lastWriteTimestamp).toBeDefined()
       })
 
       test('should set lastWriteTimestamp after a delete', async () => {
-        const doc = await payload.create({ collection: 'posts', data: { title: 'to-delete' }, overrideAccess: true })
+        const doc = await payload.create({
+          collection: 'posts',
+          data: { title: 'to-delete' },
+          overrideAccess: true,
+        })
         adapter.lastWriteTimestamp = undefined
 
         await payload.delete({ collection: 'posts', id: doc.id, overrideAccess: true })
@@ -123,18 +140,35 @@ test.suite(
           overrideAccess: true,
         })
 
-        const found = await payload.findByID({ collection: 'posts', id: doc.id, overrideAccess: true })
+        const found = await payload.findByID({
+          collection: 'posts',
+          id: doc.id,
+          overrideAccess: true,
+        })
 
         expect(found).toBeDefined()
         expect(found.title).toBe('find-after-create')
       })
 
       test('should find updated data immediately after updating', async () => {
-        const doc = await payload.create({ collection: 'posts', data: { title: 'original' }, overrideAccess: true })
+        const doc = await payload.create({
+          collection: 'posts',
+          data: { title: 'original' },
+          overrideAccess: true,
+        })
 
-        await payload.update({ collection: 'posts', id: doc.id, data: { title: 'updated' }, overrideAccess: true })
+        await payload.update({
+          collection: 'posts',
+          id: doc.id,
+          data: { title: 'updated' },
+          overrideAccess: true,
+        })
 
-        const found = await payload.findByID({ collection: 'posts', id: doc.id, overrideAccess: true })
+        const found = await payload.findByID({
+          collection: 'posts',
+          id: doc.id,
+          overrideAccess: true,
+        })
 
         expect(found.title).toBe('updated')
       })
@@ -156,7 +190,11 @@ test.suite(
       })
 
       test('should not find a document after deleting it', async () => {
-        const doc = await payload.create({ collection: 'posts', data: { title: 'delete-me' }, overrideAccess: true })
+        const doc = await payload.create({
+          collection: 'posts',
+          data: { title: 'delete-me' },
+          overrideAccess: true,
+        })
 
         await payload.delete({ collection: 'posts', id: doc.id, overrideAccess: true })
 
@@ -176,7 +214,11 @@ test.suite(
         adapter.readReplicasAfterWriteInterval = 0
 
         // Create a doc — this sets lastWriteTimestamp
-        await payload.create({ collection: 'posts', data: { title: 'interval-zero' }, overrideAccess: true })
+        await payload.create({
+          collection: 'posts',
+          data: { title: 'interval-zero' },
+          overrideAccess: true,
+        })
 
         // With interval=0, the window is effectively disabled:
         // Date.now() - lastWriteTimestamp >= 0 is NOT < 0
@@ -195,7 +237,11 @@ test.suite(
     test.describe('expired write window falls back to replica routing', () => {
       test('should route to replica when lastWriteTimestamp is old', async () => {
         // Create a doc so the table has data
-        const doc = await payload.create({ collection: 'posts', data: { title: 'old-write' }, overrideAccess: true })
+        const doc = await payload.create({
+          collection: 'posts',
+          data: { title: 'old-write' },
+          overrideAccess: true,
+        })
 
         // Simulate an old write (outside the window)
         adapter.lastWriteTimestamp = Date.now() - 10_000
@@ -203,7 +249,11 @@ test.suite(
         // This read should go through adapter.drizzle (replica-wrapped).
         // With real replication in Docker, the replica should have caught up
         // by now, so the read still succeeds.
-        const found = await payload.findByID({ collection: 'posts', id: doc.id, overrideAccess: true })
+        const found = await payload.findByID({
+          collection: 'posts',
+          id: doc.id,
+          overrideAccess: true,
+        })
 
         expect(found).toBeDefined()
         expect(found.title).toBe('old-write')

@@ -59,11 +59,13 @@ const buildFields = (label, fieldsToBuild) =>
           }
         }, {})
 
-        if (field.fields) {
+        const subFields = field.fields && buildFields(`${label}_${fieldName}`, field.fields)
+
+        if (subFields && Object.keys(subFields).length > 0) {
           objectTypeFields.fields = {
             type: new GraphQLObjectType({
               name: `${label}_${fieldName}_Fields`,
-              fields: buildFields(`${label}_${fieldName}`, field.fields),
+              fields: subFields,
             }),
           }
         }
@@ -92,12 +94,14 @@ const buildFields = (label, fieldsToBuild) =>
         return field.tabs.reduce(
           (fieldsWithTabFields, tab) => {
             if ('name' in tab) {
-              if (tab.fields.length) {
-                const tabName = formatName(tab.name)
+              const tabName = formatName(tab.name)
+              const subFields = buildFields(`${label}_${tabName}`, tab.fields)
+
+              if (Object.keys(subFields).length > 0) {
                 fieldsWithTabFields[tabName] = {
                   type: new GraphQLObjectType({
                     name: `${label}_${tabName}`,
-                    fields: buildFields(`${label}_${tabName}`, tab.fields),
+                    fields: subFields,
                   }),
                 }
               }
@@ -125,13 +129,16 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
   const { name, entityFields, operations, scope } = args
 
   const fieldsTypeName = toWords(`${name}-${scope || ''}-Fields`, true)
-  const fields = {
-    fields: {
+  const policyFields = buildFields(fieldsTypeName, entityFields)
+  const fields: ObjectTypeFields = {}
+
+  if (Object.keys(policyFields).length > 0) {
+    fields.fields = {
       type: new GraphQLObjectType({
         name: fieldsTypeName,
-        fields: buildFields(fieldsTypeName, entityFields),
+        fields: policyFields,
       }),
-    },
+    }
   }
 
   operations.forEach((operation) => {

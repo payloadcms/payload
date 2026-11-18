@@ -4,7 +4,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createPayloadRequest, ValidationError } from 'payload'
+import { createPayloadRequest, initTransaction, ValidationError } from 'payload'
 import { expect, vitest } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -103,7 +103,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           data: {
             ...getPublishCollectionLocaleData({ title: '' }),
             localizedArray: 'invalid',
-          } as never,
+          },
           locale: 'en',
           overrideAccess: true,
         })
@@ -144,7 +144,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           data: {
             localizedArray: 'invalid',
             title: '',
-          } as never,
+          },
           locale: 'en',
           overrideAccess: true,
         })
@@ -166,6 +166,34 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       ).toBe(true)
       expect((validationError as ValidationError).message).not.toContain('[en]')
     })
+
+    test.options(
+      'should validate multiple unique fields as the first operation in a transaction',
+      {
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      },
+      async ({ payload }) => {
+        const req = await createPayloadRequest({ payload })
+
+        await initTransaction(req)
+        expect(req.transactionID).toBeTruthy()
+
+        try {
+          const result = await payload.validate({
+            collection: validationUniqueCollectionSlug,
+            data: { localizedUniqueValue: 'new-localized-value', uniqueValue: 'new-value' },
+            locale: 'en',
+            overrideAccess: true,
+            req,
+          })
+
+          expect(result).toMatchObject({ valid: true })
+        } finally {
+          await payload.db.rollbackTransaction(await req.transactionID!)
+        }
+      },
+    )
 
     test('should report a configured unique field conflict', async ({ payload }) => {
       await payload.create({
@@ -194,6 +222,50 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         valid: false,
       })
     })
+
+    test.options(
+      'should report an uncommitted unique field conflict in the caller transaction',
+      {
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      },
+      async ({ payload }) => {
+        const transactionID = await payload.db.beginTransaction()
+
+        expect(transactionID).toBeTruthy()
+
+        const req = await createPayloadRequest({ payload, req: { transactionID } })
+        const data = { uniqueValue: 'uncommitted' }
+
+        try {
+          await payload.create({
+            collection: validationUniqueCollectionSlug,
+            data,
+            overrideAccess: true,
+            req,
+          })
+
+          expect(
+            await payload.validate({
+              collection: validationUniqueCollectionSlug,
+              data,
+              overrideAccess: true,
+            }),
+          ).toMatchObject({ valid: true })
+          expect(
+            await payload.validate({
+              collection: validationUniqueCollectionSlug,
+              data,
+              overrideAccess: true,
+              req,
+            }),
+          ).toMatchObject({ errors: [{ path: 'uniqueValue' }], valid: false })
+          expect(req.transactionID).toBe(transactionID)
+        } finally {
+          await payload.db.rollbackTransaction(transactionID!)
+        }
+      },
+    )
 
     test('should report a localized unique field conflict', async ({ payload }) => {
       await payload.create({
@@ -240,7 +312,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         collection: validationUniqueCollectionSlug,
         data: {
           deletedAt: new Date().toISOString(),
-        } as never,
+        },
         overrideAccess: true,
       })
 
@@ -326,7 +398,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         collection: validationUniqueCollectionSlug,
         data: {
           deletedAt: new Date().toISOString(),
-        } as never,
+        },
         overrideAccess: true,
       })
 
@@ -797,7 +869,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           data: {
             ...getPublishCollectionLocaleData({ title: 'Spanish candidate' }),
             [fieldName]: null,
-          } as never,
+          },
           locale: 'es',
           overrideAccess: true,
         })
@@ -824,7 +896,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
             ...getPublishCollectionLocaleData({ title: 'Spanish candidate' }),
             localizedArray: null,
             localizedBlocks: null,
-          } as never,
+          },
           locale: 'es',
           overrideAccess: true,
         }),
@@ -885,7 +957,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           localeSensitiveValue: 'candidate value',
           summary: 'candidate summary',
           title: 'Candidate title',
-        } as never,
+        },
         locale: ['en', 'de'],
       })
 
@@ -909,7 +981,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         data: {
           ...getPublishCollectionLocaleData({ title: 'English draft' }),
           nestedLocalizedArray: [{ value: '' }],
-        } as never,
+        },
         draft: true,
         locale: 'en',
         overrideAccess: true,
@@ -923,7 +995,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         data: {
           ...getPublishCollectionLocaleData({ title: 'Spanish draft' }),
           nestedLocalizedArray: [{ id: nestedRowID, value: 'Spanish value' }],
-        } as never,
+        },
         draft: true,
         locale: 'es',
         overrideAccess: true,
@@ -959,7 +1031,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         data: {
           ...getPublishCollectionLocaleData({ title: 'English draft' }),
           nestedLocalizedArray: [{ value: 'English value' }],
-        } as never,
+        },
         draft: true,
         locale: 'en',
         overrideAccess: true,
@@ -973,7 +1045,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         data: {
           ...getPublishCollectionLocaleData({ title: 'Spanish draft' }),
           nestedLocalizedArray: [{ id: nestedRowID, value: 'Spanish value' }],
-        } as never,
+        },
         draft: true,
         locale: 'es',
         overrideAccess: true,
@@ -1191,7 +1263,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         locale: ['en', 'es'],
         overrideAccess: false,
         req,
-        user: user as never,
+        user,
       })
 
       expect(result.valid).toBe(true)
@@ -1562,7 +1634,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         collection: validationCollectionSlug,
         data: {
           location: { coordinates: [-0.12] },
-        } as never,
+        },
         locale: 'en',
       })
 
@@ -2312,7 +2384,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           apiKey,
           password: devUser.password,
           username: 'rest-validation-api-key-user',
-        } as never,
+        },
         overrideAccess: true,
       })
 
@@ -2320,7 +2392,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         id: apiKeyUser.id,
         collection: validationAuthCollectionSlug,
         data: { apiKeyLast4: null },
-        req: {} as never,
+        req: {},
       })
 
       const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
@@ -2334,7 +2406,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
       const storedUser = await payload.db.findOne({
         collection: validationAuthCollectionSlug,
-        req: {} as never,
+        req: {},
         where: { id: { equals: apiKeyUser.id } },
       })
 
@@ -2353,7 +2425,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           apiKey,
           password: devUser.password,
           username: 'rest-trailing-slash-validation-api-key-user',
-        } as never,
+        },
         overrideAccess: true,
       })
 
@@ -2361,7 +2433,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         id: apiKeyUser.id,
         collection: validationAuthCollectionSlug,
         data: { apiKeyLast4: null },
-        req: {} as never,
+        req: {},
       })
 
       const response = await restClient.POST(`/${validationCollectionSlug}/validate/?locale=en`, {
@@ -2375,7 +2447,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
       const storedUser = await payload.db.findOne({
         collection: validationAuthCollectionSlug,
-        req: {} as never,
+        req: {},
         where: { id: { equals: apiKeyUser.id } },
       })
 
@@ -2763,7 +2835,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
           apiKey,
           password: devUser.password,
           username: 'graphql-validation-api-key-user',
-        } as never,
+        },
         overrideAccess: true,
       })
 
@@ -2771,7 +2843,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         id: apiKeyUser.id,
         collection: validationAuthCollectionSlug,
         data: { apiKeyLast4: null },
-        req: {} as never,
+        req: {},
       })
 
       const query = `mutation {
@@ -2791,7 +2863,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
       const storedUser = await payload.db.findOne({
         collection: validationAuthCollectionSlug,
-        req: {} as never,
+        req: {},
         where: { id: { equals: apiKeyUser.id } },
       })
 
@@ -3470,7 +3542,7 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         collection: publishCollectionSlug,
         data: {
           localizedArray: null,
-        } as never,
+        },
         draft: true,
         locale: 'de',
         overrideAccess: true,

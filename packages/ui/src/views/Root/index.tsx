@@ -19,7 +19,7 @@ import React from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { PageConfigProvider } from '../../exports/client/index.js'
+import { PageConfigProvider, PageLocaleProvider } from '../../exports/client/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -366,37 +366,39 @@ export const renderRoot = async ({
 
   return (
     <PageConfigProvider config={clientConfig}>
-      {!templateType && <React.Fragment>{KeyedView}</React.Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{KeyedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={collectionConfig?.slug}
-          docID={routeParams.id}
-          documentSubViewType={documentSubViewType}
-          globalSlug={globalConfig?.slug}
-          i18n={req.i18n}
-          locale={locale}
-          params={params}
-          payload={req.payload}
-          permissions={permissions}
-          req={req}
-          searchParams={searchParams}
-          user={user}
-          viewActions={viewActions}
-          viewKey={key}
-          viewType={viewType}
-          visibleEntities={{
-            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-            // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: visibleEntities?.collections,
-            globals: visibleEntities?.globals,
-          }}
-        >
-          {KeyedView}
-        </DefaultTemplate>
-      )}
+      <PageLocaleProvider locale={locale?.code}>
+        {!templateType && <React.Fragment>{KeyedView}</React.Fragment>}
+        {templateType === 'minimal' && (
+          <MinimalTemplate className={templateClassName}>{KeyedView}</MinimalTemplate>
+        )}
+        {templateType === 'default' && (
+          <DefaultTemplate
+            collectionSlug={collectionConfig?.slug}
+            docID={routeParams.id}
+            documentSubViewType={documentSubViewType}
+            globalSlug={globalConfig?.slug}
+            i18n={req.i18n}
+            locale={locale}
+            params={params}
+            payload={req.payload}
+            permissions={permissions}
+            req={req}
+            searchParams={searchParams}
+            user={user}
+            viewActions={viewActions}
+            viewKey={key}
+            viewType={viewType}
+            visibleEntities={{
+              // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+              // which this caused as soon as initPageResult.visibleEntities is passed in
+              collections: visibleEntities?.collections,
+              globals: visibleEntities?.globals,
+            }}
+          >
+            {KeyedView}
+          </DefaultTemplate>
+        )}
+      </PageLocaleProvider>
     </PageConfigProvider>
   )
 }

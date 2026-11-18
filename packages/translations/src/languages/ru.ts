@@ -298,6 +298,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     and: 'А также',
     anotherUser: 'Другой пользователь',
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
+    apiResponse: 'Ответ API',
     applyChanges: 'Применить изменения',
     ascending: 'Восходящий',
     auto: 'Автоматически',
@@ -370,6 +371,13 @@ export const ruTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Этот документ недавно был обновлен другим пользователем. Ваш просмотр устарел.',
     documents: 'Документы',
+    dragCancelled: 'Перетаскивание {{label}} отменено.',
+    dragDropped: '{{label}} отпущен. Позиция {{position}} из {{count}}.',
+    dragInstructions:
+      'Нажмите Space или Enter, чтобы захватить строку. Используйте стрелки для перемещения. С VoiceOver отключите Quick Nav и используйте Command + стрелки. Нажмите Space или Enter, чтобы отпустить, или Escape, чтобы отменить.',
+    dragMoved: '{{label}}: {{direction}}. Позиция {{position}} из {{count}}.',
+    dragPickedUp: '{{label}} захвачен. Позиция {{position}} из {{count}}.',
+    dragToMove: 'Перетащите для перемещения',
     dragToReorder: 'Перетащите для изменения порядка',
     duplicate: 'Дублировать',
     duplicateWithoutSaving: 'Дублирование без сохранения изменений',
@@ -484,6 +492,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Переиндексирование всех {{collections}}.',
     reloadDocument: 'Перезагрузить документ',
     remove: 'Удалить',
+    removeFilter: 'Удалить фильтр',
     rename: 'Переименовать',
     replaceRow: 'Заменить строку',
     requiredFields: 'Поля, отмеченные *, обязательны для заполнения.',
@@ -577,6 +586,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Расположение папки',
     goTo: 'Перейти к "{{name}}"',
     itemsMovedTo: '{{title}} перемещен в {{destination}}',
     itemsMovedToRoot: '{{title}} перемещен в корень',
@@ -637,6 +647,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addFile: 'Добавить файл',
     addFiles: 'Добавить файлы',
     bulkUpload: 'Массовая загрузка',
+    cancelUpload: 'Отменить загрузку',
     copyLinkToFile: 'Скопировать ссылку на файл',
     copyURL: 'Скопировать URL',
     crop: 'Обрезать',
@@ -658,6 +669,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     fileSize: 'Размер файла',
     filesToUpload: 'Файлы для загрузки',
     fileToUpload: 'Файл для загрузки',
+    finishSaving: 'Завершить сохранение',
     focalPoint: 'Центральная точка',
     focalPointDescription:
       'Перетащите фокусное расстояние прямо на предварительный просмотр или отрегулируйте значения ниже.',
@@ -672,12 +684,25 @@ export const ruTranslations: DefaultTranslationsObject = {
     previewSizes: 'Предварительный просмотр размеров',
     renameFile: 'Переименовать файл',
     replaceFile: 'Заменить файл',
+    resumingFile: 'Возобновление {{filename}}',
+    savingInBackground: 'Загрузка завершится в фоновом режиме, и тогда документ будет сохранён.',
     selectCollectionToBrowse: 'Выберите Коллекцию для просмотра',
     selectFile: 'Выберите файл',
     setCropArea: 'Установите область обрезки',
     setFocalPoint: 'Установить фокусное расстояние',
     sizes: 'Размеры',
     sizesFor: 'Размеры для {{label}}',
+    uploadFileMismatch: 'Выбранный файл не соответствует прерванной загрузке.',
+    uploadingFile: 'Загрузка {{filename}}',
+    uploadingFileProgress: 'Загрузка {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Загрузка ещё выполняется. Если уйти сейчас, она будет прервана.',
+    uploadInterrupted: 'Загрузка {{filename}} была прервана.',
+    uploadInterruptedWillSave:
+      'Загрузка {{filename}} была прервана. Документ будет сохранён после её завершения.',
+    uploadReadyToFinishSaving: '{{filename}} загружен. Откройте форму, чтобы завершить сохранение.',
+    uploadSavedInBackground: 'Загрузка завершена, документ сохранён.',
+    uploadStorageRejectedSegments:
+      'Хранилище не приняло ни одной части загрузки. Проверьте политику CORS бакета.',
     width: 'Ширина',
   },
   validation: {
@@ -712,6 +737,10 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Вы собираетесь опубликовать все {{label}} в выборе. Вы уверены?',
     aboutToRestore:
       'Вы собираетесь восстановить этот документ {{label}} в состояние, в котором он находился {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Восстановите содержимое от {{versionDate}} как черновик. Опубликованное содержимое останется неизменным, пока вы не опубликуете его из редактора.',
+    aboutToRestoreAsDraftAllLocales:
+      'Восстановите содержимое от {{versionDate}} как черновик для всех языковых версий. Опубликованное содержимое останется неизменным, пока вы не опубликуете его из редактора.',
     aboutToRestoreGlobal:
       'Вы собираетесь восстановить глобальную запись {{label}} в состояние, в котором она находилась {{versionDate}}.',
     aboutToRevertToPublished:

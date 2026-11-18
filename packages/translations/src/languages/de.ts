@@ -305,6 +305,7 @@ export const deTranslations: DefaultTranslationsObject = {
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
+    apiResponse: 'API-Antwort',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
     auto: 'Automatisch',
@@ -377,6 +378,13 @@ export const deTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Deine Ansicht ist veraltet.',
     documents: 'Dokumente',
+    dragCancelled: 'Ziehen von {{label}} abgebrochen.',
+    dragDropped: '{{label}} abgelegt. Position {{position}} von {{count}}.',
+    dragInstructions:
+      'Drücken Sie Space oder Enter, um eine Zeile aufzunehmen. Verschieben Sie sie mit den Pfeiltasten. Deaktivieren Sie mit VoiceOver Quick Nav und verwenden Sie Command + Pfeiltasten. Drücken Sie Space oder Enter zum Ablegen oder Escape zum Abbrechen.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} von {{count}}.',
+    dragPickedUp: '{{label}} aufgenommen. Position {{position}} von {{count}}.',
+    dragToMove: 'Zum Verschieben ziehen',
     dragToReorder: 'Ziehen, um die Reihenfolge zu ändern',
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Duplizieren ohne Änderungen zu speichern',
@@ -492,6 +500,7 @@ export const deTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',
     reloadDocument: 'Dokument neu laden',
     remove: 'Entfernen',
+    removeFilter: 'Filter entfernen',
     rename: 'Umbenennen',
     replaceRow: 'Zeile ersetzen',
     requiredFields: 'Mit * gekennzeichnete Felder sind Pflichtfelder.',
@@ -587,6 +596,7 @@ export const deTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Ordnerpfad',
     goTo: 'Gehen Sie zu "{{name}}"',
     itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
     itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',
@@ -647,6 +657,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
+    cancelUpload: 'Upload abbrechen',
     copyLinkToFile: 'Link zum Datei kopieren',
     copyURL: 'URL kopieren',
     crop: 'Zuschneiden',
@@ -668,6 +679,7 @@ export const deTranslations: DefaultTranslationsObject = {
     fileSize: 'Dateigröße',
     filesToUpload: 'Dateien zum Hochladen',
     fileToUpload: 'Datei zum Hochladen',
+    finishSaving: 'Speichern abschließen',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Setze den Fokuspunkt direkt auf der Vorschau oder passe die Werte unten an.',
@@ -682,12 +694,28 @@ export const deTranslations: DefaultTranslationsObject = {
     previewSizes: 'Bildgrößen anzeigen',
     renameFile: 'Datei umbenennen',
     replaceFile: 'Datei ersetzen',
+    resumingFile: '{{filename}} wird fortgesetzt',
+    savingInBackground:
+      'Der Upload wird im Hintergrund abgeschlossen und das Dokument dann gespeichert.',
     selectCollectionToBrowse: 'Eine Sammlung zum Durchsuchen auswählen',
     selectFile: 'Datei auswählen',
     setCropArea: 'Zuschneide-Bereich festlegen',
     setFocalPoint: 'Fokuspunkt setzen',
     sizes: 'Bildgrößen',
     sizesFor: 'Bildgrößen für {{label}}',
+    uploadFileMismatch: 'Die ausgewählte Datei stimmt nicht mit dem unterbrochenen Upload überein.',
+    uploadingFile: '{{filename}} wird hochgeladen',
+    uploadingFileProgress: '{{filename}} wird hochgeladen: {{percent}} %',
+    uploadInProgressLeaveWarning:
+      'Ein Upload läuft noch. Wenn du die Seite jetzt verlässt, wird er unterbrochen.',
+    uploadInterrupted: 'Der Upload von {{filename}} wurde unterbrochen.',
+    uploadInterruptedWillSave:
+      'Der Upload von {{filename}} wurde unterbrochen. Das Dokument wird gespeichert, sobald er abgeschlossen ist.',
+    uploadReadyToFinishSaving:
+      '{{filename}} wurde hochgeladen. Öffne das Formular, um das Speichern abzuschließen.',
+    uploadSavedInBackground: 'Der Upload ist abgeschlossen und das Dokument wurde gespeichert.',
+    uploadStorageRejectedSegments:
+      'Der Speicher hat keine Upload-Teile angenommen. Überprüfe die CORS-Richtlinie des Buckets.',
     width: 'Breite',
   },
   validation: {
@@ -723,6 +751,10 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection:
       'Du bist dabei, alle {{label}} in der Auswahl zu veröffentlichen. Bist du dir sicher?',
     aboutToRestore: 'Du bist dabei, {{label}} auf den Stand vom {{versionDate}} zurückzusetzen.',
+    aboutToRestoreAsDraft:
+      'Stellen Sie den Inhalt vom {{versionDate}} als Entwurf wieder her. Veröffentlichte Inhalte bleiben unverändert, bis Sie sie im Editor veröffentlichen.',
+    aboutToRestoreAsDraftAllLocales:
+      'Stellen Sie den Inhalt vom {{versionDate}} für alle Sprachversionen als Entwurf wieder her. Veröffentlichte Inhalte bleiben unverändert, bis Sie sie im Editor veröffentlichen.',
     aboutToRestoreGlobal:
       'Du bist dabei, das globale Dokument {{label}} auf den Stand vom {{versionDate}} zurückzusetzen.',
     aboutToRevertToPublished:

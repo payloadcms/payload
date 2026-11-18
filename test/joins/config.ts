@@ -340,6 +340,19 @@ export default buildConfigWithDefaults({
         versions: false,
       },
       {
+        slug: 'multiple-collections-has-many-parents',
+        access: { read: () => true },
+        fields: [
+          {
+            name: 'children',
+            type: 'join',
+            collection: ['multiple-collections-1', 'multiple-collections-2'],
+            on: 'hasManyParents',
+          },
+        ],
+        versions: false,
+      },
+      {
         slug: 'multiple-collections-1',
         access: { read: () => true },
         admin: { useAsTitle: 'title' },
@@ -348,6 +361,12 @@ export default buildConfigWithDefaults({
             name: 'parent',
             type: 'relationship',
             relationTo: 'multiple-collections-parents',
+          },
+          {
+            name: 'hasManyParents',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'multiple-collections-has-many-parents',
           },
           {
             name: 'title',
@@ -369,6 +388,12 @@ export default buildConfigWithDefaults({
             name: 'parent',
             type: 'relationship',
             relationTo: 'multiple-collections-parents',
+          },
+          {
+            name: 'hasManyParents',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'multiple-collections-has-many-parents',
           },
           {
             name: 'title',

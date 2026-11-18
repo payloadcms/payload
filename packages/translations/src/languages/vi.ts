@@ -296,6 +296,7 @@ export const viTranslations: DefaultTranslationsObject = {
     and: 'Và',
     anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
+    apiResponse: 'Phản hồi API',
     applyChanges: 'Áp dụng thay đổi',
     ascending: 'Tăng dần',
     auto: 'Tự động',
@@ -367,6 +368,13 @@ export const viTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tài liệu này đã được cập nhật gần đây bởi một người dùng khác. Chế độ xem của bạn đã lỗi thời.',
     documents: 'Tài liệu',
+    dragCancelled: 'Đã hủy kéo {{label}}.',
+    dragDropped: 'Đã thả {{label}}. Vị trí {{position}} trong {{count}}.',
+    dragInstructions:
+      'Nhấn Space hoặc Enter để nhấc một hàng. Dùng các phím mũi tên để di chuyển. Với VoiceOver, tắt Quick Nav và dùng Command + các phím mũi tên. Nhấn Space hoặc Enter để thả, hoặc Escape để hủy.',
+    dragMoved: '{{label}}: {{direction}}. Vị trí {{position}} trong {{count}}.',
+    dragPickedUp: 'Đã nhấc {{label}}. Vị trí {{position}} trong {{count}}.',
+    dragToMove: 'Kéo để di chuyển',
     dragToReorder: 'Kéo để sắp xếp lại',
     duplicate: 'Tạo bản sao',
     duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
@@ -481,6 +489,7 @@ export const viTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
     reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
+    removeFilter: 'Xóa bộ lọc',
     rename: 'Đổi tên',
     replaceRow: 'Thay thế hàng',
     requiredFields: 'Các trường được đánh dấu * là bắt buộc.',
@@ -572,6 +581,7 @@ export const viTranslations: DefaultTranslationsObject = {
     yes: 'Có',
   },
   hierarchy: {
+    folderLocation: 'Vị trí thư mục',
     goTo: 'Đi đến "{{name}}"',
     itemsMovedTo: '{{title}} đã di chuyển đến {{destination}}',
     itemsMovedToRoot: '{{title}} đã được chuyển đến gốc',
@@ -632,6 +642,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
     bulkUpload: 'Tải lên số lượng lớn',
+    cancelUpload: 'Hủy tải lên',
     copyLinkToFile: 'Sao chép liên kết đến tệp',
     copyURL: 'Sao chép URL',
     crop: 'Cắt xén',
@@ -653,6 +664,7 @@ export const viTranslations: DefaultTranslationsObject = {
     fileSize: 'Dung lượng file',
     filesToUpload: 'Tệp để Tải lên',
     fileToUpload: 'Tệp để Tải lên',
+    finishSaving: 'Hoàn tất lưu',
     focalPoint: 'Điểm trọng tâm',
     focalPointDescription:
       'Kéo điểm tiêu điểm trực tiếp trên ảnh xem trước hoặc điều chỉnh giá trị bên dưới.',
@@ -667,12 +679,27 @@ export const viTranslations: DefaultTranslationsObject = {
     previewSizes: 'Kích cỡ xem trước',
     renameFile: 'Đổi tên tệp',
     replaceFile: 'Thay thế tệp',
+    resumingFile: 'Đang tiếp tục {{filename}}',
+    savingInBackground:
+      'Quá trình tải lên sẽ hoàn tất ở chế độ nền và tài liệu sẽ được lưu khi đó.',
     selectCollectionToBrowse: 'Chọn một Collection để tìm',
     selectFile: 'Chọn một file',
     setCropArea: 'Đặt khu vực cắt',
     setFocalPoint: 'Đặt điểm tiêu điểm',
     sizes: 'Các độ phân giải',
     sizesFor: 'Kích thước cho {{label}}',
+    uploadFileMismatch: 'Tệp đã chọn không khớp với lần tải lên bị gián đoạn.',
+    uploadingFile: 'Đang tải lên {{filename}}',
+    uploadingFileProgress: 'Đang tải lên {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Một lượt tải lên vẫn đang diễn ra. Rời đi bây giờ sẽ làm gián đoạn nó.',
+    uploadInterrupted: 'Quá trình tải lên {{filename}} đã bị gián đoạn.',
+    uploadInterruptedWillSave:
+      'Quá trình tải lên {{filename}} đã bị gián đoạn. Tài liệu sẽ được lưu khi hoàn tất.',
+    uploadReadyToFinishSaving: '{{filename}} đã tải lên xong. Mở biểu mẫu để hoàn tất lưu.',
+    uploadSavedInBackground: 'Tải lên đã hoàn tất và tài liệu đã được lưu.',
+    uploadStorageRejectedSegments:
+      'Bộ lưu trữ không chấp nhận phần tải lên nào. Hãy kiểm tra chính sách CORS của bucket.',
     width: 'Chiều rộng',
   },
   validation: {
@@ -706,6 +733,10 @@ export const viTranslations: DefaultTranslationsObject = {
     type: 'Loại',
     aboutToPublishSelection: 'Bạn có muốn xuất bản tất cả {{label}} không?',
     aboutToRestore: 'Bạn chuẩn bị khôi phục lại {{label}} về phiên bản {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Khôi phục nội dung từ {{versionDate}} dưới dạng bản nháp. Nội dung đã xuất bản sẽ không thay đổi cho đến khi bạn xuất bản từ trình chỉnh sửa.',
+    aboutToRestoreAsDraftAllLocales:
+      'Khôi phục nội dung từ {{versionDate}} dưới dạng bản nháp cho tất cả ngôn ngữ. Nội dung đã xuất bản sẽ không thay đổi cho đến khi bạn xuất bản từ trình chỉnh sửa.',
     aboutToRestoreGlobal:
       'Bạn chuẩn bị khôi phục cấu hình chung của {{label}} về phiên bản {{versionDate}}.',
     aboutToRevertToPublished: 'Bạn có muốn tái xuất bản bản nháp này không?',

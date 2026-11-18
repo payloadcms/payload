@@ -5,7 +5,7 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the internal server handler against the real database.
-import { getDashboardDocuments } from '../../packages/ui/src/widgets/RecentlyViewed/getDocuments.js'
+import { getActivityWidgetDocs } from '../../packages/ui/src/widgets/Activity/utils/getActivityWidgetDocs.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
@@ -54,8 +54,8 @@ test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
     }
     const req = await createPayloadRequest({ payload, req: { user } })
 
-    for (const tab of ['pinned', 'recents'] as const) {
-      const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab })
+    for (const type of ['pinned', 'recents'] as const) {
+      const result = await getActivityWidgetDocs({ type, limit: 4, page: 1, req })
 
       expect(result.items).toHaveLength(1)
       expect(result.items[0].thumbnailURL).toBe(media.thumbnailURL || media.url)
@@ -88,7 +88,7 @@ test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
       user,
     })
     const req = await createPayloadRequest({ payload, req: { user } })
-    const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.items[0]).toMatchObject({
       thumbnailURL: media.url,
@@ -138,8 +138,8 @@ test.suite('Dashboard upload thumbnails', { config: './config.ts' }, () => {
     }
     const req = await createPayloadRequest({ payload, req: { user } })
 
-    for (const tab of ['pinned', 'recents'] as const) {
-      const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab })
+    for (const type of ['pinned', 'recents'] as const) {
+      const result = await getActivityWidgetDocs({ type, limit: 4, page: 1, req })
 
       expect(result.items.map(({ thumbnailURL }) => thumbnailURL)).toEqual([previewURL, previewURL])
     }

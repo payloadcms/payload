@@ -293,6 +293,7 @@ export const slTranslations: DefaultTranslationsObject = {
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
+    apiResponse: 'Odgovor API',
     applyChanges: 'Uporabi spremembe',
     ascending: 'Naraščajoče',
     auto: 'Samodejno',
@@ -364,6 +365,13 @@ export const slTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ta dokument je bil pred kratkim posodobljen od drugega uporabnika. Vaš pogled je zastarel.',
     documents: 'Dokumenti',
+    dragCancelled: 'Vlečenje {{label}} je preklicano.',
+    dragDropped: '{{label}} je spuščen. Položaj {{position}} od {{count}}.',
+    dragInstructions:
+      'Pritisnite Space ali Enter, da dvignete vrstico. Premaknite jo s puščičnimi tipkami. Z VoiceOver izklopite Quick Nav in uporabite Command + puščične tipke. Pritisnite Space ali Enter za spust ali Escape za preklic.',
+    dragMoved: '{{label}}: {{direction}}. Položaj {{position}} od {{count}}.',
+    dragPickedUp: '{{label}} je dvignjen. Položaj {{position}} od {{count}}.',
+    dragToMove: 'Povlecite za premik',
     dragToReorder: 'Povlecite za spremembo vrstnega reda',
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',
@@ -478,6 +486,7 @@ export const slTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
     reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
+    removeFilter: 'Odstrani filter',
     rename: 'Preimenuj',
     replaceRow: 'Zamenjaj vrstico',
     requiredFields: 'Polja, označena z *, so obvezna.',
@@ -570,6 +579,7 @@ export const slTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija mape',
     goTo: 'Pojdite na "{{name}}"',
     itemsMovedTo: '{{title}} preseljeno v {{destination}}',
     itemsMovedToRoot: '{{title}} premaknjeno v koren',
@@ -630,6 +640,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    cancelUpload: 'Prekliči nalaganje',
     copyLinkToFile: 'Kopiraj povezavo do datoteke',
     copyURL: 'Kopiraj URL',
     crop: 'Obreži',
@@ -651,6 +662,7 @@ export const slTranslations: DefaultTranslationsObject = {
     fileSize: 'Velikost datoteke',
     filesToUpload: 'Datoteke za nalaganje',
     fileToUpload: 'Datoteka za nalaganje',
+    finishSaving: 'Dokončaj shranjevanje',
     focalPoint: 'Žarišče',
     focalPointDescription:
       'Povlecite žarišče neposredno na predogledu ali prilagodite vrednosti spodaj.',
@@ -665,12 +677,26 @@ export const slTranslations: DefaultTranslationsObject = {
     previewSizes: 'Velikosti predogleda',
     renameFile: 'Preimenuj datoteko',
     replaceFile: 'Zamenjaj datoteko',
+    resumingFile: 'Nadaljevanje {{filename}}',
+    savingInBackground: 'Nalaganje se bo končalo v ozadju in dokument bo takrat shranjen.',
     selectCollectionToBrowse: 'Izberite zbirko za brskanje',
     selectFile: 'Izberite datoteko',
     setCropArea: 'Nastavi območje obrezovanja',
     setFocalPoint: 'Nastavi žarišče',
     sizes: 'Velikosti',
     sizesFor: 'Velikosti za {{label}}',
+    uploadFileMismatch: 'Izbrana datoteka se ne ujema s prekinjenim nalaganjem.',
+    uploadingFile: 'Nalaganje datoteke {{filename}}',
+    uploadingFileProgress: 'Nalaganje datoteke {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Nalaganje še poteka. Če zdaj zapustite stran, bo prekinjeno.',
+    uploadInterrupted: 'Nalaganje datoteke {{filename}} je bilo prekinjeno.',
+    uploadInterruptedWillSave:
+      'Nalaganje datoteke {{filename}} je bilo prekinjeno. Dokument bo shranjen, ko se konča.',
+    uploadReadyToFinishSaving:
+      'Datoteka {{filename}} je naložena. Odprite obrazec, da dokončate shranjevanje.',
+    uploadSavedInBackground: 'Nalaganje je končano in dokument je shranjen.',
+    uploadStorageRejectedSegments:
+      'Shramba ni sprejela nobenega dela nalaganja. Preverite pravilnik CORS za bucket.',
     width: 'Širina',
   },
   validation: {
@@ -705,6 +731,10 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Objavili boste vse {{label}} v izboru. Ste prepričani?',
     aboutToRestore:
       'Ta {{label}} dokument boste obnovili v stanje, v katerem je bil {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Obnovite vsebino z dne {{versionDate}} kot osnutek. Objavljena vsebina bo ostala nespremenjena, dokler je ne objavite iz urejevalnika.',
+    aboutToRestoreAsDraftAllLocales:
+      'Obnovite vsebino z dne {{versionDate}} kot osnutek za vse jezike. Objavljena vsebina bo ostala nespremenjena, dokler je ne objavite iz urejevalnika.',
     aboutToRestoreGlobal:
       'Globalni {{label}} boste obnovili v stanje, v katerem je bil {{versionDate}}.',
     aboutToRevertToPublished:

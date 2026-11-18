@@ -6,6 +6,7 @@ import React from 'react'
 
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
+import { useTableID } from '../../../elements/Table/TableIdentity.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
 import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
@@ -19,6 +20,7 @@ type DocumentGridProps = {
   readonly documentURLs?: Record<string, null | string>
   readonly enableRowSelections?: boolean
   readonly hierarchyParentFieldName?: string
+  readonly id?: string
   readonly useAsThumbnail?: string
   readonly useAsTitle?: string
   readonly viewType?: ViewTypes
@@ -43,6 +45,7 @@ const getDocumentTitle = ({
 }
 
 export const DocumentGrid: React.FC<DocumentGridProps> = ({
+  id,
   adminRoute,
   collectionLabel,
   collectionSlug,
@@ -55,6 +58,7 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
   viewType,
 }) => {
   const { selected, setSelection } = useSelection()
+  const gridID = useTableID(id ?? `payload-table-${collectionSlug}`)
 
   return (
     <CardGrid
@@ -67,6 +71,7 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
           : undefined
       }}
       getKey={getDocumentID}
+      id={gridID}
       items={docs}
       renderItem={(doc) => {
         const id = doc.id

@@ -93,11 +93,11 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs
 
       expect(firstUpdatedChildBreadcrumbs).toHaveLength(2)
-      // @ts-ignore
+      // @ts-expect-error
       expect(firstUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
 
       expect(firstUpdatedChildBreadcrumbs).toBeDefined()
-      // @ts-ignore
+      // @ts-expect-error
       expect(lastUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
     })
 

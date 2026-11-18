@@ -1,6 +1,10 @@
+import type { TestDetails } from '@playwright/test'
+
 import { test as playwrightTest } from '@playwright/test'
 
 type PayloadFramework = 'next' | 'tanstack-start'
+
+type TestBody = Parameters<typeof playwrightTest>[2]
 
 type TestOptions = {
   /**
@@ -11,7 +15,7 @@ type TestOptions = {
    * - 'rsc': Alias for 'all'. RSC is always enabled; retained to mark tests that assert server component rendering.
    */
   framework?: 'all' | 'rsc' | PayloadFramework
-}
+} & TestDetails
 
 const currentFramework: PayloadFramework =
   (process.env.PAYLOAD_FRAMEWORK as PayloadFramework) || 'next'
@@ -28,25 +32,20 @@ const currentFramework: PayloadFramework =
  *
  * // Run on all frameworks (default)
  * test('universal test', async ({ page }) => { ... })
+ *
+ * // Playwright test details like tags are passed through
+ * test('tagged test', { tag: '@also-without-cache-components' }, async ({ page }) => { ... })
  */
-function testWithOptions(
-  name: string,
-  optionsOrFn: Parameters<typeof playwrightTest>[1] | TestOptions,
-  fn?: Parameters<typeof playwrightTest>[2],
-) {
-  const options: TestOptions | undefined =
-    typeof optionsOrFn === 'object' && !Array.isArray(optionsOrFn) && 'framework' in optionsOrFn
-      ? optionsOrFn
-      : undefined
-  const testFn = options ? fn! : (optionsOrFn as Parameters<typeof playwrightTest>[1])
-
-  const framework = options?.framework ?? 'all'
+function testWithOptions(name: string, optionsOrFn: TestBody | TestOptions, fn?: TestBody) {
+  const { framework = 'all', ...details }: TestOptions =
+    typeof optionsOrFn === 'function' ? {} : optionsOrFn
+  const testFn = typeof optionsOrFn === 'function' ? optionsOrFn : fn!
 
   if (framework !== 'all' && framework !== 'rsc' && framework !== currentFramework) {
-    return playwrightTest.skip(name, testFn as Parameters<typeof playwrightTest>[1])
+    return playwrightTest.skip(name, details, testFn)
   }
 
-  return playwrightTest(name, testFn as Parameters<typeof playwrightTest>[1])
+  return playwrightTest(name, details, testFn)
 }
 
 testWithOptions.skip = playwrightTest.skip

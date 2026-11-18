@@ -16,6 +16,8 @@ export type DocumentMatchingWhereExistsArgs = {
   locale?: Locale['code']
   overrideAccess?: boolean
   req: PayloadRequest
+  /** Include uncommitted writes when validating within the caller's transaction. */
+  shouldUseTransaction?: boolean
   where: Where
 }
 
@@ -27,11 +29,16 @@ export const documentMatchingWhereExists = async ({
   locale,
   overrideAccess = false,
   req,
+  shouldUseTransaction = false,
   where,
 }: DocumentMatchingWhereExistsArgs): Promise<boolean> => {
   const queryReq = isolateObjectProperty(req, ['query', 'transactionID'])
   queryReq.query = { ...req.query }
-  delete queryReq.transactionID
+
+  if (!shouldUseTransaction) {
+    delete queryReq.transactionID
+  }
+
   const includeTrashed = Boolean(req.payload.collections[collection]?.config.trash)
 
   const { docs } = await req.payload.find({
@@ -40,7 +47,7 @@ export const documentMatchingWhereExists = async ({
     disableErrors: true,
     draft: Boolean(draftsEnabled),
     limit: 2,
-    locale: locale as Parameters<typeof req.payload.find>[0]['locale'],
+    locale,
     overrideAccess,
     pagination: false,
     req: queryReq,
