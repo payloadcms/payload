@@ -1142,6 +1142,14 @@ describe('General', () => {
         .toEqual({ operation: ['update', 'delete'] })
     })
 
+    test('should pass indexed query keys to a custom view as written', async () => {
+      await goToSearchParamsView({ query: '?operation[0]=update&operation[1]=delete' })
+
+      await expect
+        .poll(readViewSearchParams, { timeout: POLL_TOPASS_TIMEOUT })
+        .toEqual({ 'operation[0]': 'update', 'operation[1]': 'delete' })
+    })
+
     test('should pass a single query value to a custom view as a string', async () => {
       await goToSearchParamsView({ query: '?operation=delete' })
 
