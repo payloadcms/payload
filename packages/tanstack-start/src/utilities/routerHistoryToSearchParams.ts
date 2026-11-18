@@ -11,24 +11,26 @@ export type ViewSearchParams = Record<string, string | string[]>
  * it from the parsed search with `payloadStringifySearch`, which turns a
  * repeated key (`operation=a&operation=b`) into indexed keys
  * (`operation[0]=a&operation[1]=b`). The router's history still holds the query
- * string as written (on the server, the request URL's), so it is read from
- * there whenever it belongs to the location being loaded. A preload loads a
- * location the history hasn't moved to yet, so it falls back to
- * `location.searchStr`, which is the query string that navigation writes. So
- * does a loader that runs without a router instance, e.g. outside the Start
- * runtime.
+ * string as written (on the server, the request URL's), and a navigation moves
+ * the history before its loaders run, so it is read from there. A preload loads
+ * a location the history hasn't moved to, so it uses `location.searchStr`,
+ * which is the query string that navigation writes. So does a loader that runs
+ * without a router instance, e.g. outside the Start runtime.
  *
  * Returns synchronously whenever it can, so client navigations call `load` in
  * the same tick. On the server the Start context only hands out the router as
  * a Promise, so the result is a Promise there.
  */
 export const routerHistoryToSearchParams = ({
+  isPreload,
   searchStr,
 }: {
+  /** The loader's `preload` flag: it loads a location the history is not at. */
+  isPreload: boolean
   /** The loader's `location.searchStr`. */
   searchStr: string
 }): Promise<ViewSearchParams> | ViewSearchParams => {
-  const router = getRouterInstanceIfAvailable()
+  const router = isPreload ? undefined : getRouterInstanceIfAvailable()
 
   if (!router) {
     return searchStringToRecord({ searchStr })
@@ -61,6 +63,7 @@ const routerToSearchParams = ({
 }): ViewSearchParams => {
   const historySearchStr = router.history.location.search
 
+  // A safety net: the history should already be at the loaded location.
   const isHistoryAtLocation =
     router.options.stringifySearch(router.options.parseSearch(historySearchStr)) === searchStr
 

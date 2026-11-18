@@ -16,11 +16,13 @@ export type AdminLoad = (opts: {
 }) => Promise<any>
 
 const runLoader = async ({
+  isPreload,
   load,
   searchStr,
   signal,
   splat,
 }: {
+  isPreload: boolean
   load: AdminLoad
   searchStr: string
   signal: AbortSignal
@@ -38,7 +40,7 @@ const runLoader = async ({
   let data: Awaited<ReturnType<AdminLoad>>
 
   try {
-    const search = routerHistoryToSearchParams({ searchStr })
+    const search = routerHistoryToSearchParams({ isPreload, searchStr })
 
     data = await load({
       data: { _splat: splat, search: search instanceof Promise ? await search : search },
@@ -91,12 +93,15 @@ const adminRouteOptions = ({
       abortController,
       location,
       params,
+      preload,
     }: {
       abortController: AbortController
       location: any
       params: any
+      preload?: boolean
     }) => {
       const data = await runLoader({
+        isPreload: preload === true,
         load,
         searchStr: location.searchStr,
         signal: abortController.signal,

@@ -21,6 +21,21 @@ test.suite('Admin route search params', {}, () => {
     expect(search).toEqual({ operation: ['update', 'delete'] })
   })
 
+  test('should use the location search for a preload, not the current history entry', async () => {
+    const indexedSearchStr = '?operation%5B0%5D=update&operation%5B1%5D=delete'
+    const router = {
+      history: { location: { search: '?operation=update&operation=delete' } },
+      options: { parseSearch: () => ({}), stringifySearch: () => indexedSearchStr },
+    }
+
+    const search = await runInServerStartContext({
+      getRouter: () => Promise.resolve(router),
+      run: () => loadSearchParams({ isPreload: true, searchStr: indexedSearchStr }),
+    })
+
+    expect(search).toEqual({ 'operation[0]': 'update', 'operation[1]': 'delete' })
+  })
+
   test('should fall back to the location search without a router instance', async () => {
     const search = await loadSearchParams({ searchStr: '?operation%5B0%5D=update' })
 
@@ -95,7 +110,13 @@ function startNavigation() {
   return { abortController, loadSignal, navigation, reject, resolve }
 }
 
-async function loadSearchParams({ searchStr }: { searchStr: string }) {
+async function loadSearchParams({
+  isPreload = false,
+  searchStr,
+}: {
+  isPreload?: boolean
+  searchStr: string
+}) {
   let search: unknown
   const { loader } = payloadAdminSplatRoute({
     load: ({ data }) => {
@@ -108,6 +129,7 @@ async function loadSearchParams({ searchStr }: { searchStr: string }) {
     abortController: new AbortController(),
     location: { searchStr },
     params: { _splat: 'collections/posts' },
+    preload: isPreload,
   })
 
   return search
