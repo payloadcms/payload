@@ -38,8 +38,10 @@ const runLoader = async ({
   let data: Awaited<ReturnType<AdminLoad>>
 
   try {
+    const search = routerHistoryToSearchParams({ searchStr })
+
     data = await load({
-      data: { _splat: splat, search: routerHistoryToSearchParams({ searchStr }) },
+      data: { _splat: splat, search: search instanceof Promise ? await search : search },
       signal: loadController.signal,
     })
   } finally {

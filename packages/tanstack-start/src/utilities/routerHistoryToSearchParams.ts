@@ -16,44 +16,55 @@ export type ViewSearchParams = Record<string, string | string[]>
  * location the history hasn't moved to yet, so it falls back to
  * `location.searchStr`, which is the query string that navigation writes. So
  * does a loader that runs without a router instance, e.g. outside the Start
- * server runtime.
+ * runtime.
  *
- * Synchronous on purpose: the loader must call `load` in the same tick so the
- * router's abort signal is forwarded to the page load from the start.
+ * Returns synchronously whenever it can, so client navigations call `load` in
+ * the same tick. On the server the Start context only hands out the router as
+ * a Promise, so the result is a Promise there.
  */
 export const routerHistoryToSearchParams = ({
   searchStr,
 }: {
   /** The loader's `location.searchStr`. */
   searchStr: string
-}): ViewSearchParams => {
-  const router = getRouterSync()
+}): Promise<ViewSearchParams> | ViewSearchParams => {
+  const router = getRouterInstanceIfAvailable()
 
   if (!router) {
     return searchStringToRecord({ searchStr })
   }
 
+  if (router instanceof Promise) {
+    return router.then((resolvedRouter) =>
+      routerToSearchParams({ router: resolvedRouter, searchStr }),
+    )
+  }
+
+  return routerToSearchParams({ router, searchStr })
+}
+
+/** `getRouterInstance` throws on the server when there is no Start context. */
+const getRouterInstanceIfAvailable = () => {
+  try {
+    return getRouterInstance()
+  } catch {
+    return undefined
+  }
+}
+
+const routerToSearchParams = ({
+  router,
+  searchStr,
+}: {
+  router: Awaited<ReturnType<typeof getRouterInstance>>
+  searchStr: string
+}): ViewSearchParams => {
   const historySearchStr = router.history.location.search
 
   const isHistoryAtLocation =
     router.options.stringifySearch(router.options.parseSearch(historySearchStr)) === searchStr
 
   return searchStringToRecord({ searchStr: isHistoryAtLocation ? historySearchStr : searchStr })
-}
-
-/**
- * `getRouterInstance` reads `window.__TSR_ROUTER__` on the client and the Start
- * request context on the server, both synchronously, but is typed `Awaitable`
- * and throws when there is no Start context.
- */
-const getRouterSync = () => {
-  try {
-    const router = getRouterInstance()
-
-    return router instanceof Promise ? undefined : router
-  } catch {
-    return undefined
-  }
 }
 
 const searchStringToRecord = ({ searchStr }: { searchStr: string }): ViewSearchParams => {
