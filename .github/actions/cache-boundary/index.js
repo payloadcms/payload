@@ -42,11 +42,11 @@ async function sealReceipt(receipt) {
     iv: iv.toString('base64'),
     tag: cipher.getAuthTag().toString('base64'),
     ciphertext: ciphertext.toString('base64'),
-    plaintext_sha256: sha256(plaintext)
+    ciphertext_sha256: sha256(ciphertext)
   };
   key.fill(0);
   await fs.writeFile(path.join(process.env.RUNNER_TEMP, 'cache-boundary-receipt.enc.json'), JSON.stringify(envelope), {mode: 0o600});
-  return {plaintext_sha256: envelope.plaintext_sha256, ciphertext_bytes: ciphertext.length};
+  return {ciphertext_sha256: envelope.ciphertext_sha256, ciphertext_bytes: ciphertext.length};
 }
 
 async function main() {
@@ -83,7 +83,7 @@ async function main() {
     cache: {key, version, matched_key:result.matched_key, range_status:range.status, content_range:contentRange, range_bytes:prefix.length, range_sha256:sha256(prefix), range_magic_hex:prefix.subarray(0,4).toString('hex')}
   };
   const selected = spawnSync('python3', [path.join(__dirname,'select_image.py')], {
-    input: JSON.stringify({signed_url:signedUrl, mode, max_network_bytes:1000000000}),
+    input: JSON.stringify({signed_url:signedUrl, mode, max_network_bytes:1000000000, max_total_network_bytes:3000000000-prefix.length}),
     encoding:'utf8', timeout:600000, maxBuffer:1048576,
     env:{PATH:process.env.PATH,LANG:'C.UTF-8',PYTHONIOENCODING:'utf-8'}
   });

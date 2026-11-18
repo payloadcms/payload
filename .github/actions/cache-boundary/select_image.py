@@ -14,15 +14,36 @@ META_LIMIT = 262144
 SOURCE_LIMIT = 32768
 
 
+class NetworkBudget:
+    def __init__(self, per_pass, total):
+        self.per_pass, self.total, self.count, self.passes = per_pass, total, 0, []
+
+    @property
+    def remaining(self):
+        return self.total - self.count
+
+    def charge(self, amount):
+        self.count += amount
+        if self.count > self.total:
+            raise ValueError('network_total_limit')
+
+
 class LimitedReader:
-    def __init__(self, stream, limit):
-        self.stream, self.limit, self.count = stream, limit, 0
+    def __init__(self, stream, budget):
+        self.stream, self.budget = stream, budget
+        self.limit, self.count = min(budget.per_pass,budget.remaining), 0
 
     def read(self, size=-1):
+        remaining = min(self.limit-self.count,self.budget.remaining)
+        if size == 0:
+            return b''
+        if remaining <= 0:
+            raise ValueError('network_limit')
         if size < 0:
-            size = min(1048576, self.limit - self.count + 1)
-        data = self.stream.read(min(size, self.limit - self.count + 1))
+            size = min(1048576,remaining)
+        data = self.stream.read(min(size,remaining))
         self.count += len(data)
+        self.budget.charge(len(data))
         if self.count > self.limit:
             raise ValueError('network_limit')
         return data
@@ -32,22 +53,34 @@ def norm(name):
     return posixpath.normpath(name.lstrip('/'))
 
 
-def docker_entries(url, network_limit, visitor):
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError('archive_redirect')
+
+
+def open_archive(request):
+    return urllib.request.build_opener(NoRedirect).open(request,timeout=60)
+
+
+def docker_entries(url, budget, visitor):
     request = urllib.request.Request(url, headers={'Accept-Encoding':'identity'})
-    with urllib.request.urlopen(request, timeout=60) as response:
+    with open_archive(request) as response:
         if response.status != 200:
             raise ValueError('archive_http_status')
-        limited = LimitedReader(response, network_limit)
-        with tarfile.open(fileobj=limited, mode='r|*') as outer:
-            for member in outer:
-                if member.isfile() and posixpath.basename(member.name) == 'content-api-image.tar':
-                    with tarfile.open(fileobj=outer.extractfile(member), mode='r|*') as image:
-                        result = visitor(image)
-                    return result, limited.count, member.size
-        raise ValueError('expected_archive_member_missing')
+        limited = LimitedReader(response, budget)
+        try:
+            with tarfile.open(fileobj=limited, mode='r|*') as outer:
+                for member in outer:
+                    if member.isfile() and posixpath.basename(member.name) == 'content-api-image.tar':
+                        with tarfile.open(fileobj=outer.extractfile(member), mode='r|*') as image:
+                            result = visitor(image)
+                        return result, limited.count, member.size
+            raise ValueError('expected_archive_member_missing')
+        finally:
+            budget.passes.append(limited.count)
 
 
-def exact_member(url, network_limit, wanted, limit):
+def exact_member(url, budget, wanted, limit):
     def visit(image):
         for member in image:
             if norm(member.name) == norm(wanted):
@@ -58,7 +91,7 @@ def exact_member(url, network_limit, wanted, limit):
                     raise ValueError('metadata_member_truncated')
                 return data
         raise ValueError('metadata_member_missing')
-    return docker_entries(url, network_limit, visit)
+    return docker_entries(url, budget, visit)
 
 
 def source_candidates(config):
@@ -77,42 +110,66 @@ def source_candidates(config):
                 candidate = norm(token if token.startswith('/') else posixpath.join(workdir, token))
                 if '..' not in candidate.split('/') and candidate not in result:
                     result.append(candidate)
-    return result[:3]
+    return result[:1]
 
 
-def select_source(url, network_limit, layers, candidates):
+def select_source(url, budget, layers, candidates):
+    if len(candidates) != 1:
+        raise ValueError('one_source_path_required')
+    candidate = candidates[0]
     ranks = {norm(name):index for index,name in enumerate(layers)}
-    found = {}
+    found = None
 
-    def visit(image):
+    def locate(image):
+        nonlocal found
         for member in image:
             layer_name = norm(member.name)
             if layer_name not in ranks or not member.isfile():
                 continue
             rank = ranks[layer_name]
+            if found and found['layer_index'] > rank:
+                continue
+            replacement = None
+            lower_hidden = False
             with tarfile.open(fileobj=image.extractfile(member), mode='r|*') as layer:
                 for entry in layer:
                     entry_name = norm(entry.name)
-                    for candidate in candidates:
-                        old = found.get(candidate)
-                        if old and old['layer_index'] > rank:
-                            continue
-                        dirname, basename = posixpath.split(candidate)
-                        whiteout = posixpath.join(dirname, '.wh.'+basename)
-                        opaque = entry_name == '.wh..wh..opq' or (entry_name.endswith('/.wh..wh..opq') and candidate.startswith(entry_name[:-len('.wh..wh..opq')]))
-                        if entry_name == whiteout or opaque:
-                            found[candidate] = {'layer_index':rank,'deleted':True}
-                        elif entry_name == candidate and entry.isfile():
-                            data = layer.extractfile(entry).read(min(entry.size, SOURCE_LIMIT))
-                            found[candidate] = {'layer_index':rank,'layer_member':layer_name,'path':candidate,'member_size':entry.size,'retained_bytes':len(data),'complete_member':entry.size <= SOURCE_LIMIT,'prefix_sha256':hashlib.sha256(data).hexdigest(),'bytes_base64':base64.b64encode(data).decode(),'deleted':False}
-        for candidate in candidates:
-            value = found.get(candidate)
-            if value and not value.get('deleted'):
-                value.pop('deleted',None)
-                return value
-        return None
+                    dirname, basename = posixpath.split(entry_name)
+                    if basename == '.wh..wh..opq':
+                        if not dirname or candidate.startswith(dirname.rstrip('/')+'/'):
+                            lower_hidden = True
+                    elif basename.startswith('.wh.'):
+                        removed = posixpath.join(dirname,basename[4:])
+                        if candidate == removed or candidate.startswith(removed.rstrip('/')+'/'):
+                            lower_hidden = True
+                    elif entry_name == candidate:
+                        replacement = {'layer_index':rank,'layer_member':layer_name,'path':candidate,'member_size':entry.size,'header_offset':entry.offset,'deleted':not entry.isfile()}
+                    elif entry_name not in ('','.') and candidate.startswith(entry_name.rstrip('/')+'/') and not entry.isdir():
+                        replacement = {'layer_index':rank,'deleted':True}
+                        lower_hidden = True
+            if replacement is not None:
+                found = replacement
+            elif lower_hidden:
+                found = {'layer_index':rank,'deleted':True}
+        return found if found and not found.get('deleted') else None
 
-    return docker_entries(url, network_limit, visit)
+    selected, read_locate, archive_size = docker_entries(url,budget,locate)
+    if selected is None:
+        return None,read_locate,archive_size
+
+    def read_selected(image):
+        for member in image:
+            if norm(member.name) != selected['layer_member'] or not member.isfile():
+                continue
+            with tarfile.open(fileobj=image.extractfile(member),mode='r|*') as layer:
+                for entry in layer:
+                    if entry.offset == selected['header_offset'] and norm(entry.name) == candidate and entry.isfile():
+                        data = layer.extractfile(entry).read(min(entry.size,SOURCE_LIMIT))
+                        return {k:v for k,v in selected.items() if k not in ('deleted','header_offset')} | {'retained_bytes':len(data),'complete_member':entry.size <= SOURCE_LIMIT,'prefix_sha256':hashlib.sha256(data).hexdigest(),'bytes_base64':base64.b64encode(data).decode()}
+        raise ValueError('selected_source_missing')
+
+    result,read_source,_ = docker_entries(url,budget,read_selected)
+    return result,read_locate+read_source,archive_size
 
 
 def main():
@@ -121,50 +178,31 @@ def main():
     if not url.startswith('https://'):
         raise ValueError('https_required')
     maximum = min(int(params['max_network_bytes']),1000000000)
-    manifest_bytes, read_manifest, archive_size = exact_member(url, maximum, 'manifest.json', META_LIMIT)
+    budget = NetworkBudget(maximum,min(int(params.get('max_total_network_bytes',3000000000)),3000000000))
+    manifest_bytes, read_manifest, archive_size = exact_member(url, budget, 'manifest.json', META_LIMIT)
     manifests = json.loads(manifest_bytes)
     if not isinstance(manifests,list) or len(manifests) != 1:
         raise ValueError('unexpected_image_count')
     manifest = manifests[0]
-    config_bytes, read_config, _ = exact_member(url, maximum, manifest['Config'], META_LIMIT)
+    config_bytes, read_config, _ = exact_member(url, budget, manifest['Config'], META_LIMIT)
     config = json.loads(config_bytes)
     runtime = config.get('config') or {}
     receipt = {
         'mode':params['mode'],'completed':True,'archive_member':'content-api-image.tar','archive_member_size':archive_size,
         'manifest':manifest,'manifest_sha256':hashlib.sha256(manifest_bytes).hexdigest(),
         'config':{'member':manifest['Config'],'sha256':hashlib.sha256(config_bytes).hexdigest(),'size':len(config_bytes),'architecture':config.get('architecture'),'os':config.get('os'),'working_dir':runtime.get('WorkingDir'),'entrypoint':runtime.get('Entrypoint'),'cmd':runtime.get('Cmd'),'environment_names':[x.split('=',1)[0] for x in runtime.get('Env',[])],'label_names':sorted((runtime.get('Labels') or {}).keys()),'rootfs_diff_ids':(config.get('rootfs') or {}).get('diff_ids',[])},
-        'network_bytes_by_pass':[read_manifest,read_config]
+        'network_limit_bytes':budget.total
     }
     if params['mode'] == 'source_from_command':
         candidates = source_candidates(config)
         receipt['source_candidate_count'] = len(candidates)
         if candidates:
-            selected, read_source, _ = select_source(url,maximum,manifest.get('Layers') or [],candidates)
+            selected, read_source, _ = select_source(url,budget,manifest.get('Layers') or [],candidates)
             receipt['source'] = selected
-            receipt['network_bytes_by_pass'].append(read_source)
         else:
             receipt['source'] = None
-        # A Node image may invoke a package manager rather than name its entry
-        # source directly. Read only its configured working-directory package
-        # metadata, then select the explicit main/module source path.
-        workdir = runtime.get('WorkingDir')
-        if receipt['source'] is None and isinstance(workdir,str) and workdir:
-            package_path = norm(posixpath.join(workdir,'package.json'))
-            package, read_package, _ = select_source(url,maximum,manifest.get('Layers') or [],[package_path])
-            receipt['network_bytes_by_pass'].append(read_package)
-            if package and package['complete_member']:
-                package_json = json.loads(base64.b64decode(package['bytes_base64']))
-                package_candidates = []
-                for value in [package_json.get('main'),package_json.get('module')]:
-                    if isinstance(value,str) and value.endswith(('.js','.mjs','.cjs','.ts','.tsx')):
-                        candidate = norm(posixpath.join(workdir,value))
-                        if candidate.startswith(norm(workdir).rstrip('/')+'/') and candidate not in package_candidates:
-                            package_candidates.append(candidate)
-                receipt['package_metadata'] = {'path':package_path,'sha256':package['prefix_sha256'],'size':package['member_size'],'entry_candidate_count':len(package_candidates)}
-                if package_candidates:
-                    selected, read_source, _ = select_source(url,maximum,manifest.get('Layers') or [],package_candidates[:2])
-                    receipt['source'] = selected
-                    receipt['network_bytes_by_pass'].append(read_source)
+    receipt['network_bytes_by_pass'] = budget.passes
+    receipt['network_bytes_total'] = budget.count
     print(json.dumps(receipt,separators=(',',':')))
 
 
