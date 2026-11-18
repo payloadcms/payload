@@ -142,6 +142,29 @@ const getStoredBlockHash = (transaction: RecordValue): string | undefined => {
 }
 
 /**
+ * The `nano` group data written by the claim. SQL adapters store group fields as columns and set
+ * only the columns present in `data`, and their atomic update refuses fields kept outside the main
+ * table (arrays, blocks, hasMany or localized fields added through `groupOverrides.fields`), so
+ * the claim writes `blockHash` alone. The MongoDB adapter stores the group as one subdocument and
+ * `$set` replaces it whole, so there the stored group is kept and only `blockHash` changes.
+ */
+const getClaimData = ({
+  hash,
+  req,
+  transaction,
+}: {
+  hash: string
+  req: Req
+  transaction: RecordValue
+}): RecordValue => {
+  if (req.payload.db.name === 'mongoose') {
+    return { ...(transaction.nano as RecordValue), blockHash: hash }
+  }
+
+  return { blockHash: hash }
+}
+
+/**
  * Claims the block for this transaction before the order exists. The write is conditional: it
  * only matches while the transaction is still pending and its `nano.blockHash` is empty or
  * already this hash, so two concurrent confirmations cannot overwrite each other's claim. The
@@ -163,7 +186,7 @@ const claimBlock = async ({
   const storedHash = getStoredBlockHash(transaction)
   const claimed = await req.payload.db.updateOne({
     collection: transactionsSlug,
-    data: { nano: { ...(transaction.nano as RecordValue), blockHash: hash } },
+    data: { nano: getClaimData({ hash, req, transaction }) },
     options: { atomic: true },
     req,
     where: {

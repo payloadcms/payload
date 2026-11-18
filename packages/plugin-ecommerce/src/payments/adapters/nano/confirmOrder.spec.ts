@@ -52,6 +52,7 @@ const createHarness = ({
   block = createBlock() as Record<string, unknown>,
   claimedBy = [] as Record<string, unknown>[],
   claimResult = 'match' as 'match' | 'none',
+  dbName = 'postgres',
   storedAfterClaim,
   transaction = createTransaction() as Record<string, unknown>,
   user = { id: 'user-123' } as null | Record<string, unknown>,
@@ -59,6 +60,7 @@ const createHarness = ({
   block?: Record<string, unknown>
   claimedBy?: Record<string, unknown>[]
   claimResult?: 'match' | 'none'
+  dbName?: string
   storedAfterClaim?: string
   transaction?: Record<string, unknown>
   user?: null | Record<string, unknown>
@@ -78,9 +80,10 @@ const createHarness = ({
         return Promise.resolve(null)
       }
       const nano = data.nano as Record<string, unknown>
+      const before = dbName === 'mongoose' ? {} : (transaction.nano as Record<string, unknown>)
       stored = {
         ...transaction,
-        nano: { ...nano, blockHash: storedAfterClaim ?? nano.blockHash },
+        nano: { ...before, ...nano, blockHash: storedAfterClaim ?? nano.blockHash },
       }
       return Promise.resolve(stored)
     },
@@ -94,7 +97,13 @@ const createHarness = ({
     status: 200,
   })
   const req = {
-    payload: { db: { updateOne }, find, findByID, logger: { error: loggerError }, update },
+    payload: {
+      db: { name: dbName, updateOne },
+      find,
+      findByID,
+      logger: { error: loggerError },
+      update,
+    },
     user,
   } as unknown as ConfirmOrderArgs['req']
 
@@ -149,6 +158,33 @@ describe('Nano confirmOrder', () => {
     expect(harness.finalizeOrder).toHaveBeenCalledTimes(1)
     expect(harness.finalizeOrder.mock.calls[0][0].orderData.shippingAddress).toEqual({
       city: 'Test City',
+    })
+  })
+
+  it('should write only the block hash in the atomic claim on SQL adapters', async () => {
+    const transaction = createTransaction()
+    const harness = createHarness({
+      transaction: {
+        ...transaction,
+        nano: { ...transaction.nano, items: [{ sku: 'extra-1' }] },
+      },
+    })
+
+    const result = await run({ harness })
+
+    expect(result.orderID).toBe('order-123')
+    expect(harness.updateOne.mock.calls[0][0].data).toEqual({ nano: { blockHash: BLOCK_HASH } })
+  })
+
+  it('should keep the stored group in the atomic claim on the MongoDB adapter', async () => {
+    const transaction = createTransaction()
+    const harness = createHarness({ dbName: 'mongoose', transaction })
+
+    const result = await run({ harness })
+
+    expect(result.orderID).toBe('order-123')
+    expect(harness.updateOne.mock.calls[0][0].data).toEqual({
+      nano: { ...transaction.nano, blockHash: BLOCK_HASH },
     })
   })
 
