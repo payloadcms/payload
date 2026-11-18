@@ -3161,6 +3161,16 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     test('should scope nested field access to its joined collection', async ({ payload }) => {
       const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
 
+      await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          parent: parent.id,
+          title: 'Unavailable article',
+          details: { status: 'unavailable' },
+        },
+        overrideAccess: true,
+      })
+
       const result = await payload.findByID({
         id: parent.id,
         collection: accessJoinParentsSlug,
@@ -3189,6 +3199,12 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
 
     test('should scope top-level field access to its joined collection', async ({ payload }) => {
       const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await payload.create({
+        collection: accessJoinNotesSlug,
+        data: { parent: parent.id, title: 'Unavailable note', details_status: 'unavailable' },
+        overrideAccess: true,
+      })
 
       const result = await payload.findByID({
         id: parent.id,
