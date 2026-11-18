@@ -103,7 +103,7 @@ export const resaveChildren =
 
         // Anything else has to propagate too. A failed child update has already
         // killed the transaction the whole cascade shares, so swallowing here
-        // does not salvage the parent write — it only stops the caller from
+        // does not salvage the parent write. It only stops the caller from
         // being told the write was discarded. Two ways to land in this branch:
         // a non-validation failure (a database error), and a cascade deeper
         // than one level, where the throw above has already turned the

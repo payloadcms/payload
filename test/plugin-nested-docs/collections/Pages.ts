@@ -32,7 +32,7 @@ export const Pages: CollectionConfig = {
   hooks: {
     beforeChange: [
       ({ data, req }) => {
-        // Stands in for a non-validation failure during the re-save — the
+        // Stands in for a non-validation failure during the re-save. The
         // reporter names a database error. Anything of this shape is swallowed
         // by the plugin's catch even one level deep.
         if (data?.breaksOnResave && getSimulation(req).infraFailure) {
@@ -66,8 +66,8 @@ export const Pages: CollectionConfig = {
         hidden: true,
       },
       // Stands in for the reported cause: a document that is valid as stored and
-      // only fails when something re-validates it later — there, a required
-      // upload field whose media document had since been deleted.
+      // only fails when something re-validates it later. In the report that was a
+      // required upload field whose media document had since been deleted.
       validate: (value, { req }) =>
         value && getSimulation(req).staleReference ? 'This field is invalid.' : true,
     },

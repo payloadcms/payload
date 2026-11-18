@@ -1,8 +1,10 @@
-import type { ArrayField, RelationshipField } from 'payload'
+import type { ArrayField, Payload, RelationshipField } from 'payload'
 
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
+
+import type { Page } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 
@@ -527,21 +529,37 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
     })
   })
 
-  describe('error propagation', () => {
-    const createPage = async (data: Record<string, unknown>) =>
+  test.describe('error propagation', () => {
+    const createPage = (payload: Payload, data: Record<string, unknown>) =>
       payload.create({
         collection: 'pages',
         data: { _status: 'published', ...data } as Page,
+        overrideAccess: true,
       })
 
-    it('should surface a validation error raised two levels down the cascade', async () => {
-      const grandparent = await createPage({ title: 'Cascade A', slug: 'cascade-a' })
-      const parent = await createPage({
+    // The parent write can only be rolled back where the adapter runs transactions.
+    // SQLite, Firestore and Cosmos DB run this suite without them, so there the
+    // update is stored and the caller gets the error.
+    const runsTransactions = async (payload: Payload) => {
+      const transactionID = await payload.db.beginTransaction()
+
+      if (transactionID) {
+        await payload.db.rollbackTransaction(transactionID)
+      }
+
+      return Boolean(transactionID)
+    }
+
+    test('should surface a validation error raised two levels down the cascade', async ({
+      payload,
+    }) => {
+      const grandparent = await createPage(payload, { title: 'Cascade A', slug: 'cascade-a' })
+      const parent = await createPage(payload, {
         title: 'Cascade B',
         slug: 'cascade-b',
         parent: grandparent.id,
       })
-      await createPage({
+      await createPage(payload, {
         title: 'Cascade C',
         slug: 'cascade-c',
         breaksOnResave: true,
@@ -550,7 +568,7 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
 
       // Updating A re-saves B, and B's own resaveChildren re-saves C. C's
       // ValidationError is converted to an APIError one level down, so A's
-      // catch no longer recognises it and lets it go — while the failed update
+      // catch no longer recognises it and lets it go, while the failed update
       // has already killed the transaction the three of them share.
       await expect(
         payload.update({
@@ -558,22 +576,27 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           collection: 'pages',
           context: { simulate: { staleReference: true } },
           data: { title: 'Cascade A Updated', _status: 'published' },
+          overrideAccess: true,
         }),
       ).rejects.toThrow()
 
-      // What the caller was told and what the database holds now agree.
       const stored = await payload.findByID({
         id: grandparent.id,
         collection: 'pages',
         draft: false,
+        overrideAccess: true,
       })
 
-      expect(stored.title).toBe('Cascade A')
+      expect(stored.title).toBe(
+        (await runsTransactions(payload)) ? 'Cascade A' : 'Cascade A Updated',
+      )
     })
 
-    it('should surface a non-validation error raised during a child re-save', async () => {
-      const parent = await createPage({ title: 'Infra A', slug: 'infra-a' })
-      await createPage({
+    test('should surface a non-validation error raised during a child re-save', async ({
+      payload,
+    }) => {
+      const parent = await createPage(payload, { title: 'Infra A', slug: 'infra-a' })
+      await createPage(payload, {
         title: 'Infra B',
         slug: 'infra-b',
         breaksOnResave: true,
@@ -589,12 +612,18 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
           collection: 'pages',
           context: { simulate: { infraFailure: true } },
           data: { title: 'Infra A Updated', _status: 'published' },
+          overrideAccess: true,
         }),
       ).rejects.toThrow()
 
-      const stored = await payload.findByID({ id: parent.id, collection: 'pages', draft: false })
+      const stored = await payload.findByID({
+        id: parent.id,
+        collection: 'pages',
+        draft: false,
+        overrideAccess: true,
+      })
 
-      expect(stored.title).toBe('Infra A')
+      expect(stored.title).toBe((await runsTransactions(payload)) ? 'Infra A' : 'Infra A Updated')
     })
   })
 })
