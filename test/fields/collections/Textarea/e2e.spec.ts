@@ -188,7 +188,7 @@ describe('Textarea', () => {
     const textCell = page.locator('.row-1 .cell-i18nText')
 
     await expect(page.locator('#heading-i18nText')).toContainText('Text en')
-    await expect(textCell).toHaveText('—No Text en')
+    await expect(textCell).toHaveAccessibleName('No Text en')
   })
 
   test('should show i18n label', async () => {
