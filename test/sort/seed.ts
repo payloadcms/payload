@@ -7,6 +7,18 @@ import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 export async function seedSortable(payload: Payload) {
   await payload.delete({ collection: 'orderable', where: {}, overrideAccess: true })
   await payload.delete({ collection: 'orderable-join', where: {}, overrideAccess: true })
+  await payload.delete({ collection: 'orderable-hook-error', where: {}, overrideAccess: true })
+
+  await executePromises(
+    ['A', 'B'].map(
+      (title) => async () =>
+        payload.create({
+          collection: 'orderable-hook-error',
+          data: { title },
+          overrideAccess: true,
+        }),
+    ),
+  )
 
   const joinA = await payload.create({
     collection: 'orderable-join',

@@ -74,6 +74,7 @@ export interface Config {
     localized: Localized;
     orderable: Orderable;
     'orderable-join': OrderableJoin;
+    'orderable-hook-error': OrderableHookError;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -96,6 +97,7 @@ export interface Config {
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
     orderable: OrderableSelect<false> | OrderableSelect<true>;
     'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
+    'orderable-hook-error': OrderableHookErrorSelect<false> | OrderableHookErrorSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -345,6 +347,25 @@ export interface OrderableJoin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-hook-error".
+ */
+export interface OrderableHookError {
+  id: string;
+  _order?: string | null;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -394,6 +415,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'orderable-join';
         value: string | OrderableJoin;
+      } | null)
+    | ({
+        relationTo: 'orderable-hook-error';
+        value: string | OrderableHookError;
       } | null)
     | ({
         relationTo: 'users';
@@ -555,6 +580,18 @@ export interface OrderableJoinSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-hook-error_select".
+ */
+export interface OrderableHookErrorSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -643,6 +680,7 @@ export interface CollectionQueryWidget {
       | 'localized'
       | 'orderable'
       | 'orderable-join'
+      | 'orderable-hook-error'
       | 'users';
     where?:
       | {
@@ -674,6 +712,7 @@ export interface ActivityWidget {
           | 'localized'
           | 'orderable'
           | 'orderable-join'
+          | 'orderable-hook-error'
           | 'users'
         )[]
       | null;
