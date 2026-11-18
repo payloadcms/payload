@@ -155,11 +155,13 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
+          const fieldBlock = field.blocks.find((curBlock) =>
+            typeof curBlock === 'string'
+              ? curBlock === blockTypeToMatch
+              : curBlock.slug === blockTypeToMatch,
+          )
           const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+            typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
           if (block) {
             promises.push(

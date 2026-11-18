@@ -82,6 +82,33 @@ valid and are rewritten to the current scheme after the next successful login, w
 new `salt`. Treat the stored format as internal and read these fields through Payload rather than
 deriving them yourself.
 
+New hashes use 600,000 iterations by default. Some environments, such as Cloudflare Workers, do not
+support more than 100,000 iterations. To support them, set `auth.passwordHashIterations` in your
+Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  auth: {
+    passwordHashIterations: 100000,
+  },
+  // ...
+})
+```
+
+Each iteration count uses its own scheme prefix, so hashes created with either count can be
+verified. After a successful login, a hash with a different count is rehashed with the configured
+count.
+
+<Banner type="warning">
+  **Note:** An environment limited to 100,000 iterations cannot verify existing
+  600,000-iteration hashes. Those users cannot log in there until they reset
+  their passwords. A user who logs in one time through a Node.js deployment with
+  `passwordHashIterations: 100000` also gets a new hash that the environment can
+  verify.
+</Banner>
+
 The following options are available:
 
 | Option                         | Description                                                                                                                                                                                                                 |
@@ -93,6 +120,7 @@ The following options are available:
 | **`lockTime`**                 | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                  |
 | **`loginWithUsername`**        | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                           |
 | **`maxLoginAttempts`**         | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                               |
+| **`refreshTokens`**            | Set to `true` to also return a refresh token from login, which keeps clients logged in after their token expires. [More details](#refresh-tokens).                                                                          |
 | **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                        |
 | **`strategies`**               | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                               |
 | **`tokenExpiration`**          | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                             |
@@ -216,6 +244,66 @@ export default buildConfig({
     autoRefresh: true,
   },
   // highlight-end
+})
+```
+
+## Refresh Tokens
+
+Apps that aren't always running, like mobile apps or CLIs, can't refresh their token before it expires. With `refreshTokens`, login also returns a refresh token, which the [refresh operation](./operations#refresh) trades for a new token and a new refresh token, even after the token expired:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: {
+    // highlight-start
+    refreshTokens: {
+      // Optional. How many seconds the session lasts without a refresh, which is how long its
+      // refresh token can be used. Defaults to 30 days.
+      expiration: 60 * 60 * 24 * 7,
+    },
+    // highlight-end
+  },
+}
+```
+
+```ts
+const res = await fetch('http://localhost:3000/api/users/refresh-token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ refreshToken }),
+})
+
+// Store the new refresh token for next time
+const { refreshedToken, refreshToken: nextRefreshToken } = await res.json()
+```
+
+Refresh tokens don't expire on their own. They work as long as their session, which lasts `expiration` from the last refresh instead of `tokenExpiration`. The token itself still expires after `tokenExpiration`.
+
+Each refresh token is meant to be used once, so store the new one after every refresh. For 30 seconds after a refresh, the refresh token from right before it still works, so clients that refresh twice at once stay logged in. If a used refresh token comes back otherwise, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
+
+## Sessions
+
+By default, Payload saves each login as a session on the user, and logging out ends it. Besides when it was created and when it expires, each session can say what it is:
+
+- `label`: for people to read, e.g. "Chrome on macOS".
+- `type`: how the session was created. Logins use `'login'`. Plugins can use their own values, e.g. `'mcp'`.
+- `metadata`: anything else to show next to the label, as JSON.
+
+A login sets `type` to `'login'`, and `label` to the browser and operating system from its User-Agent. Code that starts a session itself with `createAuthToken` can pass its own:
+
+```ts
+import { createAuthToken } from 'payload'
+
+const { token } = await createAuthToken({
+  collectionConfig: req.payload.collections.users.config,
+  email: user.email,
+  label: 'Claude Code',
+  metadata: { redirectHost: 'localhost' },
+  req,
+  type: 'mcp',
+  user,
 })
 ```
 

@@ -1,13 +1,24 @@
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
+import type { LazySourceGetter } from './createLazySourceGetter.js'
+import type { PlannedTransformerPipeline } from './planTransformerPipeline.js'
 import type { ResolvedUploadDocument } from './resolveUploadDocument.js'
 import type { UploadTransformer } from './types.js'
 
+import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { deepFreeze } from '../../utilities/deepFreeze.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { fileSelectionParams } from '../fileSelectionParams.js'
+import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
+import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
+import { areVariantsBuildableAtRequest } from '../transformState/planUpload.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -19,23 +30,33 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
  * Orchestrates a dynamic file request end to end: resolve the document, plan the
  * request-capable transformer pipeline from the requested file's authoritative
  * MIME type (the primary file or the matched image size), enforce
- * transform-aware read access, then run every eligible transformer in declaration
- * order against a lazily-fetched source. Called from `getFileHandler` only when at
+ * transform-aware read access, then run every eligible transformer against a lazily-fetched
+ * source: first the stages that apply the saved `_transforms` (only when no default file is
+ * stored), then the stages that apply the request, each phase in declaration order. Called from `getFileHandler` only when at
  * least one transformer is configured — the zero-transformer path never reaches
  * this function.
  */
 export async function handleDynamicFileRequest({
   collection,
   filename,
+  historicalDocument,
+  isOriginal: isOriginalParam,
   prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  /**
+   * A version snapshot whose version access is checked. Its file access is checked here, as for the
+   * current file. Source retrieval and planning must never use current data.
+   */
+  historicalDocument?: ResolvedUploadDocument
+  isOriginal?: boolean
   prefix?: string
   req: PayloadRequest
 }): Promise<Response> {
-  const resolvedDocument = await resolveUploadDocument({ collection, filename, prefix, req })
+  const resolvedDocument =
+    historicalDocument ?? (await resolveUploadDocument({ collection, filename, prefix, req }))
 
   if (!resolvedDocument) {
     // There's no mimeType to plan a pipeline from, so both access modes must pass
@@ -51,10 +72,19 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
-  if (
+  const isOriginalRequest = isOriginalFileRequest({
+    doc: resolvedDocument,
+    filename,
+    isOriginal: isOriginalParam,
+  })
+  // Without transform params, a stored file is served as it is, with no transformer. A default
+  // file built at request time shares the original's name, but is not the original.
+  const hasNoTransformParams = req.searchParams?.size === 0
+  const isStoredOriginalName =
     resolvedDocument.original?.filename === filename &&
-    (resolvedDocument.filename !== filename || req.searchParams.size === 0)
-  ) {
+    !isRequestTimeFile({ entry: resolvedDocument })
+
+  if (isOriginalRequest || (isStoredOriginalName && hasNoTransformParams)) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
       isTransform: false,
@@ -65,23 +95,33 @@ export async function handleDynamicFileRequest({
       collection,
       doc: permittedDocument ?? resolvedDocument,
       filename,
+      isOriginal: isOriginalRequest,
       prefix,
       req,
     })
   }
 
-  const { document, pipeline } = await authorizeDocument({
+  const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
+    isHistorical: Boolean(historicalDocument),
     prefix,
     req,
     resolvedDocument,
   })
 
   const requestedFile = getRequestedFile({ document, filename })
+  // A file built at request time has no object, so its stages start from the original.
+  const { isBuiltAtRequest } = requestedFile
+  // The original can share the main file's name, so it is asked for by role, not by name.
+  const originalFile = {
+    filename: document.original?.filename ?? document.filename,
+    isOriginal: Boolean(document.original?.filename),
+  }
+  const storedFile = isBuiltAtRequest ? originalFile : { filename, isOriginal: false }
 
   const source = createLazySourceGetter({
-    retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
+    retrieve: () => getSourceFileResponse({ ...storedFile, collection, document, prefix, req }),
   })
 
   let currentResponse: Response | undefined
@@ -95,36 +135,54 @@ export async function handleDynamicFileRequest({
     handedOutBodyControllers.delete(response)
   }
 
-  try {
-    for (const transformer of pipeline) {
-      const previousResponse = currentResponse
-      let handedOutResponse: Response | undefined
-      const handedOutBodyController = new AbortController()
-      const stageSource = createLazySourceGetter({
-        retrieve: async () => {
-          handedOutResponse = withAbortableBody({
-            response: currentResponse ?? (await source.get()),
-            signal: handedOutBodyController.signal,
-          })
-          handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+  // A file with no stored object has nothing to serve. Its source is the original, which must not
+  // be served in its place, and a request stage must not start from the original either.
+  const assertDefaultFileBuilt = (): void => {
+    if (isBuiltAtRequest && !currentResponse) {
+      throw new TransformerContractError(
+        `No transformer built "${requestedFile.filename}", which has no stored file. A stage that applies its saved transforms must return a response.`,
+      )
+    }
+  }
 
-          return handedOutResponse
-        },
+  try {
+    for (const { options, purpose, transformer } of pipeline) {
+      if (purpose === 'request-override') {
+        assertDefaultFileBuilt()
+      }
+
+      const previousResponse = currentResponse
+      const handedOutResponses: Response[] = []
+      const stageSource = createHandedOutGetter({
+        getterName: 'getSourceFile',
+        handedOutBodyControllers,
+        handedOutResponses,
+        retrieve: async () => currentResponse ?? (await source.get()),
+      })
+      const stageOriginal = createHandedOutGetter({
+        getterName: 'getOriginalFile',
+        handedOutBodyControllers,
+        handedOutResponses,
+        retrieve: () =>
+          getSourceFileResponse({ ...originalFile, collection, document, prefix, req }),
       })
 
       const result = await transformer.handleRequest!({
         collectionSlug: collection.config.slug,
+        doc: documentSnapshot,
         documentID: document.id,
         filename: requestedFile.filename,
+        getOriginalFile: stageOriginal.get,
         getSourceFile: stageSource.get,
         mimeType: requestedFile.mimeType,
+        options,
+        originalDoc: documentSnapshot,
         req,
+        variantName: requestedFile.variantName,
       })
 
       if (result.response) {
-        if (handedOutResponse && result.response !== handedOutResponse) {
-          await discardResponse(handedOutResponse)
-        } else if (!handedOutResponse && previousResponse && result.response !== previousResponse) {
+        if (!stageSource.wasCalled() && previousResponse && result.response !== previousResponse) {
           await discardResponse(previousResponse)
         }
 
@@ -135,10 +193,18 @@ export async function handleDynamicFileRequest({
         )
       }
 
+      for (const handedOutResponse of handedOutResponses) {
+        if (handedOutResponse !== result.response) {
+          await discardResponse(handedOutResponse)
+        }
+      }
+
       if (result.status === 'complete') {
         return finalizeFileResponse({ collection, req, response: currentResponse! })
       }
     }
+
+    assertDefaultFileBuilt()
   } catch (err) {
     req.payload.logger.error({ err, msg: 'Error running the file transformer pipeline' })
     for (const handedOutBodyController of handedOutBodyControllers.values()) {
@@ -152,9 +218,42 @@ export async function handleDynamicFileRequest({
     return finalizeFileResponse({ collection, req, response: currentResponse })
   }
 
-  // No transformer produced a response — serve the original file through the
-  // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
-  return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
+  // No transformer produced a response — serve the stored file through the normal path
+  // (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
+  return retrieveFileResponse({ ...storedFile, collection, doc: document, prefix, req })
+}
+
+/**
+ * A single-use getter for one stage. Each response it hands out gets its own abort controller, so
+ * the pipeline can close the body later even when the stage locked it with a reader.
+ */
+function createHandedOutGetter({
+  getterName,
+  handedOutBodyControllers,
+  handedOutResponses,
+  retrieve,
+}: {
+  getterName: 'getOriginalFile' | 'getSourceFile'
+  /** Every handed-out body that is still open, for the whole pipeline. */
+  handedOutBodyControllers: Map<Response, AbortController>
+  /** The responses handed out to this stage. */
+  handedOutResponses: Response[]
+  retrieve: () => Promise<Response>
+}): LazySourceGetter {
+  return createLazySourceGetter({
+    getterName,
+    retrieve: async () => {
+      const handedOutBodyController = new AbortController()
+      const handedOutResponse = withAbortableBody({
+        response: await retrieve(),
+        signal: handedOutBodyController.signal,
+      })
+      handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+      handedOutResponses.push(handedOutResponse)
+
+      return handedOutResponse
+    },
+  })
 }
 
 /**
@@ -203,28 +302,98 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
   }
 }
 
-function planRequestPipeline({
+/** One planned `handleRequest` call. A transformer planned in both phases is two stages. */
+type RequestStage = {
+  options: unknown
+  purpose: 'persisted-default' | 'request-override'
+  transformer: UploadTransformer
+}
+
+/**
+ * Plans the saved-state phase, when the requested file is not stored, then the request phase. Fails
+ * before any file is read when a saved key that must run has no saved-state stage, or two.
+ */
+async function planRequestPipeline({
   collection,
   document,
+  documentSnapshot,
   filename,
+  isHistorical,
   req,
 }: {
   collection: Collection
   document: ResolvedUploadDocument
+  documentSnapshot: Readonly<ResolvedUploadDocument>
   filename: string
+  isHistorical: boolean
   req: PayloadRequest
-}): Promise<UploadTransformer[]> {
-  return planTransformerPipeline({
-    args: {
+}): Promise<RequestStage[]> {
+  const requestedFile = getRequestedFile({ document, filename })
+  const purposes = requestedFile.isBuiltAtRequest
+    ? (['persisted-default', 'request-override'] as const)
+    : (['request-override'] as const)
+  const pipeline: RequestStage[] = []
+
+  for (const purpose of purposes) {
+    const planArgs = {
       collectionSlug: collection.config.slug,
+      doc: documentSnapshot,
       documentID: document.id,
-      mimeType: getRequestedFile({ document, filename }).mimeType,
-      operation: 'request',
+      mimeType: requestedFile.mimeType,
       req,
-    },
-    capability: 'handleRequest',
-    transformers: req.payload.config.upload.transformers,
-  })
+    }
+    let plan: PlannedTransformerPipeline
+
+    if (purpose === 'persisted-default') {
+      const persistedDefaultBuild = await planPersistedDefaultStages({
+        ...planArgs,
+        transforms: document._transforms,
+      })
+      const { coverageErrors } = persistedDefaultBuild
+
+      if (coverageErrors.length > 0) {
+        throw new APIError(
+          `Cannot apply the saved transforms. ${coverageErrors.map(({ message, path }) => `${path}: ${message}`).join(' ')}`,
+          httpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
+
+      plan = persistedDefaultBuild.plan
+
+      if (
+        isHistorical &&
+        requestedFile.variantName &&
+        (!collection.config.upload.variants?.some(
+          ({ name }) => name === requestedFile.variantName,
+        ) ||
+          !areVariantsBuildableAtRequest({
+            requestTimeBuild: persistedDefaultBuild,
+            variantsTransformerSlug: collection.config.upload.variantsTransformerSlug,
+          }))
+      ) {
+        throw new APIError(
+          `No configured transformer can build historical size "${requestedFile.variantName}".`,
+          httpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
+    } else {
+      plan = await planTransformerPipeline({
+        args: { ...planArgs, operation: 'request', originalDoc: documentSnapshot, purpose },
+        capability: 'handleRequest',
+        transformers: req.payload.config.upload.transformers,
+      })
+    }
+
+    pipeline.push(
+      ...plan.pipeline.map((transformer) => ({
+        options: plan.options.get(transformer),
+        purpose,
+        transformer,
+      })),
+    )
+  }
+
+  return pipeline
 }
 
 type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { isAllowed: false }
@@ -234,7 +403,8 @@ type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { i
  * before any application-defined transformer code (`canTransform`) executes.
  *
  * 1. The first access mode comes from MIME matching alone: a transform-aware check
- *    when any transformer could handle the file, otherwise an ordinary read.
+ *    when any transformer could handle the file, otherwise an ordinary read. A historical
+ *    request without request parameters starts with an ordinary read.
  * 2. If the transform-aware check is denied, an ordinary read may still be allowed
  *    (e.g. public originals, signed-in-only variants), so that mode is tried next.
  * 3. Only once a check has passed does `canTransform` plan the real pipeline.
@@ -250,16 +420,23 @@ type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { i
 async function authorizeDocument({
   collection,
   filename,
+  isHistorical,
   prefix,
   req,
   resolvedDocument,
 }: {
   collection: Collection
   filename: string
+  isHistorical: boolean
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
-}): Promise<{ document: ResolvedUploadDocument; pipeline: UploadTransformer[] }> {
+}): Promise<{
+  document: ResolvedUploadDocument
+  /** A request never saves the document, so planning and every stage share this read-only copy. */
+  documentSnapshot: Readonly<ResolvedUploadDocument>
+  pipeline: RequestStage[]
+}> {
   const accessResults = new Map<boolean, Promise<AccessResult>>()
 
   const checkAccess = ({ isTransform }: { isTransform: boolean }): Promise<AccessResult> => {
@@ -267,7 +444,13 @@ async function authorizeDocument({
       accessResults.set(
         isTransform,
         withFileTransformAccessContext({
-          callback: () => checkFileAccess({ collection, filename, prefix, req }),
+          callback: () =>
+            checkFileAccess({
+              collection,
+              filename,
+              ...(isHistorical ? { documentID: resolvedDocument.id } : { prefix }),
+              req,
+            }),
           isTransform,
           req,
         }).then(
@@ -296,7 +479,10 @@ async function authorizeDocument({
       transformers: req.payload.config.upload.transformers,
     }).length > 0
 
-  let isTransformAccess = hasCandidateTransformers
+  // A historical request without request parameters only applies the saved state, so it starts as
+  // an ordinary read. The planned pipeline below still decides which access it needs.
+  let isTransformAccess =
+    hasCandidateTransformers && (!isHistorical || hasNonSelectionParams({ req }))
   let access = await checkAccess({ isTransform: isTransformAccess })
 
   if (!access.isAllowed && isTransformAccess) {
@@ -309,12 +495,22 @@ async function authorizeDocument({
   }
 
   const document =
-    access.document && access.document.id !== resolvedDocument.id
+    !isHistorical && access.document && access.document.id !== resolvedDocument.id
       ? access.document
       : resolvedDocument
 
-  const pipeline = await planRequestPipeline({ collection, document, filename, req })
-  const isTransform = pipeline.length > 0
+  const documentSnapshot = deepFreeze(deepCopyObject(document))
+  const pipeline = await planRequestPipeline({
+    collection,
+    document,
+    documentSnapshot,
+    filename,
+    isHistorical,
+    req,
+  })
+  // Only the request's own parameters make it a transform. Applying the saved state is an ordinary
+  // read of the saved file.
+  const isTransform = pipeline.some(({ purpose }) => purpose === 'request-override')
 
   if (isTransform !== isTransformAccess) {
     const requiredAccess = await checkAccess({ isTransform })
@@ -327,5 +523,16 @@ async function authorizeDocument({
     }
   }
 
-  return { document, pipeline }
+  return { document, documentSnapshot, pipeline }
+}
+
+const fileSelectionParamNames = new Set<string>(Object.values(fileSelectionParams))
+
+/**
+ * Whether a historical request has query parameters other than the ones that pick the file. This
+ * only picks which access check runs first: other parameters, such as `locale` or a cache-buster,
+ * also count. The planned pipeline then decides which access the request needs.
+ */
+function hasNonSelectionParams({ req }: { req: PayloadRequest }): boolean {
+  return [...(req.searchParams?.keys() ?? [])].some((key) => !fileSelectionParamNames.has(key))
 }

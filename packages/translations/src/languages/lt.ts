@@ -646,6 +646,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
+    cancelUpload: 'Atšaukti įkėlimą',
     copyLinkToFile: 'Kopijuoti nuorodą į failą',
     copyURL: 'Kopijuoti URL',
     crop: 'Pasėlis',
@@ -667,6 +668,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     fileSize: 'Failo dydis',
     filesToUpload: 'Įkelti failai',
     fileToUpload: 'Įkelti failą',
+    finishSaving: 'Užbaigti išsaugojimą',
     focalPoint: 'Fokuso Taškas',
     focalPointDescription:
       'Temkite fokusavimo tašką tiesiogiai peržiūroje arba reguliuokite žemiau esančias reikšmes.',
@@ -681,12 +683,26 @@ export const ltTranslations: DefaultTranslationsObject = {
     previewSizes: 'Peržiūros dydžiai',
     renameFile: 'Pervadinti failą',
     replaceFile: 'Pakeisti failą',
+    resumingFile: 'Tęsiamas {{filename}}',
+    savingInBackground: 'Įkėlimas bus užbaigtas fone, o tada dokumentas bus išsaugotas.',
     selectCollectionToBrowse: 'Pasirinkite kolekciją, kurią norėtumėte naršyti',
     selectFile: 'Pasirinkite failą',
     setCropArea: 'Nustatykite pjovimo plotą',
     setFocalPoint: 'Nustatyti fokuso tašką',
     sizes: 'Dydžiai',
     sizesFor: 'Dydžiai skirti {{label}}',
+    uploadFileMismatch: 'Pasirinktas failas neatitinka nutraukto įkėlimo.',
+    uploadingFile: 'Įkeliamas {{filename}}',
+    uploadingFileProgress: 'Įkeliamas {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Įkėlimas vis dar vyksta. Išėjus dabar jis bus nutrauktas.',
+    uploadInterrupted: '{{filename}} įkėlimas buvo nutrauktas.',
+    uploadInterruptedWillSave:
+      '{{filename}} įkėlimas buvo nutrauktas. Dokumentas bus išsaugotas, kai jis bus baigtas.',
+    uploadReadyToFinishSaving:
+      '{{filename}} įkeltas. Atidarykite formą, kad užbaigtumėte išsaugojimą.',
+    uploadSavedInBackground: 'Įkėlimas baigtas, dokumentas išsaugotas.',
+    uploadStorageRejectedSegments:
+      'Saugykla nepriėmė nė vienos įkėlimo dalies. Patikrinkite „bucket“ CORS politiką.',
     width: 'Plotis',
   },
   validation: {

@@ -185,6 +185,7 @@ export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sess
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 
+export { createAuthToken } from './auth/createAuthToken.js'
 export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
@@ -1355,9 +1356,12 @@ export const getPayload = async (
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
+  options = { ...options }
+
+  const cacheKey = options.key ?? 'default'
   let alreadyCachedSameConfig = false
 
-  let cached = _cached.get(options.key ?? 'default')
+  let cached = _cached.get(cacheKey)
   if (!cached) {
     cached = {
       devReloadCleanup: null,
@@ -1367,7 +1371,7 @@ export const getPayload = async (
       promise: null,
       reload: false,
     }
-    _cached.set(options.key ?? 'default', cached)
+    _cached.set(cacheKey, cached)
   } else {
     alreadyCachedSameConfig = true
   }
@@ -1432,6 +1436,12 @@ export const getPayload = async (
     connectDevReload({ cached, strategyFromOptions: options.devReloadStrategy })
   } catch (e) {
     cached.promise = null
+
+    // A failed attempt must not cause the next initialization to skip onInit.
+    if (_cached.get(cacheKey) === cached) {
+      _cached.delete(cacheKey)
+    }
+
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
     ;(e as { payloadInitError?: boolean }).payloadInitError = true
     throw e
@@ -1471,6 +1481,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { redeemRefreshToken } from './auth/redeemRefreshToken.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
@@ -1498,6 +1509,8 @@ export { generateImportMap } from './cli/commands/generateImportMap/generateImpo
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
+export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
+export type { CLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -2063,7 +2076,9 @@ export * from './types/index.js'
 export type { ValidationResult } from './types/validation.js'
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
+export { registerUploadVariants } from './uploads/registerUploadVariants.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+export type * from './uploads/sessions/types.js'
 export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
@@ -2154,6 +2169,8 @@ export type { PayloadLogger } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+export { parseErrorResponse } from './utilities/parseErrorResponse.js'
+export type { ParsedErrorResponse, ParsedNonFieldError } from './utilities/parseErrorResponse.js'
 export { parseParams } from './utilities/parseParams/index.js'
 export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
@@ -2177,8 +2194,6 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
-export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
-export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

@@ -4,8 +4,7 @@ import type { HtmlHTMLAttributes, ReactNode } from 'react'
 
 import React from 'react'
 
-import type { Theme } from '../../providers/Theme/shared.js'
-import type { RequestThemeSource } from '../../utilities/getRequestTheme.js'
+import type { RequestThemeResult } from '../../utilities/getRequestTheme.js'
 
 import { defaultTheme } from '../../providers/Theme/shared.js'
 import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
@@ -24,11 +23,9 @@ export type DocumentRootProps = {
   htmlProps?: HtmlHTMLAttributes<HTMLHtmlElement>
   languageCode?: string
   suppressHydrationWarning?: boolean
-  theme?: Theme
-  themeSource?: RequestThemeSource
   /** Optional viewport tag; adapters with router-managed metadata supply it through `head`. */
   viewport?: ReactNode
-}
+} & Partial<RequestThemeResult>
 
 export function DocumentRoot({
   children,
@@ -56,7 +53,7 @@ export function DocumentRoot({
       suppressHydrationWarning={suppressHydrationWarning}
     >
       <head>
-        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
+        {themeSource === 'fallback' && <ResolveThemeOnClient serverTheme={theme ?? defaultTheme} />}
         {viewport}
         <style>{`@layer payload-default, payload;`}</style>
         {head}

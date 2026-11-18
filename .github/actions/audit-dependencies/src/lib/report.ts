@@ -128,6 +128,17 @@ export const isResolvableBump = ({ fix }: Bump): boolean =>
   fix.status === 'fix' || fix.status === 'relock'
 
 /**
+ * Lists each `<advisory> through <dependency>` whose fix is unknown because the registry did
+ * not answer. Such a finding could have a fix, so the plan built from it is incomplete.
+ */
+export const listRegistryFailures = (findings: ReportedFinding[]): string[] =>
+  findings.flatMap((finding) =>
+    finding.bumps
+      .filter(({ fix }) => fix.status === 'unknown' && fix.reason === 'registry')
+      .map(({ dependency }) => `${finding.advisory} through ${dependency}`),
+  )
+
+/**
  * Reviews allowlisted advisories that still appear: reports any whose vulnerability
  * a bump or relock can now clear, so the exception can be removed and the fix applied.
  */

@@ -1,5 +1,6 @@
 import { type Command, CommanderError } from 'commander'
 
+import { getCLIErrorExitCode } from './exitCodeHandlers.js'
 import { redirectOutputToStderr, writeToCLIStdout } from './redirectOutputToStderr.js'
 
 export type CLIErrorIssue = {
@@ -149,7 +150,12 @@ export const getCLIErrorOutput = ({
  * their stack trace.
  */
 export const handleCLIError = ({ cli, error }: { cli?: Command; error: unknown }): void => {
-  const exitCode = error instanceof CommanderError ? error.exitCode : 1
+  const exitCode =
+    error instanceof CommanderError
+      ? error.exitCode
+      : getCLIErrorExitCode({
+          error: error instanceof CLICommandError ? (error.cause ?? error) : error,
+        })
   const shouldOutputJSON = isJSONOutput(cli)
 
   if (shouldOutputJSON && exitCode !== 0) {

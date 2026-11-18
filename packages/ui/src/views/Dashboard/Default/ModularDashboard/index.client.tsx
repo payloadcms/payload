@@ -20,6 +20,7 @@ import { closestInXAxis } from './utils/collisionDetection.js'
 import { useDashboardSensors } from './utils/sensors.js'
 import { WidgetContent } from './WidgetContent/index.js'
 import { WidgetEditControl } from './WidgetEditControl.js'
+import { WidgetMoveControl } from './WidgetMoveControl/index.js'
 
 /**
  * Custom modifier that only applies snapCenterToCursor for pointer events.
@@ -88,9 +89,20 @@ export function ModularDashboardClient({
     updateWidgetData,
   } = useDashboardLayout(initialLayout)
 
+  const [moveAnnouncement, setMoveAnnouncement] = useState('')
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const [activeControlsWidgetID, setActiveControlsWidgetID] = useState<null | string>(null)
   const sensors = useDashboardSensors()
+
+  useEffect(() => {
+    if (activeDragId !== null) {
+      document.body.classList.add('is-dragging')
+      return () => {
+        document.body.classList.remove('is-dragging')
+      }
+    }
+  }, [activeDragId])
+
   const announcements = useMemo<Announcements>(() => {
     const describeWidget = ({ id, index }: { id: UniqueIdentifier; index?: number }) => {
       const widgetID = String(id).replace(/-(?:before|after)$/, '')
@@ -151,6 +163,7 @@ export function ModularDashboardClient({
   useEffect(() => {
     if (!isEditing) {
       setActiveControlsWidgetID(null)
+      setMoveAnnouncement('')
     }
   }, [isEditing])
 
@@ -206,7 +219,7 @@ export function ModularDashboardClient({
               <p>{t('dashboard:noItems')}</p>
             </div>
           )}
-          {currentLayout?.map((widget) => {
+          {currentLayout?.map((widget, index) => {
             const slug = widget.item.id.slice(0, widget.item.id.lastIndexOf('-'))
             const label = getTranslation(
               widgets.find((widgetConfig) => widgetConfig.slug === slug)?.label ?? toWords(slug),
@@ -260,6 +273,23 @@ export function ModularDashboardClient({
                           onResize={(width) => resizeWidget(widget.item.id, width)}
                           widgetLabel={label}
                         />
+                        <WidgetMoveControl
+                          index={index}
+                          onMove={({ moveToIndex }) => {
+                            moveWidget({ moveFromIndex: index, moveToIndex })
+                            setMoveAnnouncement(
+                              t('hierarchy:itemsMovedTo', {
+                                title: label,
+                                destination: `${t('general:order')}: ${moveToIndex + 1}`,
+                              }),
+                            )
+                          }}
+                          onOpenChange={(isOpen) => {
+                            setActiveControlsWidgetID(isOpen ? widget.item.id : null)
+                          }}
+                          total={currentLayout.length}
+                          widgetLabel={label}
+                        />
                         <Button
                           aria-label={t('general:deleteLabel', { label })}
                           buttonStyle="destructive"
@@ -310,6 +340,9 @@ export function ModularDashboardClient({
           </DragOverlay>
         </div>
       </DndContext>
+      <div aria-atomic="true" className="sr-only" role="status">
+        {moveAnnouncement}
+      </div>
       <DashboardStepNav
         addWidget={addWidget}
         cancel={cancel}

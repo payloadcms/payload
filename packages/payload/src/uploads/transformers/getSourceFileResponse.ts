@@ -13,12 +13,15 @@ export async function getSourceFileResponse({
   collection,
   document,
   filename,
+  isOriginal,
   prefix,
   req,
 }: {
   collection: Collection
   document: ResolvedUploadDocument
   filename: string
+  /** Asks for the original when it shares a name with the main file. */
+  isOriginal?: boolean
   prefix?: string
   req: PayloadRequest
 }): Promise<Response> {
@@ -26,6 +29,7 @@ export async function getSourceFileResponse({
     collection,
     doc: document,
     filename,
+    isOriginal,
     operation: 'transform',
     prefix,
     req,

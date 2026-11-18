@@ -109,9 +109,13 @@ export const versionedCloudAdapter: Adapter = () => ({
     versionedCloudFiles.delete(from)
     return Promise.resolve()
   },
-  staticHandler: (_req, { doc, params: { filename } }) => {
-    const key = getStoredCloudFiles(doc as StoredUpload).find(
+  staticHandler: (_req, { doc, params: { filename, isOriginal } }) => {
+    const requestedRole = isOriginal ? 'original' : 'default'
+    const matches = getStoredCloudFiles(doc as StoredUpload).filter(
       (file) => path.posix.basename(file.key) === filename,
+    )
+    const key = (
+      matches.find((file) => file.roles.some((role) => role.type === requestedRole)) ?? matches[0]
     )?.key
     const bytes = key ? versionedCloudFiles.get(key) : undefined
 

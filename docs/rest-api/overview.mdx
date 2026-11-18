@@ -588,13 +588,13 @@ Additional REST API endpoints can be added to your application by providing an a
 
 Each endpoint object needs to have:
 
-| Property      | Description                                                                                                                                                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
-| **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`.                          |
-| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
-| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
+| Property          | Description                                                                                                                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`path`**        | A string for the endpoint route after the collection or globals slug                                                                                                                                                              |
+| **`method`**      | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                    |
+| **`handler`**     | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`. |
+| **`disableAuth`** | When `true`, Payload doesn't authenticate the request before calling the handler, so `req.user` is `null`. Use it when the handler authenticates the request itself, e.g. with `req.payload.auth()`.                              |
+| **`custom`**      | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                         |
 
 Example:
 
@@ -813,6 +813,104 @@ const res = await fetch(`${api}/${collectionSlug}/${id}`, {
 ```
 
 This can be more efficient for large JSON payloads, as you avoid converting data to and from query strings. However, only certain endpoints support this. Supported endpoints will read the parsed body under a `data` property, instead of reading from query parameters as with standard GET requests.
+
+## Parsing Error Responses
+
+A REST error response can contain field validation errors and general API errors, such as a custom storage quota error:
+
+```json
+{
+  "errors": [
+    {
+      "name": "ValidationError",
+      "message": "The following field is invalid: Title",
+      "data": {
+        "collection": "posts",
+        "errors": [
+          {
+            "label": "Title",
+            "message": "This field is required.",
+            "path": "title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "APIError",
+      "message": "Storage quota exceeded.",
+      "data": {
+        "code": "STORAGE_QUOTA_EXCEEDED"
+      }
+    }
+  ]
+}
+```
+
+Use `parseErrorResponse` from `payload/shared` to interpret a decoded REST error response in a browser or on the server:
+
+```ts
+import { parseErrorResponse } from 'payload/shared'
+
+const response = await fetch('/api/posts', {
+  body: JSON.stringify({ title: '' }),
+  headers: { 'Content-Type': 'application/json' },
+  method: 'POST',
+})
+
+if (!response.ok) {
+  const body: unknown = await response.json().catch(() => undefined)
+  const { fieldErrors, message, nonFieldErrors } = parseErrorResponse({ body })
+}
+```
+
+For the response above, the parsed result is:
+
+```json
+{
+  "fieldErrors": [
+    {
+      "message": "This field is required.",
+      "path": "title",
+      "label": "Title"
+    }
+  ],
+  "nonFieldErrors": [
+    {
+      "name": "ValidationError",
+      "data": {
+        "collection": "posts",
+        "errors": [
+          {
+            "label": "Title",
+            "message": "This field is required.",
+            "path": "title"
+          }
+        ]
+      },
+      "message": "The following field is invalid: Title"
+    },
+    {
+      "name": "APIError",
+      "data": {
+        "code": "STORAGE_QUOTA_EXCEEDED"
+      },
+      "message": "Storage quota exceeded."
+    }
+  ]
+}
+```
+
+The validation summary and the storage quota error remain in `nonFieldErrors`, including their original metadata. This response has no body-level `message`, so the parsed result omits it.
+
+The result contains:
+
+- `fieldErrors`: a `ValidationFieldError[]` containing field paths, messages, and available label, locale, and table metadata. Legacy `field` properties are normalized to `path`. Repeated paths, including errors in different locales, remain separate entries.
+- `nonFieldErrors`: error records containing validation summaries and nested errors without a usable field path and message. Additional properties, including plugin-specific `data`, are retained. A record's `message` may be absent.
+- `message`: a string message from the response body, retained separately even when field and non-field errors also exist.
+
+The utility does not consume a `Response`, inspect HTTP status codes, translate messages, or select which errors to display. Handle network failures and JSON decoding separately, and choose your own fallback when the response provides no usable message. Invalid bodies return empty error arrays.
+
+This utility parses REST error bodies, including `errors[].data.errors`. It does not parse GraphQL validation extensions or the successful response from the [document validation endpoints](../validation/overview#rest-api).
 
 ## Payload REST API SDK
 

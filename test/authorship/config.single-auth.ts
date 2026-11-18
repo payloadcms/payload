@@ -34,10 +34,12 @@ const config: Partial<Config> = {
     {
       // Default authorship on a global
       slug: menuSlug,
+      versions: { drafts: true },
       fields: [
         {
           name: 'title',
           type: 'text',
+          defaultValue: 'Default menu title',
         },
       ],
     },

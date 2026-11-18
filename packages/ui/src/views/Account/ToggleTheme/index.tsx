@@ -6,11 +6,11 @@ import type { Option as ReactSelectOption } from '../../../elements/ReactSelect/
 
 import { ReactSelect } from '../../../elements/ReactSelect/index.js'
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
-import { useTheme } from '../../../providers/Theme/index.js'
+import { useRootTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
 export const ToggleTheme: React.FC = () => {
-  const { autoMode, setTheme, theme } = useTheme()
+  const { autoMode, setTheme, theme } = useRootTheme()
   const { t } = useTranslation()
 
   const options = useMemo(

@@ -86,6 +86,8 @@
 
   .doc-controls__controls-wrapper {
     display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     align-items: center;
     margin: 0;
     gap: var(--spacer-2);
@@ -94,6 +96,8 @@
 
   .doc-controls__controls {
     display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
     align-items: center;
     margin: 0;
     gap: var(--spacer-2);
