@@ -1,0 +1,38 @@
+name: sync-issue-engagement
+
+on:
+  schedule:
+    - cron: '0 11 * * 3'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Preview engagement label changes without applying them
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: sync-issue-engagement
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.repository == 'payloadcms/payload'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+      - name: Update Issue Engagement Labels
+        run: node ./.github/actions/activity/dist/issue-engagement/index.js
+        env:
+          ENGAGEMENT_DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

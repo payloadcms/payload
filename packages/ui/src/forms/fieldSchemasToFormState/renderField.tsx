@@ -13,7 +13,6 @@ import { fieldIsHiddenOrDisabled } from 'payload/shared'
 import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 

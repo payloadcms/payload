@@ -18,7 +18,7 @@ export type PayloadAdminShellProps = {
  * `data-theme`/`lang`/`dir` on `<html>` from the server-computed layout data
  * (`getLayoutData`, exposed on the `/_payload` route loader), so the admin
  * panel shares document rendering and request preferences with Next's `RootLayout`.
- * A blocking script resolves the default theme from the browser preference before first paint.
+ * A blocking script resolves the fallback theme from the browser preference before first paint.
  */
 export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
   const documentProps = useRouterState({
@@ -33,7 +33,7 @@ export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
             languageCode: data.languageCode,
             suppressHydrationWarning: data.suppressHydrationWarning,
             theme: data.theme,
-            themeSource: data.themeSource ?? 'default',
+            themeSource: data.themeSource ?? 'fallback',
           }
         }
       }
@@ -41,7 +41,7 @@ export function PayloadAdminShell({ children }: PayloadAdminShellProps) {
       // No layout data yet (fresh session before the loader resolves): default
       // to `ltr` so the `[dir='ltr']`-scoped admin layout rules (e.g. the
       // document sidebar divider) still match, matching Next's `ltr` default.
-      return { dir: 'ltr', suppressHydrationWarning: true, themeSource: 'default' }
+      return { dir: 'ltr', suppressHydrationWarning: true, themeSource: 'fallback' }
     },
   })
 

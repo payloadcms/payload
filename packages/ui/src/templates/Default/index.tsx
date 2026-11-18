@@ -14,6 +14,10 @@ import './index.css'
 
 import React from 'react'
 
+import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
+
+import { DefaultNav } from '../../elements/Nav/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
 import {
   ActionsProvider,
@@ -24,10 +28,6 @@ import {
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
-import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
-
-import { DefaultNav } from '../../elements/Nav/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 const baseClass = 'template-default'
 
