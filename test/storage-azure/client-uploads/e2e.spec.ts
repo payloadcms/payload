@@ -84,10 +84,17 @@ test.describe('storage-azure client uploads E2E', () => {
     // Throttle only the transfer to storage; the document request that follows is not slowed.
     try {
       await page.click('#action-save')
-      await expect(page.locator('.payload-toast-container')).toContainText(
-        'Processing and saving ios-image.jpeg',
-        { timeout: POLL_TOPASS_TIMEOUT },
-      )
+      // The recorded history, not the live toast: a fast save can replace the processing toast
+      // between two checks of the page.
+      await expect
+        .poll(
+          async () =>
+            (await getToastHistory()).some((text) =>
+              text.includes('Processing and saving ios-image.jpeg'),
+            ),
+          { timeout: POLL_TOPASS_TIMEOUT },
+        )
+        .toBe(true)
     } finally {
       await stopThrottling()
     }
