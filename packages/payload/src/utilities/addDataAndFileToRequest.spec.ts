@@ -256,3 +256,44 @@ describe('addDataAndFileToRequest', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 })
+
+describe('addDataAndFileToRequest media type', () => {
+  const jsonReq = (contentType: string | null, body: string) => {
+    const headers = new Headers()
+    if (contentType) {
+      headers.set('Content-Type', contentType)
+    }
+    const request = new Request('http://localhost/api/posts', { body, headers, method: 'POST' })
+    return {
+      body: request.body,
+      headers: request.headers,
+      method: request.method,
+      payload: { config: {}, logger: { error: () => {} } },
+      text: () => request.text(),
+    } as unknown as PayloadRequest
+  }
+
+  it.each([
+    'Application/JSON',
+    'APPLICATION/JSON; charset=utf-8',
+    'application/json ; charset=utf-8',
+  ])('parses %s as JSON', async (contentType) => {
+    const req = jsonReq(contentType, '{"title":"x"}')
+    await addDataAndFileToRequest(req)
+    expect(req.data).toEqual({ title: 'x' })
+  })
+
+  it('leaves data undefined for unsupported or missing content types', async () => {
+    for (const contentType of ['application/x-www-form-urlencoded', 'text/plain', null]) {
+      const req = jsonReq(contentType, 'title=x')
+      await addDataAndFileToRequest(req)
+      expect(req.data).toBeUndefined()
+    }
+  })
+
+  it('throws 400 for invalid JSON', async () => {
+    await expect(addDataAndFileToRequest(jsonReq('Application/JSON', '{'))).rejects.toMatchObject({
+      status: 400,
+    })
+  })
+})

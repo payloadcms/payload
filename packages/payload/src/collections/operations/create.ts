@@ -47,6 +47,7 @@ import {
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { assertDataIsObject } from '../../utilities/assertDataIsObject.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import {
@@ -217,7 +218,7 @@ export const createOperation = async <
     }
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
-    if (isSavingDraft) {
+    if (isSavingDraft && data && typeof data === 'object') {
       data._status = 'draft'
     }
 
@@ -257,6 +258,8 @@ export const createOperation = async <
         collectionConfig.access.create,
       )
     }
+
+    assertDataIsObject(data, req)
 
     // /////////////////////////////////////
     // Generate data for all files and sizes

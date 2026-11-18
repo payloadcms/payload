@@ -35,6 +35,7 @@ import {
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertDataIsObject } from '../../utilities/assertDataIsObject.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
@@ -212,6 +213,9 @@ export const updateByIDOperation = async <
           collectionConfig.access.update,
         )
       : true
+
+    assertDataIsObject(data, req)
+
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
