@@ -30,6 +30,7 @@ import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug, draftPostsSlug } from './collections/Autosave/index.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { autosaveReorderCorruptionSlug } from './slugs.js'
 
 const { afterEach, beforeEach, describe } = test
 
@@ -2494,6 +2495,83 @@ test.describe('Block form-state regressions', () => {
 
   test.beforeAll(async () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+  })
+
+  test('should preserve section edits when adding blocks during autosave (#15226)', async ({
+    page,
+  }) => {
+    const collection = autosaveReorderCorruptionSlug
+    const doc = await payload.create({
+      collection,
+      data: {
+        name: `Original schema ${randomUUID()}`,
+        layout: [
+          { blockType: 'section', title: 'First section' },
+          { blockType: 'section', title: 'Second section' },
+        ],
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    let save: Awaited<ReturnType<typeof holdResponse>> | undefined
+
+    try {
+      await initPage({ page, serverURL })
+      await page.goto(new AdminUrlUtil(serverURL, collection).edit(doc.id))
+      await waitForFormReady(page)
+      await expect(page.locator('#field-layout__0__title')).toHaveValue('First section')
+      await expect(page.locator('#field-layout__1__title')).toHaveValue('Second section')
+
+      save = await holdResponse({
+        method: 'PATCH',
+        page,
+        url: `**/api/${collection}/${doc.id}?**`,
+      })
+      await page.locator('#field-name').fill(`Edited ${randomUUID()}`)
+      await save.captured
+      await addBlock({ blockToSelect: 'Section', fieldName: 'layout', page })
+      await page.locator('#field-layout__0__title').fill('Edited first section')
+      await page.locator('#field-layout__1__title').fill('Edited second section')
+      save.release()
+
+      const added = page.locator('#field-layout__2__title')
+
+      await expect(added).toBeEditable()
+      await added.fill('Added third section')
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection,
+            draft: true,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          const rows = docs[0]?.layout ?? []
+
+          return {
+            originalIDs: rows.slice(0, 2).map(({ id }) => id),
+            titles: rows.map(({ title }) => title),
+            uniqueIDs: new Set(rows.map(({ id }) => id)).size,
+          }
+        })
+        .toEqual({
+          originalIDs: doc.layout!.map(({ id }) => id),
+          titles: ['Edited first section', 'Edited second section', 'Added third section'],
+          uniqueIDs: 3,
+        })
+
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(page.locator('#field-layout__0__title')).toHaveValue('Edited first section')
+      await expect(page.locator('#field-layout__1__title')).toHaveValue('Edited second section')
+      await expect(page.locator('#field-layout__2__title')).toHaveValue('Added third section')
+    } finally {
+      await save?.cleanup()
+      await payload.delete({ collection, id: doc.id, overrideAccess: true })
+    }
   })
 
   test('should preserve block identities and values when adding and reordering during autosave (#15226)', async ({
