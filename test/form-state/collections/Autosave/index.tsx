@@ -32,6 +32,15 @@ export const AutosavePostsCollection: CollectionConfig = {
       options: ['internal', 'custom'],
     },
     {
+      name: 'size',
+      type: 'select',
+      defaultValue: 'small',
+      options: [
+        { label: 'Small', value: 'small' },
+        { label: 'Large', value: 'large' },
+      ],
+    },
+    {
       name: 'url',
       type: 'text',
       admin: {

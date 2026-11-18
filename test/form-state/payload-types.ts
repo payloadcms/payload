@@ -308,6 +308,7 @@ export interface AutosavePost {
    */
   computedTitle?: string | null;
   type?: ('internal' | 'custom') | null;
+  size?: ('small' | 'large') | null;
   url?: string | null;
   programmaticValue?: string | null;
   content?: string | null;
@@ -361,6 +362,7 @@ export interface DraftPost {
    */
   computedTitle?: string | null;
   type?: ('internal' | 'custom') | null;
+  size?: ('small' | 'large') | null;
   url?: string | null;
   programmaticValue?: string | null;
   content?: string | null;
@@ -588,6 +590,7 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
   type?: T;
+  size?: T;
   url?: T;
   programmaticValue?: T;
   content?: T;
@@ -634,6 +637,7 @@ export interface DraftPostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
   type?: T;
+  size?: T;
   url?: T;
   programmaticValue?: T;
   content?: T;

@@ -961,6 +961,55 @@ test.describe('Form State', () => {
       await expect(contentField).toHaveValue('Newer edit in another field')
     })
 
+    test('should retain radio and select edits made during an autosave (#19368)', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Before editing', type: 'internal', size: 'small' },
+        draft: true,
+      })
+
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const save = await holdResponse({
+        method: 'PATCH',
+        page,
+        url: `**/api/${autosavePostsSlug}/${doc.id}?**`,
+      })
+
+      try {
+        await page.locator('#field-title').fill('Edited before changing two fields')
+        await save.captured
+        await page.locator('label[for="field-type-custom"]').click()
+        await page.locator('#field-size .rs__control').click()
+        await page.getByRole('option', { name: 'Large', exact: true }).click()
+        save.release()
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: autosavePostsSlug,
+              draft: true,
+              overrideAccess: true,
+              where: { id: { equals: doc.id } },
+            })
+
+            return { type: docs[0]?.type, size: docs[0]?.size }
+          })
+          .toEqual({ type: 'custom', size: 'large' })
+
+        await expect(page.locator('#field-type-custom')).toBeChecked()
+        await expect(page.locator('#field-size')).toContainText('Large')
+        await page.reload()
+        await waitForFormReady(page)
+        await expect(page.locator('#field-type-custom')).toBeChecked()
+        await expect(page.locator('#field-size')).toContainText('Large')
+      } finally {
+        await save.cleanup()
+      }
+    })
+
     test('should ignore errors from stale autosave responses', async () => {
       const doc = await payload.create({
         collection: autosavePostsSlug,
