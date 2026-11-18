@@ -120,7 +120,7 @@ export const updateOperation = async <
       args = {
         ...args,
         data:
-          typeof data === 'object' && data !== null
+          typeof data === 'object' && data !== null && !Array.isArray(data)
             ? {
                 ...data,
                 ...(prefix !== undefined ? { prefix } : {}),
@@ -237,7 +237,7 @@ export const updateOperation = async <
       )
     }
 
-    assertDataIsObject(bulkUpdateData, req)
+    assertDataIsObject(bulkUpdateData, req, Boolean(collectionConfig.upload))
 
     await validateQueryPaths({
       collectionConfig,

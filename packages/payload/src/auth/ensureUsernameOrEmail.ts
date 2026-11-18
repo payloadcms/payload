@@ -26,7 +26,7 @@ export const ensureUsernameOrEmail = <TSlug extends CollectionSlug>({
   originalDoc,
   req,
 }: ValidateUsernameOrEmailArgs<TSlug>) => {
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
     return
   }
 

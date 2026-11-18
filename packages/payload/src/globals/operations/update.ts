@@ -177,7 +177,7 @@ export const updateOperation = async <
       unpublishAllLocales = false
     }
 
-    const hasObjectData = Boolean(data && typeof data === 'object')
+    const hasObjectData = Boolean(data && typeof data === 'object' && !Array.isArray(data))
 
     const isSavingDraft =
       Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
@@ -206,7 +206,11 @@ export const updateOperation = async <
         )
       : true
 
-    assertDataIsObject(data, req)
+    const hasWherePolicy = hasWhereAccessResult(accessResults)
+
+    if (!hasWherePolicy) {
+      assertDataIsObject(data, req, false)
+    }
 
     // /////////////////////////////////////
     // Retrieve document
@@ -227,12 +231,12 @@ export const updateOperation = async <
     })
     const { global, globalExists } = globalVersionResult || {}
 
-    if (
-      hasWhereAccessResult(accessResults) &&
-      globalExists &&
-      (!global || Object.keys(global).length === 0)
-    ) {
+    if (hasWherePolicy && globalExists && (!global || Object.keys(global).length === 0)) {
       throw new Forbidden(req.t)
+    }
+
+    if (hasWherePolicy) {
+      assertDataIsObject(data, req, false)
     }
 
     let globalJSON: JsonObject = {}

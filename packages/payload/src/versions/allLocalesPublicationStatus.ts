@@ -80,7 +80,7 @@ export const normalizeAllLocalesPublicationStatus = ({
   data: JsonObject
   status: AllLocalesPublicationStatus | undefined
 }): AllLocalesPublicationIntent | undefined => {
-  if (!status || !data || typeof data !== 'object') {
+  if (!status || !data || typeof data !== 'object' || Array.isArray(data)) {
     return undefined
   }
 
@@ -104,7 +104,7 @@ export const reconcileAllLocalesPublicationStatus = ({
   intent: AllLocalesPublicationIntent | undefined
   status: AllLocalesPublicationStatus | undefined
 }): AllLocalesPublicationStatus | undefined => {
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
     return undefined
   }
 
