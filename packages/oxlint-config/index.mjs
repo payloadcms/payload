@@ -13,6 +13,15 @@ const requireFromESLintReact = createRequire(require.resolve('@eslint-react/esli
 export const playwrightRecommendedRules = playwright.configs['flat/recommended'].rules
 
 /**
+ * Sort order for rules that compare raw text (imports, union members). Punctuation sorts before
+ * `-`, digits and letters, so `{ a: string } | null` and `./a` before `./a-b` stay valid.
+ */
+const textSortOptions = {
+  type: 'custom',
+  alphabet: '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~-0123456789abcdefghijklmnopqrstuvwxyz',
+}
+
+/**
  * Payload's shared oxlint config. It runs the ESLint plugins Payload used before as oxlint JS
  * plugins, so rule names and existing `eslint-disable` comments keep working.
  *
@@ -121,9 +130,65 @@ const config = {
             partitionByComment: true,
             partitionByNewLine: true,
             groups: ['top', 'unknown'],
-            customGroups: {
-              top: ['_id', 'id', 'name', 'slug', 'type'],
-            },
+            customGroups: [{ groupName: 'top', elementNamePattern: '^(_id|id|name|slug|type)$' }],
+          },
+        ],
+        'perfectionist/sort-heritage-clauses': 'off',
+        'perfectionist/sort-modules': 'off',
+        'perfectionist/sort-array-includes': ['error', textSortOptions],
+        'perfectionist/sort-exports': ['error', textSortOptions],
+        'perfectionist/sort-imports': [
+          'error',
+          {
+            ...textSortOptions,
+            internalPattern: ['^~/.+'],
+            partitionByComment: true,
+          },
+        ],
+        'perfectionist/sort-intersection-types': [
+          'error',
+          {
+            ...textSortOptions,
+            // A `| A | B` member sorts as if it starts with `|`: after punctuation, before letters
+            customGroups: [
+              { groupName: 'union', selector: 'union' },
+              { groupName: 'leading-punctuation', elementNamePattern: '^[^A-Za-z0-9-]' },
+            ],
+            groups: ['leading-punctuation', 'union', 'unknown'],
+          },
+        ],
+        'perfectionist/sort-named-exports': ['error', { type: 'natural', ignoreAlias: true }],
+        'perfectionist/sort-union-types': [
+          'error',
+          {
+            ...textSortOptions,
+            // Natural order keeps `Int8Array` before `Int16Array`
+            customGroups: [
+              { groupName: 'leading-word', elementNamePattern: '^[A-Za-z0-9-]', type: 'natural' },
+            ],
+            groups: ['unknown', 'leading-word'],
+          },
+        ],
+        'perfectionist/sort-classes': [
+          'error',
+          {
+            type: 'natural',
+            newlinesBetweenOverloadSignatures: 'ignore',
+            groups: [
+              'index-signature',
+              'static-property',
+              'static-block',
+              ['protected-property', 'protected-accessor-property'],
+              ['private-property', 'private-accessor-property'],
+              ['property', 'accessor-property'],
+              'constructor',
+              'static-method',
+              'protected-method',
+              'private-method',
+              'method',
+              ['get-method', 'set-method'],
+              'unknown',
+            ],
           },
         ],
         'no-var': 'error',
