@@ -47,7 +47,12 @@ const matches = (doc: any, where: Where): boolean => {
 
 const tenantWhere: Where = { tenant: { equals: 'A' } }
 
-const build = () => {
+const build = (overrides?: {
+  dbLocks?: typeof locks
+  pagesRead?: (...args: any[]) => any
+  pagesUpdate?: (...args: any[]) => any
+}) => {
+  const activeLocks = overrides?.dbLocks ?? locks
   const config = {
     collections: [
       {
@@ -66,8 +71,8 @@ const build = () => {
       pages: {
         config: {
           access: {
-            read: ({ req }) => (req.user ? tenantWhere : false),
-            update: ({ req }) => (req.user ? tenantWhere : false),
+            read: overrides?.pagesRead ?? (({ req }: any) => (req.user ? tenantWhere : false)),
+            update: overrides?.pagesUpdate ?? (({ req }: any) => (req.user ? tenantWhere : false)),
           },
         },
       },
@@ -79,11 +84,11 @@ const build = () => {
       ],
     },
     db: {
-      count: async ({ collection: slug, where }) => ({
+      count: async ({ collection: slug, where }: any) => ({
         totalDocs: (slug === 'pages' ? pages : []).filter((d) => matches(d, where)).length,
       }),
-      find: async ({ collection: slug, where }) => {
-        const source = slug === lockedDocumentsCollectionSlug ? locks : pages
+      find: async ({ collection: slug, where }: any) => {
+        const source = slug === lockedDocumentsCollectionSlug ? activeLocks : pages
         return { docs: source.filter((d) => !where || matches(d, where)) }
       },
     },
@@ -91,13 +96,13 @@ const build = () => {
 
   const reqFor = (user?: object) => ({ payload, user }) as unknown as PayloadRequest
 
-  return { access: collection.access!, reqFor }
+  return { access: collection.access!, payload, reqFor }
 }
 
-const visible = async (where: boolean | Where) =>
+const visible = async (where: boolean | Where, source = locks) =>
   where === false || where === true
     ? where
-    : locks.filter((l) => matches(l, where)).map((l) => l.id)
+    : source.filter((l) => matches(l, where)).map((l) => l.id)
 
 describe('payload-locked-documents access', () => {
   const user = { id: 1, collection: 'users' }
@@ -109,14 +114,9 @@ describe('payload-locked-documents access', () => {
   })
 
   it('read: returns an empty-matching Where (not false) when only another tenant holds locks', async () => {
-    const { access, reqFor } = build()
     const tenantBOnly = [locks[1]!]
-    const req = reqFor(user)
-    ;(req.payload.db as any).find = async ({ collection: slug, where }: any) => {
-      const source = slug === lockedDocumentsCollectionSlug ? tenantBOnly : pages
-      return { docs: source.filter((d) => !where || matches(d, where)) }
-    }
-    const where = await access.read!({ req } as any)
+    const { access, reqFor } = build({ dbLocks: tenantBOnly })
+    const where = await access.read!({ req: reqFor(user) } as any)
     expect(where).not.toBe(false)
     expect(tenantBOnly.filter((l) => matches(l, where as Where))).toEqual([])
   })
@@ -141,6 +141,188 @@ describe('payload-locked-documents access', () => {
     for (const op of ['update', 'delete'] as const) {
       expect(await visible(await access[op]!({ req: reqFor(user) } as any))).toEqual([10, 12])
     }
+  })
+
+  it('evaluates collection access with each target document id and batches Where clauses', async () => {
+    const seenIds: unknown[] = []
+    const eqAllow = build({
+      pagesRead: ({ id }: any) => {
+        seenIds.push(id)
+        return id === 1
+      },
+      pagesUpdate: ({ id }: any) => id === 1,
+    })
+    expect(await visible(await eqAllow.access.read!({ req: eqAllow.reqFor(user) } as any))).toEqual([
+      10, 12,
+    ])
+    expect(seenIds).toEqual([1, 2])
+    expect(
+      await visible(await eqAllow.access.update!({ req: eqAllow.reqFor(user) } as any)),
+    ).toEqual([10, 12])
+
+    const neqDeny = build({
+      pagesRead: ({ id }: any) => id !== 2,
+      pagesUpdate: ({ id }: any) => id !== 2,
+    })
+    expect(await visible(await neqDeny.access.read!({ req: neqDeny.reqFor(user) } as any))).toEqual([
+      10, 12,
+    ])
+    expect(
+      await visible(await neqDeny.access.update!({ req: neqDeny.reqFor(user) } as any)),
+    ).toEqual([10, 12])
+
+    // Per-ID Where clauses stay bound to their own targetId inside a single db.find call
+    let pageFindCalls = 0
+    const wherePerId = build({
+      pagesRead: ({ id }: any) => (id === 1 ? { tenant: { equals: 'A' } } : false),
+    })
+    const origFind = wherePerId.payload.db.find
+    wherePerId.payload.db.find = async (args: any) => {
+      if (args.collection === 'pages') {
+        pageFindCalls += 1
+      }
+      return origFind(args)
+    }
+    expect(
+      await visible(await wherePerId.access.read!({ req: wherePerId.reqFor(user) } as any)),
+    ).toEqual([10, 12])
+    expect(pageFindCalls).toBe(1)
+  })
+
+  it('rejects dual-target rows on create and ignores them on read, update, and delete', async () => {
+    const { access, reqFor } = build()
+    const create = (data: object) => access.create!({ data, req: reqFor(user) } as any)
+    expect(
+      await create({
+        document: { relationTo: 'pages', value: 1 },
+        globalSlug: 'settings',
+      }),
+    ).toBe(false)
+    expect(await create({ document: {}, globalSlug: 'settings' })).toBe(false)
+    expect(await create({ document: null, globalSlug: 'settings' })).toBe(true)
+
+    const withDualTarget = [
+      ...locks,
+      {
+        id: 14,
+        document: { relationTo: 'pages', value: 2 },
+        globalSlug: 'settings',
+        user: { relationTo: 'users', value: 2 },
+      },
+      {
+        id: 15,
+        document: { relationTo: 'pages', value: 1 },
+        globalSlug: 'settings',
+        user: { relationTo: 'users', value: 1 },
+      },
+    ]
+    const dual = build({ dbLocks: withDualTarget })
+    for (const op of ['read', 'update', 'delete'] as const) {
+      expect(
+        await visible(await dual.access[op]!({ req: dual.reqFor(user) } as any), withDualTarget),
+      ).toEqual([10, 12])
+      expect(
+        await visible(
+          await dual.access[op]!({ id: 14, req: dual.reqFor(user) } as any),
+          withDualTarget,
+        ),
+      ).toEqual([])
+      expect(
+        await visible(
+          await dual.access[op]!({ id: 15, req: dual.reqFor(user) } as any),
+          withDualTarget,
+        ),
+      ).toEqual([])
+    }
+  })
+
+  it('update: validates destination target on retargeting and rejects dual/targetless merges', async () => {
+    const { access, reqFor } = build()
+    const req = reqFor(user)
+
+    // Unauthorized destination targets are rejected for both by-ID and bulk updates
+    expect(
+      await access.update!({ id: 10, data: { document: { relationTo: 'pages', value: 2 } }, req } as any),
+    ).toBe(false)
+    expect(
+      await access.update!({ data: { document: { relationTo: 'pages', value: 2 } }, req } as any),
+    ).toBe(false)
+    expect(
+      await access.update!({ id: 12, data: { globalSlug: 'private' }, req } as any),
+    ).toBe(false)
+    expect(await access.update!({ data: { globalSlug: 'private' }, req } as any)).toBe(false)
+
+    // Setting both targets or clearing both targets is rejected
+    expect(
+      await access.update!({
+        id: 10,
+        data: { document: { relationTo: 'pages', value: 1 }, globalSlug: 'settings' },
+        req,
+      } as any),
+    ).toBe(false)
+    expect(
+      await access.update!({ data: { document: null, globalSlug: null }, req } as any),
+    ).toBe(false)
+
+    // Partial updates that add a second target or clear the only target on a row are rejected
+    expect(await access.update!({ id: 10, data: { globalSlug: 'settings' }, req } as any)).toBe(
+      false,
+    )
+    expect(
+      await access.update!({ id: 12, data: { document: { relationTo: 'pages', value: 1 } }, req } as any),
+    ).toBe(false)
+    expect(await access.update!({ id: 10, data: { document: null }, req } as any)).toBe(false)
+    expect(await access.update!({ id: 12, data: { globalSlug: null }, req } as any)).toBe(false)
+
+    // Bulk partial target update only scopes to compatible rows
+    expect(
+      await visible(await access.update!({ data: { globalSlug: 'settings' }, req } as any)),
+    ).toEqual([12])
+    expect(
+      await visible(
+        await access.update!({ data: { document: { relationTo: 'pages', value: 1 } }, req } as any),
+      ),
+    ).toEqual([10])
+
+    // Switching targets while explicitly clearing the old target is allowed
+    expect(
+      await visible(
+        await access.update!({
+          id: 10,
+          data: { document: null, globalSlug: 'settings' },
+          req,
+        } as any),
+      ),
+    ).toEqual([10])
+    expect(
+      await visible(
+        await access.update!({
+          id: 12,
+          data: { document: { relationTo: 'pages', value: 1 }, globalSlug: null },
+          req,
+        } as any),
+      ),
+    ).toEqual([12])
+
+    // Non-target field updates and keeping an authorized target are allowed
+    expect(
+      await visible(
+        await access.update!({
+          id: 10,
+          data: { user: { relationTo: 'users', value: 1 } },
+          req,
+        } as any),
+      ),
+    ).toEqual([10])
+    expect(
+      await visible(
+        await access.update!({
+          id: 10,
+          data: { document: { relationTo: 'pages', value: 1 } },
+          req,
+        } as any),
+      ),
+    ).toEqual([10])
   })
 
   it('create: requires update access to the target document', async () => {
