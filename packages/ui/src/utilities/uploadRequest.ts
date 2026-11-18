@@ -117,7 +117,16 @@ const createProgressReporter = ({
 
   const flush = () => {
     pendingFrame = null
-    onProgress?.({ loadedBytes, totalBytes })
+
+    // A failing progress observer must not stop the upload from settling: storage may already
+    // have the file. The error is rethrown on its own so it still surfaces.
+    try {
+      onProgress?.({ loadedBytes, totalBytes })
+    } catch (error) {
+      setTimeout(() => {
+        throw error
+      })
+    }
   }
 
   return {

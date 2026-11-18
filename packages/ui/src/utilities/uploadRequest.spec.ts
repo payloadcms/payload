@@ -235,4 +235,20 @@ describe('uploadRequest', () => {
     expect(response.status).toBe(204)
     expect(events).toEqual([{ loadedBytes: 0, totalBytes: 0 }])
   })
+
+  it('should still resolve when the progress callback throws', async () => {
+    const request = uploadRequest({
+      body: new Blob(['0123456789']),
+      method: 'PUT',
+      onProgress: () => {
+        throw new Error('observer failed')
+      },
+      url: '/upload',
+    })
+
+    getXHR().respond({ status: 200 })
+
+    await expect(request).resolves.toMatchObject({ status: 200 })
+    expect(() => vi.runOnlyPendingTimers()).toThrow('observer failed')
+  })
 })
