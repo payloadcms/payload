@@ -1,0 +1,17 @@
+.photo-text-button {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-2, 0.5rem);
+  margin-bottom: var(--spacer-4, 1.5rem);
+}
+
+.photo-text-button__hint {
+  margin: 0 0 var(--spacer-4, 1.5rem);
+  color: var(--theme-elevation-500);
+  font-size: var(--text-body-small-font-size, 0.75rem);
+  line-height: var(--text-body-small-line-height, 1.4);
+}
+
+.photo-text-button .photo-text-button__hint {
+  margin-bottom: 0;
+}
