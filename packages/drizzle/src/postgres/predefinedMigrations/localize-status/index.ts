@@ -4,6 +4,7 @@ import { calculateVersionLocaleStatuses } from 'payload/migrations'
 import toSnakeCase from 'to-snake-case'
 
 import { getGeneratedColumnType, getRawTable } from './getGeneratedColumnType.js'
+import { getMigrationDB } from './getMigrationDB.js'
 import { migrateMainCollectionStatus } from './migrateMainCollection.js'
 import { migrateMainGlobalStatus } from './migrateMainGlobal.js'
 
@@ -17,7 +18,8 @@ export type LocalizeStatusArgs = {
 }
 
 export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): Promise<void> {
-  const { collectionSlug, db, globalSlug, payload, req, sql } = args
+  const { collectionSlug, globalSlug, payload, req, sql } = args
+  const db: LocalizeStatusArgs['db'] = getMigrationDB({ db: args.db, payload })
   const schemaName = db.schemaName ?? 'public'
 
   if (!collectionSlug && !globalSlug) {

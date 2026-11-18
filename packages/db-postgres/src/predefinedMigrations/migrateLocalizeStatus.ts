@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { migratePostgresLocalizeStatus } from '@payloadcms/drizzle/postgres'
+import { getMigrationDB, migratePostgresLocalizeStatus } from '@payloadcms/drizzle/postgres'
 import { toSnakeCase } from 'payload/migrations'
 
 /**
@@ -70,7 +70,7 @@ export async function migrateLocalizeStatus({
 }
 
 async function _cleanupSnapshotColumn({
-  db,
+  db: migrationHandle,
   payload,
   sql,
   versionsTable,
@@ -80,6 +80,7 @@ async function _cleanupSnapshotColumn({
   sql: any
   versionsTable: string
 }): Promise<void> {
+  const db: any = getMigrationDB({ db: migrationHandle, payload })
   const schemaName = db.schemaName ?? 'public'
 
   const columnCheck = await db.execute({
