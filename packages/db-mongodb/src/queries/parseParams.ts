@@ -47,7 +47,7 @@ export async function parseParams({
           where: condition,
         })
         if (builtConditions.length > 0 && conditionOperator !== null) {
-          result[conditionOperator] = builtConditions
+          addLogicalConditions({ conditions: builtConditions, operator: conditionOperator, result })
         }
       } else {
         // It's a path - and there can be multiple comparisons on a single path.
@@ -96,7 +96,17 @@ export async function parseParams({
                 }
               }
             } else if (typeof searchParam?.value === 'object') {
-              result = deepMergeWithCombinedArrays(result, searchParam.value ?? {}, {
+              const { $and, $or, ...rawQuery } = (searchParam.value ?? {}) as Record<
+                string,
+                unknown
+              >
+              if (Array.isArray($and)) {
+                addLogicalConditions({ conditions: $and, operator: '$and', result })
+              }
+              if (Array.isArray($or)) {
+                addLogicalConditions({ conditions: $or, operator: '$or', result })
+              }
+              result = deepMergeWithCombinedArrays(result, rawQuery, {
                 // dont clone Types.ObjectIDs
                 clone: false,
               })
@@ -108,4 +118,26 @@ export async function parseParams({
   }
 
   return result
+}
+
+/**
+ * Adds `$and` / `$or` conditions without dropping the ones earlier keys of the same `where` built:
+ * `$and` conditions accumulate, and a second `$or` group is ANDed with the first one.
+ */
+function addLogicalConditions({
+  conditions,
+  operator,
+  result,
+}: {
+  conditions: unknown[]
+  operator: '$and' | '$or'
+  result: { $and?: unknown[]; $or?: unknown[] }
+}): void {
+  if (operator === '$and') {
+    result.$and = [...(result.$and ?? []), ...conditions]
+  } else if (!result.$or) {
+    result.$or = conditions
+  } else {
+    result.$and = [...(result.$and ?? []), { $or: conditions }]
+  }
 }
