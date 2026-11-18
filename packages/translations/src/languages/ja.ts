@@ -659,6 +659,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'ファイルをドラッグ & ドロップする',
     dragAndDropHere: 'または、このエリアにファイルをドラッグ & ドロップ',
     editImage: '画像を編集する',
+    file: 'ファイル',
     fileName: 'ファイル名',
     fileSize: 'ファイル容量',
     filesToUpload: 'アップロードするファイル',

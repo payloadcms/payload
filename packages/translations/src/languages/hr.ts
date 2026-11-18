@@ -659,6 +659,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Povucite i ispustite datoteku',
     dragAndDropHere: 'ili povucite i ispustite datoteku ovdje',
     editImage: 'Uredi sliku',
+    file: 'Datoteka',
     fileName: 'Ime datoteke',
     fileSize: 'Veličina datoteke',
     filesToUpload: 'Datoteke za učitavanje',

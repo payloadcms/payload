@@ -664,6 +664,7 @@ export const idTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Seret dan lepas file',
     dragAndDropHere: 'atau seret dan lepas file di sini',
     editImage: 'Edit Gambar',
+    file: 'File',
     fileName: 'Nama File',
     fileSize: 'Ukuran File',
     filesToUpload: 'File untuk Diunggah',

@@ -10,6 +10,8 @@ export type VersionPill = {
 
 export type DefaultVersionsViewProps = {
   canUpdate: boolean
+  /** The previous and current file of an upload document. Shown above the field diffs. */
+  FileComparison?: React.ReactNode
   modifiedOnly: boolean
   RenderedDiff: React.ReactNode
   selectedLocales: string[]

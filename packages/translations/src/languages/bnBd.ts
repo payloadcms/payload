@@ -660,6 +660,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'একটি ফাইল টেনে এনে ছেড়ে দিন',
     dragAndDropHere: 'অথবা একটি ফাইল টেনে এনে এখানে ছেড়ে দিন',
     editImage: 'ছবি সম্পাদনা করুন',
+    file: 'ফাইল',
     fileName: 'ফাইলের নাম',
     fileSize: 'ফাইলের আকার',
     filesToUpload: 'আপলোড করার ফাইলগুলি',

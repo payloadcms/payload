@@ -655,6 +655,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Перемістіть файл',
     dragAndDropHere: 'або перемістіть сюди файл',
     editImage: 'Редагувати зображення',
+    file: 'Файл',
     fileName: 'Назва файлу',
     fileSize: 'Розмір файлу',
     filesToUpload: 'Файли для завантаження',

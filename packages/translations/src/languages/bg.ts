@@ -660,6 +660,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Дръпни и пусни файл',
     dragAndDropHere: 'или дръпни и пусни файла тук',
     editImage: 'Редактирай изображение',
+    file: 'Файл',
     fileName: 'Име на файла',
     fileSize: 'Големина на файла',
     filesToUpload: 'Файлове за качване',

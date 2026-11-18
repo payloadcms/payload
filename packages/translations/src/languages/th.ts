@@ -636,6 +636,7 @@ export const thTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'ลากและวางไฟล์',
     dragAndDropHere: 'หรือลากและวางไฟล์ที่นี่',
     editImage: 'แก้ไขรูปภาพ',
+    file: 'ไฟล์',
     fileName: 'ชื่อไฟล์',
     fileSize: 'ขนาดไฟล์',
     filesToUpload: 'อัปโหลดไฟล์',

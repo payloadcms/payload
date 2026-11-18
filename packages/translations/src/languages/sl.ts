@@ -658,6 +658,7 @@ export const slTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Povlecite in spustite datoteko',
     dragAndDropHere: 'ali povlecite in spustite datoteko sem',
     editImage: 'Uredi sliko',
+    file: 'Datoteka',
     fileName: 'Ime datoteke',
     fileSize: 'Velikost datoteke',
     filesToUpload: 'Datoteke za nalaganje',

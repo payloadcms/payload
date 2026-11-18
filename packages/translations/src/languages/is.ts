@@ -657,6 +657,7 @@ export const isTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Dragðu og slepptu skrá',
     dragAndDropHere: 'eða dragðu og slepptu skrá hér',
     editImage: 'Breyta mynd',
+    file: 'Skrá',
     fileName: 'Skráarnafn',
     fileSize: 'Skráarstærð',
     filesToUpload: 'Skrár til að hlaða upp',

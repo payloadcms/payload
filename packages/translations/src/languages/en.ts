@@ -659,6 +659,7 @@ export const enTranslations = {
     dragAndDrop: 'Drag and drop a file',
     dragAndDropHere: 'or drag and drop a file here',
     editImage: 'Edit Image',
+    file: 'File',
     fileName: 'File Name',
     fileSize: 'File Size',
     filesToUpload: 'Files to Upload',

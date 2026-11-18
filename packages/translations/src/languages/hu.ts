@@ -668,6 +668,7 @@ export const huTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Húzzon ide egy fájlt',
     dragAndDropHere: 'vagy húzzon ide egy fájlt',
     editImage: 'Kép szerkesztése',
+    file: 'Fájl',
     fileName: 'Fájlnév',
     fileSize: 'Fájl mérete',
     filesToUpload: 'Feltöltendő fájlok',

@@ -666,6 +666,7 @@ export const trTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Bir dosya sürükleyip bırakabilirsiniz',
     dragAndDropHere: 'veya buraya bir dosya sürükleyip bırakabilirsiniz',
     editImage: 'Görüntüyü Düzenle',
+    file: 'Dosya',
     fileName: 'Dosya adı',
     fileSize: 'Dosya boyutu',
     filesToUpload: 'Yüklemek için Dosyalar',
