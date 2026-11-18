@@ -2,7 +2,7 @@
 
 import { lazyRouteComponent, notFound, redirect } from '@tanstack/react-router'
 
-import { getViewSearchParams } from '../../utilities/viewSearchParams.js'
+import { routerHistoryToSearchParams } from '../../utilities/routerHistoryToSearchParams.js'
 import { getAdminMeta } from '../metadata.js'
 
 /**
@@ -39,7 +39,7 @@ const runLoader = async ({
 
   try {
     data = await load({
-      data: { _splat: splat, search: await getViewSearchParams({ searchStr }) },
+      data: { _splat: splat, search: await routerHistoryToSearchParams({ searchStr }) },
       signal: loadController.signal,
     })
   } finally {

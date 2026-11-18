@@ -16,7 +16,7 @@ export type ViewSearchParams = Record<string, string | string[]>
  * location the history hasn't moved to yet, so it falls back to
  * `location.searchStr`, which is the query string that navigation writes.
  */
-export const getViewSearchParams = async ({
+export const routerHistoryToSearchParams = async ({
   searchStr,
 }: {
   /** The loader's `location.searchStr`. */
