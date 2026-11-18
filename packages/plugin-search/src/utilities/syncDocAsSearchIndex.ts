@@ -11,6 +11,7 @@ export const syncDocAsSearchIndex = async ({
   req,
 }: SyncDocArgs) => {
   const { id, _status: status, title } = doc || {}
+  const hasTransaction = Boolean(req.transactionID)
 
   const { beforeSync, defaultPriorities, deleteDrafts, searchOverrides, syncDrafts } = pluginConfig
 
@@ -166,6 +167,9 @@ export const syncDocAsSearchIndex = async ({
               err,
               msg: `Error deleting duplicative ${searchSlug} documents.`,
             })
+            if (hasTransaction) {
+              throw err
+            }
           }
         }
 
@@ -189,6 +193,9 @@ export const syncDocAsSearchIndex = async ({
                 err,
                 msg: `Error deleting ${searchSlug} document for trashed doc.`,
               })
+              if (hasTransaction) {
+                throw err
+              }
             }
           } else {
             if (doSync) {
@@ -208,6 +215,9 @@ export const syncDocAsSearchIndex = async ({
                 })
               } catch (err: unknown) {
                 payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
+                if (hasTransaction) {
+                  throw err
+                }
               }
             }
 
@@ -253,6 +263,9 @@ export const syncDocAsSearchIndex = async ({
                   })
                 } catch (err: unknown) {
                   payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+                  if (hasTransaction) {
+                    throw err
+                  }
                 }
               }
             }
@@ -272,10 +285,16 @@ export const syncDocAsSearchIndex = async ({
             })
           } catch (err: unknown) {
             payload.logger.error({ err, msg: `Error creating ${searchSlug} document.` })
+            if (hasTransaction) {
+              throw err
+            }
           }
         }
       } catch (err: unknown) {
         payload.logger.error({ err, msg: `Error finding ${searchSlug} document.` })
+        if (hasTransaction) {
+          throw err
+        }
       }
     }
   } catch (err: unknown) {
@@ -286,6 +305,9 @@ export const syncDocAsSearchIndex = async ({
 
     if (onSyncError) {
       onSyncError()
+    }
+    if (hasTransaction) {
+      throw err
     }
   }
 
