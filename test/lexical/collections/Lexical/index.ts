@@ -291,6 +291,11 @@ export const getLexicalFieldsCollection: (args: {
                 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
             },
             hasMany: true,
+            hooks: {
+              beforeValidate: [
+                ({ value }) => value?.map((linkRelation: string) => linkRelation.trim()),
+              ],
+            },
             label: 'Rel Attribute',
             options: ['noopener', 'noreferrer', 'nofollow'],
           },
