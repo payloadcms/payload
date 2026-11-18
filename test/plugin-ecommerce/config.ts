@@ -107,6 +107,10 @@ export default buildConfigWithDefaults({
                 type: 'text',
                 required: true,
               },
+              {
+                name: 'title',
+                type: 'text',
+              },
               ...defaultCollection.fields,
             ],
           }),
