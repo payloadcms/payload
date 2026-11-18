@@ -12,7 +12,6 @@ import {
   EditDepthProvider,
   Form,
   formatDrawerSlug,
-  OperationProvider,
   RenderFields,
   ShimmerEffect,
   useConfig,
@@ -311,19 +310,17 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     clientBlock,
   ])
 
-  const onChange = useMemo<FormProps['onChange']>(
-    () => [
-      ({ formState, submitted }) => {
-        if (submitted) {
-          if (!CustomLabelFromProps) {
-            setCustomLabel(formState._components?.customComponents?.BlockLabel)
-          }
-          if (!CustomBlockFromProps) {
-            setCustomBlock(formState._components?.customComponents?.Block)
-          }
+  const onChange = useCallback<NonNullable<FormProps['onChange']>[number]>(
+    ({ formState, submitted }) => {
+      if (submitted) {
+        if (!CustomLabelFromProps) {
+          setCustomLabel(formState._components?.customComponents?.BlockLabel)
         }
-      },
-    ],
+        if (!CustomBlockFromProps) {
+          setCustomBlock(formState._components?.customComponents?.Block)
+        }
+      }
+    },
     [CustomLabelFromProps, CustomBlockFromProps],
   )
 
@@ -461,70 +458,68 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   }
 
   return (
-    <OperationProvider operation="update">
-      <Form
-        disableValidationOnSubmit
-        el="div"
-        fields={clientBlock?.fields}
-        initialState={initialState || {}}
-        onChange={onChange}
-        onSubmit={(formState) => {
-          onFormSubmit(formState)
-          toggleDrawer()
-        }}
-        readOnly={!isEditable}
-        schemaPath={schemaFieldsPath}
-        uuid={formUuid}
-      >
-        <EditDepthProvider>
-          <Drawer
-            className={''}
-            headerActions={headerActions}
-            slug={drawerSlug}
-            title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
-              label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
-            })}
-          >
-            {initialState ? (
-              <div className="fields-drawer">
-                <RenderFields
-                  fields={clientBlock?.fields}
-                  forceRender
-                  parentIndexPath=""
-                  parentPath="" // See Blocks feature path for details as for why this is empty
-                  parentSchemaPath={schemaFieldsPath}
-                  permissions={true}
-                  readOnly={!isEditable}
-                />
-                <RegisterFormSubmit submitRef={submitRef} />
-              </div>
-            ) : null}
-          </Drawer>
-        </EditDepthProvider>
-        {resolvedCustomBlock ? (
-          <InlineBlockComponentContext
-            value={{
-              EditButton,
-              initialState,
-              InlineBlockContainer,
-              Label,
-              nodeKey,
-              RemoveButton,
-            }}
-          >
-            {resolvedCustomBlock}
-          </InlineBlockComponentContext>
-        ) : (
-          <InlineBlockContainer>
-            {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
-            {isEditable ? (
-              <div className={`${baseClass}__actions`}>
-                <RemoveButton />
-              </div>
-            ) : null}
-          </InlineBlockContainer>
-        )}
-      </Form>
-    </OperationProvider>
+    <Form
+      disableValidationOnSubmit
+      el="div"
+      fields={clientBlock?.fields}
+      initialState={initialState || {}}
+      onChange={[onChange]}
+      onSubmit={(formState) => {
+        onFormSubmit(formState)
+        toggleDrawer()
+      }}
+      readOnly={!isEditable}
+      schemaPath={schemaFieldsPath}
+      uuid={formUuid}
+    >
+      <EditDepthProvider>
+        <Drawer
+          className={''}
+          headerActions={headerActions}
+          slug={drawerSlug}
+          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+            label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
+          })}
+        >
+          {initialState ? (
+            <div className="fields-drawer">
+              <RenderFields
+                fields={clientBlock?.fields}
+                forceRender
+                parentIndexPath=""
+                parentPath="" // See Blocks feature path for details as for why this is empty
+                parentSchemaPath={schemaFieldsPath}
+                permissions={true}
+                readOnly={!isEditable}
+              />
+              <RegisterFormSubmit submitRef={submitRef} />
+            </div>
+          ) : null}
+        </Drawer>
+      </EditDepthProvider>
+      {resolvedCustomBlock ? (
+        <InlineBlockComponentContext
+          value={{
+            EditButton,
+            initialState,
+            InlineBlockContainer,
+            Label,
+            nodeKey,
+            RemoveButton,
+          }}
+        >
+          {resolvedCustomBlock}
+        </InlineBlockComponentContext>
+      ) : (
+        <InlineBlockContainer>
+          {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
+          {isEditable ? (
+            <div className={`${baseClass}__actions`}>
+              <RemoveButton />
+            </div>
+          ) : null}
+        </InlineBlockContainer>
+      )}
+    </Form>
   )
 }

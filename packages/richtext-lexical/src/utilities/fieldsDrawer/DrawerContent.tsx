@@ -4,7 +4,6 @@ import type { FormState } from 'payload'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   Form,
-  OperationProvider,
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
@@ -40,7 +39,6 @@ export const DrawerContent: React.FC<
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
   const operation = useOperation()
-  const [formUUID] = useState(() => uuid())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -108,28 +106,26 @@ export const DrawerContent: React.FC<
   }
 
   return (
-    <OperationProvider operation="update">
-      <Form
-        className="fields-drawer"
-        disableValidationOnSubmit
+    <Form
+      className="fields-drawer"
+      disableValidationOnSubmit
+      fields={Array.isArray(fields) ? fields : []}
+      initialState={initialState}
+      onSubmit={handleDrawerSubmit}
+      readOnly={!isEditable}
+      schemaPath={schemaFieldsPath}
+      uuid={uuid()}
+    >
+      <RenderFields
         fields={Array.isArray(fields) ? fields : []}
-        initialState={initialState}
-        onSubmit={handleDrawerSubmit}
+        forceRender
+        parentIndexPath=""
+        parentPath="" // See Blocks feature path for details as for why this is empty
+        parentSchemaPath={schemaFieldsPath}
+        permissions={true}
         readOnly={!isEditable}
-        schemaPath={schemaFieldsPath}
-        uuid={formUUID}
-      >
-        <RenderFields
-          fields={Array.isArray(fields) ? fields : []}
-          forceRender
-          parentIndexPath=""
-          parentPath="" // See Blocks feature path for details as for why this is empty
-          parentSchemaPath={schemaFieldsPath}
-          permissions={true}
-          readOnly={!isEditable}
-        />
-        <RegisterFormSubmit submitRef={submitRef} />
-      </Form>
-    </OperationProvider>
+      />
+      <RegisterFormSubmit submitRef={submitRef} />
+    </Form>
   )
 }
