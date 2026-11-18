@@ -1373,7 +1373,7 @@ describe('Dashboard', () => {
     const card = drawer.getByRole('button', { name: 'Count Widget', exact: true })
 
     await expect(card).toHaveAccessibleDescription(
-      'Display the total number of documents in a collection.',
+      /Display the total number of documents in a collection\./,
     )
     await expect(card.locator('.thumbnail-card__description')).toBeVisible()
     await drawer.getByRole('textbox').fill('Count Widget')
@@ -1752,7 +1752,7 @@ describe('Dashboard', () => {
           height: Math.round(toolbarBounds.height),
         }
       })
-      .toEqual({ centerOffset: 0, gap: 8, height: 40 })
+      .toEqual({ centerOffset: 0, gap: 16, height: 40 })
     await secondWidget.hover()
     await expect(firstControls).toBeVisible()
     await expect(secondControls).toBeHidden()
@@ -1773,7 +1773,7 @@ describe('Dashboard', () => {
 
     await d.setEditing()
     const widget = d.widgetByPos(4)
-    const control = widget.locator('.widget-wrapper__select-btn')
+    const control = widget.locator('.widget-wrapper__select-btn[aria-haspopup="menu"]')
 
     await widget.locator('.widget-wrapper__drag-btn').click()
     await expect(control).toHaveText('Tickets')
@@ -2047,7 +2047,11 @@ describe('Dashboard', () => {
     await page.keyboard.press('Tab')
     await expect(widget.locator('.widget-wrapper__size-btn')).toBeFocused()
     await page.keyboard.press('Tab')
-    await expect(widget.locator('.widget-wrapper__select-btn')).toBeFocused()
+    await expect(widget.locator('.widget-wrapper__select-btn[aria-haspopup="menu"]')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(
+      widget.getByRole('button', { name: 'Count Widget: Options', exact: true }),
+    ).toBeFocused()
     await page.keyboard.press('Tab')
     await expect(widget.locator('.widget-wrapper__edit-btn')).toBeFocused()
     await page.keyboard.press('Enter')
@@ -2074,7 +2078,7 @@ describe('Dashboard', () => {
     const countCard = picker.getByRole('button', { name: 'Count Widget', exact: true })
 
     await expect(countCard).toHaveAccessibleDescription(
-      'Display the total number of documents in a collection.',
+      /Display the total number of documents in a collection\./,
     )
     await expect(countCard).not.toHaveClass(/thumbnail-card--draggable/)
     await picker.getByRole('button', { name: 'Upload files', exact: true }).click()

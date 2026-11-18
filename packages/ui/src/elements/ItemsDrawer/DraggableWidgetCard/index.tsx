@@ -27,7 +27,17 @@ export function DraggableWidgetCard({
     <ThumbnailCard
       {...cardProps}
       className="thumbnail-card--draggable"
-      extraButtonProps={{ ...attributes, ...listeners, id: draggableArgs.id, ref: setNodeRef }}
+      extraButtonProps={{
+        ...attributes,
+        ...listeners,
+        id: draggableArgs.id,
+        onKeyDown: (event) => {
+          if (event.key !== 'Enter') {
+            listeners?.onKeyDown?.(event)
+          }
+        },
+        ref: setNodeRef,
+      }}
     />
   )
 }

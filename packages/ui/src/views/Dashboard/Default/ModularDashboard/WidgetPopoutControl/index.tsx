@@ -27,6 +27,7 @@ export function WidgetPopoutControl({
 
   return (
     <Popup
+      disableKeyboardNavigation
       horizontalAlign="center"
       popupAriaLabel={`${widgetLabel}: ${label}`}
       popupType="dialog"

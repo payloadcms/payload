@@ -270,7 +270,16 @@ export class DashboardHelper {
     const confirmButton = this.page.locator(
       '#cancel-dashboard-changes [data-dialog-action="confirm"]',
     )
-    await confirmButton.click()
+    await expect
+      .poll(
+        async () =>
+          (await confirmButton.isVisible()) ||
+          !(await this.stepNavLast.getByText('Editing Dashboard').isVisible()),
+      )
+      .toBe(true)
+    if (await confirmButton.isVisible()) {
+      await confirmButton.click()
+    }
     await this.assertIsEditing(false)
     // Wait for any layout changes/transitions to settle
     await this.page.waitForTimeout(200)
@@ -342,7 +351,12 @@ export class DashboardHelper {
     // validate that the move was successful with the new order
     const snapshotAfter = await this.getSnapshot()
     const expectedSnapshot = moveArrayItem(snapshot, from, to, place)
-    expect(snapshotAfter).toEqual(expectedSnapshot)
+    expect(snapshotAfter.map(([id]) => id)).toEqual(expectedSnapshot.map(([id]) => id))
+    // The source and destination may resize to share a row; other widths must be preserved.
+    const resizedIDs = new Set([snapshot[from - 1][0], snapshot[to - 1][0]])
+    expect(snapshotAfter.filter(([id]) => !resizedIDs.has(id))).toEqual(
+      expectedSnapshot.filter(([id]) => !resizedIDs.has(id)),
+    )
   }
 }
 

@@ -71,6 +71,8 @@ export type PopupProps = {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
+  /** Let contained form inputs handle navigation keys; Escape still closes the popup. */
+  disableKeyboardNavigation?: boolean
   forceOpen?: boolean
   /**
    * Preferred horizontal alignment of the popup, if there is enough space available.
@@ -150,6 +152,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     children,
     className,
     disabled,
+    disableKeyboardNavigation = false,
     forceOpen,
     horizontalAlign: horizontalAlignProp,
     hoverSubmenu = false,
@@ -549,7 +552,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     // Form controls in dialog popovers handle Tab and arrow keys natively.
-    if (popupRole === 'dialog') {
+    if (disableKeyboardNavigation) {
       return
     }
 

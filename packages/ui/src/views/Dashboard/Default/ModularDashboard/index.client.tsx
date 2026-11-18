@@ -161,9 +161,12 @@ export function ModularDashboardClient({
   const restoreDrawer = useCallback(
     (source: DrawerWidgetDragData) => {
       openModal(source.drawerSlug)
-      requestAnimationFrame(() =>
-        document.getElementById(getDrawerWidgetDragID({ slug: source.widget.slug }))?.focus(),
-      )
+      requestAnimationFrame(() => {
+        // Restore the source after the reopened drawer activates its focus trap.
+        setTimeout(() => {
+          document.getElementById(getDrawerWidgetDragID({ slug: source.widget.slug }))?.focus()
+        }, 0)
+      })
     },
     [openModal],
   )
