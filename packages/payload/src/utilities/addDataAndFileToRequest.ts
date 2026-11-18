@@ -14,7 +14,10 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
   const { body, headers, method, payload } = req
 
   if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body) {
-    const [contentType] = (headers.get('Content-Type') || '').split(';', 1)
+    // Media types are case-insensitive (RFC 9110)
+    const [contentType] = (headers.get('Content-Type') || '')
+      .split(';', 1)
+      .map((type) => type.trim().toLowerCase())
     const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
     const hasBodyStream = req.body !== null
 
@@ -56,7 +59,11 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (fields?._payload && typeof fields._payload === 'string') {
-        req.data = JSON.parse(fields._payload)
+        try {
+          req.data = JSON.parse(fields._payload)
+        } catch {
+          throw new APIError('Invalid JSON', 400)
+        }
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {

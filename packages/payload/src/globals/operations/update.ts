@@ -24,6 +24,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertDataIsObject } from '../../utilities/assertDataIsObject.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -176,18 +177,19 @@ export const updateOperation = async <
       unpublishAllLocales = false
     }
 
+    const hasObjectData = Boolean(data && typeof data === 'object')
+
     const isSavingDraft =
       Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
-      data._status !== 'published' &&
+      (!hasObjectData || data._status !== 'published') &&
       !publishAllLocales
 
-    if (isSavingDraft) {
+    if (isSavingDraft && hasObjectData) {
       data._status = 'draft'
     }
 
-    const submittedTopLevelFieldNames = unpublishAllLocales
-      ? getTopLevelFieldNames(data)
-      : undefined
+    const submittedTopLevelFieldNames =
+      unpublishAllLocales && hasObjectData ? getTopLevelFieldNames(data) : undefined
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -203,6 +205,8 @@ export const updateOperation = async <
           globalConfig.access.update,
         )
       : true
+
+    assertDataIsObject(data, req)
 
     // /////////////////////////////////////
     // Retrieve document
