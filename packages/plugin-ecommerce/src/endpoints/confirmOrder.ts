@@ -475,9 +475,25 @@ const decrementInventory = async ({
       throw new Error('Inventory item target is missing or invalid.')
     }
 
+    const collection = hasVariant ? variantsSlug : productsSlug
+
+    const target = await req.payload.findByID({
+      id,
+      collection,
+      depth: 0,
+      overrideAccess: true,
+      req,
+      select: { inventory: true },
+    })
+
+    // Empty inventory means stock is not tracked for this product or variant
+    if (typeof target?.inventory !== 'number') {
+      continue
+    }
+
     const updatedInventory = await req.payload.db.updateOne({
       id,
-      collection: hasVariant ? variantsSlug : productsSlug,
+      collection,
       data: { inventory: { $inc: item.quantity * -1 } },
       req,
     })
