@@ -1,7 +1,10 @@
 'use client'
 import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
 
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import {
+  createClientUploadHandler,
+  getClientUploadErrorMessage,
+} from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 export const GcsClientUploadHandler = createClientUploadHandler({
@@ -29,6 +32,15 @@ export const GcsClientUploadHandler = createClientUploadHandler({
       credentials: 'include',
       method: 'POST',
     })
+
+    if (!response.ok) {
+      throw new Error(
+        await getClientUploadErrorMessage(
+          response,
+          'Failed to retrieve signed URL for Google Cloud Storage client upload',
+        ),
+      )
+    }
 
     const {
       clientUploadContext,
