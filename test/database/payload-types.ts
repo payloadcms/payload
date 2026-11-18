@@ -1119,6 +1119,12 @@ export interface ReservedFieldName {
  */
 export interface ReservedFieldNameClash {
   id: string;
+  localizedScores?:
+    | {
+        values?: number[] | null;
+        id?: string | null;
+      }[]
+    | null;
   numbers?:
     | {
         drawPosition?: number | null;
@@ -2013,6 +2019,8 @@ export interface ReservedFieldNamesSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2021,6 +2029,12 @@ export interface ReservedFieldNamesSelect<T extends boolean = true> {
  * via the `definition` "reserved-field-name-clashes_select".
  */
 export interface ReservedFieldNameClashesSelect<T extends boolean = true> {
+  localizedScores?:
+    | T
+    | {
+        values?: T;
+        id?: T;
+      };
   numbers?:
     | T
     | {

@@ -186,6 +186,12 @@ export const buildTable = ({
     indexes,
   }
 
+  if (!isRoot) {
+    // A companion table built earlier, such as the `_locales` table of a sibling array called
+    // `items` next to an array called `itemsLocales`, can already use this name.
+    trackSubTableNameClash({ adapter, tableName })
+  }
+
   adapter.rawTables[tableName] = promoteLongInlineForeignKeys({ adapter, table })
 
   if (hasLocalizedField || localizedRelations.size) {
@@ -807,10 +813,10 @@ export const buildTable = ({
 
 /**
  * Companion tables (`_locales`, `_texts`, `_numbers`, `_rels`) are named by appending a suffix
- * to the parent table name, so they can match an array or `hasMany` select table built earlier
- * for a field with that name. Writing the companion table would silently replace that table, so
- * the name is recorded instead and `buildRawSchema` builds the schema again with a distinct name
- * for the sub-table.
+ * to the parent table name, so they can match an array, block or `hasMany` select table built
+ * before or after them. Writing the second table would silently replace the first, so the name is
+ * recorded instead and `buildRawSchema` builds the schema again with a distinct name for the
+ * sub-table.
  */
 const trackSubTableNameClash = ({
   adapter,

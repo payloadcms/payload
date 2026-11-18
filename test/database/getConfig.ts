@@ -1152,6 +1152,18 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'reserved-field-name-clashes',
       fields: [
         {
+          name: 'localizedScores',
+          type: 'array',
+          fields: [
+            {
+              name: 'values',
+              type: 'number',
+              hasMany: true,
+              localized: true,
+            },
+          ],
+        },
+        {
           name: 'numbers',
           type: 'array',
           fields: [
