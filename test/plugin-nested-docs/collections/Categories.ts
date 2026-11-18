@@ -12,6 +12,7 @@ export const Categories: CollectionConfig = {
   fields: [
     {
       name: 'name',
+      localized: true,
       required: true,
       type: 'text',
     },
