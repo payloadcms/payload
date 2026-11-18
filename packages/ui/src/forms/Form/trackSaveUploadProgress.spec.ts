@@ -100,4 +100,29 @@ describe('trackSaveUploadProgress', () => {
       totalBytes: 100,
     })
   })
+
+  it('should return the last state from stop when a save ends without a result', () => {
+    const onChange = vi.fn()
+    const upload = trackSaveUploadProgress({ fileName: 'video.mp4', onChange, t, totalBytes: 100 })
+
+    upload.report({ loadedBytes: 40, totalBytes: 100 })
+
+    const lastState = onChange.mock.lastCall?.[0]
+
+    expect(upload.stop()).toBe(lastState)
+
+    onChange.mockClear()
+    upload.report({ loadedBytes: 90, totalBytes: 100 })
+    upload.settle({ isSuccessful: true })
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('should return nothing from stop after the save settled', () => {
+    const upload = trackSaveUploadProgress({ fileName: 'video.mp4', t, totalBytes: 100 })
+
+    upload.settle({ isSuccessful: true })
+
+    expect(upload.stop()).toBeUndefined()
+  })
 })

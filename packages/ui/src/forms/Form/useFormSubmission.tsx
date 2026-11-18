@@ -782,6 +782,14 @@ export const useFormSubmission = ({
           toast.dismiss(promiseToastID)
         }
 
+        // A save that ended without a result, e.g. one replaced by a newer save, must not leave
+        // `uploadStatus` at `uploading`. A newer save's progress is left alone.
+        const abandonedProgress = saveUpload?.stop()
+
+        if (abandonedProgress) {
+          setUploadProgress?.((current) => (current === abandonedProgress ? undefined : current))
+        }
+
         // Without a result toast, e.g. a create that redirects, the progress toast is removed.
         const uploadToastID = uploadToast?.getResultID()
 

@@ -99,7 +99,7 @@ export type DocumentInfoContext = {
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   /** @internal Set by Payload while a save uploads a file. */
-  setUploadProgress?: (progress: undefined | UploadProgress) => void
+  setUploadProgress?: React.Dispatch<React.SetStateAction<undefined | UploadProgress>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number

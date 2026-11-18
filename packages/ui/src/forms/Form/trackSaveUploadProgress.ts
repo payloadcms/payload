@@ -35,8 +35,13 @@ export const trackSaveUploadProgress = ({
   let lastProgress: UploadTransferProgress = { loadedBytes: 0, totalBytes }
   let lastPercent: number | undefined
   let isSettled = false
+  let lastReported: undefined | UploadProgress
+  const emit = (progress: UploadProgress) => {
+    lastReported = progress
+    onChange?.(progress)
+  }
 
-  onChange?.({ ...lastProgress, status: 'uploading' })
+  emit({ ...lastProgress, status: 'uploading' })
 
   return {
     /** Re-renders only when the whole percent changes, not on every progress event. */
@@ -49,7 +54,7 @@ export const trackSaveUploadProgress = ({
 
       lastPercent = percent
       lastProgress = progress
-      onChange?.({ ...progress, status: 'uploading' })
+      emit({ ...progress, status: 'uploading' })
       progressToast?.show(formatMessage(getUploadProgressMessage({ fileName, progress, t })))
     },
     /** Ends the upload state. A failed save keeps the bytes sent so far. */
@@ -59,11 +64,27 @@ export const trackSaveUploadProgress = ({
       }
 
       isSettled = true
-      onChange?.({
+      emit({
         loadedBytes: isSuccessful ? lastProgress.totalBytes : lastProgress.loadedBytes,
         status: isSuccessful ? 'success' : 'failed',
         totalBytes: lastProgress.totalBytes,
       })
+    },
+    /**
+     * Stops a save that ended without a result, e.g. one replaced by a newer save. Later reports
+     * are ignored.
+     *
+     * @returns The last reported state if the save was still running, so the caller can clear it
+     * unless a newer save has reported since.
+     */
+    stop: (): undefined | UploadProgress => {
+      if (isSettled) {
+        return undefined
+      }
+
+      isSettled = true
+
+      return lastReported
     },
   }
 }
