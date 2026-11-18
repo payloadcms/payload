@@ -110,6 +110,13 @@ export const createOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.data === undefined && Boolean(args.collection.config.upload && args.req.file)) {
+      args = {
+        ...args,
+        data: {} as typeof args.data,
+      }
+    }
+
     // Keep a remote URL only as an ephemeral file source, then strip all submitted generated
     // identity before untrusted create hooks run. The fetched file receives new server-owned
     // identity before persistence.

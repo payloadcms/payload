@@ -2,6 +2,10 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { describe, expect, it } from 'vitest'
 
+import {
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+} from '../versions/allLocalesPublicationStatus.js'
 import { assertDataIsObject } from './assertDataIsObject.js'
 
 const file = { name: 'a.txt' } as PayloadRequest['file']
@@ -32,5 +36,26 @@ describe('assertDataIsObject', () => {
     expect(() => assertDataIsObject(data, { file }, true)).toThrow(
       expect.objectContaining({ status: 400 }),
     )
+  })
+
+  it('preserves publishAllLocales intent when a file-only upload initializes missing data to {}', () => {
+    const req = { file }
+    const isUploadCollection = true
+    const incomingData: Record<string, unknown> | undefined = undefined
+    const data =
+      incomingData === undefined && Boolean(isUploadCollection && req.file) ? {} : incomingData
+
+    const intent = normalizeAllLocalesPublicationStatus({
+      data: data as Record<string, unknown>,
+      status: 'published',
+    })
+    expect(data).toEqual({ _status: 'published' })
+    expect(
+      reconcileAllLocalesPublicationStatus({
+        data: data as Record<string, unknown>,
+        intent,
+        status: 'published',
+      }),
+    ).toBe('published')
   })
 })

@@ -113,6 +113,13 @@ export const updateOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.data === undefined && Boolean(args.collection.config.upload && args.req.file)) {
+      args = {
+        ...args,
+        data: {} as typeof args.data,
+      }
+    }
+
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
       const data = sanitizeUploadData(args.data, 'update')
