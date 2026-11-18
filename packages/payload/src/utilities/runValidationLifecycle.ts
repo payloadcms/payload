@@ -68,18 +68,22 @@ export async function runValidationLifecycle(
     onValidationData?.(deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(originalDoc, data))
     if (!skipMutationHooks) {
       await beforeValidation?.({ data })
+    }
 
-      data = await beforeValidate({
-        id,
-        collection,
-        context: req.context,
-        data,
-        doc: originalDoc,
-        global,
-        operation: validationOperation,
-        overrideAccess,
-        req,
-      })
+    data = await beforeValidate({
+      id,
+      collection,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      global,
+      operation: validationOperation,
+      overrideAccess,
+      req,
+      skipHooks: skipMutationHooks,
+    })
+
+    if (!skipMutationHooks) {
       onValidationData?.(data)
 
       if (collection) {
