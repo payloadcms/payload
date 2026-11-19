@@ -218,7 +218,7 @@ describe('buildPolymorphicJoinQuery', () => {
 
     expect(query.sql).toContain('from "join_article_versions"')
     expect(query.sql).toContain('"version_parent_id" as "parent"')
-    expect(query.sql).toContain('"version_title" as "sortPath"')
+    expect(query.sql).toContain('"version_title" as "sortValue"')
     expect(query.sql).toContain('"latest" = ?')
     expect(query.sql).toContain('"version_title" = ?')
     expect(query.sql).toContain('from "join_notes"')
@@ -288,9 +288,9 @@ describe('buildPolymorphicJoinQuery', () => {
   it('sorts by createdAt descending by default when one target has timestamps', () => {
     const query = renderQuery(buildQuery())
 
-    expect(query.sql).toContain('"created_at" as "sortPath" from "join_articles"')
-    expect(query.sql).toContain('? as "sortPath" from "join_notes"')
-    expect(query.sql).toContain('order by "sortPath" desc')
+    expect(query.sql).toContain('"created_at" as "sortValue" from "join_articles"')
+    expect(query.sql).toContain('? as "sortValue" from "join_notes"')
+    expect(query.sql).toContain('order by "sortValue" desc')
     expect(query.params).toContain(null)
   })
 
@@ -307,17 +307,17 @@ describe('buildPolymorphicJoinQuery', () => {
     })
     const query = renderQuery(buildQuery({ adapter: adapterWithoutTimestamps }))
 
-    expect(query.sql).toContain('"id" as "sortPath" from "join_articles"')
-    expect(query.sql).toContain('"id" as "sortPath" from "join_notes"')
-    expect(query.sql).toContain('order by "sortPath" asc')
+    expect(query.sql).toContain('"id" as "sortValue" from "join_articles"')
+    expect(query.sql).toContain('"id" as "sortValue" from "join_notes"')
+    expect(query.sql).toContain('order by "sortValue" asc')
   })
 
   it('supports an explicit ascending nested sort and substitutes null when it is absent', () => {
     const query = renderQuery(buildQuery({ sort: 'details.rank' }))
 
-    expect(query.sql).toContain('"details_rank" as "sortPath" from "join_articles"')
-    expect(query.sql).toContain('? as "sortPath" from "join_notes"')
-    expect(query.sql).toContain('order by "sortPath" asc')
+    expect(query.sql).toContain('"details_rank" as "sortValue" from "join_articles"')
+    expect(query.sql).toContain('? as "sortValue" from "join_notes"')
+    expect(query.sql).toContain('order by "sortValue" asc')
     expect(query.params).toContain(null)
   })
 

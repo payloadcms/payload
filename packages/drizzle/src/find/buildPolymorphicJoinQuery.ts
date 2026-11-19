@@ -116,7 +116,9 @@ export const buildPolymorphicJoinQuery = ({
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
-  const sortPath = sortField.replace('-', '').split('.').join('_')
+  const sortFieldPath = sortField.replace('-', '')
+  const sortColumnName = sortFieldPath.split('.').join('_')
+  const readsAllLocales = !locale || locale === 'all'
   const wherePlan: PolymorphicJoinWherePlan = where
     ? createPolymorphicJoinWherePlan({
         adapter,
@@ -128,18 +130,57 @@ export const buildPolymorphicJoinQuery = ({
   let unionQuery: null | SQLiteSelect = null
 
   for (const { joinOnColumnName, collection, readLatestChildVersion, table } of collectionTables) {
-    const idColumn = readLatestChildVersion ? table['parent'] : table['id']
-    const childSortColumnName =
-      readLatestChildVersion && sortPath !== 'id' ? `version_${sortPath}` : sortPath
     const sortFieldAtPath = getFieldByPath({
       fields: adapter.payload.collections[collection].config.flattenedFields,
-      path: sortField.replace('-', ''),
+      path: sortFieldPath,
     })
-    const isSortLocalized = Boolean(sortFieldAtPath?.pathHasLocalized)
-    const sortTable = isSortLocalized
-      ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
-      : table
-    const sortColumn = sortPath === 'id' ? idColumn : sortTable?.[childSortColumnName]
+    const hasLocalizedSort = Boolean(sortFieldAtPath?.pathHasLocalized)
+    const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
+      const collectionField = pathPlan.fieldsByCollection.get(collection)
+
+      return collectionField?.type === 'scalar' && collectionField.isLocalized
+    })
+    const needsLocaleRows = hasLocalizedSort || hasLocalizedWhere
+    const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
+
+    const idColumn = readLatestChildVersion ? table['parent'] : table['id']
+    const sortTable = hasLocalizedSort ? localesTable : table
+    const sortColumn =
+      sortFieldPath === 'id'
+        ? idColumn
+        : sortTable?.[readLatestChildVersion ? `version_${sortColumnName}` : sortColumnName]
+
+    const shouldCollapseLocaleRows = needsLocaleRows && readsAllLocales
+    // A shared sort value lets DISTINCT collapse translations of the same document.
+    const sortValue =
+      shouldCollapseLocaleRows && hasLocalizedSort && sortColumn
+        ? sql`first_value(${sortColumn}) over (
+            partition by ${table[joinOnColumnName]}, ${table['id']}
+            order by ${sortOrder(sortColumn)} nulls last
+          )`
+        : (sortColumn ?? null)
+    const selectFields = {
+      id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
+      parent: sql`${table[joinOnColumnName]}`.as(onPath),
+      relationTo: sql`${collection}`.as('relationTo'),
+      sortValue: sql`${sortValue}`.as('sortValue'),
+    }
+    let collectionQuery = (
+      shouldCollapseLocaleRows ? db.selectDistinct(selectFields) : db.select(selectFields)
+    )
+      .from(table)
+      .$dynamic()
+
+    if (needsLocaleRows) {
+      collectionQuery = collectionQuery.leftJoin(
+        localesTable,
+        and(
+          eq(table['id'], localesTable._parentID),
+          readsAllLocales ? undefined : eq(localesTable._locale, locale),
+        ),
+      )
+    }
+
     const targetWhere =
       where && Object.keys(where).length > 0
         ? buildPolymorphicJoinWhere({
@@ -156,43 +197,6 @@ export const buildPolymorphicJoinQuery = ({
       targetWhere,
       readLatestChildVersion ? eq(table['latest'], true) : undefined,
     )
-    const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
-      const collectionField = pathPlan.fieldsByCollection.get(collection)
-
-      return collectionField?.type === 'scalar' && collectionField.isLocalized
-    })
-    const hasLocalizedFields = hasLocalizedWhere || isSortLocalized
-    const shouldDeduplicate = hasLocalizedFields && (!locale || locale === 'all')
-    const sortValue =
-      shouldDeduplicate && isSortLocalized && sortColumn
-        ? sql`first_value(${sortColumn}) over (
-            partition by ${table[joinOnColumnName]}, ${table['id']}
-            order by ${sortOrder(sortColumn)} nulls last
-          )`
-        : (sortColumn ?? null)
-    const selectFields = {
-      id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
-      parent: sql`${table[joinOnColumnName]}`.as(onPath),
-      relationTo: sql`${collection}`.as('relationTo'),
-      sortPath: sql`${sortValue}`.as('sortPath'),
-    }
-    let collectionQuery = (
-      shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
-    )
-      .from(table)
-      .$dynamic()
-
-    if (hasLocalizedFields) {
-      const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
-
-      collectionQuery = collectionQuery.leftJoin(
-        localesTable,
-        and(
-          eq(table['id'], localesTable._parentID),
-          locale && locale !== 'all' ? eq(localesTable._locale, locale) : undefined,
-        ),
-      )
-    }
 
     if (collectionWhere) {
       collectionQuery = collectionQuery.where(collectionWhere)
@@ -239,7 +243,8 @@ export const buildPolymorphicJoinQuery = ({
     })}
     FROM (
       SELECT * FROM ${sql`${unionQuery.as(sortedUnionAlias)}`}
-      WHERE ${parentWhere} order by ${sortOrder(sql`"sortPath"`)}${limitOffsetSQL}
+      WHERE ${parentWhere}
+      order by ${sortOrder(sql`"sortValue"`)}${limitOffsetSQL}
     ) AS ${sql.raw(`"${subQueryAlias}"`)}
   )`.as(columnName)
 
