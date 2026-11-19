@@ -280,9 +280,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
       }),
     onSafeAreaExpire: ({ x, y }) => {
       const parentContent = parentPopup?.popupRef.current
+
       const root = parentContent?.getRootNode() as
         | ({ elementFromPoint?: Document['elementFromPoint'] } & Node)
         | undefined
+
       const target =
         typeof root?.elementFromPoint === 'function'
           ? root.elementFromPoint(x, y)
@@ -540,6 +542,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     const activeElement = getActiveElement({ element: popup })
+
     const activePopup = activeElement?.closest(`.${baseClass}__content`)
     if (activePopup && activePopup !== popup) {
       return
@@ -554,7 +557,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     if (e.key === 'ArrowRight' && popupRole === 'menu') {
       const trigger = activeElement?.closest<HTMLElement>(`.${baseClass}__trigger-wrap`)
+
       const nestedTrigger = trigger?.querySelector<HTMLElement>('button, [role="menuitem"]')
+
       if (nestedTrigger) {
         e.preventDefault()
         nestedTrigger.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }))
@@ -585,6 +590,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         e.preventDefault()
 
         const currentIndex = menuItems.findIndex((item) => item === activeElement)
+
         const nextIndex =
           e.key === 'Home'
             ? 0
@@ -735,9 +741,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     ownerWindow?.addEventListener('resize', updatePosition)
     ownerWindow?.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+
     if (root !== ownerDocument) {
       root.addEventListener('scroll', updatePosition, { capture: true, passive: true })
     }
+
     ownerDocument.addEventListener('mousedown', handleClickOutside)
     popup.addEventListener('keydown', handleKeyDown)
     popup.addEventListener('click', handleActionableClick)
@@ -746,9 +754,11 @@ export const Popup: React.FC<PopupProps> = (props) => {
       cancelAnimationFrame(rafId)
       ownerWindow?.removeEventListener('resize', updatePosition)
       ownerWindow?.removeEventListener('scroll', updatePosition, { capture: true })
+
       if (root !== ownerDocument) {
         root.removeEventListener('scroll', updatePosition, { capture: true })
       }
+
       ownerDocument.removeEventListener('mousedown', handleClickOutside)
       popup.removeEventListener('keydown', handleKeyDown)
       popup.removeEventListener('click', handleActionableClick)

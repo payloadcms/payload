@@ -37,21 +37,21 @@ export function PopupTestRoot({
     }
   }, [])
 
+  const content = (
+    <>
+      <style>{shouldLoadBaseStyles ? baseStyles : tokenStyles}</style>
+      <style>{styles}</style>
+      {children}
+    </>
+  )
+
   if (!isShadowRoot) {
-    return children
+    return content
   }
 
   return (
     <div data-testid="shadow-host" ref={attachShadow}>
-      {shadowRoot &&
-        createPortal(
-          <>
-            <style>{shouldLoadBaseStyles ? baseStyles : tokenStyles}</style>
-            <style>{styles}</style>
-            {children}
-          </>,
-          shadowRoot,
-        )}
+      {shadowRoot && createPortal(content, shadowRoot)}
     </div>
   )
 }
