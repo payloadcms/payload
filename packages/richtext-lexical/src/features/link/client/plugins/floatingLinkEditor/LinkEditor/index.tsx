@@ -30,11 +30,7 @@ import {
   SELECTION_CHANGE_COMMAND,
   SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
-import {
-  deepCopyObjectSimpleWithoutReactComponents,
-  formatAdminURL,
-  getDataFromFormState,
-} from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
@@ -104,19 +100,16 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   const handleDrawerInitialize = useCallback(
     ({ formState }: { formState: FormState }) => {
-      const fields = getDataFromFormState(
-        deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
-        true,
-      ) as LinkFields
-
-      delete fields.text
+      const { text: _text, ...nodeFormState } = formState
 
       editor.update(
         () => {
           const node = linkNodeKey ? $getNodeByKey(linkNodeKey) : null
 
           if ($isLinkNode(node)) {
-            node.setFields(mergeNodeFields({ currentFields: node.getFields(), newFields: fields }))
+            node.setFields(
+              mergeNodeFields({ currentFields: node.getFields(), formState: nodeFormState }),
+            )
           }
         },
         { tag: SKIP_DOM_SELECTION_TAG },

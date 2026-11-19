@@ -22,12 +22,7 @@ import {
   type ElementFormatType,
   SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
-import {
-  deepCopyObjectSimpleWithoutReactComponents,
-  formatAdminURL,
-  getDataFromFormState,
-  isImage,
-} from 'payload/shared'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -166,11 +161,6 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
   const onExtraFieldsDrawerInitialize = useCallback(
     ({ formState }: { formState: FormState }) => {
-      const fields = getDataFromFormState(
-        deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
-        true,
-      )
-
       editor.update(
         () => {
           const node = $getNodeByKey(nodeKey)
@@ -182,7 +172,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
               ...data,
               fields: mergeNodeFields({
                 currentFields: data.fields ?? {},
-                newFields: fields,
+                formState,
               }),
             })
           }

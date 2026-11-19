@@ -1,14 +1,38 @@
-import { deepMerge } from 'payload/shared'
+import type { FormState } from 'payload'
 
-/** Preserves fields omitted by read access when applying server-initialized node fields. */
+import {
+  deepCopyObjectSimpleWithoutReactComponents,
+  deepMerge,
+  getDataFromFormState,
+  isPlainObject,
+} from 'payload/shared'
+
+/** Applies initialized field values while preserving fields omitted by read access. */
 export const mergeNodeFields = <T extends object>({
   currentFields,
-  newFields,
+  formState,
 }: {
   currentFields: T
-  newFields: Partial<T>
-}): T =>
-  deepMerge<T>(currentFields, newFields, {
+  formState: FormState
+}): T => {
+  const state = deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true })
+
+  // Unflattening retains field values by reference, distinguishing them from group and row containers.
+  const fieldValues = new WeakSet<object>()
+
+  for (const field of Object.values(state)) {
+    if (Array.isArray(field.rows) && (field.value === 0 || field.value === null)) {
+      field.disableFormData = false
+    }
+
+    if (!field.disableFormData && field.value !== null && typeof field.value === 'object') {
+      fieldValues.add(field.value)
+    }
+  }
+
+  const newFields = getDataFromFormState(state, true) as Partial<T>
+
+  return deepMerge<T>(currentFields, newFields, {
     arrayMerge: (target, source, options) =>
       source.map((value: unknown, index) => {
         if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -25,4 +49,6 @@ export const mergeNodeFields = <T extends object>({
 
         return deepMerge(previousRow ?? {}, row, options)
       }),
+    isMergeableObject: (value) => isPlainObject(value) && !fieldValues.has(value),
   })
+}
