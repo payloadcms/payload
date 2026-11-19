@@ -131,36 +131,46 @@ function normalizeWhere({
         ['contains', 'like', 'not_like'].includes(operator) &&
         ['code', 'email', 'slug', 'text', 'textarea'].includes(field.type) &&
         typeof operand === 'string'
+      const operandPath = `${path}.contains.${key}.${operator}`
+
+      if (!isComparison && !isTextMatch) {
+        throw new QueryError([{ path: operandPath }])
+      }
+
       const isMembership = operator === 'in' || operator === 'not_in'
       const values = isMembership ? operand : [operand]
       if (
-        (!isComparison && !isTextMatch) ||
         !Array.isArray(values) ||
         !values.every(
           (value) => value === null || ['boolean', 'number', 'string'].includes(typeof value),
-        ) ||
-        (field.type === 'number' &&
-          operator !== 'exists' &&
-          values.some(
-            (value) =>
-              value !== null &&
-              ((typeof value !== 'number' && (typeof value !== 'string' || value.trim() === '')) ||
-                !Number.isFinite(Number(value))),
-          )) ||
-        (field.type === 'date' &&
-          operator !== 'exists' &&
-          values.some(
-            (value) =>
-              value !== null && (typeof value !== 'string' || Number.isNaN(Date.parse(value))),
-          ))
+        )
       ) {
-        throw new QueryError([{ path: `${path}.contains.${key}.${operator}` }])
+        throw new QueryError([{ path: operandPath }])
       }
 
-      if (field.type === 'number' && operator !== 'exists') {
+      if (operator === 'exists') {
+        continue
+      }
+
+      if (field.type === 'number') {
+        if (values.some((value) => !isValidNumberFilterValue({ value }))) {
+          throw new QueryError([{ path: operandPath }])
+        }
+
         const numbers = values.map((value) => (value === null ? null : Number(value)))
 
         predicate[operator as Operator] = isMembership ? numbers : (numbers[0] ?? null)
+      }
+
+      if (field.type === 'date') {
+        const hasInvalidDate = values.some(
+          (value) =>
+            value !== null && (typeof value !== 'string' || Number.isNaN(Date.parse(value))),
+        )
+
+        if (hasInvalidDate) {
+          throw new QueryError([{ path: operandPath }])
+        }
       }
     }
 
@@ -171,6 +181,18 @@ function normalizeWhere({
     return conditions[0]!
   }
   return conditions.length ? { and: conditions } : {}
+}
+
+function isValidNumberFilterValue({ value }: { value: unknown }): boolean {
+  if (value === null) {
+    return true
+  }
+
+  if (typeof value === 'string' && value.trim() === '') {
+    return false
+  }
+
+  return (typeof value === 'number' || typeof value === 'string') && Number.isFinite(Number(value))
 }
 
 export function hasRowContains({
