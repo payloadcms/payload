@@ -113,6 +113,14 @@ export const createTransactionsCollection: (props: Props) => CollectionConfig = 
                       // @ts-expect-error - translations are not typed in plugins yet
                       t('plugin-ecommerce:billingAddress'),
                   } as Field,
+                  {
+                    name: 'shippingAddress',
+                    type: 'group',
+                    fields: addressFields,
+                    label: ({ t }) =>
+                      // @ts-expect-error - translations are not typed in plugins yet
+                      t('plugin-ecommerce:shippingAddress'),
+                  } as Field,
                 ]
               : []),
           ],

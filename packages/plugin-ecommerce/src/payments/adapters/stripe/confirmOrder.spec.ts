@@ -15,8 +15,11 @@ vi.mock('stripe', () => {
 })
 
 import { confirmOrder } from './confirmOrder.js'
+import { hashCartItems } from './validateSettlement.js'
 
 type ConfirmOrderArgs = Parameters<ReturnType<typeof confirmOrder>>[0]
+
+const DEFAULT_ITEMS = [{ id: 'item-1', product: 'product-123', quantity: 1 }]
 
 const createTransaction = (overrides: Record<string, unknown> = {}) => ({
   amount: 1000,
@@ -24,8 +27,9 @@ const createTransaction = (overrides: Record<string, unknown> = {}) => ({
   currency: 'USD',
   customer: 'user-123',
   id: 'txn-123',
-  items: [{ id: 'item-1', product: 'product-123', quantity: 1 }],
+  items: DEFAULT_ITEMS,
   order: undefined,
+  shippingAddress: { city: 'Test City' },
   status: 'pending',
   stripe: {
     customerID: 'cus-123',
@@ -41,8 +45,8 @@ const createPaymentIntent = (overrides: Record<string, unknown> = {}) => ({
   id: 'pi_123',
   metadata: {
     cartID: 'cart-123',
-    cartItemsSnapshot: JSON.stringify([{ id: 'item-1', product: 'product-123', quantity: 1 }]),
-    shippingAddress: JSON.stringify({ city: 'Test City' }),
+    // New format: 64-hex SHA-256 digest, no cartItemsSnapshot or shippingAddress
+    cartItemsHash: hashCartItems(DEFAULT_ITEMS),
   },
   status: 'succeeded',
   ...overrides,
@@ -108,7 +112,9 @@ describe('confirmOrder', () => {
         amount: 1000,
         currency: 'USD',
         customer: 'user-123',
-        items: [{ id: 'item-1', product: 'product-123', quantity: 1 }],
+        // items come from the transaction record (not metadata)
+        items: DEFAULT_ITEMS,
+        // shippingAddress comes from the transaction record (not Stripe metadata)
         shippingAddress: { city: 'Test City' },
         status: 'processing',
       },
@@ -202,14 +208,13 @@ describe('confirmOrder', () => {
   })
 
   it('should reject provider item drift before finalization', async () => {
+    // The PaymentIntent carries the hash of quantity=2, but the transaction has quantity=1
     const harness = createHarness()
     mockPaymentIntentsRetrieve.mockResolvedValue(
       createPaymentIntent({
         metadata: {
-          ...createPaymentIntent().metadata,
-          cartItemsSnapshot: JSON.stringify([
-            { id: 'item-1', product: 'product-123', quantity: 2 },
-          ]),
+          cartID: 'cart-123',
+          cartItemsHash: hashCartItems([{ id: 'item-1', product: 'product-123', quantity: 2 }]),
         },
       }),
     )
@@ -217,6 +222,135 @@ describe('confirmOrder', () => {
     await expect(runConfirmation({ harness })).rejects.toThrow('items')
 
     expect(harness.finalizeOrder).not.toHaveBeenCalled()
+  })
+
+  it('should confirm when cartItemsHash is absent (upgrade-safe legacy PaymentIntent)', async () => {
+    // A PaymentIntent created by the old version has no cartItemsHash — must still confirm.
+    const harness = createHarness()
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({
+        metadata: { cartID: 'cart-123' },
+      }),
+    )
+
+    await expect(runConfirmation({ harness })).resolves.toBeTruthy()
+    expect(harness.finalizeOrder).toHaveBeenCalled()
+  })
+
+  it('should use shippingAddress from the transaction when present', async () => {
+    const harness = createHarness({
+      transaction: createTransaction({ shippingAddress: { city: 'From Transaction' } }),
+    })
+
+    await runConfirmation({ harness })
+
+    expect(harness.finalizeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderData: expect.objectContaining({ shippingAddress: { city: 'From Transaction' } }),
+      }),
+    )
+  })
+
+  it('should fall back to metadata shippingAddress for legacy PaymentIntents', async () => {
+    // Old PaymentIntents had shippingAddress in metadata; new ones store it in the transaction.
+    const harness = createHarness({
+      transaction: createTransaction({ shippingAddress: undefined }),
+    })
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({
+        metadata: {
+          cartID: 'cart-123',
+          cartItemsHash: hashCartItems(DEFAULT_ITEMS),
+          shippingAddress: JSON.stringify({ city: 'Legacy City' }),
+        },
+      }),
+    )
+
+    await runConfirmation({ harness })
+
+    expect(harness.finalizeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderData: expect.objectContaining({ shippingAddress: { city: 'Legacy City' } }),
+      }),
+    )
+  })
+
+  it('should fall back to metadata shippingAddress when SQL adapter returns an empty group object', async () => {
+    // SQL adapters initialise group fields with an empty object `{}` even when no
+    // address was saved. An empty object is truthy but carries no address data, so
+    // the fallback to Stripe metadata must still fire in that case.
+    const harness = createHarness({
+      transaction: createTransaction({ shippingAddress: {} }),
+    })
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({
+        metadata: {
+          cartID: 'cart-123',
+          cartItemsHash: hashCartItems(DEFAULT_ITEMS),
+          shippingAddress: JSON.stringify({ city: 'SQL Fallback City' }),
+        },
+      }),
+    )
+
+    await runConfirmation({ harness })
+
+    expect(harness.finalizeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderData: expect.objectContaining({ shippingAddress: { city: 'SQL Fallback City' } }),
+      }),
+    )
+  })
+
+  it('should save a shipping address exceeding 600 chars in the transaction and not in metadata', async () => {
+    // Verifies the end-to-end contract introduced by this PR:
+    //   • The full address object is forwarded to finalizeOrder (from the transaction)
+    //   • The Stripe PaymentIntent metadata does NOT carry shippingAddress
+    //   • Every metadata value stays within Stripe's 500-character limit
+    const longAddress = {
+      addressLine1: 'A'.repeat(100),
+      addressLine2: 'B'.repeat(100),
+      city: 'C'.repeat(80),
+      company: 'D'.repeat(80),
+      country: 'United Kingdom',
+      firstName: 'E'.repeat(60),
+      lastName: 'F'.repeat(60),
+      phone: '+44' + '9'.repeat(40),
+      postalCode: 'SW1A ' + '1'.repeat(50),
+      state: 'Greater London',
+      title: 'Dr.',
+    }
+
+    // Pre-condition: address JSON genuinely exceeds 600 characters
+    expect(JSON.stringify(longAddress).length).toBeGreaterThan(600)
+
+    const harness = createHarness({
+      transaction: createTransaction({ shippingAddress: longAddress }),
+    })
+    // PaymentIntent metadata has NO shippingAddress key — only cartID and cartItemsHash
+    const paymentIntentMeta = {
+      cartID: 'cart-123',
+      cartItemsHash: hashCartItems(DEFAULT_ITEMS),
+    }
+    mockPaymentIntentsRetrieve.mockResolvedValue(
+      createPaymentIntent({ metadata: paymentIntentMeta }),
+    )
+
+    await runConfirmation({ harness })
+
+    // The full address must be passed to finalizeOrder from the transaction record
+    expect(harness.finalizeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderData: expect.objectContaining({ shippingAddress: longAddress }),
+      }),
+    )
+
+    // Every metadata value must be within Stripe's 500-character limit
+    for (const [key, value] of Object.entries(paymentIntentMeta)) {
+      expect(
+        value.length,
+        `Stripe metadata key "${key}" exceeds 500 characters`,
+      ).toBeLessThanOrEqual(500)
+    }
   })
 
   it('should log and propagate finalization failures', async () => {
