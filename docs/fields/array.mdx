@@ -74,6 +74,23 @@ _\* An asterisk denotes that a property is required._
   [More details](/docs/database/indexes#unique-fields).
 </Banner>
 
+## Filter by fields on the same row
+
+Use `contains` on an Array Field to match a document when one row satisfies the nested filter.
+
+```ts
+const where = {
+  items: {
+    contains: {
+      heading: { equals: 'Welcome' },
+      published: { equals: true },
+    },
+  },
+}
+```
+
+A row must have both values to match. If the Array Field is inside a Group or named Tab, use its dotted field path, such as `settings.items`, in place of `items`. This works with Local API and REST queries on MongoDB and Drizzle.
+
 ## Admin Options
 
 To customize the appearance and behavior of the Array Field in the [Admin Panel](../admin/overview), you can use the `admin` option:

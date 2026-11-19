@@ -11,8 +11,10 @@ import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
 import {
   getDateOnlyComparison,
+  getFieldInGroups,
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
+  resolveRowContains,
   validOperatorSet,
 } from 'payload/shared'
 
@@ -22,6 +24,7 @@ import type { OperatorMapKey } from './operatorMap.js'
 import { getCollection } from '../utilities/getEntity.js'
 import { isObjectID } from '../utilities/isObjectID.js'
 import { operatorMap } from './operatorMap.js'
+import { parseParams } from './parseParams.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type SearchParam = {
@@ -107,6 +110,61 @@ export async function buildSearchParam({
   }
 
   const [{ field, path }] = paths
+
+  if (
+    operator === 'contains' &&
+    field.type === 'array' &&
+    paths.length === 1 &&
+    isNestedRelationshipQuery(val)
+  ) {
+    const rowPath = getFieldInGroups({ fields, path: sanitizedPath })
+    if (!rowPath) {
+      throw new APIError(`Unsupported row filter path: ${incomingPath}`, 400)
+    }
+
+    const rowFilter = resolveRowContains({
+      field,
+      path: incomingPath,
+      where: val,
+    })
+
+    const buildElementMatch = async (queryLocale?: string) => {
+      const nested = await parseParams({
+        fields: rowFilter.flattenedFields,
+        locale: queryLocale,
+        parentIsLocalized:
+          parentIsLocalized || rowPath.parentIsLocalized || Boolean(field.localized),
+        payload,
+        where: rowFilter.where,
+      })
+
+      return {
+        $elemMatch: nested,
+      }
+    }
+
+    if (locale === 'all' && payload.config.localization) {
+      const matches = await Promise.all(
+        payload.config.localization.localeCodes.map(async (queryLocale) => {
+          const [resolved] = getLocalizedPaths({
+            collectionSlug,
+            fields,
+            globalSlug,
+            incomingPath: sanitizedPath,
+            locale: queryLocale,
+            parentIsLocalized,
+            payload,
+          })
+
+          return { [resolved!.path]: await buildElementMatch(queryLocale) }
+        }),
+      )
+
+      return { value: { $and: [{ $or: matches }] } }
+    }
+
+    return { path, value: await buildElementMatch(locale) }
+  }
 
   if (
     hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&

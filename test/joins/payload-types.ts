@@ -284,11 +284,28 @@ export interface AccessJoinArticle {
   items?:
     | {
         heading?: string | null;
+        published?: boolean | null;
+        rank?: number | null;
         tags?: ('available' | 'unavailable')[] | null;
         id?: string | null;
       }[]
     | null;
+  localizedItems?:
+    | {
+        heading?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   details?: {
+    editorial?: {
+      items?:
+        | {
+            heading?: string | null;
+            published?: boolean | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
     articleTags?: ('available' | 'unavailable')[] | null;
     status?: string | null;
     tags?: ('available' | 'not-permitted')[] | null;
@@ -308,6 +325,7 @@ export interface AccessJoinArticle {
   } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1561,12 +1579,31 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
     | T
     | {
         heading?: T;
+        published?: T;
+        rank?: T;
         tags?: T;
+        id?: T;
+      };
+  localizedItems?:
+    | T
+    | {
+        heading?: T;
         id?: T;
       };
   details?:
     | T
     | {
+        editorial?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    heading?: T;
+                    published?: T;
+                    id?: T;
+                  };
+            };
         articleTags?: T;
         status?: T;
         tags?: T;
@@ -1582,6 +1619,7 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2276,6 +2314,7 @@ declare module 'payload' {
   // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
+
 export interface Section {
   heading?: string | null;
   id?: string | null;

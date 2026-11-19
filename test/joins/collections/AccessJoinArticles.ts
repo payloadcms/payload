@@ -4,6 +4,7 @@ import { accessJoinArticlesSlug, accessJoinParentsSlug } from '../shared.js'
 
 export const AccessJoinArticles: CollectionConfig = {
   slug: accessJoinArticlesSlug,
+  versions: { drafts: true },
   access: {
     read: ({ req }) => {
       if (req.context.useNearAccessConstraint) {
@@ -212,6 +213,8 @@ export const AccessJoinArticles: CollectionConfig = {
       type: 'array',
       fields: [
         { name: 'heading', type: 'text' },
+        { name: 'published', type: 'checkbox' },
+        { name: 'rank', type: 'number' },
         {
           name: 'tags',
           type: 'select',
@@ -221,9 +224,34 @@ export const AccessJoinArticles: CollectionConfig = {
       ],
     },
     {
+      name: 'localizedItems',
+      type: 'array',
+      localized: true,
+      fields: [{ name: 'heading', type: 'text' }],
+    },
+    {
       name: 'details',
       type: 'group',
       fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'editorial',
+              fields: [
+                {
+                  name: 'items',
+                  type: 'array',
+                  dbName: 'join_editorial_items',
+                  fields: [
+                    { name: 'heading', type: 'text' },
+                    { name: 'published', type: 'checkbox' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
         {
           name: 'articleTags',
           type: 'select',

@@ -42,6 +42,12 @@ export {
 export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 export { combineQueries } from '../database/combineQueries.js'
 export { isNestedRelationshipQuery } from '../database/isNestedRelationshipQuery.js'
+export {
+  getFieldInGroups,
+  hasRowContains,
+  isRowContainsField,
+  resolveRowContains,
+} from '../database/resolveRowContains.js'
 
 export { APIError, APIErrorName } from '../errors/APIError.js'
 export { MissingEditorProp } from '../errors/MissingEditorProp.js'

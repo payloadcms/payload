@@ -18,6 +18,7 @@ import {
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath, QueryError } from 'payload'
 import {
+  getFieldInGroups,
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
   validOperatorSet,
@@ -34,6 +35,7 @@ import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol, isRawConstraint } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildOperatorConstraint } from './buildOperatorConstraint.js'
+import { buildRowContainsCondition } from './buildRowContainsCondition.js'
 import { getTableAlias } from './getTableAlias.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { resolveRelationshipPath } from './resolveRelationshipPath.js'
@@ -109,6 +111,26 @@ export function parseParams({
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
                 const originalOperator = operator as Operator
+
+                if (operator === 'contains' && isNestedRelationshipQuery(val)) {
+                  const path = relationOrPath.replace(/__/g, '.')
+                  const field = getFieldInGroups({ fields, path })?.field
+
+                  if (field?.type === 'array') {
+                    constraints.push(
+                      buildRowContainsCondition({
+                        adapter,
+                        aliasTable,
+                        field,
+                        locale,
+                        path,
+                        tableName,
+                        where: val,
+                      }),
+                    )
+                    continue
+                  }
+                }
 
                 if (
                   hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&

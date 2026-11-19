@@ -11,6 +11,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
 import { prefixWherePaths } from '../prefixWherePaths.js'
+import { isRowContainsField, resolveRowContains } from '../resolveRowContains.js'
 import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
@@ -105,8 +106,40 @@ export async function validateSearchParam({
     hasNestedWhere &&
     Boolean(relatedCollectionSlug)
 
+  const isRowContains =
+    operator === 'contains' && hasNestedWhere && relationshipField?.type === 'array'
+
+  if (isRowContains && !isRowContainsField({ fields, path: sanitizedPath })) {
+    errors.push({ path: incomingPath })
+    return
+  }
+
+  if (isRowContains) {
+    const rowFilter = resolveRowContains({
+      field: relationshipField,
+      path: incomingPath,
+      where: val,
+    })
+
+    const where = prefixWherePaths({ prefix: sanitizedPath, where: rowFilter.where })
+    const entity = collectionConfig ? { collectionConfig } : { globalConfig: globalConfig! }
+    promises.push(
+      validateQueryPaths({
+        ...entity,
+        errors,
+        overrideAccess,
+        policies,
+        req,
+        showHiddenFields,
+        versionFields,
+        where,
+      }),
+    )
+  }
+
   if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
-    const isLegitimateNestedContains = operator === 'contains' && isNestedHasManyQuery
+    const isLegitimateNestedContains =
+      operator === 'contains' && (isNestedHasManyQuery || isRowContains)
     const containsPlainObject =
       hasNestedWhere ||
       (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry)))
