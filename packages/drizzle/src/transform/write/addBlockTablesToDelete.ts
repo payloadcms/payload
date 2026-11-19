@@ -1,5 +1,6 @@
 import type { FlattenedBlocksField, FlattenedField } from 'payload'
 
+import { fieldIsVirtual } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -64,6 +65,10 @@ const addNestedBlockTablesToDelete = ({
   fields,
 }: { fields: FlattenedField[] } & Omit<Args, 'field'>): void => {
   fields.forEach((field) => {
+    if (fieldIsVirtual(field)) {
+      return
+    }
+
     if (field.type === 'blocks') {
       addBlockTablesToDelete({ adapter, baseTableName, blocksToDelete, field })
     } else if ('flattenedFields' in field) {
