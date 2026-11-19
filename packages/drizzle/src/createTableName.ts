@@ -72,8 +72,10 @@ export const createTableName = ({
   let result = customTableNameResult || defaultTableName
 
   // A sub-table can share its name with a companion table of its parent, for example an array
-  // field called `rels` next to the `_rels` relationships table. Only those tables are renamed.
-  const subTableNameReplacement = prefix ? adapter.subTableNameReplacements?.get(result) : undefined
+  // field called `rels` next to the `_rels` relationships table. Only those tables are renamed,
+  // never enums.
+  const subTableNameReplacement =
+    prefix && target === 'dbName' ? adapter.subTableNameReplacements?.get(result) : undefined
 
   if (subTableNameReplacement) {
     result = subTableNameReplacement
