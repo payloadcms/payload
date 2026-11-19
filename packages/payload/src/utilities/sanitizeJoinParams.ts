@@ -19,6 +19,11 @@ export type JoinParams =
  * @param joins
  */
 export const sanitizeJoinParams = (_joins: JoinParams = {}): JoinQuery => {
+  // Handle top-level `?joins=false` (REST API sends it as the string "false")
+  if (_joins === false || (_joins as unknown) === 'false') {
+    return false
+  }
+
   const joinQuery: Record<string, any> = {}
   const joins = _joins as Record<string, any>
 
