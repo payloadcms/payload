@@ -1,4 +1,5 @@
-import type { Config } from './types.js'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Config, SanitizedConfig } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
@@ -150,5 +151,28 @@ describe('sanitizeConfig', () => {
       localeCodes: [],
       locales: [],
     })
+  })
+
+  // Dev reloads with server fast refresh re-sanitize collection configs from modules that didn't change
+  it('should not duplicate the orderable field or hook when the same collection config is sanitized again', () => {
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      fields: [{ name: 'title', type: 'text' }],
+      orderable: true,
+    }
+    const sanitize = () => sanitizeConfig({ ...configDefaults, collections: [collection] })
+    const getPosts = (config: SanitizedConfig) =>
+      config.collections.find(({ slug }) => slug === 'posts')
+
+    const firstPosts = getPosts(sanitize())
+    const firstHookCount = firstPosts?.hooks.beforeChange.length
+
+    const secondPosts = getPosts(sanitize())
+
+    expect(
+      secondPosts?.fields.filter((field) => 'name' in field && field.name === '_order'),
+    ).toHaveLength(1)
+    expect(secondPosts?.hooks.beforeChange).toHaveLength(firstHookCount ?? 0)
+    expect(() => sanitize()).not.toThrow()
   })
 })
