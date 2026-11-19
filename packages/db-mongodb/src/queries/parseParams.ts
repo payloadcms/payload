@@ -47,7 +47,12 @@ export async function parseParams({
           where: condition,
         })
         if (builtConditions.length > 0 && conditionOperator !== null) {
-          result[conditionOperator] = builtConditions
+          if (conditionOperator === '$and') {
+            // Preserve filters already added to $and, including all-locale row matches.
+            result.$and = [...(result.$and ?? []), ...builtConditions]
+          } else {
+            result.$or = builtConditions
+          }
         }
       } else {
         // It's a path - and there can be multiple comparisons on a single path.

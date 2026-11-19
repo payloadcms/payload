@@ -7,6 +7,7 @@ import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from './queryValidation/validateSortQuery.js'
+import { hasRowContains, isRowContainsField } from './resolveRowContains.js'
 import { sanitizeWhereQuery } from './sanitizeWhereQuery.js'
 
 type Args = {
@@ -67,6 +68,17 @@ const sanitizeJoinFieldQuery = async ({
 
   if (join.field.where) {
     joinQuery.where = combineQueries(joinQuery.where, deepCopyObjectSimple(join.field.where))
+  }
+
+  if (Array.isArray(join.field.collection)) {
+    const where = combineQueries(joinQuery.where, accessResult)
+    const isRowField = (path: string) =>
+      isRowContainsField({ fields: joinCollectionConfig.flattenedFields, path })
+
+    if (hasRowContains({ isRowField, where })) {
+      errors.push({ path: joinPath })
+      return
+    }
   }
 
   promises.push(
