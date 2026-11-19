@@ -166,7 +166,13 @@ export const createSegmentedUpload = ({
       await completeMultipartUpload(finalPath, parts, { ...blobOptions, key, uploadId })
       await deleteStagedParts({ object })
 
-      return { size: (await getSize({ pathname: finalPath, token })) ?? -1 }
+      const size = await getSize({ pathname: finalPath, token })
+
+      if (size === null) {
+        throw new Error('Vercel Blob did not store the assembled upload.')
+      }
+
+      return { size }
     },
 
     getSegmentRequests: ({ expiresIn, object, segments }) =>

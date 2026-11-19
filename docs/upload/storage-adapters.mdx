@@ -83,7 +83,7 @@ pnpm add @payloadcms/storage-vercel-blob
 - Ensure you have `BLOB_READ_WRITE_TOKEN` set in your Vercel environment variables. This is usually set by Vercel automatically after adding blob storage to your project.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to Vercel Blob.
-- With `clientUploads` enabled, files of 64MB or more use resumable upload sessions: each segment is uploaded straight to Vercel Blob as a temporary blob under `payload-upload-sessions/`, and an interrupted upload continues from the segments already stored. After a page reload, it continues once the same file is selected again. When the upload completes, Payload assembles the segments into the final blob and removes the temporary blobs. Assembly copies the file within Vercel Blob from the request that completes the upload, so very large files need a function `maxDuration` long enough to copy them.
+- With `clientUploads` enabled, files of 64MiB or more upload in resumable segments, stored as temporary blobs under `payload-upload-sessions/` until the upload completes. Completing the upload copies the segments into the final file, so very large files need a function `maxDuration` long enough for that copy.
 
 ```ts
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
