@@ -19,7 +19,6 @@ export const DraftJoinArticles: CollectionConfig = {
       name: 'project',
       type: 'relationship',
       relationTo: draftJoinProjectsSlug,
-      draftJoinWorkspacesSlug,
     },
   ],
 }

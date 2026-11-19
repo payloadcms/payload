@@ -106,13 +106,13 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "id" column`)
     }
 
-    const childParentColumnName = readLatestChildVersion ? `version_${onPath}` : onPath
+    const joinOnColumnName = readLatestChildVersion ? `version_${onPath}` : onPath
 
-    if (!table[childParentColumnName]) {
+    if (!table[joinOnColumnName]) {
       throw new Error(`Polymorphic join collection "${collection}" has no "${onPath}" column`)
     }
 
-    return { childParentColumnName, collection, readLatestChildVersion, table }
+    return { joinOnColumnName, collection, readLatestChildVersion, table }
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
@@ -127,12 +127,7 @@ export const buildPolymorphicJoinQuery = ({
     : new Map()
   let unionQuery: null | SQLiteSelect = null
 
-  for (const {
-    childParentColumnName,
-    collection,
-    readLatestChildVersion,
-    table,
-  } of collectionTables) {
+  for (const { joinOnColumnName, collection, readLatestChildVersion, table } of collectionTables) {
     const idColumn = readLatestChildVersion ? table['parent'] : table['id']
     const childSortColumnName =
       readLatestChildVersion && sortPath !== 'id' ? `version_${sortPath}` : sortPath
@@ -147,7 +142,7 @@ export const buildPolymorphicJoinQuery = ({
     const sortColumn = sortPath === 'id' ? idColumn : sortTable?.[childSortColumnName]
     const selectFields = {
       id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
-      parent: sql`${table[childParentColumnName]}`.as(onPath),
+      parent: sql`${table[joinOnColumnName]}`.as(onPath),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
