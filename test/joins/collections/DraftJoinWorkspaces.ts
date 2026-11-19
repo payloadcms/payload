@@ -9,6 +9,10 @@ export const DraftJoinWorkspaces: CollectionConfig = {
     { name: 'title', type: 'text' },
     {
       name: 'documents',
+      access: {
+        read: ({ doc, req }) =>
+          !req.context.hideWorkspaceMembership || doc?.title === 'Visible workspace',
+      },
       type: 'join',
       collection: [draftJoinArticlesSlug, draftJoinNotesSlug],
       on: 'workspace',

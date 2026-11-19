@@ -9,7 +9,12 @@ export const DraftJoinArticles: CollectionConfig = {
   fields: [
     { name: 'title', type: 'text', localized: true },
     { name: 'tags', type: 'select', hasMany: true, options: ['included', 'excluded'] },
-    { name: 'workspace', type: 'relationship', relationTo: draftJoinWorkspacesSlug },
+    {
+      name: 'workspace',
+      type: 'relationship',
+      relationTo: draftJoinWorkspacesSlug,
+      access: { read: ({ req }) => !req.context.hideWorkspaceMembership },
+    },
     {
       name: 'project',
       type: 'relationship',
