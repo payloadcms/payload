@@ -20,6 +20,7 @@ type RelationshipRow = {
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
+import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
 import { markWrite } from '../utilities/readAfterWrite.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
@@ -367,7 +368,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
-    if (operation === 'update') {
+    if (operation === 'update' && hasCompanionRelation({ adapter, relation: '_rels', tableName })) {
       // Filter out specific item deletions (those with itemToRemove) from general path deletions
       const generalRelationshipDeletes = rowToInsert.relationshipsToDelete.filter(
         (rel) => !('itemToRemove' in rel),
@@ -580,7 +581,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const textsTableName = `${tableName}_texts`
 
-    if (operation === 'update') {
+    if (
+      operation === 'update' &&
+      hasCompanionRelation({ adapter, relation: '_texts', tableName })
+    ) {
       await deleteExistingRowsByPath({
         adapter,
         db,
@@ -608,7 +612,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const numbersTableName = `${tableName}_numbers`
 
-    if (operation === 'update') {
+    if (
+      operation === 'update' &&
+      hasCompanionRelation({ adapter, relation: '_numbers', tableName })
+    ) {
       await deleteExistingRowsByPath({
         adapter,
         db,

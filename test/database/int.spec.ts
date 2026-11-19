@@ -3433,6 +3433,40 @@ describe('database', () => {
       })
     })
 
+    it('should update a collection with array fields named `numbers`, `texts`, or `rels`', async () => {
+      const created = await payload.create({
+        collection: 'reserved-field-names',
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 1 }, { drawPosition: 2 }],
+          texts: [{ value: 'first' }, { value: 'second' }],
+          rels: [{ value: 'first' }, { value: 'second' }],
+        },
+      })
+
+      // Shortening the arrays makes the update clear rows at the indexes they no longer use.
+      const updated = await payload.update({
+        collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 3 }],
+          texts: [{ value: 'third' }],
+          rels: [{ value: 'third' }],
+        },
+      })
+
+      expect(updated.numbers?.map((row) => row.drawPosition)).toStrictEqual([3])
+      expect(updated.texts?.map((row) => row.value)).toStrictEqual(['third'])
+      expect(updated.rels?.map((row) => row.value)).toStrictEqual(['third'])
+
+      await payload.delete({
+        collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+      })
+    })
+
     it('should keep arrays apart when the renamed table name is taken by another array', async () => {
       const created = await payload.create({
         collection: 'reserved-field-name-clashes',
