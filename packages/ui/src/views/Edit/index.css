@@ -82,6 +82,15 @@
       --field-tabs-edge-display: none;
       max-width: calc(var(--spacer-6) * 27);
     }
+
+    .collection-edit--constrain-document-width
+      .collection-edit__main
+      > .document-fields:not(.document-fields--force-sidebar-wrap):where(
+        .document-fields--no-sidebar,
+        :has(.document-fields__sidebar-fields > .render-fields:empty)
+      ) {
+      max-width: calc(var(--spacer-6) * 18);
+    }
   }
 
   @container drawer (width <= 768px) {
