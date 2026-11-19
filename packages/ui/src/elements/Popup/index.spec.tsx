@@ -203,6 +203,32 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     await expect.element(nested).toHaveAttribute('aria-expanded', 'false')
   })
 
+  test('should close each menu once when tabbing out', async () => {
+    const onClose = vi.fn()
+    const screen = await render(
+      <Popup button="Actions" onToggleClose={onClose} popupType="menu">
+        <Popup button="More actions" popupType="menu">
+          <div data-popup-prevent-close>
+            <PopupTestRoot isShadowRoot>
+              <input aria-label="Nested draft" />
+            </PopupTestRoot>
+          </div>
+        </Popup>
+      </Popup>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    await screen.getByRole('menuitem', { name: 'More actions', exact: true }).click()
+    await screen.getByRole('textbox', { name: 'Nested draft' }).fill('Unsaved draft')
+    await userEvent.keyboard('{Tab}')
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
+    // Flush the queued close callbacks before counting them.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
   test('should keep the menu aligned with its trigger when scrolling', async () => {
     const screen = await render(
       <div data-testid="scroll-container" style={{ height: 240, overflow: 'auto' }}>

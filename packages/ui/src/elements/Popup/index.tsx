@@ -17,7 +17,6 @@ import React, {
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useModalFocus } from '../../providers/ModalFocus/index.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
-import { getActiveElement } from '../../utilities/getActiveElement.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
 import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
@@ -544,7 +543,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // Navigation candidates and their focused element must share a DOM root.
     const root = popup.getRootNode() as Document | ShadowRoot
     const activeElement = root.activeElement
-    const activePopup = getActiveElement({ element: popup })?.closest(`.${baseClass}__content`)
+
+    const activePopup = e
+      .composedPath()
+      .find(
+        (target): target is Element =>
+          target instanceof Element && target.classList.contains(`${baseClass}__content`),
+      )
 
     if (activePopup && activePopup !== popup) {
       return

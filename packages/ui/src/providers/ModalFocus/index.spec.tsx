@@ -98,6 +98,39 @@ function runPopupFocusTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     }
   })
 
+  test('should remember a focusable host when clicking its content', async () => {
+    let getTargets: () => readonly HTMLElement[] = () => []
+
+    function Controls() {
+      getTargets = useModalFocus().getReturnFocusTargets
+
+      return (
+        <Popup button="Actions" popupType="dialog">
+          <div data-popup-prevent-close>
+            <PopupTestRoot isShadowRoot tabIndex={0}>
+              <span>Embedded action</span>
+            </PopupTestRoot>
+          </div>
+        </Popup>
+      )
+    }
+
+    const screen = await render(
+      <ModalFocusProvider>
+        <Controls />
+      </ModalFocusProvider>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    const content = screen.getByText('Embedded action', { exact: true })
+    const host = (content.element().getRootNode() as ShadowRoot).host
+
+    await content.click()
+    expect(getTargets()).toEqual([host, trigger.element()])
+  })
+
   describe.each([
     { context: 'with styling classes', shouldRemoveClasses: false },
     { context: 'without styling classes', shouldRemoveClasses: true },

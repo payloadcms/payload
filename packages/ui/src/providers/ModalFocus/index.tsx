@@ -26,7 +26,8 @@ export function ModalFocusProvider({ children }: { children: ReactNode }) {
   const shadowRootsRef = useRef(new Map<ShadowRoot, number>())
   const getReturnFocusTargets = useCallback(() => targetsRef.current, [])
   const rememberPopupTriggers = useCallback((event?: Event) => {
-    const target = event?.composedPath()[0] ?? event?.target
+    const path = event?.composedPath()
+    const target = path?.[0] ?? event?.target
     const opener =
       target instanceof Element ? target : getActiveElement({ element: document.documentElement })
 
@@ -44,7 +45,11 @@ export function ModalFocusProvider({ children }: { children: ReactNode }) {
       if (getTrigger) {
         // Pointer activation does not focus buttons in every browser.
         if (!targets.length) {
-          const popupOpener = opener.closest<HTMLElement>('button, a[href], [tabindex]')
+          const popupOpener =
+            path?.find(
+              (target): target is HTMLElement =>
+                target instanceof HTMLElement && target.matches('button, a[href], [tabindex]'),
+            ) ?? opener.closest<HTMLElement>('button, a[href], [tabindex]')
 
           if (popupOpener) {
             targets.push(popupOpener)
