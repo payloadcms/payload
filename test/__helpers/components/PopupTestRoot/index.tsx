@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { expect } from 'vitest'
 
+import tokenStyles from '../../../../packages/ui/src/css/tokens.css?inline'
 import buttonStyles from '../../../../packages/ui/src/elements/Button/index.css?inline'
 import popupStyles from '../../../../packages/ui/src/elements/Popup/index.css?inline'
 import listStyles from '../../../../packages/ui/src/elements/Popup/PopupButtonList/index.css?inline'
@@ -13,14 +14,7 @@ import submenuStyles from '../../../../packages/ui/src/elements/Popup/PopupButto
 import triggerStyles from '../../../../packages/ui/src/elements/Popup/PopupTrigger/index.css?inline'
 import baseStyles from '../../../../packages/ui/src/styles.css?inline'
 
-const styles = [
-  baseStyles,
-  buttonStyles,
-  popupStyles,
-  listStyles,
-  submenuStyles,
-  triggerStyles,
-].join('\n')
+const styles = [buttonStyles, popupStyles, listStyles, submenuStyles, triggerStyles].join('\n')
 
 // The DOM focus matcher reads document.activeElement instead of the shadow root.
 export const expectFocus = ({ locator }: { locator: Locator }) =>
@@ -29,9 +23,12 @@ export const expectFocus = ({ locator }: { locator: Locator }) =>
 export function PopupTestRoot({
   children,
   isShadowRoot = false,
+  shouldLoadBaseStyles = true,
 }: {
   children: ReactNode
   isShadowRoot?: boolean
+  /** Disable to load only tokens and component styles inside the shadow root. */
+  shouldLoadBaseStyles?: boolean
 }) {
   const [shadowRoot, setShadowRoot] = useState<null | ShadowRoot>(null)
   const attachShadow = useCallback((element: HTMLDivElement | null) => {
@@ -49,6 +46,7 @@ export function PopupTestRoot({
       {shadowRoot &&
         createPortal(
           <>
+            <style>{shouldLoadBaseStyles ? baseStyles : tokenStyles}</style>
             <style>{styles}</style>
             {children}
           </>,

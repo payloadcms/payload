@@ -13,6 +13,36 @@ import {
 import { useTheme } from '../../providers/Theme/index.js'
 import { Popup, PopupList } from './index.js'
 
+test('should preserve standalone menu item insets without the Admin stylesheet', async () => {
+  const screen = await render(
+    <PopupTestRoot isShadowRoot shouldLoadBaseStyles={false}>
+      <Popup button="Actions" popupAriaLabel="Actions menu" popupType="menu">
+        <PopupList.ButtonGroup>
+          <PopupList.Button onClick={() => {}}>Select</PopupList.Button>
+        </PopupList.ButtonGroup>
+      </Popup>
+    </PopupTestRoot>,
+  )
+
+  await screen.getByRole('button', { name: 'Actions', exact: true }).click()
+  const menu = screen.getByRole('menu', { name: 'Actions menu' })
+  const option = screen.getByRole('menuitem', { name: 'Select', exact: true })
+
+  await expect
+    .poll(() => {
+      const menuElement = menu.element()
+      const menuBox = menuElement.getBoundingClientRect()
+      const optionBox = option.element().getBoundingClientRect()
+
+      return {
+        leftInset: optionBox.left - menuBox.left,
+        padding: getComputedStyle(menuElement).padding,
+        topInset: optionBox.top - menuBox.top,
+      }
+    })
+    .toEqual({ leftInset: 8, padding: '0px', topInset: 8 })
+})
+
 test.each([false, true])(
   'should restore focus when pointer-closing a nested shadow control: %s',
   async (isShadowRoot) => {
