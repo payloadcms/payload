@@ -555,9 +555,10 @@ export const useFormSubmission = ({
             res = await action(formData)
           }
 
-          saveUpload?.settle({ isSuccessful: res?.status < 400 })
-
           if (requestContext.isCurrent()) {
+            // A replaced save leaves the progress to the newer one; `finally` stops it.
+            saveUpload?.settle({ isSuccessful: res?.status < 400 })
+
             if (res.status < 400 && !isModifiedWhileProcessing.current) {
               setIsModified(false)
             }
@@ -754,7 +755,9 @@ export const useFormSubmission = ({
 
         const isCurrentRequest = requestContext.isCurrent()
 
-        saveUpload?.settle({ isSuccessful: false })
+        if (isCurrentRequest) {
+          saveUpload?.settle({ isSuccessful: false })
+        }
 
         if (!preservePromiseToast && !isCurrentRequest) {
           return
