@@ -155,6 +155,30 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
   })
 
+  test('should navigate past a focused embedded control', async () => {
+    const screen = await render(
+      <Popup button="Actions" popupType="dialog">
+        <button type="button">First</button>
+        <PopupTestRoot isShadowRoot tabIndex={0}>
+          <button type="button">Embedded control</button>
+        </PopupTestRoot>
+        <button type="button">Last</button>
+      </Popup>,
+      { wrapper: Root },
+    )
+    const embedded = screen.getByRole('button', { name: 'Embedded control' })
+
+    await screen.getByRole('button', { name: 'Actions', exact: true }).click()
+    embedded.element().focus()
+    await expectFocus({ locator: embedded })
+    await userEvent.keyboard('{ArrowDown}')
+    await expectFocus({ locator: screen.getByRole('button', { name: 'Last', exact: true }) })
+
+    embedded.element().focus()
+    await userEvent.keyboard('{ArrowUp}')
+    await expectFocus({ locator: screen.getByRole('button', { name: 'First', exact: true }) })
+  })
+
   test('should return focus to the submenu trigger on Escape', async () => {
     const screen = await render(
       <Popup button="Actions" popupType="menu">

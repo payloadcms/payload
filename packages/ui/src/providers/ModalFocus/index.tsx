@@ -103,9 +103,12 @@ export function ModalFocusProvider({ children }: { children: ReactNode }) {
     rememberPopupTriggers()
     document.addEventListener('focusin', rememberPopupTriggers)
     document.addEventListener('pointerdown', rememberPopupTriggers, true)
+    // Keyboard activation can follow focus changes hidden by nested shadow roots.
+    document.addEventListener('click', rememberPopupTriggers, true)
     return () => {
       document.removeEventListener('focusin', rememberPopupTriggers)
       document.removeEventListener('pointerdown', rememberPopupTriggers, true)
+      document.removeEventListener('click', rememberPopupTriggers, true)
     }
   }, [rememberPopupTriggers])
 

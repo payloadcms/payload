@@ -24,11 +24,14 @@ export function PopupTestRoot({
   children,
   isShadowRoot = false,
   shouldLoadBaseStyles = true,
+  tabIndex,
 }: {
   children: ReactNode
   isShadowRoot?: boolean
   /** Disable to load only tokens and component styles inside the shadow root. */
   shouldLoadBaseStyles?: boolean
+  /** Tab order of the shadow host. */
+  tabIndex?: number
 }) {
   const [shadowRoot, setShadowRoot] = useState<null | ShadowRoot>(null)
   const attachShadow = useCallback((element: HTMLDivElement | null) => {
@@ -50,7 +53,7 @@ export function PopupTestRoot({
   }
 
   return (
-    <div data-testid="shadow-host" ref={attachShadow}>
+    <div data-testid="shadow-host" ref={attachShadow} tabIndex={tabIndex}>
       {shadowRoot && createPortal(content, shadowRoot)}
     </div>
   )

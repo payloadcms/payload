@@ -541,8 +541,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
-    const activeElement = getActiveElement({ element: popup })
-    const activePopup = activeElement?.closest(`.${baseClass}__content`)
+    // Navigation candidates and their focused element must share a DOM root.
+    const root = popup.getRootNode() as Document | ShadowRoot
+    const activeElement = root.activeElement
+    const activePopup = getActiveElement({ element: popup })?.closest(`.${baseClass}__content`)
 
     if (activePopup && activePopup !== popup) {
       return

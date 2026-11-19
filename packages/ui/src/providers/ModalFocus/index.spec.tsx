@@ -50,6 +50,54 @@ function runPopupFocusTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     expect(targets).toEqual(expectedTargets)
   })
 
+  test('should remember the control activated with the keyboard', async () => {
+    let targets: readonly HTMLElement[] = []
+
+    function Controls() {
+      const { getReturnFocusTargets } = useModalFocus()
+      const capture = () => {
+        targets = getReturnFocusTargets()
+      }
+
+      return (
+        <Popup button="Actions" popupType="dialog">
+          <div data-popup-prevent-close>
+            <PopupTestRoot isShadowRoot>
+              <button onClick={capture} type="button">
+                First action
+              </button>
+              <button onClick={capture} type="button">
+                Second action
+              </button>
+            </PopupTestRoot>
+          </div>
+        </Popup>
+      )
+    }
+
+    const screen = await render(
+      <ModalFocusProvider>
+        <Controls />
+      </ModalFocusProvider>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    const first = screen.getByRole('button', { name: 'First action' })
+    const second = screen.getByRole('button', { name: 'Second action' })
+    const expectedTargets = [second.element(), trigger.element()]
+
+    for (const key of ['{Enter}', ' ']) {
+      targets = []
+      first.element().focus()
+      await userEvent.keyboard('{Tab}')
+      await expectFocus({ locator: second })
+      await userEvent.keyboard(key)
+      expect(targets).toEqual(expectedTargets)
+    }
+  })
+
   describe.each([
     { context: 'with styling classes', shouldRemoveClasses: false },
     { context: 'without styling classes', shouldRemoveClasses: true },
@@ -96,13 +144,13 @@ function runPopupFocusTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     try {
       const screen = await render(<Fixture count={1} />, { wrapper: Root })
 
-      for (const event of ['focusin', 'pointerdown']) {
+      for (const event of ['click', 'focusin', 'pointerdown']) {
         expect(addListener.mock.calls.filter(([type]) => type === event)).toHaveLength(1)
       }
 
       await screen.rerender(<Fixture count={12} />)
 
-      for (const event of ['focusin', 'pointerdown']) {
+      for (const event of ['click', 'focusin', 'pointerdown']) {
         const registrations = addListener.mock.calls.filter(([type]) => type === event)
 
         expect(registrations).toHaveLength(1)
@@ -110,7 +158,7 @@ function runPopupFocusTests({ isShadowRoot }: { isShadowRoot: boolean }) {
 
       await screen.unmount()
 
-      for (const event of ['focusin', 'pointerdown']) {
+      for (const event of ['click', 'focusin', 'pointerdown']) {
         const registration = addListener.mock.calls.find(([type]) => type === event)!
 
         expect(removeListener.mock.calls).toContainEqual(registration)
