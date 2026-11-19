@@ -49,6 +49,7 @@ import { getSelectedNode } from '../../../../../../lexical/utils/getSelectedNode
 import { setFloatingElemPositionForLinkEditor } from '../../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
 import { FieldsDrawer } from '../../../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDrawer } from '../../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../../../utilities/mergeNodeFields.js'
 import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
@@ -64,6 +65,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   // TO-DO: There are several states that should not be state, because they
   // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
   const [linkNode, setLinkNode] = useState<LinkNode>()
+  const linkNodeKey = linkNode?.getKey()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const selectedNodeRectRef = useRef<DOMRect | null>(null)
@@ -99,6 +101,29 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
   const { modalState } = useModal()
   const isDrawerOpen = Boolean(modalState[drawerSlug]?.isOpen)
+
+  const handleDrawerInitialize = useCallback(
+    ({ formState }: { formState: FormState }) => {
+      const fields = getDataFromFormState(
+        deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
+        true,
+      ) as LinkFields
+
+      delete fields.text
+
+      editor.update(
+        () => {
+          const node = linkNodeKey ? $getNodeByKey(linkNodeKey) : null
+
+          if ($isLinkNode(node)) {
+            node.setFields(mergeNodeFields({ currentFields: node.getFields(), newFields: fields }))
+          }
+        },
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
+    },
+    [editor, linkNodeKey],
+  )
 
   const setNotLink = useCallback(() => {
     setIsLink(false)
@@ -444,25 +469,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         drawerSlug={drawerSlug}
         drawerTitle={t('fields:editLink')}
         featureKey="link"
-        handleDrawerInitialize={({ formState }) => {
-          const fields = getDataFromFormState(
-            deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
-            true,
-          ) as LinkFields
-
-          delete fields.text
-
-          editor.update(
-            () => {
-              const node = linkNode ? $getNodeByKey(linkNode.getKey()) : null
-
-              if ($isLinkNode(node)) {
-                node.setFields(fields)
-              }
-            },
-            { tag: SKIP_DOM_SELECTION_TAG },
-          )
-        }}
+        handleDrawerInitialize={handleDrawerInitialize}
         handleDrawerSubmit={(fields: FormState, data: Data) => {
           const newLinkPayload = data as { text: string } & LinkFields
 

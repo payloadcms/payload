@@ -42,6 +42,7 @@ export const DrawerContent: React.FC<
   const operation = useOperation()
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
+
   // Updating the node's defaults must not restart the open drawer's editing session.
   const [initialData] = useState(data)
 
@@ -59,6 +60,7 @@ export const DrawerContent: React.FC<
 
   // Parent autosave updates this context without starting a new drawer editing session.
   const getParentDocumentFields = useEffectEvent(() => parentDocumentFields)
+
   const initializeNode = useEffectEvent((formState: FormState) => {
     handleDrawerInitialize?.({ formState })
   })

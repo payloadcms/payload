@@ -38,6 +38,7 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import { $isUploadNode } from '../nodes/UploadNode.js'
 import './index.css'
@@ -163,6 +164,35 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
       ?.sanitizedClientFeatureProps as BaseClientFeatureProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
+  const onExtraFieldsDrawerInitialize = useCallback(
+    ({ formState }: { formState: FormState }) => {
+      const fields = getDataFromFormState(
+        deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
+        true,
+      )
+
+      editor.update(
+        () => {
+          const node = $getNodeByKey(nodeKey)
+
+          if ($isUploadNode(node)) {
+            const data = node.getData()
+
+            node.setData({
+              ...data,
+              fields: mergeNodeFields({
+                currentFields: data.fields ?? {},
+                newFields: fields,
+              }),
+            })
+          }
+        },
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
+    },
+    [editor, nodeKey],
+  )
+
   const onExtraFieldsDrawerSubmit = useCallback(
     (_: FormState, data: JsonObject) => {
       // Update lexical node (with key nodeKey) with new data
@@ -275,23 +305,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
           featureKey="upload"
-          handleDrawerInitialize={({ formState }) => {
-            const fields = getDataFromFormState(
-              deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
-              true,
-            )
-
-            editor.update(
-              () => {
-                const node = $getNodeByKey(nodeKey)
-
-                if ($isUploadNode(node)) {
-                  node.setData({ ...node.getData(), fields })
-                }
-              },
-              { tag: SKIP_DOM_SELECTION_TAG },
-            )
-          }}
+          handleDrawerInitialize={onExtraFieldsDrawerInitialize}
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
           schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}

@@ -42,7 +42,13 @@ const createLexicalLinkFeature = ({
 
               return [
                 ...modifiedFields,
-                { name: 'someText', type: 'text' },
+                {
+                  name: 'someText',
+                  type: 'text',
+                  access: {
+                    read: ({ req }) => req.headers.get('x-hide-lexical-fields') !== 'true',
+                  },
+                },
                 {
                   name: 'hyperlink',
                   type: 'blocks',
@@ -53,6 +59,9 @@ const createLexicalLinkFeature = ({
                         {
                           name: 'label',
                           type: 'text',
+                          access: {
+                            read: ({ req }) => req.headers.get('x-hide-lexical-fields') !== 'true',
+                          },
                         },
                         {
                           name: 'asset',

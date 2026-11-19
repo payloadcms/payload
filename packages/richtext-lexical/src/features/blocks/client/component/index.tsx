@@ -52,6 +52,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
@@ -286,7 +287,11 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           () => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              const newData = newFormStateData
+              const newData = mergeNodeFields({
+                currentFields: node.getFields(),
+                newFields: newFormStateData,
+              })
+
               newData.blockType = blockType
 
               node.setFields(newData, true)

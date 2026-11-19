@@ -42,6 +42,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
@@ -263,7 +264,11 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           () => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isInlineBlockNode(node)) {
-              const newData = newFormStateData
+              const newData = mergeNodeFields({
+                currentFields: node.getFields(),
+                newFields: newFormStateData,
+              })
+
               newData.blockType = formData.blockType
 
               node.setFields(newData, true)
