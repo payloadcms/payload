@@ -2897,6 +2897,58 @@ test.describe('Block form-state regressions', () => {
     }
   })
 
+  test('should render block fields when edits are reverted during their pending refresh', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Before editing' },
+      overrideAccess: true,
+    })
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let refresh: Awaited<ReturnType<typeof holdResponse>> | undefined
+    let refreshCount = 0
+
+    try {
+      await page.clock.install()
+      await initPage({ page, serverURL })
+      await page.goto(editURL)
+      await waitForFormReady(page)
+      await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
+      refresh = await holdResponse({
+        matches: (request) => (request.postData() ?? '').includes('checkForStaleData'),
+        method: 'POST',
+        page,
+        url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+      })
+
+      page.on('request', (request) => {
+        if (request.method() === 'POST' && request.postData()?.includes('checkForStaleData')) {
+          refreshCount += 1
+        }
+      })
+
+      await page.locator('#field-title').fill('A')
+      await addBlock({ blockToSelect: 'Text', fieldName: 'blocks', page })
+      await page.clock.runFor(1000)
+      await refresh.captured
+      await page.locator('#field-title').fill('AB')
+      await page.locator('#field-title').fill('A')
+      await page.clock.runFor(1000)
+      refresh.release()
+      await refresh.finished
+      await page.clock.resume()
+
+      await expect(page.locator('#field-blocks__0__text')).toBeEditable()
+      await page.clock.runFor(1000)
+      expect(refreshCount).toBe(2)
+    } finally {
+      await refresh?.cleanup()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
   test('should keep server-filtered rows removed on the next autosave', async ({ page }) => {
     const doc = await payload.create({
       collection: autosavePostsSlug,

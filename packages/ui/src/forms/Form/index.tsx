@@ -75,7 +75,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const isFirstRenderRef = useRef(true)
+  const lastQueuedFormSequenceRef = useRef<number | undefined>(undefined)
 
   const {
     dispatchFields,
@@ -393,15 +393,19 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
+      const formSequence = getFormSequence()
+
+      // Reverted edits still invalidate requests, even when their final values match.
       if (
-        (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
+        (formSequence !== lastQueuedFormSequenceRef.current ||
+          !dequal(formState, prevFormStateRef.current)) &&
         isModified
       ) {
+        lastQueuedFormSequenceRef.current = formSequence
         queueFormStateRefresh()
       }
 
       prevFormStateRef.current = formState
-      isFirstRenderRef.current = false
     },
     [isModified, submitted, formState],
     250,
