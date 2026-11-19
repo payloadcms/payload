@@ -20,6 +20,7 @@ import { copyVercelBlobFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
+import { createSegmentedUpload } from './segmentedUpload.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateVercelBlobAdapterArgs {
@@ -142,6 +143,16 @@ export function createVercelBlobAdapter({
         }
       },
       requiresUploadReceipt: true,
+      segmented: createSegmentedUpload({
+        access: clientUploadsAccess,
+        baseUrl,
+        blobAccess: access,
+        cacheControlMaxAge,
+        collection,
+        collectionPrefix: prefix,
+        token,
+        useCompositePrefixes,
+      }),
       useInAdmin: true,
     },
 
