@@ -2,12 +2,10 @@ import type {
   SerializedEditorState,
   SerializedLexicalNode,
   SerializedParagraphNode,
-  SerializedTextNode,
 } from '@payloadcms/richtext-lexical/lexical'
 import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
 
 import {
-  $createLinkNode,
   BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
@@ -15,7 +13,6 @@ import {
   lexicalEditor,
   type LexicalRichTextAdapter,
   LinkFeature,
-  LinkNode,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedListItemNode,
@@ -24,16 +21,6 @@ import {
   type SerializedUploadNode,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
-import {
-  $createParagraphNode,
-  $createTextNode,
-  $getNodeByKey,
-  $getRoot,
-  $getSelection,
-  COMMAND_PRIORITY_LOW,
-  HISTORY_MERGE_TAG,
-  SKIP_DOM_SELECTION_TAG,
-} from '@payloadcms/richtext-lexical/lexical'
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import {
   configToJSONSchema,
@@ -71,8 +58,6 @@ import {
 
 import { convertLexicalNodesToHTMLAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/index.js'
 import { convertLexicalNodesToHTML } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/index.js'
-import { $updateLinkFields } from '../../packages/richtext-lexical/src/features/link/client/updateLinkFields.js'
-import { UPDATE_EDITOR_STATE_COMMAND } from '../../packages/richtext-lexical/src/lexical/updateEditorState.js'
 
 // Diff converters
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
@@ -162,79 +147,6 @@ test.suite('Lexical', { config: './config.ts' }, () => {
         },
       })
     ).docs[0].id
-  })
-
-  test.describe('external link fields', () => {
-    test('should apply server fields while preserving node keys and selection', () => {
-      const { editor, key, value } = createLinkStateEditor()
-      const link = (value.root.children[0] as SerializedParagraphNode)
-        .children[0] as SerializedLinkNode
-
-      link.fields = {
-        ...link.fields,
-        newTab: true,
-        url: 'https://example.com/server',
-        custom: 'server',
-      }
-
-      const updates: Set<string>[] = []
-      const unregister = editor.registerUpdateListener(({ tags }) => updates.push(tags))
-      let wasHandled = false
-
-      editor.update(
-        () => {
-          wasHandled = editor.dispatchCommand(UPDATE_EDITOR_STATE_COMMAND, value)
-        },
-        { discrete: true },
-      )
-
-      expect(wasHandled).toBe(true)
-      expect(editor.getEditorState().toJSON()).toEqual(value)
-      editor.getEditorState().read(() => {
-        expect($getNodeByKey(key)).toBeInstanceOf(LinkNode)
-        expect($getSelection()?.getNodes()[0]?.getParent()?.getKey()).toBe(key)
-      })
-      expect(updates).toHaveLength(1)
-      expect(updates[0]).toEqual(new Set([HISTORY_MERGE_TAG, SKIP_DOM_SELECTION_TAG]))
-      unregister()
-    })
-
-    test('should reject non-link changes without partially applying link fields', () => {
-      for (const change of ['text', 'structure', 'identity', 'paragraph']) {
-        const { editor, value } = createLinkStateEditor()
-        const before = editor.getEditorState().toJSON()
-        const paragraph = value.root.children[0] as SerializedParagraphNode
-        const link = paragraph.children[0] as SerializedLinkNode
-
-        link.fields.newTab = true
-
-        if (change === 'text') {
-          const text = link.children[0] as SerializedTextNode
-
-          text.text = 'server text'
-        } else if (change === 'structure') {
-          const newParagraph: SerializedParagraphNode = { ...paragraph, children: [] }
-
-          value.root.children.push(newParagraph)
-        } else if (change === 'identity') {
-          link.id = 'different-link'
-        } else {
-          paragraph.indent = 1
-        }
-
-        let wasHandled = true
-
-        editor.update(
-          () => {
-            wasHandled = editor.dispatchCommand(UPDATE_EDITOR_STATE_COMMAND, value)
-          },
-          { discrete: true },
-        )
-
-        expect(wasHandled).toBe(false)
-        expect(editor.getEditorState().toJSON()).toEqual(before)
-      }
-    })
   })
 
   test.describe('basic', () => {
@@ -2141,37 +2053,6 @@ function createParagraphRichText({ textNode }: { textNode: Record<string, unknow
       format: '',
       indent: 0,
     },
-  }
-}
-
-function createLinkStateEditor() {
-  const editor = createHeadlessEditor({ nodes: [LinkNode] })
-  let key = ''
-
-  editor.registerCommand(
-    UPDATE_EDITOR_STATE_COMMAND,
-    (value) => $updateLinkFields({ value }),
-    COMMAND_PRIORITY_LOW,
-  )
-
-  editor.update(
-    () => {
-      const link = $createLinkNode({
-        fields: { linkType: 'custom', newTab: false, url: 'https://example.com/client' },
-      })
-
-      link.append($createTextNode('Link'))
-      $getRoot().append($createParagraphNode().append(link))
-      link.selectEnd()
-      key = link.getKey()
-    },
-    { discrete: true },
-  )
-
-  return {
-    editor,
-    key,
-    value: JSON.parse(JSON.stringify(editor.getEditorState().toJSON())) as SerializedEditorState,
   }
 }
 

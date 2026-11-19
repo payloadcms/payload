@@ -20,8 +20,14 @@ import {
   $isNodeSelection,
   $isRangeSelection,
   type ElementFormatType,
+  SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
-import { formatAdminURL, isImage } from 'payload/shared'
+import {
+  deepCopyObjectSimpleWithoutReactComponents,
+  formatAdminURL,
+  getDataFromFormState,
+  isImage,
+} from 'payload/shared'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -269,6 +275,23 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
           featureKey="upload"
+          handleDrawerInitialize={({ formState }) => {
+            const fields = getDataFromFormState(
+              deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
+              true,
+            )
+
+            editor.update(
+              () => {
+                const node = $getNodeByKey(nodeKey)
+
+                if ($isUploadNode(node)) {
+                  node.setData({ ...node.getData(), fields })
+                }
+              },
+              { tag: SKIP_DOM_SELECTION_TAG },
+            )
+          }}
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
           schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}

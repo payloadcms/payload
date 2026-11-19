@@ -29,6 +29,7 @@ export const DrawerContent: React.FC<
   data,
   featureKey,
   fieldMapOverride,
+  handleDrawerInitialize,
   handleDrawerSubmit,
   schemaFieldsPathOverride,
   schemaPath,
@@ -41,6 +42,8 @@ export const DrawerContent: React.FC<
   const operation = useOperation()
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
+  // Updating the node's defaults must not restart the open drawer's editing session.
+  const [initialData] = useState(data)
 
   const {
     fieldProps: { featureClientSchemaMap },
@@ -56,6 +59,9 @@ export const DrawerContent: React.FC<
 
   // Parent autosave updates this context without starting a new drawer editing session.
   const getParentDocumentFields = useEffectEvent(() => parentDocumentFields)
+  const initializeNode = useEffectEvent((formState: FormState) => {
+    handleDrawerInitialize?.({ formState })
+  })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -64,14 +70,14 @@ export const DrawerContent: React.FC<
       const { state } = await getFormState({
         id,
         collectionSlug,
-        data: data ?? {},
+        data: initialData ?? {},
         docPermissions: {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
         documentFormState: getParentDocumentFields(),
         globalSlug,
-        initialBlockData: data,
+        initialBlockData: initialData,
         operation,
         readOnly: !isEditable,
         renderAllFields: true,
@@ -80,6 +86,7 @@ export const DrawerContent: React.FC<
       })
 
       if (!controller.signal.aborted && state) {
+        initializeNode(state)
         setInitialState(state)
       }
     }
@@ -92,7 +99,7 @@ export const DrawerContent: React.FC<
   }, [
     schemaFieldsPath,
     id,
-    data,
+    initialData,
     getFormState,
     collectionSlug,
     isEditable,

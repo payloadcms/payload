@@ -18,6 +18,7 @@ import {
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
 import {
+  $getNodeByKey,
   $getSelection,
   $isLineBreakNode,
   $isRangeSelection,
@@ -27,8 +28,13 @@ import {
   getDOMSelection,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
-import { formatAdminURL } from 'payload/shared'
+import {
+  deepCopyObjectSimpleWithoutReactComponents,
+  formatAdminURL,
+  getDataFromFormState,
+} from 'payload/shared'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
@@ -438,6 +444,25 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         drawerSlug={drawerSlug}
         drawerTitle={t('fields:editLink')}
         featureKey="link"
+        handleDrawerInitialize={({ formState }) => {
+          const fields = getDataFromFormState(
+            deepCopyObjectSimpleWithoutReactComponents(formState, { excludeFiles: true }),
+            true,
+          ) as LinkFields
+
+          delete fields.text
+
+          editor.update(
+            () => {
+              const node = linkNode ? $getNodeByKey(linkNode.getKey()) : null
+
+              if ($isLinkNode(node)) {
+                node.setFields(fields)
+              }
+            },
+            { tag: SKIP_DOM_SELECTION_TAG },
+          )
+        }}
         handleDrawerSubmit={(fields: FormState, data: Data) => {
           const newLinkPayload = data as { text: string } & LinkFields
 

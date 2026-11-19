@@ -1,5 +1,5 @@
 'use client'
-import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
+import type { EditorState, SerializedEditorState } from 'lexical'
 import type { FallbackProps } from 'react-error-boundary'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -32,7 +32,6 @@ import './index.css'
 import type { LexicalRichTextFieldProps } from '../types/index.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
-import { UPDATE_EDITOR_STATE_COMMAND } from '../lexical/updateEditorState.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
 import { useRichTextView } from './RichTextViewProvider.js'
 import { ViewSelector } from './ViewSelector.js'
@@ -111,7 +110,6 @@ const RichTextComponent: React.FC<
 
   const prevInitialValueRef = React.useRef<SerializedEditorState | undefined>(initialValue)
   const prevValueRef = React.useRef<SerializedEditorState | undefined>(value)
-  const editorRef = React.useRef<LexicalEditor | undefined>(undefined)
 
   useEffect(() => {
     const updateViewPortWidth = () => {
@@ -147,9 +145,7 @@ const RichTextComponent: React.FC<
   const runDeprioritized = useRunDeprioritized() // defaults to 500 ms timeout
 
   const handleChange = useCallback(
-    (editorState: EditorState, editor: LexicalEditor) => {
-      editorRef.current = editor
-
+    (editorState: EditorState) => {
       // Capture `editorState` in the closure so we can safely run later.
       const updateFieldValue = () => {
         const newState = editorState.toJSON()
@@ -189,16 +185,6 @@ const RichTextComponent: React.FC<
       ) {
         prevInitialValueRef.current = initialValue
         prevValueRef.current = value
-
-        if (
-          editorRef.current?.getRootElement() &&
-          value?.root &&
-          editorRef.current.dispatchCommand(UPDATE_EDITOR_STATE_COMMAND, value)
-        ) {
-          return
-        }
-
-        editorRef.current = undefined
         setRerenderProviderKey(new Date())
       }
     },

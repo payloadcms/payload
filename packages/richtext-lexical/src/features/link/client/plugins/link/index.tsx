@@ -15,10 +15,8 @@ import type { LinkFields } from '../../../server/schema.js'
 import type { ClientProps } from '../../index.js'
 import type { LinkPayload } from '../floatingLinkEditor/types.js'
 
-import { UPDATE_EDITOR_STATE_COMMAND } from '../../../../../lexical/updateEditorState.js'
 import { validateUrl } from '../../../../../lexical/utils/url.js'
 import { $toggleLink, LinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
-import { $updateLinkFields } from '../../updateLinkFields.js'
 
 export const LinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
@@ -28,11 +26,6 @@ export const LinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
       throw new Error('LinkPlugin: LinkNode not registered on editor')
     }
     return mergeRegister(
-      editor.registerCommand(
-        UPDATE_EDITOR_STATE_COMMAND,
-        (value) => $updateLinkFields({ value }),
-        COMMAND_PRIORITY_LOW,
-      ),
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
