@@ -20,8 +20,8 @@ const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
-  draftsEnabled?: boolean
   locale?: string
+  readLatestChildVersion?: boolean
   table: GenericTable
   where: Where
   wherePlan: PolymorphicJoinWherePlan
@@ -54,8 +54,8 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
-  draftsEnabled,
   locale,
+  readLatestChildVersion,
   table,
   where,
   wherePlan,
@@ -73,8 +73,8 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
-          draftsEnabled,
           locale,
+          readLatestChildVersion,
           table,
           where: nestedWhere,
           wherePlan,
@@ -92,7 +92,7 @@ export const buildPolymorphicJoinWhere = ({
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
-      draftsEnabled,
+      readLatestChildVersion,
       schemaPath: key,
       table,
       wherePlan,
@@ -264,7 +264,7 @@ export const buildPolymorphicJoinWhere = ({
 const resolveWherePath = ({
   adapter,
   collection,
-  draftsEnabled,
+  readLatestChildVersion,
   schemaPath,
   table,
   wherePlan,
@@ -309,8 +309,8 @@ const resolveWherePath = ({
       jsonExpression: getHasManySelectExpression({
         adapter,
         collection,
-        draftsEnabled,
         pathPlan,
+        readLatestChildVersion,
         table,
       }),
       pathPlan,
@@ -347,14 +347,14 @@ const resolveWherePath = ({
 const getHasManySelectExpression = ({
   adapter,
   collection,
-  draftsEnabled,
   pathPlan,
+  readLatestChildVersion,
   table,
 }: {
   adapter: DrizzleAdapter
   collection: string
-  draftsEnabled?: boolean
   pathPlan: WherePathPlan
+  readLatestChildVersion?: boolean
   table: GenericTable
 }): string => {
   if (pathPlan.fieldsByCollection.get(collection)?.type !== 'hasManySelect') {
@@ -366,7 +366,7 @@ const getHasManySelectExpression = ({
     .map((pathSegment) => toSnakeCase(pathSegment))
     .join('_')
   const valuesTableName = adapter.tableNameMap.get(
-    draftsEnabled
+    readLatestChildVersion
       ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}_version_${selectTablePath}`
       : `${toSnakeCase(collection)}_${selectTablePath}`,
   )

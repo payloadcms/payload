@@ -127,15 +127,16 @@ export const buildJoinAggregation = async ({
       aliases.push(alias)
 
       const { collectionConfig, Model } = getCollection({ adapter, collectionSlug })
-      const useDrafts = (draftsEnabled || versions) && hasDraftsEnabled(collectionConfig)
-      const JoinModel = useDrafts ? adapter.versions[collectionSlug] : Model
+      const readLatestChildVersion =
+        (draftsEnabled || versions) && hasDraftsEnabled(collectionConfig)
+      const JoinModel = readLatestChildVersion ? adapter.versions[collectionSlug] : Model
 
       if (!JoinModel) {
         throw new APIError(`Join Model was not found for ${collectionSlug}`)
       }
 
       const basePipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
-        ...(useDrafts
+        ...(readLatestChildVersion
           ? [
               { $match: { latest: true } },
               {
@@ -160,7 +161,7 @@ export const buildJoinAggregation = async ({
       aggregate.push({
         $lookup: {
           as: alias,
-          foreignField: useDrafts ? `version.${join.field.on}` : join.field.on,
+          foreignField: readLatestChildVersion ? `version.${join.field.on}` : join.field.on,
           from: JoinModel.collection.name,
           localField: versions ? 'parent' : '_id',
           pipeline: [
@@ -195,7 +196,7 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
-            foreignField: useDrafts ? `version.${join.field.on}` : join.field.on,
+            foreignField: readLatestChildVersion ? `version.${join.field.on}` : join.field.on,
             from: JoinModel.collection.name,
             localField: versions ? 'parent' : '_id',
             pipeline: [
