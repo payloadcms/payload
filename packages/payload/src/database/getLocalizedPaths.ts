@@ -11,6 +11,7 @@ import { SAFE_FIELD_PATH_REGEX } from '../types/constants.js'
 import { getFieldByPath } from '../utilities/getFieldByPath.js'
 
 export function getLocalizedPaths({
+  blockSlug,
   collectionSlug,
   fields,
   globalSlug,
@@ -21,6 +22,7 @@ export function getLocalizedPaths({
   payload,
   showHiddenFields = false,
 }: {
+  blockSlug?: string
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
@@ -78,6 +80,10 @@ export function getLocalizedPaths({
               block = payload.blocks[_block]!
             } else {
               block = _block
+            }
+
+            if (blockSlug && block.slug !== blockSlug) {
+              continue
             }
 
             matchedField = block.flattenedFields.find((field) => field.name === segment)!

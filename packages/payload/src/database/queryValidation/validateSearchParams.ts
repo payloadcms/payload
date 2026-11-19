@@ -16,6 +16,7 @@ import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
+  blockSlug?: string
   collectionConfig?: SanitizedCollectionConfig
   constraint: WhereField
   errors: { path: string }[]
@@ -38,6 +39,7 @@ type Args = {
  * Validate the Payload key / value / operator
  */
 export async function validateSearchParam({
+  blockSlug,
   collectionConfig,
   constraint,
   errors,
@@ -79,6 +81,7 @@ export async function validateSearchParam({
 
   if (sanitizedPath !== 'id') {
     paths = getLocalizedPaths({
+      blockSlug,
       collectionSlug: collectionConfig?.slug,
       fields,
       globalSlug: globalConfig?.slug,
@@ -107,7 +110,9 @@ export async function validateSearchParam({
     Boolean(relatedCollectionSlug)
 
   const isRowContains =
-    operator === 'contains' && hasNestedWhere && relationshipField?.type === 'array'
+    operator === 'contains' &&
+    hasNestedWhere &&
+    (relationshipField?.type === 'array' || relationshipField?.type === 'blocks')
 
   if (isRowContains && !isRowContainsField({ fields, path: sanitizedPath })) {
     errors.push({ path: incomingPath })
@@ -116,25 +121,29 @@ export async function validateSearchParam({
 
   if (isRowContains) {
     const rowFilter = resolveRowContains({
+      blocks: req.payload.blocks,
       field: relationshipField,
       path: incomingPath,
       where: val,
     })
 
-    const where = prefixWherePaths({ prefix: sanitizedPath, where: rowFilter.where })
-    const entity = collectionConfig ? { collectionConfig } : { globalConfig: globalConfig! }
-    promises.push(
-      validateQueryPaths({
-        ...entity,
-        errors,
-        overrideAccess,
-        policies,
-        req,
-        showHiddenFields,
-        versionFields,
-        where,
-      }),
-    )
+    if (rowFilter) {
+      const where = prefixWherePaths({ prefix: sanitizedPath, where: rowFilter.where })
+      const entity = collectionConfig ? { collectionConfig } : { globalConfig: globalConfig! }
+      promises.push(
+        validateQueryPaths({
+          ...entity,
+          blockSlug: rowFilter.block?.slug,
+          errors,
+          overrideAccess,
+          policies,
+          req,
+          showHiddenFields,
+          versionFields,
+          where,
+        }),
+      )
+    }
   }
 
   if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
@@ -325,6 +334,7 @@ export async function validateSearchParam({
         if (
           segments.length &&
           hasReadAccessToQueryPath({
+            blockSlug,
             fields: entity.flattenedFields,
             permissions: policies[entityType]![entitySlug]!.fields,
             req,

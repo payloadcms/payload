@@ -116,7 +116,7 @@ export function parseParams({
                   const path = relationOrPath.replace(/__/g, '.')
                   const field = getFieldInGroups({ fields, path })?.field
 
-                  if (field?.type === 'array') {
+                  if (field?.type === 'array' || field?.type === 'blocks') {
                     constraints.push(
                       buildRowContainsCondition({
                         adapter,

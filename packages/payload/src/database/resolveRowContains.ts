@@ -1,4 +1,9 @@
-import type { FlattenedArrayField, FlattenedField } from '../fields/config/types.js'
+import type {
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+} from '../fields/config/types.js'
 import type { Operator, Where, WhereField } from '../types/index.js'
 
 import { QueryError } from '../errors/QueryError.js'
@@ -64,21 +69,53 @@ export function isRowContainsField({
 }): boolean {
   const field = getFieldInGroups({ fields, path })?.field
 
-  return field?.type === 'array'
+  return field?.type === 'array' || field?.type === 'blocks'
 }
 
 export function resolveRowContains({
+  blocks,
   field,
   path,
   where,
 }: {
-  field: FlattenedArrayField
+  blocks: Record<string, FlattenedBlock>
+  field: FlattenedArrayField | FlattenedBlocksField
   path: string
   where: Where
 }) {
+  if (field.type === 'array') {
+    return {
+      flattenedFields: field.flattenedFields,
+      where: normalizeWhere({ flattenedFields: field.flattenedFields, path, where }),
+    }
+  }
+
+  const { blockType, ...blockWhere } = where
+
+  if (
+    !blockType ||
+    Array.isArray(blockType) ||
+    Object.keys(blockType).length !== 1 ||
+    typeof blockType.equals !== 'string' ||
+    !blockType.equals
+  ) {
+    throw new QueryError([{ path: `${path}.contains.blockType` }])
+  }
+
+  const slug = blockType.equals
+  const configuredBlock = field.blocks.find((block) =>
+    typeof block === 'string' ? block === slug : block.slug === slug,
+  )
+  const block = typeof configuredBlock === 'string' ? blocks[configuredBlock] : configuredBlock
+
+  if (!block) {
+    return null
+  }
+
   return {
-    flattenedFields: field.flattenedFields,
-    where: normalizeWhere({ flattenedFields: field.flattenedFields, path, where }),
+    block,
+    flattenedFields: block.flattenedFields,
+    where: normalizeWhere({ flattenedFields: block.flattenedFields, path, where: blockWhere }),
   }
 }
 
