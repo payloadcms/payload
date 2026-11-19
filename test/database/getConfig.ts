@@ -261,6 +261,12 @@ export const getConfig: () => Partial<Config> = () => ({
               slug: 'block-third',
               fields: [
                 {
+                  name: 'virtualBlocks',
+                  type: 'blocks',
+                  blocks: [{ slug: 'virtual-block', fields: [] }],
+                  virtual: true,
+                },
+                {
                   type: 'blocks',
                   name: 'nested',
                   blocks: [
