@@ -140,12 +140,6 @@ export const buildPolymorphicJoinQuery = ({
       ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
       : table
     const sortColumn = sortPath === 'id' ? idColumn : sortTable?.[childSortColumnName]
-    const selectFields = {
-      id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
-      parent: sql`${table[joinOnColumnName]}`.as(onPath),
-      relationTo: sql`${collection}`.as('relationTo'),
-      sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
-    }
     const targetWhere =
       where && Object.keys(where).length > 0
         ? buildPolymorphicJoinWhere({
@@ -169,6 +163,19 @@ export const buildPolymorphicJoinQuery = ({
     })
     const hasLocalizedFields = hasLocalizedWhere || isSortLocalized
     const shouldDeduplicate = hasLocalizedFields && (!locale || locale === 'all')
+    const sortValue =
+      shouldDeduplicate && isSortLocalized && sortColumn
+        ? sql`first_value(${sortColumn}) over (
+            partition by ${table[joinOnColumnName]}, ${table['id']}
+            order by ${sortOrder(sortColumn)} nulls last
+          )`
+        : (sortColumn ?? null)
+    const selectFields = {
+      id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
+      parent: sql`${table[joinOnColumnName]}`.as(onPath),
+      relationTo: sql`${collection}`.as('relationTo'),
+      sortPath: sql`${sortValue}`.as('sortPath'),
+    }
     let collectionQuery = (
       shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
     )

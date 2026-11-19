@@ -212,6 +212,87 @@ test.suite('Polymorphic join drafts', { config: './drafts.config.ts' }, () => {
           })
         })
 
+        test.options(
+          'should sort draft and unversioned join results by document ID',
+          { db: 'mongo' },
+          async ({ payload }) => {
+            const project = await payload.create({
+              collection: draftJoinProjectsSlug,
+              overrideAccess: true,
+              data: { title: 'Project', _status: 'published' },
+            })
+
+            const note = await payload.create({
+              collection: draftJoinNotesSlug,
+              overrideAccess: true,
+              data: { title: 'Note', project: project.id },
+            })
+
+            await payload.create({
+              collection: draftJoinArticlesSlug,
+              overrideAccess: true,
+              data: { title: 'Article', project: project.id },
+              draft: true,
+            })
+
+            const result = await payload.findByID({
+              collection: draftJoinProjectsSlug,
+              id: project.id,
+              depth: 0,
+              draft: true,
+              joins: { documents: { limit: 1, sort: 'id' } },
+            })
+
+            expect(result.documents).toMatchObject({
+              docs: [{ relationTo: draftJoinNotesSlug, value: note.id }],
+              hasNextPage: true,
+            })
+          },
+        )
+
+        test.options(
+          'should count each joined draft once when sorting across locales',
+          { db: 'drizzle' },
+          async ({ payload }) => {
+            const project = await payload.create({
+              collection: draftJoinProjectsSlug,
+              overrideAccess: true,
+              data: { title: 'Project', _status: 'published' },
+            })
+
+            const article = await payload.create({
+              collection: draftJoinArticlesSlug,
+              overrideAccess: true,
+              data: { title: 'Welcome', project: project.id, _status: 'published' },
+              locale: 'en',
+            })
+
+            await payload.update({
+              collection: draftJoinArticlesSlug,
+              overrideAccess: true,
+              id: article.id,
+              data: { title: 'Bienvenue' },
+              draft: true,
+              locale: 'fr',
+            })
+
+            const result = await payload.findByID({
+              collection: draftJoinProjectsSlug,
+              id: project.id,
+              depth: 0,
+              draft: true,
+              locale: 'all',
+              joins: { documents: { count: true, limit: 1, sort: 'title' } },
+            })
+
+            expect(result.documents).toMatchObject({
+              docs: [{ relationTo: draftJoinArticlesSlug, value: article.id }],
+              hasNextPage: false,
+              totalDocs: 1,
+            })
+          },
+        )
+
         test('should apply localized and has-many filters to the latest draft', async ({
           payload,
         }) => {
