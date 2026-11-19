@@ -103,6 +103,20 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     expect(created.variants?.card).toMatchObject({ _stored: false, mimeType: null })
   })
 
+  test('should reject an upload outside the MIME types the collection allows', async ({
+    payload,
+  }) => {
+    const bytes = Buffer.from('not an image')
+
+    await expect(
+      payload.create({
+        collection: restrictedDynamicMediaSlug,
+        data: {},
+        file: { name: 'note.txt', data: bytes, mimetype: 'text/plain', size: bytes.length },
+      }),
+    ).rejects.toThrow('The following field is invalid: file')
+  })
+
   test('should apply the saved crop on the plain URL and serve the original with ?original=true', async ({
     payload,
     restClient,

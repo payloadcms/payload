@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { restrictedDynamicMediaDir, restrictedDynamicMediaSlug } from '../shared.js'
 import { DynamicMedia } from './DynamicMedia.js'
 
-/** Limits uploads to images, so the MIME type allow-list applies to its request-time variants. */
+/** Limits uploads to images, to check that request-time variants still save. */
 export const RestrictedDynamicMedia: CollectionConfig = {
   ...DynamicMedia,
   slug: restrictedDynamicMediaSlug,
