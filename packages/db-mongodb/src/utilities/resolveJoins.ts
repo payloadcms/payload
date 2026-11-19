@@ -273,10 +273,12 @@ export async function resolveJoins({
         readLatestChildVersion,
         results,
         sort: Object.fromEntries(
-          Object.entries(sort).map(([path, direction]) => [
-            readLatestChildVersion ? path.replace(/^version\./, '') : path,
-            direction,
-          ]),
+          Object.entries(sort).map(([path, direction]) => {
+            const documentIDPath = readLatestChildVersion ? 'parent' : '_id'
+            const documentPath = readLatestChildVersion ? path.replace(/^version\./, '') : path
+
+            return [path === documentIDPath ? 'id' : documentPath, direction]
+          }),
         ),
       }
     })
