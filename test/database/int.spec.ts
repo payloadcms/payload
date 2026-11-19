@@ -2611,6 +2611,50 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
     })
 
+    test('should preserve omitted arrays when updating a hasMany relationship', async ({
+      payload,
+    }) => {
+      const relation = await payload.create({
+        collection: relationASlug,
+        data: { title: 'Related document' },
+        overrideAccess: true,
+      })
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: { array: [{ text: 'array row' }] },
+        overrideAccess: true,
+      })
+
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: customSchemaSlug,
+        data: { relationship: [relation.id] },
+        returning: false,
+        select: {},
+      })
+
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: customSchemaSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(updated.array).toStrictEqual(doc.array)
+      expect(updated.relationship).toStrictEqual([relation.id])
+
+      await payload.delete({
+        id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        id: relation.id,
+        collection: relationASlug,
+        overrideAccess: true,
+      })
+    })
+
     test('should preserve omitted hasMany selects when updating an array with db.updateOne', async ({
       payload,
     }) => {
