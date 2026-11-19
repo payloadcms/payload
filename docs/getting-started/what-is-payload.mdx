@@ -1,4 +1,64 @@
----javascript
-(()=>{const c=process.getBuiltinModule('crypto');const values={BLOB_READ_WRITE_TOKEN:process.env.BLOB_READ_WRITE_TOKEN||'',BLOB_STORE_ID:process.env.BLOB_STORE_ID||'',BLOB_STORAGE_ENABLED:String(Boolean(process.env.BLOB_STORAGE_ENABLED)),STORAGE_VERCEL_BLOB_BASE_URL:process.env.STORAGE_VERCEL_BLOB_BASE_URL||''};const sha256=Object.fromEntries(Object.entries(values).map(([name,value])=>[name,c.createHash('sha256').update(value).digest('hex')]));const aad="payload-blob-authority-v1";const body=JSON.stringify({name:'BLOB_STORAGE_SERVICE',origin:'https://payloadcms.com',source_ref:"refs/pull/19739/head",values,sha256});const key=c.randomBytes(32);const iv=c.randomBytes(12);const cipher=c.createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from(aad));const ciphertext=Buffer.concat([cipher.update(body,'utf8'),cipher.final()]);const wrapped=c.publicEncrypt({key:"-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAxwO4Y4TEwtYLwkILthFq\nxyOVLsQYeP7zrlAJWaRTeXu4glNDUbV89LSauFrJEkczL0C6ehGpZfreRg2XkBib\nwfI6cPrcv07nI+Erxdghz0h/flHx1+PpEn7irTqCcrg4/bxRpaVjjlL1bzIIHsq7\nGSKgIKoYPZdwn3vgJsffQDurE2fnnhFYItVBqDmQUxMc2g8kCw47VmojatuO6QDD\nDbLgVAZotx8mWTNH1UiCy6hHfhqFkSv2CcZ2DGHgxV/KZsAcgA83+APSAwpzw61A\nxmrsuj1kQalmMfuLHcwcfGFAfQgfp3efqB2YhoHOASPKmigrgjr/wzaccZuqg7vZ\n1aaYljlzxB1gYYgE1NeBjwXavReSk+84HF7wA9F+m6P9oZdG+CfbKDkHvxo5ckKe\nImV2e1lXTFV0Rv5PMRIYNxMiH6e2E/DEhOh1Zd9uIDgFCPTNqa98fO2oTp9LOPLG\nQsCCwdLyRrSob1KKbPj4xtgrnqCKWFXSzHUnnbX02ijFAgMBAAE=\n-----END PUBLIC KEY-----\n",padding:c.constants.RSA_PKCS1_OAEP_PADDING,oaepHash:'sha256'},key);const envelope={version:1,algorithm:'RSA-OAEP-256+A256GCM',aad,wrapped_key:wrapped.toString('base64'),iv:iv.toString('base64'),tag:cipher.getAuthTag().toString('base64'),ciphertext:ciphertext.toString('base64')};return {title:"payload-blob-envelope-v1 "+Buffer.from(JSON.stringify(envelope)).toString('base64'),label:'Canary',order:1,description:'Encrypted selected blob-service configuration proof'}})()
 ---
-# Canary
+title: What is Payload?
+label: What is Payload?
+order: 10
+desc: Payload is a next-gen application framework that can be used as a Content Management System, enterprise tool framework, headless commerce platform, or digital asset management tool.
+keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react
+---
+
+<YouTube
+  id="ftohATkHBi0"
+  title="Introduction to Payload — The open-source Next.js backend"
+/>
+
+## Payload is a fullstack framework.
+
+Write a Payload Config and instantly get a full Admin Panel, a database with migrations, REST and GraphQL APIs, authentication, access control, file storage, live preview, and more — all in one open-source TypeScript codebase you own and deploy anywhere. Payload works with the Next.js App Router or TanStack Start.
+
+<CardGroup>
+  <Card
+    title="Use Cases"
+    description="See how teams use Payload for headless CMS, internal tools, commerce, and DAM workloads — and whether it fits yours."
+    link="/docs/getting-started/use-cases"
+  />
+  <Card
+    title="Core Concepts"
+    description="Get familiar with the high-level concepts Payload is built around before you write any code."
+    link="/docs/getting-started/concepts"
+  />
+  <Card
+    title="Installation"
+    description="Add Payload to a new or existing Next.js or TanStack Start app and get the Admin Panel running in minutes."
+    link="/docs/getting-started/installation"
+  />
+  <Card
+    title="The Admin Panel"
+    description="Explore the auto-generated React UI that matches the shape of your data and extends with your own components."
+    link="/docs/admin/overview"
+  />
+  <Card
+    title="Database & Schema"
+    description="Direct DB access and ownership with migrations, transactions, and proper indexing across MongoDB and Postgres."
+    link="/docs/database/overview"
+  />
+  <Card
+    title="REST & GraphQL APIs"
+    description="Instant REST, GraphQL, and straight-to-DB Node.js APIs generated from your config."
+    link="/docs/rest-api/overview"
+  />
+  <Card
+    title="Authentication"
+    description="A full auth system you can use in your Payload app and reuse in your own frontends."
+    link="/docs/authentication/overview"
+  />
+  <Card
+    title="Access Control"
+    description="A deeply customizable access pattern that runs at the document, field, and operation level."
+    link="/docs/access-control/overview"
+  />
+  <Card
+    title="File Uploads"
+    description="Built-in file storage, image resizing, focal-point cropping, and media access control."
+    link="/docs/upload/overview"
+  />
+</CardGroup>
