@@ -261,6 +261,70 @@ test.suite('Polymorphic join drafts', { config: './drafts.config.ts' }, () => {
           })
         })
 
+        test('should keep private draft memberships out of another workspace’s counts', async ({
+          payload,
+        }) => {
+          const visibleWorkspace = await payload.create({
+            collection: draftJoinWorkspacesSlug,
+            data: { title: 'Visible workspace' },
+            overrideAccess: true,
+          })
+          const privateWorkspace = await payload.create({
+            collection: draftJoinWorkspacesSlug,
+            data: { title: 'Private workspace' },
+            overrideAccess: true,
+          })
+          const note = await payload.create({
+            collection: draftJoinNotesSlug,
+            data: { title: 'Visible note', workspace: visibleWorkspace.id },
+            overrideAccess: true,
+          })
+          const article = await payload.create({
+            collection: draftJoinArticlesSlug,
+            data: { title: 'Announcement', _status: 'published' },
+            overrideAccess: true,
+          })
+
+          await payload.update({
+            collection: draftJoinArticlesSlug,
+            id: article.id,
+            data: { workspace: privateWorkspace.id },
+            draft: true,
+            overrideAccess: true,
+          })
+
+          const context = { hideWorkspaceMembership: true }
+          const draftArticle = await payload.findByID({
+            collection: draftJoinArticlesSlug,
+            context,
+            depth: 0,
+            draft: true,
+            id: article.id,
+            overrideAccess: false,
+          })
+          expect(draftArticle).not.toHaveProperty('workspace')
+
+          const { docs } = await payload.find({
+            collection: draftJoinWorkspacesSlug,
+            context,
+            depth: 0,
+            draft: true,
+            joins: { documents: { count: true, limit: 1 } },
+            overrideAccess: false,
+            where: { id: { in: [visibleWorkspace.id, privateWorkspace.id] } },
+          })
+          const visible = docs.find(({ id }) => id === visibleWorkspace.id)
+          const privateResult = docs.find(({ id }) => id === privateWorkspace.id)
+
+          expect(visible?.documents).toMatchObject({
+            docs: [{ relationTo: draftJoinNotesSlug, value: note.id }],
+            hasNextPage: false,
+            totalDocs: 1,
+          })
+          expect(privateResult).toMatchObject({ id: privateWorkspace.id })
+          expect(privateResult).not.toHaveProperty('documents')
+        })
+
         test('should read draft memberships when the parent collection has no drafts', async ({
           payload,
         }) => {
