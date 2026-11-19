@@ -20,9 +20,22 @@ const poweredByHeader = {
  * @param {import('next').NextConfig} nextConfig
  * @param {Object} [options] - Optional configuration options
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
- * */
+ * @param {'all' | 'admin-only' | false} [options.clientHintHeaders] - Controls where client hint headers are added. @default 'all'
+ * @param {string} [options.adminRoute] - Admin route used when clientHintHeaders is 'admin-only'. @default '/admin'
+ */
 export const withPayload = (nextConfig = {}, options = {}) => {
   const env = { ...nextConfig.env }
+  const clientHintHeaderMode = options.clientHintHeaders ?? 'all'
+  const configuredAdminRoute = options.adminRoute ?? '/admin'
+  if (typeof configuredAdminRoute !== 'string') {
+    throw new Error('Payload: adminRoute must be a string.')
+  }
+  const normalizedAdminRoute = configuredAdminRoute.trim().replace(/^\/+|\/+$/g, '')
+  const adminRoute = normalizedAdminRoute ? `/${normalizedAdminRoute}` : '/'
+  const adminRouteSource = adminRoute === '/' ? '/:path*' : `${adminRoute}/:path*`
+  if (!['all', 'admin-only', false].includes(clientHintHeaderMode)) {
+    throw new Error("Payload: clientHintHeaders must be 'all', 'admin-only', or false.")
+  }
   // Adds `export const instant = false` to the admin layout and page. See `instantLoader.js` for
   // why this cannot live in the generated admin files.
   const instantLoader = nextConfig.cacheComponents
@@ -122,28 +135,44 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
-
-      return [
-        ...(headersFromConfig || []),
+      const clientHintHeaders = [
         {
+          key: 'Accept-CH',
+          value: 'Sec-CH-Prefers-Color-Scheme',
+        },
+        {
+          key: 'Vary',
+          value: 'Sec-CH-Prefers-Color-Scheme',
+        },
+        {
+          key: 'Critical-CH',
+          value: 'Sec-CH-Prefers-Color-Scheme',
+        },
+      ]
+      const result = [...(headersFromConfig || [])]
+      if (clientHintHeaderMode === 'all') {
+        result.push({
           headers: [
-            {
-              key: 'Accept-CH',
-              value: 'Sec-CH-Prefers-Color-Scheme',
-            },
-            {
-              key: 'Vary',
-              value: 'Sec-CH-Prefers-Color-Scheme',
-            },
-            {
-              key: 'Critical-CH',
-              value: 'Sec-CH-Prefers-Color-Scheme',
-            },
+            ...clientHintHeaders,
             ...(nextConfig.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
           source: '/:path*',
-        },
-      ]
+        })
+      } else {
+        if (clientHintHeaderMode === 'admin-only') {
+          result.push({
+            headers: clientHintHeaders,
+            source: adminRouteSource,
+          })
+        }
+        if (nextConfig.poweredByHeader !== false) {
+          result.push({
+            headers: [poweredByHeader],
+            source: '/:path*',
+          })
+        }
+      }
+      return result
     },
     serverExternalPackages: [
       ...new Set([

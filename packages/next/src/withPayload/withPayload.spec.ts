@@ -116,4 +116,98 @@ describe('withPayload', () => {
       }
     }
   })
+
+  it('should add client hint headers to all routes by default', async () => {
+    const result = withPayload({})
+    const headers = await result.headers()
+
+    expect(headers).toContainEqual({
+      source: '/:path*',
+      headers: [
+        { key: 'Accept-CH', value: 'Sec-CH-Prefers-Color-Scheme' },
+        { key: 'Vary', value: 'Sec-CH-Prefers-Color-Scheme' },
+        { key: 'Critical-CH', value: 'Sec-CH-Prefers-Color-Scheme' },
+        { key: 'X-Powered-By', value: 'Next.js, Payload' },
+      ],
+    })
+  })
+
+  it('should add client hint headers only to the admin route', async () => {
+    const result = withPayload({}, { clientHintHeaders: 'admin-only' })
+    const headers = await result.headers()
+
+    expect(headers).toContainEqual({
+      source: '/admin/:path*',
+      headers: [
+        { key: 'Accept-CH', value: 'Sec-CH-Prefers-Color-Scheme' },
+        { key: 'Vary', value: 'Sec-CH-Prefers-Color-Scheme' },
+        { key: 'Critical-CH', value: 'Sec-CH-Prefers-Color-Scheme' },
+      ],
+    })
+
+    expect(headers).toContainEqual({
+      source: '/:path*',
+      headers: [{ key: 'X-Powered-By', value: 'Next.js, Payload' }],
+    })
+  })
+
+  it('should support a custom admin route', async () => {
+    const result = withPayload({}, { clientHintHeaders: 'admin-only', adminRoute: '/cms' })
+    const headers = await result.headers()
+
+    expect(headers).toContainEqual(
+      expect.objectContaining({
+        source: '/cms/:path*',
+      }),
+    )
+  })
+
+  it('should not add client hint headers when disabled', async () => {
+    const result = withPayload({}, { clientHintHeaders: false })
+    const headers = await result.headers()
+
+    expect(headers).not.toContainEqual(
+      expect.objectContaining({
+        headers: expect.arrayContaining([expect.objectContaining({ key: 'Accept-CH' })]),
+      }),
+    )
+
+    expect(headers).toContainEqual({
+      source: '/:path*',
+      headers: [{ key: 'X-Powered-By', value: 'Next.js, Payload' }],
+    })
+  })
+
+  it('should preserve user-provided headers', async () => {
+    const customHeaders = [
+      {
+        source: '/public/:path*',
+        headers: [{ key: 'X-Custom-Header', value: 'custom-value' }],
+      },
+    ]
+
+    const result = withPayload({
+      headers: async () => customHeaders,
+    })
+    const headers = await result.headers()
+
+    expect(headers).toContainEqual(customHeaders[0])
+  })
+
+  it('should respect poweredByHeader false', async () => {
+    const result = withPayload({ poweredByHeader: false })
+    const headers = await result.headers()
+
+    expect(headers).not.toContainEqual(
+      expect.objectContaining({
+        headers: expect.arrayContaining([expect.objectContaining({ key: 'X-Powered-By' })]),
+      }),
+    )
+  })
+
+  it('should reject an invalid clientHintHeaders option', () => {
+    expect(() => withPayload({}, { clientHintHeaders: 'invalid' as never })).toThrow(
+      "Payload: clientHintHeaders must be 'all', 'admin-only', or false.",
+    )
+  })
 })
