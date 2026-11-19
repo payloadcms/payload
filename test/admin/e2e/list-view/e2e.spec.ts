@@ -1866,8 +1866,8 @@ describe('List View', () => {
         targetState: 'asc',
       })
 
-      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
-        '<No Some Text Field>',
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveAccessibleName(
+        'No Some Text Field',
       )
 
       await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
@@ -1883,8 +1883,8 @@ describe('List View', () => {
         'nested group text field',
       )
 
-      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
-        '<No Some Text Field>',
+      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveAccessibleName(
+        'No Some Text Field',
       )
     })
 
@@ -1901,9 +1901,9 @@ describe('List View', () => {
         targetState: 'asc',
       })
 
-      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
-        '<No Nested Text Field In Named Tab>',
-      )
+      await expect(
+        page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab'),
+      ).toHaveAccessibleName('No Nested Text Field In Named Tab')
 
       await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
@@ -1918,9 +1918,9 @@ describe('List View', () => {
         'nested text in named tab',
       )
 
-      await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
-        '<No Nested Text Field In Named Tab>',
-      )
+      await expect(
+        page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab'),
+      ).toHaveAccessibleName('No Nested Text Field In Named Tab')
     })
 
     test('should sort with existing filters', async () => {

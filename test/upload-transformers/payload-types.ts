@@ -167,6 +167,7 @@ export interface Config {
     'resize-preview-media': ResizePreviewMedia;
     'outside-fit-media': OutsideFitMedia;
     'variant-media': VariantMedia;
+    'converted-variant-media': ConvertedVariantMedia;
     'request-variants-media': RequestVariantsMedia;
     'contract-media': ContractMedia;
     'payload-kv': PayloadKv;
@@ -182,6 +183,7 @@ export interface Config {
     'resize-preview-media': ResizePreviewMediaSelect<false> | ResizePreviewMediaSelect<true>;
     'outside-fit-media': OutsideFitMediaSelect<false> | OutsideFitMediaSelect<true>;
     'variant-media': VariantMediaSelect<false> | VariantMediaSelect<true>;
+    'converted-variant-media': ConvertedVariantMediaSelect<false> | ConvertedVariantMediaSelect<true>;
     'request-variants-media': RequestVariantsMediaSelect<false> | RequestVariantsMediaSelect<true>;
     'contract-media': ContractMediaSelect<false> | ContractMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -435,6 +437,58 @@ export interface VariantMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "converted-variant-media".
+ */
+export interface ConvertedVariantMedia {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    webp?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "request-variants-media".
  */
 export interface RequestVariantsMedia {
@@ -568,6 +622,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'variant-media';
         value: string | VariantMedia;
+      } | null)
+    | ({
+        relationTo: 'converted-variant-media';
+        value: string | ConvertedVariantMedia;
       } | null)
     | ({
         relationTo: 'request-variants-media';
@@ -801,6 +859,57 @@ export interface VariantMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "converted-variant-media_select".
+ */
+export interface ConvertedVariantMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        webp?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "request-variants-media_select".
  */
 export interface RequestVariantsMediaSelect<T extends boolean = true> {
@@ -1004,6 +1113,7 @@ export interface CollectionQueryWidget {
       | 'resize-preview-media'
       | 'outside-fit-media'
       | 'variant-media'
+      | 'converted-variant-media'
       | 'request-variants-media'
       | 'contract-media'
       | 'users';
@@ -1034,6 +1144,7 @@ export interface ActivityWidget {
           | 'resize-preview-media'
           | 'outside-fit-media'
           | 'variant-media'
+          | 'converted-variant-media'
           | 'request-variants-media'
           | 'contract-media'
           | 'users'
@@ -1054,6 +1165,7 @@ export interface UploadDropzoneWidget {
           | 'resize-preview-media'
           | 'outside-fit-media'
           | 'variant-media'
+          | 'converted-variant-media'
           | 'request-variants-media'
           | 'contract-media'
         )[]

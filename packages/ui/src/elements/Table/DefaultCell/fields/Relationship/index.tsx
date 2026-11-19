@@ -15,6 +15,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
+import { EmptyCell } from '../../EmptyCell/index.js'
 import { FileCell } from '../File/index.js'
 
 type Value = { relationTo: string; value: number | string }
@@ -29,7 +30,6 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData: cellDataFromProps,
   customCellProps: customCellContext,
   field,
-  field: { label },
 }) => {
   // conditionally extract relationTo both both relationship and join fields
   const relationTo =
@@ -131,7 +131,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
       {Array.isArray(cellData) &&
         cellData.length > totalToShow &&
         t('fields:itemsAndMore', { count: cellData.length - totalToShow, items: '' })}
-      {values.length === 0 && t('general:noLabel', { label: getTranslation(label || '', i18n) })}
+      {values.length === 0 && <EmptyCell label={getTranslation(field.label || '', i18n)} />}
     </div>
   )
 }

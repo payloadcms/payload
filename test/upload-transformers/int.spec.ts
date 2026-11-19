@@ -13,6 +13,7 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import {
+  convertedVariantMediaSlug,
   outsideFitMediaSlug,
   requestVariantsMediaSlug,
   resizePreviewMediaSlug,
@@ -494,6 +495,18 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
       expect(transformerCallCounts.dynamicOnlySharp).toBeGreaterThan(0)
       expect(doc._stored).not.toBe(false)
       expect(doc).toMatchObject({ height: crop.height, width: crop.width })
+    })
+
+    test('should save a stored variant whose format is not in the upload MIME types', async () => {
+      const doc = (await uploadFixture({
+        collection: convertedVariantMediaSlug,
+        fixture: 'image.png',
+      })) as unknown as { variants: { webp: { filename: null | string; mimeType: null | string } } }
+
+      expect(doc.variants.webp).toMatchObject({
+        filename: 'image-50x50.webp',
+        mimeType: 'image/webp',
+      })
     })
   })
 })
