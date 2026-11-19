@@ -48,6 +48,7 @@ export async function parseParams({
         })
         if (builtConditions.length > 0 && conditionOperator !== null) {
           if (conditionOperator === '$and') {
+            // Preserve filters already added to $and, including all-locale row matches.
             result.$and = [...(result.$and ?? []), ...builtConditions]
           } else {
             result.$or = builtConditions
