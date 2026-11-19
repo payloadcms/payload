@@ -188,6 +188,39 @@ test.suite('Localized draft preservation', { config: './config.ts' }, () => {
     expect(draft._status!.es).toBe('draft')
   })
 
+  test('should preserve other collection locale statuses when a different user saves a localized draft', async ({
+    payload,
+  }) => {
+    const doc = await publishSharedCollectionLocales({ payload })
+    const user = await payload.create({
+      collection: 'users',
+      data: { email: 'localized-draft-editor@example.com', password: 'test' },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: allFieldsLocalizedSlug,
+      data: { _status: 'draft', text: 'spanish draft' },
+      draft: true,
+      locale: spanishLocale,
+      overrideAccess: true,
+      user: { ...user, collection: 'users' },
+    })
+
+    const draft = await payload.findByID({
+      id: doc.id,
+      collection: allFieldsLocalizedSlug,
+      draft: true,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(draft.updatedBy).toMatchObject({ relationTo: 'users' })
+    expect(draft._status!.en).toBe('published')
+    expect(draft._status!.es).toBe('draft')
+  })
+
   for (const field of ['sharedRows', 'sharedBlocks'] as const) {
     test(`should preserve other global locale statuses when only a localized ${field} child changes`, async ({
       payload,
