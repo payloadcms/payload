@@ -9,6 +9,7 @@ import { fieldShouldBeLocalized } from '../../fields/config/types.js'
  * An absent path does not contribute; a schemaless suffix belongs to its JSON/rich text field.
  */
 export const hasReadAccessToQueryPath = ({
+  blockSlug,
   fields,
   isParentLocalized = false,
   permissions,
@@ -17,6 +18,7 @@ export const hasReadAccessToQueryPath = ({
   segments,
   shouldShowHiddenFields = false,
 }: {
+  blockSlug?: string
   fields: FlattenedField[]
   isParentLocalized?: boolean
   permissions: FieldsPermissions
@@ -62,7 +64,7 @@ export const hasReadAccessToQueryPath = ({
         .map((candidate) => {
           const block = typeof candidate === 'string' ? req.payload.blocks[candidate] : candidate
 
-          return block
+          return block && (!blockSlug || block.slug === blockSlug)
             ? hasReadAccessToQueryPath({
                 fields: block.flattenedFields,
                 isParentLocalized: isLocalized,
@@ -80,6 +82,7 @@ export const hasReadAccessToQueryPath = ({
     }
   } else if ('flattenedFields' in field) {
     canRead = hasReadAccessToQueryPath({
+      blockSlug,
       fields: field.flattenedFields,
       isParentLocalized: isLocalized,
       permissions: permission?.fields || {},

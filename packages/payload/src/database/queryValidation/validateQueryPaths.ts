@@ -9,6 +9,7 @@ import { validOperatorSet } from '../../types/constants.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
+  blockSlug?: string
   errors?: { path: string }[]
   overrideAccess: boolean
   // TODO: Rename to permissions or entityPermissions in 4.0
@@ -30,6 +31,7 @@ type Args = {
 )
 
 export async function validateQueryPaths({
+  blockSlug,
   collectionConfig,
   errors = [],
   globalConfig,
@@ -57,6 +59,7 @@ export async function validateQueryPaths({
           if (collectionConfig) {
             promises.push(
               validateQueryPaths({
+                blockSlug,
                 collectionConfig,
                 errors,
                 overrideAccess,
@@ -71,6 +74,7 @@ export async function validateQueryPaths({
           } else {
             promises.push(
               validateQueryPaths({
+                blockSlug,
                 errors,
                 globalConfig,
                 overrideAccess,
@@ -92,6 +96,7 @@ export async function validateQueryPaths({
           if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
+                blockSlug,
                 collectionConfig,
                 constraint: where as WhereField,
                 errors,

@@ -280,7 +280,7 @@ export interface AccessJoinArticle {
     | number
     | boolean
     | null;
-  content?: Section[] | null;
+  content?: (Section | Hero)[] | null;
   items?:
     | {
         heading?: string | null;
@@ -305,6 +305,7 @@ export interface AccessJoinArticle {
             id?: string | null;
           }[]
         | null;
+      callouts?: EditorNote[] | null;
     };
     articleTags?: ('available' | 'unavailable')[] | null;
     status?: string | null;
@@ -1574,6 +1575,13 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        hero?:
+          | T
+          | {
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   items?:
     | T
@@ -1602,6 +1610,17 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
                     heading?: T;
                     published?: T;
                     id?: T;
+                  };
+              callouts?:
+                | T
+                | {
+                    editorNote?:
+                      | T
+                      | {
+                          heading?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
                   };
             };
         articleTags?: T;
@@ -2320,4 +2339,18 @@ export interface Section {
   id?: string | null;
   blockName?: string | null;
   blockType: 'section';
+}
+
+export interface Hero {
+  heading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
+}
+
+export interface EditorNote {
+  heading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'editorNote';
 }

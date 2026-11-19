@@ -204,7 +204,23 @@ export const AccessJoinArticles: CollectionConfig = {
       blocks: [
         {
           slug: 'section',
-          fields: [{ name: 'heading', type: 'text' }],
+          fields: [
+            {
+              name: 'heading',
+              type: 'text',
+              access: { read: ({ req }) => req.context.canReadSectionHeading !== false },
+            },
+          ],
+        },
+        {
+          slug: 'hero',
+          fields: [
+            {
+              name: 'heading',
+              type: 'text',
+              access: { read: ({ req }) => req.context.canReadHeroHeading !== false },
+            },
+          ],
         },
       ],
     },
@@ -247,6 +263,11 @@ export const AccessJoinArticles: CollectionConfig = {
                     { name: 'heading', type: 'text' },
                     { name: 'published', type: 'checkbox' },
                   ],
+                },
+                {
+                  name: 'callouts',
+                  type: 'blocks',
+                  blocks: [{ slug: 'editorNote', fields: [{ name: 'heading', type: 'text' }] }],
                 },
               ],
             },

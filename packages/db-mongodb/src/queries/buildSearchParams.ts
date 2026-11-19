@@ -113,7 +113,7 @@ export async function buildSearchParam({
 
   if (
     operator === 'contains' &&
-    field.type === 'array' &&
+    (field.type === 'array' || field.type === 'blocks') &&
     paths.length === 1 &&
     isNestedRelationshipQuery(val)
   ) {
@@ -123,10 +123,15 @@ export async function buildSearchParam({
     }
 
     const rowFilter = resolveRowContains({
+      blocks: payload.blocks,
       field,
       path: incomingPath,
       where: val,
     })
+
+    if (!rowFilter) {
+      return { path: '_id', value: { $in: [] } }
+    }
 
     const buildElementMatch = async (queryLocale?: string) => {
       const nested = await parseParams({
@@ -139,7 +144,7 @@ export async function buildSearchParam({
       })
 
       return {
-        $elemMatch: nested,
+        $elemMatch: rowFilter.block ? { ...nested, blockType: rowFilter.block.slug } : nested,
       }
     }
 

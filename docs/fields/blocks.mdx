@@ -339,6 +339,23 @@ If you provide `admin.components.Label`, that component replaces both the name a
 | `blockName`   | Each block | Editor input in the Admin                  | Yes           | Optional label; hide with `admin.disableBlockName` or replace with custom `admin.components.Label` |
 | `block.label` | Block type | `label` in block config or `slug` fallback | Yes           | Shared by all blocks of that type. Can be replaced with custom `admin.components.Label`            |
 
+### Filter by fields on the same block
+
+Use `contains` on a Blocks Field to match a document when one block satisfies the nested filter. Include `blockType.equals` to select the block slug.
+
+```ts
+const where = {
+  content: {
+    contains: {
+      blockType: { equals: 'hero' },
+      heading: { equals: 'Welcome' },
+    },
+  },
+}
+```
+
+This matches a document with a `hero` block whose heading is `Welcome`. If the Blocks Field is inside a Group or named Tab, use its dotted field path, such as `settings.layout`, in place of `layout`. The same filter works in a Local API or REST `where` query on MongoDB and Drizzle. It supports comparisons on single-value fields inside the selected block, including fields in groups and named tabs. SQL adapters require relational block storage.
+
 ### Custom Components
 
 #### Field
