@@ -11,8 +11,6 @@ import type {
 import type React from 'react'
 import type { Dispatch } from 'react'
 
-import type { AcceptValues } from './mergeServerFormState.js'
-
 export type Preferences = {
   [key: string]: unknown
 }
@@ -113,7 +111,8 @@ export type FormProps = {
 )
 
 export type SubmitOptions<C = Record<string, unknown>> = {
-  acceptValues?: AcceptValues
+  /** Accept server values and row structure; defaults to preserving existing local values and rows. */
+  acceptValues?: boolean
   action?: string
   /**
    * If you want to pass additional data to the onSuccess callback, you can use this context object.
@@ -236,7 +235,7 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  acceptValues?: AcceptValues
+  acceptValues?: boolean
   prevStateRef?: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'

@@ -13,7 +13,6 @@ import React, { use, useCallback, useEffect, useMemo, useRef, useState } from 'r
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState.js'
-import type { AcceptValues } from './mergeServerFormState.js'
 import type { FieldAction, Context as FormContextType, FormProps } from './types.js'
 
 import { useQueue } from '../../hooks/useQueue.js'
@@ -36,7 +35,7 @@ type FormStateRequestArgs = Omit<BuildFormStateArgs, 'req'>
 
 type AfterSaveArgs = {
   /** How saved values merge with edits made during a background save. */
-  acceptValues?: AcceptValues
+  acceptValues?: boolean
   isCurrent?: TaskContext['isCurrent']
   /** Refresh document permissions before rebuilding saved state. */
   refreshPermissions?: boolean
