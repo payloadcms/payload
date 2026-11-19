@@ -143,6 +143,10 @@ export const traverseFields = ({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      if (fieldData === undefined) {
+        return
+      }
+
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       const arrayPathPrefix = `${path || ''}${field.name}.`
 

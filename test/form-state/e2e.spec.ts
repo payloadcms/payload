@@ -210,19 +210,8 @@ test.describe('Form State', () => {
     await page.locator('#field-title').fill('Test')
 
     // Both frameworks send the same form state, but TanStack wraps it in a Seroval-encoded RPC payload.
-    const readFormState = ({ request }: { request: Request }): FormState | undefined => {
-      if (currentFramework === 'tanstack-start') {
-        const { data }: { data: { args: { formState?: FormState }; name: string } } = fromJSON(
-          request.postDataJSON(),
-        )
-
-        return data.name === 'form-state' ? data.args.formState : undefined
-      }
-
-      const body = request.postDataJSON() as { args: { formState?: FormState } }[]
-
-      return body[0]?.args?.formState
-    }
+    const readFormState = ({ request }: { request: Request }): FormState | undefined =>
+      readFormStateRequest({ request })?.formState
 
     // Add three rows to check that each request remembers fields rendered by earlier requests.
     for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
@@ -414,6 +403,236 @@ test.describe('Form State', () => {
     await expect(
       page.locator('#field-computedArray #computedArray-row-0 #field-computedArray__0__text'),
     ).toHaveValue('This is a computed value.')
+  })
+
+  test('should preserve content after sorting blocks with different field shapes', async () => {
+    const doc = await createPost({
+      sortedBlocks: [
+        { blockType: 'one', title: 'One', order: 2, content: { text: 'One nested content' } },
+        { blockType: 'two', title: 'Two', order: 1, content: 'Two scalar content' },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__1__order').fill('3')
+      await saveDocAndAssert(page)
+
+      await expect(
+        page.locator('#field-sortedBlocks .blocks-field__block-pill').first(),
+      ).toHaveText('Two')
+      await expect(page.locator('#field-sortedBlocks__0__content')).toHaveValue(
+        'Two scalar content',
+      )
+      await expect(
+        page
+          .locator('#field-sortedBlocks .blocks-field__row')
+          .first()
+          .locator('#field-sortedBlocks__0__title'),
+      ).toHaveValue('Two')
+
+      await page.locator('#field-title').fill('After sorting the blocks')
+      await saveDocAndAssert(page)
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.sortedBlocks?.map(({ blockType, content }) => ({ blockType, content }))
+        })
+        .toEqual([
+          { blockType: 'two', content: 'Two scalar content' },
+          { blockType: 'one', content: { text: 'One nested content' } },
+        ])
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should keep block fields and collapsed state with their IDs after a beforeChange reorder', async () => {
+    const doc = await createPost()
+
+    await page.goto(postsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
+    try {
+      for (const [index, blockType] of ['One', 'Two', 'Three'].entries()) {
+        await addBlock({ blockToSelect: blockType, fieldName: 'sortedBlocks', page })
+        await page.locator(`#field-sortedBlocks__${index}__title`).fill(blockType)
+        await page.locator(`#field-sortedBlocks__${index}__order`).fill(String(index + 1))
+        await saveDocAndAssert(page)
+
+        const expectedBlocks = ['One', 'Two', 'Three'].slice(0, index + 1).reverse()
+        const rows = page.locator('#field-sortedBlocks .blocks-field__row')
+
+        await expect(rows).toHaveCount(expectedBlocks.length)
+
+        for (const [rowIndex, title] of expectedBlocks.entries()) {
+          await expect(rows.nth(rowIndex).locator('.blocks-field__block-pill')).toHaveText(title)
+          await expect(rows.nth(rowIndex).locator('button.collapsible__toggle')).toHaveAttribute(
+            'aria-expanded',
+            rowIndex === 0 ? 'true' : 'false',
+          )
+          await expect(
+            rows.nth(rowIndex).locator(`#field-sortedBlocks__${rowIndex}__title`),
+          ).toHaveValue(title)
+          await expect(page.locator(`#field-sortedBlocks__${rowIndex}__order`)).toHaveValue(
+            String(index + 1 - rowIndex),
+          )
+        }
+
+        await rows.first().locator('button.collapsible__toggle').press('Enter')
+        await expect(rows.first().locator('button.collapsible__toggle')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        )
+        await page.locator('#field-title').fill(`Sorted blocks save ${index + 1}`)
+        await saveDocAndAssert(page)
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              overrideAccess: true,
+              where: { id: { equals: doc.id } },
+            })
+
+            return docs[0]?.sortedBlocks?.map(({ blockType, order, title }) => ({
+              blockType,
+              order,
+              title,
+            }))
+          })
+          .toEqual(
+            expectedBlocks.map((title, rowIndex) => ({
+              blockType: title.toLowerCase(),
+              order: index + 1 - rowIndex,
+              title,
+            })),
+          )
+      }
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should preserve a hidden custom field when it becomes visible after a server reorder', async () => {
+    const doc = await createPost({
+      sortedBlocks: [
+        { blockType: 'two', title: 'First', order: 2 },
+        { blockType: 'two', title: 'Second', order: 1 },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__0__order').fill('-1')
+      await saveDocAndAssert(page)
+
+      const rows = page.locator('#field-sortedBlocks .blocks-field__row')
+
+      await expect(rows.nth(0).getByRole('textbox', { name: 'Title', exact: true })).toHaveValue(
+        'Second',
+      )
+      await expect(rows.nth(1).getByRole('textbox', { name: 'Title', exact: true })).toBeHidden()
+
+      await page.locator('#field-sortedBlocks__1__order').fill('0')
+
+      const restoredTitle = rows.nth(1).getByRole('textbox', { name: 'Title', exact: true })
+
+      await expect(restoredTitle).toHaveValue('First')
+      await restoredTitle.fill('First updated')
+      await expect(rows.nth(0).getByRole('textbox', { name: 'Title', exact: true })).toHaveValue(
+        'Second',
+      )
+      await saveDocAndAssert(page)
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.sortedBlocks?.map(({ title }) => title)
+        })
+        .toEqual(['Second', 'First updated'])
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should preserve cached paths for unchanged fields and rows after saving', async () => {
+    const doc = await createPost({
+      array: [{ customTextField: 'Unchanged array row' }],
+      sortedBlocks: [
+        { blockType: 'two', title: 'First', order: 3 },
+        { blockType: 'two', title: 'Second', order: 2 },
+        { blockType: 'two', title: 'Third', order: 1 },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__1__order').fill('4')
+
+      const requestPromise = page.waitForRequest((request) => {
+        const isFormStateURL =
+          currentFramework === 'tanstack-start'
+            ? request.url().startsWith(`${serverURL}/_serverFn/`)
+            : request.url() === postsUrl.edit(doc.id)
+
+        if (request.method() !== 'POST' || !isFormStateURL) {
+          return false
+        }
+
+        return readFormStateRequest({ request })?.data?.sortedBlocks?.[0]?.title === 'Second'
+      })
+
+      await saveDocAndAssert(page)
+
+      const request = await requestPromise
+      const formState = readFormStateRequest({ request })?.formState as FormState
+
+      await expect
+        .poll(() => ({
+          title: formState.title.lastRenderedPath,
+          array: formState.array.lastRenderedPath,
+          arrayField: formState['array.0.customTextField'].lastRenderedPath,
+          arrayRow: formState.array.rows?.[0]?.lastRenderedPath,
+          sortedBlocks: formState.sortedBlocks.lastRenderedPath,
+          blockFields: [0, 1, 2].map(
+            (index) => formState[`sortedBlocks.${index}.title`].lastRenderedPath,
+          ),
+          blockRows: formState.sortedBlocks.rows?.map(({ lastRenderedPath }) => lastRenderedPath),
+        }))
+        .toEqual({
+          title: 'title',
+          array: 'array',
+          arrayField: 'array.0.customTextField',
+          arrayRow: 'array.0',
+          sortedBlocks: 'sortedBlocks',
+          blockFields: [undefined, undefined, 'sortedBlocks.2.title'],
+          blockRows: [undefined, undefined, 'sortedBlocks.2'],
+        })
+
+      await expect(
+        page
+          .locator('#field-sortedBlocks .blocks-field__row')
+          .first()
+          .locator('#field-sortedBlocks__0__title'),
+      ).toHaveValue('Second')
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
   })
 
   test('should finish post-save rebuilding before a pending edit refresh', async () => {
@@ -1788,6 +2007,19 @@ test.describe('Shared form request queue', () => {
     expect(saveCount).toBe(1)
   })
 })
+
+function readFormStateRequest({
+  request,
+}: {
+  request: Request
+}): { data?: Partial<Post>; formState?: FormState } | undefined {
+  const body =
+    currentFramework === 'tanstack-start'
+      ? fromJSON(request.postDataJSON()).data
+      : request.postDataJSON()[0]
+
+  return body?.name === 'form-state' ? body.args : undefined
+}
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
