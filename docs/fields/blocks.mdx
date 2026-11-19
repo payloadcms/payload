@@ -354,7 +354,7 @@ const where = {
 }
 ```
 
-This matches a document with a `hero` block whose heading is `Welcome`. If the Blocks Field is inside a Group or named Tab, use its dotted field path, such as `settings.layout`, in place of `layout`. The same filter works in a Local API or REST `where` query on MongoDB and Drizzle. It supports comparisons on single-value fields inside the selected block, including fields in groups and named tabs. SQL adapters require relational block storage.
+This matches a document with a `hero` block whose heading is `Welcome`. If the Blocks Field is inside a Group or named Tab, use its dotted field path, such as `settings.layout`, in place of `layout`. The same filter works in a Local API or REST `where` query and in a Join Field's `where` option on MongoDB and Drizzle. It supports comparisons on single-value fields inside the selected block, including fields in groups and named tabs. SQL adapters require relational block storage.
 
 ### Custom Components
 

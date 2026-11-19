@@ -14,7 +14,7 @@ type Args = {
   overrideAccess: boolean
   // TODO: Rename to permissions or entityPermissions in 4.0
   policies?: EntityPolicies
-  polymorphicJoin?: boolean
+  polymorphicJoinCollections?: string[]
   req: PayloadRequest
   showHiddenFields?: boolean
   versionFields?: FlattenedField[]
@@ -40,7 +40,7 @@ export async function validateQueryPaths({
     collections: {},
     globals: {},
   },
-  polymorphicJoin,
+  polymorphicJoinCollections,
   req,
   showHiddenFields,
   versionFields,
@@ -64,7 +64,7 @@ export async function validateQueryPaths({
                 errors,
                 overrideAccess,
                 policies,
-                polymorphicJoin,
+                polymorphicJoinCollections,
                 req,
                 showHiddenFields,
                 versionFields,
@@ -79,7 +79,7 @@ export async function validateQueryPaths({
                 globalConfig,
                 overrideAccess,
                 policies,
-                polymorphicJoin,
+                polymorphicJoinCollections,
                 req,
                 showHiddenFields,
                 versionFields,
@@ -106,7 +106,7 @@ export async function validateQueryPaths({
                 overrideAccess,
                 path,
                 policies,
-                polymorphicJoin,
+                polymorphicJoinCollections,
                 req,
                 showHiddenFields,
                 val,

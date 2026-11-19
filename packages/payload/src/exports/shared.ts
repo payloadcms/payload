@@ -48,6 +48,10 @@ export {
   isRowContainsField,
   resolveRowContains,
 } from '../database/resolveRowContains.js'
+export {
+  matchesCollectionConstraint,
+  scopePolymorphicJoinWhere,
+} from '../database/scopePolymorphicJoinWhere.js'
 
 export { APIError, APIErrorName } from '../errors/APIError.js'
 export { MissingEditorProp } from '../errors/MissingEditorProp.js'

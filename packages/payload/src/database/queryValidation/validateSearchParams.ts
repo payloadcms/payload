@@ -28,7 +28,7 @@ type Args = {
   path: string
   // TODO: Rename to permissions or entityPermissions in 4.0
   policies: EntityPolicies
-  polymorphicJoin?: boolean
+  polymorphicJoinCollections?: string[]
   req: PayloadRequest
   showHiddenFields?: boolean
   val: unknown
@@ -50,7 +50,7 @@ export async function validateSearchParam({
   parentIsLocalized,
   path: incomingPath,
   policies,
-  polymorphicJoin,
+  polymorphicJoinCollections,
   req,
   showHiddenFields,
   val,
@@ -148,7 +148,19 @@ export async function validateSearchParam({
 
   if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
     const isLegitimateNestedContains =
-      operator === 'contains' && (isNestedHasManyQuery || isRowContains)
+      operator === 'contains' &&
+      (isNestedHasManyQuery ||
+        isRowContains ||
+        (polymorphicJoinCollections &&
+          !relationshipField &&
+          hasNestedWhere &&
+          SAFE_FIELD_PATH_REGEX.test(incomingPath) &&
+          polymorphicJoinCollections.some((slug) =>
+            isRowContainsField({
+              fields: req.payload.collections[slug]!.config.flattenedFields,
+              path: sanitizedPath,
+            }),
+          )))
     const containsPlainObject =
       hasNestedWhere ||
       (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry)))
@@ -190,7 +202,7 @@ export async function validateSearchParam({
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
         const isUnknownPolymorphicJoinField =
-          polymorphicJoin && !field && SAFE_FIELD_PATH_REGEX.test(incomingPath)
+          polymorphicJoinCollections && !field && SAFE_FIELD_PATH_REGEX.test(incomingPath)
 
         if (!isUnknownPolymorphicJoinField) {
           errors.push({ path })
@@ -213,7 +225,7 @@ export async function validateSearchParam({
         }
       }
 
-      if (polymorphicJoin && path === 'relationTo') {
+      if (polymorphicJoinCollections && path === 'relationTo') {
         return
       }
 

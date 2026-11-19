@@ -3,7 +3,8 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
-import { type FlattenedJoinField, type Where } from 'payload'
+import { type FlattenedJoinField, QueryError, type Where } from 'payload'
+import { getFieldInGroups, hasRowContains, scopePolymorphicJoinWhere } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
@@ -107,6 +108,12 @@ export const buildPolymorphicJoinQuery = ({
   const wherePlan: PolymorphicJoinWherePlan = where
     ? createPolymorphicJoinWherePlan({ adapter, collections, where })
     : new Map()
+  const rowPaths = [...wherePlan.values()].filter(({ fieldsByCollection }) =>
+    [...fieldsByCollection.values()].some(({ type }) => type === 'rowContains'),
+  )
+  const conflictingRowPaths = rowPaths
+    .filter(({ type }) => type === 'invalid')
+    .map(({ schemaPath }) => schemaPath)
   let unionQuery: null | SQLiteSelect = null
 
   for (const { collection, table } of collectionTables) {
@@ -118,19 +125,38 @@ export const buildPolymorphicJoinQuery = ({
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
     const joins: BuildQueryJoinAliases = []
-    const collectionWhere =
-      where && Object.keys(where).length > 0
-        ? buildPolymorphicJoinWhere({
-            adapter,
-            collection,
-            joins,
-            locale,
-            table,
-            where,
-            wherePlan,
-          })
-        : undefined
-    const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
+    const scopedWhere =
+      where && rowPaths.length
+        ? scopePolymorphicJoinWhere({ collectionSlug: collection, where })
+        : where
+
+    let collectionPlan = wherePlan
+    let collectionWhere: SQL | undefined
+
+    if (scopedWhere === false) {
+      collectionWhere = sql`false`
+    } else if (scopedWhere && scopedWhere !== true && Object.keys(scopedWhere).length > 0) {
+      if (conflictingRowPaths.length) {
+        collectionPlan = replanConflictingRowPaths({
+          adapter,
+          collection,
+          conflictingRowPaths,
+          where: scopedWhere,
+          wherePlan,
+        })
+      }
+
+      collectionWhere = buildPolymorphicJoinWhere({
+        adapter,
+        collection,
+        joins,
+        locale,
+        table,
+        where: scopedWhere,
+        wherePlan: collectionPlan,
+      })
+    }
+    const hasLocalizedWhere = [...collectionPlan.values()].some((pathPlan) => {
       const collectionField = pathPlan.fieldsByCollection.get(collection)
 
       return collectionField?.type === 'scalar' && collectionField.isLocalized
@@ -218,6 +244,47 @@ export const buildPolymorphicJoinQuery = ({
     count: countExpression,
     documents,
   }
+}
+
+function replanConflictingRowPaths({
+  adapter,
+  collection,
+  conflictingRowPaths,
+  where,
+  wherePlan,
+}: {
+  adapter: DrizzleAdapter
+  collection: string
+  conflictingRowPaths: string[]
+  where: Where
+  wherePlan: PolymorphicJoinWherePlan
+}): PolymorphicJoinWherePlan {
+  const localPlan = createPolymorphicJoinWherePlan({ adapter, collections: [collection], where })
+  const collectionPlan = new Map(wherePlan)
+  const { flattenedFields } = adapter.payload.collections[collection]!.config
+
+  for (const path of conflictingRowPaths) {
+    const localPath = localPlan.get(path)
+    if (!localPath) {
+      continue
+    }
+
+    if (
+      localPath.type === 'rowContains' ||
+      !hasRowContains({ isRowField: (candidate) => candidate === path, where })
+    ) {
+      collectionPlan.set(path, localPath)
+      continue
+    }
+
+    if (getFieldInGroups({ fields: flattenedFields, path })) {
+      throw new QueryError([{ path: `${path}.contains` }])
+    }
+
+    collectionPlan.set(path, { ...localPath, type: 'rowContains' })
+  }
+
+  return collectionPlan
 }
 
 const getSortField = ({

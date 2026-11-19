@@ -7,6 +7,12 @@ export const AccessJoinArticles: CollectionConfig = {
   versions: { drafts: true },
   access: {
     read: ({ req }) => {
+      if (req.context.requireWelcomeItem) {
+        return {
+          items: { contains: { heading: { equals: 'Welcome' }, published: { equals: true } } },
+        }
+      }
+
       if (req.context.useNearAccessConstraint) {
         return { coordinates: { near: [0, 0, 1000] } }
       }

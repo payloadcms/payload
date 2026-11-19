@@ -1,7 +1,7 @@
 import type { Column } from 'drizzle-orm'
 
 import { type FlattenedField, type Where } from 'payload'
-import { fieldShouldBeLocalized } from 'payload/shared'
+import { fieldShouldBeLocalized, isNestedRelationshipQuery } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
@@ -17,14 +17,14 @@ export type ScalarWhereField = {
 }
 
 type CollectionWhereField =
-  | { field: FlattenedField; type: 'collectionQuery' | 'hasManySelect' }
+  | { field: FlattenedField; type: 'collectionQuery' | 'hasManySelect' | 'rowContains' }
   | ScalarWhereField
 
 export type WherePathPlan = {
   columnPath: string
   fieldsByCollection: Map<string, CollectionWhereField>
   schemaPath: string
-  type: 'collectionQuery' | 'hasManySelect' | 'invalid' | 'scalar'
+  type: 'collectionQuery' | 'hasManySelect' | 'invalid' | 'rowContains' | 'scalar'
 }
 
 export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
@@ -67,7 +67,16 @@ export const createPolymorphicJoinWherePlan = ({
     return { collection, collectionConfig, table, tableName }
   })
   const schemaPathsByColumnPath = new Map<string, Set<string>>()
-  const schemaPaths = new Set(getWhereSchemaPaths(where))
+  const entries = getWhereEntries(where)
+  const schemaPaths = new Set(entries.map(([path]) => path))
+  const rowContainsPaths = new Set(
+    entries
+      .filter(
+        ([, condition]) =>
+          !Array.isArray(condition) && isNestedRelationshipQuery(condition?.contains),
+      )
+      .map(([path]) => path),
+  )
 
   for (const schemaPath of schemaPaths) {
     const columnPath = getColumnPath(schemaPath)
@@ -84,6 +93,7 @@ export const createPolymorphicJoinWherePlan = ({
     const fieldsByCollection = new Map<string, CollectionWhereField>()
     let isFieldPresent = schemaPath === 'id' || schemaPath === 'relationTo'
     let hasManySelect = false
+    let hasRowContains = false
     let hasCollectionQuery = false
     let hasUnsupportedFieldShape = false
     const columnQueryValueSignatures = new Set<string>()
@@ -125,6 +135,16 @@ export const createPolymorphicJoinWherePlan = ({
       }
 
       isFieldPresent = true
+
+      if (
+        (fieldAtPath.field.type === 'array' || fieldAtPath.field.type === 'blocks') &&
+        rowContainsPaths.has(schemaPath) &&
+        !fieldAtPath.requiresCollectionQuery
+      ) {
+        hasRowContains = true
+        fieldsByCollection.set(collection, { type: 'rowContains', field: fieldAtPath.field })
+        continue
+      }
 
       if (fieldAtPath.requiresCollectionQuery) {
         const field = fieldAtPath.field
@@ -187,6 +207,8 @@ export const createPolymorphicJoinWherePlan = ({
       !isFieldPresent ||
       hasUnsupportedFieldShape ||
       (hasManySelect && columnQueryValueSignatures.size > 0) ||
+      (hasRowContains &&
+        (hasManySelect || hasCollectionQuery || columnQueryValueSignatures.size > 0)) ||
       (hasCollectionQuery && (hasManySelect || columnQueryValueSignatures.size > 0)) ||
       collectionQueryValueSignatures.size > 1 ||
       columnQueryValueSignatures.size > 1
@@ -195,6 +217,8 @@ export const createPolymorphicJoinWherePlan = ({
 
     if (isInvalid) {
       type = 'invalid'
+    } else if (hasRowContains) {
+      type = 'rowContains'
     } else if (hasCollectionQuery) {
       type = 'collectionQuery'
     } else if (hasManySelect) {
@@ -256,22 +280,22 @@ const getFieldQueryValueSignature = ({
   return `${field.type}:${column?.getSQLType() ?? ''}`
 }
 
-const getWhereSchemaPaths = (where: Where): string[] => {
-  const paths: string[] = []
+const getWhereEntries = (where: Where): [string, Where[string]][] => {
+  const entries: [string, Where[string]][] = []
 
   for (const key in where) {
     if (['AND', 'OR'].includes(key.toUpperCase())) {
       if (Array.isArray(where[key])) {
         for (const nestedWhere of where[key]) {
-          paths.push(...getWhereSchemaPaths(nestedWhere))
+          entries.push(...getWhereEntries(nestedWhere))
         }
       }
     } else {
-      paths.push(key)
+      entries.push([key, where[key]])
     }
   }
 
-  return paths
+  return entries
 }
 
 const getColumnPath = (schemaPath: string): string =>

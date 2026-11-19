@@ -2,6 +2,7 @@ import type { Column, SQL } from 'drizzle-orm'
 
 import { and, getTableName, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { type FlattenedField, type Operator, QueryError, type Where } from 'payload'
+import { isNestedRelationshipQuery } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
@@ -94,6 +95,32 @@ export const buildPolymorphicJoinWhere = ({
     const pathPlan = wherePlan.get(key)
 
     const collectionField = pathPlan?.fieldsByCollection.get(collection)
+
+    if (pathPlan?.type === 'rowContains') {
+      const filter = where[key]
+
+      if (
+        Array.isArray(filter) ||
+        Object.keys(filter).length !== 1 ||
+        !isNestedRelationshipQuery(filter.contains)
+      ) {
+        throw new QueryError([{ path: key }])
+      }
+
+      constraints.push(
+        collectionField
+          ? buildCollectionFieldWhere({
+              adapter,
+              collection,
+              joins,
+              locale,
+              table,
+              where: { [key]: filter },
+            })
+          : sql`false`,
+      )
+      continue
+    }
 
     if (pathPlan?.type === 'collectionQuery' && collectionField) {
       if (collectionField.field.type === 'select' && collectionField.field.hasMany) {
