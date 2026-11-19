@@ -480,5 +480,20 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
       expect(doc.filename).toBe(doc.original?.filename)
       expect(doc).toMatchObject({ height: crop.height, width: crop.width })
     })
+
+    test('should apply the crop with Sharp when the variants owner cannot build the file at request', async () => {
+      const crop = { height: 20, width: 30, x: 0, y: 0 }
+
+      const doc = (await payload.create({
+        collection: requestVariantsMediaSlug,
+        data: { _transforms: { crop } },
+        file: await getFileByPath(path.resolve(dirname, '../uploads/image.jpg')),
+        overrideAccess: true,
+      })) as unknown as { _stored?: boolean | null; height: number; width: number }
+
+      expect(transformerCallCounts.dynamicOnlySharp).toBeGreaterThan(0)
+      expect(doc._stored).not.toBe(false)
+      expect(doc).toMatchObject({ height: crop.height, width: crop.width })
+    })
   })
 })

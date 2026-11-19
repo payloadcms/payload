@@ -1,10 +1,4 @@
-import type {
-  CanTransformArgs,
-  Config,
-  TransformFileArgs,
-  TransformFileResult,
-  UploadTransformer,
-} from 'payload'
+import type { Config, TransformFileArgs, TransformFileResult, UploadTransformer } from 'payload'
 import type { TransformerWithInternalBridge } from 'payload/internal'
 
 import { getUploadTransformerInternal, uploadTransformerInternal } from 'payload/internal'
@@ -71,16 +65,9 @@ export function sharpTransformer(
   const transformer: TransformerWithInternalBridge & UploadTransformer = {
     slug: options.slug ?? 'sharp',
     canTransform: (args) => {
-      // At upload, the MIME match that ran before `canTransform` decides eligibility, except for a
-      // collection another transformer owns. Only dynamic request routing needs the query.
+      // Upload-time eligibility is already decided by the MIME match that ran
+      // before `canTransform`; only dynamic request routing needs the query.
       if (args.operation === 'upload') {
-        if (
-          !handlesCollection(args) &&
-          hasVariantsOfAnotherTransformer({ ...args, transformerSlug: transformer.slug })
-        ) {
-          return false
-        }
-
         return { canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }
       }
 
@@ -120,23 +107,6 @@ export function sharpTransformer(
   }
 
   return transformer
-}
-
-/**
- * Whether another transformer registered the collection's variants. That transformer then owns the
- * collection's files, so Sharp must not build a main file that differs from the variants it builds.
- */
-function hasVariantsOfAnotherTransformer({
-  collectionSlug,
-  req,
-  transformerSlug,
-}: {
-  transformerSlug: string
-} & Pick<CanTransformArgs, 'collectionSlug' | 'req'>): boolean {
-  const variantsTransformerSlug =
-    req.payload.collections[collectionSlug]?.config.upload?.variantsTransformerSlug
-
-  return Boolean(variantsTransformerSlug) && variantsTransformerSlug !== transformerSlug
 }
 
 /**

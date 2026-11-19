@@ -83,7 +83,12 @@ export async function planUploadRebuild({
     return { outcome: 'rebuild' }
   }
 
-  const rebuildPlan = await planUploadPipeline({ ...planArgs, mimeType: storedMimeType })
+  const rebuildPlan = await planUploadPipeline({
+    ...planArgs,
+    canApplyAtRequest,
+    documentID,
+    mimeType: storedMimeType,
+  })
   const hasRequiredChange =
     isDuplicating || hasCropOrResizeEdit || changedKeys.some(isClaimRequired)
   const shouldRebuild =
@@ -143,11 +148,17 @@ function hasClaimedOptionalChange({
 
 /** Plans the upload pipeline for one MIME type, without checking claims. */
 export async function planUploadPipeline({
-  collectionSlug,
+  canApplyAtRequest,
+  documentID,
   mimeType,
-  pipelineOriginalDoc,
-  req,
-}: { mimeType: string } & PlanArgs): Promise<UploadPlan> {
+  ...planArgs
+}: {
+  /** False when no original would be stored for request-time stages to start from. */
+  canApplyAtRequest: boolean
+  documentID?: number | string
+  mimeType: string
+} & PlanArgs): Promise<UploadPlan> {
+  const { collectionSlug, pipelineOriginalDoc, req } = planArgs
   const plan = await planTransformerPipeline({
     args: {
       collectionSlug,
@@ -161,7 +172,73 @@ export async function planUploadPipeline({
     transformers: req.payload.config.upload?.transformers ?? [],
   })
 
-  return { ...plan, mimeType }
+  const variantsOwnerSlug = canApplyAtRequest
+    ? await getVariantsOwnerThatBuildsAtRequest({ ...planArgs, documentID, mimeType })
+    : undefined
+
+  return {
+    ...(variantsOwnerSlug
+      ? withoutBridgesThatDoNotOwnCollection({ collectionSlug, plan, variantsOwnerSlug })
+      : plan),
+    mimeType,
+  }
+}
+
+/**
+ * The slug of the transformer that registered the collection's sizes, when it can build the
+ * default file and the sizes from the original at request time. Otherwise `undefined`.
+ */
+async function getVariantsOwnerThatBuildsAtRequest({
+  documentID,
+  mimeType,
+  ...planArgs
+}: { documentID?: number | string; mimeType: string } & PlanArgs): Promise<string | undefined> {
+  const upload = planArgs.req.payload.collections?.[planArgs.collectionSlug]?.config.upload
+  const variantsTransformerSlug = upload?.variantsTransformerSlug
+
+  if (!upload?.variants?.length || !variantsTransformerSlug) {
+    return undefined
+  }
+
+  const canOwnerBuild = await canBuildAtRequest({
+    ...planArgs,
+    documentID,
+    mimeType,
+    requiredTransformerSlug: variantsTransformerSlug,
+  })
+
+  return canOwnerBuild ? variantsTransformerSlug : undefined
+}
+
+/**
+ * The plan without the upload bridges that do not own the collection. The transformer that
+ * registered the sizes owns the collection's files, so a bridge must not build a main file that
+ * differs from those sizes. A bridge that the collection is configured on still runs.
+ */
+function withoutBridgesThatDoNotOwnCollection({
+  collectionSlug,
+  plan,
+  variantsOwnerSlug,
+}: {
+  collectionSlug: string
+  plan: PlannedTransformerPipeline
+  variantsOwnerSlug: string
+}): PlannedTransformerPipeline {
+  const isKept = (transformer: UploadTransformer): boolean => {
+    const bridge = getUploadTransformerInternal(transformer)
+
+    return (
+      !bridge?.transformUpload ||
+      transformer.slug === variantsOwnerSlug ||
+      Boolean(bridge.handlesCollection?.({ collectionSlug }))
+    )
+  }
+
+  return {
+    claims: new Map([...plan.claims].filter(([transformer]) => isKept(transformer))),
+    options: new Map([...plan.options].filter(([transformer]) => isKept(transformer))),
+    pipeline: plan.pipeline.filter(isKept),
+  }
 }
 
 /**

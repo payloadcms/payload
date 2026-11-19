@@ -10,7 +10,8 @@ const dirname = path.dirname(filename)
 
 /**
  * Its variants are registered by `requestVariantsTransformer`, which builds the crop and each size
- * when the file is requested. Sharp has no settings for it, so Sharp must not process its uploads.
+ * of a PNG when the file is requested. Sharp has no settings for it, so Sharp processes only the
+ * uploads that this transformer cannot build.
  */
 export const RequestVariantsMedia: CollectionConfig = {
   slug: requestVariantsMediaSlug,

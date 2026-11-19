@@ -200,7 +200,8 @@ export const requestVariantsTransformer: UploadTransformer = {
       config,
       transformerSlug: 'request-variants',
     }),
-  mimeTypes: ['image/*'],
+  // Not JPEG, so a test can upload a file that this transformer cannot build at request time.
+  mimeTypes: ['image/png'],
 }
 
 export const testTransformers: UploadTransformer[] = [
