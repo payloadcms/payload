@@ -50,8 +50,9 @@ export const NavProvider: React.FC<{
   const pathname = usePathname()
 
   const { getPreference, setPreference } = usePreferences()
-  const navRef = useRef(null)
+  const navRef = useRef<HTMLDivElement>(null)
   const navToggleRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
+  const shouldReturnFocus = useRef(false)
   const previousBreakpoints = useRef<{ mid?: boolean; small?: boolean }>({})
   const previousPathname = useRef(pathname)
 
@@ -60,6 +61,12 @@ export const NavProvider: React.FC<{
 
   const setNavOpen = React.useCallback(
     (value: boolean, persist = false) => {
+      if (!value) {
+        const nav = navRef.current?.parentElement
+
+        shouldReturnFocus.current = Boolean(nav?.contains(nav.ownerDocument.activeElement))
+      }
+
       setNavOpenState(value)
 
       if (persist) {
@@ -70,6 +77,21 @@ export const NavProvider: React.FC<{
   )
 
   const [hydrated, setHydrated] = React.useState(false)
+
+  useEffect(() => {
+    if (!navOpen && shouldReturnFocus.current) {
+      shouldReturnFocus.current = false
+      navToggleRef.current?.focus({ preventScroll: true })
+    } else if (
+      navOpen &&
+      navToggleRef.current === navToggleRef.current?.ownerDocument.activeElement &&
+      navToggleRef.current?.getClientRects().length === 0
+    ) {
+      navRef.current?.parentElement
+        ?.querySelector<HTMLButtonElement>('.nav__close')
+        ?.focus({ preventScroll: true })
+    }
+  }, [navOpen])
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
