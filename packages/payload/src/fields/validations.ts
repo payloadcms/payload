@@ -133,11 +133,11 @@ export const password: PasswordFieldValidation = (
     maxLength = fieldMaxLength
   }
 
-  if (value && maxLength && value.length > maxLength) {
+  if (value && typeof maxLength === 'number' && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
   }
 
-  if (value && minLength && value.length < minLength) {
+  if (value && typeof minLength === 'number' && value.length < minLength) {
     return t('validation:longerThanMin', { minLength })
   }
 
@@ -259,7 +259,7 @@ export const username: UsernameFieldValidation = (
     maxLength = config.defaultMaxTextLength
   }
 
-  if (value && maxLength && value.length > maxLength) {
+  if (value && typeof maxLength === 'number' && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
   }
 
@@ -292,11 +292,11 @@ export const textarea: TextareaFieldValidation = (
   if (typeof fieldMaxLength === 'number') {
     maxLength = fieldMaxLength
   }
-  if (value && maxLength && value.length > maxLength) {
+  if (value && typeof maxLength === 'number' && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
   }
 
-  if (value && minLength && value.length < minLength) {
+  if (value && typeof minLength === 'number' && value.length < minLength) {
     return t('validation:longerThanMin', { minLength })
   }
 
