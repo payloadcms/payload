@@ -11,9 +11,7 @@ import { formatOptions } from './formatOptions.js'
 
 export const Select: React.FC<Props> = ({
   disabled,
-  field: {
-    admin: { placeholder },
-  },
+  field,
   isClearable,
   onChange,
   operator,
@@ -80,7 +78,7 @@ export const Select: React.FC<Props> = ({
       isMulti={isMulti}
       onChange={onSelect}
       options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
-      placeholder={placeholder}
+      placeholder={field?.admin?.placeholder}
       value={valueToRender}
     />
   )
