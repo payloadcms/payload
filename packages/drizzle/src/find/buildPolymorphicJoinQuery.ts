@@ -54,7 +54,7 @@ type PolymorphicJoinQuery = {
 export const buildPolymorphicJoinQuery = ({
   adapter,
   currentTableName,
-  draftsEnabled,
+  draftsEnabled: readDraftChildren,
   field,
   limit,
   locale,
@@ -63,7 +63,7 @@ export const buildPolymorphicJoinQuery = ({
   path,
   shouldCount,
   sort,
-  versions,
+  versions: parentIsVersion,
   where,
 }: BuildPolymorphicJoinQueryArgs): PolymorphicJoinQuery => {
   if (!Array.isArray(field.collection)) {
@@ -87,12 +87,14 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Unknown polymorphic join collection "${collection}"`)
     }
 
-    const useDrafts = Boolean(
-      (draftsEnabled || versions) &&
+    const readLatestChildVersion = Boolean(
+      (readDraftChildren || parentIsVersion) &&
       hasDraftsEnabled(adapter.payload.collections[collection].config),
     )
     const tableName = adapter.tableNameMap.get(
-      useDrafts ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}` : toSnakeCase(collection),
+      readLatestChildVersion
+        ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}`
+        : toSnakeCase(collection),
     )
     const table = tableName ? (adapter.tables[tableName] as GenericTable | undefined) : undefined
 
@@ -104,13 +106,13 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "id" column`)
     }
 
-    const sourceOnPath = useDrafts ? `version_${onPath}` : onPath
+    const childParentColumnName = readLatestChildVersion ? `version_${onPath}` : onPath
 
-    if (!table[sourceOnPath]) {
+    if (!table[childParentColumnName]) {
       throw new Error(`Polymorphic join collection "${collection}" has no "${onPath}" column`)
     }
 
-    return { collection, sourceOnPath, table, useDrafts }
+    return { childParentColumnName, collection, readLatestChildVersion, table }
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
@@ -119,15 +121,21 @@ export const buildPolymorphicJoinQuery = ({
     ? createPolymorphicJoinWherePlan({
         adapter,
         collections,
-        draftsEnabled: draftsEnabled || versions,
+        readDraftChildren: readDraftChildren || parentIsVersion,
         where,
       })
     : new Map()
   let unionQuery: null | SQLiteSelect = null
 
-  for (const { collection, sourceOnPath, table, useDrafts } of collectionTables) {
-    const idColumn = useDrafts ? table['parent'] : table['id']
-    const sourceSortPath = useDrafts && sortPath !== 'id' ? `version_${sortPath}` : sortPath
+  for (const {
+    childParentColumnName,
+    collection,
+    readLatestChildVersion,
+    table,
+  } of collectionTables) {
+    const idColumn = readLatestChildVersion ? table['parent'] : table['id']
+    const childSortColumnName =
+      readLatestChildVersion && sortPath !== 'id' ? `version_${sortPath}` : sortPath
     const sortFieldAtPath = getFieldByPath({
       fields: adapter.payload.collections[collection].config.flattenedFields,
       path: sortField.replace('-', ''),
@@ -136,10 +144,10 @@ export const buildPolymorphicJoinQuery = ({
     const sortTable = isSortLocalized
       ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
       : table
-    const sortColumn = sortPath === 'id' ? idColumn : sortTable?.[sourceSortPath]
+    const sortColumn = sortPath === 'id' ? idColumn : sortTable?.[childSortColumnName]
     const selectFields = {
-      id: useDrafts ? sql`${idColumn}`.as('id') : idColumn,
-      parent: sql`${table[sourceOnPath]}`.as(onPath),
+      id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
+      parent: sql`${table[childParentColumnName]}`.as(onPath),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
@@ -148,14 +156,17 @@ export const buildPolymorphicJoinQuery = ({
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
-            draftsEnabled: useDrafts,
             locale,
+            readLatestChildVersion,
             table,
             where,
             wherePlan,
           })
         : undefined
-    const collectionWhere = and(targetWhere, useDrafts ? eq(table['latest'], true) : undefined)
+    const collectionWhere = and(
+      targetWhere,
+      readLatestChildVersion ? eq(table['latest'], true) : undefined,
+    )
     const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
       const collectionField = pathPlan.fieldsByCollection.get(collection)
 
@@ -193,7 +204,7 @@ export const buildPolymorphicJoinQuery = ({
   }
 
   const subQueryAlias = `${columnName}_subquery`
-  const currentIDColumnName = versions ? adapter.tables[currentTableName].parent.name : 'id'
+  const currentIDColumnName = parentIsVersion ? adapter.tables[currentTableName].parent.name : 'id'
   const currentID = sql.raw(`"${currentTableName}"."${currentIDColumnName}"`)
   const parentConstraint = eq(currentID, sql.raw(`"${subQueryAlias}"."${onPath}"`))
   const countExpression = shouldCount
