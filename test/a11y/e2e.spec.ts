@@ -1448,7 +1448,7 @@ test.describe('Admin accessibility', () => {
         await expect(nav).not.toHaveClass(/nav--nav-open/)
         await expect(toggle).toBeFocused()
         releasePreference.resolve()
-        await expect(await persistedClose).toBeOK()
+        await expect.poll(async () => (await persistedClose).ok()).toBe(true)
         await expect(nav).not.toHaveClass(/nav--nav-open/)
         await expect(nav).toHaveAttribute('inert', '')
         await expect(toggle).toHaveAttribute('aria-expanded', 'false')
