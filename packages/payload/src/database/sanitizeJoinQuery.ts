@@ -9,6 +9,7 @@ import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from './queryValidation/validateSortQuery.js'
 import { hasRowContains, isRowContainsField } from './resolveRowContains.js'
 import { sanitizeWhereQuery } from './sanitizeWhereQuery.js'
+import { scopePolymorphicJoinWhere } from './scopePolymorphicJoinWhere.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -20,6 +21,7 @@ type Args = {
 const sanitizeJoinFieldQuery = async ({
   collectionSlug,
   errors,
+  isRowField,
   join,
   joinsQuery,
   overrideAccess,
@@ -28,17 +30,18 @@ const sanitizeJoinFieldQuery = async ({
 }: {
   collectionSlug: string
   errors: { path: string }[]
+  isRowField?: (path: string) => boolean
   join: SanitizedJoin
-  joinsQuery: JoinQuery
+  joinsQuery: Exclude<JoinQuery, false>
   overrideAccess: boolean
   promises: Promise<void>[]
   req: PayloadRequest
 }) => {
   const { joinPath } = join
 
-  // TODO: fix any's in joinsQuery[joinPath]
+  const configuredQuery = joinsQuery[joinPath]
 
-  if ((joinsQuery as any)[joinPath] === false) {
+  if (configuredQuery === false) {
     return
   }
 
@@ -52,15 +55,12 @@ const sanitizeJoinFieldQuery = async ({
     : true
 
   if (accessResult === false) {
-    ;(joinsQuery as any)[joinPath] = false
+    joinsQuery[joinPath] = false
     return
   }
 
-  if (!(joinsQuery as any)[joinPath]) {
-    ;(joinsQuery as any)[joinPath] = {}
-  }
-
-  const joinQuery = (joinsQuery as any)[joinPath]
+  const joinQuery = configuredQuery ?? {}
+  joinsQuery[joinPath] = joinQuery
 
   if (!joinQuery.where) {
     joinQuery.where = {}
@@ -70,23 +70,27 @@ const sanitizeJoinFieldQuery = async ({
     joinQuery.where = combineQueries(joinQuery.where, deepCopyObjectSimple(join.field.where))
   }
 
-  if (Array.isArray(join.field.collection)) {
-    const where = combineQueries(joinQuery.where, accessResult)
-    const isRowField = (path: string) =>
-      isRowContainsField({ fields: joinCollectionConfig.flattenedFields, path })
+  const polymorphicJoinCollections = Array.isArray(join.field.collection)
+    ? join.field.collection
+    : undefined
+  const where =
+    isRowField && hasRowContains({ isRowField, where: joinQuery.where })
+      ? scopePolymorphicJoinWhere({ collectionSlug, where: joinQuery.where })
+      : joinQuery.where
 
-    if (hasRowContains({ isRowField, where })) {
-      errors.push({ path: joinPath })
-      return
-    }
+  if (where === false) {
+    joinsQuery[joinPath] = false
+    return
   }
+
+  joinQuery.where = where === true ? {} : where
 
   promises.push(
     validateQueryPaths({
       collectionConfig: joinCollectionConfig,
       errors,
       overrideAccess,
-      polymorphicJoin: Array.isArray(join.field.collection),
+      polymorphicJoinCollections,
       req,
       // incoming where input, but we shouldn't validate generated from the access control.
       where: joinQuery.where,
@@ -146,16 +150,24 @@ export const sanitizeJoinQuery = async ({
   }
 
   for (const join of collectionConfig.polymorphicJoins) {
+    const collections = join.field.collection
     const joinQuery = joinsQuery[join.joinPath]
 
     // Preserve joins explicitly disabled by the caller.
-    if (joinQuery === false) {
+    if (joinQuery === false || !Array.isArray(collections)) {
       continue
     }
 
     const readableCollections: Where[] = []
+    const isRowField = (path: string) =>
+      collections.some((slug) =>
+        isRowContainsField({
+          fields: req.payload.collections[slug]!.config.flattenedFields,
+          path,
+        }),
+      )
 
-    for (const collectionSlug of join.field.collection) {
+    for (const collectionSlug of collections) {
       const collectionJoins: JoinQuery = {
         [join.joinPath]: deepCopyObjectSimple(joinQuery || {}),
       }
@@ -163,6 +175,7 @@ export const sanitizeJoinQuery = async ({
       await sanitizeJoinFieldQuery({
         collectionSlug,
         errors,
+        isRowField,
         join,
         joinsQuery: collectionJoins,
         overrideAccess,

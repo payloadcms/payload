@@ -208,6 +208,10 @@ export const AccessJoinNotes: CollectionConfig = {
       ],
     },
     {
+      name: 'localizedItems',
+      type: 'text',
+    },
+    {
       name: 'details',
       type: 'group',
       fields: [

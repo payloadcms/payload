@@ -1,7 +1,8 @@
 import type { FlattenedField, Where } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated, getFieldByPath, QueryError } from 'payload'
+import { createArrayFromCommaDelineated, getFieldByPath } from 'payload'
+import { matchesCollectionConstraint } from 'payload/shared'
 
 type ResolvedCollectionCondition =
   | { matches: 'all-documents' }
@@ -143,47 +144,4 @@ function combineConditions({
   }
 
   return { matches: 'documents-matching-where', where: { [operator]: filters } }
-}
-
-function matchesCollectionConstraint({
-  collectionSlug,
-  constraint,
-}: {
-  collectionSlug: string
-  constraint: unknown
-}): boolean {
-  if (!constraint || typeof constraint !== 'object' || Array.isArray(constraint)) {
-    throw new QueryError([{ path: 'relationTo' }])
-  }
-
-  const matches = Object.entries(constraint).map(([operator, value]) => {
-    switch (operator) {
-      case 'equals':
-        return value === collectionSlug
-      case 'in':
-        return includesCollection({ collectionSlug, constraint: value })
-      case 'not_equals':
-        return value !== collectionSlug
-      case 'not_in':
-        return !includesCollection({ collectionSlug, constraint: value })
-      default:
-        throw new QueryError([{ path: `relationTo.${operator}` }])
-    }
-  })
-
-  return matches.every(Boolean)
-}
-
-function includesCollection({
-  collectionSlug,
-  constraint,
-}: {
-  collectionSlug: string
-  constraint: unknown
-}): boolean {
-  if (typeof constraint === 'string') {
-    return constraint.split(',').includes(collectionSlug)
-  }
-
-  return Array.isArray(constraint) && constraint.includes(collectionSlug)
 }

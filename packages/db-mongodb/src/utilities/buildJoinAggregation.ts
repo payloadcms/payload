@@ -11,7 +11,15 @@ import {
   type JoinQuery,
   type SanitizedCollectionConfig,
 } from 'payload'
-import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
+import {
+  fieldShouldBeLocalized,
+  getFieldInGroups,
+  hasDraftsEnabled,
+  hasRowContains,
+  isNestedRelationshipQuery,
+  isRowContainsField,
+  scopePolymorphicJoinWhere,
+} from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel } from '../types.js'
@@ -69,6 +77,10 @@ export const buildJoinAggregation = async ({
   }
 
   for (const join of polymorphicJoinsConfig) {
+    const collections = join.field.collection
+    if (!Array.isArray(collections)) {
+      continue
+    }
     if (projection && !projection[join.joinPath]) {
       continue
     }
@@ -87,7 +99,7 @@ export const buildJoinAggregation = async ({
 
     const pageEnd = (page || 1) * limitJoin
     const aggregatedFields: FlattenedField[] = []
-    for (const collectionSlug of join.field.collection) {
+    for (const collectionSlug of collections) {
       const { collectionConfig } = getCollection({ adapter, collectionSlug })
 
       for (const field of collectionConfig.flattenedFields) {
@@ -106,12 +118,22 @@ export const buildJoinAggregation = async ({
       timestamps: true,
     })
 
-    const $match = await buildQuery({
-      adapter,
-      fields: aggregatedFields,
-      locale,
-      where: whereJoin,
-    })
+    const isRowField = (path: string) =>
+      collections.some((slug) =>
+        isRowContainsField({
+          fields: adapter.payload.collections[slug]!.config.flattenedFields,
+          path,
+        }),
+      )
+    const hasRowFilters = hasRowContains({ isRowField, where: whereJoin })
+    const sharedMatch = hasRowFilters
+      ? undefined
+      : await buildQuery({
+          adapter,
+          fields: aggregatedFields,
+          locale,
+          where: whereJoin,
+        })
 
     const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
     const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
@@ -122,9 +144,43 @@ export const buildJoinAggregation = async ({
 
     const as = join.joinPath
 
-    for (const collectionSlug of join.field.collection) {
+    for (const collectionSlug of collections) {
       const alias = `${as}.docs.${collectionSlug}`
       aliases.push(alias)
+
+      const targetFields = adapter.payload.collections[collectionSlug]!.config.flattenedFields
+      const scopedWhere = hasRowFilters
+        ? scopePolymorphicJoinWhere({
+            canMatchField: ({ constraint, path }) => {
+              const schemaPath = path.replace(/__/g, '.')
+              return (
+                Array.isArray(constraint) ||
+                !isNestedRelationshipQuery(constraint?.contains) ||
+                !isRowField(schemaPath) ||
+                Boolean(getFieldInGroups({ fields: targetFields, path: schemaPath }))
+              )
+            },
+            collectionSlug,
+            where: whereJoin,
+          })
+        : true
+      let $match = sharedMatch
+      if (typeof scopedWhere !== 'boolean') {
+        $match = await buildQuery({
+          adapter,
+          collectionSlug,
+          fields: [
+            ...targetFields,
+            ...aggregatedFields.filter(
+              (field) => !targetFields.some(({ name }) => name === field.name),
+            ),
+          ],
+          locale,
+          where: scopedWhere,
+        })
+      } else {
+        $match ??= scopedWhere ? {} : { _id: { $in: [] } }
+      }
 
       const basePipeline = [
         {

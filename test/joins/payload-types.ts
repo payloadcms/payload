@@ -402,6 +402,7 @@ export interface AccessJoinNote {
         id?: string | null;
       }[]
     | null;
+  localizedItems?: string | null;
   details?: {
     tags?: ('available' | 'not-permitted')[] | null;
     mixedTags?: ('available' | 'not-permitted') | null;
@@ -1665,6 +1666,7 @@ export interface AccessJoinNotesSelect<T extends boolean = true> {
         tags?: T;
         id?: T;
       };
+  localizedItems?: T;
   details?:
     | T
     | {
@@ -2333,7 +2335,6 @@ declare module 'payload' {
   // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
-
 export interface Section {
   heading?: string | null;
   id?: string | null;
