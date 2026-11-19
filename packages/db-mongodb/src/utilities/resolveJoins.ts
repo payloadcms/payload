@@ -353,7 +353,22 @@ export async function resolveJoins({
             return 1 * sort
           }
         }
-        return 0
+
+        if (!isPolymorphicJoin) {
+          return 0
+        }
+
+        const aJoin = a.__joinData as { relationTo: string; value: number | string }
+        const bJoin = b.__joinData as { relationTo: string; value: number | string }
+        const collectionOrder = aJoin.relationTo.localeCompare(bJoin.relationTo)
+
+        if (collectionOrder) {
+          return collectionOrder
+        }
+
+        return typeof aJoin.value === 'number' && typeof bJoin.value === 'number'
+          ? aJoin.value - bJoin.value
+          : String(aJoin.value).localeCompare(String(bJoin.value))
       })
       results.docs = results.docs.map(
         (doc) => (isPolymorphicJoin ? doc.__joinData : doc.id) as Record<string, unknown>,

@@ -152,6 +152,7 @@ export const buildJoinAggregation = async ({
             {
               $sort: {
                 [sortProperty]: sortDirection,
+                ...(sortProperty === '_id' ? {} : { _id: 1 }),
               },
             },
             ...(limitJoin > 0
@@ -225,6 +226,8 @@ export const buildJoinAggregation = async ({
             input: `$${as}.docs`,
             sortBy: {
               [sortProperty]: sortDirection,
+              ...(sortProperty === 'relationTo' ? {} : { relationTo: 1 }),
+              value: 1,
             },
           },
         },

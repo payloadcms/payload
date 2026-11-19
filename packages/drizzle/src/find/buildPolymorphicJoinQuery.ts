@@ -173,7 +173,11 @@ export const buildPolymorphicJoinQuery = ({
         .where(parentConstraint)}`.as(`${columnName}_count`)
     : undefined
 
-  unionQuery = unionQuery.orderBy(sortOrder(sql`"sortPath"`))
+  unionQuery = unionQuery.orderBy(
+    sortOrder(sql`"sortPath"`),
+    asc(sql`"relationTo"`),
+    asc(sql`"id"`),
+  )
 
   const sortedUnionAlias = `${columnName}_sorted`
   let limitOffsetSQL = sql.empty()
