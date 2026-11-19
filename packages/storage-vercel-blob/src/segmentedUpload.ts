@@ -4,6 +4,7 @@ import type {
   ReservedObject,
   SegmentedUploadCapability,
   UploadInstructionsAccess,
+  UploadSessionTransferConfig,
 } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -61,7 +62,14 @@ type Args = {
   useCompositePrefixes?: boolean
 }
 
-type VercelBlobProviderState = { contentType: string }
+type VercelBlobProviderState = {
+  contentType: string
+  /** The transfer settings core planned segments with, so the plan can be rebuilt later. */
+  transfer: {
+    collection?: UploadSessionTransferConfig
+    global?: UploadSessionTransferConfig
+  }
+}
 
 /**
  * Vercel Blob uploads for durable upload sessions. The browser uploads each segment straight to
@@ -217,42 +225,41 @@ export const createSegmentedUpload = ({
         operation: () => list({ limit: 1, prefix: getStagingPrefix({ object }), token }),
       })
 
+      const upload = typeof collection.upload === 'object' ? collection.upload : undefined
+
       return {
         object,
-        providerState: { contentType: mimeType } satisfies VercelBlobProviderState,
+        providerState: {
+          contentType: mimeType,
+          transfer: { collection: upload?.transfer, global: req.payload.config.upload?.transfer },
+        } satisfies VercelBlobProviderState,
       }
     },
 
     limits,
 
-    reconcile: async ({ object, req }) => {
-      const stagedParts = await listStagedParts({ object, token })
-
-      if (stagedParts.length) {
-        return stagedParts.flatMap(({ pathname, size }) => {
-          const number = getPartNumber({ object, pathname })
-
-          return number === null ? [] : [{ number, size }]
-        }) satisfies ReconciledSegments
-      }
-
+    reconcile: async ({ object, providerState }) => {
       const finalSize = await getSize({ pathname: object.storageFilePath, token })
 
-      if (finalSize === null) {
-        return []
+      // Once the final blob is assembled it holds every segment, even if core did not record the
+      // completion or some staged parts were not removed. The plan core froze is rebuilt from the
+      // settings it was made with; `complete` then removes any staged parts left over.
+      if (finalSize !== null) {
+        const { transfer } = providerState as VercelBlobProviderState
+
+        return planSegments({
+          collectionTransfer: transfer.collection,
+          globalTransfer: transfer.global,
+          limits,
+          size: finalSize,
+        }).segments.map(({ end, number, start }) => ({ number, size: end - start }))
       }
 
-      // Completion removes the staged parts once the final blob is assembled. If core did not
-      // record that completion, the final blob holds every segment of the plan core froze, which
-      // the same inputs reproduce.
-      const upload = typeof collection.upload === 'object' ? collection.upload : undefined
+      return (await listStagedParts({ object, token })).flatMap(({ pathname, size }) => {
+        const number = getPartNumber({ object, pathname })
 
-      return planSegments({
-        collectionTransfer: upload?.transfer,
-        globalTransfer: req.payload.config.upload?.transfer,
-        limits,
-        size: finalSize,
-      }).segments.map(({ end, number, start }) => ({ number, size: end - start }))
+        return number === null ? [] : [{ number, size }]
+      }) satisfies ReconciledSegments
     },
   }
 }
@@ -390,6 +397,10 @@ const isBlobError = ({
 }): boolean =>
   err instanceof errorClass || (err instanceof Error && err.constructor.name === errorClass.name)
 
+/**
+ * Maps items with bounded concurrency. After the first failure no new items start, and running
+ * ones finish before the failure is thrown, so nothing keeps uploading once completion has failed.
+ */
 const mapWithConcurrency = async <T, R>({
   concurrency,
   items,
@@ -401,16 +412,25 @@ const mapWithConcurrency = async <T, R>({
 }): Promise<R[]> => {
   const results: R[] = new Array(items.length)
   let nextIndex = 0
+  let failure: { err: unknown } | undefined
 
   const worker = async () => {
-    while (nextIndex < items.length) {
+    while (!failure && nextIndex < items.length) {
       const index = nextIndex++
 
-      results[index] = await mapper(items[index]!)
+      try {
+        results[index] = await mapper(items[index]!)
+      } catch (err) {
+        failure ??= { err }
+      }
     }
   }
 
   await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker))
+
+  if (failure) {
+    throw failure.err
+  }
 
   return results
 }

@@ -49,6 +49,12 @@ const stagingPrefix = `${UPLOAD_STAGING_PREFIX}key/video.mp4/`
 
 const req = { payload: { config: { upload: {} } } } as unknown as PayloadRequest
 
+// Planned with 5 MiB segments, while the collection config below now prefers 10 MiB.
+const providerState = {
+  contentType: 'video/mp4',
+  transfer: { collection: { preferredSegmentSize: 5 * MiB } },
+}
+
 const createCapability = () =>
   createSegmentedUpload({
     baseUrl: 'https://store.public.blob.vercel-storage.com',
@@ -57,7 +63,7 @@ const createCapability = () =>
     collection: {
       slug: 'videos',
       fields: [],
-      upload: { transfer: { preferredSegmentSize: 5 * MiB } },
+      upload: { transfer: { preferredSegmentSize: 10 * MiB } },
     },
     collectionPrefix: '',
     token: 'vercel_blob_rw_store_secret',
@@ -89,7 +95,7 @@ describe('Vercel Blob segmented uploads', () => {
       expiresIn: 900,
       mimeType: 'video/mp4',
       object,
-      providerState: { contentType: 'video/mp4' },
+      providerState,
       req,
       segments: [
         { end: 5 * MiB, number: 1, start: 0 },
@@ -126,7 +132,7 @@ describe('Vercel Blob segmented uploads', () => {
 
     const reconciled = await createCapability().reconcile({
       object,
-      providerState: { contentType: 'video/mp4' },
+      providerState,
       req,
     })
 
@@ -142,7 +148,7 @@ describe('Vercel Blob segmented uploads', () => {
 
     const reconciled = await createCapability().reconcile({
       object,
-      providerState: { contentType: 'video/mp4' },
+      providerState,
       req,
     })
 
@@ -151,6 +157,40 @@ describe('Vercel Blob segmented uploads', () => {
       { number: 2, size: 5 * MiB },
       { number: 3, size: MiB },
     ])
+  })
+
+  it('should reconcile from the final blob even when some staged parts remain', async () => {
+    mocks.head.mockResolvedValue({ size: 11 * MiB })
+    mocks.list.mockResolvedValue({
+      blobs: [stagedBlob({ name: '00003', size: MiB })],
+      hasMore: false,
+    })
+
+    const reconciled = await createCapability().reconcile({ object, providerState, req })
+
+    expect(reconciled.map(({ number }) => number)).toEqual([1, 2, 3])
+  })
+
+  it('should stop uploading parts after one fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(Buffer.alloc(5))),
+    )
+    mocks.createMultipartUpload.mockResolvedValue({ key: 'mpu-key', uploadId: 'mpu-id' })
+    mocks.uploadPart.mockRejectedValue(new Error('part failed'))
+
+    await expect(
+      createCapability().complete({
+        object,
+        providerState,
+        req,
+        segments: Array.from({ length: 10 }, (_, index) => ({ number: index + 1, size: 5 })),
+      }),
+    ).rejects.toThrow('part failed')
+    // Give any worker that kept going time to start more parts.
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    // Only the first batch of concurrent parts started.
+    expect(mocks.uploadPart.mock.calls.length).toBeLessThanOrEqual(4)
   })
 
   it('should assemble staged parts in order, then remove them', async () => {
@@ -175,7 +215,7 @@ describe('Vercel Blob segmented uploads', () => {
 
     const result = await createCapability().complete({
       object,
-      providerState: { contentType: 'video/mp4' },
+      providerState,
       req,
       segments: [
         { number: 2, size: 2 },
@@ -212,7 +252,7 @@ describe('Vercel Blob segmented uploads', () => {
     await expect(
       createCapability().complete({
         object,
-        providerState: { contentType: 'video/mp4' },
+        providerState,
         req,
         segments: [{ number: 1, size: 5 }],
       }),
@@ -225,7 +265,7 @@ describe('Vercel Blob segmented uploads', () => {
 
     const result = await createCapability().complete({
       object,
-      providerState: { contentType: 'video/mp4' },
+      providerState,
       req,
       segments: [{ number: 1, size: 7 }],
     })
@@ -241,7 +281,7 @@ describe('Vercel Blob segmented uploads', () => {
     })
     mocks.head.mockResolvedValue({ size: 5 })
 
-    await createCapability().abort({ object, providerState: { contentType: 'video/mp4' }, req })
+    await createCapability().abort({ object, providerState, req })
 
     expect(mocks.del).toHaveBeenCalledWith(
       [stagedBlob({ name: '00001', size: 5 }).url],

@@ -119,6 +119,27 @@ describe('createVercelBlobAdapter', () => {
   })
 })
 
+describe('createVercelBlobAdapter upload sessions', () => {
+  it.each([
+    { clientUploads: true, hasSessions: true },
+    { clientUploads: false, hasSessions: false },
+  ])(
+    'should only support upload sessions when clientUploads is $clientUploads',
+    ({ clientUploads, hasSessions }) => {
+      const generatedAdapter = createVercelBlobAdapter({
+        access: 'public',
+        baseUrl: 'https://example.com',
+        cacheControlMaxAge: 60,
+        clientUploads,
+        collectionSources: [],
+        token: 'read-write-token',
+      })({ collection: { slug: 'media' }, prefix: '' } as never)
+
+      expect(Boolean(generatedAdapter.uploadInstructions?.segmented)).toBe(hasSessions)
+    },
+  )
+})
+
 describe('vercelBlobStorage configuration', () => {
   const config = {
     collections: [{ slug: 'media', fields: [], upload: true }],

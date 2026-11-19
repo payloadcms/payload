@@ -255,12 +255,19 @@ test.suite('@payloadcms/storage-vercel-blob upload sessions', { config: './confi
       targetID: String(originalDoc.id),
     })
 
-    await uploadAllSegments({ restClient, session: replacement })
+    // Same size, so the frozen segment plan matches, but different bytes.
+    const replacementBytes = randomBytes(fileBytes.length)
+
+    await uploadAllSegments({ bytes: replacementBytes, restClient, session: replacement })
 
     const { doc } = await complete({ data: {}, restClient, session: replacement })
 
     expect(doc.id).toBe(originalDoc.id)
     expect(doc.title).toBe('Original')
+
+    const download = await restClient.GET(`/${videosSlug}/file/${doc.filename}`)
+
+    expect(Buffer.from(await download.arrayBuffer()).equals(replacementBytes)).toBe(true)
   })
 
   test('should remove staged segments when the session is cancelled', async ({ restClient }) => {
@@ -369,15 +376,17 @@ const getInstructions = async ({
 }
 
 const putSegment = async ({
+  bytes = fileBytes,
   request,
   session,
 }: {
+  bytes?: Buffer
   request: UploadSegmentRequest
   session: ClientUploadSession
 }) => {
   const segment = session.transfer.segments.find(({ number }) => number === request.number)!
   const response = await fetch(request.url, {
-    body: fileBytes.subarray(segment.start, segment.end),
+    body: bytes.subarray(segment.start, segment.end),
     headers: request.headers,
     method: request.method,
   })
@@ -386,16 +395,18 @@ const putSegment = async ({
 }
 
 const uploadAllSegments = async ({
+  bytes,
   restClient,
   session,
 }: {
+  bytes?: Buffer
   restClient: RESTClient
   session: ClientUploadSession
 }) => {
   let { requests } = await getInstructions({ restClient, session })
 
   while (requests.length) {
-    await Promise.all(requests.map((request) => putSegment({ request, session })))
+    await Promise.all(requests.map((request) => putSegment({ bytes, request, session })))
     ;({ requests } = await getInstructions({ restClient, session }))
   }
 }

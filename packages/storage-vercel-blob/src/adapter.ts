@@ -143,16 +143,19 @@ export function createVercelBlobAdapter({
         }
       },
       requiresUploadReceipt: true,
-      segmented: createSegmentedUpload({
-        access: clientUploadsAccess,
-        baseUrl,
-        blobAccess: access,
-        cacheControlMaxAge,
-        collection,
-        collectionPrefix: prefix,
-        token,
-        useCompositePrefixes,
-      }),
+      // Sessions upload straight to Vercel Blob, so they follow the `clientUploads` setting.
+      segmented: clientUploads
+        ? createSegmentedUpload({
+            access: clientUploadsAccess,
+            baseUrl,
+            blobAccess: access,
+            cacheControlMaxAge,
+            collection,
+            collectionPrefix: prefix,
+            token,
+            useCompositePrefixes,
+          })
+        : undefined,
       useInAdmin: true,
     },
 
