@@ -28,6 +28,7 @@ import { useDocumentForm } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { requestPriority } from './requestPriority.js'
+import { clearRenderPathsForChangedRows } from './rowHelpers.js'
 
 type FormStateRequestArgs = Omit<BuildFormStateArgs, 'req'>
 
@@ -271,6 +272,10 @@ export const useFormState = ({
         : isNested
           ? getDataFromFormState(formState, true)
           : savedDocument
+
+      if (data && formState && action.type === 'afterSave' && acceptValues === true) {
+        clearRenderPathsForChangedRows({ data, formState })
+      }
 
       const args: FormStateRequestArgs = {
         id: widgetSlug ? undefined : document.id,
