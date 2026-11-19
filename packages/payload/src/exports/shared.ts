@@ -126,6 +126,7 @@ export {
 } from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
+export { defaultTransferConfig as defaultUploadTransferConfig } from '../uploads/sessions/defaults.js'
 export { cropToPercent } from '../uploads/transformState/cropUnits.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
@@ -217,6 +218,9 @@ export {
 export { normalizeSliderValue } from '../utilities/normalizeSliderValue.js'
 
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
+
+export { parseErrorResponse } from '../utilities/parseErrorResponse.js'
+export type { ParsedErrorResponse, ParsedNonFieldError } from '../utilities/parseErrorResponse.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 

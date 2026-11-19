@@ -9,6 +9,7 @@ import sharp from 'sharp'
 import {
   dynamicMediaSlug,
   publicCloudMediaSlug,
+  restrictedDynamicMediaSlug,
   versionedCloudMediaSlug,
   versionedDynamicMediaSlug,
 } from './shared.js'
@@ -16,6 +17,7 @@ import {
 const dynamicCollectionSlugs = [
   dynamicMediaSlug,
   publicCloudMediaSlug,
+  restrictedDynamicMediaSlug,
   versionedCloudMediaSlug,
   versionedDynamicMediaSlug,
 ]
@@ -137,6 +139,7 @@ export const requestCropTransformer: UploadTransformer = {
     registerUploadVariants({
       collections: {
         [dynamicMediaSlug]: { variants: [{ name: 'card' }] },
+        [restrictedDynamicMediaSlug]: { variants: [{ name: 'card' }] },
         [versionedDynamicMediaSlug]: { variants: [{ name: 'card' }] },
         [versionedCloudMediaSlug]: { variants: [{ name: 'card' }] },
       },
@@ -189,6 +192,6 @@ export const uploadBridgeTransformer: TransformerWithInternalBridge & UploadTran
   mimeTypes: ['image/*'],
   transformFile: () => Promise.resolve({ status: 'continue' }),
   [uploadTransformerInternal]: {
-    prepareUpload: ({ file }) => Promise.resolve([{ fieldPath: 'filename', file }]),
+    transformUpload: ({ file }) => Promise.resolve([{ fieldPath: 'filename', file }]),
   },
 }

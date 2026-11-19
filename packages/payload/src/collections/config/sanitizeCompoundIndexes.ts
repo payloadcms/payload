@@ -4,6 +4,7 @@ import type { CompoundIndex, SanitizedCompoundIndex } from './types.js'
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 
+/** Resolves compound index paths and rejects configurations that cannot be validated reliably. */
 export const sanitizeCompoundIndexes = ({
   fields,
   indexes,
@@ -30,7 +31,36 @@ export const sanitizeCompoundIndexes = ({
         )
       }
 
+      if (index.unique && index.requireExists?.length) {
+        const segments = path.split('.')
+
+        for (let length = 1; length < segments.length; length++) {
+          const parentPath = segments.slice(0, length).join('.')
+          const parent = getFieldByPath({ fields, path: parentPath })
+
+          if (parent && ['array', 'blocks'].includes(parent.field.type)) {
+            throw new InvalidConfiguration(
+              `Unique compound indexes with requireExists cannot index paths within arrays or blocks. Path: ${path}`,
+            )
+          }
+        }
+      }
+
       sanitized.fields.push({ field, localizedPath, path, pathHasLocalized })
+    }
+
+    if (index.requireExists) {
+      sanitized.requireExists = index.requireExists.map((path) => {
+        const result = getFieldByPath({ fields, path })
+
+        if (!result) {
+          throw new InvalidConfiguration(`Field ${path} in requireExists was not found`)
+        }
+
+        const { localizedPath, pathHasLocalized } = result
+
+        return { localizedPath, path, pathHasLocalized }
+      })
     }
 
     sanitizedCompoundIndexes.push(sanitized)

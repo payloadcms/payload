@@ -13,6 +13,7 @@ import type { MCPBuiltinOAuthConfig, MCPOAuthTokens } from '../types.js'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { seal, unseal } from '../utils/seal.js'
+import { canUseMCP } from './access.js'
 import { getMCPResource } from './oauth.js'
 import { issueLoginToken, refreshLoginToken } from './oauthLoginToken.js'
 
@@ -35,7 +36,7 @@ type Code = {
 }
 
 /** Why `MCPAuthorizeView` can't show the Allow form. */
-export type AuthorizeViewError = 'expired' | 'invalid-link'
+export type AuthorizeViewError = 'expired' | 'forbidden' | 'invalid-link'
 
 /** The admin page where users allow MCP clients, `MCPAuthorizeView`. */
 export const authorizeViewPath = '/mcp/authorize'
@@ -165,7 +166,7 @@ const register: PayloadHandler = async (req) => {
   )
 }
 
-const authorize: PayloadHandler = (req) => {
+const authorize: PayloadHandler = async (req) => {
   const url = new URL(req.url!)
   const params = url.searchParams
   const clientID = params.get('client_id')
@@ -209,6 +210,11 @@ const authorize: PayloadHandler = (req) => {
     })
   }
 
+  // Users who can't use MCP aren't asked to allow a client that couldn't do anything for them
+  if (!(await canUseMCP({ req }))) {
+    return redirectToAuthorizeView({ params: { error: 'forbidden' }, req })
+  }
+
   const consent: Consent = {
     clientID: clientID!,
     codeChallenge,
@@ -246,10 +252,16 @@ const approve = async ({
 
   const form = new URLSearchParams(await req.text!())
   const consent = unseal<Consent>({ type: 'consent', req, value: form.get('consent') })
+  const client = consent && unseal<Client>({ type: 'client', req, value: consent.clientID })
   const user = getBrowserUser(req)
 
   // The form is only valid for the user it was shown to
-  if (!consent || user?.id !== consent.userID || user.collection !== consent.collection) {
+  if (
+    !consent ||
+    !client ||
+    user?.id !== consent.userID ||
+    user.collection !== consent.collection
+  ) {
     return redirectToAuthorizeView({ params: { error: 'expired' }, req })
   }
 
@@ -264,11 +276,19 @@ const approve = async ({
     })
   }
 
+  // Checked again since the Allow page was shown, so no tokens are issued to users who lost access
+  if (!(await canUseMCP({ req }))) {
+    return redirectToAuthorizeView({ params: { error: 'forbidden' }, req })
+  }
+
   const code: Code = {
     clientID,
     codeChallenge,
     redirectURI,
-    tokens: await getTokenHooks(req).issueToken({ req }),
+    tokens: await getTokenHooks(req).issueToken({
+      client: { name: client.name, redirectURI },
+      req,
+    }),
   }
 
   return redirect({

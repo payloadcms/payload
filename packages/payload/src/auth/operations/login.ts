@@ -23,6 +23,7 @@ import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.j
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { createAuthToken } from '../createAuthToken.js'
 import { getLoginOptions } from '../getLoginOptions.js'
+import { getUserAgentLabel } from '../getUserAgentLabel.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
@@ -283,8 +284,10 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     }
 
     const { exp, refreshToken, token, ...session } = await createAuthToken({
+      type: 'login',
       collectionConfig,
       email: sanitizedEmail!,
+      label: getUserAgentLabel({ userAgent: req.headers?.get('User-Agent') }),
       req,
       shouldCreateRefreshToken: Boolean(collectionConfig.auth.refreshTokens),
       user,

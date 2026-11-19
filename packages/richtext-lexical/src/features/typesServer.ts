@@ -239,7 +239,7 @@ export type JSONSchemaFn = (args: JSONSchemaArgs) => JSONSchema4
 // overload, and LexicalExportJSON widens custom nodes' serialized type discriminants.
 type SerializedNodeJSON<T extends LexicalNode> = T['exportJSON'] extends {
   (compact?: false): infer Serialized extends SerializedLexicalNode
-  // eslint-disable-next-line perfectionist/sort-object-types -- Overload order determines inference.
+  // Overload order determines inference.
   (compact: boolean): unknown
 }
   ? Serialized

@@ -17,7 +17,13 @@ export type LoadLayoutDataResult = {
   layout: RenderableServerComponent<ReactElement>
 } & Pick<
   RootLayoutData,
-  'dir' | 'highContrastMode' | 'languageCode' | 'suppressHydrationWarning' | 'theme' | 'themeSource'
+  | 'dir'
+  | 'highContrastMode'
+  | 'highContrastModeSource'
+  | 'languageCode'
+  | 'suppressHydrationWarning'
+  | 'theme'
+  | 'themeSource'
 >
 
 export type RootLayoutData = {
@@ -82,11 +88,20 @@ export async function loadLayoutData({
   importMap: ImportMap
 }): Promise<LoadLayoutDataResult> {
   const data = await getLayoutData({ configPromise: config, importMap })
-  const { dir, highContrastMode, languageCode, suppressHydrationWarning, theme, themeSource } = data
+  const {
+    dir,
+    highContrastMode,
+    highContrastModeSource,
+    languageCode,
+    suppressHydrationWarning,
+    theme,
+    themeSource,
+  } = data
 
   return {
     dir,
     highContrastMode,
+    highContrastModeSource,
     languageCode,
     layout: await renderServerComponent(createElement(PayloadRootProviders, { data })),
     suppressHydrationWarning,

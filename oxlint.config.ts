@@ -78,6 +78,7 @@ export default defineConfig({
       vitestImports: [
         '../__helpers/int/vitest.js',
         '../../__helpers/int/vitest.js',
+        '../../../__helpers/int/vitest.js',
         '../__helpers/memory/vitest.js',
         '../int/vitest.js',
         './helpers/mcpFixtures.js',

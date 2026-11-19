@@ -29,8 +29,8 @@ async function build() {
     // plugins: [commonjs()],
     sourcemap: true,
     plugins: [sassPlugin({ css: 'external' })],
-    // 24.22.1 is the lowest version of node supported by Payload
-    target: 'node24.22.1',
+    // 24.22.3 is the lowest version of node supported by Payload
+    target: 'node24.22.3',
   })
   console.log('payload server bundled successfully')
 

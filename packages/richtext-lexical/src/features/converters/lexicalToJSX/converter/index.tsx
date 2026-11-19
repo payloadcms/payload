@@ -14,6 +14,7 @@ import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../..
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
+import { getExplicitDirection } from '../../utilities/getExplicitDirection.js'
 
 /**
  * Creates a JSX converter from a NodeMapValue
@@ -307,25 +308,25 @@ export function convertLexicalNodesToJSX({
         }
       }
 
-      if (React.isValidElement(reactNode)) {
-        // Inject style into reactNode
-        if (style.textAlign || style.paddingInlineStart) {
-          const newStyle = {
-            ...style,
-            // @ts-expect-error type better later
-            ...(reactNode?.props?.style ?? {}),
-            // reactNode style comes after, thus a textAlign specified in the converter has priority over the one we inject here
-          }
+      const dir = getExplicitDirection({ node })
 
-          return React.cloneElement(reactNode, {
-            key: i,
-            // @ts-expect-error type better later
-            style: newStyle,
-          })
-        }
-        return React.cloneElement(reactNode, {
+      if (React.isValidElement<{ dir?: string; style?: React.CSSProperties }>(reactNode)) {
+        const injectedProps: { dir?: string; key: number; style?: React.CSSProperties } = {
           key: i,
-        })
+        }
+
+        // A dir or style specified in the converter has priority over the one we inject here
+        if (dir && reactNode.props.dir === undefined) {
+          injectedProps.dir = dir
+        }
+        if (style.textAlign || style.paddingInlineStart) {
+          injectedProps.style = {
+            ...style,
+            ...(reactNode.props.style ?? {}),
+          }
+        }
+
+        return React.cloneElement(reactNode, injectedProps)
       }
 
       return reactNode

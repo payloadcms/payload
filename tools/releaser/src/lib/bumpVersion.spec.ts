@@ -15,13 +15,6 @@ vi.mock('./getPackageDetails.js', () => ({
 import { getPackageDetails } from './getPackageDetails.js'
 import { getWorkspace } from './getWorkspace.js'
 
-const stubRegistryCanary = (canary: string): void => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => ({ json: async () => ({ 'dist-tags': { canary } }) })),
-  )
-}
-
 describe('bumpVersion', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -36,7 +29,6 @@ describe('bumpVersion', () => {
   it.each([
     { version: '4.0.0-canary.37', expected: '4.0.0-beta.0', preid: 'beta' as const },
     { version: '4.0.0-beta.0', expected: '4.0.0-beta.1', preid: 'beta' as const },
-    { version: '4.0.0-canary.37', expected: '4.0.0-canary.38', preid: 'canary' as const },
   ])(
     'should bump $version to $expected in the root and release packages',
     async ({ version, expected, preid }) => {
@@ -66,26 +58,21 @@ describe('bumpVersion', () => {
     },
   )
 
-  // The live canary path (publish-prerelease.ts calls bumpVersion('canary')):
-  // derives the next iteration from the registry's current canary dist-tag, NOT
-  // from the committed version. This legacy registry-fetch derivation is slated
-  // for removal once canary derives from the committed version.
-  it('should increment the canary iteration from the registry dist-tag', async () => {
-    stubRegistryCanary('4.0.0-canary.9')
-    const workspace = getWorkspace()
+  it('should write the date-based canary version without reading the registry', async () => {
+    const fetchSpy = vi.fn()
+    vi.stubGlobal('fetch', fetchSpy)
 
-    const next = await workspace.bumpVersion('canary')
+    const next = await getWorkspace().bumpVersion('canary', {
+      date: new Date('2026-11-12T07:00:00Z'),
+    })
 
-    expect(next).toBe('4.0.0-canary.10')
-  })
-
-  it('should reset the canary iteration to 0 when the registry canary is on a different minor base', async () => {
-    stubRegistryCanary('3.99.0-canary.5')
-    const workspace = getWorkspace()
-
-    const next = await workspace.bumpVersion('canary')
-
-    // committed 4.0.0-canary.9 --minor -> 4.0.0 base; registry mismatch -> .0
-    expect(next).toBe('4.0.0-canary.0')
+    // Root fixture 4.0.0-canary.9 has base 4.0.0.
+    expect(next).toBe('4.0.0-canary.20261112')
+    expect(fetchSpy).not.toHaveBeenCalled()
+    expect(fse.writeJSON).toHaveBeenCalledWith(
+      ROOT_PACKAGE_JSON,
+      { version: '4.0.0-canary.20261112' },
+      { spaces: 2 },
+    )
   })
 })
