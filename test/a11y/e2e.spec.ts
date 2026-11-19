@@ -1409,6 +1409,56 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Appearance and layout', () => {
+    test('should preserve an explicit sidebar close while its saved preference is loading', async ({
+      page,
+    }) => {
+      const preferenceURL = `${serverURL}/api/payload-preferences/nav`
+      const savedPreference = await page.request.post(preferenceURL, {
+        data: { value: { open: true } },
+      })
+
+      await expect(savedPreference).toBeOK()
+      await page.setViewportSize({ height: 900, width: 1280 })
+      const preferenceRequested = Promise.withResolvers<void>()
+      const releasePreference = Promise.withResolvers<void>()
+
+      await page.route(preferenceURL, async (route) => {
+        if (route.request().method() !== 'GET') {
+          await route.continue()
+          return
+        }
+
+        const response = await route.fetch()
+
+        preferenceRequested.resolve()
+        await releasePreference.promise
+        await route.fulfill({ response })
+      })
+
+      try {
+        await page.goto(postsURL.list)
+        await preferenceRequested.promise
+        const nav = page.locator('aside.nav')
+        const toggle = page.locator('.app-header__sidebar-toggle')
+        const persistedClose = page.waitForResponse(
+          (response) => response.url() === preferenceURL && response.request().method() === 'POST',
+        )
+
+        await nav.getByRole('button', { name: 'Hide sidebar', exact: true }).click()
+        await expect(nav).not.toHaveClass(/nav--nav-open/)
+        await expect(toggle).toBeFocused()
+        releasePreference.resolve()
+        await expect(await persistedClose).toBeOK()
+        await expect(nav).not.toHaveClass(/nav--nav-open/)
+        await expect(nav).toHaveAttribute('inert', '')
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+        await expect(toggle).toBeFocused()
+      } finally {
+        releasePreference.resolve()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+
     test('should collapse navigation at 1024px and preserve keyboard focus across the breakpoint', async ({
       page,
     }) => {

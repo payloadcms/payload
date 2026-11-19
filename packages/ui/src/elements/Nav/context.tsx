@@ -53,6 +53,7 @@ export const NavProvider: React.FC<{
   const navRef = useRef<HTMLDivElement>(null)
   const navToggleRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
   const shouldReturnFocus = useRef(false)
+  const navPreferenceVersion = useRef(0)
   const previousBreakpoints = useRef<{ mid?: boolean; small?: boolean }>({})
   const previousPathname = useRef(pathname)
 
@@ -70,6 +71,7 @@ export const NavProvider: React.FC<{
       setNavOpenState(value)
 
       if (persist) {
+        navPreferenceVersion.current += 1
         void setPreference(PREFERENCE_KEYS.NAV, { open: value }, true)
       }
     },
@@ -98,10 +100,11 @@ export const NavProvider: React.FC<{
     let isCancelled = false
 
     if (midBreak === false) {
+      const preferenceVersion = navPreferenceVersion.current
       const setNavFromPreferences = async () => {
         const preferredState = await getNavPreference(getPreference)
 
-        if (!isCancelled) {
+        if (!isCancelled && preferenceVersion === navPreferenceVersion.current) {
           setNavOpen(preferredState)
         }
       }
