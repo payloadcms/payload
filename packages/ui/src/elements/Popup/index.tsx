@@ -542,8 +542,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     const activeElement = getActiveElement({ element: popup })
-
     const activePopup = activeElement?.closest(`.${baseClass}__content`)
+
     if (activePopup && activePopup !== popup) {
       return
     }
