@@ -30,6 +30,11 @@ const createLexicalLinkFeature = ({
           ...defaultFeatures,
           TreeViewFeature(),
           LinkFeature({
+            autoLinks: {
+              fields: {
+                newTab: true,
+              },
+            },
             fields: ({ defaultFields }) => {
               const modifiedFields = defaultFields.map((field) => {
                 if (field.name === 'newTab') {
