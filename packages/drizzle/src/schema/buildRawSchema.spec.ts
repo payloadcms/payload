@@ -750,6 +750,46 @@ describe('buildRawSchema', () => {
       expect(adapter.rawTables.p_numbers_field).toBeUndefined()
     })
 
+    it('should not give a hasMany select enum the dbName of its table', () => {
+      const adapter = buildCollection([
+        { name: 'tags', type: 'select', dbName: 'p_tags_custom', hasMany: true, options: ['a'] },
+      ])
+
+      expect(adapter.rawTables.p_tags_custom.columns.value).toMatchObject({
+        enumName: 'enum_p_tags_custom',
+      })
+    })
+
+    it('should not give a renamed hasMany select table and its enum the same name', () => {
+      const adapter = buildCollection([
+        { name: 'values', type: 'select', dbName: 'p_numbers', hasMany: true, options: ['a'] },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_values')).toBe('p_numbers_field')
+      expect(adapter.rawTables.p_numbers_field.columns.value).toMatchObject({
+        enumName: 'enum_p_numbers_field',
+      })
+      expect(adapter.rawTables.p_numbers.columns.number).toBeDefined()
+    })
+
+    it('should keep the enumName of a hasMany select that sets one', () => {
+      const adapter = buildCollection([
+        {
+          name: 'tags',
+          type: 'select',
+          dbName: 'p_tags_custom',
+          enumName: 'tags_enum',
+          hasMany: true,
+          options: ['a'],
+        },
+      ])
+
+      expect(adapter.rawTables.p_tags_custom.columns.value).toMatchObject({
+        enumName: 'tags_enum',
+      })
+    })
+
     it('should not report a locales table for an array whose only localized field is a hasMany number', () => {
       const config = sanitizeConfig({
         collections: [
