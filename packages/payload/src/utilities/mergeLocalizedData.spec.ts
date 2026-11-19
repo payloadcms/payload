@@ -293,12 +293,14 @@ describe('mergeLocalizedData', () => {
       const docWithLocales = {
         items: [
           {
+            id: 'item-1',
             name: {
               en: 'EN Item 1',
               es: 'ES Item 1',
             },
           },
           {
+            id: 'item-2',
             name: {
               en: 'EN Item 2',
               es: 'ES Item 2',
@@ -310,11 +312,13 @@ describe('mergeLocalizedData', () => {
       const dataWithLocales = {
         items: [
           {
+            id: 'item-1',
             name: {
               en: 'Updated EN Item 1',
             },
           },
           {
+            id: 'item-2',
             name: {
               en: 'Updated EN Item 2',
             },
@@ -332,15 +336,225 @@ describe('mergeLocalizedData', () => {
 
       expect(result.items).toEqual([
         {
+          id: 'item-1',
           name: {
             en: 'Updated EN Item 1',
             es: 'ES Item 1',
           },
         },
         {
+          id: 'item-2',
           name: {
             en: 'Updated EN Item 2',
             es: 'ES Item 2',
+          },
+        },
+      ])
+    })
+    it('should keep localized values with matching rows when array rows are reordered (#18678)', () => {
+      const fields: Field[] = [
+        {
+          name: 'items',
+          type: 'array',
+          localized: false,
+          fields: [
+            {
+              name: 'key',
+              type: 'text',
+            },
+            {
+              name: 'label',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        items: [
+          {
+            id: 'row-1',
+            key: 'first',
+            label: {
+              en: 'First',
+              de: 'Erste',
+            },
+          },
+          {
+            id: 'row-2',
+            key: 'second',
+            label: {
+              en: 'Second',
+              de: 'Zweite',
+            },
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        items: [
+          {
+            id: 'row-2',
+            key: 'second',
+            label: {
+              en: 'Second Updated',
+            },
+          },
+          {
+            id: 'row-1',
+            key: 'first',
+            label: {
+              en: 'First Updated',
+            },
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.items).toEqual([
+        {
+          id: 'row-2',
+          key: 'second',
+          label: {
+            en: 'Second Updated',
+            de: 'Zweite',
+          },
+        },
+        {
+          id: 'row-1',
+          key: 'first',
+          label: {
+            en: 'First Updated',
+            de: 'Erste',
+          },
+        },
+      ])
+    })
+
+    it('should treat incoming array rows without IDs as new rows without positional merging', () => {
+      const fields: Field[] = [
+        {
+          name: 'items',
+          type: 'array',
+          localized: false,
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'other',
+              type: 'text',
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        items: [
+          {
+            id: 'a',
+            label: {
+              en: 'Old',
+              de: 'Alt',
+            },
+            other: 'old data',
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        items: [
+          {
+            label: {
+              en: 'New',
+            },
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.items).toEqual([
+        {
+          label: {
+            en: 'New',
+          },
+        },
+      ])
+    })
+
+    it('should not inherit old data for incoming array rows with unmatched IDs', () => {
+      const fields: Field[] = [
+        {
+          name: 'items',
+          type: 'array',
+          localized: false,
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'other',
+              type: 'text',
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        items: [
+          {
+            id: 'a',
+            label: {
+              en: 'Old',
+              de: 'Alt',
+            },
+            other: 'old data',
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        items: [
+          {
+            id: 'b',
+            label: {
+              en: 'New',
+            },
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.items).toEqual([
+        {
+          label: {
+            en: 'New',
           },
         },
       ])
@@ -471,6 +685,286 @@ describe('mergeLocalizedData', () => {
           },
         ],
       })
+    })
+
+    it('should not carry fields of a previous block at the same index into a new block of different blockType (#18678)', () => {
+      const fields: Field[] = [
+        {
+          name: 'content',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'alpha',
+              fields: [
+                {
+                  name: 'a',
+                  type: 'text',
+                },
+                {
+                  name: 'alphaLabel',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+            {
+              slug: 'beta',
+              fields: [
+                {
+                  name: 'b',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        content: [
+          {
+            id: 'block-1',
+            blockType: 'alpha',
+            a: 'from alpha',
+            alphaLabel: {
+              en: 'alpha label',
+            },
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        content: [
+          {
+            id: 'block-2',
+            blockType: 'beta',
+            b: 'from beta',
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.content).toEqual([
+        {
+          id: 'block-2',
+          blockType: 'beta',
+          b: 'from beta',
+        },
+      ])
+    })
+
+    it('should preserve omitted fields and other locales when matching blocks move (#18678)', () => {
+      const fields: Field[] = [
+        {
+          name: 'content',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'card',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  localized: true,
+                },
+                {
+                  name: 'other',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        content: [
+          {
+            id: 'a',
+            blockType: 'card',
+            label: { en: 'First', de: 'Erste' },
+            other: 'keep-first',
+          },
+          {
+            id: 'b',
+            blockType: 'card',
+            label: { en: 'Second', de: 'Zweite' },
+            other: 'keep-second',
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        content: [
+          {
+            id: 'b',
+            blockType: 'card',
+            label: { en: 'Second Updated' },
+          },
+          {
+            id: 'a',
+            blockType: 'card',
+            label: { en: 'First Updated' },
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.content).toEqual([
+        {
+          id: 'b',
+          blockType: 'card',
+          blockName: undefined,
+          label: { en: 'Second Updated', de: 'Zweite' },
+          other: 'keep-second',
+        },
+        {
+          id: 'a',
+          blockType: 'card',
+          blockName: undefined,
+          label: { en: 'First Updated', de: 'Erste' },
+          other: 'keep-first',
+        },
+      ])
+    })
+
+    it('should treat incoming blocks without IDs as new rows even when blockType matches', () => {
+      const fields: Field[] = [
+        {
+          name: 'content',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'card',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  localized: true,
+                },
+                {
+                  name: 'other',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        content: [
+          {
+            id: 'a',
+            blockType: 'card',
+            label: { en: 'Old', de: 'Alt' },
+            other: 'old data',
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        content: [
+          {
+            blockType: 'card',
+            label: { en: 'New' },
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.content).toEqual([
+        {
+          id: undefined,
+          blockType: 'card',
+          blockName: undefined,
+          label: { en: 'New' },
+        },
+      ])
+    })
+
+    it('should not inherit old data for incoming blocks with unmatched IDs even when blockType matches', () => {
+      const fields: Field[] = [
+        {
+          name: 'content',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'card',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  localized: true,
+                },
+                {
+                  name: 'other',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        content: [
+          {
+            id: 'a',
+            blockType: 'card',
+            label: { en: 'Old', de: 'Alt' },
+            other: 'old data',
+          },
+        ],
+      }
+
+      const dataWithLocales = {
+        content: [
+          {
+            id: 'b',
+            blockType: 'card',
+            label: { en: 'New' },
+          },
+        ],
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.content).toEqual([
+        {
+          id: 'b',
+          blockType: 'card',
+          blockName: undefined,
+          label: { en: 'New' },
+        },
+      ])
     })
   })
 
