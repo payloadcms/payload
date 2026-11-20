@@ -71,6 +71,13 @@ function createVideoThumbnail(file: File): Promise<string> {
     }
 
     video.onseeked = () => {
+      // A file with no decodable video track (audio only, or an unsupported codec such as HEVC)
+      // seeks with zero width and would encode an empty frame
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        reject(new Error(`Video "${file.name}" has no video frame to create a thumbnail`))
+        return
+      }
+
       drawToDataURL({
         outputFormat: 'image/jpeg',
         quality: 0.8,
