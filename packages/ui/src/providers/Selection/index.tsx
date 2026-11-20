@@ -8,6 +8,7 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useAuth } from '../Auth/index.js'
 import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
+import { useNestedDocsTree } from '../NestedDocs/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
 
 export enum SelectAllStatus {
@@ -52,6 +53,7 @@ type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly docs: any[]
   readonly totalDocs: number
+  readonly useNestedDocsData?: boolean
 }
 
 const reduceActiveSelections = (selected: Map<number | string, boolean>): (number | string)[] => {
@@ -66,7 +68,16 @@ const reduceActiveSelections = (selected: Map<number | string, boolean>): (numbe
   return ids
 }
 
-export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
+export const SelectionProvider: React.FC<Props> = ({
+  children,
+  docs: originalDocs = [],
+  totalDocs: originalTotalDocs,
+  useNestedDocsData = false,
+}) => {
+  const treeContext = useNestedDocsTree()
+  const tree = useNestedDocsData ? treeContext : null
+  const docs = tree?.docs ?? originalDocs
+  const totalDocs = tree ? docs.length : originalTotalDocs
   const contextRef = useRef({} as SelectionContext)
   const { user } = useAuth()
 
@@ -200,6 +211,22 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   )
 
   const getSelectedIds = useCallback(() => reduceActiveSelections(selected), [selected])
+
+  useEffect(() => {
+    if (!tree) {
+      return
+    }
+
+    const visibleIDs = new Set(docs.map(({ id }) => id))
+
+    setSelected((current) => {
+      if ([...current.keys()].every((id) => visibleIDs.has(id))) {
+        return current
+      }
+
+      return new Map([...current].filter(([id]) => visibleIDs.has(id)))
+    })
+  }, [docs, tree])
 
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {

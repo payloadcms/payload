@@ -25,10 +25,9 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { NestedDocsTreeProvider } from '../../providers/NestedDocs/index.js'
+import { NestedDocsSelectionProvider } from '../../providers/NestedDocsSelection/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
-import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -307,7 +306,15 @@ export function DefaultListView(props: ListViewClientProps) {
     >
       <Container className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
-          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
+          <NestedDocsSelectionProvider
+            collectionSlug={collectionSlug}
+            columns={treeColumns}
+            data={data}
+            enabled={isNestedDocsTreeLayout}
+            initialExpanded={nestedDocExpanded}
+            rows={nestedDocRows}
+            sort={query?.sort}
+          >
             {BeforeList}
             <CollectionListHeader
               collectionConfig={collectionConfig}
@@ -336,6 +343,7 @@ export function DefaultListView(props: ListViewClientProps) {
               i18n={i18n}
               isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
               newDocumentURL={newDocumentURL}
+              showSelectAllAcrossPages={!isNestedDocsTreeLayout}
               smallBreak={smallBreak}
               viewType={viewType}
             />
@@ -443,17 +451,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   viewType={viewType}
                 />
               ) : (
-                <NestedDocsTreeProvider
-                  collectionSlug={collectionSlug}
-                  columns={treeColumns}
-                  data={data}
-                  enabled={isNestedDocsTreeLayout}
-                  initialExpanded={nestedDocExpanded}
-                  rows={nestedDocRows}
-                  sort={query?.sort}
-                >
-                  <RelationshipProvider>{Table}</RelationshipProvider>
-                </NestedDocsTreeProvider>
+                <RelationshipProvider>{Table}</RelationshipProvider>
               )
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
@@ -517,7 +515,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
               />
             )}
-          </SelectionProvider>
+          </NestedDocsSelectionProvider>
         </TableColumnsProvider>
         {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
           <PageControls collectionConfig={collectionConfig} />
