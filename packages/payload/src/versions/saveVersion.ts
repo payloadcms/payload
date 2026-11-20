@@ -24,13 +24,15 @@ function isPlainObject(obj: unknown): obj is Record<string, unknown> {
   return typeof obj === 'object' && obj !== null && !Array.isArray(obj)
 }
 
-function mergeDraftData({
+export function mergeDraftData({
+  depth = 0,
   fields,
   incoming,
   locale,
   localeCodes,
   target,
 }: {
+  depth?: number
   fields?: Field[]
   incoming: Record<string, unknown>
   locale?: string
@@ -38,33 +40,67 @@ function mergeDraftData({
   target: Record<string, unknown>
 }): void {
   for (const [key, value] of Object.entries(incoming)) {
-    if (SYSTEM_FIELDS.has(key)) {
+    if (depth === 0 && SYSTEM_FIELDS.has(key)) {
       continue
     }
 
     const fieldConfig = fields?.find((f) => 'name' in f && f.name === key)
     const isLocalized =
-      Boolean(fieldConfig && 'localized' in fieldConfig && fieldConfig.localized) ||
-      Boolean(
-        localeCodes &&
-          isPlainObject(target[key]) &&
-          Object.keys(target[key] as object).every((k) => localeCodes.includes(k)),
-      )
+      fieldConfig
+        ? Boolean('localized' in fieldConfig && fieldConfig.localized)
+        : Boolean(
+            localeCodes &&
+              isPlainObject(target[key]) &&
+              Object.keys(target[key] as object).length > 0 &&
+              Object.keys(target[key] as object).every((k) => localeCodes.includes(k)),
+          )
 
     if (isLocalized && locale) {
+      const nestedFields =
+        fieldConfig && 'fields' in fieldConfig && Array.isArray(fieldConfig.fields)
+          ? fieldConfig.fields
+          : undefined
+
       if (
         isPlainObject(value) &&
         localeCodes &&
+        Object.keys(value).length > 0 &&
         Object.keys(value).every((k) => localeCodes.includes(k))
       ) {
-        target[key] = {
-          ...(isPlainObject(target[key]) ? (target[key] as object) : {}),
-          ...value,
+        if (!isPlainObject(target[key])) {
+          target[key] = {}
+        }
+        for (const [loc, locVal] of Object.entries(value)) {
+          const targetLocaleVal = (target[key] as Record<string, unknown>)[loc]
+          if (isPlainObject(targetLocaleVal) && isPlainObject(locVal)) {
+            mergeDraftData({
+              depth: depth + 1,
+              fields: nestedFields,
+              incoming: locVal as Record<string, unknown>,
+              locale: loc,
+              localeCodes,
+              target: targetLocaleVal as Record<string, unknown>,
+            })
+          } else {
+            ;(target[key] as Record<string, unknown>)[loc] = locVal
+          }
         }
       } else {
-        target[key] = {
-          ...(isPlainObject(target[key]) ? (target[key] as object) : {}),
-          [locale]: value,
+        if (!isPlainObject(target[key])) {
+          target[key] = {}
+        }
+        const existingLocaleVal = (target[key] as Record<string, unknown>)[locale]
+        if (isPlainObject(existingLocaleVal) && isPlainObject(value)) {
+          mergeDraftData({
+            depth: depth + 1,
+            fields: nestedFields,
+            incoming: value as Record<string, unknown>,
+            locale,
+            localeCodes,
+            target: existingLocaleVal as Record<string, unknown>,
+          })
+        } else {
+          ;(target[key] as Record<string, unknown>)[locale] = value
         }
       }
     } else if (isPlainObject(target[key]) && isPlainObject(value)) {
@@ -73,6 +109,7 @@ function mergeDraftData({
           ? fieldConfig.fields
           : undefined
       mergeDraftData({
+        depth: depth + 1,
         fields: nestedFields,
         incoming: value,
         locale,

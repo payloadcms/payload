@@ -54,6 +54,29 @@ import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePu
 import { resolveLocalizedStatus } from '../../../versions/resolveLocalizedStatus.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 
+function omitDeniedFields(
+  data: Record<string, unknown>,
+  deniedPaths: Set<string>,
+  parentPath = '',
+): Record<string, unknown> {
+  if (deniedPaths.size === 0) {
+    return data
+  }
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data)) {
+    const currentPath = parentPath ? `${parentPath}.${key}` : key
+    if (deniedPaths.has(currentPath)) {
+      continue
+    }
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      result[key] = omitDeniedFields(value as Record<string, unknown>, deniedPaths, currentPath)
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -217,6 +240,7 @@ export const updateDocument = async <
   // beforeValidate - Fields
   // /////////////////////////////////////
 
+  const deniedFieldPaths = new Set<string>()
   let statusFieldAccess = false
   const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
     doc: originalDoc,
@@ -235,6 +259,9 @@ export const updateDocument = async <
     onFieldAccess: ({ accessResult, path }) => {
       if (path === '_status') {
         statusFieldAccess = accessResult
+      }
+      if (!accessResult) {
+        deniedFieldPaths.add(path)
       }
     },
     operation: 'update',
@@ -524,13 +551,21 @@ export const updateDocument = async <
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
+      const draftData =
+        incomingData && typeof incomingData === 'object'
+          ? (omitDeniedFields(
+              incomingData as Record<string, unknown>,
+              deniedFieldPaths,
+            ) as JsonObject)
+          : undefined
+
       resultWithLocales = await saveVersion({
         id,
         autosave,
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,
-        draftData: incomingData,
+        draftData,
         operation: 'update',
         payload,
         publish: isExplicitPublish,

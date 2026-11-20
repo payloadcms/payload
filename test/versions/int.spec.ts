@@ -10,6 +10,7 @@ import {
   createPayloadRequest,
   Forbidden,
   getFileByPath,
+  mergeDraftData,
   NotFound,
   restoreVersionOperationGlobal,
   saveVersion,
@@ -31,6 +32,7 @@ import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
   autosaveWithMultiSelectCollectionSlug,
+  diffCollectionSlug,
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
@@ -2279,6 +2281,263 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedFinal.title.es).toBe('draft es title')
         expect(publishedFinal.title.de).toBe('draft de title')
         expect(publishedFinal.description).toBe('pending localized draft desc')
+      })
+
+      test('issue #19670 / Finding 1: should preserve nested id in draftData while ignoring root id', () => {
+        const target: Record<string, unknown> = {
+          id: 'root-id-preserved',
+          nested: {
+            id: 'nested-item-old',
+            name: 'old-name',
+          },
+        }
+
+        mergeDraftData({
+          incoming: {
+            id: 'root-id-attempted-overwrite',
+            nested: {
+              id: 'nested-item-new',
+              name: 'new-name',
+            },
+          },
+          target,
+        })
+
+        // Root 'id' must be ignored (not overwritten)
+        expect(target.id).toBe('root-id-preserved')
+        // Nested 'id' at depth > 0 must be preserved and updated
+        expect((target.nested as Record<string, unknown>).id).toBe('nested-item-new')
+        expect((target.nested as Record<string, unknown>).name).toBe('new-name')
+      })
+
+      test('issue #19670 / Finding 2: empty object on unlocalized field should not be inferred as localized', () => {
+        const target: Record<string, unknown> = {
+          emptyJson: {},
+          title: 'initial',
+        }
+
+        mergeDraftData({
+          incoming: {
+            title: 'updated',
+          },
+          locale: 'en',
+          localeCodes: ['en', 'es', 'de'],
+          target,
+        })
+
+        // emptyJson must remain {} and not be converted to a localized { en: ... } map
+        expect(target.emptyJson).toEqual({})
+        expect(target.title).toBe('updated')
+      })
+
+      test('issue #19670 / Finding 3: should partially merge localized group properties without wiping sibling properties in pending draft', () => {
+        const target: Record<string, unknown> = {
+          group: {
+            en: {
+              fieldA: 'existing-a',
+              fieldB: 'existing-b',
+            },
+            es: {
+              fieldA: 'existing-es-a',
+              fieldB: 'existing-es-b',
+            },
+          },
+        }
+
+        // Partial update in 'en' locale: only updates fieldA
+        mergeDraftData({
+          fields: [
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                { name: 'fieldA', type: 'text' },
+                { name: 'fieldB', type: 'text' },
+              ],
+              localized: true,
+            },
+          ],
+          incoming: {
+            group: { fieldA: 'updated-a' },
+          },
+          locale: 'en',
+          localeCodes: ['en', 'es', 'de'],
+          target,
+        })
+
+        // In 'en', fieldA should be updated while sibling fieldB is preserved
+        const groupEn = (target.group as Record<string, unknown>).en as Record<string, unknown>
+        expect(groupEn.fieldA).toBe('updated-a')
+        expect(groupEn.fieldB).toBe('existing-b')
+
+        // Other locales ('es') should remain intact
+        const groupEs = (target.group as Record<string, unknown>).es as Record<string, unknown>
+        expect(groupEs.fieldA).toBe('existing-es-a')
+        expect(groupEs.fieldB).toBe('existing-es-b')
+      })
+
+      test('issue #19670 / Finding 4: should not write unauthorized fields to pending draft during non-draft update', async ({
+        payload,
+      }) => {
+        // Create initial published doc in diff collection with field-level restricted field
+        const published = await payload.create({
+          collection: diffCollectionSlug,
+          data: {
+            _status: 'published',
+            namedTab1: {
+              textInNamedTab1: 'tab text initial',
+              textInNamedTab1UpdateFalse: 'secret initial',
+            },
+            text: 'initial text',
+          },
+          overrideAccess: true,
+        })
+
+        // Create pending draft with draft secret
+        await payload.update({
+          id: published.id,
+          collection: diffCollectionSlug,
+          data: {
+            namedTab1: {
+              textInNamedTab1UpdateFalse: 'secret draft preserved',
+            },
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Verify draft was saved
+        const draftBefore = await payload.findByID({
+          id: published.id,
+          collection: diffCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftBefore.namedTab1?.textInNamedTab1UpdateFalse).toBe('secret draft preserved')
+
+        // Perform non-draft update with overrideAccess: false trying to update the restricted field
+        await payload.update({
+          id: published.id,
+          collection: diffCollectionSlug,
+          data: {
+            namedTab1: {
+              textInNamedTab1UpdateFalse: 'malicious overwrite attempt',
+            },
+            text: 'updated text',
+          },
+          overrideAccess: false,
+          user,
+        })
+
+        // Verify published doc did not accept the restricted field update
+        const publishedAfter = await payload.findByID({
+          id: published.id,
+          collection: diffCollectionSlug,
+          draft: false,
+          overrideAccess: true,
+        })
+        expect(publishedAfter.text).toBe('updated text')
+        expect(publishedAfter.namedTab1?.textInNamedTab1UpdateFalse).toBe('secret initial')
+
+        // Verify pending draft did NOT receive the unauthorized field
+        const draftAfter = await payload.findByID({
+          id: published.id,
+          collection: diffCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftAfter.text).toBe('updated text')
+        expect(draftAfter.namedTab1?.textInNamedTab1UpdateFalse).toBe('secret draft preserved')
+      })
+
+      test('issue #19670 / Finding 5: should not publish pending draft when updating global with locale: all and without explicit publish intent', async ({
+        payload,
+      }) => {
+        // Create published global with localized title
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'published desc 19670',
+            title: {
+              de: 'initial global de 19670',
+              en: 'initial global en 19670',
+              es: 'initial global es 19670',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Save a pending draft
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'pending draft desc 19670',
+          },
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Verify pending draft has draft status
+        const draftBefore = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(draftBefore._status).toEqual({
+          de: 'draft',
+          en: 'draft',
+          es: 'draft',
+        })
+        expect(draftBefore.description).toBe('pending draft desc 19670')
+
+        // Perform non-draft update with locale: 'all' (without draft: true or _status: 'published')
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: {
+              de: 'updated global de 19670',
+              en: 'updated global en 19670',
+              es: 'updated global es 19670',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Verify published global was updated
+        const publishedAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toEqual({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+        })
+        expect(publishedAfter.title.en).toBe('updated global en 19670')
+        expect(publishedAfter.title.es).toBe('updated global es 19670')
+        expect(publishedAfter.description).toBe('published desc 19670')
+
+        // Pending draft should STILL be a draft and preserve draft content while receiving the title update
+        const draftAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(draftAfter._status).toEqual({
+          de: 'draft',
+          en: 'draft',
+          es: 'draft',
+        })
+        expect(draftAfter.title.en).toBe('updated global en 19670')
+        expect(draftAfter.title.es).toBe('updated global es 19670')
+        expect(draftAfter.description).toBe('pending draft desc 19670')
       })
 
       test('should have correct updatedAt timestamps when saving drafts', async ({ payload }) => {
