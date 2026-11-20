@@ -17,6 +17,7 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import { DefaultDocumentIDType, Where } from 'payload'
 
 export const ProductsCollection: CollectionOverride = ({ defaultCollection }) => ({
@@ -54,6 +55,14 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
   },
   fields: [
     { name: 'title', type: 'text', required: true },
+    {
+      name: 'descriptionPlainText',
+      type: 'textarea',
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+    },
     {
       type: 'tabs',
       tabs: [
@@ -212,4 +221,19 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
       useAsSlug: 'title',
     },
   ],
+  hooks: {
+    ...defaultCollection?.hooks,
+    beforeChange: [
+      ...(defaultCollection?.hooks?.beforeChange || []),
+      ({ data }) => {
+        if (data?.description) {
+          data.descriptionPlainText = convertLexicalToPlaintext({ data: data.description })
+        } else if (data) {
+          data.descriptionPlainText = ''
+        }
+
+        return data
+      },
+      ],
+  },
 })
