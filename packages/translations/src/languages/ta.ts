@@ -172,6 +172,7 @@ export const taTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'செல்லுபடியற்ற கோப்பு வகை: {{value}}',
     invalidRequestArgs: 'விண்ணப்பத்தில் தவறான அளவுருக்கள் அனுப்பப்பட்டுள்ளன: {{args}}',
     loadingDocument: 'ID {{id}} கொண்ட ஆவணத்தை ஏற்றும் போது ஒரு பிரச்சனை ஏற்பட்டது.',
+    loadingItems: 'உருப்படிகளை ஏற்ற முடியவில்லை.',
     localesNotSaved_one: 'பின்வரும் மொழி சேமிக்கப்படவில்லை:',
     localesNotSaved_other: 'பின்வரும் மொழிகள் சேமிக்கப்படவில்லை:',
     logoutFailed: 'வெளியேற்றம் தோல்வியடைந்தது.',

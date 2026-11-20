@@ -172,6 +172,7 @@ export const daTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i anmodningen: {{args}}',
     loadingDocument: 'Der opstod et problem med at loade dokumentet med ID {{id}}.',
+    loadingItems: 'Elementerne kunne ikke indlæses.',
     localesNotSaved_one: 'Følgende lokalitet kunne ikke gemmes:',
     localesNotSaved_other: 'Følgende lokaliteter kunne ikke gemmes:',
     logoutFailed: 'Log ud mislykket.',

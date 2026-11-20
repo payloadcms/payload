@@ -176,6 +176,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Tipo de arquivo inválido: {{value}}',
     invalidRequestArgs: 'Argumentos inválidos passados na solicitação: {{args}}',
     loadingDocument: 'Ocorreu um problema ao carregar o documento com ID {{id}}.',
+    loadingItems: 'Não foi possível carregar os itens.',
     localesNotSaved_one: 'A seguinte configuração regional não pôde ser salva:',
     localesNotSaved_other: 'As seguintes configurações regionais não puderam ser salvas:',
     logoutFailed: 'Falha ao sair.',

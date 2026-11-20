@@ -175,6 +175,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ongeldig bestandstype: {{value}}',
     invalidRequestArgs: 'Ongeldige argumenten in verzoek: {{args}}',
     loadingDocument: 'Er was een probleem met het laden van het document met ID {{id}}.',
+    loadingItems: 'Kan items niet laden.',
     localesNotSaved_one: 'De volgende taalinstelling kon niet worden opgeslagen:',
     localesNotSaved_other: 'De volgende taalinstellingen konden niet worden opgeslagen:',
     logoutFailed: 'Uitloggen mislukt.',

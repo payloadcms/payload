@@ -177,6 +177,7 @@ export const caTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: "Tipus d'arxiu no vàlid: {{value}}",
     invalidRequestArgs: 'Arguments no vàlids en la sol·licitud: {{args}}',
     loadingDocument: "Hi ha hagut un problema carregant el document amb l'ID {{id}}.",
+    loadingItems: 'No s’han pogut carregar els elements.',
     localesNotSaved_one: "No s'ha pogut desar el següent idioma:",
     localesNotSaved_other: "No s'han pogut desar els següents idiomes:",
     logoutFailed: 'La desconnexió ha fallat.',

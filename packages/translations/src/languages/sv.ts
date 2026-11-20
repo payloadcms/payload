@@ -173,6 +173,7 @@ export const svTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ogiltig filtyp: {{value}}',
     invalidRequestArgs: 'Ogiltiga argument har skickats i begäran: {{args}}',
     loadingDocument: 'Det gick inte att läsa in dokumentet med ID {{id}}.',
+    loadingItems: 'Det gick inte att läsa in objekten.',
     localesNotSaved_one: 'Följande språk kunde inte sparas:',
     localesNotSaved_other: 'Följande språk kunde inte sparas:',
     logoutFailed: 'Utloggning misslyckades',

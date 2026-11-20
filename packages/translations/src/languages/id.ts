@@ -175,6 +175,7 @@ export const idTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Jenis file tidak valid: {{value}}',
     invalidRequestArgs: 'Argumen yang diteruskan dalam permintaan tidak valid: {{args}}',
     loadingDocument: 'Terjadi masalah saat memuat dokumen dengan ID {{id}}.',
+    loadingItems: 'Item tidak dapat dimuat.',
     localesNotSaved_one: 'Lokal berikut tidak dapat disimpan:',
     localesNotSaved_other: 'Lokal-lokal berikut tidak dapat disimpan:',
     logoutFailed: 'Gagal keluar.',

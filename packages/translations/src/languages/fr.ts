@@ -178,6 +178,7 @@ export const frTranslations: DefaultTranslationsObject = {
     invalidRequestArgs: 'Arguments non valides dans la requête : {{args}}',
     loadingDocument:
       'Un problème est survenu lors du chargement du document qui a pour identifiant {{id}}.',
+    loadingItems: 'Impossible de charger les éléments.',
     localesNotSaved_one: 'Le paramètre régional suivant n’a pas pu être enregistré :',
     localesNotSaved_other: 'Les paramètres régionaux suivants n’ont pas pu être enregistrés :',
     logoutFailed: 'La déconnexion a échouée.',

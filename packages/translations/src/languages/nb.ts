@@ -174,6 +174,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ugyldig filtype: {{value}}',
     invalidRequestArgs: 'Ugyldige argumenter i forespørselen: {{args}}',
     loadingDocument: 'Det oppstod et problem under lasting av dokumentet med ID {{id}}.',
+    loadingItems: 'Kunne ikke laste inn elementer.',
     localesNotSaved_one: 'Følgende språk kunne ikke lagres:',
     localesNotSaved_other: 'Følgende språk kunne ikke lagres:',
     logoutFailed: 'Utlogging mislyktes.',
