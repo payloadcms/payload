@@ -48,6 +48,7 @@ import {
   postsSlug,
   relationASlug,
   relationBSlug,
+  writeInputSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -79,6 +80,69 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     user = loginResult.user
     token = loginResult.token
   })
+
+  test.options(
+    'should preserve nested input and logical row IDs when saving a version',
+    { db: 'all' },
+    async ({ payload }) => {
+      const parent = await payload.db.create({
+        collection: writeInputSlug,
+        data: { title: 'Parent document' },
+      })
+
+      const versionData = {
+        title: 'Version document',
+        layout: [
+          {
+            id: '000000000000000000000001',
+            blockType: 'content',
+            items: [
+              {
+                id: '000000000000000000000002',
+                settings: { label: 'Shared label' },
+                translations: { en: { label: 'English' }, es: { label: 'Spanish' } },
+              },
+            ],
+          },
+        ],
+      }
+
+      const original = structuredClone(versionData)
+
+      const timestamp = new Date().toISOString()
+
+      try {
+        const version = await payload.db.createVersion({
+          autosave: false,
+          collectionSlug: writeInputSlug,
+          createdAt: timestamp,
+          parent: parent.id,
+          updatedAt: timestamp,
+          versionData,
+        })
+
+        expect(versionData).toEqual(original)
+
+        const stored = await payload.db.findVersions({
+          collection: writeInputSlug,
+          limit: 1,
+          where: { id: { equals: version.id } },
+        })
+
+        expect(stored.docs).toHaveLength(1)
+        expect(stored.docs[0]?.version).toMatchObject(original)
+      } finally {
+        await payload.db.deleteVersions({
+          collection: writeInputSlug,
+          where: { parent: { equals: parent.id } },
+        })
+        await payload.db.deleteMany({
+          collection: writeInputSlug,
+          where: { id: { equals: parent.id } },
+        })
+      }
+    },
+  )
 
   test.options.describe(
     'connection pool',
@@ -2547,6 +2611,50 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
     })
 
+    test('should preserve omitted arrays when updating a hasMany relationship', async ({
+      payload,
+    }) => {
+      const relation = await payload.create({
+        collection: relationASlug,
+        data: { title: 'Related document' },
+        overrideAccess: true,
+      })
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: { array: [{ text: 'array row' }] },
+        overrideAccess: true,
+      })
+
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: customSchemaSlug,
+        data: { relationship: [relation.id] },
+        returning: false,
+        select: {},
+      })
+
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: customSchemaSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(updated.array).toStrictEqual(doc.array)
+      expect(updated.relationship).toStrictEqual([relation.id])
+
+      await payload.delete({
+        id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        id: relation.id,
+        collection: relationASlug,
+        overrideAccess: true,
+      })
+    })
+
     test('should preserve omitted hasMany selects when updating an array with db.updateOne', async ({
       payload,
     }) => {
@@ -3910,6 +4018,24 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       for (const enumName in payload.db.enums) {
         expect(module).toHaveProperty(enumName)
       }
+    })
+
+    test('should not duplicate explicitly defined draft status options', async ({ payload }) => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
+        return
+      }
+
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+      await payload.db.generateSchema({
+        outputFile,
+      })
+
+      const module = await import(outputFile)
+
+      expect(module.enum_categories_status?.enumValues).toEqual(['draft', 'published'])
+      expect(module.enum__categories_v_version_status?.enumValues).toEqual(['draft', 'published'])
     })
 
     test('should generate Drizzle SQLite schema', async ({ payload }) => {

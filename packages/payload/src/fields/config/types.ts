@@ -1145,9 +1145,16 @@ export type JSONField = {
     maxHeight?: number
   } & FieldAdmin
 
+  /** Customize the generated TypeScript type name for `jsonSchema`.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
   jsonSchema?: {
     fileMatch: string[]
-    schema: JSONSchema4
+    /** Inline schema. When omitted, the schema is fetched from `uri`. */
+    schema?: JSONSchema4
     uri: string
   }
   type: 'json'

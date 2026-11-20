@@ -16,27 +16,35 @@ import {
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
-/** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
-export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) => {
-  const previousState = ['_payloadManagedCloudStorage', '_payloadManagedCloudMetadata'].map(
-    (key) => ({
-      hasProperty: Object.hasOwn(req.context ?? {}, key),
-      key,
-      value: req.context?.[key],
-    }),
-  )
+/** Request context keys that carry one upload's cloud storage state. */
+const cloudStorageStateKeys = [
+  '_payloadCloudStorage',
+  '_payloadManagedCloudMetadata',
+  '_payloadManagedCloudStorage',
+  '_payloadVerifiedProviderOriginal',
+  'skipCloudStorage',
+]
 
-  return () => {
-    req.context ??= {}
-    for (const { hasProperty, key, value } of previousState) {
-      if (hasProperty) {
-        req.context[key] = value
-      } else {
-        delete req.context[key]
-      }
-    }
+/**
+ * Removes the caller's cloud storage state from `req.context`, for a nested file operation that
+ * shares the caller's context. Returns a function that puts the caller's values back.
+ */
+export const hideCloudStorageState = ({ req }: { req: PayloadRequest }): (() => void) => {
+  const restoreCloudStorageState = captureContextKeys({ keys: cloudStorageStateKeys, req })
+
+  for (const key of cloudStorageStateKeys) {
+    delete req.context?.[key]
   }
+
+  return restoreCloudStorageState
 }
+
+/** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
+export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) =>
+  captureContextKeys({
+    keys: ['_payloadManagedCloudStorage', '_payloadManagedCloudMetadata'],
+    req,
+  })
 
 export const runCloudFileCreation = async <T>({
   collection,
@@ -313,5 +321,31 @@ const withCloudHookGuard = async <T>({
     return await write()
   } finally {
     restoreCloudHookState()
+  }
+}
+
+/** Returns a function that puts back the current values of `keys` in `req.context`. */
+const captureContextKeys = ({
+  keys,
+  req,
+}: {
+  keys: string[]
+  req: PayloadRequest
+}): (() => void) => {
+  const previousState = keys.map((key) => ({
+    hasProperty: Object.hasOwn(req.context ?? {}, key),
+    key,
+    value: req.context?.[key],
+  }))
+
+  return () => {
+    req.context ??= {}
+    for (const { hasProperty, key, value } of previousState) {
+      if (hasProperty) {
+        req.context[key] = value
+      } else {
+        delete req.context[key]
+      }
+    }
   }
 }

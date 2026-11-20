@@ -3,20 +3,48 @@ import type { AuthStrategyFunctionArgs } from './index.js'
 
 import { parseCookies } from '../utilities/parseCookies.js'
 
-type ExtractionMethod = (args: { headers: Headers; payload: BasePayload }) => null | string
+type ExtractionMethod = (args: {
+  headers: Headers
+  method?: string
+  payload: BasePayload
+}) => null | string
+
+const SAFE_METHODS = ['GET', 'HEAD']
+
+/**
+ * A cross-site top-level navigation (link click, or the redirect back from an identity
+ * provider) is not a CSRF vector per the Fetch Metadata Resource Isolation Policy, as long
+ * as it uses a safe method. Browsers always send `Origin` on non-GET/HEAD requests, so when
+ * `method` is unknown (e.g. server-rendered pages) the missing `Origin` already implies a safe method.
+ */
+const isSafeTopLevelNavigation = ({
+  headers,
+  method,
+}: {
+  headers: Headers
+  method?: string
+}): boolean => {
+  if (headers.get('Sec-Fetch-Mode') !== 'navigate') {
+    return false
+  }
+
+  if (headers.get('Sec-Fetch-Dest') !== 'document') {
+    return false
+  }
+
+  return !method || SAFE_METHODS.includes(method.toUpperCase())
+}
+
+/**
+ * Reads the token from an `Authorization: Bearer <token>` header (RFC 6750). The scheme is
+ * case-insensitive and may be followed by more than one space.
+ */
+export const extractBearerToken = ({ headers }: { headers: Headers }): null | string =>
+  headers.get('Authorization')?.match(/^Bearer +(\S+)$/i)?.[1] ?? null
 
 const extractionMethods: Record<string, ExtractionMethod> = {
-  Bearer: ({ headers }) => {
-    const jwtFromHeader = headers.get('Authorization')
-
-    // RFC6750 OAuth 2.0 Bearer token
-    if (jwtFromHeader?.startsWith('Bearer ')) {
-      return jwtFromHeader.replace('Bearer ', '')
-    }
-
-    return null
-  },
-  cookie: ({ headers, payload }) => {
+  Bearer: extractBearerToken,
+  cookie: ({ headers, method, payload }) => {
     const cookies = parseCookies(headers)
     const tokenCookieName = `${payload.config.cookiePrefix}-token`
     const cookieToken = cookies.get(tokenCookieName)
@@ -48,6 +76,10 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return cookieToken
     }
 
+    if (secFetchSite === 'cross-site' && isSafeTopLevelNavigation({ headers, method })) {
+      return cookieToken
+    }
+
     // Sec-Fetch-Site is omitted by browsers for same-origin navigations over plain HTTP on
     // non-localhost hosts (it is only sent to potentially trustworthy origins). Its absence is
     // therefore inconclusive rather than cross-site — fall back to validating the Referer
@@ -66,7 +98,7 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       }
     }
 
-    // Reject cross-site requests and missing header (non-browser clients)
+    // Reject other cross-site requests and missing header (non-browser clients)
     return null
   },
   JWT: ({ headers }) => {
@@ -81,12 +113,17 @@ const extractionMethods: Record<string, ExtractionMethod> = {
 }
 
 export const extractJWT = (args: Omit<AuthStrategyFunctionArgs, 'strategyName'>): null | string => {
-  const { headers, payload } = args
+  const { headers, payload, req } = args
+  const method = req?.method
 
   const extractionOrder = payload.config.auth.jwtOrder
 
   for (const extractionStrategy of extractionOrder) {
-    const result = extractionMethods[extractionStrategy]!({ headers, payload })
+    const result = extractionMethods[extractionStrategy]!({
+      headers,
+      method,
+      payload,
+    })
 
     if (result) {
       return result

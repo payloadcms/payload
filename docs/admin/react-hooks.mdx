@@ -169,7 +169,7 @@ You can do lots of powerful stuff by retrieving the full form state, like using 
 ```tsx
 'use client'
 import { useAllFormFields } from '@payloadcms/ui'
-import { reduceFieldsToValues, getSiblingData } from 'payload/shared'
+import { getDataFromFormState, getSiblingDataFromFormState } from 'payload/shared'
 
 const ExampleComponent: React.FC = () => {
   // the `fields` const will be equal to all fields' state,
@@ -178,11 +178,11 @@ const ExampleComponent: React.FC = () => {
 
   // Pass in fields, and indicate if you'd like to "unflatten" field data.
   // The result below will reflect the data stored in the form at the given time
-  const formData = reduceFieldsToValues(fields, true);
+  const formData = getDataFromFormState(fields, true);
 
   // Pass in field state and a path,
   // and you will be sent all sibling data of the path that you've specified
-  const siblingData = getSiblingData(fields, 'someFieldName');
+  const siblingData = getSiblingDataFromFormState(fields, 'someFieldName');
 
   return (
     // return some JSX here if necessary
@@ -1032,34 +1032,47 @@ Returns methods to set and get user preferences. More info can be found [here](h
 
 ## useTheme
 
-Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
+Returns `theme` (`'light'` or `'dark'`), `autoMode`, `highContrastMode`, and setters from the nearest provider.
 
 ```tsx
 'use client'
 import { useTheme } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
-  // highlight-start
-  const { autoMode, setTheme, theme } = useTheme()
-  // highlight-end
+  const { theme } = useTheme()
+
+  return <span>The surrounding theme is {theme}</span>
+}
+```
+
+Use `ThemeProvider` to override theme or contrast for part of the UI. Values you omit inherit from the parent. To use the local setters, pass a ref to the themed element through `targetRef`.
+
+## useRootTheme
+
+Use `useRootTheme` to escape nested overrides and read or change the Admin's root preferences. In a dark popup on a light page, `theme` below is `'dark'` and `rootTheme` is `'light'`:
+
+```tsx
+'use client'
+import { useRootTheme, useTheme } from '@payloadcms/ui'
+
+function ThemeControls() {
+  const { theme } = useTheme()
+  const { theme: rootTheme, setTheme: setRootTheme } = useRootTheme()
 
   return (
     <>
-      <span>
-        The current theme is {theme} and autoMode is {autoMode}
-      </span>
-      <button
-        type="button"
-        onClick={() =>
-          setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
-        }
-      >
-        Toggle theme
+      <p>
+        Panel theme: {theme}. Page theme: {rootTheme}.
+      </p>
+      <button type="button" onClick={() => setRootTheme('auto')}>
+        Use system theme
       </button>
     </>
   )
 }
 ```
+
+Automatic mode is a root preference, so use this hook for `setTheme('auto')`.
 
 ## useTableColumns
 

@@ -8,89 +8,181 @@
       :root {
         color-scheme: light;
         font:
-          14px/1.5 system-ui,
+          13px/1.5 system-ui,
           sans-serif;
-        color: #252422;
-        background: #fff;
-      }
-      body {
-        max-width: 1120px;
-        margin: 32px auto;
-        padding: 0 24px;
+        color: light-dark(#252422, #ededeb);
+        background: light-dark(#fff, #191919);
+        --control-line: light-dark(#dededb, #41413e);
+        --control-bg: light-dark(#f4f4f2, #252523);
+        --selected-bg: light-dark(#fff, #484845);
       }
       * {
         box-sizing: border-box;
       }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        max-width: 1120px;
+        margin: 16px auto;
+        padding: 0 16px;
+      }
       button,
-      input {
+      input,
+      select {
         font: inherit;
       }
       button {
-        border: 0;
-        border-radius: 100px;
-        padding: 10px 18px;
-        background: #f3f2ef;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 32px;
+        padding: 4px 10px;
+        border: 1px solid var(--control-line);
+        border-radius: 6px;
+        background: var(--control-bg);
         color: inherit;
-        min-height: 40px;
+        cursor: pointer;
       }
-      button:focus-visible,
-      input:focus-visible {
-        outline: 2px solid #252422;
-        outline-offset: 3px;
+      button:hover {
+        background: var(--selected-bg);
       }
-      button[aria-pressed='true'] {
-        background: #e2e0db;
+      :is(button, input, select):focus-visible {
+        outline: 2px solid #0d99ff;
+        outline-offset: 2px;
       }
       .controls {
         display: flex;
         align-items: center;
-        gap: 20px;
         flex-wrap: wrap;
-        margin-bottom: 20px;
+        gap: 8px;
+        padding: 8px;
+        margin-bottom: 12px;
+        border: 1px solid var(--control-line);
+        border-radius: 10px;
+        background: light-dark(#fafaf9, #20201e);
       }
       .presets {
         display: flex;
-        gap: 4px;
+        align-items: center;
+        gap: 2px;
+        padding: 2px;
+        border: 1px solid var(--control-line);
+        border-radius: 7px;
+        background: var(--control-bg);
       }
-      label {
+      .icon-button {
+        width: 30px;
+        min-height: 30px;
+        padding: 6px;
+      }
+      .presets .icon-button {
+        border-color: transparent;
+        background: transparent;
+      }
+      .presets button[aria-pressed='true'] {
+        background: var(--selected-bg);
+        border-color: var(--control-line);
+        box-shadow: 0 1px 2px #0000000a;
+      }
+      .icon-button svg {
+        width: 16px;
+        height: 16px;
+        flex: none;
+      }
+      .toolbar-field {
         display: flex;
         align-items: center;
-        gap: 8px;
-        min-height: 40px;
-        color: #66635e;
+        gap: 6px;
+        font-size: 12px;
+        color: light-dark(#66635e, #bbb8b0);
       }
-      input {
-        accent-color: #252422;
+      select {
+        height: 32px;
+        min-width: 76px;
+        border: 1px solid var(--control-line);
+        border-radius: 6px;
+        padding: 3px 6px;
+        color: light-dark(#252422, #ededeb);
+        background: var(--selected-bg);
+        cursor: pointer;
+      }
+      .toolbar-divider {
+        height: 22px;
+        width: 1px;
+        background: var(--control-line);
+        margin-inline: 2px;
+      }
+      .toggles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-left: auto;
+      }
+      .check-toggle {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 32px;
+        padding: 3px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .check-toggle:hover {
+        background: var(--control-bg);
+      }
+      input[type='checkbox'] {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+        accent-color: light-dark(#252422, #ededeb);
       }
       .timeline {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto;
         align-items: center;
-        gap: 16px;
-        margin-top: 20px;
+        gap: 12px;
+        margin-top: 12px;
       }
       .timeline input {
         width: 100%;
+        min-height: 24px;
+        margin: 0;
+        accent-color: light-dark(#252422, #ededeb);
       }
       output {
         font:
-          12px/1.5 ui-monospace,
+          11px/1.5 ui-monospace,
           monospace;
         font-variant-numeric: tabular-nums;
       }
       .status {
-        color: #66635e;
-        font-size: 12px;
-        margin-top: 12px;
+        color: light-dark(#66635e, #bbb8b0);
+        font-size: 11px;
+        margin-top: 8px;
       }
       #chrome {
         overflow: hidden;
-        border-radius: 12px;
+      }
+      @media (max-width: 600px) {
+        .toggles {
+          margin-left: 0;
+        }
+        .toolbar-divider {
+          display: none;
+        }
       }
       @media (pointer: coarse) {
         button,
-        label {
+        select,
+        .check-toggle {
           min-height: 44px;
+        }
+        .icon-button {
+          width: 44px;
         }
       }
     </style>
@@ -98,13 +190,132 @@
   <body>
     <div class="controls" aria-label="Preview controls">
       <div class="presets" role="group" aria-label="Window size">
-        <button type="button" data-width="1280" aria-pressed="true">Desktop</button>
-        <button type="button" data-width="768" aria-pressed="false">Tablet</button>
-        <button type="button" data-width="390" aria-pressed="false">Mobile</button>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Desktop"
+          title="Desktop"
+          data-width="1280"
+          aria-pressed="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <rect x="3" y="4" width="18" height="13" rx="2" />
+            <path d="M8 21h8m-4-4v4" />
+          </svg></button
+        ><button
+          type="button"
+          class="icon-button"
+          aria-label="Tablet"
+          title="Tablet"
+          data-width="768"
+          aria-pressed="false"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <path d="M11 18h2" />
+          </svg></button
+        ><button
+          type="button"
+          class="icon-button"
+          aria-label="Mobile"
+          title="Mobile"
+          data-width="390"
+          aria-pressed="false"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <rect x="7" y="2" width="10" height="20" rx="2" />
+            <path d="M11 18h2" />
+          </svg>
+        </button>
       </div>
-      <button type="button" id="refresh">Refresh frame</button>
-      <label><input type="checkbox" id="dimensions" checked />Dimensions</label>
-      <label><input type="checkbox" id="annotation" checked />Annotation</label>
+      <div class="presets" role="group" aria-label="Theme">
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Light"
+          title="Light"
+          data-theme="light"
+          aria-pressed="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"
+            />
+          </svg></button
+        ><button
+          type="button"
+          class="icon-button"
+          aria-label="Dark"
+          title="Dark"
+          data-theme="dark"
+          aria-pressed="false"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M20.5 13A9 9 0 0 1 11 3.5 9 9 0 1 0 20.5 13Z" />
+          </svg>
+        </button>
+      </div>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <label class="toolbar-field"
+        ><span>Demo</span
+        ><select id="change-kind" aria-label="Demo type">
+          <option value="feature">Feature</option>
+          <option value="fix">Fix</option>
+          <option value="bug">Bug</option>
+        </select></label
+      >
+      <div class="toggles">
+        <label class="check-toggle"><input type="checkbox" id="many-steps" />Many steps</label>
+        <label class="check-toggle"
+          ><input type="checkbox" id="annotation" checked />Annotation</label
+        >
+      </div>
     </div>
     <div id="chrome"></div>
     <div class="timeline">

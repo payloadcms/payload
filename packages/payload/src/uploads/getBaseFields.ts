@@ -6,6 +6,8 @@ import type { SanitizedUploadConfig } from './types.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { shouldRequestOriginal } from './isOriginalFileRequest.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
+import { getTransformStateSchema } from './transformState/transformStateSchema.js'
+import { validateTransformState } from './transformState/validateTransformState.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
 const disabledFromImageSize = (
@@ -107,6 +109,15 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     label: ({ t }) => t('upload:fileSize'),
   }
 
+  // Set only by core, and only to `false`, for a file entry with no stored object. A missing value
+  // means stored. `sanitizeUploadData` drops client input. Like `_objectKey`, it is not
+  // field-level `hidden`, because that would remove it before the URL hooks can read it.
+  const storedField: Field = {
+    name: '_stored',
+    type: 'checkbox',
+    admin: { disabled: true, hidden: true, readOnly: true },
+  }
+
   const filename: Field = {
     name: 'filename',
     type: 'text',
@@ -172,6 +183,33 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     filesize,
     width,
     height,
+    storedField,
+    {
+      name: '_transforms',
+      type: 'json',
+      admin: { disabled: true },
+      hooks: {
+        beforeChange: [
+          ({ operation, value }) => {
+            const isEmptyObject =
+              value &&
+              typeof value === 'object' &&
+              !Array.isArray(value) &&
+              !Object.keys(value).length
+
+            return isEmptyObject || (operation === 'create' && value === undefined) ? null : value
+          },
+        ],
+      },
+      interfaceName: 'UploadTransforms',
+      jsonSchema: {
+        fileMatch: ['payload://upload-transforms'],
+        schema: getTransformStateSchema({ transformers: config.upload?.transformers ?? [] }),
+        uri: 'payload://upload-transforms',
+      },
+      label: 'Transforms',
+      validate: validateTransformState,
+    },
     {
       name: 'original',
       type: 'group',
@@ -226,6 +264,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           type: 'text',
           admin: { disabled: true, hidden: true, readOnly: true },
         },
+        storedField,
       ],
     },
   ]
@@ -325,6 +364,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                 ...mimeType.admin,
                 ...disabledFromImageSize(size.admin),
               },
+              // `upload.mimeTypes` limits the files a user can upload. A variant is a transformer's
+              // output: it may use another format, and a variant built on request has no MIME type yet.
+              validate: undefined,
             },
             {
               ...filesize,
@@ -351,6 +393,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               type: 'text',
               admin: { disabled: true, hidden: true, readOnly: true },
             },
+            storedField,
           ],
           label: size.name,
         })),

@@ -10,6 +10,8 @@ import type {
 } from './types.js'
 
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
+import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { normalizeStorageKey } from './naming.js'
 
 export const getStoredFileIdentity = ({ key }: StoredFileIdentity): string =>
@@ -64,7 +66,11 @@ export const collectStoredFiles = ({
       return
     }
     const representation = value as Record<string, unknown>
-    if (typeof representation.filename !== 'string') {
+    // A `_stored: false` entry is built when it is requested, so it has no object to copy or delete.
+    if (
+      typeof representation.filename !== 'string' ||
+      isRequestTimeFile({ entry: representation })
+    ) {
       return
     }
     const filename = representation.filename
@@ -76,9 +82,21 @@ export const collectStoredFiles = ({
           collectionSlug: collection.slug,
           config: req.payload.config,
           filename,
+          isOriginal: role.type === 'original' && shouldRequestOriginal({ doc }),
           relative: true,
           urlOrPath: undefined,
-        })
+        }) &&
+      // Archiving can rename the original away from the main file while retaining its role query.
+      (role.type !== 'original' ||
+        representation.url !==
+          generateFilePathOrURL({
+            collectionSlug: collection.slug,
+            config: req.payload.config,
+            filename,
+            isOriginal: true,
+            relative: true,
+            urlOrPath: undefined,
+          }))
     ) {
       return
     }
@@ -108,6 +126,10 @@ export const collectStoredFiles = ({
   }
   return createStoredFileList({ references })
 }
+
+/** Whether the original is one of the stored files, so a request-time file can be built from it. */
+export const hasStoredOriginal = ({ storedFiles }: { storedFiles: StoredFileList }): boolean =>
+  storedFiles.some(({ roles }) => roles.some(({ type }) => type === 'original'))
 
 export const withLegacyUploadFileData = ({
   collection,

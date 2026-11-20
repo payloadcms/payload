@@ -1,28 +1,39 @@
-import { mountDemoChrome } from '../WindowChrome/index.mjs'
+import { bindDemoHistory, getDefaultCanvas, mountDemoChrome } from '../WindowChrome/index.mjs'
+import { mountAnnotationSidebar } from '../WindowChrome/sidebar.mjs'
 import { observeAccessibility } from '../accessibility-demo.mjs'
 
 const isAccessibility = new URLSearchParams(location.search).has('accessibility')
 
+let theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'
+
+const canvas = getDefaultCanvas({ viewport: { width: 1280, height: 720 } })
 const root = document.querySelector('#chrome')
+const application = document.createElement('iframe')
+const change = {
+  kind:
+    { feature: 'Feature', fix: 'Fix', bug: 'Bug' }[
+      new URLSearchParams(location.search).get('kind')
+    ] ?? 'Feature',
+  title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
+  description: isAccessibility
+    ? 'Follow keyboard input and movement announcements.'
+    : 'Browse and manage content on desktop, tablet, and mobile.',
+}
 const chrome = mountDemoChrome({
+  onNavigate: (direction) => application.contentWindow.history.go(direction),
+  onRefresh: refreshApplication,
   root,
+  canvas,
   accessibility: isAccessibility,
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
-  theme: new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light',
-  change: {
-    kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
-    title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
-    description: isAccessibility
-      ? 'Follow keyboard input and movement announcements.'
-      : 'Browse and manage content on desktop, tablet, and mobile.',
-  },
+  theme,
 })
-const application = document.createElement('iframe')
 application.slot = 'content'
 application.title = 'Responsive sample application'
 application.src = isAccessibility
   ? '/preview/accessibility-application.html'
   : '/preview/application.html'
+bindDemoHistory({ app: application, chrome })
 let stopAccessibility
 if (isAccessibility)
   application.addEventListener('load', () => {
@@ -32,6 +43,35 @@ if (isAccessibility)
       report: (state) => chrome.setAccessibilityState(state),
     })
   })
+function applyTheme() {
+  chrome.setTheme(theme)
+  document.documentElement.style.colorScheme = theme
+  if (application.contentDocument?.body) {
+    application.contentDocument.documentElement.style.colorScheme = theme
+    application.contentDocument.body.style.colorScheme = theme
+  }
+  document.querySelectorAll('[data-theme]').forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.dataset.theme === theme))
+  })
+}
+application.addEventListener('load', applyTheme)
+document.querySelectorAll('[data-theme]').forEach((button) => {
+  button.addEventListener('click', () => {
+    theme = button.dataset.theme
+    const url = new URL(location.href)
+    url.searchParams.set('theme', theme)
+    history.replaceState(null, '', url)
+    applyTheme()
+  })
+})
+applyTheme()
+const changeKind = document.querySelector('#change-kind')
+changeKind.value = new URLSearchParams(location.search).get('kind') ?? 'feature'
+changeKind.addEventListener('change', () => {
+  const url = new URL(location.href)
+  url.searchParams.set('kind', changeKind.value)
+  location.href = url.href
+})
 root.append(application)
 const timeline = document.querySelector('#timeline')
 const play = document.querySelector('#play')
@@ -43,6 +83,81 @@ let time = 0
 let animation
 let width = 1280
 
+const steps = [
+  {
+    title: 'See the full picture',
+    body: 'View post titles, publishing status, and update dates together.',
+  },
+  {
+    kind: 'Bug',
+    title: 'Keep essential details visible',
+    body: 'Update dates hide as space narrows; titles and status remain.',
+  },
+  {
+    title: 'Make room for content',
+    body: 'The sidebar collapses so the post list can use the full width.',
+  },
+]
+const manySteps = document.querySelector('#many-steps')
+manySteps.checked = new URLSearchParams(location.search).has('manySteps')
+if (manySteps.checked) {
+  steps.push(
+    {
+      title: 'Review field spacing',
+      body: 'Check that labels and values have room at smaller widths.',
+    },
+    {
+      title: 'Inspect the collection navigation',
+      body: 'Keep the collection links available while browsing content.',
+    },
+    {
+      title: 'Compare publishing statuses',
+      body: 'Published and draft items stay easy to distinguish.',
+    },
+    {
+      kind: 'Bug',
+      title: 'Check longer document titles',
+      body: 'Long names should remain readable within the list.',
+    },
+    { title: 'Review row actions', body: 'Keep the actions close to the document they belong to.' },
+    {
+      title: 'Inspect the mobile layout',
+      body: 'Confirm the list makes good use of a narrow window.',
+    },
+    {
+      title: 'Return to the collection overview',
+      body: 'Review the overall layout after checking individual details.',
+    },
+    {
+      title: 'Compare the available themes',
+      body: 'Check text and controls against both light and dark backgrounds.',
+    },
+    {
+      title: 'Finish the walkthrough',
+      body: 'The current step stays visible while earlier steps remain available above.',
+    },
+  )
+}
+manySteps.addEventListener('change', () => {
+  const url = new URL(location.href)
+  if (manySteps.checked) url.searchParams.set('manySteps', '')
+  else url.searchParams.delete('manySteps')
+  location.href = url.href
+})
+const sidebar = mountAnnotationSidebar({
+  root,
+  change,
+  steps,
+  onSelect: (index) => {
+    renderAt({
+      milliseconds: manySteps.checked
+        ? (index * timelineDuration) / steps.length + 1
+        : [0, tabletArrival, mobileArrival][index],
+    })
+    stop()
+  },
+})
+
 function renderAt({ milliseconds }) {
   time = Math.max(0, Math.min(timelineDuration, milliseconds))
   const isFirstResize = time <= tabletArrival
@@ -50,37 +165,17 @@ function renderAt({ milliseconds }) {
   const eased = progress * progress * (3 - 2 * progress)
   width = Math.round(isFirstResize ? 1280 - 512 * eased : 768 - 378 * eased)
   chrome.setViewport({ width, height: 720 })
-  const step =
-    time < tabletArrival
-      ? {
-          index: 1,
-          title: 'See the full picture',
-          body: 'View post titles, publishing status, and update dates together.',
-        }
+  const stepIndex = manySteps.checked
+    ? Math.min(steps.length - 1, Math.floor((time / timelineDuration) * steps.length))
+    : time < tabletArrival
+      ? 0
       : time < mobileArrival
-        ? {
-            index: 2,
-            title: 'Keep essential details visible',
-            body: 'Update dates hide as space narrows; titles and status remain.',
-          }
-        : {
-            index: 3,
-            title: 'Make room for content',
-            body: 'The sidebar collapses so the post list can use the full width.',
-          }
-  chrome.setAnnotation(
-    document.querySelector('#annotation').checked
-      ? isAccessibility
-        ? {
-            index: 1,
-            total: 1,
-            title: 'Try it with the keyboard',
-            body: 'Click a Move down button, then use Tab and Enter. Commands and announcements appear below this step.',
-          }
-        : { ...step, total: 3 }
-      : null,
+        ? 1
+        : 2
+  const step = { ...steps[stepIndex], index: stepIndex + 1 }
+  sidebar.setAnnotation(
+    document.querySelector('#annotation').checked ? { ...step, total: steps.length } : null,
   )
-  chrome.setSizeVisible({ isVisible: document.querySelector('#dimensions').checked })
   timeline.value = String(time)
   document.querySelector('#time').textContent =
     `${(time / 1000).toFixed(2)} / ${(timelineDuration / 1000).toFixed(2)} s`
@@ -92,7 +187,8 @@ function stop() {
   cancelAnimationFrame(animation)
   animation = undefined
   play.textContent = 'Play resize'
-  document.querySelector('#status').textContent = `Window: ${width} × 720. Canvas: 1600 × 1000.`
+  document.querySelector('#status').textContent =
+    `Window: ${width} × 720. Canvas: ${canvas.width} × ${canvas.height}.`
 }
 document.querySelectorAll('[data-width]').forEach((button) =>
   button.addEventListener('click', () => {
@@ -107,10 +203,9 @@ timeline.addEventListener('input', () => {
   renderAt({ milliseconds: Number(timeline.value) })
   stop()
 })
-for (const id of ['dimensions', 'annotation'])
-  document
-    .querySelector(`#${id}`)
-    .addEventListener('change', () => renderAt({ milliseconds: time }))
+document
+  .querySelector('#annotation')
+  .addEventListener('change', () => renderAt({ milliseconds: time }))
 play.addEventListener('click', () => {
   if (animation !== undefined) {
     stop()
@@ -132,21 +227,24 @@ play.addEventListener('click', () => {
   animation = requestAnimationFrame(tick)
 })
 renderAt({ milliseconds: 0 })
+stop()
 
-const refresh = document.querySelector('#refresh')
-refresh.addEventListener('click', async () => {
-  if (refresh.getAttribute('aria-disabled') === 'true') return
-  refresh.setAttribute('aria-disabled', 'true')
+let isRefreshing = false
+
+async function refreshApplication() {
+  if (isRefreshing) return
+  isRefreshing = true
   chrome.setRefreshState({ state: 'refreshing' })
-  const started = performance.now()
-  const loaded = new Promise((resolve) =>
-    application.addEventListener('load', resolve, { once: true }),
-  )
-  application.contentWindow.location.reload()
-  await loaded
-  await new Promise((resolve) =>
-    setTimeout(resolve, Math.max(0, 300 - (performance.now() - started))),
-  )
-  chrome.setRefreshState({ state: 'refreshed' })
-  refresh.setAttribute('aria-disabled', 'false')
-})
+  try {
+    const loaded = new Promise((resolve) =>
+      application.addEventListener('load', resolve, { once: true }),
+    )
+    application.contentWindow.location.reload()
+    await loaded
+    chrome.setRefreshState({ state: 'refreshed' })
+  } catch {
+    chrome.setRefreshState({ state: 'failed' })
+  } finally {
+    isRefreshing = false
+  }
+}

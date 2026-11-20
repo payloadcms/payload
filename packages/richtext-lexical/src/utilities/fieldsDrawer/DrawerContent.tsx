@@ -8,10 +8,11 @@ import {
   useDocumentForm,
   useDocumentInfo,
   useEffectEvent,
+  useOperation,
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -37,8 +38,7 @@ export const DrawerContent: React.FC<
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
-
-  const onChangeAbortControllerRef = useRef(new AbortController())
+  const operation = useOperation()
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -72,14 +72,16 @@ export const DrawerContent: React.FC<
         documentFormState: getParentDocumentFields(),
         globalSlug,
         initialBlockData: data,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
       })
 
-      setInitialState(state)
+      if (!controller.signal.aborted && state) {
+        setInitialState(state)
+      }
     }
 
     void awaitInitialState()
@@ -96,56 +98,8 @@ export const DrawerContent: React.FC<
     isEditable,
     globalSlug,
     getDocPreferences,
+    operation,
   ])
-
-  const onChange = useCallback(
-    async ({ formState: prevFormState }: { formState: FormState }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: parentDocumentFields,
-        formState: prevFormState,
-        globalSlug,
-        initialBlockFormState: prevFormState,
-        operation: 'update',
-        readOnly: !isEditable,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!state) {
-        return prevFormState
-      }
-
-      return state
-    },
-    [
-      getFormState,
-      id,
-      isEditable,
-      collectionSlug,
-      getDocPreferences,
-      parentDocumentFields,
-      globalSlug,
-      schemaFieldsPath,
-    ],
-  )
-
-  // cleanup effect
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
 
   if (initialState === false) {
     return null
@@ -153,13 +107,13 @@ export const DrawerContent: React.FC<
 
   return (
     <Form
-      beforeSubmit={[onChange]}
       className="fields-drawer"
       disableValidationOnSubmit
       fields={Array.isArray(fields) ? fields : []}
       initialState={initialState}
-      onChange={[onChange]}
       onSubmit={handleDrawerSubmit}
+      readOnly={!isEditable}
+      schemaPath={schemaFieldsPath}
       uuid={uuid()}
     >
       <RenderFields

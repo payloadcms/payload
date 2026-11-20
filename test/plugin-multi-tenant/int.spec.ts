@@ -1,12 +1,13 @@
-import type { DefaultDocumentIDType, PaginatedDocs } from 'payload'
+import type { DefaultDocumentIDType, PaginatedDocs, ServerAdapter, User } from 'payload'
 
 import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { Relationship } from './payload-types.js'
 
+import { getGlobalViewRedirect } from '../../packages/plugin-multi-tenant/src/utilities/getGlobalViewRedirect.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { multiTenantPostsAccessResultEvents } from './config.base.js'
@@ -594,6 +595,290 @@ test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
           user: tenantMemberUser,
         }),
       ).rejects.toThrow(ValidationError)
+    })
+  })
+
+  test.describe('global collection redirects', () => {
+    const server = {
+      unauthorized: () => {
+        throw new Error('Unauthorized')
+      },
+    } as ServerAdapter
+    const createdIDs: { collection: string; id: DefaultDocumentIDType }[] = []
+    let member: User
+    let tenantA: DefaultDocumentIDType
+    let tenantB: DefaultDocumentIDType
+
+    test.beforeEach(async ({ payload }) => {
+      const firstTenant = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Redirect Tenant A', domain: 'redirect-a.test' },
+      })
+      const secondTenant = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Redirect Tenant B', domain: 'redirect-b.test' },
+      })
+
+      tenantA = firstTenant.id
+      tenantB = secondTenant.id
+      createdIDs.push({ id: tenantA, collection: tenantsSlug })
+      createdIDs.push({ id: tenantB, collection: tenantsSlug })
+
+      member = (await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'redirect-member@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [{ tenant: tenantA }],
+        },
+        overrideAccess: true,
+      })) as User
+      createdIDs.push({ id: member.id, collection: usersSlug })
+    })
+
+    test.afterEach(async ({ payload }) => {
+      vi.restoreAllMocks()
+      for (const { id, collection } of createdIDs.reverse()) {
+        await payload.delete({ id, collection, overrideAccess: true })
+      }
+      createdIDs.length = 0
+    })
+
+    test('should select an available tenant for the collection list', async ({ payload }) => {
+      const secondMenu = await payload.create({
+        collection: menuSlug,
+        data: { tenant: tenantB, title: 'Second menu' },
+        overrideAccess: true,
+      })
+      createdIDs.push({ id: secondMenu.id, collection: menuSlug })
+
+      const route = await getGlobalViewRedirect({
+        slug: menuSlug,
+        headers: new Headers([['cookie', `payload-tenant=${tenantB}`]]),
+        payload,
+        server,
+        tenantFieldName: 'tenant',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...member, collection: usersSlug },
+        userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+        view: 'list',
+      })
+
+      expect(route).toContain(`/collections/${menuSlug}/create`)
+      expect(route).not.toContain(String(secondMenu.id))
+    })
+
+    test('should create an autosave draft only for an available tenant', async ({ payload }) => {
+      const route = await getGlobalViewRedirect({
+        slug: autosaveGlobalSlug,
+        headers: new Headers([['cookie', `payload-tenant=${tenantB}`]]),
+        payload,
+        server,
+        tenantFieldName: 'tenant',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...member, collection: usersSlug },
+        userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+        view: 'list',
+      })
+      const drafts = await payload.find({
+        collection: autosaveGlobalSlug,
+        draft: true,
+        overrideAccess: true,
+        where: { tenant: { in: [tenantA, tenantB] } },
+      })
+
+      for (const doc of drafts.docs) {
+        createdIDs.push({ id: doc.id, collection: autosaveGlobalSlug })
+      }
+      expect(drafts.docs).toHaveLength(1)
+      expect(drafts.docs[0]?.tenant).toEqual(expect.objectContaining({ id: tenantA }))
+      expect(route).toContain(String(drafts.docs[0]?.id))
+    })
+
+    test('should return to Admin when the user has no available tenants', async ({ payload }) => {
+      const unassignedUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'redirect-unassigned@test.com',
+          password: 'test',
+          roles: ['user'],
+          tenants: [],
+        },
+        overrideAccess: true,
+      })
+      createdIDs.push({ id: unassignedUser.id, collection: usersSlug })
+
+      const route = await getGlobalViewRedirect({
+        slug: autosaveGlobalSlug,
+        headers: new Headers([['cookie', `payload-tenant=${tenantB}`]]),
+        payload,
+        server,
+        tenantFieldName: 'tenant',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...unassignedUser, collection: usersSlug },
+        userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+        view: 'list',
+      })
+      const drafts = await payload.find({
+        collection: autosaveGlobalSlug,
+        draft: true,
+        overrideAccess: true,
+        where: { tenant: { equals: tenantB } },
+      })
+
+      expect(route).toBe('/admin')
+      expect(drafts.docs).toHaveLength(0)
+    })
+
+    test('should redirect to a document in an available tenant', async ({ payload }) => {
+      const firstMenu = await payload.create({
+        collection: menuSlug,
+        data: { tenant: tenantA, title: 'First menu' },
+        overrideAccess: true,
+      })
+      createdIDs.push({ id: firstMenu.id, collection: menuSlug })
+
+      const route = await getGlobalViewRedirect({
+        slug: menuSlug,
+        headers: new Headers([['cookie', `payload-tenant=${tenantA}`]]),
+        payload,
+        server,
+        tenantFieldName: 'tenant',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...member, collection: usersSlug },
+        userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+        view: 'list',
+      })
+
+      expect(route).toContain(`/collections/${menuSlug}/${firstMenu.id}`)
+    })
+
+    test('should redirect a document route to the selected available tenant', async ({
+      payload,
+    }) => {
+      const firstMenu = await payload.create({
+        collection: menuSlug,
+        data: { tenant: tenantA, title: 'First menu' },
+        overrideAccess: true,
+      })
+      const secondMenu = await payload.create({
+        collection: menuSlug,
+        data: { tenant: tenantB, title: 'Second menu' },
+        overrideAccess: true,
+      })
+      createdIDs.push({ id: firstMenu.id, collection: menuSlug })
+      createdIDs.push({ id: secondMenu.id, collection: menuSlug })
+
+      const route = await getGlobalViewRedirect({
+        slug: menuSlug,
+        docID: secondMenu.id,
+        headers: new Headers([['cookie', `payload-tenant=${tenantB}`]]),
+        payload,
+        server,
+        tenantFieldName: 'tenant',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...member, collection: usersSlug },
+        userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+        view: 'document',
+      })
+
+      expect(route).toContain(`/collections/${menuSlug}/${firstMenu.id}`)
+    })
+
+    test('should allow a user with all-tenant access to select another tenant', async ({
+      payload,
+    }) => {
+      const admin = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'redirect-admin@test.com',
+          password: 'test',
+          roles: ['admin'],
+          tenants: [],
+        },
+        overrideAccess: true,
+      })
+      const secondMenu = await payload.create({
+        collection: menuSlug,
+        data: { tenant: tenantB, title: 'Second menu' },
+        overrideAccess: true,
+      })
+      createdIDs.push({ id: secondMenu.id, collection: menuSlug })
+      createdIDs.push({ id: admin.id, collection: usersSlug })
+
+      const route = await getGlobalViewRedirect({
+        slug: menuSlug,
+        headers: new Headers([['cookie', `payload-tenant=${tenantB}`]]),
+        payload,
+        server,
+        tenantFieldName: 'tenant',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...admin, collection: usersSlug },
+        userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
+        view: 'list',
+      })
+
+      expect(route).toContain(`/collections/${menuSlug}/${secondMenu.id}`)
+    })
+
+    test('should use the configured tenant field for an autosave draft', async ({ payload }) => {
+      const find = vi
+        .spyOn(payload, 'find')
+        .mockResolvedValueOnce({ docs: [{ id: tenantA, name: 'First tenant' }] } as never)
+        .mockResolvedValueOnce({ docs: [] } as never)
+      const create = vi.spyOn(payload, 'create').mockResolvedValue({ id: 42 } as never)
+
+      const route = await getGlobalViewRedirect({
+        slug: autosaveGlobalSlug,
+        headers: new Headers([['cookie', `payload-tenant=${tenantA}`]]),
+        payload,
+        server,
+        tenantFieldName: 'site',
+        tenantsArrayFieldName: 'tenants',
+        tenantsArrayTenantFieldName: 'tenant',
+        tenantsCollectionSlug: tenantsSlug,
+        useAsTitle: 'name',
+        user: { ...member, collection: usersSlug },
+        userHasAccessToAllTenants: () => false,
+        view: 'list',
+      })
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { site: tenantA },
+          draft: true,
+          overrideAccess: false,
+          user: expect.objectContaining({ id: member.id }),
+        }),
+      )
+      expect(find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collection: autosaveGlobalSlug,
+          overrideAccess: false,
+          user: expect.objectContaining({ id: member.id }),
+          where: { site: { in: [tenantA] } },
+        }),
+      )
+      expect(route).toContain(`/collections/${autosaveGlobalSlug}/42`)
     })
   })
 

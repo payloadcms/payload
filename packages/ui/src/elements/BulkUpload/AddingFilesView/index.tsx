@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 import React from 'react'
 
 import { PlusIcon } from '../../../icons/Plus/index.js'
@@ -113,7 +113,7 @@ export function AddingFilesView({ modalSlug }: Props) {
                 hasPublishPermission={hasPublishPermission}
                 hasSavePermission={hasSavePermission}
                 id={null}
-                initialData={reduceFieldsToValues(activeForm.formState, true)}
+                initialData={getDataFromFormState(activeForm.formState, true)}
                 initialState={activeForm.formState}
                 isLocked={false}
                 key={`${collectionSlug}-${activeIndex}-${forms.length}`}

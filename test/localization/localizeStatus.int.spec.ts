@@ -269,6 +269,80 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
           expect(['draft', 'published']).toContain(row._status)
         })
       })
+
+      test('should create localized status columns with the enum types the schema generator declares', async ({
+        payload,
+      }) => {
+        const db = payload.db
+
+        await migratePostgresLocalizeStatus({
+          collectionSlug: 'testMigrationArticles',
+          db,
+          payload,
+          sql,
+        })
+
+        const columnTypes = await db.drizzle.execute(sql`
+          SELECT table_name, column_name, udt_name
+          FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND (
+              (table_name = 'test_migration_articles_locales' AND column_name = '_status')
+              OR (table_name = '_test_migration_articles_v_locales' AND column_name = 'version__status')
+            )
+          ORDER BY table_name ASC, column_name ASC
+        `)
+
+        expect(columnTypes.rows).toEqual([
+          {
+            column_name: 'version__status',
+            table_name: '_test_migration_articles_v_locales',
+            udt_name: 'enum__test_migration_articles_v_version_status',
+          },
+          {
+            column_name: '_status',
+            table_name: 'test_migration_articles_locales',
+            udt_name: 'enum_test_migration_articles_status',
+          },
+        ])
+      })
+
+      test('should migrate with the Drizzle transaction handle a migration receives', async ({
+        payload,
+      }) => {
+        await payload.db.drizzle.transaction(async (transaction) => {
+          await migratePostgresLocalizeStatus({
+            collectionSlug: 'testMigrationArticles',
+            db: transaction,
+            payload,
+            sql,
+          })
+        })
+
+        const columnTypes = await payload.db.drizzle.execute(sql`
+          SELECT table_name, column_name, udt_name
+          FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND (
+              (table_name = 'test_migration_articles_locales' AND column_name = '_status')
+              OR (table_name = '_test_migration_articles_v_locales' AND column_name = 'version__status')
+            )
+          ORDER BY table_name ASC, column_name ASC
+        `)
+
+        expect(columnTypes.rows).toEqual([
+          {
+            column_name: 'version__status',
+            table_name: '_test_migration_articles_v_locales',
+            udt_name: 'enum__test_migration_articles_v_version_status',
+          },
+          {
+            column_name: '_status',
+            table_name: 'test_migration_articles_locales',
+            udt_name: 'enum_test_migration_articles_status',
+          },
+        ])
+      })
     })
 
     test.describe('Scenario 3: Demonstrate version history migration', () => {
@@ -681,7 +755,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
 
     test.describe('Scenario 1: Creating new locales table', () => {
-      test('should migrate non-localized _status to localized', async ({ payload }) => {
+      test('should migrate non-localized _status to localized on SQLite', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         const post1 = await payload.create({
@@ -810,7 +884,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
 
     test.describe('Scenario 3: Test publishedLocale handling', () => {
-      test('should handle publishedLocale correctly', async ({ payload }) => {
+      test('should handle publishedLocale correctly on SQLite', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v`))
@@ -900,7 +974,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
 
     test.describe('Scenario 4: Skip collections without versions', () => {
-      test('should skip migration for collections without versions enabled', async ({
+      test('should skip migration for collections without versions enabled on SQLite', async ({
         payload,
       }) => {
         const doc = await payload.create({
