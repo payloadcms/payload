@@ -1819,6 +1819,28 @@ test.describe('Hierarchy Sidebar', () => {
           .toBeNull()
       })
 
+      test('should move a selected document from one folder to another', async () => {
+        const product = await createProductInChildFolder()
+        const destination = await createFolder({ name: `Document Destination ${Date.now()}` })
+
+        await page.goto(`${foldersURL.hierarchy}&parentFolder=${childFolder.id}`)
+
+        await page.locator('tr', { hasText: product.name }).getByRole('checkbox').click()
+        await openMoveModalFromAssignedHierarchy({
+          button: page.getByRole('button', { name: 'Move', exact: true }),
+          page,
+        })
+
+        const modal = page.locator('.hierarchy-modal')
+
+        await modal.getByRole('checkbox', { name: destination.name }).check()
+        await modal.locator('.dialog__footer').getByRole('button', { name: 'Confirm' }).click()
+
+        await expect
+          .poll(() => findParentFolderID({ id: product.id, collection: 'products' }))
+          .toBe(destination.id)
+      })
+
       test('should send one bulk move request when confirm is double clicked', async () => {
         const uniqueSuffix = Date.now()
         const destinationFolder = await createFolder({
