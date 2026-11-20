@@ -196,6 +196,7 @@ export function FlatFolderContentsView({
       <DocumentCard
         href={isFolder ? folderURL : editURL}
         isSelected={isSelected({ id: row.id, collectionSlug: row._collectionSlug })}
+        navigateOnTitleClick
         onSelect={
           isLocked({ id: row.id, collectionSlug: row._collectionSlug })
             ? undefined

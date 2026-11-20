@@ -75,6 +75,36 @@ test('should keep nested actions interactive on an href-only card', async () => 
   expect(push).not.toHaveBeenCalled()
 })
 
+test('should navigate from the title when card selection is available', async () => {
+  const onSelect = vi.fn()
+  const push = vi.fn()
+  const TestLink = ({ href, ...props }: LinkAdapterProps) => <a href={href} {...props} />
+
+  const screen = await render(
+    <RouterAdapterContext
+      value={{
+        Link: TestLink,
+        params: {},
+        pathname: '/',
+        router: { back: vi.fn(), push, refresh: vi.fn(), replace: vi.fn() },
+        searchParams: new URLSearchParams(),
+      }}
+    >
+      <DocumentCard
+        href="/documents/1"
+        navigateOnTitleClick
+        onSelect={onSelect}
+        title="Example document"
+      />
+    </RouterAdapterContext>,
+  )
+
+  await screen.getByRole('link', { name: 'Example document' }).click()
+
+  expect(push).toHaveBeenCalledWith('/documents/1', { scroll: undefined })
+  expect(onSelect).not.toHaveBeenCalled()
+})
+
 test('should keep selection available without navigating when the href is null', async () => {
   const onSelect = vi.fn()
   const push = vi.fn()

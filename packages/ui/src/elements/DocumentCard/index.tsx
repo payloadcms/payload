@@ -19,6 +19,7 @@ export type DocumentCardProps = {
   readonly children?: React.ReactNode
   readonly href?: null | string
   readonly isSelected?: boolean
+  readonly navigateOnTitleClick?: boolean
   readonly onSelect?: () => void
   readonly placeholder?: React.ReactNode
   readonly thumbnail?: DocumentCardThumbnail
@@ -30,6 +31,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   children,
   href,
   isSelected = false,
+  navigateOnTitleClick = false,
   onSelect,
   placeholder,
   thumbnail,
@@ -40,7 +42,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   const selectionStatusID = React.useId()
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!onSelect || event.detail === 0) {
+    if (!onSelect || navigateOnTitleClick || event.detail === 0) {
       return
     }
 
