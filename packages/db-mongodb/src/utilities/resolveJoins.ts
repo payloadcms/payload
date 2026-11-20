@@ -112,6 +112,10 @@ export async function resolveJoins({
     const page = joinQuery.page ?? 1
     const skip = (page - 1) * limit
 
+    // A database limit or count would be shared by every parent, so page each parent's children
+    // in memory when there is more than one parent or more than one target collection.
+    const shouldPaginateInMemory = isPolymorphicJoin || docs.length > 1
+
     // Process collections concurrently
     const collectionPromises = allCollections.map(async (joinCollectionSlug) => {
       const targetConfig = adapter.payload.collections[joinCollectionSlug]?.config
@@ -246,9 +250,9 @@ export async function resolveJoins({
       const [results, dbCount] = await Promise.all([
         JoinModel.find(whereQuery, projection, {
           sort,
-          ...(isPolymorphicJoin ? {} : { limit, skip }),
+          ...(shouldPaginateInMemory ? {} : { limit, skip }),
         }).lean(),
-        isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
+        shouldPaginateInMemory ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
       ])
 
       transform({
@@ -307,6 +311,9 @@ export async function resolveJoins({
           continue
         }
 
+        // A child can point at the same parent from several array rows or blocks
+        const addedParentKeys = new Set<string>()
+
         for (let parentValue of parentValues) {
           if (!parentValue) {
             continue
@@ -321,7 +328,12 @@ export async function resolveJoins({
             value: result.id,
           }
 
-          const parentKey = parentValue as string
+          const parentKey = String(parentValue)
+          if (addedParentKeys.has(parentKey)) {
+            continue
+          }
+          addedParentKeys.add(parentKey)
+
           if (!grouped[parentKey]) {
             grouped[parentKey] = {
               docs: [],
@@ -375,11 +387,11 @@ export async function resolveJoins({
     return {
       countFromDatabase,
       grouped,
-      isPolymorphicJoin,
       joinQuery,
       limit,
       localizedJoinPath,
       page,
+      shouldPaginateInMemory,
       skip,
     }
   })
@@ -396,26 +408,26 @@ export async function resolveJoins({
     const {
       countFromDatabase,
       grouped,
-      isPolymorphicJoin,
       joinQuery,
       limit,
       localizedJoinPath,
+      shouldPaginateInMemory,
       skip,
     } = joinResult
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
       const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
-      const children = grouped[id]?.docs || []
-      const totalDocs = isPolymorphicJoin ? children.length : countFromDatabase
+      const children = grouped[String(id)]?.docs || []
+      const totalDocs = shouldPaginateInMemory ? children.length : countFromDatabase
 
       // Calculate the slice for pagination
       // When limit is 0, it means unlimited - return all results
-      const slice = isPolymorphicJoin
+      const slice = shouldPaginateInMemory
         ? limit === 0
           ? children
           : children.slice(skip, skip + limit)
-        : // For non-polymorphic joins, we assume that page and limit were applied at the database level
+        : // With one parent and one collection, page and limit were applied in the database
           children
 
       // Create the join result object with pagination metadata

@@ -106,6 +106,36 @@ test.suite('Polymorphic join pagination', { config: './config.ts', db: 'mongo' }
           expect(emptyChildren?.totalDocs).toBe(count ? 0 : undefined)
         })
 
+        test('should page a regular join separately for each parent', async ({ payload }) => {
+          const smaller = await createJoinedDocuments({ payload, articles: ['Zulu'] })
+          const larger = await createJoinedDocuments({
+            payload,
+            articles: ['Accessibility', 'Community', 'Events'],
+          })
+
+          const { docs } = await payload.find({
+            collection: accessJoinParentsSlug,
+            depth: 0,
+            joins: { articles: { count, limit: 2, sort: 'title' } },
+            overrideAccess: true,
+            where: { id: { in: [smaller.parentID, larger.parentID] } },
+          })
+
+          const smallerArticles = docs.find(({ id }) => id === smaller.parentID)?.articles
+          const largerArticles = docs.find(({ id }) => id === larger.parentID)?.articles
+
+          expect(smallerArticles).toMatchObject({
+            docs: smaller.articles.map(({ value }) => value),
+            hasNextPage: false,
+          })
+          expect(smallerArticles?.totalDocs).toBe(count ? 1 : undefined)
+          expect(largerArticles).toMatchObject({
+            docs: larger.articles.slice(0, 2).map(({ value }) => value),
+            hasNextPage: true,
+          })
+          expect(largerArticles?.totalDocs).toBe(count ? 3 : undefined)
+        })
+
         test('should return an empty page past the mixed results', async ({ payload }) => {
           const { parentID } = await createJoinedDocuments({
             payload,
