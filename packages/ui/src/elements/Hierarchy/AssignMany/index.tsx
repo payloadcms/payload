@@ -108,7 +108,7 @@ export function AssignMany({
               }
 
               const values: (number | string)[] = (rawValues || []).map(
-                (value: number | { id: number | string } | string) =>
+                (value: { id: number | string } | number | string) =>
                   typeof value === 'object' ? value.id : value,
               )
               const isAssigned = values.some((value) => String(value) === String(hierarchyID))
