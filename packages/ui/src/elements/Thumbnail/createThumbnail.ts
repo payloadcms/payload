@@ -62,7 +62,8 @@ function createVideoThumbnail(file: File): Promise<string> {
 
     video.muted = true
     video.playsInline = true
-    video.preload = 'auto'
+    // The seek loads the frame, so the browser does not buffer the whole file
+    video.preload = 'metadata'
 
     video.onloadedmetadata = () => {
       // Duration is NaN or Infinity for some containers until fully buffered
@@ -98,7 +99,9 @@ function createVideoThumbnail(file: File): Promise<string> {
 
   return frame.finally(() => {
     clearTimeout(timeoutID)
+    // Browsers limit active media players, so release this one before GC does
     video.removeAttribute('src')
+    video.load()
     URL.revokeObjectURL(objectURL)
   })
 }
