@@ -40,6 +40,77 @@ import {
 let postsURL: AdminUrlUtil
 let serverURL: string
 
+test.describe('Standalone modals', () => {
+  test.beforeAll(async () => {
+    ;({ serverURL } = await initPayloadE2ENoConfig({
+      dirname: fileURLToPath(new URL('.', import.meta.url)),
+    }))
+  })
+
+  test('should operate confirmation modals without admin providers', async ({ page }) => {
+    await page.goto(`${serverURL}/modals`)
+    await page.locator('html').evaluate((element) => {
+      element.setAttribute('data-enhanced-contrast', '')
+    })
+    await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+    const trigger = page.getByRole('button', { name: 'Open confirmation', exact: true })
+    const dialog = page.getByRole('dialog', { name: 'Standalone confirmation', exact: true })
+
+    await expect(dialog).toBeHidden()
+    await trigger.focus()
+    await trigger.press('Enter')
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('heading')).toBeFocused()
+    await expect(page.getByRole('main')).toHaveCount(0)
+
+    for (const key of ['Tab', 'Shift+Tab']) {
+      for (let step = 0; step < 5; step++) {
+        await page.keyboard.press(key)
+        await expectFocusInside({ container: dialog, page })
+      }
+    }
+
+    for (const theme of ['light', 'dark']) {
+      await page.locator('html').evaluate((element, theme) => {
+        element.setAttribute('data-theme', theme)
+      }, theme)
+      await scanA11y({ name: `standalone confirmation (${theme}, enhanced contrast)`, page })
+    }
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(trigger).toBeFocused()
+    await expect(page.getByRole('main')).toBeVisible()
+    await trigger.press('Enter')
+    await dialog.getByRole('button', { name: 'Cancel action', exact: true }).click()
+    await expect(page.getByRole('status')).toHaveText('Cancelled')
+    await expect(trigger).toBeFocused()
+    await trigger.press('Enter')
+    await dialog.getByRole('button', { name: 'Confirm action', exact: true }).click()
+    await expect(page.getByRole('status')).toHaveText('Confirmed')
+    await expect(trigger).toBeFocused()
+  })
+
+  test('should isolate nested confirmation modals and restore focus', async ({ page }) => {
+    await page.goto(`${serverURL}/modals`)
+    await page.getByRole('button', { name: 'Open confirmation', exact: true }).click()
+
+    const parent = page.locator('#standalone-confirmation')
+    const nestedTrigger = page.getByRole('button', { name: 'Open nested confirmation' })
+    const child = page.getByRole('dialog', { name: 'Nested confirmation', exact: true })
+
+    await nestedTrigger.click()
+    await expect(child.getByRole('heading')).toBeFocused()
+    await expect(parent).toHaveAttribute('inert', '')
+    await page.keyboard.press('Escape')
+    await expect(child).toBeHidden()
+    await expect(parent).not.toHaveAttribute('inert')
+    await expect(nestedTrigger).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: 'Open confirmation', exact: true })).toBeFocused()
+  })
+})
+
 test.describe('Admin accessibility', () => {
   test.beforeAll(async () => {
     ;({ serverURL } = await initPayloadE2ENoConfig({

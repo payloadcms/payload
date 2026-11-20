@@ -2,7 +2,6 @@
 import type { RouterAdapterComponent, ServerFunctionClient } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
-import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
@@ -22,8 +21,7 @@ import { DocumentEventsProvider } from '../../providers/DocumentEvents/index.js'
 import { EmbedProvider } from '../../providers/Embed/index.js'
 import { HierarchyProvider } from '../../providers/Hierarchy/index.js'
 import { LocaleProvider } from '../../providers/Locale/index.js'
-import { ModalAccessibility } from '../../providers/ModalAccessibility/index.js'
-import { ModalFocusProvider } from '../../providers/ModalFocus/index.js'
+import { ModalContainer, ModalProvider } from '../../providers/Modal/index.js'
 import { PreferencesProvider } from '../../providers/Preferences/index.js'
 import { RouteCache } from '../../providers/RouteCache/index.js'
 import { RouteTransitionProvider } from '../../providers/RouteTransition/index.js'
@@ -94,56 +92,49 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                         }}
                       >
                         <ScrollInfoProvider>
-                          <ModalProvider
-                            classPrefix="payload"
-                            transTime={0}
-                            zIndex="var(--z-modal)"
-                          >
-                            <ModalFocusProvider>
-                              <DrawerStackProvider>
-                                <ModalAccessibility />
-                                <CloseModalOnRouteChange />
-                                <AuthProvider permissions={permissions} user={user}>
-                                  <PreferencesProvider>
-                                    <HierarchyProvider>
-                                      <RootThemeProvider
-                                        highContrastMode={highContrastMode}
-                                        theme={theme}
-                                      >
-                                        <EmbedProvider embed={embed}>
-                                          <LocaleProvider locale={locale}>
-                                            <StepNavProvider>
-                                              <LoadingOverlayProvider>
-                                                <DocumentEventsProvider>
-                                                  <NavProvider initialIsOpen={isNavOpen}>
-                                                    <UploadSessionsProvider>
-                                                      <UploadHandlersProvider>
-                                                        <DndContext
-                                                          collisionDetection={pointerWithin}
-                                                          // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                          id={dndContextID}
-                                                        >
-                                                          <ProgressBar />
-                                                          {children}
-                                                        </DndContext>
-                                                      </UploadHandlersProvider>
-                                                    </UploadSessionsProvider>
-                                                  </NavProvider>
-                                                </DocumentEventsProvider>
-                                              </LoadingOverlayProvider>
-                                            </StepNavProvider>
-                                          </LocaleProvider>
-                                        </EmbedProvider>
-                                      </RootThemeProvider>
-                                    </HierarchyProvider>
-                                  </PreferencesProvider>
-                                  <ModalContainer />
-                                  <StayLoggedInModal />
-                                </AuthProvider>
-                                {/* AuthProvider can unmount its children during logout; keep pending toasts alive. */}
-                                <ToastContainer config={config} />
-                              </DrawerStackProvider>
-                            </ModalFocusProvider>
+                          <ModalProvider>
+                            <DrawerStackProvider>
+                              <CloseModalOnRouteChange />
+                              <AuthProvider permissions={permissions} user={user}>
+                                <PreferencesProvider>
+                                  <HierarchyProvider>
+                                    <RootThemeProvider
+                                      highContrastMode={highContrastMode}
+                                      theme={theme}
+                                    >
+                                      <EmbedProvider embed={embed}>
+                                        <LocaleProvider locale={locale}>
+                                          <StepNavProvider>
+                                            <LoadingOverlayProvider>
+                                              <DocumentEventsProvider>
+                                                <NavProvider initialIsOpen={isNavOpen}>
+                                                  <UploadSessionsProvider>
+                                                    <UploadHandlersProvider>
+                                                      <DndContext
+                                                        collisionDetection={pointerWithin}
+                                                        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                        id={dndContextID}
+                                                      >
+                                                        <ProgressBar />
+                                                        {children}
+                                                      </DndContext>
+                                                    </UploadHandlersProvider>
+                                                  </UploadSessionsProvider>
+                                                </NavProvider>
+                                              </DocumentEventsProvider>
+                                            </LoadingOverlayProvider>
+                                          </StepNavProvider>
+                                        </LocaleProvider>
+                                      </EmbedProvider>
+                                    </RootThemeProvider>
+                                  </HierarchyProvider>
+                                </PreferencesProvider>
+                                <ModalContainer />
+                                <StayLoggedInModal />
+                              </AuthProvider>
+                              {/* AuthProvider can unmount its children during logout; keep pending toasts alive. */}
+                              <ToastContainer config={config} />
+                            </DrawerStackProvider>
                           </ModalProvider>
                         </ScrollInfoProvider>
                       </WindowInfoProvider>
