@@ -85,16 +85,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     return () => {
       abortAndIgnore(controller)
     }
-  }, [
-    schemaFieldsPath,
-    id,
-    data,
-    getFormState,
-    collectionSlug,
-    isEditable,
-    globalSlug,
-    getDocPreferences,
-  ])
+  }, [schemaFieldsPath, id, data, collectionSlug, isEditable, globalSlug])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }: { formState: FormState }) => {
