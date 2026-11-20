@@ -111,7 +111,10 @@ export function canUseFlatFolderContents({
       fieldDefinitions.set(field.name, definition)
     }
   }
-  if (customIDTypes.size > 1) {
+  if (
+    customIDTypes.size > 1 ||
+    ('useJoinAggregations' in req.payload.db && customIDTypes.has('text'))
+  ) {
     return false
   }
 

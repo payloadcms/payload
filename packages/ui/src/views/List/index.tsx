@@ -508,7 +508,9 @@ export const renderListView = async (
       try {
         hierarchyData = await handleHierarchy({ ...hierarchyArgs, flat: true })
 
-        if (hierarchyData.parent) {
+        if (!hierarchyData.parent) {
+          hierarchyData = await handleHierarchy(hierarchyArgs)
+        } else {
           const { documents } = await getFlatFolderContents({
             args: {
               collectionSlug,
@@ -738,7 +740,7 @@ export const ListView: React.FC<RenderListViewArgs> = async (args) => {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
-    if (error.message === 'not-found') {
+    if (error instanceof NotFound || error.message === 'not-found') {
       args.initPageResult.req.server.notFound()
     } else {
       console.error(error) // eslint-disable-line no-console

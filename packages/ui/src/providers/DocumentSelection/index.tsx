@@ -62,6 +62,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
   children,
   collectionData,
   currentUserId,
+  getSelectionMetadata,
   preserveSelectionOnDataChange = false,
   selectionScopeKey,
 }) => {
@@ -92,7 +93,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
           for (const doc of docs) {
             const metadata = previous[collectionSlug]?.selected.get(doc.id)
             if (metadata && !(doc._isLocked && doc._userEditing?.id !== currentUserId)) {
-              selected.set(doc.id, metadata)
+              selected.set(doc.id, getSelectionMetadata?.({ collectionSlug, doc }) ?? metadata)
             }
           }
         }
@@ -104,7 +105,13 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
       return next
     })
-  }, [collectionData, currentUserId, preserveSelectionOnDataChange, selectionScopeKey])
+  }, [
+    collectionData,
+    currentUserId,
+    getSelectionMetadata,
+    preserveSelectionOnDataChange,
+    selectionScopeKey,
+  ])
 
   const isLocked = useCallback(
     ({ id, collectionSlug }: { collectionSlug: string; id: number | string }): boolean => {

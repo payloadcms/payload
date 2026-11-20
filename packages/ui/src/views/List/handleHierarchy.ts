@@ -105,12 +105,11 @@ export const handleHierarchy = async ({
         }
       : { [parentFieldName]: { equals: parentId } }
 
-  // Folder type selection filters documents, not subfolder navigation.
-  // Keep the existing hierarchy-item filter for non-folder collections.
+  // Flat views keep subfolder navigation visible; grouped views retain their type filter.
   let typeCondition: Record<string, unknown> | undefined
 
   if (
-    hierarchyConfig.allowHasMany !== false &&
+    !flat &&
     typeFilter &&
     typeFilter.length > 0 &&
     hierarchyConfig.collectionSpecific &&

@@ -146,7 +146,7 @@ test.suite('Flat folder contents', { config: './config.ts' }, () => {
     expect(filtered.documents.totalDocs).toBe(0)
   })
 
-  test('should keep subfolders visible across document type filters and folder views', async ({
+  test('should keep flat subfolders visible while grouped views apply type filters', async ({
     payload,
   }) => {
     const { parent, req } = await setup({ payload })
@@ -220,8 +220,8 @@ test.suite('Flat folder contents', { config: './config.ts' }, () => {
     expect(continued.folders.totalDocs).toBe(12)
     expect(continued.folders.docs).toHaveLength(2)
     expect(new Set(folderIDs).size).toBe(12)
-    expect(fallback.childrenData.totalDocs).toBe(12)
-    expect(root.childrenData.docs.map((doc) => doc.id)).toContain(parent.id)
+    expect(fallback.childrenData.totalDocs).toBe(0)
+    expect(root.childrenData.totalDocs).toBe(0)
     expect(foldersOnly.folders.totalDocs).toBe(12)
     expect(foldersOnly.documents.totalDocs).toBe(0)
   })

@@ -125,6 +125,8 @@ export type DocumentSelectionProviderProps<TDoc extends SelectableDocument = Sel
   readonly collectionData: CollectionData<TDoc>
   /** Current user ID for determining document lock status */
   readonly currentUserId?: string
+  /** Refresh selected metadata from current rows when preserving selections. */
+  readonly getSelectionMetadata?: (args: { collectionSlug: string; doc: TDoc }) => SelectionMetadata
   /** Keep selections that remain in the loaded data when a page is appended. */
   readonly preserveSelectionOnDataChange?: boolean
   /** Changing this key clears selections, even when preservation is enabled. */

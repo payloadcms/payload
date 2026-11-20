@@ -9,6 +9,7 @@ import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } fr
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
+import type { SelectableDocument } from '../../providers/DocumentSelection/types.js'
 import type { FlatFolderContents } from '../List/getFlatFolderContents.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
@@ -484,6 +485,25 @@ function HierarchyListContent(props: ListViewClientProps) {
           : {},
     [collectionSlug, flatContents, hierarchyData],
   )
+  const selectionMetadataFieldName =
+    hierarchyConfig?.collectionSpecific && typeof hierarchyConfig.collectionSpecific === 'object'
+      ? hierarchyConfig.collectionSpecific.fieldName
+      : undefined
+  const getSelectionMetadata = useCallback(
+    ({
+      collectionSlug: selectedCollectionSlug,
+      doc,
+    }: {
+      collectionSlug: string
+      doc: SelectableDocument
+    }) => ({
+      allowedCollections:
+        selectedCollectionSlug === collectionSlug && selectionMetadataFieldName
+          ? ((doc as Record<string, unknown>)[selectionMetadataFieldName] as string[] | undefined)
+          : undefined,
+    }),
+    [collectionSlug, selectionMetadataFieldName],
+  )
 
   return (
     <Fragment>
@@ -491,6 +511,7 @@ function HierarchyListContent(props: ListViewClientProps) {
         {BeforeList}
         <DocumentSelectionProvider
           collectionData={collectionData}
+          getSelectionMetadata={getSelectionMetadata}
           preserveSelectionOnDataChange={Boolean(flatContents)}
           selectionScopeKey={flatContents ? flatQueryKey : undefined}
         >
