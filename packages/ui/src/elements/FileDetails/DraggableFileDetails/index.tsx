@@ -47,6 +47,8 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
   } = props
 
   const { id, filename, mimeType, thumbnailURL, url } = doc
+  // The row keeps its thumbnail slot, so a hidden preview shows the file icon and loads no media
+  const isPreviewAllowed = uploadConfig.displayPreview !== false
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id,
@@ -86,11 +88,10 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
               className={`${baseClass}__thumbnail`}
               collectionSlug={collectionSlug}
               doc={doc}
-              fileSrc={thumbnailURL || url}
+              fileSrc={isPreviewAllowed ? thumbnailURL || url : undefined}
               imageCacheTag={imageCacheTag}
               isVideo={
-                uploadConfig.displayPreview !== false &&
-                Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))
+                isPreviewAllowed && Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))
               }
               uploadConfig={uploadConfig}
             />
