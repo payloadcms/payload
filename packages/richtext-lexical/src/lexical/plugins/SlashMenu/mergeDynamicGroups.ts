@@ -6,11 +6,11 @@ type DynamicGroupFn = (args: { editor: LexicalEditor; queryString: string }) => 
 
 /**
  * Filters configured slash-menu groups by `filterItem`, merges `dynamicGroups`
- * results, then drops empty groups when `queryString` is non-empty.
+ * results, then drops groups that ended up without items.
  * Keeps configured group order and labels through the merge so a dynamic group
  * with a matching key can refill a group whose static items were all filtered out.
- * When `queryString` is `null` (menu closed), returns `groups` unchanged.
- * An empty string (bare `/`) skips item filtering and empty-group pruning.
+ * When `queryString` is `null` (menu closed), dynamic groups are not resolved.
+ * An empty string (bare `/`) skips item filtering.
  */
 export function resolveSlashMenuGroups({
   dynamicGroupFns,
@@ -42,12 +42,7 @@ export function resolveSlashMenuGroups({
     queryString,
   })
 
-  // Bare '/' (queryString === '') keeps empty groups; non-empty queries prune them
-  if (queryString) {
-    return mergedGroups.filter((group) => group.items.length > 0)
-  }
-
-  return mergedGroups
+  return mergedGroups.filter((group) => group.items.length > 0)
 }
 
 /**

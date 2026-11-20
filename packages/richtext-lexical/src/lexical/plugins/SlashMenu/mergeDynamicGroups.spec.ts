@@ -126,6 +126,19 @@ describe('resolveSlashMenuGroups', () => {
     expect(result[1]!.items.map((item) => item.key)).toEqual(['upload'])
     expect(dynamicGroupFn).toHaveBeenCalledWith({ editor, queryString: 'up' })
   })
+
+  it('should drop a dynamic group without items for a bare slash', () => {
+    const groups = [createGroup({ items: [createItem({ key: 'paragraph' })], key: 'basic' })]
+
+    const result = resolveSlashMenuGroups({
+      dynamicGroupFns: [() => [createGroup({ items: [], key: 'custom' })]],
+      editor,
+      groups,
+      queryString: '',
+    })
+
+    expect(result.map((group) => group.key)).toEqual(['basic'])
+  })
 })
 
 describe('mergeDynamicGroups', () => {
