@@ -96,7 +96,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setIsLink(false)
     if (editorRef && editorRef.current) {
       editorRef.current.style.opacity = '0'
-      editorRef.current.style.transform = 'translate(-10000px, -10000px)'
+      editorRef.current.style.pointerEvents = 'none'
+      editorRef.current.style.transform = 'none'
     }
     setIsAutoLink(false)
     // Nested fields can temporarily move selection away from the editor. Keep the backing form
@@ -372,7 +373,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" ref={editorRef}>
+      <div
+        className="link-editor"
+        hidden={!isLink}
+        ref={editorRef}
+        style={{ display: isLink ? undefined : 'none' }}
+      >
         <div className="link-input">
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
