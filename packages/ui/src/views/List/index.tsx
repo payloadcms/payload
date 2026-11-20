@@ -1,8 +1,6 @@
 import type {
   AdminViewServerProps,
-  CollectionPreferences,
   Column,
-  ColumnPreference,
   CurrentHierarchyItem,
   HierarchyViewData,
   ListQuery,
@@ -44,13 +42,14 @@ import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.j
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
-import { getPreferences, upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
+import { getNestedDocsRootWhere } from './getNestedDocsRootWhere.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
+import { resolveListPreferences } from './resolveListPreferences.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 import './index.css'
 
@@ -146,40 +145,22 @@ export const renderListView = async (
   const query: ListQuery = { ...(queryFromArgs || queryFromReq) }
   const hasTreeLayout =
     canReadNestedDocsTree({ collectionConfig }) && viewType === 'list' && !drawerSlug
-  const preferencesKey = `collection-${collectionSlug}`
-  const savedCollectionPreferences =
-    hasTreeLayout && user
-      ? (
-          await getPreferences<CollectionPreferences>(
-            preferencesKey,
-            payload,
-            user.id,
-            user.collection,
-          )
-        )?.value
-      : undefined
-  const isSavedTreeLayout = hasTreeLayout && savedCollectionPreferences?.documentLayout === 'tree'
-
-  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   query.queryByGroup =
     query?.queryByGroup && typeof query.queryByGroup === 'string'
       ? JSON.parse(query.queryByGroup)
       : query?.queryByGroup
 
-  const collectionPreferences = isSavedTreeLayout
-    ? savedCollectionPreferences
-    : await upsertPreferences<CollectionPreferences>({
-        key: preferencesKey,
-        req,
-        value: {
-          columns: columnsFromQuery,
-          groupBy: query?.groupBy,
-          limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-          preset: query?.preset,
-          sort: query?.sort as string,
-        },
-      })
+  const { collectionPreferences, isSavedTreeLayout } = await resolveListPreferences({
+    collectionSlug,
+    hasTreeLayout,
+    query,
+    req,
+  })
+  const documentLayout =
+    collectionPreferences?.documentLayout === 'tree' && !hasTreeLayout
+      ? 'table'
+      : collectionPreferences?.documentLayout
 
   let queryPreset: QueryPreset | undefined
   let queryPresetPermissions: SanitizedCollectionPermission | undefined =
@@ -348,22 +329,21 @@ export const renderListView = async (
     select._status = true
   }
 
-  // Check for hierarchy parent param
-  const shouldLoadNestedDocsTree = Boolean(
-    hasTreeLayout &&
-    collectionPreferences?.documentLayout === 'tree' &&
-    !query.groupBy &&
-    !query.search &&
-    (!query.where || Object.keys(query.where).length === 0),
-  )
   const isHierarchyCollection = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
   const hierarchyParentFieldName =
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
   const isHierarchyView = viewType === 'hierarchy'
+  const nestedDocsRootWhere = getNestedDocsRootWhere({
+    documentLayout,
+    parentFieldName: hierarchyParentFieldName,
+    query,
+    where: whereWithMergedSearch,
+  })
   let hierarchyParentId: null | number | string = null
 
+  // Check for hierarchy parent param
   if (isHierarchyCollection) {
     const parentParam = searchParams?.[hierarchyParentFieldName]
     if (parentParam === 'null' || parentParam === undefined) {
@@ -464,17 +444,7 @@ export const renderListView = async (
         sort: query?.sort,
         trash,
         user,
-        where: shouldLoadNestedDocsTree
-          ? combineWhereConstraints([
-              whereWithMergedSearch,
-              {
-                or: [
-                  { [hierarchyParentFieldName]: { exists: false } },
-                  { [hierarchyParentFieldName]: { equals: null } },
-                ],
-              },
-            ])
-          : whereWithMergedSearch,
+        where: nestedDocsRootWhere ?? whereWithMergedSearch,
       })
 
       if (shouldLoadNestedDocsTree) {
@@ -670,10 +640,7 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
-      documentLayout:
-        collectionPreferences?.documentLayout === 'tree' && !hasTreeLayout
-          ? 'table'
-          : collectionPreferences?.documentLayout,
+      documentLayout,
       documentURLs,
       enableRowSelections,
       groupedData,
