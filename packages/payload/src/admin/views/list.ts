@@ -22,6 +22,21 @@ export type CurrentHierarchyItem = {
   title: string
 }
 
+export type FlatFolderContents = {
+  documents: {
+    docs: Array<{ [key: string]: unknown; _collectionSlug: string; id: number | string }>
+    hasNextPage: boolean
+    page: number
+    totalDocs: number
+  }
+  folders: {
+    docs: Array<{ [key: string]: unknown; _collectionSlug: string; id: number | string }>
+    hasNextPage: boolean
+    page: number
+    totalDocs: number
+  }
+}
+
 export type HierarchyViewData = {
   /**
    * Collections allowed for creation based on parent's collectionSpecific field.
@@ -95,6 +110,7 @@ export type ListViewClientProps = {
   documentLayout?: CollectionPreferences['documentLayout']
   /** Server-resolved grid destinations. A null value disables document navigation. */
   documentURLs?: Record<string, null | string>
+  flatFolderContents?: FlatFolderContents
   enableRowSelections?: boolean
   groupedData?: ListViewGroup[]
   hasCreatePermission: boolean

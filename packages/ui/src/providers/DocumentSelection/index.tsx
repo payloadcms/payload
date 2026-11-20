@@ -62,8 +62,11 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
   children,
   collectionData,
   currentUserId,
+  preserveSelectionOnDataChange = false,
+  selectionScopeKey,
 }) => {
   const contextRef = useRef({} as DocumentSelectionContextValue)
+  const previousSelectionScope = useRef(selectionScopeKey)
 
   const [selections, setSelections] = useState<SelectionState>(() => {
     const initial: SelectionState = {}
@@ -77,16 +80,31 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
   // Reset selections when collectionData changes (new docs loaded)
   useEffect(() => {
-    setSelections(() => {
-      const reset: SelectionState = {}
+    const shouldPreserve =
+      preserveSelectionOnDataChange && previousSelectionScope.current === selectionScopeKey
+    previousSelectionScope.current = selectionScopeKey
+    setSelections((previous) => {
+      const next: SelectionState = {}
 
-      for (const collectionSlug of Object.keys(collectionData)) {
-        reset[collectionSlug] = createEmptyCollectionState()
+      for (const [collectionSlug, { docs }] of Object.entries(collectionData)) {
+        const selected = new Map<number | string, SelectionMetadata>()
+        if (shouldPreserve) {
+          for (const doc of docs) {
+            const metadata = previous[collectionSlug]?.selected.get(doc.id)
+            if (metadata && !(doc._isLocked && doc._userEditing?.id !== currentUserId)) {
+              selected.set(doc.id, metadata)
+            }
+          }
+        }
+        next[collectionSlug] = {
+          selectAllStatus: computeSelectAllStatus({ docCount: docs.length, selected }),
+          selected,
+        }
       }
 
-      return reset
+      return next
     })
-  }, [collectionData])
+  }, [collectionData, currentUserId, preserveSelectionOnDataChange, selectionScopeKey])
 
   const isLocked = useCallback(
     ({ id, collectionSlug }: { collectionSlug: string; id: number | string }): boolean => {

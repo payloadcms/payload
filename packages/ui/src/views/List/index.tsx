@@ -15,7 +15,7 @@ import type {
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { docAccessOperation } from 'payload'
+import { docAccessOperation, NotFound } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   combineWhereConstraints,
@@ -45,6 +45,7 @@ import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnail
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
+import { canUseFlatFolderContents, getFlatFolderContents } from './getFlatFolderContents.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -378,6 +379,7 @@ export const renderListView = async (
 
   // Hierarchy data for client-side rendering
   let hierarchyData: HierarchyViewData | undefined
+  let flatFolderContents: ListViewClientProps['flatFolderContents']
 
   try {
     if (query.groupBy) {
@@ -475,14 +477,22 @@ export const renderListView = async (
   let HierarchyIcon: React.ReactNode | undefined
 
   if (isHierarchyCollection && isHierarchyView) {
+    const canUseFlatContents =
+      !drawerSlug &&
+      hierarchyParentId !== null &&
+      collectionPreferences?.documentLayout !== 'grid' &&
+      canUseFlatFolderContents({ collectionConfig, req })
+
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
     const typeFilterParam = searchParams?.typeFilter
     const typeFilter =
-      typeof typeFilterParam === 'string' && typeFilterParam.length > 0
-        ? typeFilterParam.split(',')
+      typeof typeFilterParam === 'string' && (typeFilterParam.length > 0 || canUseFlatContents)
+        ? canUseFlatContents
+          ? typeFilterParam.split(',').filter(Boolean)
+          : typeFilterParam.split(',')
         : undefined
 
-    hierarchyData = await handleHierarchy({
+    const hierarchyArgs = {
       baseFilter: baseFilterConstraint,
       collectionConfig,
       collectionSlug,
@@ -492,7 +502,50 @@ export const renderListView = async (
       search: typeof query?.search === 'string' ? query.search : undefined,
       typeFilter,
       user,
-    })
+    }
+
+    if (canUseFlatContents) {
+      try {
+        hierarchyData = await handleHierarchy({ ...hierarchyArgs, flat: true })
+
+        if (hierarchyData.parent) {
+          const { documents } = await getFlatFolderContents({
+            args: {
+              collectionSlug,
+              parentID: hierarchyParentId,
+              search: typeof query?.search === 'string' ? query.search : undefined,
+              source: 'documents',
+              typeFilter,
+            },
+            req,
+          })
+
+          flatFolderContents = {
+            documents,
+            folders: {
+              docs: hierarchyData.childrenData.docs.map((doc) => ({
+                ...doc,
+                _collectionSlug: collectionSlug,
+              })),
+              hasNextPage: hierarchyData.childrenData.hasNextPage,
+              page: hierarchyData.childrenData.page ?? 1,
+              totalDocs: hierarchyData.childrenData.totalDocs,
+            },
+          }
+        }
+      } catch (err) {
+        if (err instanceof NotFound) {
+          throw err
+        }
+        req.payload.logger.warn({
+          err,
+          msg: `Flat folder contents unavailable for ${collectionSlug}`,
+        })
+        hierarchyData = await handleHierarchy(hierarchyArgs)
+      }
+    } else {
+      hierarchyData = await handleHierarchy(hierarchyArgs)
+    }
 
     data = hierarchyData.childrenData
 
@@ -605,6 +658,7 @@ export const renderListView = async (
       disableQueryPresets,
       documentLayout: collectionPreferences?.documentLayout,
       documentURLs,
+      flatFolderContents,
       enableRowSelections,
       groupedData,
       hasCreatePermission,

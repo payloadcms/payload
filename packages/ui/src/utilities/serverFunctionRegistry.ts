@@ -6,6 +6,7 @@ import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
+import { getFlatFolderContentsHandler } from '../views/List/getFlatFolderContents.js'
 import { getActivityWidgetDocsHandler } from '../widgets/Activity/utils/getActivityWidgetDocs.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
@@ -30,6 +31,7 @@ import { switchLanguageHandler } from './switchLanguageHandler.js'
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
+  'get-flat-folder-contents': getFlatFolderContentsHandler,
   'get-activity-widget-docs': getActivityWidgetDocsHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,

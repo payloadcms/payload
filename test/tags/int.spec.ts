@@ -1,16 +1,33 @@
 import type { Payload } from 'payload'
 
 import { renderTabHandler } from '@payloadcms/ui/rsc'
+import { createPayloadRequest } from 'payload'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Verify the flat-view capability gate against a real tags preset.
+import { canUseFlatFolderContents } from '../../packages/ui/src/views/List/getFlatFolderContents.js'
 
 const tagsSlug = 'tags'
 const postsSlug = 'posts'
 
 test.suite('Tags Helpers', { config: './config.ts' }, () => {
+  test('should keep default multi-assignment tags in the legacy hierarchy view', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload })
+    const tagsConfig = payload.collections[tagsSlug].config
+
+    expect(
+      tagsConfig.hierarchy &&
+        typeof tagsConfig.hierarchy === 'object' &&
+        tagsConfig.hierarchy.allowHasMany,
+    ).toBe(true)
+    expect(canUseFlatFolderContents({ collectionConfig: tagsConfig, req })).toBe(false)
+  })
+
   test.describe('createTagsCollection', () => {
     test('should create a collection with hierarchy enabled', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)

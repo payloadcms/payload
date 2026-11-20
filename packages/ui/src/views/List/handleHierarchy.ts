@@ -12,6 +12,8 @@ import { getTranslation } from '@payloadcms/translations'
 import { getAncestors } from 'payload'
 import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 
+import { FLAT_FOLDER_PAGE_SIZE } from './getFlatFolderContents.js'
+
 /**
  * Fetches hierarchy data for a collection with a selected parent.
  * Returns data that can be rendered client-side by HierarchyTable.
@@ -20,6 +22,7 @@ export const handleHierarchy = async ({
   baseFilter,
   collectionConfig,
   collectionSlug,
+  flat = false,
   parentId,
   permissions,
   req,
@@ -30,6 +33,7 @@ export const handleHierarchy = async ({
   baseFilter?: null | Where
   collectionConfig: SanitizedCollectionConfig
   collectionSlug: string
+  flat?: boolean
   parentId: null | number | string
   permissions?: SanitizedPermissions
   req: PayloadRequest
@@ -50,6 +54,15 @@ export const handleHierarchy = async ({
   const parentFieldName = hierarchyConfig.parentFieldName
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
+  const limit = flat ? FLAT_FOLDER_PAGE_SIZE : DEFAULT_HIERARCHY_LIST_LIMIT
+  const effectiveBaseFilter = flat
+    ? await (collectionConfig.admin.baseFilter ?? collectionConfig.admin.baseListFilter)?.({
+        limit,
+        page: 1,
+        req,
+        sort: useAsTitle,
+      })
+    : baseFilter
 
   // Fetch the parent item and breadcrumbs (skip for root level)
   let parent: null | (Record<string, unknown> & TypeWithID) = null
@@ -92,11 +105,12 @@ export const handleHierarchy = async ({
         }
       : { [parentFieldName]: { equals: parentId } }
 
-  // Build type filter condition if typeFilter is provided and collectionSpecific is configured
-  // Filter to folders that allow ANY of the selected types OR are unrestricted
+  // Folder type selection filters documents, not subfolder navigation.
+  // Keep the existing hierarchy-item filter for non-folder collections.
   let typeCondition: Record<string, unknown> | undefined
 
   if (
+    hierarchyConfig.allowHasMany !== false &&
     typeFilter &&
     typeFilter.length > 0 &&
     hierarchyConfig.collectionSpecific &&
@@ -136,13 +150,14 @@ export const handleHierarchy = async ({
     draft: true,
     fallbackLocale: false,
     includeLockStatus: true,
-    limit: DEFAULT_HIERARCHY_LIST_LIMIT,
+    limit,
     locale: req.locale,
     overrideAccess: false,
     page: 1,
     req,
+    sort: flat ? [useAsTitle, 'id'] : undefined,
     user,
-    where: combineWhereConstraints([childrenWhere, baseFilter]),
+    where: combineWhereConstraints([childrenWhere, effectiveBaseFilter]),
   })
 
   // Fetch related documents from other collections
@@ -154,7 +169,7 @@ export const handleHierarchy = async ({
   // Use pre-computed relatedCollections from sanitized hierarchy config
   const relatedCollectionsConfig = hierarchyConfig.relatedCollections || {}
 
-  for (const [relatedSlug, fieldInfo] of Object.entries(relatedCollectionsConfig)) {
+  for (const [relatedSlug, fieldInfo] of flat ? [] : Object.entries(relatedCollectionsConfig)) {
     if (relatedSlug === collectionSlug) {
       continue
     }

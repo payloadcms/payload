@@ -2,7 +2,6 @@
 
 import React from 'react'
 
-import type { SlotColumn } from './SlotTable.js'
 import type { TableRow } from './types.js'
 
 import { Link } from '../../../elements/Link/index.js'
@@ -13,7 +12,13 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { getHierarchyListURL } from '../getHierarchyListURL.js'
 import { baseClass } from './types.js'
 
-export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
+export const ChildNameCell = ({
+  isDirectLink = false,
+  row,
+}: {
+  isDirectLink?: boolean
+  row: TableRow
+}) => {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -44,17 +49,17 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
 
   const DefaultIcon = isFolder ? <FolderIcon /> : <TagIcon />
 
-  return (
-    <div className={`${baseClass}__name-cell`}>
-      <Link className={`${baseClass}__name-link cell-link`} href={hierarchyURL}>
-        <span className={`${baseClass}__name-icon`}>{row._hierarchyIcon || DefaultIcon}</span>
-        <span className={`${baseClass}__name-text`}>{title}</span>
-        {row._hasChildren && (
-          <span className={`${baseClass}__chevron`}>
-            <ChevronIcon direction="right" />
-          </span>
-        )}
-      </Link>
-    </div>
+  const link = (
+    <Link className={`${baseClass}__name-link cell-link`} href={hierarchyURL}>
+      <span className={`${baseClass}__name-icon`}>{row._hierarchyIcon || DefaultIcon}</span>
+      <span className={`${baseClass}__name-text`}>{title}</span>
+      {row._hasChildren && (
+        <span className={`${baseClass}__chevron`}>
+          <ChevronIcon direction="right" />
+        </span>
+      )}
+    </Link>
   )
+
+  return isDirectLink ? link : <div className={`${baseClass}__name-cell`}>{link}</div>
 }

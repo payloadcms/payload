@@ -4,11 +4,12 @@ import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
+import type { FlatFolderContents } from '../List/getFlatFolderContents.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
@@ -25,7 +26,9 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FlatFolderContentsView } from './FlatFolderContents/index.js'
 import { getHierarchyListURL } from './getHierarchyListURL.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
@@ -35,6 +38,15 @@ import './index.css'
 const baseClass = 'hierarchy-list'
 
 export function HierarchyListView(props: ListViewClientProps) {
+  return (
+    <HierarchyListContent
+      key={`${props.collectionSlug}:${props.hierarchyData?.parentId}`}
+      {...props}
+    />
+  )
+}
+
+function HierarchyListContent(props: ListViewClientProps) {
   const {
     AfterList,
     baseFilter,
@@ -43,6 +55,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     currentHierarchyItem,
     Description,
     documentLayout,
+    flatFolderContents,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
@@ -52,8 +65,23 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   const router = useRouter()
   const { setPreference } = usePreferences()
-  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
   const searchParams = useSearchParams()
+  const searchFromURL = searchParams.get('search') || ''
+  const typeFilterFromURL = searchParams.get('typeFilter')
+  const flatQueryKey = JSON.stringify([
+    collectionSlug,
+    hierarchyData?.parentId,
+    searchFromURL,
+    typeFilterFromURL,
+  ])
+  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
+  const [flatState, setFlatState] = useState({ contents: flatFolderContents, key: flatQueryKey })
+  const flatContents = flatState.key === flatQueryKey ? flatState.contents : flatFolderContents
+  const [flatLoading, setFlatLoading] = useState<'documents' | 'folders' | null>(null)
+  const [flatError, setFlatError] = useState<string>()
+  const flatLoadingRef = useRef(false)
+  const flatQueryKeyRef = useRef(flatQueryKey)
+  const requestVersionRef = useRef(0)
   const { startRouteTransition } = useRouteTransition()
 
   const { allowCreate, isInDrawer } = useListDrawerContext()
@@ -77,6 +105,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
+  const isFlatFolderView = Boolean(flatContents)
   const parentFieldName = hierarchyConfig?.parentFieldName
 
   const { i18n, t } = useTranslation()
@@ -85,12 +114,24 @@ export function HierarchyListView(props: ListViewClientProps) {
   const { setStepNav } = useStepNav()
   const { parent, refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
+  const { serverFunction } = useServerFunctions()
 
   // Callback for when a new document is created
   const handleSave = useCallback(() => {
+    requestVersionRef.current += 1
     clearRouteCache()
     refreshTree(collectionSlug)
-  }, [clearRouteCache, collectionSlug, refreshTree])
+    router.refresh()
+  }, [clearRouteCache, collectionSlug, refreshTree, router])
+
+  useEffect(() => {
+    flatQueryKeyRef.current = flatQueryKey
+    requestVersionRef.current += 1
+    flatLoadingRef.current = false
+    setFlatLoading(null)
+    setFlatError(undefined)
+    setFlatState({ contents: flatFolderContents, key: flatQueryKey })
+  }, [flatFolderContents, flatQueryKey])
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
     setLayout(nextLayout)
@@ -100,9 +141,6 @@ export function HierarchyListView(props: ListViewClientProps) {
     }))
     router.refresh()
   }
-
-  // Get search from URL params
-  const searchFromURL = searchParams.get('search') || ''
 
   // Update URL when search changes (debouncing is handled by ListSearchFilter)
   // This triggers a server refetch via Next.js router
@@ -124,6 +162,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       const newUrl = `${window.location.pathname}${queryString}`
 
       if (window.location.search !== queryString) {
+        requestVersionRef.current += 1
         void startRouteTransition(() => router.replace(newUrl))
       }
     },
@@ -181,6 +220,98 @@ export function HierarchyListView(props: ListViewClientProps) {
   ])
 
   const parentId = hierarchyData?.parentId ?? null
+
+  const handleFlatLoadMore = useCallback(
+    async (source: 'documents' | 'folders') => {
+      if (flatLoadingRef.current || !flatContents || parentId === null) {
+        return
+      }
+
+      flatLoadingRef.current = true
+      const requestVersion = requestVersionRef.current
+      setFlatLoading(source)
+      setFlatError(undefined)
+
+      try {
+        const page = flatContents[source].page + 1
+        const next = (await serverFunction({
+          name: 'get-flat-folder-contents',
+          args: {
+            collectionSlug,
+            page,
+            parentID: parentId,
+            search: searchFromURL || undefined,
+            source,
+            typeFilter:
+              typeFilterFromURL !== null ? typeFilterFromURL.split(',').filter(Boolean) : undefined,
+          },
+        })) as FlatFolderContents
+        if (
+          requestVersionRef.current !== requestVersion ||
+          flatQueryKeyRef.current !== flatQueryKey
+        ) {
+          return
+        }
+        const nextPage = next[source]
+
+        if (nextPage.page !== page) {
+          throw new Error('Unexpected folder contents page')
+        }
+
+        setFlatState((previous) => {
+          if (
+            previous.key !== flatQueryKey ||
+            !previous.contents ||
+            previous.contents[source].page !== page - 1
+          ) {
+            return previous
+          }
+
+          const existing = new Set(
+            previous.contents[source].docs.map((doc) =>
+              JSON.stringify([doc._collectionSlug, doc.id]),
+            ),
+          )
+          const newDocs = nextPage.docs.filter(
+            (doc) => !existing.has(JSON.stringify([doc._collectionSlug, doc.id])),
+          )
+
+          return {
+            ...previous,
+            contents: {
+              ...previous.contents,
+              [source]: { ...nextPage, docs: [...previous.contents[source].docs, ...newDocs] },
+            },
+          }
+        })
+      } catch (_error) {
+        if (
+          requestVersionRef.current === requestVersion &&
+          flatQueryKeyRef.current === flatQueryKey
+        ) {
+          setFlatError(t('error:unknown'))
+        }
+      } finally {
+        if (
+          requestVersionRef.current === requestVersion &&
+          flatQueryKeyRef.current === flatQueryKey
+        ) {
+          flatLoadingRef.current = false
+          setFlatLoading(null)
+        }
+      }
+    },
+    [
+      collectionSlug,
+      flatContents,
+      flatQueryKey,
+      parentId,
+      searchFromURL,
+      serverFunction,
+      t,
+      typeFilterFromURL,
+    ],
+  )
 
   // Build collections array for create button
   // Filter by allowedCollections when set (from parent's collectionSpecific field)
@@ -264,10 +395,14 @@ export function HierarchyListView(props: ListViewClientProps) {
     return options
   }, [allowedCollections, getEntityConfig, hierarchyConfig?.relatedCollections, i18n])
 
-  const typeFilterFromURL = searchParams.get('typeFilter')
   const selectedTypes = useMemo(
-    () => (typeFilterFromURL ? typeFilterFromURL.split(',') : typeOptions.map((opt) => opt.value)),
-    [typeFilterFromURL, typeOptions],
+    () =>
+      typeFilterFromURL !== null && (isFlatFolderView || typeFilterFromURL)
+        ? isFlatFolderView
+          ? typeFilterFromURL.split(',').filter(Boolean)
+          : typeFilterFromURL.split(',')
+        : typeOptions.map((opt) => opt.value),
+    [isFlatFolderView, typeFilterFromURL, typeOptions],
   )
 
   // Update URL when type filter changes
@@ -281,7 +416,7 @@ export function HierarchyListView(props: ListViewClientProps) {
 
       // Only add typeFilter if not all types are selected
       const allSelected = values.length === typeOptions.length
-      if (!allSelected && values.length > 0) {
+      if (!allSelected && (isFlatFolderView || values.length > 0)) {
         currentParams.typeFilter = values.join(',')
       } else {
         delete currentParams.typeFilter
@@ -291,10 +426,11 @@ export function HierarchyListView(props: ListViewClientProps) {
       const newUrl = `${window.location.pathname}${queryString}`
 
       if (window.location.search !== queryString) {
+        requestVersionRef.current += 1
         void startRouteTransition(() => router.replace(newUrl))
       }
     },
-    [router, searchParams, startRouteTransition, typeOptions.length],
+    [isFlatFolderView, router, searchParams, startRouteTransition, typeOptions.length],
   )
 
   // Filter children based on selected types (client-side for immediate feedback)
@@ -319,22 +455,45 @@ export function HierarchyListView(props: ListViewClientProps) {
       }))
   }, [hierarchyData?.relatedDocumentsByCollection, selectedTypes])
 
-  const collectionData = hierarchyData
-    ? {
-        [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-        ...Object.fromEntries(
-          Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
-            ([slug, related]) => [slug, { docs: related.result.docs }],
-          ),
-        ),
-      }
-    : {}
+  const collectionData = useMemo(
+    () =>
+      flatContents
+        ? Object.fromEntries(
+            Array.from(
+              [...flatContents.folders.docs, ...flatContents.documents.docs].reduce(
+                (groups, doc) => {
+                  const group = groups.get(doc._collectionSlug) ?? []
+                  group.push(doc)
+                  groups.set(doc._collectionSlug, group)
+                  return groups
+                },
+                new Map<string, FlatFolderContents['documents']['docs']>(),
+              ),
+              ([slug, docs]) => [slug, { docs }],
+            ),
+          )
+        : hierarchyData
+          ? {
+              [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+              ...Object.fromEntries(
+                Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
+                  ([slug, related]) => [slug, { docs: related.result.docs }],
+                ),
+              ),
+            }
+          : {},
+    [collectionSlug, flatContents, hierarchyData],
+  )
 
   return (
     <Fragment>
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
-        <DocumentSelectionProvider collectionData={collectionData}>
+        <DocumentSelectionProvider
+          collectionData={collectionData}
+          preserveSelectionOnDataChange={Boolean(flatContents)}
+          selectionScopeKey={flatContents ? flatQueryKey : undefined}
+        >
           <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
@@ -398,26 +557,38 @@ export function HierarchyListView(props: ListViewClientProps) {
               {!isInDrawer && <LayoutToggle layout={layout} onChange={handleLayoutChange} />}
             </ListControlsBar>
 
-            <HierarchyTable
-              baseFilter={baseFilter}
-              childrenData={filteredChildrenData}
-              collections={collections}
-              collectionSlug={collectionSlug}
-              hasCreatePermission={hasCreatePermission}
-              HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
-              hierarchyLabel={collectionLabel}
-              key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
-                hierarchyData?.relatedDocumentsByCollection || {},
-              )
-                .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
-                .join(',')}`}
-              layout={layout}
-              parentFieldName={parentFieldName}
-              parentId={parentId}
-              relatedGroups={filteredRelatedGroups}
-              search={searchFromURL}
-              useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-            />
+            {flatContents && parentId !== null ? (
+              <FlatFolderContentsView
+                collectionSlug={collectionSlug}
+                contents={flatContents}
+                error={flatError}
+                HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
+                isLoading={flatLoading}
+                onLoadMore={handleFlatLoadMore}
+                parentID={parentId}
+              />
+            ) : (
+              <HierarchyTable
+                baseFilter={baseFilter}
+                childrenData={filteredChildrenData}
+                collections={collections}
+                collectionSlug={collectionSlug}
+                hasCreatePermission={hasCreatePermission}
+                HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
+                hierarchyLabel={collectionLabel}
+                key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
+                  hierarchyData?.relatedDocumentsByCollection || {},
+                )
+                  .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
+                  .join(',')}`}
+                layout={layout}
+                parentFieldName={parentFieldName}
+                parentId={parentId}
+                relatedGroups={filteredRelatedGroups}
+                search={searchFromURL}
+                useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+              />
+            )}
           </div>
         </DocumentSelectionProvider>
         {AfterList}

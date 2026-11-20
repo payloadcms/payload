@@ -1,0 +1,9 @@
+@layer payload-default {
+  .flat-folder-contents__more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacer-2);
+    padding-block: var(--spacer-3);
+    padding-inline: var(--gutter-h);
+  }
+}
