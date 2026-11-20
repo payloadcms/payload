@@ -163,9 +163,9 @@ export const buildJoinAggregation = async ({
               : []),
             {
               $project: {
-                value: '$_id',
-                sortValue: `$${sortProperty}`,
                 relationTo: 1,
+                sortValue: `$${sortProperty}`,
+                value: '$_id',
               },
             },
           ],
@@ -222,6 +222,7 @@ export const buildJoinAggregation = async ({
             input: `$${as}.docs`,
             sortBy: {
               sortValue: sortDirection,
+              // eslint-disable-next-line perfectionist/sort-objects -- Primary sort precedes tie-breakers.
               relationTo: 1,
               value: 1,
             },
