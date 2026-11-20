@@ -341,6 +341,7 @@ export const renderListView = async (
     query,
     where: whereWithMergedSearch,
   })
+  const shouldLoadNestedDocsTree = Boolean(nestedDocsRootWhere)
   let hierarchyParentId: null | number | string = null
 
   // Check for hierarchy parent param
