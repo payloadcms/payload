@@ -2047,6 +2047,38 @@ describe('Access Control', () => {
       expect(docs).toHaveLength(1)
     })
 
+    it('should build the read permissions of a collection once per query with several paths and a sort', async () => {
+      const config = payload.collections[hiddenAccessCountSlug].config
+      const titleField = config.fields.find((field) => 'name' in field && field.name === 'title')
+      const readAccess = vitest.fn(() => true)
+      const originalAccess = titleField && 'access' in titleField ? titleField.access : undefined
+
+      if (!titleField || !('access' in titleField)) {
+        throw new Error('title field not found')
+      }
+
+      titleField.access = { read: readAccess }
+
+      try {
+        await payload.find({
+          collection: hiddenAccessCountSlug,
+          overrideAccess: false,
+          sort: '-title',
+          where: {
+            and: [
+              { title: { equals: 'no-such-title' } },
+              { title: { not_equals: 'other' } },
+              { title: { like: 'no' } },
+            ],
+          },
+        })
+
+        expect(readAccess).toHaveBeenCalledTimes(1)
+      } finally {
+        titleField.access = originalAccess
+      }
+    })
+
     it('should respect query constraint using hidden field on count', async () => {
       await payload.create({
         collection: hiddenAccessCountSlug,
