@@ -3158,10 +3158,18 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       )
     })
 
-    test('should not match flattened field names from another joined collection', async ({
-      payload,
-    }) => {
+    test('should scope nested field access to its joined collection', async ({ payload }) => {
       const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          parent: parent.id,
+          title: 'Unavailable article',
+          details: { status: 'unavailable' },
+        },
+        overrideAccess: true,
+      })
 
       const result = await payload.findByID({
         id: parent.id,
@@ -3177,15 +3185,26 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         user,
       })
 
-      expect(result.children.docs).toHaveLength(1)
-      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
-      expect(result.children.totalDocs).toBe(1)
+      expect(result.children.docs).toHaveLength(4)
+      expect(
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinArticlesSlug),
+      ).toEqual([
+        expect.objectContaining({ value: expect.objectContaining({ id: allowedChild.id }) }),
+      ])
+      expect(
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toHaveLength(3)
+      expect(result.children.totalDocs).toBe(4)
     })
 
-    test('should not match nested fields to top-level paths from another joined collection', async ({
-      payload,
-    }) => {
+    test('should scope top-level field access to its joined collection', async ({ payload }) => {
       const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await payload.create({
+        collection: accessJoinNotesSlug,
+        data: { parent: parent.id, title: 'Unavailable note', details_status: 'unavailable' },
+        overrideAccess: true,
+      })
 
       const result = await payload.findByID({
         id: parent.id,
@@ -3201,11 +3220,14 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         user,
       })
 
-      expect(result.children.docs).toHaveLength(3)
+      expect(result.children.docs).toHaveLength(4)
       expect(
-        result.children.docs.every(({ relationTo }) => relationTo === accessJoinNotesSlug),
-      ).toBe(true)
-      expect(result.children.totalDocs).toBe(3)
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toHaveLength(3)
+      expect(
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinArticlesSlug),
+      ).toHaveLength(1)
+      expect(result.children.totalDocs).toBe(4)
     })
 
     test('should reject distinct schema paths that share a flattened field name', async ({

@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
-import type { JoinQuery, PayloadRequest } from '../types/index.js'
+import type { JoinQuery, PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
@@ -134,17 +134,46 @@ export const sanitizeJoinQuery = async ({
   }
 
   for (const join of collectionConfig.polymorphicJoins) {
+    const joinQuery = joinsQuery[join.joinPath]
+
+    // Preserve joins explicitly disabled by the caller.
+    if (joinQuery === false) {
+      continue
+    }
+
+    const readableCollections: Where[] = []
+
     for (const collectionSlug of join.field.collection) {
+      const collectionJoins: JoinQuery = {
+        [join.joinPath]: deepCopyObjectSimple(joinQuery || {}),
+      }
+
       await sanitizeJoinFieldQuery({
         collectionSlug,
         errors,
         join,
-        joinsQuery,
+        joinsQuery: collectionJoins,
         overrideAccess,
         promises,
         req,
       })
+
+      const collectionQuery = collectionJoins[join.joinPath]
+
+      // Include only targets the current user can read.
+      if (collectionQuery !== false) {
+        readableCollections.push(
+          combineQueries(collectionQuery?.where || {}, {
+            relationTo: { equals: collectionSlug },
+          }),
+        )
+      }
     }
+
+    // Disable the join when none of its targets are readable.
+    joinsQuery[join.joinPath] = readableCollections.length
+      ? { ...joinQuery, where: { or: readableCollections } }
+      : false
   }
 
   await Promise.all(promises)
