@@ -480,8 +480,8 @@ export function HierarchyTable({
   const handleCheckboxChange = useCallback(
     (row: TableRow) => {
       toggleSelection({
-        collectionSlug: row._collectionSlug,
         id: row.id,
+        collectionSlug: row._collectionSlug,
         metadata: { allowedCollections: row._allowedCollections as string[] | undefined },
       })
     },
@@ -492,8 +492,8 @@ export function HierarchyTable({
     (checked: boolean) => {
       for (const row of combinedRows) {
         if (
-          !isLocked({ collectionSlug: row._collectionSlug, id: row.id }) &&
-          isSelected({ collectionSlug: row._collectionSlug, id: row.id }) !== checked
+          !isLocked({ id: row.id, collectionSlug: row._collectionSlug }) &&
+          isSelected({ id: row.id, collectionSlug: row._collectionSlug }) !== checked
         ) {
           handleCheckboxChange(row)
         }
