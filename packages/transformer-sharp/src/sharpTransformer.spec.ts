@@ -3,6 +3,7 @@ import type { Config, UploadCollectionSlug } from 'payload'
 import { describe, expect, it } from 'vitest'
 
 import { resolveSharpDynamicDefaults, sharpTransformer } from './sharpTransformer.js'
+import { DEFAULT_MAX_INPUT_PIXELS } from './types.js'
 
 describe('sharpTransformer', () => {
   it("should default mimeTypes to canResizeImage's allow-list exactly, excluding jxl", () => {
@@ -93,5 +94,11 @@ describe('resolveSharpDynamicDefaults', () => {
       position: 'center',
       withoutEnlargement: false,
     })
+  })
+})
+
+describe('DEFAULT_MAX_INPUT_PIXELS', () => {
+  it("should default to 50,000,000 — well under Sharp's 268,435,456 default, while still accepting 48 MP phone sensors", () => {
+    expect(DEFAULT_MAX_INPUT_PIXELS).toBe(50_000_000)
   })
 })

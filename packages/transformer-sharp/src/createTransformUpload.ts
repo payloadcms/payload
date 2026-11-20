@@ -1,6 +1,8 @@
 import type { ProbedImageSize } from 'payload'
 import type { UploadTransformation, UploadTransformerInternal } from 'payload/internal'
 
+import { ValidationError } from 'payload'
+
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { canResizeImage } from './canResizeImage.js'
@@ -12,8 +14,20 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
 /**
  * Sharp throws on truncated/header-only files. Returns `undefined` instead —
  * matching core's dependency-free probe — since unreadable dimensions shouldn't fail the upload.
+ *
+ * The probe deliberately runs WITHOUT `limitInputPixels`: Sharp enforces that
+ * limit even on `metadata()`, so a capped probe could not read the dimensions
+ * an over-cap source is refused for. `metadata()` only reads the header, so
+ * the uncapped probe is cheap; the caller refuses from the dimensions it
+ * returns, and every decode constructor still carries the cap.
  */
-async function tryProbe(file: File, sharpDependency: SharpDependency) {
+async function tryProbe({
+  file,
+  sharpDependency,
+}: {
+  file: File
+  sharpDependency: SharpDependency
+}) {
   try {
     const sharpFile = await createSharpFromFile({ file, sharpDependency })
     const metadata = await sharpFile.metadata()
@@ -32,21 +46,46 @@ async function tryProbe(file: File, sharpDependency: SharpDependency) {
  */
 export function createTransformUpload({
   collections,
+  maxInputPixels: globalMaxInputPixels,
   sharpDependency,
 }: {
   collections: Partial<Record<string, SharpCollectionConfig>>
+  maxInputPixels: number
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['transformUpload']> {
   return async function transformUpload({ collectionSlug, cropSize, file, req, transform }) {
-    const collectionUpload = collections[collectionSlug] ?? {}
+    // The collection's own cap wins over the transformer's global one.
+    const maxInputPixels = collections[collectionSlug]?.maxInputPixels ?? globalMaxInputPixels
+    const collectionUpload: SharpCollectionConfig = {
+      ...collections[collectionSlug],
+      maxInputPixels,
+    }
 
     const fileSupportsResize = canResizeImage(file.type)
 
     let originalDimensions: ProbedImageSize | undefined
 
     if (fileSupportsResize) {
-      const originalMeta = await tryProbe(file, sharpDependency)
+      const originalMeta = await tryProbe({ file, sharpDependency })
       if (originalMeta) {
+        // `metadata()` reads the header only, so the pixel count is known before
+        // any pixel is decoded. Refuse a decompression bomb here, with a 400,
+        // rather than letting Sharp decode gigabytes and fail later.
+        // Animated sources decode every frame, so the budget counts them all.
+        const frameCount = originalMeta.pages ?? 1
+        const sourcePixels = originalMeta.width * originalMeta.height * frameCount
+        if (sourcePixels > maxInputPixels) {
+          const frameDescription = frameCount > 1 ? ` across ${frameCount} frames` : ''
+          throw new ValidationError({
+            errors: [
+              {
+                message: `Uploaded image is ${originalMeta.width}x${originalMeta.height}${frameDescription} (${sourcePixels} pixels), which exceeds the maximum input size of ${maxInputPixels} pixels.`,
+                path: 'file',
+              },
+            ],
+          })
+        }
+
         originalDimensions = { height: originalMeta.height, width: originalMeta.width }
       }
     }
@@ -138,7 +177,7 @@ async function describeResult({
     return { fieldPath, file: resultFile, mimeType: resultFile.type }
   }
 
-  const meta = await tryProbe(resultFile, sharpDependency)
+  const meta = await tryProbe({ file: resultFile, sharpDependency })
 
   if (!meta) {
     return { fieldPath, file: resultFile, mimeType: resultFile.type }

@@ -3,6 +3,7 @@ import type { SharpOptions } from 'sharp'
 
 import type { SharpDependency, SharpDynamicDefaults } from './types.js'
 
+import { withInputPixelLimit } from './createSharpFromFile.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
 
 // Must match generateFileData.ts's allow-list — the only MIME types Sharp auto-detects multi-frame animation for.
@@ -17,9 +18,11 @@ const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
  */
 export function createHandleRequest({
   dynamicDefaults,
+  maxInputPixels,
   sharpDependency,
 }: {
   dynamicDefaults: Required<SharpDynamicDefaults>
+  maxInputPixels: number
   sharpDependency: SharpDependency
 }): (args: HandleTransformRequestArgs) => Promise<HandleTransformRequestResult> {
   return async ({ getSourceFile, mimeType, req }) => {
@@ -52,9 +55,45 @@ export function createHandleRequest({
     const sourceBuffer = Buffer.from(await source.arrayBuffer())
 
     const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
-    const sharpOptions: SharpOptions = isAnimated ? { animated: true } : {}
+    const probeOptions: SharpOptions = isAnimated ? { animated: true } : {}
+    // The resize constructor carries the cap as defence-in-depth, but the
+    // metadata probe must not: Sharp enforces `limitInputPixels` even on
+    // `metadata()`, so a capped probe could not read the dimensions an
+    // over-cap source is refused for. `metadata()` only reads the header.
+    const sharpOptions = withInputPixelLimit({ maxInputPixels, options: probeOptions })
 
     const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
+
+    // `metadata()` reads the header only, so the source pixel count is known before
+    // any pixel is decoded. Refuse a decompression bomb here, with a 400, rather
+    // than letting the resize below decode gigabytes. Animated sources decode
+    // every frame, so the budget counts them all.
+    const metadata = await sharpDependency(sourceBuffer, probeOptions).metadata()
+    const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
+    const frameHeight = metadata.pageHeight ?? metadata.height
+    // EXIF orientations 5-8 rotate the image by 90°, so `.rotate()` below swaps its axes.
+    const isRotatedQuarterTurn = [5, 6, 7, 8].includes(metadata.orientation!)
+    const sourceWidth = isRotatedQuarterTurn ? frameHeight : metadata.width
+    const sourceHeight = isRotatedQuarterTurn ? metadata.width : frameHeight
+    const sourcePixels = (sourceWidth ?? 0) * (sourceHeight ?? 0) * frameCount
+
+    if (sourcePixels > maxInputPixels) {
+      const frameDescription = frameCount > 1 ? ` across ${frameCount} frames` : ''
+
+      return {
+        response: Response.json(
+          {
+            errors: [
+              {
+                message: `Source image is ${sourceWidth}x${sourceHeight}${frameDescription} (${sourcePixels} pixels), which exceeds the maximum input size of ${maxInputPixels} pixels.`,
+              },
+            ],
+          },
+          { status: 400 },
+        ),
+        status: 'complete',
+      }
+    }
 
     // The output size is only known once the source is probed: with a single dimension
     // Sharp derives the other from the aspect ratio, `fit: 'outside'` can overflow the
@@ -66,16 +105,11 @@ export function createHandleRequest({
       parseResult.height === undefined ||
       dynamicDefaults.fit === 'outside'
     ) {
-      const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
-      const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
-      const frameHeight = metadata.pageHeight ?? metadata.height
-      // EXIF orientations 5-8 rotate the image by 90°, so `.rotate()` below swaps its axes.
-      const isRotatedQuarterTurn = [5, 6, 7, 8].includes(metadata.orientation!)
       const output = getOutputDimensions({
         fit: dynamicDefaults.fit,
         height: parseResult.height,
-        sourceHeight: isRotatedQuarterTurn ? metadata.width : frameHeight,
-        sourceWidth: isRotatedQuarterTurn ? frameHeight : metadata.width,
+        sourceHeight,
+        sourceWidth,
         width: parseResult.width,
         withoutEnlargement,
       })

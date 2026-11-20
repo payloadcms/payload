@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
+import { DEFAULT_MAX_INPUT_PIXELS } from './types.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 // 200x200, 44 frames.
@@ -33,16 +34,22 @@ const makeSourceImage = async ({
 
 const resizeReal = async ({
   dynamicDefaults = resolveSharpDynamicDefaults(),
+  maxInputPixels = DEFAULT_MAX_INPUT_PIXELS,
   mimeType = 'image/png',
   query,
   sourceBuffer,
 }: {
   dynamicDefaults?: ReturnType<typeof resolveSharpDynamicDefaults>
+  maxInputPixels?: number
   mimeType?: string
   query: string
   sourceBuffer: Buffer
 }) => {
-  const handleRequest = createHandleRequest({ dynamicDefaults, sharpDependency: sharp })
+  const handleRequest = createHandleRequest({
+    dynamicDefaults,
+    maxInputPixels,
+    sharpDependency: sharp,
+  })
   const getSourceFile = vi.fn().mockResolvedValue(new Response(sourceBuffer))
 
   const result = await handleRequest({
@@ -176,4 +183,48 @@ describe('createHandleRequest', () => {
       expect(metadata.format).toBe(expectedMetadataFormat)
     },
   )
+
+  it('should refuse a dynamic resize whose source exceeds maxInputPixels with a 400', async () => {
+    // 400x400 is 160,000 pixels — over a 10,000 cap. The output (100x100) is
+    // well within maxPixels, so only the source cap can refuse this.
+    const sourceBuffer = await makeSourceImage({ height: 400, width: 400 })
+
+    const result = await resizeReal({
+      maxInputPixels: 10_000,
+      mimeType: 'image/png',
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
+  it('should count every frame of an animated source against maxInputPixels', async () => {
+    // 200x200 across 44 frames is 1,760,000 pixels — over a 1,000,000 cap,
+    // even though the requested 100x100 output is within maxPixels.
+    const result = await resizeReal({
+      maxInputPixels: 1_000_000,
+      mimeType: 'image/webp',
+      query: 'width=100',
+      sourceBuffer: animatedWebp,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
+  it('should resize a source within maxInputPixels', async () => {
+    const sourceBuffer = await makeSourceImage({ height: 400, width: 400 })
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({
+        maxInputPixels: 50_000_000,
+        mimeType: 'image/png',
+        query: 'width=100',
+        sourceBuffer,
+      }),
+    )
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.height).toBe(100)
+  })
 })
