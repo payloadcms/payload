@@ -110,8 +110,8 @@ export type ListViewClientProps = {
   documentLayout?: CollectionPreferences['documentLayout']
   /** Server-resolved grid destinations. A null value disables document navigation. */
   documentURLs?: Record<string, null | string>
-  flatFolderContents?: FlatFolderContents
   enableRowSelections?: boolean
+  flatFolderContents?: FlatFolderContents
   groupedData?: ListViewGroup[]
   hasCreatePermission: boolean
   hasDeletePermission?: boolean

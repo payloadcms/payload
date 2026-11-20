@@ -94,10 +94,10 @@ export function canUseFlatFolderContents({
     for (const field of collection.config.flattenedFields) {
       const definition = JSON.stringify({
         type: field.type,
+        date: field.type === 'date' ? field.admin?.date : undefined,
         hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false,
         localized: Boolean(field.localized),
         relationTo: 'relationTo' in field ? field.relationTo : undefined,
-        date: field.type === 'date' ? field.admin?.date : undefined,
       })
 
       const existing = fieldDefinitions.get(field.name)
@@ -324,10 +324,10 @@ export async function getFlatFolderContents({
 
             for (const doc of docs) {
               documents.set(JSON.stringify([slug, doc.id]), {
+                id: doc.id,
                 _collectionSlug: slug,
                 _isLocked: doc._isLocked,
                 _userEditing: doc._userEditing,
-                id: doc.id,
                 [titleField]: doc[titleField],
                 updatedAt: doc.updatedAt,
               })
