@@ -546,6 +546,8 @@ export const idTranslations: DefaultTranslationsObject = {
       'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     tableLayout: 'Tabel',
     treeLayout: 'Pohon',
+    treeSearchResults:
+      'Dokumen yang cocok ditampilkan sebagai daftar datar. Hapus pencarian, filter, dan pengelompokan untuk kembali ke pohon.',
     takeOver: 'Ambil alih',
     theme: 'Tema',
     thisLanguage: 'Bahasa Indonesia',

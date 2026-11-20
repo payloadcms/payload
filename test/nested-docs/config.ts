@@ -29,6 +29,7 @@ export default buildConfigWithDefaults({
       },
       {
         slug: pagesSlug,
+        enableQueryPresets: true,
         access: {
           create: () => true,
           delete: () => true,

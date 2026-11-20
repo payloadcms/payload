@@ -551,6 +551,8 @@ export const itTranslations: DefaultTranslationsObject = {
       'Sono stati reindicizzati con successo {{count}} dei {{total}} documenti da {{collections}}, e {{skips}} bozze sono state saltate.',
     tableLayout: 'Tabella',
     treeLayout: 'Albero',
+    treeSearchResults:
+      'I documenti corrispondenti sono mostrati in un elenco piatto. Rimuovi ricerca, filtri e raggruppamento per tornare all’albero.',
     takeOver: 'Prendi il controllo',
     theme: 'Tema',
     thisLanguage: 'Italiano',

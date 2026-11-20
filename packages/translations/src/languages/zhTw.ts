@@ -516,6 +516,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
       '已成功重新索引 {{count}} 個來自 {{collections}} 的 {{total}} 個文件，並跳過了 {{skips}} 個草稿。',
     tableLayout: '表格',
     treeLayout: '樹狀',
+    treeSearchResults: '符合條件的文件以平面清單顯示。清除搜尋、篩選及分組以返回樹狀檢視。',
     takeOver: '接手編輯',
     theme: '主題',
     thisLanguage: '中文（繁體）',

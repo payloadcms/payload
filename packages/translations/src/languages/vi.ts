@@ -544,6 +544,8 @@ export const viTranslations: DefaultTranslationsObject = {
       'Đã lập chỉ mục lại thành công {{count}} trên tổng số {{total}} tài liệu từ {{collections}}, và bỏ qua {{skips}} bản nháp.',
     tableLayout: 'Bảng',
     treeLayout: 'Cây',
+    treeSearchResults:
+      'Các tài liệu phù hợp được hiển thị dưới dạng danh sách phẳng. Xóa tìm kiếm, bộ lọc và nhóm để quay lại cây.',
     takeOver: 'Tiếp quản',
     theme: 'Giao diện',
     thisLanguage: 'Vietnamese (Tiếng Việt)',

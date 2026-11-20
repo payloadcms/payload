@@ -540,6 +540,8 @@ export const csTranslations: DefaultTranslationsObject = {
       'Úspěšně reindexováno {{count}} z {{total}} dokumentů z {{collections}} a přeskočeno {{skips}} konceptů.',
     tableLayout: 'Tabulka',
     treeLayout: 'Strom',
+    treeSearchResults:
+      'Odpovídající dokumenty jsou zobrazeny jako plochý seznam. Pro návrat ke stromu zrušte hledání, filtry a seskupení.',
     takeOver: 'Převzít',
     theme: 'Téma',
     thisLanguage: 'Čeština',

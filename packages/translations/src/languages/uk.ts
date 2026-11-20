@@ -539,6 +539,8 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Успішно переіндексовано {{count}} із {{total}} документів із {{collections}}, пропущено {{skips}} чернеток.',
     tableLayout: 'Таблиця',
     treeLayout: 'Дерево',
+    treeSearchResults:
+      'Знайдені документи показано пласким списком. Очистьте пошук, фільтри й групування, щоб повернутися до дерева.',
     takeOver: 'Перехопити',
     theme: 'Тема',
     thisLanguage: 'Українська',

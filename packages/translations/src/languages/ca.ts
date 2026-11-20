@@ -548,6 +548,8 @@ export const caTranslations: DefaultTranslationsObject = {
       "S'han reindexat correctament {{count}} de {{total}} documents de {{collections}} i s'han omès {{skips}} esborranys.",
     tableLayout: 'Taula',
     treeLayout: 'Arbre',
+    treeSearchResults:
+      'Els documents coincidents es mostren en una llista plana. Esborreu la cerca, els filtres i l’agrupació per tornar a l’arbre.',
     takeOver: 'Prendre el control',
     theme: 'Tema',
     thisLanguage: 'Catala',

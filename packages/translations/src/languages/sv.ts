@@ -545,6 +545,8 @@ export const svTranslations: DefaultTranslationsObject = {
       'Omindexerade {{count}} av {{total}} dokument från {{collections}}. {{skips}} utkast hoppades över.',
     tableLayout: 'Tabell',
     treeLayout: 'Träd',
+    treeSearchResults:
+      'Matchande dokument visas som en platt lista. Rensa sökning, filter och gruppering för att återgå till trädet.',
     takeOver: 'Ta över',
     theme: 'Tema',
     thisLanguage: 'Svenska',

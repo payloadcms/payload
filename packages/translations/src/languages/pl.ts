@@ -543,6 +543,8 @@ export const plTranslations: DefaultTranslationsObject = {
       'Pomyślnie ponownie zindeksowano {{count}} z {{total}} dokumentów z {{collections}}, pomijając {{skips}} szkice.',
     tableLayout: 'Tabela',
     treeLayout: 'Drzewo',
+    treeSearchResults:
+      'Pasujące dokumenty są wyświetlane jako płaska lista. Wyczyść wyszukiwanie, filtry i grupowanie, aby wrócić do drzewa.',
     takeOver: 'Przejąć',
     theme: 'Motyw',
     thisLanguage: 'Polski',

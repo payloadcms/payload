@@ -543,6 +543,8 @@ export const enTranslations = {
       'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     tableLayout: 'Table',
     treeLayout: 'Tree',
+    treeSearchResults:
+      'Showing matching documents as a flat list. Clear search, filters and grouping to return to the tree.',
     takeOver: 'Take over',
     theme: 'Theme',
     thisLanguage: 'English',

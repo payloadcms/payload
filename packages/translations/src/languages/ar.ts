@@ -531,6 +531,8 @@ export const arTranslations: DefaultTranslationsObject = {
       'تمت إعادة فهرسة {{count}} من أصل {{total}} مستند من {{collections}} وتخطي {{skips}} مسودة.',
     tableLayout: 'جدول',
     treeLayout: 'شجرة',
+    treeSearchResults:
+      'تُعرض المستندات المطابقة في قائمة مسطحة. امسح البحث وعوامل التصفية والتجميع للعودة إلى الشجرة.',
     takeOver: 'تولي',
     theme: 'سمة',
     thisLanguage: 'العربية',
