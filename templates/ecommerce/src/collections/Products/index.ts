@@ -225,15 +225,17 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     ...defaultCollection?.hooks,
     beforeChange: [
       ...(defaultCollection?.hooks?.beforeChange || []),
-      ({ data }) => {
-        if (data?.description) {
+      ({ data, operation }) => {
+        if (!data) {
+          return data
+        }
+        if (data.description) {
           data.descriptionPlainText = convertLexicalToPlaintext({ data: data.description })
-        } else if (data) {
+        } else if (operation === 'create' || 'description' in data) {
           data.descriptionPlainText = ''
         }
-
         return data
       },
-      ],
+    ],
   },
 })
