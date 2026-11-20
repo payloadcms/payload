@@ -548,6 +548,8 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Reindexação bem‑sucedida de {{count}} de {{total}} documentos de {{collections}}, e {{skips}} rascunhos foram ignorados.',
     tableLayout: 'Tabela',
     treeLayout: 'Árvore',
+    treeSearchResults:
+      'Os documentos correspondentes são apresentados numa lista simples. Limpe a pesquisa, os filtros e o agrupamento para voltar à árvore.',
     takeOver: 'Assumir',
     theme: 'Tema',
     thisLanguage: 'Português',

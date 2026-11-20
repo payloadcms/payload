@@ -547,6 +547,8 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}}, пропущено {{skips}} черновиков.',
     tableLayout: 'Таблица',
     treeLayout: 'Дерево',
+    treeSearchResults:
+      'Найденные документы показаны плоским списком. Сбросьте поиск, фильтры и группировку, чтобы вернуться к дереву.',
     takeOver: 'Взять на себя',
     theme: 'Тема',
     thisLanguage: 'Русский',

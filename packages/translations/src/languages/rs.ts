@@ -542,6 +542,8 @@ export const rsTranslations: DefaultTranslationsObject = {
       'Успешно је реиндексирано {{count}} од укупно {{total}} докумената из {{collections}}, и {{skips}} нацрта је прескочено.',
     tableLayout: 'Табела',
     treeLayout: 'Стабло',
+    treeSearchResults:
+      'Одговарајући документи су приказани као равна листа. Обришите претрагу, филтере и груписање за повратак на стабло.',
     takeOver: 'Превузети',
     theme: 'Tema',
     thisLanguage: 'Српски (ћирилица)',

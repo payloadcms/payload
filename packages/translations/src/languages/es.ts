@@ -552,6 +552,8 @@ export const esTranslations: DefaultTranslationsObject = {
       'Se reindexaron correctamente {{count}} de {{total}} documentos de {{collections}} y se omitieron {{skips}} borradores.',
     tableLayout: 'Tabla',
     treeLayout: 'Árbol',
+    treeSearchResults:
+      'Los documentos coincidentes se muestran en una lista plana. Borra la búsqueda, los filtros y la agrupación para volver al árbol.',
     takeOver: 'Tomar el control',
     theme: 'Tema',
     thisLanguage: 'Español',

@@ -543,6 +543,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Uspešno je reindeksirano {{count}} od ukupno {{total}} dokumenata iz {{collections}}, i {{skips}} nacrta je preskočeno.',
     tableLayout: 'Tabela',
     treeLayout: 'Stablo',
+    treeSearchResults:
+      'Odgovarajući dokumenti su prikazani kao ravna lista. Obrišite pretragu, filtere i grupisanje za povratak na stablo.',
     takeOver: 'Preuzeti',
     theme: 'Tema',
     thisLanguage: 'Srpski (latinica)',

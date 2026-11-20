@@ -552,6 +552,8 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Succesvol {{count}} van {{total}} documenten uit {{collections}} opnieuw geïndexeerd, en {{skips}} concepten werden overgeslagen.',
     tableLayout: 'Tabel',
     treeLayout: 'Boom',
+    treeSearchResults:
+      'Overeenkomende documenten worden als een platte lijst getoond. Wis zoeken, filters en groepering om terug te keren naar de boom.',
     takeOver: 'Overnemen',
     theme: 'Thema',
     thisLanguage: 'Nederlands',

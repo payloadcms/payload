@@ -542,6 +542,8 @@ export const slTranslations: DefaultTranslationsObject = {
       'Uspešno je bilo ponovo indeksiranih {{count}} od skupno {{total}} dokumentov iz {{collections}}, in {{skips}} osnutkov je bilo preskočenih.',
     tableLayout: 'Tabela',
     treeLayout: 'Drevo',
+    treeSearchResults:
+      'Ujemajoči se dokumenti so prikazani kot raven seznam. Počistite iskanje, filtre in združevanje za vrnitev v drevo.',
     takeOver: 'Prevzemi',
     theme: 'Tema',
     thisLanguage: 'Slovenščina',

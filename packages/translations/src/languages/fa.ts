@@ -535,6 +535,8 @@ export const faTranslations: DefaultTranslationsObject = {
       'با موفقیت {{count}} از {{total}} سند از {{collections}} بازشاخص‌گذاری شد و {{skips}} پیش‌نویس رد شد.',
     tableLayout: 'جدول',
     treeLayout: 'درخت',
+    treeSearchResults:
+      'سندهای منطبق به صورت فهرست مسطح نمایش داده می‌شوند. برای بازگشت به درخت، جستجو، فیلترها و گروه‌بندی را پاک کنید.',
     takeOver: 'ادامه ویرایش',
     theme: 'قالب',
     thisLanguage: 'فارسی',

@@ -540,6 +540,8 @@ export const koTranslations: DefaultTranslationsObject = {
       '{{collections}} 의 문서 총 **{{total}}**건 중 **{{count}}**건이 성공적으로 재인덱싱되었으며, **{{skips}}**건의 초안이 건너뛰어졌습니다.',
     tableLayout: '테이블',
     treeLayout: '트리',
+    treeSearchResults:
+      '일치하는 문서를 일반 목록으로 표시합니다. 트리로 돌아가려면 검색, 필터 및 그룹화를 해제하세요.',
     takeOver: '인수하기',
     theme: '테마',
     thisLanguage: '한국어',

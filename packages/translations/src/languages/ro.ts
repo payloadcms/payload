@@ -550,6 +550,8 @@ export const roTranslations: DefaultTranslationsObject = {
       'Au fost reindexate cu succes {{count}} din {{total}} documente din {{collections}}, iar {{skips}} proiecte au fost omise.',
     tableLayout: 'Tabel',
     treeLayout: 'Arbore',
+    treeSearchResults:
+      'Documentele corespunzătoare sunt afișate ca listă plată. Ștergeți căutarea, filtrele și gruparea pentru a reveni la arbore.',
     takeOver: 'Preia controlul',
     theme: 'Temă',
     thisLanguage: 'Română',

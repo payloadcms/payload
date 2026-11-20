@@ -539,6 +539,8 @@ export const etTranslations: DefaultTranslationsObject = {
       'Õnnestus ümberindekseerida {{count}} dokumenti {{total}}-st kollektsioonist {{collections}} ja {{skips}} mustandeid jäeti vahele.',
     tableLayout: 'Tabel',
     treeLayout: 'Puu',
+    treeSearchResults:
+      'Sobivad dokumendid kuvatakse lameda loendina. Puusse naasmiseks tühjendage otsing, filtrid ja rühmitamine.',
     takeOver: 'Võta üle',
     theme: 'Teema',
     thisLanguage: 'Eesti',

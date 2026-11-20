@@ -543,6 +543,8 @@ export const daTranslations: DefaultTranslationsObject = {
       '{{count}} ud af {{total}} dokumenter fra {{collections}} blev succesfuldt genindekseret, og {{skips}} kladder blev sprunget over.',
     tableLayout: 'Tabel',
     treeLayout: 'Træ',
+    treeSearchResults:
+      'Matchende dokumenter vises som en flad liste. Ryd søgning, filtre og gruppering for at vende tilbage til træet.',
     takeOver: 'Overtag',
     theme: 'Tema',
     thisLanguage: 'Dansk',

@@ -540,6 +540,8 @@ export const isTranslations: DefaultTranslationsObject = {
       'Tókst að endurvísa {{count}} af {{total}} skjölum úr {{collections}} og {{skips}} drög voru sleppt.',
     tableLayout: 'Tafla',
     treeLayout: 'Tré',
+    treeSearchResults:
+      'Samsvarandi skjöl eru sýnd sem flatur listi. Hreinsaðu leit, síur og flokkun til að fara aftur í tréð.',
     takeOver: 'Taka yfir',
     theme: 'Þema',
     thisLanguage: 'Íslenska',

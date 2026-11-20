@@ -543,6 +543,8 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Uspješno je reindeksirano {{count}} od {{total}} dokumenata iz {{collections}}, a {{skips}} nacrta je preskočeno.',
     tableLayout: 'Tablica',
     treeLayout: 'Stablo',
+    treeSearchResults:
+      'Odgovarajući dokumenti prikazani su kao ravni popis. Očistite pretraživanje, filtre i grupiranje za povratak na stablo.',
     takeOver: 'Preuzmi',
     theme: 'Tema',
     thisLanguage: 'Hrvatski',

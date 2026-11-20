@@ -547,6 +547,8 @@ export const azTranslations: DefaultTranslationsObject = {
       '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
     tableLayout: 'Cədvəl',
     treeLayout: 'Ağac',
+    treeSearchResults:
+      'Uyğun sənədlər düz siyahıda göstərilir. Ağaca qayıtmaq üçün axtarışı, filtrləri və qruplaşdırmanı təmizləyin.',
     takeOver: 'Əvvəl',
     theme: 'Mövzu',
     thisLanguage: 'Azərbaycan dili',

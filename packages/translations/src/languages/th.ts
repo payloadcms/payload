@@ -523,6 +523,8 @@ export const thTranslations: DefaultTranslationsObject = {
       'ทำการรีอินเด็กซ์เอกสารจำนวน {{count}} จาก {{total}} เอกสารจาก {{collections}} สำเร็จ และข้ามร่างเอกสาร {{skips}} รายการ',
     tableLayout: 'ตาราง',
     treeLayout: 'แผนผังต้นไม้',
+    treeSearchResults:
+      'แสดงเอกสารที่ตรงกันเป็นรายการแบบเรียบ ล้างการค้นหา ตัวกรอง และการจัดกลุ่มเพื่อกลับไปยังแผนผังต้นไม้',
     takeOver: 'เข้ายึด',
     theme: 'ธีม',
     thisLanguage: 'ไทย',

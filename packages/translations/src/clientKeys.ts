@@ -349,6 +349,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:layout',
   'general:tableLayout',
   'general:treeLayout',
+  'general:treeSearchResults',
   'general:gridLayout',
   'general:selectedDocument',
   'general:notSelectedDocument',
