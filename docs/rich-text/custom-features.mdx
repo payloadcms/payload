@@ -770,6 +770,56 @@ export const MyClientFeature = createClientFeature({
 | **`onSelect`** | A function which is called when the slash menu item is selected.                                                                                                                                                                                                                  |
 | **`keywords`** | Keywords are used to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. In addition to the keywords, the label and key will be used to find the right slash menu item. |
 
+### Dynamic Slash Menu groups
+
+Static items only appear when the text typed after the `/` matches their label, key or keywords. If an item depends on the typed text itself, use `dynamicGroups` instead. This example offers a "3x4 Grid" item when you type `/3x4`:
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import { INSERT_GRID_COMMAND } from './plugin'
+import { GridIcon } from './icon'
+
+export const GridClientFeature = createClientFeature({
+  slashMenu: {
+    dynamicGroups: ({ queryString }) => {
+      const match = queryString.match(/^(\d+)x(\d+)$/)
+      if (!match) {
+        return []
+      }
+
+      const [, rows, columns] = match
+
+      return [
+        {
+          items: [
+            {
+              Icon: GridIcon,
+              key: `grid-${rows}x${columns}`,
+              label: `${rows}x${columns} Grid`,
+              onSelect: ({ editor }) => {
+                editor.dispatchCommand(INSERT_GRID_COMMAND, {
+                  columns: Number(columns),
+                  rows: Number(rows),
+                })
+              },
+            },
+          ],
+          key: 'grid',
+          label: 'Grid',
+        },
+      ]
+    },
+  },
+})
+```
+
+- The function runs when the slash menu opens and again on every keystroke. It receives the text typed after the `/` (an empty string for a bare `/`) and the `editor`, which you can use to read the current selection.
+- The items it returns are not filtered by the typed text. Your function decides which items to return.
+- Items from a group whose `key` matches an existing group are added to that group. Other groups are added after the static ones. Groups without items are hidden.
+- The function must be synchronous, and every item `key` must be unique. If it throws, the error is logged to the console and its groups are skipped.
+
 ### Markdown Transformers#client-feature-markdown-transformers
 
 The Client Feature, just like the Server Feature, allows you to add markdown transformers. Markdown transformers on the client are used to create new nodes when a certain markdown pattern is typed in the editor.

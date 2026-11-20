@@ -125,13 +125,11 @@ export const sanitizeClientFeatures = (
       }
     }
 
-    if (feature.slashMenu?.groups) {
-      if (feature.slashMenu.dynamicGroups?.length) {
-        sanitized.slashMenu.dynamicGroups = sanitized.slashMenu.dynamicGroups.concat(
-          feature.slashMenu.dynamicGroups,
-        )
-      }
+    if (feature.slashMenu?.dynamicGroups) {
+      sanitized.slashMenu.dynamicGroups.push(feature.slashMenu.dynamicGroups)
+    }
 
+    if (feature.slashMenu?.groups) {
       for (const optionGroup of feature.slashMenu.groups) {
         // 1. find the group with the same name or create new one
         let group = sanitized.slashMenu.groups.find((group) => group.key === optionGroup.key)
