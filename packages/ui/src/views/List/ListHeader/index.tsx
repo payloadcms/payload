@@ -38,6 +38,7 @@ export type ListHeaderProps = {
   isBulkUploadEnabled: boolean
   newDocumentURL: string
   onBulkUploadSuccess?: () => void
+  showSelectAllAcrossPages?: boolean
   smallBreak: boolean
   TitleActions?: React.ReactNode[]
   viewType?: ViewTypes
@@ -57,6 +58,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   i18n,
   isBulkUploadEnabled,
   onBulkUploadSuccess,
+  showSelectAllAcrossPages,
   smallBreak,
   viewType,
 }) => {
@@ -111,7 +113,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             hasTrashPermission={hasTrashPermission}
             key="list-selection"
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
-            showSelectAllAcrossPages={!isGroupingBy}
+            showSelectAllAcrossPages={!isGroupingBy && showSelectAllAcrossPages !== false}
             viewType={viewType}
           />
         ),
