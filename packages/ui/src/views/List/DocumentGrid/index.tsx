@@ -17,6 +17,8 @@ import { getDocumentListItemURL } from '../getDocumentListItemURL.js'
 
 type DocumentGridProps = {
   readonly adminRoute: string
+  /** Whether a document's video upload may load a frame. Defaults to always. */
+  readonly canPreviewVideo?: (doc: Record<string, unknown>) => boolean
   readonly collectionLabel: string
   readonly collectionSlug: string
   readonly docs: Record<string, unknown>[]
@@ -50,6 +52,7 @@ const getDocumentTitle = ({
 export const DocumentGrid: React.FC<DocumentGridProps> = ({
   id,
   adminRoute,
+  canPreviewVideo,
   collectionLabel,
   collectionSlug,
   docs,
@@ -79,7 +82,10 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
       renderItem={(doc) => {
         const id = doc.id
         const documentID = getDocumentID(doc)
-        const videoThumbnailSrc = getDocumentVideoThumbnail({ doc, useAsThumbnail })
+        const videoThumbnailSrc =
+          (canPreviewVideo?.(doc) ?? true)
+            ? getDocumentVideoThumbnail({ doc, useAsThumbnail })
+            : undefined
         const thumbnailSrc = videoThumbnailSrc ?? getDocumentThumbnail({ doc, useAsThumbnail })
         const title = getDocumentTitle({ doc, useAsTitle })
 

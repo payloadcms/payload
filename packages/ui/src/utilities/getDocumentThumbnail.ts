@@ -12,7 +12,7 @@ export function getDocumentThumbnail({
   doc,
   useAsThumbnail,
 }: GetDocumentThumbnailArgs): string | undefined {
-  const upload = getThumbnailUpload({ doc, useAsThumbnail })
+  const upload = getThumbnailSource({ doc, useAsThumbnail })?.upload
 
   if (!upload) {
     return undefined
@@ -43,7 +43,7 @@ export function getDocumentVideoThumbnail({
   doc,
   useAsThumbnail,
 }: GetDocumentThumbnailArgs): string | undefined {
-  const upload = getThumbnailUpload({ doc, useAsThumbnail })
+  const upload = getThumbnailSource({ doc, useAsThumbnail })?.upload
 
   if (!upload) {
     return undefined
@@ -56,11 +56,58 @@ export function getDocumentVideoThumbnail({
   })
 }
 
+/**
+ * Whether the upload behind a document card may load a video frame, which downloads part of
+ * the video. Follows the list table's `displayPreview` order: the field, then the upload collection.
+ */
+export function isDocumentVideoPreviewAllowed({
+  collectionSlug,
+  doc,
+  getUploadDisplayPreview,
+  thumbnailField,
+  useAsThumbnail,
+}: {
+  /** The collection of `doc`. */
+  collectionSlug: string
+  /** Resolve the `upload.displayPreview` option of a collection. */
+  getUploadDisplayPreview: (collectionSlug: string) => boolean | undefined
+  /** The upload field that `useAsThumbnail` names. */
+  thumbnailField?: { displayPreview?: boolean; relationTo: string | string[] }
+} & GetDocumentThumbnailArgs): boolean {
+  const source = getThumbnailSource({ doc, useAsThumbnail })
+
+  if (!source) {
+    return false
+  }
+
+  if (!source.isFieldValue) {
+    return getUploadDisplayPreview(collectionSlug) ?? true
+  }
+
+  const relationTo =
+    source.relationTo ??
+    (typeof thumbnailField?.relationTo === 'string' ? thumbnailField.relationTo : undefined)
+
+  return (
+    thumbnailField?.displayPreview ??
+    (relationTo ? getUploadDisplayPreview(relationTo) : undefined) ??
+    true
+  )
+}
+
+type ThumbnailSource = {
+  /** `false` when the document is itself the upload. */
+  isFieldValue: boolean
+  /** The related collection of a polymorphic field value. */
+  relationTo?: string
+  upload: Record<string, unknown>
+}
+
 /** Unwrap the `useAsThumbnail` field value (single, hasMany, or polymorphic) to its upload doc. */
-function getThumbnailUpload({
+function getThumbnailSource({
   doc,
   useAsThumbnail,
-}: GetDocumentThumbnailArgs): Record<string, unknown> | undefined {
+}: GetDocumentThumbnailArgs): ThumbnailSource | undefined {
   const value = useAsThumbnail ? doc[useAsThumbnail] : undefined
   const firstValue = Array.isArray(value) ? value[0] : value
   const candidate = Array.isArray(value)
@@ -68,14 +115,18 @@ function getThumbnailUpload({
     : firstValue && typeof firstValue === 'object'
       ? firstValue
       : doc
-  const thumbnailDoc =
+  const isPolymorphic =
     candidate && typeof candidate === 'object' && 'relationTo' in candidate && 'value' in candidate
-      ? candidate.value
-      : candidate
+  const thumbnailDoc = isPolymorphic ? candidate.value : candidate
 
   if (!thumbnailDoc || typeof thumbnailDoc !== 'object') {
     return undefined
   }
 
-  return thumbnailDoc as Record<string, unknown>
+  return {
+    isFieldValue: candidate !== doc,
+    relationTo:
+      isPolymorphic && typeof candidate.relationTo === 'string' ? candidate.relationTo : undefined,
+    upload: thumbnailDoc as Record<string, unknown>,
+  }
 }

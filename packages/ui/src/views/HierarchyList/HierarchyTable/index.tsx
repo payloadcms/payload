@@ -576,14 +576,17 @@ export function HierarchyTable({
                     parentID: row.id,
                   })
                   const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
-                  const videoThumbnailSrc = group.isChildren
-                    ? undefined
-                    : getVideoThumbnailSrc({
+                  // A video frame downloads part of the video, so `displayPreview: false` skips it
+                  const isVideoPreviewAllowed =
+                    !group.isChildren && config?.upload?.displayPreview !== false
+                  const videoThumbnailSrc = isVideoPreviewAllowed
+                    ? getVideoThumbnailSrc({
                         mimeType,
                         thumbnailURL:
                           typeof row.thumbnailURL === 'string' ? row.thumbnailURL : undefined,
                         url: typeof row.url === 'string' ? row.url : undefined,
                       })
+                    : undefined
                   const imageThumbnailSrc =
                     !group.isChildren && mimeType && isImage(mimeType)
                       ? getBestFitFromSizes({

@@ -88,7 +88,10 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
               doc={doc}
               fileSrc={thumbnailURL || url}
               imageCacheTag={imageCacheTag}
-              isVideo={Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))}
+              isVideo={
+                uploadConfig.displayPreview !== false &&
+                Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))
+              }
               uploadConfig={uploadConfig}
             />
           </div>
