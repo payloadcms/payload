@@ -7,7 +7,8 @@
   }
 
   .thumbnail:not(.thumbnail--size-none) img,
-  .thumbnail:not(.thumbnail--size-none) svg {
+  .thumbnail:not(.thumbnail--size-none) svg,
+  .thumbnail:not(.thumbnail--size-none) video {
     width: 100%;
     height: 100%;
     object-fit: cover;

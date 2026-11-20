@@ -2,6 +2,7 @@
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getVideoThumbnailSrc } from '../../../utilities/getVideoThumbnailSrc.js'
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import './index.css'
@@ -45,7 +46,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
     uploadConfig,
   } = props
 
-  const { id, filename, thumbnailURL, url } = doc
+  const { id, filename, mimeType, thumbnailURL, url } = doc
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id,
@@ -87,6 +88,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
               doc={doc}
               fileSrc={thumbnailURL || url}
               imageCacheTag={imageCacheTag}
+              isVideo={Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))}
               uploadConfig={uploadConfig}
             />
           </div>
