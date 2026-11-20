@@ -664,6 +664,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Temkite ir numeskite failą',
     dragAndDropHere: 'arba nuvilkite failą čia',
     editImage: 'Redaguoti vaizdą',
+    file: 'Failas',
     fileName: 'Failo pavadinimas',
     fileSize: 'Failo dydis',
     filesToUpload: 'Įkelti failai',

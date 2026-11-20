@@ -664,6 +664,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Քաշեք և գցեք ֆայլը',
     dragAndDropHere: 'կամ քաշեք և գցեք ֆայլն այստեղ',
     editImage: 'Խմբագրել պատկերը',
+    file: 'Ֆայլ',
     fileName: 'Ֆայլի անուն',
     fileSize: 'Ֆայլի չափ',
     filesToUpload: 'Վերբեռնման ֆայլեր',

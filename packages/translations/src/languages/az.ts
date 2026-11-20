@@ -665,6 +665,7 @@ export const azTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Faylı buraya sürükləyin və buraxın',
     dragAndDropHere: 'və ya faylı buraya sürükləyin və buraxın',
     editImage: 'Şəkili Redaktə Et',
+    file: 'Fayl',
     fileName: 'Faylın Adı',
     fileSize: 'Faylım Ölçüsü',
     filesToUpload: 'Yükləmək üçün fayllar',

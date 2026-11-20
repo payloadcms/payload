@@ -668,6 +668,7 @@ export const esTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Arrastra y suelta un archivo',
     dragAndDropHere: 'o arrastra un archivo aquí',
     editImage: 'Editar imagen',
+    file: 'Archivo',
     fileName: 'Nombre del archivo',
     fileSize: 'Tamaño del archivo',
     filesToUpload: 'Archivos para subir',

@@ -668,6 +668,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Sleep een bestand',
     dragAndDropHere: 'of sleep een bestand naar hier',
     editImage: 'Afbeelding bewerken',
+    file: 'Bestand',
     fileName: 'Bestandsnaam',
     fileSize: 'Bestandsgrootte',
     filesToUpload: 'Bestanden om te uploaden',

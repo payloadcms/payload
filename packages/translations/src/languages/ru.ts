@@ -665,6 +665,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Перетащите файл',
     dragAndDropHere: 'или перетащите файл сюда',
     editImage: 'Редактировать изображение',
+    file: 'Файл',
     fileName: 'Имя файла',
     fileSize: 'Размер файла',
     filesToUpload: 'Файлы для загрузки',

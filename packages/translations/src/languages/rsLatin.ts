@@ -659,6 +659,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Prevucite i ispustite datoteku',
     dragAndDropHere: 'ili povucite i ispustite datoteku ovde',
     editImage: 'Uredi sliku',
+    file: 'Datoteka',
     fileName: 'Ime datoteke',
     fileSize: 'Veličina datoteke',
     filesToUpload: 'Fajlovi za Slanje',

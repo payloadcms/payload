@@ -25,6 +25,7 @@ const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   canUpdate,
+  FileComparison,
   modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
   selectedLocales: selectedLocalesFromProps,
@@ -243,6 +244,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       />
       <Gutter className={`${baseClass}__diff-wrap`}>
         <SelectedLocalesContext value={{ selectedLocales: locales.map((locale) => locale.name) }}>
+          {versionToCreatedAt && FileComparison}
           {versionToCreatedAt && RenderedDiff}
         </SelectedLocalesContext>
       </Gutter>

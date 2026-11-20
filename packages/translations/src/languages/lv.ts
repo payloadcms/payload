@@ -658,6 +658,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Ievelciet un nometiet failu',
     dragAndDropHere: 'vai ievelciet un nometiet failu šeit',
     editImage: 'Rediģēt attēlu',
+    file: 'Fails',
     fileName: 'Faila nosaukums',
     fileSize: 'Faila izmērs',
     filesToUpload: 'Faili augšupielādei',

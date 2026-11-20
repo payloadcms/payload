@@ -658,6 +658,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Превуците и испустите датотеку',
     dragAndDropHere: 'или превуците и испустите датотеку овде',
     editImage: 'Уреди слику',
+    file: 'Датотека',
     fileName: 'Име датотеке',
     fileSize: 'Величина датотеке',
     filesToUpload: 'Fajlovi za otpremanje',

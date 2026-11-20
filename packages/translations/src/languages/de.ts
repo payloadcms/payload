@@ -675,6 +675,7 @@ export const deTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Datei per Drag & Drop verschieben',
     dragAndDropHere: 'oder Datei hier ablegen',
     editImage: 'Bild bearbeiten',
+    file: 'Datei',
     fileName: 'Dateiname',
     fileSize: 'Dateigröße',
     filesToUpload: 'Dateien zum Hochladen',

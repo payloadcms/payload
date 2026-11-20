@@ -11,14 +11,20 @@ import React from 'react'
 
 import type { CompareOption } from './Default/types.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { DefaultVersionView, VersionPillLabel } from '../../exports/client/index.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import {
+  DefaultVersionView,
+  VersionFileComparison,
+  VersionPillLabel,
+} from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../utilities/getClientSchemaMap.js'
 import { getSchemaMap } from '../../utilities/getSchemaMap.js'
 import { fetchLatestVersion, fetchVersion, fetchVersions } from '../Versions/fetchVersions.js'
 import { getVersionLabel } from '../Versions/VersionPillLabel/getVersionLabel.js'
+import { getFileComparison } from './FileComparison/getFileComparison.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
@@ -256,6 +262,14 @@ export async function VersionView(props: DocumentViewServerProps) {
     },
   })
 
+  const fileComparison = collectionConfig?.upload
+    ? getFileComparison({
+        modifiedOnly,
+        versionFromData: versionFrom?.version,
+        versionToData: versionTo.version,
+      })
+    : null
+
   const versionToCreatedAtFormatted = versionTo.updatedAt
     ? formatDate({
         date:
@@ -428,6 +442,14 @@ export async function VersionView(props: DocumentViewServerProps) {
   return (
     <DefaultVersionView
       canUpdate={docPermissions?.update}
+      FileComparison={
+        fileComparison ? (
+          <VersionFileComparison
+            comparison={fileComparison}
+            showPreview={collectionConfig.upload.displayPreview ?? true}
+          />
+        ) : undefined
+      }
       modifiedOnly={modifiedOnly}
       RenderedDiff={RenderedDiff}
       selectedLocales={selectedLocales}

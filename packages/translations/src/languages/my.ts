@@ -645,6 +645,7 @@ export const myTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',
     dragAndDropHere: 'သို့မဟုတ် ဖိုင်တစ်ခုကို ဤနေရာတွင် ဆွဲချပါ။',
     editImage: 'ပုံပြင်ပြောင်းရန်',
+    file: 'ဖိုင်',
     fileName: 'ဖိုင် နာမည်',
     fileSize: 'ဖိုင် အရွယ်အစား',
     filesToUpload: 'အပ်လုဒ်တင်ရန် ဖိုင်များ',

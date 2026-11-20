@@ -664,6 +664,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Arraste e solte um arquivo',
     dragAndDropHere: 'ou arraste um arquivo aqui',
     editImage: 'Editar imagem',
+    file: 'Arquivo',
     fileName: 'Nome do Arquivo',
     fileSize: 'Tamanho do Arquivo',
     filesToUpload: 'Arquivos para Carregar',
