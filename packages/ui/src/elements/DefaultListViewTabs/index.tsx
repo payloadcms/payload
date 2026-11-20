@@ -36,7 +36,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const { setPreference } = usePreferences()
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
-  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy)
+  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
 
   if (!isTrashEnabled && !isHierarchyEnabled) {
     return null

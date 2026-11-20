@@ -206,6 +206,7 @@ export function DefaultListView(props: ListViewClientProps) {
     !isInDrawer &&
     viewType === 'list' &&
     collectionConfig.hierarchy &&
+    !collectionConfig.nestedDocs &&
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : undefined
