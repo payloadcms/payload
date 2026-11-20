@@ -112,7 +112,7 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "${onPath}" column`)
     }
 
-    return { collection, joinOnColumnName, readLatestChildVersion, table }
+    return { joinOnColumnName, collection, readLatestChildVersion, table }
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
@@ -129,7 +129,7 @@ export const buildPolymorphicJoinQuery = ({
     : new Map()
   let unionQuery: null | SQLiteSelect = null
 
-  for (const { collection, joinOnColumnName, readLatestChildVersion, table } of collectionTables) {
+  for (const { joinOnColumnName, collection, readLatestChildVersion, table } of collectionTables) {
     const sortFieldAtPath = getFieldByPath({
       fields: adapter.payload.collections[collection].config.flattenedFields,
       path: sortFieldPath,
