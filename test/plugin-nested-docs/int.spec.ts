@@ -497,4 +497,104 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(grandchild.categorization[2].label).toStrictEqual('grandchild')
     })
   })
+
+  describe('error propagation', () => {
+    const createdPageIDs: (number | string)[] = []
+
+    const createPage = async (data: Record<string, unknown>) => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: { _status: 'published', ...data } as Page,
+      })
+      createdPageIDs.push(page.id)
+      return page
+    }
+
+    afterEach(async () => {
+      // Clean up in reverse order (children before parents)
+      for (const id of [...createdPageIDs].reverse()) {
+        await payload.delete({ id, collection: 'pages' })
+      }
+      createdPageIDs.length = 0
+    })
+
+    // The parent write can only be rolled back where the adapter runs transactions.
+    // SQLite, Firestore and Cosmos DB run this suite without them, so there the
+    // update is stored and the caller gets the error.
+    let hasTransactions = false
+
+    beforeAll(async () => {
+      const transactionID = await payload.db.beginTransaction()
+      hasTransactions = Boolean(transactionID)
+
+      if (transactionID) {
+        await payload.db.rollbackTransaction(transactionID)
+      }
+    })
+
+    it('should surface a validation error raised two levels down the cascade', async () => {
+      const grandparent = await createPage({ slug: 'cascade-a', title: 'Cascade A' })
+      const parent = await createPage({
+        slug: 'cascade-b',
+        parent: grandparent.id,
+        title: 'Cascade B',
+      })
+      await createPage({
+        slug: 'cascade-c',
+        breaksOnResave: true,
+        parent: parent.id,
+        title: 'Cascade C',
+      })
+
+      // Updating A re-saves B, and B's own resaveChildren re-saves C. C's
+      // ValidationError is converted to an APIError one level down, so A's
+      // catch no longer recognises it and lets it go, while the failed update
+      // has already killed the transaction the three of them share.
+      await expect(
+        payload.update({
+          id: grandparent.id,
+          collection: 'pages',
+          context: { simulate: { staleReference: true } },
+          data: { _status: 'published', title: 'Cascade A Updated' },
+        }),
+      ).rejects.toMatchObject({
+        message: 'Could not publish or save changes: One or more children are invalid.',
+        status: 400,
+      })
+
+      const stored = await payload.findByID({
+        id: grandparent.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(stored.title).toBe(hasTransactions ? 'Cascade A' : 'Cascade A Updated')
+    })
+
+    it('should surface a non-validation error raised during a child re-save', async () => {
+      const parent = await createPage({ slug: 'infra-a', title: 'Infra A' })
+      await createPage({
+        slug: 'infra-b',
+        breaksOnResave: true,
+        parent: parent.id,
+        title: 'Infra B',
+      })
+
+      // This one needs no cascade depth at all: the catch only ever rethrows
+      // ValidationErrors, so a database error during the child re-save is
+      // swallowed on the first level.
+      await expect(
+        payload.update({
+          id: parent.id,
+          collection: 'pages',
+          context: { simulate: { infraFailure: true } },
+          data: { _status: 'published', title: 'Infra A Updated' },
+        }),
+      ).rejects.toThrow('Simulated database failure while re-saving a child.')
+
+      const stored = await payload.findByID({ id: parent.id, collection: 'pages', draft: false })
+
+      expect(stored.title).toBe(hasTransactions ? 'Infra A' : 'Infra A Updated')
+    })
+  })
 })
