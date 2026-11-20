@@ -126,6 +126,74 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     expect(onSelect).toHaveBeenCalledOnce()
   })
 
+  test('should close after activating an embedded action', async () => {
+    const onSelect = vi.fn()
+    const screen = await render(
+      <Popup button="Actions" popupType="dialog">
+        <PopupTestRoot isShadowRoot>
+          <button onClick={onSelect} type="button">
+            <span>Embedded action</span>
+          </button>
+        </PopupTestRoot>
+      </Popup>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    await screen.getByText('Embedded action', { exact: true }).click()
+    expect(onSelect).toHaveBeenCalledOnce()
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('should keep the popup open when an embedded action prevents closing', async () => {
+    const onSelect = vi.fn()
+    const screen = await render(
+      <Popup button="Actions" popupType="dialog">
+        <PopupTestRoot isShadowRoot>
+          <div data-popup-prevent-close>
+            <button onClick={onSelect} type="button">
+              <span>Embedded action</span>
+            </button>
+          </div>
+        </PopupTestRoot>
+      </Popup>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    await screen.getByText('Embedded action', { exact: true }).click()
+    expect(onSelect).toHaveBeenCalledOnce()
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  test('should keep the parent open when using an embedded submenu', async () => {
+    const onSelect = vi.fn()
+    const screen = await render(
+      <Popup button="Actions" popupType="menu">
+        <PopupTestRoot isShadowRoot>
+          <Popup button="More actions" popupType="menu">
+            <PopupList.Button onClick={onSelect}>Nested action</PopupList.Button>
+          </Popup>
+        </PopupTestRoot>
+      </Popup>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    const nested = screen.getByRole('menuitem', { name: 'More actions', exact: true })
+
+    await nested.click()
+    await expect.element(nested).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+    await screen.getByRole('menuitem', { name: 'Nested action', exact: true }).click()
+    expect(onSelect).toHaveBeenCalledOnce()
+    await expect.element(nested).toHaveAttribute('aria-expanded', 'false')
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
+
   test('should navigate menu items with the keyboard', async () => {
     const screen = await render(
       <Popup button="Actions" popupType="menu">
@@ -231,13 +299,19 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
 
   test('should keep the menu aligned with its trigger when scrolling', async () => {
     const screen = await render(
-      <div data-testid="scroll-container" style={{ height: 240, overflow: 'auto' }}>
-        <div style={{ height: 800, padding: 64 }}>
-          <div style={{ display: 'flex', height: 24 }}>
-            <Popup button="Actions" popupAriaLabel="Actions menu" popupType="menu">
-              <PopupList.Button onClick={() => {}}>Select</PopupList.Button>
-            </Popup>
-          </div>
+      <div data-testid="outer-scroll-container" style={{ height: 320, overflow: 'auto' }}>
+        <div style={{ height: 960, padding: 32 }}>
+          <PopupTestRoot isShadowRoot={isShadowRoot}>
+            <div data-testid="scroll-container" style={{ height: 240, overflow: 'auto' }}>
+              <div style={{ height: 800, padding: 64 }}>
+                <div style={{ display: 'flex', height: 24 }}>
+                  <Popup button="Actions" popupAriaLabel="Actions menu" popupType="menu">
+                    <PopupList.Button onClick={() => {}}>Select</PopupList.Button>
+                  </Popup>
+                </div>
+              </div>
+            </div>
+          </PopupTestRoot>
         </div>
       </div>,
       { wrapper: Root },
@@ -253,8 +327,12 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
       )
 
     await expect.poll(getGap).toBe(8)
-    screen.getByTestId('scroll-container').element().scrollTop = 32
-    await expect.poll(getGap).toBe(8)
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+
+    for (const testId of ['scroll-container', 'outer-scroll-container']) {
+      screen.getByTestId(testId).element().scrollTop = 32
+      await expect.poll(getGap).toBe(8)
+    }
   })
 
   test('should close when clicking outside the popup', async () => {

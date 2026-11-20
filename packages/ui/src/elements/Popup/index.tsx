@@ -649,23 +649,28 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // /////////////////////////////////////
 
   const handleActionableClick = useEffectEvent((e: MouseEvent) => {
-    const target = e.target as HTMLElement
+    const path = e
+      .composedPath()
+      .filter((target): target is Element => (target as Node).nodeType === Node.ELEMENT_NODE)
+    const popupIndex = popupRef.current ? path.indexOf(popupRef.current) : -1
 
-    // Allow opting out with data-popup-prevent-close attribute on element or ancestor
-    if (target.closest('[data-popup-prevent-close]')) {
+    if (popupIndex < 0 || path.some((target) => target.hasAttribute('data-popup-prevent-close'))) {
       return
     }
 
-    // Check if the clicked element or any ancestor is an actionable element
-    const actionable = target.closest('button, a[href], [role="button"], [role="menuitem"]')
-    if (actionable && popupRef.current?.contains(actionable)) {
-      if (actionable.closest(`.${baseClass}__content`) !== popupRef.current) {
-        return
-      }
-      // Don't close if clicking a nested popup's trigger — it will manage its own open state
-      if (actionable.closest(`.${baseClass}__trigger-wrap`)) {
-        return
-      }
+    const contentPath = path.slice(0, popupIndex)
+    const actionable = contentPath.find((target) =>
+      target.matches('button, a[href], [role="button"], [role="menuitem"]'),
+    )
+
+    // A nested popup or trigger handles its own activation.
+    const isNestedInteraction = contentPath.some(
+      (target) =>
+        target.matches(POPUP_CONTENT_SELECTOR) ||
+        target.classList.contains(`${baseClass}__trigger-wrap`),
+    )
+
+    if (actionable && !isNestedInteraction) {
       closePopup()
     }
   })
@@ -744,12 +749,28 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     const ownerDocument = popup.ownerDocument
     const ownerWindow = ownerDocument.defaultView
-    const root = popup.getRootNode()
+    const scrollRoots: ShadowRoot[] = []
+    let ancestor: Node | null = popup
+
+    // Scroll events stay within their root, so every enclosing root needs a listener.
+    while (ancestor) {
+      if (ancestor.nodeType === Node.DOCUMENT_FRAGMENT_NODE && 'host' in ancestor) {
+        const root = ancestor as ShadowRoot
+
+        scrollRoots.push(root)
+        ancestor = root.host
+      } else {
+        const slot =
+          ancestor.nodeType === Node.ELEMENT_NODE ? (ancestor as Element).assignedSlot : null
+
+        ancestor = slot ?? ancestor.parentNode
+      }
+    }
 
     ownerWindow?.addEventListener('resize', updatePosition)
     ownerWindow?.addEventListener('scroll', updatePosition, { capture: true, passive: true })
 
-    if (root !== ownerDocument) {
+    for (const root of scrollRoots) {
       root.addEventListener('scroll', updatePosition, { capture: true, passive: true })
     }
 
@@ -762,7 +783,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       ownerWindow?.removeEventListener('resize', updatePosition)
       ownerWindow?.removeEventListener('scroll', updatePosition, { capture: true })
 
-      if (root !== ownerDocument) {
+      for (const root of scrollRoots) {
         root.removeEventListener('scroll', updatePosition, { capture: true })
       }
 
