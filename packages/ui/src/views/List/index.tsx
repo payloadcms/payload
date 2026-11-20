@@ -9,13 +9,14 @@ import type {
   ListViewClientProps,
   ListViewGroup,
   ListViewServerPropsOnly,
+  NestedDocRow,
   PaginatedDocs,
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { canReadNestedDocsTree, docAccessOperation } from 'payload'
+import { canReadNestedDocsTree, docAccessOperation, getNestedDocsTreeMetadata } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   combineWhereConstraints,
@@ -411,6 +412,7 @@ export const renderListView = async (
 
   // Hierarchy data for client-side rendering
   let hierarchyData: HierarchyViewData | undefined
+  let nestedDocRows: Record<string, NestedDocRow> | undefined
 
   try {
     if (query.groupBy) {
@@ -475,6 +477,27 @@ export const renderListView = async (
           : whereWithMergedSearch,
       })
 
+      if (shouldLoadNestedDocsTree) {
+        ;({ rows: nestedDocRows } = await getNestedDocsTreeMetadata({
+          data,
+          findArgs: {
+            collection: collectionSlug,
+            depth: thumbnailFieldName ? 1 : 0,
+            draft: true,
+            fallbackLocale: false,
+            includeLockStatus: true,
+            limit: data.limit,
+            locale: req.locale,
+            populate: thumbnailPopulate,
+            select,
+            sort: query.sort,
+            where: whereWithMergedSearch,
+          },
+          parentFieldName: hierarchyParentFieldName,
+          req,
+        }))
+      }
+
       // Enrich documents with correct display status for drafts
       data = await enrichDocsWithVersionStatus({
         collectionConfig,
@@ -495,6 +518,7 @@ export const renderListView = async (
             ? hierarchyParentFieldName
             : undefined,
         i18n: req.i18n,
+        nestedDocRows,
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,
         query,

@@ -8,6 +8,7 @@ import type {
   Field,
   ImportMap,
   ListQuery,
+  NestedDocRow,
   PaginatedDocs,
   Payload,
   PayloadRequest,
@@ -85,6 +86,7 @@ export const renderTable = ({
   hierarchyParentFieldName,
   i18n,
   key = 'table',
+  nestedDocRows,
   orderableFieldName,
   payload,
   query,
@@ -111,6 +113,7 @@ export const renderTable = ({
   hierarchyParentFieldName?: string
   i18n: I18nClient
   key?: string
+  nestedDocRows?: Record<string, NestedDocRow>
   orderableFieldName: string
   payload: Payload
   query?: ListQuery
@@ -335,6 +338,16 @@ export const renderTable = ({
               columns={columnsToUse}
               data={data?.docs || []}
               id={tableId}
+              nestedDocs={
+                nestedDocRows && collectionConfig
+                  ? {
+                      collectionSlug: collectionConfig.slug,
+                      rows: nestedDocRows,
+                      sort: query?.sort,
+                    }
+                  : undefined
+              }
+              useAsTitle={useAsTitle}
             />
           </TableSectionContent>
         </TableSectionRoot>
