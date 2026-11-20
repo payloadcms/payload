@@ -13,6 +13,11 @@ export const ParagraphHTMLConverter: HTMLConverter<any> = {
       },
       submissionData,
     })
+    // The {{*:table}} variable expands to a block-level <table>, which a <p> cannot contain
+    if (childrenText.includes('<table')) {
+      return childrenText
+    }
+
     return `<p>${childrenText}</p>`
   },
   nodeTypes: ['paragraph'],
