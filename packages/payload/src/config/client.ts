@@ -40,6 +40,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'secret'
   | 'sharp'
   | 'typescript'
+  | 'upload'
 >
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
@@ -99,6 +100,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'logger',
   'kv',
   'queryPresets',
+  'upload',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
