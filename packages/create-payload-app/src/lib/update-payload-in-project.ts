@@ -5,6 +5,7 @@ import { Project } from 'ts-morph'
 
 import type { NextAppDetails, TanStackAppDetails } from '../types.js'
 
+import { payloadPackageNames } from '../payload-package-names.js'
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { info } from '../utils/log.js'
 import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
@@ -184,9 +185,7 @@ async function performPayloadPackageUpdate({
     (dependencies): dependencies is Record<string, string> => Boolean(dependencies),
   )
   const payloadPackageEntries = dependencyGroups.flatMap((dependencies) =>
-    Object.entries(dependencies).filter(
-      ([packageName]) => packageName === 'payload' || packageName.startsWith('@payloadcms/'),
-    ),
+    Object.entries(dependencies).filter(([packageName]) => payloadPackageNames.has(packageName)),
   )
   const payloadVersion = payloadPackageEntries.find(
     ([packageName]) => packageName === 'payload',
@@ -210,7 +209,7 @@ async function performPayloadPackageUpdate({
 
   const payloadPackages = payloadPackageEntries
     .map(([packageName]) => packageName)
-    .filter((packageName) => packageName.startsWith('@payloadcms/'))
+    .filter((packageName) => packageName !== 'payload')
   const packageNames = ['payload', ...new Set(payloadPackages)]
   const packagesToUpdate = packageNames.map(
     (packageName) => `${packageName}@${latestPayloadVersion}`,

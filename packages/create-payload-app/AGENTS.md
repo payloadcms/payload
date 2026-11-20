@@ -154,7 +154,7 @@ sequenceDiagram
 
 ### Existing Payload Upgrades
 
-When Payload is already installed in a detected Next.js or TanStack project, the CLI offers to upgrade it instead of initializing it again. The upgrade aligns every existing `payload` and `@payloadcms/*` entry in dependencies and devDependencies to the requested version. TanStack upgrades also refresh only Payload-owned `_payload` route files from the current template.
+When Payload is already installed in a detected Next.js or TanStack project, the CLI offers to upgrade it instead of initializing it again. The upgrade aligns existing dependencies and devDependencies in the core release list to the requested version, leaving independently versioned packages unchanged. The bundled package list is generated from `tools/releaser/src/lib/publishList.ts` by `pnpm build:package-list`. Generated lists are gitignored and regenerated before tests and typechecks (including builds). TanStack upgrades also refresh only Payload-owned `_payload` route files from the current template.
 
 ### Testing
 

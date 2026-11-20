@@ -2,6 +2,8 @@ import semver from 'semver'
 
 import type { ResolvedVersions } from './types.js'
 
+import { payloadPackageNames } from '../payload-package-names.js'
+
 type RewriteArgs = {
   data: Record<string, unknown>
   resolved: ResolvedVersions
@@ -19,15 +21,7 @@ const DEP_FIELDS = ['dependencies', 'devDependencies'] as const
 /** Any protocol-prefixed specifier (`workspace:*`, `catalog:`, `link:`, `file:`, `npm:`, a URL). */
 const PLACEHOLDER_SPEC = /^[a-z][a-z0-9+.-]*:/i
 
-export const isPayloadPackage = (name: string): boolean =>
-  name === 'payload' || name.startsWith('@payloadcms/')
-
-/**
- * The `@payloadcms/eslint-*` packages are versioned independently of the core
- * payload packages, so they are tracked on `latest` rather than lockstep-pinned.
- */
-export const isPayloadEslintPackage = (name: string): boolean =>
-  name.startsWith('@payloadcms/eslint')
+export const isPayloadPackage = (name: string): boolean => payloadPackageNames.has(name)
 
 /**
  * A dependency whose version is resolved by the package manager, not a semver
@@ -70,10 +64,6 @@ function pinPayloadPackages(
         skipped.push(name)
         continue
       }
-      if (isPayloadEslintPackage(name)) {
-        deps[name] = 'latest'
-        continue
-      }
       deps[name] = version
       pinned.push(name)
     }
@@ -114,7 +104,11 @@ function pruneOverrideBlock(
   removed: string[],
 ): void {
   for (const name of Object.keys(block)) {
-    if (isPayloadPackage(name)) {
+    // Skip the leading @ in scoped names when finding a version selector.
+    const versionSeparatorIndex = name.indexOf('@', 1)
+    const packageName = versionSeparatorIndex === -1 ? name : name.slice(0, versionSeparatorIndex)
+
+    if (isPayloadPackage(packageName)) {
       delete block[name]
       removed.push(`${label}.${name}`)
     }

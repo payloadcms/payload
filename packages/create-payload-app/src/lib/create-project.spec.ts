@@ -187,6 +187,28 @@ describe('createProject', () => {
     })
 
     describe('updates package.json', () => {
+      it('should preserve independently versioned packages when creating a project', () => {
+        const packageJson = {
+          dependencies: {
+            '@payloadcms/db-mongodb': '^3.0.0',
+            '@payloadcms/plugin-publication-workflows': '1.4.1',
+            '@payloadcms/plugin-visual-editing': '1.0.0',
+            '@payloadcms/unknown-package': '2.0.0',
+            payload: '^3.0.0',
+          },
+        }
+
+        updatePackageJSONDependencies({ latestVersion: '4.0.0-beta.9', packageJson })
+
+        expect(packageJson.dependencies).toEqual({
+          '@payloadcms/db-mongodb': '4.0.0-beta.9',
+          '@payloadcms/plugin-publication-workflows': '1.4.1',
+          '@payloadcms/plugin-visual-editing': '1.0.0',
+          '@payloadcms/unknown-package': '2.0.0',
+          payload: '4.0.0-beta.9',
+        })
+      })
+
       it('updates package name and bumps workspace versions', async () => {
         const latestVersion = '3.0.0'
         const initialJSON = {

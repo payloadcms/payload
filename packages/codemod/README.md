@@ -43,10 +43,10 @@ the prompt instead of prompting.
 directory (run it from your project root):
 
 1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (its own prerelease id, else `beta`; override with `--tag <dist-tag>`).
-2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
+2. Rewrites `package.json`: pins packages in Payload's core release list to that exact version in
    lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
-   the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
-   versioned independently, so they are set to `latest` rather than lockstep-pinned.
+   the TypeScript / `@types/node` / `engines.node` floors. Independently versioned packages,
+   including enterprise plugins and `@payloadcms/eslint-*`, are left unchanged.
 3. Installs with your detected package manager.
 4. Runs every registered transform against the now-v4 tree.
 5. Prints a report and points you at the bundled runbook for the rest.

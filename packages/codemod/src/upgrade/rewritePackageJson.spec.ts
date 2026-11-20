@@ -32,6 +32,55 @@ const baseInput = () => ({
 })
 
 describe('rewritePackageJson', () => {
+  it('should remove qualified core overrides while preserving independent packages', () => {
+    const data = {
+      overrides: {
+        '@payloadcms/next@^3.0.0': '3.90.0',
+        '@payloadcms/plugin-publication-workflows@*': '1.4.1',
+        '@payloadcms/ui@*': '3.90.0',
+        '@payloadcms/ui-custom@*': '1.0.0',
+        'payload@*': '3.90.0',
+        react: '19.0.0',
+      },
+    }
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(data.overrides).toEqual({
+      '@payloadcms/plugin-publication-workflows@*': '1.4.1',
+      '@payloadcms/ui-custom@*': '1.0.0',
+      react: '19.0.0',
+    })
+    expect(summary.overridesRemoved).toEqual([
+      'overrides.@payloadcms/next@^3.0.0',
+      'overrides.@payloadcms/ui@*',
+      'overrides.payload@*',
+    ])
+  })
+
+  it('should preserve independently versioned packages and their overrides', () => {
+    const independentPackages = {
+      '@payloadcms/plugin-publication-workflows': '1.4.1',
+      '@payloadcms/plugin-visual-editing': '1.0.0',
+      '@payloadcms/unknown-package': '1.0.0',
+    }
+    const data = {
+      dependencies: { ...independentPackages, payload: '^3.0.0' },
+      devDependencies: { ...independentPackages },
+      overrides: { ...independentPackages, payload: '3.0.0' },
+      pnpm: { overrides: { ...independentPackages, payload: '3.0.0' } },
+      resolutions: { ...independentPackages, payload: '3.0.0' },
+    }
+
+    rewritePackageJson({ data, resolved })
+
+    expect(data.dependencies).toEqual({ ...independentPackages, payload: resolved.payloadVersion })
+    expect(data.devDependencies).toMatchObject(independentPackages)
+    expect(data.overrides).toEqual(independentPackages)
+    expect(data.pnpm.overrides).toEqual(independentPackages)
+    expect(data.resolutions).toEqual(independentPackages)
+  })
+
   it('pins payload packages exactly, deletes payload overrides, writes floors, leaves next/react', () => {
     const data = baseInput() as Record<string, unknown>
 
@@ -46,8 +95,8 @@ describe('rewritePackageJson', () => {
         react: '19.0.0', // untouched
       },
       devDependencies: {
-        '@payloadcms/eslint-config': 'latest', // versioned independently
-        '@payloadcms/eslint-plugin': 'latest', // versioned independently
+        '@payloadcms/eslint-config': '^3.0.0', // versioned independently
+        '@payloadcms/eslint-plugin': '^3.0.0', // versioned independently
         '@types/node': '24.12.3',
         typescript: '6.0.3',
       },
@@ -83,18 +132,13 @@ describe('rewritePackageJson', () => {
       '@payloadcms/richtext-lexical': 'link:../lexical',
       payload: 'workspace:*',
     })
-    // The non-placeholder eslint dep still moves to latest; the workspace one does not.
+    // Independently versioned lint packages stay unchanged.
     expect(data.devDependencies).toMatchObject({
       '@payloadcms/eslint-config': 'workspace:^',
       '@payloadcms/ui': '4.0.0-canary.20',
     })
     expect(summary.placeholdersSkipped.sort()).toEqual(
-      [
-        '@payloadcms/eslint-config',
-        '@payloadcms/next',
-        '@payloadcms/richtext-lexical',
-        'payload',
-      ].sort(),
+      ['@payloadcms/next', '@payloadcms/richtext-lexical', 'payload'].sort(),
     )
     expect(summary.pinnedPayload).toEqual(['@payloadcms/ui'])
   })

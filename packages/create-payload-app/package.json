@@ -50,11 +50,12 @@
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
     "build:debug": "pnpm build",
+    "build:package-list": "node ../../tools/releaser/scripts/generate-package-list.mjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo} src/payload-package-names.ts",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
     "test": "vitest --run",
-    "typecheck": "tsc"
+    "typecheck": "pnpm build:package-list && tsc"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",

@@ -1,0 +1,14 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**", "src/payload-package-names.ts"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tools/releaser/scripts/generate-package-list.mjs",
+        "$TURBO_ROOT$/tools/releaser/src/lib/publishList.ts",
+        "$TURBO_ROOT$/packages/*/package.json"
+      ]
+    }
+  }
+}
