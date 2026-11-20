@@ -322,7 +322,7 @@ export const renderListView = async (
   }
 
   // Check for hierarchy parent param
-  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  const isHierarchyCollection = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
   const hierarchyParentFieldName =
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
