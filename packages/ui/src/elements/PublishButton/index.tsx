@@ -191,7 +191,11 @@ export function PublishButton({
       }
 
       if (!validation.valid) {
-        const introMessage = t('error:followingFieldsInvalid', { count: validation.errors.length })
+        // The message shows no number, so only "one field" or "several fields" matters. Passing
+        // the real count would let plural rules pick the singular for 21 fields, e.g. in Russian.
+        const introMessage = t('error:followingFieldsInvalid', {
+          count: validation.errors.length === 1 ? 1 : 2,
+        })
         const fieldList = validation.errors
           .map(
             (error) =>

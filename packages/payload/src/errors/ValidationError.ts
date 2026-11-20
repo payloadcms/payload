@@ -42,8 +42,10 @@ export class ValidationError extends APIError<{
     },
     t?: TFunction,
   ) {
+    // The message shows no number, so only "one field" or "several fields" matters. Passing the
+    // real count would let plural rules pick the singular for 21 fields, e.g. in Russian.
     const message = t
-      ? t('error:followingFieldsInvalid', { count: results.errors.length })
+      ? t('error:followingFieldsInvalid', { count: results.errors.length === 1 ? 1 : 2 })
       : results.errors.length === 1
         ? en.translations.error.followingFieldsInvalid_one
         : en.translations.error.followingFieldsInvalid_other

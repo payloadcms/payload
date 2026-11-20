@@ -72,10 +72,11 @@ export const TranslationProvider: React.FC<Props> = ({
     (key, vars): string =>
       t({
         key,
+        language,
         translations,
         vars,
       }),
-    [translations],
+    [language, translations],
   )
 
   const switchLanguage = React.useCallback(
