@@ -76,13 +76,13 @@ export type SlotTableProps<TRow = Record<string, unknown>> = {
    * Get unique ID for each row
    */
   getRowId?: (row: TRow, index: number) => number | string
-  /** Accessible name for the selection checkbox in a row */
-  getRowSelectionLabel?: (row: TRow, index: number) => string
   /**
    * Returns the user who is editing/locking a row, or undefined if not locked.
    * When a user is returned, a lock icon replaces the checkbox for that row.
    */
   getRowLockedUser?: (row: TRow, index: number) => undefined | User
+  /** Accessible name for the selection checkbox in a row */
+  getRowSelectionLabel?: (row: TRow, index: number) => string
   /**
    * Merge checkbox header with first column header using colspan (default: false)
    * The first column header will span both checkbox and content cells
