@@ -550,6 +550,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Succesvol {{count}} van {{total}} documenten uit {{collections}} opnieuw geïndexeerd, en {{skips}} concepten werden overgeslagen.',
     tableLayout: 'Tabel',
+    treeLayout: 'Boom',
     takeOver: 'Overnemen',
     theme: 'Thema',
     thisLanguage: 'Nederlands',

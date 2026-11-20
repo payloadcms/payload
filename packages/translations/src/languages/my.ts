@@ -530,6 +530,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
     tableLayout: 'ဇယား',
+    treeLayout: 'သစ်ပင်ပုံစံ',
     takeOver: 'တာဝန်ယူပါ',
     theme: 'အကြောင်းအရာ',
     thisLanguage: 'မြန်မာစာ',

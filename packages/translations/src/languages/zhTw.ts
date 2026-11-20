@@ -514,6 +514,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '已成功重新索引 {{count}} 個來自 {{collections}} 的 {{total}} 個文件，並跳過了 {{skips}} 個草稿。',
     tableLayout: '表格',
+    treeLayout: '樹狀',
     takeOver: '接手編輯',
     theme: '主題',
     thisLanguage: '中文（繁體）',

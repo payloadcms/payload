@@ -100,6 +100,7 @@ export type ListViewClientProps = {
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
+  hasTreeLayout?: boolean
   /**
    * Hierarchy data used by the hierarchy list view.
    */

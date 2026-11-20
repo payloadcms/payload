@@ -63,6 +63,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
+    hasTreeLayout,
     hierarchyData,
     listMenuItems,
     newDocumentURL,
@@ -341,7 +342,11 @@ export function DefaultListView(props: ListViewClientProps) {
               isWhereOpen={isWhereOpen}
               layoutToggle={
                 !hierarchyData && !isInDrawer ? (
-                  <LayoutToggle layout={layout} onChange={handleLayoutChange} />
+                  <LayoutToggle
+                    hasTreeLayout={hasTreeLayout}
+                    layout={layout}
+                    onChange={handleLayoutChange}
+                  />
                 ) : undefined
               }
               listMenuItems={listMenuItems}

@@ -541,6 +541,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} থেকে মোট {{total}}টি নথির মধ্যে {{count}}টি সফলভাবে পুনরায় সূচীকৃত হয়েছে এবং {{skips}}টি খসড়া বাদ দেওয়া হয়েছে।',
     tableLayout: 'টেবিল',
+    treeLayout: 'ট্রি',
     takeOver: 'দায়িত্ব নিন',
     theme: 'বিষয়',
     thisLanguage: 'বাংলা (বাংলাদেশ)',

@@ -546,6 +546,7 @@ export const caTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       "S'han reindexat correctament {{count}} de {{total}} documents de {{collections}} i s'han omès {{skips}} esborranys.",
     tableLayout: 'Taula',
+    treeLayout: 'Arbre',
     takeOver: 'Prendre el control',
     theme: 'Tema',
     thisLanguage: 'Catala',

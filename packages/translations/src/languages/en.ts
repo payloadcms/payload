@@ -541,6 +541,7 @@ export const enTranslations = {
     successfullyReindexed:
       'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     tableLayout: 'Table',
+    treeLayout: 'Tree',
     takeOver: 'Take over',
     theme: 'Theme',
     thisLanguage: 'English',

@@ -545,6 +545,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}}, пропущено {{skips}} черновиков.',
     tableLayout: 'Таблица',
+    treeLayout: 'Дерево',
     takeOver: 'Взять на себя',
     theme: 'Тема',
     thisLanguage: 'Русский',

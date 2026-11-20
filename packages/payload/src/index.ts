@@ -1993,6 +1993,7 @@ export {
 export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export { canReadNestedDocsTree } from './hierarchy/canReadNestedDocsTree.js'
 export {
   DEFAULT_ALLOW_HAS_MANY,
   DEFAULT_HIERARCHY_TREE_LIMIT,

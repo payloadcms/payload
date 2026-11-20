@@ -516,6 +516,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '已成功重新索引 {{count}} 个来自 {{collections}} 的 {{total}} 个文档，并跳过了 {{skips}} 个草稿。',
     tableLayout: '表格',
+    treeLayout: '树形',
     takeOver: '接管',
     theme: '主题',
     thisLanguage: '中文 (简体)',

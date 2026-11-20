@@ -538,6 +538,7 @@ export const isTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Tókst að endurvísa {{count}} af {{total}} skjölum úr {{collections}} og {{skips}} drög voru sleppt.',
     tableLayout: 'Tafla',
+    treeLayout: 'Tré',
     takeOver: 'Taka yfir',
     theme: 'Þema',
     thisLanguage: 'Íslenska',

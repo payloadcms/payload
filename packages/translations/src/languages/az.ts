@@ -545,6 +545,7 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
     tableLayout: 'Cədvəl',
+    treeLayout: 'Ağac',
     takeOver: 'Əvvəl',
     theme: 'Mövzu',
     thisLanguage: 'Azərbaycan dili',

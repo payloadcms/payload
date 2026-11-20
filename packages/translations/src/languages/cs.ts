@@ -538,6 +538,7 @@ export const csTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Úspěšně reindexováno {{count}} z {{total}} dokumentů z {{collections}} a přeskočeno {{skips}} konceptů.',
     tableLayout: 'Tabulka',
+    treeLayout: 'Strom',
     takeOver: 'Převzít',
     theme: 'Téma',
     thisLanguage: 'Čeština',

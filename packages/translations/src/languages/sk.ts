@@ -538,6 +538,7 @@ export const skTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Úspešne bolo preindexovaných {{count}} z {{total}} dokumentov z kolekcie {{collections}}, a {{skips}} konceptov bolo preskočených.',
     tableLayout: 'Tabuľka',
+    treeLayout: 'Strom',
     takeOver: 'Prevziať',
     theme: 'Téma',
     thisLanguage: 'Slovenčina',

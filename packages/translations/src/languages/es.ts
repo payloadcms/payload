@@ -550,6 +550,7 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Se reindexaron correctamente {{count}} de {{total}} documentos de {{collections}} y se omitieron {{skips}} borradores.',
     tableLayout: 'Tabla',
+    treeLayout: 'Árbol',
     takeOver: 'Tomar el control',
     theme: 'Tema',
     thisLanguage: 'Español',

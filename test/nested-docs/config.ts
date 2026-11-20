@@ -15,6 +15,7 @@ export default buildConfigWithDefaults({
       {
         slug: articlesSlug,
         access: { create: () => true, delete: () => true, read: () => true, update: () => true },
+        admin: { defaultColumns: ['title', 'updatedAt'] },
         fields: [{ name: 'title', type: 'text' }],
         nestedDocs: { parentFieldName: 'ancestor' },
         trash: true,

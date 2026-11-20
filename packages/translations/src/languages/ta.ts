@@ -534,6 +534,7 @@ export const taTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} இலிருந்து மொத்த {{total}} ஆவணங்களில் {{count}} ஆவணங்கள் வெற்றிகரமாக மறுஇன்டெக்ஸ் செய்யப்பட்டன, மேலும் {{skips}} வரைவு எடுக்க முடியவில்லை.',
     tableLayout: 'அட்டவணை',
+    treeLayout: 'மரம்',
     takeOver: 'கையகப்படுத்து',
     theme: 'தீம்',
     thisLanguage: 'தமிழ்',

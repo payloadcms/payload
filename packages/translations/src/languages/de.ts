@@ -555,6 +555,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
     tableLayout: 'Tabelle',
+    treeLayout: 'Baum',
     takeOver: 'Übernehmen',
     theme: 'Thema',
     thisLanguage: 'Deutsch',

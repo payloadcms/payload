@@ -542,6 +542,7 @@ export const viTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Đã lập chỉ mục lại thành công {{count}} trên tổng số {{total}} tài liệu từ {{collections}}, và bỏ qua {{skips}} bản nháp.',
     tableLayout: 'Bảng',
+    treeLayout: 'Cây',
     takeOver: 'Tiếp quản',
     theme: 'Giao diện',
     thisLanguage: 'Vietnamese (Tiếng Việt)',

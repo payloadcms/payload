@@ -541,6 +541,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Uspješno je reindeksirano {{count}} od {{total}} dokumenata iz {{collections}}, a {{skips}} nacrta je preskočeno.',
     tableLayout: 'Tablica',
+    treeLayout: 'Stablo',
     takeOver: 'Preuzmi',
     theme: 'Tema',
     thisLanguage: 'Hrvatski',

@@ -347,6 +347,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:lastModified',
   'general:layout',
   'general:tableLayout',
+  'general:treeLayout',
   'general:gridLayout',
   'general:selectedDocument',
   'general:notSelectedDocument',

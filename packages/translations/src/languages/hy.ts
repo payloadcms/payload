@@ -544,6 +544,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
     tableLayout: 'Աղյուսակ',
+    treeLayout: 'Ծառ',
     takeOver: 'Վերցնել վերահսկողությունը',
     theme: 'Թեմա',
     thisLanguage: 'Հայերեն',

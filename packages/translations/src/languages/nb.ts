@@ -544,6 +544,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Vellykket reindeksering av {{count}} av totalt {{total}} dokumenter fra {{collections}}, og {{skips}} utkast ble hoppet over.',
     tableLayout: 'Tabell',
+    treeLayout: 'Tre',
     takeOver: 'Ta over',
     theme: 'Tema',
     thisLanguage: 'Norsk',

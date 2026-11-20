@@ -521,6 +521,7 @@ export const thTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'ทำการรีอินเด็กซ์เอกสารจำนวน {{count}} จาก {{total}} เอกสารจาก {{collections}} สำเร็จ และข้ามร่างเอกสาร {{skips}} รายการ',
     tableLayout: 'ตาราง',
+    treeLayout: 'แผนผังต้นไม้',
     takeOver: 'เข้ายึด',
     theme: 'ธีม',
     thisLanguage: 'ไทย',

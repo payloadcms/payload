@@ -542,6 +542,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} থেকে মোট {{total}}টি ডকুমেন্টের মধ্যে {{count}}টি সফলভাবে পুনরায় ইনডেক্স করা হয়েছে এবং {{skips}}টি খসড়া বাদ দেওয়া হয়েছে।',
     tableLayout: 'টেবিল',
+    treeLayout: 'ট্রি',
     takeOver: 'দায়িত্ব নিন',
     theme: 'থিম',
     thisLanguage: 'বাংলা (বাংলাদেশ)',

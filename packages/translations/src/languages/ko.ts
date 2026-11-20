@@ -538,6 +538,7 @@ export const koTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} 의 문서 총 **{{total}}**건 중 **{{count}}**건이 성공적으로 재인덱싱되었으며, **{{skips}}**건의 초안이 건너뛰어졌습니다.',
     tableLayout: '테이블',
+    treeLayout: '트리',
     takeOver: '인수하기',
     theme: '테마',
     thisLanguage: '한국어',

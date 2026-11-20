@@ -540,6 +540,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно је реиндексирано {{count}} од укупно {{total}} докумената из {{collections}}, и {{skips}} нацрта је прескочено.',
     tableLayout: 'Табела',
+    treeLayout: 'Стабло',
     takeOver: 'Превузети',
     theme: 'Tema',
     thisLanguage: 'Српски (ћирилица)',

@@ -541,6 +541,7 @@ export const daTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} ud af {{total}} dokumenter fra {{collections}} blev succesfuldt genindekseret, og {{skips}} kladder blev sprunget over.',
     tableLayout: 'Tabel',
+    treeLayout: 'Træ',
     takeOver: 'Overtag',
     theme: 'Tema',
     thisLanguage: 'Dansk',
