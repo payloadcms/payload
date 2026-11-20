@@ -448,6 +448,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '覆盖现有字段数据',
     pageNotFound: '未找到页面',
     pageNumberRange: '请输入 1 到 {{totalPages}} 之间的页码。',
+    parentDocument: '父文档',
     password: '密码',
     pasteBelow: '粘贴下方',
     pasteField: '粘贴字段',

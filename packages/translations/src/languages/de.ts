@@ -484,6 +484,7 @@ export const deTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Vorhandene Eingaben überschreiben',
     pageNotFound: 'Seite nicht gefunden',
     pageNumberRange: 'Geben Sie eine Seitenzahl von 1 bis {{totalPages}} ein.',
+    parentDocument: 'Übergeordnetes Dokument',
     password: 'Passwort',
     pasteBelow: 'Unten einfügen',
     pasteField: 'Feld einfügen',

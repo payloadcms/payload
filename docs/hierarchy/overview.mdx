@@ -1025,3 +1025,18 @@ If types aren't generated, regenerate them:
 ```bash
 payload generate:types
 ```
+
+## Nested document collections
+
+Use `nestedDocs: true` to give documents in a collection their own parent relationship. The editor places **Parent document** in the sidebar. Folder and tag assignments remain separate.
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: { useAsTitle: 'title' },
+  nestedDocs: true,
+  fields: [{ name: 'title', type: 'text', required: true }],
+}
+```
+
+The parent field defaults to `_h_parent_document`. Set `nestedDocs: { parentFieldName: 'parentPage' }` to choose another name. The field is single-value and cannot be localized. Configure only one of `nestedDocs`, `hierarchy`, `folders`, or `tags` on a collection; separate relationship fields can still assign a nested document to folders or tags.
