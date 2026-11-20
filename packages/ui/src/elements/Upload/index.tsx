@@ -16,6 +16,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { useFileFieldUploadSession } from '../../providers/UploadSessions/useFileFieldUploadSession.js'
+import { isVideoMimeType } from '../../utilities/getVideoThumbnailSrc.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -463,7 +464,8 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
                   collectionSlug={collectionSlug}
-                  fileSrc={isImage(value.type) ? fileSrc : null}
+                  fileSrc={isImage(value.type) || isVideoMimeType(value.type) ? fileSrc : null}
+                  isVideo={isVideoMimeType(value.type)}
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>

@@ -6,6 +6,7 @@ import React from 'react'
 import { SelectInput } from '../../../fields/Select/Input.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { isVideoMimeType } from '../../../utilities/getVideoThumbnailSrc.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
@@ -153,7 +154,7 @@ function SidebarThumbnail({ file, formID }: { file: File; formID: string }) {
       setThumbnailURL(null)
 
       try {
-        if (isImage(file.type)) {
+        if (isImage(file.type) || isVideoMimeType(file.type)) {
           const url = await createThumbnail(file)
           if (!isCancelled) {
             setThumbnailURL(url)
