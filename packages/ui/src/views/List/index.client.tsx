@@ -538,7 +538,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         disableBulkDelete={disableBulkDelete}
                         disableBulkEdit={disableBulkEdit}
                         label={collectionLabel}
-                        showSelectAllAcrossPages={!isGroupingBy}
+                        showSelectAllAcrossPages={!isGroupingBy && !isNestedDocsTreeLayout}
                         viewType={viewType}
                       />
                       <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
