@@ -49,7 +49,8 @@ export function resolveSlashMenuGroups({
  * Invokes slash-menu `dynamicGroups` callbacks when the menu is open and merges
  * their results into `groups`. When `queryString` is `null` (menu closed),
  * returns `groups` unchanged without calling any callbacks. An empty string
- * (bare `/`) still invokes each callback with `queryString: ''`.
+ * (bare `/`) still invokes each callback with `queryString: ''`. A callback that
+ * throws is logged and skipped so the other groups still render.
  */
 export function applyDynamicGroups({
   dynamicGroupFns,
@@ -70,12 +71,16 @@ export function applyDynamicGroups({
   let dynamicGroups: SlashMenuGroup[] = []
 
   for (const dynamicGroupFn of dynamicGroupFns) {
-    dynamicGroups = dynamicGroups.concat(
-      dynamicGroupFn({
-        editor,
-        queryString,
-      }),
-    )
+    try {
+      dynamicGroups = dynamicGroups.concat(
+        dynamicGroupFn({
+          editor,
+          queryString,
+        }),
+      )
+    } catch (error) {
+      console.error('A slash menu dynamicGroups function threw an error and was skipped.', error)
+    }
   }
 
   return mergeDynamicGroups({

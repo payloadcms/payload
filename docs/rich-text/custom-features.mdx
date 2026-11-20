@@ -818,7 +818,7 @@ export const GridClientFeature = createClientFeature({
 - The function runs when the slash menu opens and again on every keystroke. It receives the text typed after the `/` (an empty string for a bare `/`) and the `editor`, which you can use to read the current selection.
 - The items it returns are not filtered by the typed text. Your function decides which items to return.
 - Items from a group whose `key` matches an existing group are added to that group. Other groups are added after the static ones. Groups without items are hidden.
-- The function must be synchronous, and every item `key` must be unique.
+- The function must be synchronous, and every item `key` must be unique. If it throws, the error is logged to the console and its groups are skipped.
 
 ### Markdown Transformers#client-feature-markdown-transformers
 

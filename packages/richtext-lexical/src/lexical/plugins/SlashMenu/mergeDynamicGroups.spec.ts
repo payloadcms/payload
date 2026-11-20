@@ -82,6 +82,29 @@ describe('applyDynamicGroups', () => {
     expect(result).toBe(groups)
     expect(result.map((group) => group.key)).toEqual(['basic'])
   })
+
+  it('should skip a dynamicGroups callback that throws and keep the other groups', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const groups = [createGroup({ items: [createItem({ key: 'paragraph' })], key: 'basic' })]
+    const throwingFn = vi.fn((): SlashMenuGroup[] => {
+      throw new Error('boom')
+    })
+    const workingFn = vi.fn(() => [
+      createGroup({ items: [createItem({ key: 'dynamic' })], key: 'custom' }),
+    ])
+
+    const result = applyDynamicGroups({
+      dynamicGroupFns: [throwingFn, workingFn],
+      editor,
+      groups,
+      queryString: 'x',
+    })
+
+    expect(result.map((group) => group.key)).toEqual(['basic', 'custom'])
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
+
+    consoleErrorSpy.mockRestore()
+  })
 })
 
 describe('resolveSlashMenuGroups', () => {
