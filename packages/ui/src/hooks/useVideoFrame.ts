@@ -13,7 +13,7 @@ type UseVideoFrameResult = {
   isLoading: boolean
   /** `false` after a load error. A video that loads after the timeout still replaces the fallback. */
   shouldRenderVideo: boolean
-  /** `true` on a load error, or while loading after the timeout passes. */
+  /** `true` on a load error or a file with no frame, or while loading after the timeout passes. */
   shouldShowFallback: boolean
   /** Spread onto a `<video muted>`, with `muted` set on the element so lint can verify it. */
   videoProps: React.VideoHTMLAttributes<HTMLVideoElement>
@@ -21,7 +21,7 @@ type UseVideoFrameResult = {
 
 /**
  * Track the load state of a silent, static video frame used as a thumbnail.
- * Some browsers (e.g. iOS Safari) never load metadata without user interaction, so a timeout
+ * Some browsers (e.g. iOS Safari) never load a frame without user interaction, so a timeout
  * shows the fallback instead of an endless loading state.
  */
 export const useVideoFrame = ({
@@ -42,7 +42,9 @@ export const useVideoFrame = ({
     videoProps: {
       hidden: status !== 'loaded',
       onError: () => setStatus('error'),
-      onLoadedMetadata: () => setStatus('loaded'),
+      // A file with no decodable video track (audio only, or an unsupported codec such as HEVC)
+      // loads with zero width and would paint an empty box
+      onLoadedData: (event) => setStatus(event.currentTarget.videoWidth > 0 ? 'loaded' : 'error'),
       playsInline: true,
       preload: 'metadata',
       src: `${src}#t=${VIDEO_FRAME_TIME}`,
