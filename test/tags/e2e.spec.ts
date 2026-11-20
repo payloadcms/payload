@@ -136,6 +136,47 @@ test.describe('Tags', () => {
     await page.unrouteAll()
   })
 
+  test('should show tag members from different collections in one table', async () => {
+    const { docs: italianTags } = await payload.find({
+      collection: tagsSlug,
+      overrideAccess: true,
+      where: { name: { equals: 'Italian' } },
+    })
+    const childTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Italian Subtag', [`_h_${tagsSlug}`]: italianTags[0].id },
+      overrideAccess: true,
+    })
+    createdTagIds.push(childTag.id)
+
+    const tree = await openTagsTree()
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+
+    const table = page.locator('.hierarchy-tables table')
+
+    await expect(table).toHaveCount(1)
+    await expect(table.getByRole('row', { name: /Italian Subtag/ })).toBeVisible()
+    await expect(table.getByRole('row', { name: /Creamy Mushroom Risotto/ })).toBeVisible()
+    await expect(table.getByRole('row', { name: /Guide to Italian Cuisine/ })).toBeVisible()
+    await expect(table.getByRole('columnheader', { name: 'Collection' })).toBeVisible()
+  })
+
+  test('should not offer Move for a document with multiple tags', async () => {
+    const tree = await openTagsTree()
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+
+    const postRow = page
+      .locator('.hierarchy-tables table')
+      .getByRole('row', { name: /Creamy Mushroom Risotto/ })
+
+    await postRow.getByRole('checkbox').check()
+    await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0)
+  })
+
   test.describe('hierarchy relationship field', () => {
     test('should apply, cancel, reopen, and clear Tags field selections', async () => {
       const post = await payload.create({
