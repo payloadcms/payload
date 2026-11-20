@@ -221,6 +221,14 @@
       height: var(--stroke-width-medium);
       background: var(--color-icon);
       border-radius: var(--stroke-width-small);
+      z-index: 1;
+    }
+  }
+
+  .column-selector__item--over-bottom {
+    &::before {
+      top: auto;
+      bottom: calc(-1 * var(--stroke-width-small));
     }
   }
 
