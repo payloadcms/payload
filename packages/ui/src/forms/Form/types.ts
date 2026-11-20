@@ -220,6 +220,11 @@ export type DUPLICATE_ROW = {
   type: 'DUPLICATE_ROW'
 }
 
+export type CLEAR_ROWS = {
+  path: string
+  type: 'CLEAR_ROWS'
+}
+
 export type MOVE_ROW = {
   moveFromIndex: number
   moveToIndex: number
@@ -247,6 +252,7 @@ export type SET_ALL_ROWS_COLLAPSED = {
 export type FieldAction =
   | ADD_ROW
   | ADD_SERVER_ERRORS
+  | CLEAR_ROWS
   | DUPLICATE_ROW
   | MERGE_SERVER_STATE
   | MODIFY_CONDITION
