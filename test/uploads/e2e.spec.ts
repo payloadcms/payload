@@ -941,6 +941,30 @@ describe('Uploads', () => {
     ).toBeVisible()
   })
 
+  test('should show a video frame thumbnail in a list cell of an upload field', async () => {
+    const {
+      docs: [videoDoc],
+    } = await payload.find({
+      collection: mediaSlug,
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      where: { mimeType: { equals: 'video/mp4' } },
+    })
+
+    const relationDoc = await payload.create({
+      collection: relationSlug,
+      data: { image: videoDoc?.id },
+      overrideAccess: true,
+    })
+
+    await page.goto(relationURL.list)
+
+    const row = page.locator('tbody tr', { hasText: String(relationDoc.id) })
+
+    await expect(row.locator('.cell-image .thumbnail video')).toBeVisible()
+  })
+
   test('should show a video frame thumbnail in the bulk upload sidebar', async () => {
     await page.goto(mediaURL.list)
     await expect(page.locator('.list-header__title')).toBeVisible()
