@@ -458,6 +458,56 @@ describe('configToJSONSchema', () => {
     expect(schema.definitions.test.properties.title.required).toStrictEqual(false)
   })
 
+  it('should allow typescriptSchema to promote an optional field to required', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              typescriptSchema: [() => ({ type: 'string', required: true })],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect(schema.definitions.test.required).toContain('title')
+  })
+
+  it('should keep an explicitly required field required when admin.condition is set', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              admin: { condition: () => true },
+              typescriptSchema: [() => ({ type: 'string' })],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect(schema.definitions.test.required).toContain('title')
+  })
+
   it('should propagate forceInlineBlocks to nested fields (array, group, tab)', async () => {
     const namedBlock: Block = {
       slug: 'myBlock',
