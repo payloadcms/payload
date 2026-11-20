@@ -331,7 +331,9 @@ function Content({
                 }}
                 size="medium"
               >
-                {`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                {t('general:createNewLabel', {
+                  label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+                })}
               </Button>,
             ]}
             Message={
