@@ -140,7 +140,9 @@ function HierarchyListContent(props: ListViewClientProps) {
       ...(preferences ?? {}),
       documentLayout: nextLayout,
     }))
-    router.refresh()
+    if (!flatContents) {
+      router.refresh()
+    }
   }
 
   // Update URL when search changes (debouncing is handled by ListSearchFilter)
@@ -585,7 +587,9 @@ function HierarchyListContent(props: ListViewClientProps) {
                 error={flatError}
                 HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
                 isLoading={flatLoading}
+                layout={layout}
                 onLoadMore={handleFlatLoadMore}
+                parentFieldName={parentFieldName ?? 'parent'}
                 parentID={parentId}
               />
             ) : (

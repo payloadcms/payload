@@ -1,17 +1,25 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import React, { useMemo } from 'react'
 
+import type { DocumentLayout } from '../../../elements/LayoutToggle/index.js'
 import type { FlatFolderContents } from '../../List/getFlatFolderContents.js'
 import type { SlotColumn } from '../HierarchyTable/SlotTable.js'
 import type { TableRow } from '../HierarchyTable/types.js'
 
 import { Button } from '../../../elements/Button/index.js'
+import { CardGrid } from '../../../elements/CardGrid/index.js'
+import { DocumentCard } from '../../../elements/DocumentCard/index.js'
+import { Link } from '../../../elements/Link/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
+import { DocumentIcon } from '../../../icons/Document/index.js'
+import { FolderIcon } from '../../../icons/Folder/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getHierarchyListURL } from '../getHierarchyListURL.js'
 import { ChildNameCell } from '../HierarchyTable/ChildNameCell.js'
 import { DateCell } from '../HierarchyTable/DateCell.js'
 import { RelatedNameCell } from '../HierarchyTable/RelatedNameCell.js'
@@ -36,7 +44,9 @@ export function FlatFolderContentsView({
   error,
   HierarchyIcon,
   isLoading,
+  layout,
   onLoadMore,
+  parentFieldName,
   parentID,
 }: {
   collectionSlug: string
@@ -44,11 +54,18 @@ export function FlatFolderContentsView({
   error?: string
   HierarchyIcon?: React.ReactNode
   isLoading: 'documents' | 'folders' | null
+  layout: DocumentLayout
   onLoadMore: (source: 'documents' | 'folders') => void
+  parentFieldName: string
   parentID: number | string
 }) {
   const { i18n, t } = useTranslation()
-  const { getEntityConfig } = useConfig()
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+    getEntityConfig,
+  } = useConfig()
   const { isLocked, isSelected, toggleSelection } = useDocumentSelection()
 
   const rows = useMemo<TableRow[]>(
@@ -145,6 +162,60 @@ export function FlatFolderContentsView({
     }
   }
 
+  const cardGroups = [
+    { items: rows.slice(0, contents.folders.docs.length), key: 'folders', label: folderLabel },
+    {
+      items: rows.slice(contents.folders.docs.length),
+      key: 'documents',
+      label: t('general:documents'),
+    },
+  ]
+
+  const renderCard = (row: TableRow) => {
+    const isFolder = row._collectionSlug === collectionSlug
+    const config = getEntityConfig({ collectionSlug: row._collectionSlug })
+    const titleField = config.admin.useAsTitle || 'id'
+    const rawTitle = row[titleField]
+    const title =
+      typeof rawTitle === 'string' || typeof rawTitle === 'number'
+        ? String(rawTitle)
+        : String(row.id)
+    const thumbnailSrc = typeof row._thumbnailSrc === 'string' ? row._thumbnailSrc : undefined
+    const editURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${row._collectionSlug}/${encodeURIComponent(String(row.id))}`,
+    })
+    const folderURL = getHierarchyListURL({
+      adminRoute,
+      collectionSlug,
+      parentFieldName,
+      parentID: row.id,
+    })
+
+    return (
+      <DocumentCard
+        href={isFolder ? folderURL : editURL}
+        isSelected={isSelected({ id: row.id, collectionSlug: row._collectionSlug })}
+        onSelect={
+          isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+            ? undefined
+            : () => toggleRow(row)
+        }
+        placeholder={isFolder ? (HierarchyIcon ?? <FolderIcon />) : <DocumentIcon />}
+        thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
+        title={title}
+      >
+        {isFolder ? (
+          <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
+            {t('general:edit')}
+          </Link>
+        ) : (
+          row._collectionLabel
+        )}
+      </DocumentCard>
+    )
+  }
+
   if (!rows.length && !isLoading) {
     return (
       <NoListResults
@@ -157,22 +228,43 @@ export function FlatFolderContentsView({
 
   return (
     <div className="flat-folder-contents">
-      <SlotTable
-        collectionSlug={collectionSlug}
-        columns={columns}
-        data={rows}
-        enableDragHandle={false}
-        getRowId={(row) => `${row._collectionSlug}:${row.id}`}
-        getRowLockedUser={(row) =>
-          isLocked({ id: row.id, collectionSlug: row._collectionSlug })
-            ? row._userEditing
-            : undefined
-        }
-        onCheckboxChange={toggleRow}
-        onSelectAllChange={toggleAll}
-        parentId={parentID}
-        selectedIds={selectedIDs}
-      />
+      {layout === 'grid' ? (
+        <div className="flat-folder-contents__grids">
+          {cardGroups.map(({ items, key, label }) =>
+            items.length ? (
+              <CardGrid
+                ariaLabel={label}
+                getItemClassName={(row) =>
+                  isSelected({ id: row.id, collectionSlug: row._collectionSlug })
+                    ? 'card-grid__item--selected'
+                    : undefined
+                }
+                getKey={(row) => `${row._collectionSlug}:${row.id}`}
+                items={items}
+                key={key}
+                renderItem={renderCard}
+              />
+            ) : null,
+          )}
+        </div>
+      ) : (
+        <SlotTable
+          collectionSlug={collectionSlug}
+          columns={columns}
+          data={rows}
+          enableDragHandle={false}
+          getRowId={(row) => `${row._collectionSlug}:${row.id}`}
+          getRowLockedUser={(row) =>
+            isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+              ? row._userEditing
+              : undefined
+          }
+          onCheckboxChange={toggleRow}
+          onSelectAllChange={toggleAll}
+          parentId={parentID}
+          selectedIds={selectedIDs}
+        />
+      )}
       <div className="flat-folder-contents__more">
         {contents.folders.hasNextPage && (
           <Button

@@ -480,7 +480,6 @@ export const renderListView = async (
     const canUseFlatContents =
       !drawerSlug &&
       hierarchyParentId !== null &&
-      collectionPreferences?.documentLayout !== 'grid' &&
       canUseFlatFolderContents({ collectionConfig, req })
 
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)

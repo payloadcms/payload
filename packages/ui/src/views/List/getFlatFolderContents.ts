@@ -8,6 +8,9 @@ import type {
 
 import { canAccessAdmin, combineWhereConstraints } from 'payload/shared'
 
+import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
+import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
+
 export const FLAT_FOLDER_PAGE_SIZE = 10
 
 export type FlatFolderContents = NonNullable<ListViewClientProps['flatFolderContents']>
@@ -315,7 +318,10 @@ export async function getFlatFolderContents({
               overrideAccess: false,
               pagination: false,
               req,
-              select: { id: true, [titleField]: true, updatedAt: true },
+              select: getDocumentThumbnailSelect({
+                collectionConfig: config,
+                select: { id: true, [titleField]: true, updatedAt: true },
+              }),
               user: req.user,
               where: combineWhereConstraints([
                 { id: { in: ids } },
@@ -330,6 +336,7 @@ export async function getFlatFolderContents({
                 id: doc.id,
                 _collectionSlug: slug,
                 _isLocked: doc._isLocked,
+                _thumbnailSrc: config.upload ? getDocumentThumbnail({ doc }) : undefined,
                 _userEditing: doc._userEditing,
                 [titleField]: doc[titleField],
                 updatedAt: doc.updatedAt,
