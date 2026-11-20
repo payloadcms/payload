@@ -452,6 +452,19 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
       resolve: () => Promise<void>
     }
   }
+  /**
+   * Array and `hasMany` select table names that turned out to equal a companion table of their
+   * parent (`_rels`, `_texts`, `_numbers`, `_locales`) while the schema was built. The schema is
+   * then built again with the names from `subTableNameReplacements`, until no new clashes are found.
+   * @internal
+   */
+  subTableNameClashes?: Set<string>
+  /**
+   * Maps each name in `subTableNameClashes` to a name no other table uses or starts with.
+   * Kept across builds; `createTableName` uses it on every build after the first.
+   * @internal
+   */
+  subTableNameReplacements?: Map<string, string>
   tableNameMap: Map<string, string>
   tables: Record<string, any>
   transactionOptions: unknown

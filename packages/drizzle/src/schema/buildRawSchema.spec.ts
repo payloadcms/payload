@@ -1,10 +1,12 @@
-import type { Block, Config, SanitizedConfig } from 'payload'
+import type { Block, CollectionConfig, Config, SanitizedConfig } from 'payload'
 import { sanitizeConfig } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
 import { setColumnID } from '../postgres/schema/setColumnID.js'
 import type { DrizzleAdapter } from '../types.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
+import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
+import { warnRenamedSubTables } from '../utilities/warnRenamedSubTables.js'
 import { buildRawSchema } from './buildRawSchema.js'
 
 const headlineBlock: Block = {
@@ -56,6 +58,7 @@ const createAdapter = (
     },
     rawRelations: {},
     rawTables: {},
+    relationshipsSuffix: '_rels',
     tableNameMap: new Map(),
     versionsSuffix: '_versions',
   }) as unknown as DrizzleAdapter
@@ -415,5 +418,371 @@ describe('buildRawSchema', () => {
       table: 'authors',
     })
     expect(adapter.rawTables.p.foreignKeys?.[`${columnKey}Fk`]).toBeUndefined()
+  })
+
+  describe('sub-tables named like a companion table', () => {
+    const buildCollection = async (fields: CollectionConfig['fields']) => {
+      const config = await sanitizeConfig({
+        collections: [
+          { slug: 'p', fields, timestamps: false, versions: false },
+          { slug: 'authors', fields: [], timestamps: false, versions: false },
+        ],
+      } as Config)
+
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      return adapter
+    }
+
+    it('should rename an array table that shares its name with the relationships table', async () => {
+      const adapter = await buildCollection([
+        { name: 'rels', type: 'array', fields: [{ name: 'value', type: 'text' }] },
+        { name: 'authors', type: 'relationship', hasMany: true, relationTo: 'authors' },
+      ])
+
+      expect(adapter.tableNameMap.get('p_rels')).toBe('p_rels_field')
+      expect(adapter.rawTables.p_rels_field.columns.value).toBeDefined()
+      expect(adapter.rawTables.p_rels.columns.authorsID).toBeDefined()
+      expect(adapter.rawTables.p_rels.columns.value).toBeUndefined()
+    })
+
+    it('should rename array and select tables that share their names with the texts and numbers tables', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'texts', type: 'select', hasMany: true, options: ['a', 'b'] },
+        { name: 'scores', type: 'number', hasMany: true },
+        { name: 'tags', type: 'text', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field')
+      expect(adapter.tableNameMap.get('p_texts')).toBe('p_texts_field')
+      expect(adapter.rawTables.p_numbers_field.columns.drawPosition).toBeDefined()
+      expect(adapter.rawTables.p_numbers.columns.number).toBeDefined()
+      expect(adapter.rawTables.p_texts.columns.text).toBeDefined()
+    })
+
+    it('should pick an unused name when the suffixed name is taken by another field', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'numbersField', type: 'array', fields: [{ name: 'label', type: 'text' }] },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field_2')
+      expect(adapter.tableNameMap.get('p_numbers_field')).toBe('p_numbers_field')
+      expect(adapter.rawTables.p_numbers_field_2.columns.drawPosition).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field.columns.label).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field.columns.drawPosition).toBeUndefined()
+      expect(adapter.rawTables.p_numbers.columns.number).toBeDefined()
+    })
+
+    it('should not rename into a name used as a prefix by nested tables', async () => {
+      // Only `p_numbers_field_items` exists, not `p_numbers_field`. Renaming `p_numbers` to
+      // `p_numbers_field` would turn its nested `items` table into `p_numbers_field_items` too.
+      const adapter = await buildCollection([
+        {
+          name: 'numbers',
+          type: 'array',
+          fields: [
+            { name: 'items', type: 'array', fields: [{ name: 'position', type: 'number' }] },
+          ],
+        },
+        {
+          name: 'numbersFieldItems',
+          type: 'array',
+          fields: [{ name: 'label', type: 'text' }],
+        },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field_2')
+      expect(adapter.rawTables.p_numbers_field_2_items.columns.position).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_items.columns.label).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_items.columns.position).toBeUndefined()
+    })
+
+    it('should rename a nested table that clashes only after its parent was renamed', async () => {
+      // `p_numbers` is renamed to `p_numbers_field` because of the `scores` numbers table. Its
+      // nested `locales` array then becomes `p_numbers_field_locales`, the name of the renamed
+      // array's own locales table.
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'numbers',
+                type: 'array',
+                fields: [
+                  { name: 'title', type: 'text', localized: true },
+                  { name: 'locales', type: 'array', fields: [{ name: 'code', type: 'text' }] },
+                ],
+              },
+              { name: 'scores', type: 'number', hasMany: true },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'de'] },
+      } as Config)
+
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      const numbersTableName = adapter.tableNameMap.get('p_numbers')!
+      const nestedLocalesTableName = adapter.tableNameMap.get(`${numbersTableName}_locales`)!
+
+      expect(numbersTableName).toBe('p_numbers_field')
+      expect(nestedLocalesTableName).not.toBe('p_numbers_field_locales')
+      expect(adapter.rawTables[nestedLocalesTableName].columns.code).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_locales.columns.title).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field_locales.columns.code).toBeUndefined()
+    })
+
+    it('should keep the table name when there is no companion table with that name', async () => {
+      // No `hasMany` number or text fields, so there are no `p_numbers` or `p_texts` companion tables.
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'texts', type: 'array', fields: [{ name: 'value', type: 'text' }] },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers')
+      expect(adapter.tableNameMap.get('p_texts')).toBe('p_texts')
+      expect(adapter.rawTables.p_numbers.columns.drawPosition).toBeDefined()
+      expect(adapter.rawTables.p_texts.columns.value).toBeDefined()
+      expect(adapter.rawTables.p_numbers_field).toBeUndefined()
+    })
+
+    it('should rename an array table that takes the name of a companion table built before it', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'items',
+                type: 'array',
+                fields: [{ name: 'title', type: 'text', localized: true }],
+              },
+              { name: 'itemsLocales', type: 'array', fields: [{ name: 'label', type: 'text' }] },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(adapter.tableNameMap.get('p_items_locales')).toBe('p_items_locales_field')
+      expect(adapter.rawTables.p_items_locales.columns.title).toBeDefined()
+      expect(adapter.rawTables.p_items_locales.columns.label).toBeUndefined()
+      expect(adapter.rawTables.p_items_locales_field.columns.label).toBeDefined()
+    })
+
+    it('should rename an array table that takes the dbName of a collection built after it', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [{ name: 'items', type: 'array', fields: [{ name: 'label', type: 'text' }] }],
+            timestamps: false,
+            versions: false,
+          },
+          {
+            slug: 'q',
+            dbName: 'p_items',
+            fields: [{ name: 'title', type: 'text' }],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(adapter.tableNameMap.get('p_items')).toBe('p_items_field')
+      expect(adapter.rawTables.p_items.columns.title).toBeDefined()
+      expect(adapter.rawTables.p_items_field.columns.label).toBeDefined()
+    })
+
+    it('should keep the replacement name within the identifier length limit', async () => {
+      const slug = 'a'.repeat(51)
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug,
+            fields: [
+              {
+                name: 'numbers',
+                type: 'array',
+                fields: [{ name: 'drawPosition', type: 'number' }],
+              },
+              { name: 'scores', type: 'number', hasMany: true },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      const replacement = adapter.tableNameMap.get(`${slug}_numbers`)
+
+      expect(replacement).toHaveLength(63)
+      expect(replacement?.endsWith('_field')).toBe(true)
+      expect(adapter.rawTables[replacement!].columns.drawPosition).toBeDefined()
+    })
+
+    it('should not rename a table to the name of an enum', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'scores', type: 'number', hasMany: true },
+        { name: 'status', type: 'select', enumName: 'p_numbers_field', options: ['a', 'b'] },
+      ])
+
+      expect(adapter.tableNameMap.get('p_numbers')).toBe('p_numbers_field_2')
+      expect(adapter.rawTables.p_numbers_field).toBeUndefined()
+    })
+
+    it('should not give a hasMany select enum the dbName of its table', async () => {
+      const adapter = await buildCollection([
+        { name: 'tags', type: 'select', dbName: 'p_tags_custom', hasMany: true, options: ['a'] },
+      ])
+
+      expect(adapter.rawTables.p_tags_custom.columns.value).toMatchObject({
+        enumName: 'enum_p_tags_custom',
+      })
+    })
+
+    it('should not give a renamed hasMany select table and its enum the same name', async () => {
+      const adapter = await buildCollection([
+        { name: 'values', type: 'select', dbName: 'p_numbers', hasMany: true, options: ['a'] },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+
+      expect(adapter.tableNameMap.get('p_values')).toBe('p_numbers_field')
+      expect(adapter.rawTables.p_numbers_field.columns.value).toMatchObject({
+        enumName: 'enum_p_numbers_field',
+      })
+      expect(adapter.rawTables.p_numbers.columns.number).toBeDefined()
+    })
+
+    it('should keep the enumName of a hasMany select that sets one', async () => {
+      const adapter = await buildCollection([
+        {
+          name: 'tags',
+          type: 'select',
+          dbName: 'p_tags_custom',
+          enumName: 'tags_enum',
+          hasMany: true,
+          options: ['a'],
+        },
+      ])
+
+      expect(adapter.rawTables.p_tags_custom.columns.value).toMatchObject({
+        enumName: 'tags_enum',
+      })
+    })
+
+    it('should not report a locales table for an array whose only localized field is a hasMany number', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'items',
+                type: 'array',
+                fields: [{ name: 'scores', type: 'number', hasMany: true, localized: true }],
+              },
+              {
+                name: 'withTitle',
+                type: 'array',
+                fields: [{ name: 'title', type: 'text', localized: true }],
+              },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(hasCompanionRelation({ adapter, relation: '_locales', tableName: 'p_items' })).toBe(
+        false,
+      )
+      expect(
+        hasCompanionRelation({ adapter, relation: '_locales', tableName: 'p_with_title' }),
+      ).toBe(true)
+    })
+
+    it('should warn about renamed tables', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+        { name: 'scores', type: 'number', hasMany: true },
+      ])
+      const warn = vi.fn()
+
+      warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn).toHaveBeenCalledTimes(1)
+      expect(warn.mock.calls[0][0]).toContain('p_numbers -> p_numbers_field')
+    })
+
+    it('should warn with the name a nested table had before its parent was renamed', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [
+              {
+                name: 'numbers',
+                type: 'array',
+                fields: [
+                  { name: 'title', type: 'text', localized: true },
+                  { name: 'locales', type: 'array', fields: [{ name: 'code', type: 'text' }] },
+                ],
+              },
+              { name: 'scores', type: 'number', hasMany: true },
+            ],
+            timestamps: false,
+            versions: false,
+          },
+        ],
+        localization: { defaultLocale: 'en', locales: ['en', 'de'] },
+      } as Config)
+      const adapter = createAdapter(config)
+      const warn = vi.fn()
+
+      buildRawSchema({ adapter, setColumnID })
+      warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn.mock.calls[0][0]).toContain('p_numbers_locales -> p_numbers_field_locales_field')
+      expect(warn.mock.calls[0][0]).not.toContain('p_numbers_field_locales ->')
+    })
+
+    it('should not warn when no table was renamed', async () => {
+      const adapter = await buildCollection([
+        { name: 'numbers', type: 'array', fields: [{ name: 'drawPosition', type: 'number' }] },
+      ])
+      const warn = vi.fn()
+
+      warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn).not.toHaveBeenCalled()
+    })
   })
 })
