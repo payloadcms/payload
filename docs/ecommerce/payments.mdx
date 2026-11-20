@@ -3,7 +3,7 @@ title: Payment Adapters
 label: Payment Adapters
 order: 40
 desc: Add ecommerce functionality to your Payload CMS application with this plugin.
-keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
+keywords: plugins, ecommerce, stripe, nano, plugin, payload, cms, shop, payments
 ---
 
 A deeper look into the payment adapter pattern used by the Ecommerce Plugin, and how to create your own.
@@ -11,6 +11,7 @@ A deeper look into the payment adapter pattern used by the Ecommerce Plugin, and
 The current list of supported payment adapters are:
 
 - [Stripe](#stripe)
+- [Nano](#nano)
 
 ## REST API
 
@@ -186,6 +187,54 @@ import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/strip
 ```
 
 Then you can use the `usePayments` hook to access the `initiatePayment` and `confirmOrder` functions, see the [Frontend docs](./frontend#usepayments) for more details.
+
+## Nano
+
+The Nano adapter accepts payments in Nano (XNO), a feeless network that confirms in about a second. It needs no extra package and no keys: you give it the receiving address and a node RPC URL, and it only reads the payer's send block from that node.
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { nanoAdapter } from '@payloadcms/plugin-ecommerce/payments/nano'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // Payload config...
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          nanoAdapter({
+            account: process.env.NANO_ACCOUNT,
+            nodeURL: process.env.NANO_NODE_URL,
+            // XNO for one smallest unit of each currency (one cent for USD)
+            prices: { USD: process.env.NANO_XNO_PER_USD_CENT },
+          }),
+        ],
+      },
+    }),
+  ],
+})
+```
+
+### Configuration
+
+| Option         | Type     | Description                                                                                                                                  |
+| -------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| account        | `string` | The Nano address that receives payments. Its checksum is validated when the adapter is created.                                              |
+| nodeURL        | `string` | The Nano node RPC URL used to read send blocks (`block_info`). Use your own node or a public RPC you trust.                                  |
+| prices         | `object` | XNO price of one smallest unit of each currency, as a decimal string, e.g. `{ USD: '0.0001' }`. Currencies not listed cannot be paid in Nano. |
+| nodeHeaders    | `object` | (Optional) Extra headers for the node RPC, e.g. an API key header a hosted node requires.                                                    |
+| maxAgeSeconds  | `number` | (Optional) How old a send block may be when it is presented. Defaults to `86400`.                                                            |
+| groupOverrides | `object` | (Optional) An object to override the default fields of the payment group. See [Payment Fields](./advanced#payment-fields) for more details.  |
+
+### How a Nano payment is confirmed
+
+`initiate` creates a pending transaction and returns `payTo`, `amountRaw` (1 XNO = 10^30 raw, computed from the cart subtotal with integer math), `amountXNO`, `reference` and `representative`. A Nano send carries no memo, so the payer sets the send block's representative to the returned `representative`: it is derived from the reference, the receiving account and the exact amount ([xno-binding v1](https://github.com/dhyabi2/xno-call-binding/blob/main/docs/BINDING-STANDARD.md), option C), which ties the block to this one order.
+
+`confirm-order` takes `reference` and the `blockHash`. The adapter reads the block from your node and finalizes the order only for a confirmed send of exactly `amountRaw` to your account carrying that representative. The block hash is stored in the unique `nano.blockHash` field before the order is created, so one block can settle only one transaction, also across restarts. The claim is a conditional write that only matches while the transaction is pending and has no other block, so concurrent confirmations cannot overwrite each other. Retrying `confirm-order` with the same block after settlement returns the existing order.
+
+Use `nanoAdapterClient()` from the same import path in `EcommerceProvider`.
 
 ## Making your own Payment Adapter
 
