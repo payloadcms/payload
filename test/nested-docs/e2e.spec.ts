@@ -61,4 +61,27 @@ test.describe('Nested document tree', () => {
     await page.reload()
     await expect(page.getByRole('link', { name: 'Department 12', exact: true })).toBeVisible()
   })
+
+  test('should show branch connectors and identify a child’s parent', async ({ page }) => {
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+
+    const parent = page
+      .getByRole('row')
+      .filter({ has: page.getByRole('link', { name: 'About us', exact: true }) })
+    const child = page
+      .getByRole('row')
+      .filter({ has: page.getByRole('link', { name: 'Department 12', exact: true }) })
+    const connectorX = (row: typeof parent) =>
+      row.locator('.tree-connectors__incoming').evaluate((line) => line.getBoundingClientRect().x)
+
+    await expect(
+      child
+        .getByRole('gridcell')
+        .filter({ has: page.getByRole('link', { name: 'Department 12', exact: true }) }),
+    ).toHaveAccessibleName('Parent document: About us. Department 12')
+    const parentX = await connectorX(parent)
+
+    await expect.poll(() => connectorX(child)).toBeGreaterThan(parentX)
+  })
 })

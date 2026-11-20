@@ -176,6 +176,7 @@ export const trTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Geçersiz dosya türü: {{value}}',
     invalidRequestArgs: 'İstek içerisinde geçersiz argümanlar iletildi: {{args}}',
     loadingDocument: "{{id}} ID'ye sahip döküman yüklenirken bir sorun oluştu.",
+    loadingItems: 'Öğeler yüklenemedi.',
     localesNotSaved_one: 'Aşağıdaki yerel ayar kaydedilemedi:',
     localesNotSaved_other: 'Aşağıdaki yerel ayarlar kaydedilemedi:',
     logoutFailed: 'Çıkış başarısız oldu.',

@@ -172,6 +172,7 @@ export const koTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: '잘못된 파일 형식: {{value}}',
     invalidRequestArgs: '요청에 잘못된 인수가 전달되었습니다: {{args}}',
     loadingDocument: 'ID가 {{id}}인 문서를 불러오는 중에 문제가 발생했습니다.',
+    loadingItems: '항목을 불러오지 못했습니다.',
     localesNotSaved_one: '다음 로케일을 저장할 수 없습니다:',
     localesNotSaved_other: '다음 로케일들을 저장할 수 없습니다:',
     logoutFailed: '로그아웃 실패했습니다.',

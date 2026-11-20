@@ -174,6 +174,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'অবৈধ ফাইল প্রকার: {{value}}',
     invalidRequestArgs: 'অনুরোধে অবৈধ আর্গুমেন্ট পাস করা হয়েছে: {{args}}',
     loadingDocument: '{{id}} আইডি সহ ডকুমেন্ট লোড করতে একটি সমস্যা হয়েছে।',
+    loadingItems: 'আইটেমগুলি লোড করা যায়নি.',
     localesNotSaved_one: 'নিম্নলিখিত লোকেল সংরক্ষণ করা যায়নি:',
     localesNotSaved_other: 'নিম্নলিখিত লোকেলগুলি সংরক্ষণ করা যায়নি:',
     logoutFailed: 'লগআউট ব্যর্থ হয়েছে।',

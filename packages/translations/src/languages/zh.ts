@@ -163,6 +163,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: '无效的文件类型： {{value}}',
     invalidRequestArgs: '请求中传递了无效的参数：{{args}}',
     loadingDocument: '加载 ID 为 {{id}} 的文档时出现了问题。',
+    loadingItems: '无法加载项目。',
     localesNotSaved_one: '无法保存以下语言环境设置：',
     localesNotSaved_other: '无法保存以下语言环境设置：',
     logoutFailed: '登出失败。',

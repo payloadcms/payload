@@ -175,6 +175,7 @@ export const viTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Lỗi - Định dạng tệp không hợp lệ: {{value}}.',
     invalidRequestArgs: 'Các đối số không hợp lệ đã được truyền trong yêu cầu: {{args}}',
     loadingDocument: 'Lỗi - Đã xảy ra vấn để khi tải bản tài liệu với ID {{id}}.',
+    loadingItems: 'Không thể tải các mục.',
     localesNotSaved_one: 'Không thể lưu trữ cài đặt vùng sau đây:',
     localesNotSaved_other: 'Không thể lưu trữ các cài đặt vùng sau đây:',
     logoutFailed: 'Đăng xuất thất bại.',

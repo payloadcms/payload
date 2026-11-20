@@ -174,6 +174,7 @@ export const enTranslations = {
     invalidFileTypeValue: 'Invalid file type: {{value}}',
     invalidRequestArgs: 'Invalid arguments passed in request: {{args}}',
     loadingDocument: 'There was a problem loading the document with ID of {{id}}.',
+    loadingItems: "Couldn't load items.",
     localesNotSaved_one: 'The following locale could not be saved:',
     localesNotSaved_other: 'The following locales could not be saved:',
     logoutFailed: 'Logout failed.',

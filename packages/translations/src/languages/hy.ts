@@ -174,6 +174,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Անվավեր ֆայլի տեսակ՝ {{value}}',
     invalidRequestArgs: 'Հայտում փոխանցված անվավեր արգումենտներ՝ {{args}}',
     loadingDocument: '{{id}} ID-ով փաստաթուղթը բեռնելու ժամանակ խնդիր է առաջացել։',
+    loadingItems: 'Չհաջողվեց բեռնել տարրերը։',
     localesNotSaved_one: 'Հետևյալ լոկալը չի պահպանվել։',
     localesNotSaved_other: 'Հետևյալ լոկալները չեն պահպանվել։',
     logoutFailed: 'Դուրս գալը ձախողվել է։',

@@ -161,6 +161,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: '檔案類型無效：{{value}}',
     invalidRequestArgs: '請求中傳入的參數無效：{{args}}',
     loadingDocument: '載入 ID 為 {{id}} 的文件時發生問題。',
+    loadingItems: '無法載入項目。',
     localesNotSaved_one: '以下語言地區無法儲存：',
     localesNotSaved_other: '以下語言地區無法儲存：',
     logoutFailed: '登出失敗。',

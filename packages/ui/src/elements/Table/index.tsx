@@ -8,7 +8,7 @@ import { useNestedDocsTree } from '../../providers/NestedDocs/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useGridNavigation } from './GridNavigation/useGridNavigation.js'
 import { NestedDocsBranchRow } from './NestedDocsBranchRow/index.js'
-import { NestedDocsLoadMoreRow } from './NestedDocsLoadMoreRow/index.js'
+import { NestedDocsContinuationRow } from './NestedDocsContinuationRow/index.js'
 import { TableGridContext, useTableID, useTableNavigationLabel } from './TableIdentity.js'
 import { TableRow } from './TableRow/index.js'
 import './index.css'
@@ -86,7 +86,11 @@ export const Table: React.FC<Props> = ({
 
   return (
     <div
-      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+      className={[
+        baseClass,
+        appearance && `${baseClass}--appearance-${appearance}`,
+        nestedDocs && `${baseClass}--nested-docs`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -128,21 +132,38 @@ export const Table: React.FC<Props> = ({
                     columns={activeColumns}
                     hasCellNavigation={isGrid}
                     hasRowSelection={Boolean(hasRowSelection)}
+                    isLastRendered={
+                      rowIndex === data.length - 1 && !tree?.continuationsByRowID.has(String(key))
+                    }
                     row={row}
                     rowIndex={rowIndex}
                     rowMetadata={metadata}
                     useAsTitle={useAsTitle}
                   />
-                {(tree?.continuationsByRowID.get(String(key)) ?? []).map((parentID) => {
-                    const label = parentID === null ? t('general:treeLayout') : String(parentID)
+                  {(tree?.continuationsByRowID.get(String(key)) ?? []).map((parentID) => {
+                    const parent =
+                      parentID === null
+                        ? undefined
+                        : tree?.docs.find((doc) => String(doc.id) === String(parentID))
+                    const titleValue = parent && useAsTitle ? parent[useAsTitle] : undefined
+                    const label =
+                      parentID === null
+                        ? (ariaLabel ?? navigationLabel ?? t('general:treeLayout'))
+                        : typeof titleValue === 'string' || typeof titleValue === 'number'
+                          ? String(titleValue)
+                          : String(parentID)
 
                     return (
-                      <NestedDocsLoadMoreRow
-                        columnCount={activeColumns.length}
+                      <NestedDocsContinuationRow
+                        columns={activeColumns}
                         hasCellNavigation={isGrid}
                         key={`load-${parentID}`}
                         label={label}
                         parentID={parentID}
+                        titleColumn={
+                          activeColumns.find((column) => column.isLinkedColumn)?.accessor ??
+                          activeColumns.find((column) => column.accessor !== '_select')?.accessor
+                        }
                       />
                     )
                   })}

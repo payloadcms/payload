@@ -173,6 +173,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Невірний тип файлу: {{value}}',
     invalidRequestArgs: 'Неправильні аргументи передано в запиті: {{args}}',
     loadingDocument: 'Виникла помилка під час завантаження документа з ID {{id}}.',
+    loadingItems: 'Не вдалося завантажити елементи.',
     localesNotSaved_one: 'Не вдалося зберегти наступну локалізацію:',
     localesNotSaved_other: 'Не вдалося зберегти такі локалізації:',
     logoutFailed: 'Вихід не вдався.',

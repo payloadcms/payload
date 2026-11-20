@@ -167,6 +167,7 @@ export const heTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'סוג קובץ לא תקין: {{value}}',
     invalidRequestArgs: 'ארגומנטים לא חוקיים הועברו בבקשה: {{args}}',
     loadingDocument: 'אירעה בעיה בטעינת המסמך עם מזהה {{id}}.',
+    loadingItems: 'לא ניתן היה לטעון את הפריטים.',
     localesNotSaved_one: 'לא ניתן לשמור את השפה הבאה:',
     localesNotSaved_other: 'לא ניתן לשמור את השפות הבאות:',
     logoutFailed: 'התנתקות נכשלה.',

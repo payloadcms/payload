@@ -172,6 +172,7 @@ export const arTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'نوع ملف غير صالح: {{value}}',
     invalidRequestArgs: 'تم تمرير وسيطات غير صالحة في الطلب: {{args}}',
     loadingDocument: 'حدثت مشكلة أثناء تحميل المستند برقم التعريف {{id}}.',
+    loadingItems: 'تعذر تحميل العناصر.',
     localesNotSaved_one: 'لم يتم حفظ اللغة التالية:',
     localesNotSaved_other: 'لم يتم حفظ اللغات التالية:',
     logoutFailed: 'فشل في تسجيل الخروج.',

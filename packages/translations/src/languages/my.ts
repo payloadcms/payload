@@ -168,6 +168,7 @@ export const myTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား: {{value}}',
     invalidRequestArgs: 'တောင်းဆိုမှုတွင် မှားယွင်းသော အကြောင်းပြချက်များ ပေးပို့ထားသည်: {{args}}',
     loadingDocument: '{{id}} ID ဖြင့် ဖိုင်ကို ဖွင့်ရာတွင် ပြဿနာရှိနေသည်။',
+    loadingItems: 'အကြောင်းအရာများကို မတင်နိုင်ပါ။',
     localesNotSaved_one: 'အောက်ပါ ဒေသသတ်မှတ်ချက်ကို သိမ်းဆည်း၍ မရပါ။',
     localesNotSaved_other: 'အောက်ပါ ဒေသသတ်မှတ်ချက်များကို သိမ်းဆည်း၍ မရပါ။',
     logoutFailed: 'ထွက်မှားနေသည်။',

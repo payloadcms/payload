@@ -174,6 +174,7 @@ export const azTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Yanlış fayl növü: {{value}}',
     invalidRequestArgs: 'Sorguda etibarsız arqumentlər təqdim edildi: {{args}}',
     loadingDocument: '{{id}} ID-li sənədin yüklənməsində problem baş verdi.',
+    loadingItems: 'Elementləri yükləmək mümkün olmadı.',
     localesNotSaved_one: 'Aşağıdakı yerləşdirmə saxlanıla bilmədi:',
     localesNotSaved_other: 'Aşağıdakı yerləşdirmələr saxlanıla bilmədi:',
     logoutFailed: 'Çıxış uğursuz oldu.',

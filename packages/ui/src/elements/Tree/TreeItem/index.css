@@ -1,0 +1,87 @@
+@layer payload-default {
+  .tree-item {
+    --tree-indent: calc(var(--spacer-4) + var(--spacer-1));
+    --tree-arm-length: var(--spacer-2-5);
+    --tree-content-offset: var(--spacer-3);
+
+    display: flex;
+    align-items: center;
+    padding-inline-start: calc(
+      var(--tree-indent-level) * var(--tree-indent) +
+        var(--tree-gutter, calc(var(--spacer-1) * 0)) + var(--tree-content-offset)
+    );
+
+    &[data-variant='continuation'] {
+      --tree-arm-length: calc(var(--spacer-2-5) * 2);
+      --tree-content-offset: calc(var(--spacer-3) + var(--spacer-2-5));
+    }
+
+    &[data-variant='group'] {
+      min-block-size: calc(var(--spacer-4) * 2);
+
+      > .tree-item__toggle {
+        position: relative;
+        z-index: 1;
+        margin-inline-start: calc(var(--spacer-1) / 2 - var(--tree-indent));
+      }
+    }
+
+    > a {
+      display: flex;
+      align-items: center;
+      padding-block: var(--spacer-2);
+      padding-inline: 0;
+      min-height: calc(var(--spacer-4) * 2);
+      flex: 1;
+    }
+
+    > .tree-item__toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      color: var(--color-text);
+      cursor: pointer;
+      flex: 0 0 calc(var(--spacer-4) - var(--spacer-1));
+      min-width: calc(var(--spacer-4) - var(--spacer-1));
+      min-height: calc(var(--spacer-4) - var(--spacer-1));
+      margin-inline-start: calc(var(--spacer-1) / 2);
+      margin-inline-end: var(--spacer-2);
+      background-color: var(--color-bg-secondary);
+      border-radius: var(--radius-medium);
+
+      > span {
+        display: flex;
+      }
+
+      &:hover {
+        background-color: var(--color-bg-secondary-hover);
+      }
+
+      &:active {
+        background-color: var(--color-bg-secondary-pressed);
+      }
+
+      &:focus-visible {
+        outline: var(--stroke-width-medium) solid var(--color-text);
+        outline-offset: var(--stroke-width-medium);
+      }
+
+      &:dir(rtl) {
+        transform: scaleX(-1);
+      }
+    }
+
+    > .tree-item__spacer {
+      flex: 0 0 var(--spacer-1);
+      min-width: var(--spacer-1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tree-item__toggle .icon--spinner {
+      animation: none;
+    }
+  }
+}
