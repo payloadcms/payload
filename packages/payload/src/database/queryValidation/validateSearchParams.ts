@@ -14,6 +14,42 @@ import { prefixWherePaths } from '../prefixWherePaths.js'
 import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
+type EntityPermissionsPromises = Map<string, Promise<unknown>>
+
+/**
+ * In-flight permission builds per request. `policies` is filled only after the build resolves, and
+ * `find` validates the where paths, the sort and the joins with separate `policies` objects, so
+ * each of them used to start its own build of the same entity's permissions.
+ */
+const entityPermissionsInFlight = new WeakMap<PayloadRequest, EntityPermissionsPromises>()
+
+const getEntityReadPermissions = ({
+  slug,
+  type,
+  build,
+  req,
+}: {
+  build: () => ReturnType<typeof getEntityPermissions>
+  req: PayloadRequest
+  slug: string
+  type: 'collections' | 'globals'
+}): ReturnType<typeof getEntityPermissions> => {
+  let promises = entityPermissionsInFlight.get(req)
+  if (!promises) {
+    promises = new Map()
+    entityPermissionsInFlight.set(req, promises)
+  }
+
+  const key = `${type}:${slug}`
+  let promise = promises.get(key) as ReturnType<typeof getEntityPermissions> | undefined
+  if (!promise) {
+    promise = build()
+    promises.set(key, promise)
+  }
+
+  return promise
+}
+
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   constraint: WhereField
@@ -66,12 +102,18 @@ export async function validateSearchParam({
   const blockReferencesPermissions = {}
 
   if (globalConfig && !policies.globals![slug]) {
-    policies.globals![slug] = await getEntityPermissions({
-      blockReferencesPermissions,
-      entity: globalConfig,
-      entityType: 'global',
-      fetchData: false,
-      operations: ['read'],
+    policies.globals![slug] = await getEntityReadPermissions({
+      slug,
+      type: 'globals',
+      build: () =>
+        getEntityPermissions({
+          blockReferencesPermissions,
+          entity: globalConfig,
+          entityType: 'global',
+          fetchData: false,
+          operations: ['read'],
+          req,
+        }),
       req,
     })
   }
@@ -192,13 +234,19 @@ export async function validateSearchParam({
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections![collectionSlug]) {
-            policies.collections![collectionSlug] = await getEntityPermissions({
-              blockReferencesPermissions,
-              entity: req.payload.collections[collectionSlug]!.config,
-              entityType: 'collection',
-              fetchData: false,
-              operations: ['read'],
-              req: isolateObjectProperty(req, 'transactionID'),
+            policies.collections![collectionSlug] = await getEntityReadPermissions({
+              slug: collectionSlug,
+              type: 'collections',
+              build: () =>
+                getEntityPermissions({
+                  blockReferencesPermissions,
+                  entity: req.payload.collections[collectionSlug]!.config,
+                  entityType: 'collection',
+                  fetchData: false,
+                  operations: ['read'],
+                  req: isolateObjectProperty(req, 'transactionID'),
+                }),
+              req,
             })
           }
 
