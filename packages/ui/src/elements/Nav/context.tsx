@@ -44,19 +44,17 @@ export const NavProvider: React.FC<{
   initialIsOpen?: boolean
 }> = ({ children, initialIsOpen }) => {
   const {
-    breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
+    breakpoints: { m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
   const pathname = usePathname()
 
   const { getPreference, setPreference } = usePreferences()
-  const navRef = useRef(null)
+  const navRef = useRef<HTMLDivElement>(null)
   const navToggleRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
-  const previousBreakpoints = useRef({
-    large: largeBreak,
-    mid: midBreak,
-    small: smallBreak,
-  })
+  const shouldReturnFocus = useRef(false)
+  const navPreferenceVersion = useRef(0)
+  const previousBreakpoints = useRef<{ mid?: boolean; small?: boolean }>({})
   const previousPathname = useRef(pathname)
 
   // The server supplies the saved open state for the initial render.
@@ -64,9 +62,16 @@ export const NavProvider: React.FC<{
 
   const setNavOpen = React.useCallback(
     (value: boolean, persist = false) => {
+      if (!value) {
+        const nav = navRef.current?.parentElement
+
+        shouldReturnFocus.current = Boolean(nav?.contains(nav.ownerDocument.activeElement))
+      }
+
       setNavOpenState(value)
 
       if (persist) {
+        navPreferenceVersion.current += 1
         void setPreference(PREFERENCE_KEYS.NAV, { open: value }, true)
       }
     },
@@ -75,17 +80,42 @@ export const NavProvider: React.FC<{
 
   const [hydrated, setHydrated] = React.useState(false)
 
+  useEffect(() => {
+    if (!navOpen && shouldReturnFocus.current) {
+      shouldReturnFocus.current = false
+      navToggleRef.current?.focus({ preventScroll: true })
+    } else if (
+      navOpen &&
+      navToggleRef.current === navToggleRef.current?.ownerDocument.activeElement &&
+      navToggleRef.current?.getClientRects().length === 0
+    ) {
+      navRef.current?.parentElement
+        ?.querySelector<HTMLButtonElement>('.nav__close')
+        ?.focus({ preventScroll: true })
+    }
+  }, [navOpen])
+
   // on load check the user's preference and set "initial" state
   useEffect(() => {
-    if (largeBreak === false) {
+    let isCancelled = false
+
+    if (midBreak === false) {
+      const preferenceVersion = navPreferenceVersion.current
       const setNavFromPreferences = async () => {
         const preferredState = await getNavPreference(getPreference)
-        setNavOpen(preferredState)
+
+        if (!isCancelled && preferenceVersion === navPreferenceVersion.current) {
+          setNavOpen(preferredState)
+        }
       }
 
       void setNavFromPreferences()
     }
-  }, [largeBreak, getPreference, setNavOpen])
+
+    return () => {
+      isCancelled = true
+    }
+  }, [midBreak, getPreference, setNavOpen])
 
   // on smaller screens where the nav is a modal
   // close the nav when the user navigates away
@@ -108,29 +138,25 @@ export const NavProvider: React.FC<{
     }
   }, [navOpen, midBreak])
 
-  // on smaller screens where the nav is a modal
-  // close the nav when the user resizes down to mobile
-  // the sidebar is a modal on mobile
+  // Automatically collapse on tablet/mobile without changing the saved preference.
   useEffect(() => {
     const previous = previousBreakpoints.current
 
     if (
-      (largeBreak === true && previous.large === false) ||
-      (midBreak === true && previous.mid === false) ||
+      (midBreak === true && previous.mid !== true) ||
       (smallBreak === true && previous.small !== true)
     ) {
       setNavOpen(false)
     }
 
     previousBreakpoints.current = {
-      large: largeBreak,
       mid: midBreak,
       small: smallBreak,
     }
     if (typeof smallBreak === 'boolean') {
       setHydrated(true)
     }
-  }, [largeBreak, midBreak, setNavOpen, smallBreak])
+  }, [midBreak, setNavOpen, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {

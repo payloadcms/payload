@@ -1409,6 +1409,136 @@ test.describe('Admin accessibility', () => {
   })
 
   test.describe('Appearance and layout', () => {
+    test('should preserve an explicit sidebar close while its saved preference is loading', async ({
+      page,
+    }) => {
+      const preferenceURL = `${serverURL}/api/payload-preferences/nav`
+      const savedPreference = await page.request.post(preferenceURL, {
+        data: { value: { open: true } },
+      })
+
+      await expect(savedPreference).toBeOK()
+      await page.setViewportSize({ height: 900, width: 1280 })
+      const preferenceRequested = Promise.withResolvers<void>()
+      const releasePreference = Promise.withResolvers<void>()
+
+      await page.route(preferenceURL, async (route) => {
+        if (route.request().method() !== 'GET') {
+          await route.continue()
+          return
+        }
+
+        const response = await route.fetch()
+
+        preferenceRequested.resolve()
+        await releasePreference.promise
+        await route.fulfill({ response })
+      })
+
+      try {
+        await page.goto(postsURL.list)
+        await preferenceRequested.promise
+        const nav = page.locator('aside.nav')
+        const toggle = page.locator('.app-header__sidebar-toggle')
+        const persistedClose = page.waitForResponse(
+          (response) => response.url() === preferenceURL && response.request().method() === 'POST',
+        )
+
+        await nav.getByRole('button', { name: 'Hide sidebar', exact: true }).click()
+        await expect(nav).not.toHaveClass(/nav--nav-open/)
+        await expect(toggle).toBeFocused()
+        releasePreference.resolve()
+        await expect.poll(async () => (await persistedClose).ok()).toBe(true)
+        await expect(nav).not.toHaveClass(/nav--nav-open/)
+        await expect(nav).toHaveAttribute('inert', '')
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+        await expect(toggle).toBeFocused()
+      } finally {
+        releasePreference.resolve()
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+
+    test('should collapse navigation at 1024px and preserve keyboard focus across the breakpoint', async ({
+      page,
+    }) => {
+      const savedPreference = await page.request.post(`${serverURL}/api/payload-preferences/nav`, {
+        data: { value: { open: true } },
+      })
+
+      await expect(savedPreference).toBeOK()
+      await page.setViewportSize({ height: 900, width: 1600 })
+      await page.goto(postsURL.list)
+      const nav = page.locator('aside.nav')
+      const toggle = page.locator('.app-header__sidebar-toggle')
+
+      await expect(nav).toHaveClass(/nav--nav-hydrated/)
+      for (const width of [1440, 1280, 1025]) {
+        await page.setViewportSize({ height: 900, width })
+        await expect(nav).toHaveClass(/nav--nav-open/)
+        await expect(nav).not.toHaveAttribute('inert')
+      }
+      await nav.locator('.nav__link').first().focus()
+      await page.setViewportSize({ height: 900, width: 1024 })
+      await expect(nav).not.toHaveClass(/nav--nav-open/)
+      await expect(nav).toHaveAttribute('inert', '')
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      await expect(toggle).toBeFocused()
+
+      await page.setViewportSize({ height: 900, width: 1025 })
+      await expect(nav).toHaveClass(/nav--nav-open/)
+      await expect(nav).not.toHaveAttribute('inert')
+      await expect(nav.getByRole('button', { name: 'Hide sidebar', exact: true })).toBeFocused()
+    })
+
+    test('should match the initial sidebar layout before and after hydration at 1024px', async ({
+      browser,
+      page,
+    }) => {
+      const savedPreference = await page.request.post(`${serverURL}/api/payload-preferences/nav`, {
+        data: { value: { open: true } },
+      })
+
+      await expect(savedPreference).toBeOK()
+      const serverRenderedContext = await browser.newContext({
+        javaScriptEnabled: false,
+        storageState: await page.context().storageState(),
+      })
+      const serverRenderedPage = await serverRenderedContext.newPage()
+
+      try {
+        for (const width of [768, 960, 1024, 1025, 1280]) {
+          for (const target of [serverRenderedPage, page]) {
+            await target.setViewportSize({ height: 900, width })
+            await target.goto(postsURL.list)
+          }
+          await expect(page.locator('aside.nav')).toHaveClass(/nav--nav-hydrated/)
+          const initialBounds = await serverRenderedPage
+            .locator('.template-default__wrap')
+            .evaluate((element) => {
+              const { width, x } = element.getBoundingClientRect()
+
+              return { width, x }
+            })
+
+          await expect
+            .poll(() =>
+              page.locator('.template-default__wrap').evaluate((element) => {
+                const { width, x } = element.getBoundingClientRect()
+
+                return { width, x }
+              }),
+            )
+            .toEqual(initialBounds)
+          await expect(serverRenderedPage.locator('aside.nav')).toBeVisible({
+            visible: width > 1024,
+          })
+        }
+      } finally {
+        await serverRenderedContext.close()
+      }
+    })
+
     for (const { name, path, ready } of [
       { name: 'dashboard', path: '', ready: '.dashboard' },
       { name: 'document form', path: '/collections/posts/create', ready: '#field-title' },
