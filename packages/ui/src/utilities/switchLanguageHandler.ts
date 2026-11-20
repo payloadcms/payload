@@ -5,7 +5,7 @@ type SwitchLanguageArgs = {
 }
 
 /**
- * Server-function dispatched from {@link TranslationProvider} when the user switches
+ * Server-function dispatched from {@link AdminTranslationProvider} when the user switches
  * the admin language. Writes the language cookie via the request's `ServerAdapter`,
  * which avoids closing over framework-specific bindings in a client-callable server
  * action (see `slugifyHandler` JSDoc for the broader pattern).
