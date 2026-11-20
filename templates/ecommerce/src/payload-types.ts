@@ -452,6 +452,7 @@ export interface Order {
 export interface Product {
   id: string;
   title: string;
+  descriptionPlainText?: string | null;
   description?: LexicalRichText<LexicalNodes_9D897FEE> | null;
   gallery?:
     | {
@@ -1754,6 +1755,7 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
+  descriptionPlainText?: T;
   description?: T;
   gallery?:
     | T
