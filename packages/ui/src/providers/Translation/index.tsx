@@ -24,6 +24,10 @@ export type TranslationProviderProps = {
    * Update the provider props to apply the new language.
    */
   onLanguageChange?: TranslationContextType['switchLanguage']
+  /**
+   * The dictionary available to descendants; may contain only the keys they use.
+   * Select keys from the request-resolved translations on the server to preserve overrides while sending only the required strings to the browser.
+   */
   translations: I18nClient['translations']
 }
 
