@@ -13,6 +13,7 @@ import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
 import { NestProviders } from './NestProviders.js'
+import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
 
 import '@payloadcms/ui/scss/app.scss'
 
@@ -75,7 +76,7 @@ const RootLayoutContent = async ({
     user: userWithReadAccess,
   } = await initReq({ configPromise, importMap, key: 'RootLayout' })
 
-  const theme = getRequestTheme({
+  const { theme, themeSource } = getRequestTheme({
     config,
     cookies,
     headers,
@@ -125,10 +126,13 @@ const RootLayoutContent = async ({
       data-theme={theme}
       dir={dir}
       lang={languageCode}
-      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      suppressHydrationWarning={
+        config.admin.theme === 'all' || config.admin.suppressHydrationWarning
+      }
       {...htmlProps}
     >
       <head>
+        {themeSource === 'default' && <ResolveThemeOnClient serverTheme={theme} />}
         <style>{`@layer payload-default, payload;`}</style>
       </head>
       <body>

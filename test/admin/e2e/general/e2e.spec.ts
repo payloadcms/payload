@@ -304,6 +304,35 @@ describe('General', () => {
   })
 
   describe('theme', () => {
+    test('should resolve automatic dark theme before hydration without client hints', async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: 'dark' })
+      await page.route('**/*', async (route) => {
+        const request = route.request()
+
+        if (request.resourceType() === 'script') {
+          await route.abort()
+          return
+        }
+
+        if (request.isNavigationRequest()) {
+          const headers = { ...request.headers(), 'sec-ch-prefers-color-scheme': 'unsupported' }
+          const response = await route.fetch({ headers })
+
+          await route.fulfill({ response })
+          return
+        }
+
+        await route.continue()
+      })
+
+      const response = await page.goto(postsUrl.admin, { waitUntil: 'domcontentloaded' })
+
+      expect(await response?.text()).toMatch(/<html[^>]*data-theme="light"/)
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    })
+
     test('should render light theme by default', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')

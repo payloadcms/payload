@@ -1,9 +1,12 @@
 'use client'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
-import { useConfig } from '../Config/index.js'
+import type { Theme } from './shared.js'
 
-export type Theme = 'dark' | 'light'
+import { useConfig } from '../Config/index.js'
+import { defaultTheme } from './shared.js'
+
+export { defaultTheme, type Theme } from './shared.js'
 
 export type ThemeContext = {
   autoMode: boolean
@@ -52,8 +55,6 @@ const getTheme = (
 
   return { theme, themeFromCookies }
 }
-
-export const defaultTheme = 'light'
 
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
