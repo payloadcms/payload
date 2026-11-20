@@ -94,6 +94,8 @@ const formatBaseSchema = ({
     unique: (!disableUnique && field.unique) || false,
   }
 
+  const effectivelyOptional = field.required !== true || Boolean(field.admin?.condition)
+
   if (
     schema.unique &&
     (fieldShouldBeLocalized({ field, parentIsLocalized }) ||
@@ -101,7 +103,7 @@ const formatBaseSchema = ({
       (fieldAffectsData(field) &&
         field.type !== 'group' &&
         field.type !== 'tab' &&
-        field.required !== true))
+        effectivelyOptional))
   ) {
     schema.sparse = true
   }
