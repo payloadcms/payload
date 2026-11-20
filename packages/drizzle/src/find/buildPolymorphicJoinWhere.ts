@@ -21,6 +21,7 @@ type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
   locale?: string
+  readLatestChildVersion?: boolean
   table: GenericTable
   where: Where
   wherePlan: PolymorphicJoinWherePlan
@@ -54,6 +55,7 @@ export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
   locale,
+  readLatestChildVersion,
   table,
   where,
   wherePlan,
@@ -72,6 +74,7 @@ export const buildPolymorphicJoinWhere = ({
           adapter,
           collection,
           locale,
+          readLatestChildVersion,
           table,
           where: nestedWhere,
           wherePlan,
@@ -89,6 +92,7 @@ export const buildPolymorphicJoinWhere = ({
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
+      readLatestChildVersion,
       schemaPath: key,
       table,
       wherePlan,
@@ -260,6 +264,7 @@ export const buildPolymorphicJoinWhere = ({
 const resolveWherePath = ({
   adapter,
   collection,
+  readLatestChildVersion,
   schemaPath,
   table,
   wherePlan,
@@ -305,6 +310,7 @@ const resolveWherePath = ({
         adapter,
         collection,
         pathPlan,
+        readLatestChildVersion,
         table,
       }),
       pathPlan,
@@ -327,8 +333,10 @@ const resolveWherePath = ({
     type: 'scalar',
     column: fieldContext
       ? fieldContext.isLocalized
-        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][pathPlan.columnPath]
-        : table[pathPlan.columnPath]
+        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][
+            fieldContext.columnPath ?? pathPlan.columnPath
+          ]
+        : table[fieldContext.columnPath ?? pathPlan.columnPath]
       : sql`null`,
     fieldContext,
     pathPlan,
@@ -340,11 +348,13 @@ const getHasManySelectExpression = ({
   adapter,
   collection,
   pathPlan,
+  readLatestChildVersion,
   table,
 }: {
   adapter: DrizzleAdapter
   collection: string
   pathPlan: WherePathPlan
+  readLatestChildVersion?: boolean
   table: GenericTable
 }): string => {
   if (pathPlan.fieldsByCollection.get(collection)?.type !== 'hasManySelect') {
@@ -355,7 +365,11 @@ const getHasManySelectExpression = ({
     .split('.')
     .map((pathSegment) => toSnakeCase(pathSegment))
     .join('_')
-  const valuesTableName = adapter.tableNameMap.get(`${toSnakeCase(collection)}_${selectTablePath}`)
+  const valuesTableName = adapter.tableNameMap.get(
+    readLatestChildVersion
+      ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}_version_${selectTablePath}`
+      : `${toSnakeCase(collection)}_${selectTablePath}`,
+  )
 
   if (!valuesTableName) {
     throw new Error(

@@ -22,6 +22,7 @@ export type ResolveJoinsArgs = {
   collectionSlug: string
   /** Array of documents to resolve joins for */
   docs: Record<string, unknown>[]
+  draftsEnabled?: boolean
   /** Join query specifications (which joins to resolve and how) */
   joins?: JoinQuery
   /** Optional locale for localized queries */
@@ -41,10 +42,11 @@ export async function resolveJoins({
   adapter,
   collectionSlug,
   docs,
+  draftsEnabled: readDraftChildren,
   joins,
   locale,
   projection,
-  versions = false,
+  versions: parentIsVersion = false,
 }: ResolveJoinsArgs): Promise<void> {
   // Early return if no joins are specified or no documents to process
   if (!joins || docs.length === 0) {
@@ -123,9 +125,10 @@ export async function resolveJoins({
         return null
       }
 
-      const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
+      const readLatestChildVersion =
+        (readDraftChildren || parentIsVersion) && Boolean(targetConfig.versions?.drafts)
       let JoinModel
-      if (useDrafts) {
+      if (readLatestChildVersion) {
         JoinModel = adapter.versions[targetConfig.slug]
       } else {
         JoinModel = adapter.collections[targetConfig.slug]
@@ -136,7 +139,9 @@ export async function resolveJoins({
       }
 
       // Extract all parent document IDs to use in the join query
-      const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
+      const parentIDs = docs.map((d) =>
+        parentIsVersion ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id),
+      )
 
       let whereQuery: Record<string, unknown> = joinQuery.where || {}
 
@@ -161,7 +166,7 @@ export async function resolveJoins({
         }
       }
 
-      whereQuery = useDrafts
+      whereQuery = readLatestChildVersion
         ? await JoinModel.buildQuery({
             locale,
             payload: adapter.payload,
@@ -185,7 +190,7 @@ export async function resolveJoins({
       if (effectiveLocale && typeof localizationConfig === 'object' && localizationConfig) {
         const pathSegments = joinDef.field.on.split('.')
         const transformedSegments: string[] = []
-        const fields = useDrafts
+        const fields = readLatestChildVersion
           ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
           : targetConfig.flattenedFields
 
@@ -204,7 +209,7 @@ export async function resolveJoins({
       }
 
       // Add version prefix for draft queries
-      if (useDrafts) {
+      if (readLatestChildVersion) {
         dbFieldName = `version.${dbFieldName}`
       }
 
@@ -227,7 +232,7 @@ export async function resolveJoins({
       }
 
       // Build the sort parameters for the query
-      const fields = useDrafts
+      const fields = readLatestChildVersion
         ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
         : targetConfig.flattenedFields
 
@@ -236,7 +241,7 @@ export async function resolveJoins({
         config: adapter.payload.config,
         fields,
         locale,
-        sort: useDrafts
+        sort: readLatestChildVersion
           ? getQueryDraftsSort({
               collectionConfig: targetConfig,
               sort: joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
@@ -245,7 +250,7 @@ export async function resolveJoins({
         timestamps: true,
       })
 
-      const projection = buildJoinProjection(dbFieldName, useDrafts, sort)
+      const projection = buildJoinProjection(dbFieldName, readLatestChildVersion, sort)
 
       const [results, dbCount] = await Promise.all([
         JoinModel.find(whereQuery, projection, {
@@ -258,7 +263,7 @@ export async function resolveJoins({
       transform({
         adapter,
         data: results,
-        fields: useDrafts
+        fields: readLatestChildVersion
           ? buildVersionCollectionFields(adapter.payload.config, targetConfig, false)
           : targetConfig.fields,
         operation: 'read',
@@ -269,9 +274,16 @@ export async function resolveJoins({
         collectionSlug: joinCollectionSlug,
         count: dbCount,
         dbFieldName,
+        readLatestChildVersion,
         results,
-        sort,
-        useDrafts,
+        sort: Object.fromEntries(
+          Object.entries(sort).map(([path, direction]) => {
+            const documentIDPath = readLatestChildVersion ? 'parent' : '_id'
+            const documentPath = readLatestChildVersion ? path.replace(/^version\./, '') : path
+
+            return [path === documentIDPath ? 'id' : documentPath, direction]
+          }),
+        ),
       }
     })
 
@@ -292,12 +304,13 @@ export async function resolveJoins({
         continue
       }
 
-      const { collectionSlug, count, dbFieldName, results, sort, useDrafts } = collectionResult
+      const { collectionSlug, count, dbFieldName, readLatestChildVersion, results, sort } =
+        collectionResult
 
       countFromDatabase += count
 
       for (const result of results) {
-        if (useDrafts) {
+        if (readLatestChildVersion) {
           result.id = result.parent
         }
 
@@ -343,7 +356,8 @@ export async function resolveJoins({
 
           // Always store the ObjectID reference in polymorphic format
           grouped[parentKey].docs.push({
-            ...result,
+            ...(readLatestChildVersion ? (result.version as Record<string, unknown>) : result),
+            id: result.id,
             __joinData: joinData,
           })
         }
@@ -354,8 +368,8 @@ export async function resolveJoins({
       results.docs.sort((a, b) => {
         for (const [fieldName, sortOrder] of Object.entries(results.sort)) {
           const sort = sortOrder === 'asc' ? 1 : -1
-          const aValue = a[fieldName] as Date | number | string
-          const bValue = b[fieldName] as Date | number | string
+          const aValue = getByPathWithArrays(a, fieldName)[0] as Date | number | string
+          const bValue = getByPathWithArrays(b, fieldName)[0] as Date | number | string
           if (aValue < bValue) {
             return -1 * sort
           }
@@ -417,7 +431,9 @@ export async function resolveJoins({
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
-      const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
+      const id = (
+        parentIsVersion ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)
+      ) as string
       const children = grouped[String(id)]?.docs || []
       const totalDocs = shouldPaginateInMemory ? children.length : countFromDatabase
 
@@ -445,7 +461,7 @@ export async function resolveJoins({
       // This handles nested join paths like "user.posts" by creating intermediate objects
       const segments = localizedJoinPath.split('.')
       let ref: Record<string, unknown>
-      if (versions) {
+      if (parentIsVersion) {
         if (!doc.version) {
           doc.version = {}
         }
@@ -474,7 +490,7 @@ type SanitizedJoin = SanitizedJoins[string][number]
  */
 function buildJoinProjection(
   baseFieldName: string,
-  useDrafts: boolean,
+  readLatestChildVersion: boolean,
   sort: Record<string, string>,
 ): Record<string, 1> {
   const projection: Record<string, 1> = {
@@ -482,7 +498,7 @@ function buildJoinProjection(
     [baseFieldName]: 1,
   }
 
-  if (useDrafts) {
+  if (readLatestChildVersion) {
     projection.parent = 1
   }
 

@@ -69,7 +69,9 @@ export const buildJoinAggregation = async ({
   }
 
   for (const join of polymorphicJoinsConfig) {
-    if (projection && !projection[join.joinPath]) {
+    const as = versions ? `version.${join.joinPath}` : join.joinPath
+
+    if (projection && !projection[as]) {
       continue
     }
 
@@ -120,13 +122,30 @@ export const buildJoinAggregation = async ({
 
     const aliases: string[] = []
 
-    const as = join.joinPath
-
     for (const collectionSlug of join.field.collection) {
       const alias = `${as}.docs.${collectionSlug}`
       aliases.push(alias)
 
-      const basePipeline = [
+      const { collectionConfig, Model } = getCollection({ adapter, collectionSlug })
+      const readLatestChildVersion =
+        (draftsEnabled || versions) && hasDraftsEnabled(collectionConfig)
+      const JoinModel = readLatestChildVersion ? adapter.versions[collectionSlug] : Model
+
+      if (!JoinModel) {
+        throw new APIError(`Join Model was not found for ${collectionSlug}`)
+      }
+
+      const basePipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
+        ...(readLatestChildVersion
+          ? [
+              { $match: { latest: true } },
+              {
+                $replaceRoot: {
+                  newRoot: { $mergeObjects: ['$version', { _id: '$parent' }] },
+                },
+              },
+            ]
+          : []),
         {
           $addFields: {
             relationTo: {
@@ -139,14 +158,12 @@ export const buildJoinAggregation = async ({
         },
       ]
 
-      const { Model: JoinModel } = getCollection({ adapter, collectionSlug })
-
       aggregate.push({
         $lookup: {
           as: alias,
-          foreignField: join.field.on,
+          foreignField: readLatestChildVersion ? `version.${join.field.on}` : join.field.on,
           from: JoinModel.collection.name,
-          localField: '_id',
+          localField: versions ? 'parent' : '_id',
           pipeline: [
             ...basePipeline,
             {
@@ -179,9 +196,9 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
-            foreignField: join.field.on,
+            foreignField: readLatestChildVersion ? `version.${join.field.on}` : join.field.on,
             from: JoinModel.collection.name,
-            localField: '_id',
+            localField: versions ? 'parent' : '_id',
             pipeline: [
               ...basePipeline,
               {

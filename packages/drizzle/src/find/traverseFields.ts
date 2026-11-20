@@ -411,6 +411,7 @@ export const traverseFields = ({
           const polymorphicJoinQuery = buildPolymorphicJoinQuery({
             adapter,
             currentTableName,
+            draftsEnabled,
             field,
             limit,
             locale,
@@ -419,6 +420,7 @@ export const traverseFields = ({
             path,
             shouldCount,
             sort,
+            versions,
             where,
           })
 

@@ -3,7 +3,8 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
-import { type FlattenedJoinField, type Where } from 'payload'
+import { type FlattenedJoinField, getFieldByPath, type Where } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
@@ -16,6 +17,7 @@ import { createPolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan
 type BuildPolymorphicJoinQueryArgs = {
   adapter: DrizzleAdapter
   currentTableName: string
+  draftsEnabled?: boolean
   field: FlattenedJoinField
   limit: number
   locale?: string
@@ -24,6 +26,7 @@ type BuildPolymorphicJoinQueryArgs = {
   path: string
   shouldCount: boolean
   sort?: string | string[]
+  versions?: boolean
   where?: Where
 }
 
@@ -51,6 +54,7 @@ type PolymorphicJoinQuery = {
 export const buildPolymorphicJoinQuery = ({
   adapter,
   currentTableName,
+  draftsEnabled: readDraftChildren,
   field,
   limit,
   locale,
@@ -59,6 +63,7 @@ export const buildPolymorphicJoinQuery = ({
   path,
   shouldCount,
   sort,
+  versions: parentIsVersion,
   where,
 }: BuildPolymorphicJoinQueryArgs): PolymorphicJoinQuery => {
   if (!Array.isArray(field.collection)) {
@@ -82,7 +87,15 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Unknown polymorphic join collection "${collection}"`)
     }
 
-    const tableName = adapter.tableNameMap.get(toSnakeCase(collection))
+    const readLatestChildVersion = Boolean(
+      (readDraftChildren || parentIsVersion) &&
+      hasDraftsEnabled(adapter.payload.collections[collection].config),
+    )
+    const tableName = adapter.tableNameMap.get(
+      readLatestChildVersion
+        ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}`
+        : toSnakeCase(collection),
+    )
     const table = tableName ? (adapter.tables[tableName] as GenericTable | undefined) : undefined
 
     if (!table) {
@@ -93,62 +106,97 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "id" column`)
     }
 
-    if (!table[onPath]) {
+    const joinOnColumnName = readLatestChildVersion ? `version_${onPath}` : onPath
+
+    if (!table[joinOnColumnName]) {
       throw new Error(`Polymorphic join collection "${collection}" has no "${onPath}" column`)
     }
 
-    return { collection, table }
+    return { collection, joinOnColumnName, readLatestChildVersion, table }
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
-  const sortPath = sortField.replace('-', '').split('.').join('_')
+  const sortFieldPath = sortField.replace('-', '')
+  const sortColumnName = sortFieldPath.split('.').join('_')
+  const readsAllLocales = !locale || locale === 'all'
   const wherePlan: PolymorphicJoinWherePlan = where
-    ? createPolymorphicJoinWherePlan({ adapter, collections, where })
+    ? createPolymorphicJoinWherePlan({
+        adapter,
+        collections,
+        readDraftChildren: readDraftChildren || parentIsVersion,
+        where,
+      })
     : new Map()
   let unionQuery: null | SQLiteSelect = null
 
-  for (const { collection, table } of collectionTables) {
-    const sortColumn = table[sortPath]
-    const selectFields = {
-      id: table['id'],
-      parent: sql`${table[onPath]}`.as(onPath),
-      relationTo: sql`${collection}`.as('relationTo'),
-      sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
-    }
-    const collectionWhere =
-      where && Object.keys(where).length > 0
-        ? buildPolymorphicJoinWhere({
-            adapter,
-            collection,
-            locale,
-            table,
-            where,
-            wherePlan,
-          })
-        : undefined
+  for (const { collection, joinOnColumnName, readLatestChildVersion, table } of collectionTables) {
+    const sortFieldAtPath = getFieldByPath({
+      fields: adapter.payload.collections[collection].config.flattenedFields,
+      path: sortFieldPath,
+    })
+    const hasLocalizedSort = Boolean(sortFieldAtPath?.pathHasLocalized)
     const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
       const collectionField = pathPlan.fieldsByCollection.get(collection)
 
       return collectionField?.type === 'scalar' && collectionField.isLocalized
     })
-    const shouldDeduplicate = hasLocalizedWhere && (!locale || locale === 'all')
+    const needsLocaleRows = hasLocalizedSort || hasLocalizedWhere
+    const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
+
+    const idColumn = readLatestChildVersion ? table['parent'] : table['id']
+    const sortTable = hasLocalizedSort ? localesTable : table
+    const sortColumn =
+      sortFieldPath === 'id'
+        ? idColumn
+        : sortTable?.[readLatestChildVersion ? `version_${sortColumnName}` : sortColumnName]
+
+    const shouldCollapseLocaleRows = needsLocaleRows && readsAllLocales
+    // A shared sort value lets DISTINCT collapse translations of the same document.
+    const sortValue =
+      shouldCollapseLocaleRows && hasLocalizedSort && sortColumn
+        ? sql`first_value(${sortColumn}) over (
+            partition by ${table[joinOnColumnName]}, ${table['id']}
+            order by ${sortOrder(sortColumn)} nulls last
+          )`
+        : (sortColumn ?? null)
+    const selectFields = {
+      id: readLatestChildVersion ? sql`${idColumn}`.as('id') : idColumn,
+      parent: sql`${table[joinOnColumnName]}`.as(onPath),
+      relationTo: sql`${collection}`.as('relationTo'),
+      sortValue: sql`${sortValue}`.as('sortValue'),
+    }
     let collectionQuery = (
-      shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
+      shouldCollapseLocaleRows ? db.selectDistinct(selectFields) : db.select(selectFields)
     )
       .from(table)
       .$dynamic()
 
-    if (hasLocalizedWhere) {
-      const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
-
+    if (needsLocaleRows) {
       collectionQuery = collectionQuery.leftJoin(
         localesTable,
         and(
           eq(table['id'], localesTable._parentID),
-          locale && locale !== 'all' ? eq(localesTable._locale, locale) : undefined,
+          readsAllLocales ? undefined : eq(localesTable._locale, locale),
         ),
       )
     }
+
+    const targetWhere =
+      where && Object.keys(where).length > 0
+        ? buildPolymorphicJoinWhere({
+            adapter,
+            collection,
+            locale,
+            readLatestChildVersion,
+            table,
+            where,
+            wherePlan,
+          })
+        : undefined
+    const collectionWhere = and(
+      targetWhere,
+      readLatestChildVersion ? eq(table['latest'], true) : undefined,
+    )
 
     if (collectionWhere) {
       collectionQuery = collectionQuery.where(collectionWhere)
@@ -162,18 +210,15 @@ export const buildPolymorphicJoinQuery = ({
   }
 
   const subQueryAlias = `${columnName}_subquery`
-  const parentConstraint = eq(
-    sql.raw(`"${currentTableName}"."id"`),
-    sql.raw(`"${subQueryAlias}"."${onPath}"`),
-  )
+  const currentIDColumnName = parentIsVersion ? adapter.tables[currentTableName].parent.name : 'id'
+  const currentID = sql.raw(`"${currentTableName}"."${currentIDColumnName}"`)
+  const parentConstraint = eq(currentID, sql.raw(`"${subQueryAlias}"."${onPath}"`))
   const countExpression = shouldCount
     ? sql`${db
         .select({ count: count() })
         .from(sql`${unionQuery.as(subQueryAlias)}`)
         .where(parentConstraint)}`.as(`${columnName}_count`)
     : undefined
-
-  unionQuery = unionQuery.orderBy(sortOrder(sql`"sortPath"`))
 
   const sortedUnionAlias = `${columnName}_sorted`
   let limitOffsetSQL = sql.empty()
@@ -190,7 +235,7 @@ export const buildPolymorphicJoinQuery = ({
     }
   }
 
-  const parentWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
+  const parentWhere = eq(sql.raw(`"${sortedUnionAlias}"."${onPath}"`), currentID)
   const documents = sql`(
     SELECT ${jsonAggBuildObject(adapter, {
       id: sql.raw(`"${subQueryAlias}"."id"`),
@@ -198,7 +243,8 @@ export const buildPolymorphicJoinQuery = ({
     })}
     FROM (
       SELECT * FROM ${sql`${unionQuery.as(sortedUnionAlias)}`}
-      WHERE ${parentWhere}${limitOffsetSQL}
+      WHERE ${parentWhere}
+      order by ${sortOrder(sql`"sortValue"`)}${limitOffsetSQL}
     ) AS ${sql.raw(`"${subQueryAlias}"`)}
   )`.as(columnName)
 
