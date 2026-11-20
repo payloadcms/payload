@@ -4,6 +4,7 @@ import { and, getTableName, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { type FlattenedField, type Operator, QueryError, type Where } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
+import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
 import type { DrizzleResolvedOperator } from '../queries/operatorMap.js'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type {
@@ -14,12 +15,14 @@ import type {
 
 import { buildOperatorConstraint } from '../queries/buildOperatorConstraint.js'
 import { sanitizeQueryValue } from '../queries/sanitizeQueryValue.js'
+import { buildCollectionFieldWhere } from './buildCollectionFieldWhere.js'
 
 const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in', 'like'])
 
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
+  joins?: BuildQueryJoinAliases
   locale?: string
   table: GenericTable
   where: Where
@@ -53,6 +56,7 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
+  joins = [],
   locale,
   table,
   where,
@@ -71,6 +75,7 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
+          joins,
           locale,
           table,
           where: nestedWhere,
@@ -86,6 +91,28 @@ export const buildPolymorphicJoinWhere = ({
       continue
     }
 
+    const pathPlan = wherePlan.get(key)
+
+    const collectionField = pathPlan?.fieldsByCollection.get(collection)
+
+    if (pathPlan?.type === 'collectionQuery' && collectionField) {
+      if (collectionField.field.type === 'select' && collectionField.field.hasMany) {
+        validateHasManySelectOperators({ operators: Object.keys(where[key]), path: key })
+      }
+
+      constraints.push(
+        buildCollectionFieldWhere({
+          adapter,
+          collection,
+          joins,
+          locale,
+          table,
+          where: { [key]: where[key] },
+        }),
+      )
+      continue
+    }
+
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
@@ -93,6 +120,10 @@ export const buildPolymorphicJoinWhere = ({
       table,
       wherePlan,
     })
+
+    if (resolvedPath.type === 'hasManySelect') {
+      validateHasManySelectOperators({ operators: Object.keys(where[key]), path: key })
+    }
 
     for (let payloadOperator of Object.keys(where[key])) {
       const originalOperator = payloadOperator as Operator
@@ -103,10 +134,6 @@ export const buildPolymorphicJoinWhere = ({
       }
 
       if (resolvedPath.type === 'hasManySelect') {
-        if (!supportedJSONQueryOperators.has(payloadOperator)) {
-          throw new QueryError([{ path: `${key}.${payloadOperator}` }])
-        }
-
         const sanitizedQueryValue = sanitizeQueryValue({
           adapter,
           field: resolvedPath.fieldContext,
@@ -289,6 +316,30 @@ const resolveWherePath = ({
     }
   }
 
+  if (pathPlan.type === 'collectionQuery') {
+    const field = [...pathPlan.fieldsByCollection.values()][0]?.field
+
+    if (!field) {
+      return { type: 'invalid', pathPlan }
+    }
+
+    if (field.type === 'select' && field.hasMany) {
+      return {
+        type: 'hasManySelect',
+        fieldContext: field,
+        jsonExpression: adapter.name === 'postgres' ? `'[]'::jsonb` : `'[]'`,
+        pathPlan,
+      }
+    }
+
+    return {
+      type: 'scalar',
+      column: sql`null`,
+      pathPlan,
+      queryValueContext: { type: 'scalar', field, isUUID: false },
+    }
+  }
+
   if (pathPlan.type === 'hasManySelect') {
     const fieldContext = [...pathPlan.fieldsByCollection.values()].find(
       (field) => field.type === 'hasManySelect',
@@ -376,4 +427,18 @@ const getHasManySelectExpression = ({
   }
 
   return `(select json_group_array(${qualifiedValuesTableName}.value) from ${qualifiedValuesTableName} where ${qualifiedValuesTableName}.parent_id = ${parentTableName}.id)`
+}
+
+function validateHasManySelectOperators({
+  operators,
+  path,
+}: {
+  operators: string[]
+  path: string
+}) {
+  for (const operator of operators) {
+    if (!supportedJSONQueryOperators.has(operator)) {
+      throw new QueryError([{ path: `${path}.${operator}` }])
+    }
+  }
 }

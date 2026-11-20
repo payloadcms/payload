@@ -198,9 +198,20 @@ export const AccessJoinArticles: CollectionConfig = {
       type: 'json',
     },
     {
+      name: 'content',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'section',
+          fields: [{ name: 'heading', type: 'text' }],
+        },
+      ],
+    },
+    {
       name: 'items',
       type: 'array',
       fields: [
+        { name: 'heading', type: 'text' },
         {
           name: 'tags',
           type: 'select',

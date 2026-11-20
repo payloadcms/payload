@@ -70,21 +70,6 @@ const articleFields: Field[] = [
   { name: 'variantSelect', options: ['available'], type: 'select' },
   { name: 'variantValue', type: 'text' },
   { localized: true, name: 'localizedTitle', type: 'text' },
-  {
-    name: 'entries',
-    type: 'array',
-    fields: [{ hasMany: true, name: 'tags', options: ['available'], type: 'select' }],
-  },
-  {
-    name: 'content',
-    type: 'blocks',
-    blocks: [
-      {
-        slug: 'hero',
-        fields: [{ hasMany: true, name: 'tags', options: ['available'], type: 'select' }],
-      },
-    ],
-  },
 ]
 
 const noteFields: Field[] = [
@@ -329,12 +314,6 @@ describe('createPolymorphicJoinWherePlan', () => {
       'variantTags',
     ],
     ['a localized field', { localizedTitle: { equals: 'value' } }, 'localizedTitle'],
-    ['a field stored in array rows', { 'entries.tags': { equals: 'value' } }, 'entries.tags'],
-    [
-      'a field stored in block rows',
-      { 'content.hero.tags': { equals: 'value' } },
-      'content.hero.tags',
-    ],
   ] as const)('marks %s as invalid', (_description, where, schemaPath) => {
     expect(createPlan(where as Where).get(schemaPath)).toMatchObject({ type: 'invalid' })
   })

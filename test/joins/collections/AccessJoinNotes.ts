@@ -198,6 +198,7 @@ export const AccessJoinNotes: CollectionConfig = {
       name: 'items',
       type: 'array',
       fields: [
+        { name: 'heading', type: 'text' },
         {
           name: 'tags',
           type: 'select',

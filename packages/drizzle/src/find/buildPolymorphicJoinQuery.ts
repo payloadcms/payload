@@ -6,9 +6,11 @@ import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
 import { type FlattenedJoinField, type Where } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
+import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
+import { addJoinTable } from '../queries/addJoinTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
 import { createPolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
@@ -115,11 +117,13 @@ export const buildPolymorphicJoinQuery = ({
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
+    const joins: BuildQueryJoinAliases = []
     const collectionWhere =
       where && Object.keys(where).length > 0
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
+            joins,
             locale,
             table,
             where,
@@ -131,23 +135,30 @@ export const buildPolymorphicJoinQuery = ({
 
       return collectionField?.type === 'scalar' && collectionField.isLocalized
     })
-    const shouldDeduplicate = hasLocalizedWhere && (!locale || locale === 'all')
+    const shouldDeduplicate =
+      joins.length > 0 || (hasLocalizedWhere && (!locale || locale === 'all'))
+
+    if (hasLocalizedWhere) {
+      const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
+
+      addJoinTable({
+        condition: and(
+          eq(table['id'], localesTable._parentID),
+          locale && locale !== 'all' ? eq(localesTable._locale, locale) : undefined,
+        ),
+        joins,
+        table: localesTable,
+      })
+    }
+
     let collectionQuery = (
       shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
     )
       .from(table)
       .$dynamic()
 
-    if (hasLocalizedWhere) {
-      const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
-
-      collectionQuery = collectionQuery.leftJoin(
-        localesTable,
-        and(
-          eq(table['id'], localesTable._parentID),
-          locale && locale !== 'all' ? eq(localesTable._locale, locale) : undefined,
-        ),
-      )
+    for (const { type, condition, table: joinedTable } of joins) {
+      collectionQuery = collectionQuery[type ?? 'leftJoin'](joinedTable, condition)
     }
 
     if (collectionWhere) {
