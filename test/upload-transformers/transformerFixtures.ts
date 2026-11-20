@@ -1,6 +1,9 @@
 import type { UploadTransformer } from 'payload'
 
+import { registerUploadVariants } from 'payload'
 import sharp from 'sharp'
+
+import { requestVariantsMediaSlug } from './shared.js'
 
 /**
  * Call counters for the fake transformers below, reset by each test that needs
@@ -161,6 +164,44 @@ export const replaceFileTransformer: UploadTransformer = {
   mimeTypes: ['application/json'],
   transformFile: ({ req }) =>
     Promise.resolve({ file: req.context.transformedFile as File, status: 'complete' }),
+}
+
+type Crop = { height: number; width: number; x: number; y: number }
+
+/**
+ * Registers a `card` size and applies the saved crop when the file is requested, as a CDN
+ * transformer would. It never runs at upload, so the collection stores only the original.
+ */
+export const requestVariantsTransformer: UploadTransformer = {
+  slug: 'request-variants',
+  canTransform: ({ collectionSlug, operation, purpose }) =>
+    collectionSlug === requestVariantsMediaSlug &&
+    operation === 'request' &&
+    purpose === 'persisted-default'
+      ? { canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }
+      : false,
+  handleRequest: async ({ doc, getOriginalFile, mimeType }) => {
+    const crop = (doc._transforms as { crop?: Crop } | null)?.crop
+    const original = sharp(Buffer.from(await (await getOriginalFile()).arrayBuffer()))
+    const cropped = crop
+      ? original.extract({ height: crop.height, left: crop.x, top: crop.y, width: crop.width })
+      : original
+
+    return {
+      response: new Response(new Uint8Array(await cropped.toBuffer()), {
+        headers: { 'Content-Type': mimeType },
+      }),
+      status: 'continue',
+    }
+  },
+  init: (config) =>
+    registerUploadVariants({
+      collections: { [requestVariantsMediaSlug]: { variants: [{ name: 'card' }] } },
+      config,
+      transformerSlug: 'request-variants',
+    }),
+  // Not JPEG, so a test can upload a file that this transformer cannot build at request time.
+  mimeTypes: ['image/png'],
 }
 
 export const testTransformers: UploadTransformer[] = [

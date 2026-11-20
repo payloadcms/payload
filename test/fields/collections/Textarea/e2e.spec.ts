@@ -175,7 +175,7 @@ describe('Textarea', () => {
     await expect(page.locator('table .row-1 .cell-disableListColumnText')).toBeHidden()
   })
 
-  test('should display i18n label in cells when missing field data', async () => {
+  test('should display an empty placeholder for a field with an i18n label', async () => {
     await page.goto(url.list)
     await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
 
@@ -187,7 +187,8 @@ describe('Textarea', () => {
 
     const textCell = page.locator('.row-1 .cell-i18nText')
 
-    await expect(textCell).toHaveText('<No Text en>')
+    await expect(page.locator('#heading-i18nText')).toContainText('Text en')
+    await expect(textCell).toHaveAccessibleName('No Text en')
   })
 
   test('should show i18n label', async () => {
