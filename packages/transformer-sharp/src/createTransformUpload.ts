@@ -43,11 +43,17 @@ export function createTransformUpload({
     const fileSupportsResize = canResizeImage(file.type)
 
     let originalDimensions: ProbedImageSize | undefined
+    // The size the image is displayed at. EXIF orientations 5-8 store the image sideways,
+    // and `transformSize` rotates it upright before resizing, so size decisions must use this.
+    let displayedDimensions: ProbedImageSize | undefined
 
     if (fileSupportsResize) {
       const originalMeta = await tryProbe(file, sharpDependency)
       if (originalMeta) {
         originalDimensions = { height: originalMeta.height, width: originalMeta.width }
+        displayedDimensions = [5, 6, 7, 8].includes(originalMeta.orientation!)
+          ? { height: originalMeta.width, width: originalMeta.height }
+          : originalDimensions
       }
     }
 
@@ -81,13 +87,13 @@ export function createTransformUpload({
     const focalPointEnabled = effectiveFocalPoint !== false
     const variants = collectionUpload.variants
 
-    if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
+    if (canProcessAsImage && Array.isArray(variants) && originalDimensions && displayedDimensions) {
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
-          dimensions: originalDimensions,
+          dimensions: displayedDimensions,
           // Whether a size may use a focal point. `transformFile` uses one only when it is saved.
           hasFocalPoint: focalPointEnabled,
           imageResizeConfig,
