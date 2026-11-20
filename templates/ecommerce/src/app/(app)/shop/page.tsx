@@ -50,7 +50,7 @@ export default async function ShopPage({ searchParams }: Props) {
                           },
                         },
                         {
-                          description: {
+                          descriptionPlainText: {
                             like: searchValue,
                           },
                         },
