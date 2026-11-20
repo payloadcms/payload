@@ -1501,6 +1501,10 @@ The internal `UploadDataImproved` type has been removed, and its definition is n
 import type { UploadData } from '@payloadcms/richtext-lexical'
 ```
 
+### Lexical: `slashMenu.dynamicGroups` removed from client features
+
+The `slashMenu.dynamicGroups` option of `createClientFeature` has been removed. It never added its items to the slash menu, so removing it doesn't change how the editor behaves. If your feature sets it, delete it and define its items in `slashMenu.groups` instead.
+
 ### Lexical: the `version` of nodes is ignored
 
 Lexical deprecated the `version` property of serialized nodes, and now ignores it when it loads a document. Payload no longer reads it either.

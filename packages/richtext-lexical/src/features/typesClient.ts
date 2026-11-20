@@ -1,11 +1,5 @@
 import type { Transformer } from '@lexical/markdown'
-import type {
-  Klass,
-  LexicalEditor,
-  LexicalNode,
-  LexicalNodeReplacement,
-  TextFormatType,
-} from 'lexical'
+import type { Klass, LexicalNode, LexicalNodeReplacement, TextFormatType } from 'lexical'
 import type { ClientConfig, RichTextFieldClient } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
@@ -159,19 +153,6 @@ export type ClientFeature<ClientFeatureProps> = {
   sanitizedClientFeatureProps?: BaseClientFeatureProps<ClientFeatureProps>
   slashMenu?: {
     /**
-     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
-     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
-     *
-     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
-     */
-    dynamicGroups?: ({
-      editor,
-      queryString,
-    }: {
-      editor: LexicalEditor
-      queryString: string
-    }) => SlashMenuGroup[]
-    /**
      * Static array of groups together with the items in them. These will always be present.
      * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.
      */
@@ -224,15 +205,6 @@ export type SanitizedClientFeatures = {
    */
   plugins?: Array<SanitizedPlugin>
   slashMenu: {
-    /**
-     * Dynamic groups allow you to add different groups depending on the query string (so, the text after the slash).
-     * Thus, to re-calculate the available groups, this function will be called every time you type after the /.
-     *
-     * The groups provided by dynamicGroups will be merged with the static groups provided by the groups property.
-     */
-    dynamicGroups: Array<
-      ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
-    >
     /**
      * Static array of groups together with the items in them. These will always be present.
      * While typing after the /, they will be filtered by the query string and the keywords, key and display name of the items.

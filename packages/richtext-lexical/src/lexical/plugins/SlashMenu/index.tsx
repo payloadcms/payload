@@ -1,7 +1,6 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
@@ -81,7 +80,6 @@ export function SlashMenuPlugin({
 }: {
   anchorElem?: HTMLElement
 }): React.ReactElement {
-  const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
   const { i18n } = useTranslation<{}, string>()
@@ -92,22 +90,6 @@ export function SlashMenuPlugin({
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,
   })
-
-  const getDynamicItems = useCallback(() => {
-    let groupWithItems: Array<SlashMenuGroup> = []
-
-    for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      if (queryString) {
-        const dynamicGroupWithItems = dynamicItem({
-          editor,
-          queryString,
-        })
-        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
-      }
-    }
-
-    return groupWithItems
-  }, [editor, queryString, editorConfig?.features])
 
   const groups: SlashMenuGroup[] = useMemo(() => {
     let groupsWithItems: SlashMenuGroup[] = []
@@ -162,36 +144,12 @@ export function SlashMenuPlugin({
       })
 
       groupsWithItems = groupsWithItems.filter((group) => group != null)
-
-      // Now add dynamic groups
-      const dynamicItemGroups = getDynamicItems()
-
-      // merge dynamic items into groups
-      for (const dynamicGroup of dynamicItemGroups) {
-        // 1. find the group with the same name or create new one
-        let group = groupsWithItems.find((group) => group.key === dynamicGroup.key)
-        if (!group) {
-          group = {
-            ...dynamicGroup,
-            items: [],
-          }
-        } else {
-          groupsWithItems = groupsWithItems.filter((group) => group.key !== dynamicGroup.key)
-        }
-
-        // 2. Add items to group items array and add to sanitized.slashMenu.groupsWithItems
-        if (group?.items?.length) {
-          group.items = group.items.concat(group.items)
-        }
-        groupsWithItems.push(group)
-      }
     }
 
     return groupsWithItems
   }, [
     queryString,
     editorConfig?.features.slashMenu.groups,
-    getDynamicItems,
     featureClientSchemaMap,
     i18n,
     schemaPath,

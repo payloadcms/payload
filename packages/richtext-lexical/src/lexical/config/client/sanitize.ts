@@ -23,7 +23,6 @@ export const sanitizeClientFeatures = (
     plugins: [],
     providers: [],
     slashMenu: {
-      dynamicGroups: [],
       groups: [],
     },
     toolbarFixed: {
@@ -126,12 +125,6 @@ export const sanitizeClientFeatures = (
     }
 
     if (feature.slashMenu?.groups) {
-      if (feature.slashMenu.dynamicGroups?.length) {
-        sanitized.slashMenu.dynamicGroups = sanitized.slashMenu.dynamicGroups.concat(
-          feature.slashMenu.dynamicGroups,
-        )
-      }
-
       for (const optionGroup of feature.slashMenu.groups) {
         // 1. find the group with the same name or create new one
         let group = sanitized.slashMenu.groups.find((group) => group.key === optionGroup.key)
