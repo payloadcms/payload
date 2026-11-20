@@ -9,6 +9,7 @@ import type {
 import { canAccessAdmin, combineWhereConstraints } from 'payload/shared'
 
 import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
+import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 
 export const FLAT_FOLDER_PAGE_SIZE = 10
@@ -300,6 +301,7 @@ export async function getFlatFolderContents({
 
             const config = req.payload.collections[slug].config
             const titleField = config.admin.useAsTitle || 'id'
+            const thumbnailFieldName = config.admin.useAsThumbnail
             const membershipField = hierarchy.relatedCollections[slug].fieldName
             const baseFilter = await (config.admin.baseFilter ?? config.admin.baseListFilter)?.({
               limit: FLAT_FOLDER_PAGE_SIZE,
@@ -309,7 +311,7 @@ export async function getFlatFolderContents({
             })
             const { docs } = await req.payload.find({
               collection: slug,
-              depth: 0,
+              depth: thumbnailFieldName ? 1 : 0,
               draft: false,
               fallbackLocale: false,
               includeLockStatus: true,
@@ -317,10 +319,21 @@ export async function getFlatFolderContents({
               locale: req.locale,
               overrideAccess: false,
               pagination: false,
+              populate: thumbnailFieldName
+                ? getDocumentThumbnailPopulate({
+                    collectionConfig: config,
+                    collections: req.payload.config.collections,
+                  })
+                : undefined,
               req,
               select: getDocumentThumbnailSelect({
                 collectionConfig: config,
-                select: { id: true, [titleField]: true, updatedAt: true },
+                select: {
+                  id: true,
+                  [titleField]: true,
+                  ...(thumbnailFieldName ? { [thumbnailFieldName]: true } : {}),
+                  updatedAt: true,
+                },
               }),
               user: req.user,
               where: combineWhereConstraints([
@@ -336,7 +349,7 @@ export async function getFlatFolderContents({
                 id: doc.id,
                 _collectionSlug: slug,
                 _isLocked: doc._isLocked,
-                _thumbnailSrc: config.upload ? getDocumentThumbnail({ doc }) : undefined,
+                _thumbnailSrc: getDocumentThumbnail({ doc, useAsThumbnail: thumbnailFieldName }),
                 _userEditing: doc._userEditing,
                 [titleField]: doc[titleField],
                 updatedAt: doc.updatedAt,
