@@ -1,11 +1,11 @@
 import type { CollectionBeforeDeleteHook } from '../../index.js'
 
-import { promoteHierarchyChildren } from '../promoteHierarchyChildren.js'
+import { applyHierarchyDeleteStrategy } from '../applyHierarchyDeleteStrategy.js'
 
 type Args = { parentFieldName: string }
 
 export const hierarchyCollectionBeforeDelete =
   ({ parentFieldName }: Args): CollectionBeforeDeleteHook =>
   async ({ id, collection, req }) => {
-    await promoteHierarchyChildren({ id, collection, parentFieldName, req })
+    await applyHierarchyDeleteStrategy({ id, collection, parentFieldName, req })
   }
