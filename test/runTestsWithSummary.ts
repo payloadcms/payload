@@ -80,7 +80,9 @@ interface SuiteResult {
 }
 
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
-const contentAPISuiteTimeout = 120000
+// Some suites run longer than 2 minutes. A suite killed at the timeout writes no
+// JSON report, so it is recorded as 0/<collected>.
+const contentAPISuiteTimeout = 300000
 // Chatty suites can exceed Node's 1 MiB execSync default; truncated stdout has
 // no JSON report, so the suite is recorded as 0/<collected>.
 const vitestExecMaxBuffer = 64 * 1024 * 1024
@@ -102,6 +104,37 @@ function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.Proc
   }
 
   return env
+}
+
+type Shard = {
+  index: number
+  total: number
+}
+
+/** Parses `--shard=<index>/<total>` (1-based), matching the vitest flag format. */
+function parseShardArg(argv: string[]): Shard | undefined {
+  const arg = argv.find((value) => value.startsWith('--shard='))
+  if (!arg) {
+    return undefined
+  }
+
+  const match = /^--shard=(\d+)\/(\d+)$/.exec(arg)
+  const index = Number(match?.[1])
+  const total = Number(match?.[2])
+  if (!match || total < 1 || index < 1 || index > total) {
+    throw new Error(`Invalid ${arg}: expected --shard=<index>/<total> with 1 <= index <= total`)
+  }
+
+  return { index, total }
+}
+
+/** Round-robin keeps shards balanced without a duration table that goes stale. */
+function selectShardSuites(suites: string[], shard: Shard | undefined): string[] {
+  if (!shard) {
+    return suites
+  }
+
+  return suites.filter((_, i) => i % shard.total === shard.index - 1)
 }
 
 function getTestDirectories(): string[] {
@@ -490,8 +523,10 @@ function formatDuration(ms: number): string {
 function main() {
   console.log('🧪 Running integration tests suite by suite...\n')
 
-  const testDirs = getTestDirectories()
-  console.log(`Found ${testDirs.length} test suites\n`)
+  const shard = parseShardArg(process.argv.slice(2))
+  const testDirs = selectShardSuites(getTestDirectories(), shard)
+  const shardLabel = shard ? ` (shard ${shard.index}/${shard.total})` : ''
+  console.log(`Found ${testDirs.length} test suites${shardLabel}\n`)
 
   const results: SuiteResult[] = []
   const overallStart = Date.now()
