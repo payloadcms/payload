@@ -11,7 +11,6 @@ import { ValidationError } from '../../errors/ValidationError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
-import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import {
   getTransformDefinitionError,
   getTransformStateError,
@@ -25,6 +24,7 @@ import { runRequestTimeFileRestore } from './restoreRequestTime.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
+  getUploadFileEntries,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
@@ -59,8 +59,12 @@ export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): Payload
 export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> => {
   await assertRestoredTransformsValid(args)
 
-  const entries = [args.selected, ...Object.values(args.selected.variants ?? {})]
-  return entries.some((entry) => isRequestTimeFile({ entry: entry as JsonObject }))
+  const entries = getUploadFileEntries({
+    collection: args.collection,
+    doc: args.selected,
+    req: args.req,
+  })
+  return entries.some(({ status }) => status === 'requestTime')
     ? runRequestTimeFileRestore({ ...args, runStoredRestore: runStoredFileRestore })
     : runStoredFileRestore(args)
 }

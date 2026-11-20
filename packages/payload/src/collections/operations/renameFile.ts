@@ -26,10 +26,11 @@ import { normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
+  getUploadFileEntries,
+  getUploadFileValue,
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/storedFiles.js'
 import { getUnplannedSafeFileName } from '../../uploads/getSafeFilename.js'
-import { isRequestTimeFile } from '../../uploads/isRequestTimeFile.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -177,9 +178,18 @@ export const renameFileOperation = async (
       throw new APIError('The upload has no files to rename.', 400)
     }
 
+    const requestTimeEntries = getUploadFileEntries({
+      collection: collection.config,
+      doc: stored,
+      req,
+    }).filter(({ status }) => status === 'requestTime')
+
     // A dynamic main file has no file of its own. It is built from the original and shares its name.
     const renamedOriginal = renamed.original as { filename?: string } | undefined
-    if (isRequestTimeFile({ entry: stored }) && renamedOriginal?.filename) {
+    if (
+      requestTimeEntries.some(({ role }) => role.type === 'default') &&
+      renamedOriginal?.filename
+    ) {
       renamed.filename = renamedOriginal.filename
     }
 
@@ -190,12 +200,13 @@ export const renameFileOperation = async (
       renamedOriginal?.filename,
       ...Object.values(renamedVariants).map((variant) => variant?.filename),
     ])
-    for (const variant of Object.values(renamedVariants)) {
-      if (
-        !variant ||
-        !isRequestTimeFile({ entry: variant }) ||
-        typeof variant.filename !== 'string'
-      ) {
+    for (const { role } of requestTimeEntries) {
+      const variant =
+        role.type === 'size'
+          ? (getUploadFileValue({ doc: renamed, role }) as FileSize | undefined)
+          : undefined
+
+      if (typeof variant?.filename !== 'string') {
         continue
       }
       const suffix = variant.filename.startsWith(mainStem)
