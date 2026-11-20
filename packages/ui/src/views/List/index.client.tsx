@@ -4,7 +4,7 @@ import type { CollectionPreferences, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
@@ -25,6 +25,7 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { NestedDocsTreeProvider } from '../../providers/NestedDocs/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
@@ -66,6 +67,8 @@ export function DefaultListView(props: ListViewClientProps) {
     hasTreeLayout,
     hierarchyData,
     listMenuItems,
+    nestedDocExpanded,
+    nestedDocRows,
     newDocumentURL,
     NoResults,
     queryPreset,
@@ -113,6 +116,11 @@ export function DefaultListView(props: ListViewClientProps) {
   const searchChangeResults = useRef<unknown>(null)
   const isDataGrouped = groupedData !== undefined
   const shouldRenderGrid = layout === 'grid' && !isInDrawer
+  const isNestedDocsTreeLayout = Boolean(hasTreeLayout && layout === 'tree' && nestedDocRows)
+  const treeColumns = useMemo(
+    () => columnState.filter((column) => column.accessor !== '_select'),
+    [columnState],
+  )
 
   const hasWhereParam = useRef(Boolean(query?.where))
   const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
@@ -435,7 +443,17 @@ export function DefaultListView(props: ListViewClientProps) {
                   viewType={viewType}
                 />
               ) : (
-                <RelationshipProvider>{Table}</RelationshipProvider>
+                <NestedDocsTreeProvider
+                  collectionSlug={collectionSlug}
+                  columns={treeColumns}
+                  data={data}
+                  enabled={isNestedDocsTreeLayout}
+                  initialExpanded={nestedDocExpanded}
+                  rows={nestedDocRows}
+                  sort={query?.sort}
+                >
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                </NestedDocsTreeProvider>
               )
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
@@ -478,7 +496,7 @@ export function DefaultListView(props: ListViewClientProps) {
               ))}
             {AfterListTable}
             {AfterList}
-            {docs?.length > 0 && !isGroupingBy && (
+            {docs?.length > 0 && !isGroupingBy && !isNestedDocsTreeLayout && (
               <PageControls
                 AfterPageControls={
                   smallBreak ? (
