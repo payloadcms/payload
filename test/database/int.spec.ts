@@ -3454,6 +3454,24 @@ describe('database', () => {
       }
     })
 
+    it('should not duplicate explicitly defined draft status options', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
+        return
+      }
+
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+      await payload.db.generateSchema({
+        outputFile,
+      })
+
+      const module = await import(outputFile)
+
+      expect(module.enum_categories_status?.enumValues).toEqual(['draft', 'published'])
+      expect(module.enum__categories_v_version_status?.enumValues).toEqual(['draft', 'published'])
+    })
+
     it('should generate Drizzle SQLite schema', async () => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('sqlite')) {
