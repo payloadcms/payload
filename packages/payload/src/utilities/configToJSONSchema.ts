@@ -657,9 +657,12 @@ export function fieldsToJSONSchema({
           }
 
           case 'json': {
+            // A plain JSON field is a JSON value. Reference the shared
+            // recursive `JsonValue` definition so the generated type is
+            // serialisable (fixes #19783) instead of `{ [k: string]: unknown }`.
             fieldSchema = field.jsonSchema?.schema || {
               ...baseFieldSchema,
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+              $ref: '#/$defs/JsonValue',
             }
 
             if (field.interfaceName && field.jsonSchema?.schema) {
@@ -1129,6 +1132,11 @@ export function entityToStandaloneJSONSchema({
     definitions.set('supportedTimezones', timezonesToJSONSchema(supportedTimezones))
   }
 
+  // JSON fields `$ref` JsonValue, which lives on the root config schema, so add it here.
+  if (schemaHasRef([schema, ...definitions.values()], '#/$defs/JsonValue')) {
+    definitions.set('JsonValue', jsonValueSchema)
+  }
+
   return {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     ...schema,
@@ -1488,6 +1496,30 @@ export function registerBlockInterface(
 }
 
 /**
+ * A recursive JSON value. Generated `json` fields reference this shared
+ * definition (via `$ref: '#/$defs/JsonValue'`) so the generated types use a
+ * serialisable `JsonValue` instead of `unknown`.
+ *
+ * `json-schema-to-typescript` compiles it to
+ * `string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue }`,
+ * which TanStack Start's `createServerFn` serialisability check accepts.
+ * Before this, a plain `json` field compiled to
+ * `{ [k: string]: unknown } | unknown[] | ...` and any server function
+ * returning such a document failed `tsc` (fixes #19783).
+ */
+const jsonValueSchema: JSONSchema4 = {
+  anyOf: [
+    { type: 'string' },
+    { type: 'number' },
+    { type: 'boolean' },
+    { type: 'null' },
+    { type: 'array', items: { $ref: '#/$defs/JsonValue' } },
+    { type: 'object', additionalProperties: { $ref: '#/$defs/JsonValue' } },
+  ],
+  title: 'JsonValue',
+}
+
+/**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
 export function configToJSONSchema(
@@ -1648,6 +1680,7 @@ export function configToJSONSchema(
 
   let jsonSchema: JSONSchema4 = {
     $defs: {
+      JsonValue: jsonValueSchema,
       supportedTimezones: timezoneDefinitions,
       ...entityDefinitions,
       ...widgetSchemas.definitions,

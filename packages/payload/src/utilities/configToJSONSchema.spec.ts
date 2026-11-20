@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import { compile } from 'json-schema-to-typescript'
 import { describe, it, expect } from 'vitest'
 
 import type { Config } from '../config/types.js'
@@ -916,5 +917,80 @@ describe('configToJSONSchema', () => {
 
     // Doesn't pull in unrelated collections.
     expect(schema.$defs?.other).toBeUndefined()
+  })
+
+  it('should reference the shared JsonValue definition for plain json fields', () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [{ slug: 'posts', fields: [{ name: 'metadata', type: 'json' }] }],
+    }
+
+    const { jsonSchema: schema } = configToJSONSchema(sanitizeConfig(config), 'text')
+
+    // A plain json field is a JSON value — it references the shared recursive
+    // definition instead of inlining `type: [...]` (which compiled to
+    // `{ [k: string]: unknown }` and broke TanStack Start, fixes #19783).
+    expect((schema?.$defs?.posts as JSONSchema4).properties!.metadata).toStrictEqual({
+      $ref: '#/$defs/JsonValue',
+    })
+    expect(schema?.$defs?.JsonValue).toStrictEqual({
+      title: 'JsonValue',
+      anyOf: [
+        { type: 'string' },
+        { type: 'number' },
+        { type: 'boolean' },
+        { type: 'null' },
+        { type: 'array', items: { $ref: '#/$defs/JsonValue' } },
+        { type: 'object', additionalProperties: { $ref: '#/$defs/JsonValue' } },
+      ],
+    })
+  })
+
+  it('should compile json fields to a serialisable JsonValue type, not unknown', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        { slug: 'posts', fields: [{ name: 'metadata', type: 'json' }] },
+        { slug: 'media', fields: [], upload: true },
+      ],
+    }
+
+    const { jsonSchema: schema } = configToJSONSchema(sanitizeConfig(config), 'text')
+    const compiled = await compile(schema, 'Config', {
+      bannerComment: '',
+      style: { singleQuote: true },
+      unreachableDefinitions: true,
+      cwd: process.cwd(),
+    })
+
+    // The generated types must not type JSON fields as `unknown`: TanStack
+    // Start's createServerFn serialisability check rejects it (fixes #19783).
+    // (The `Auth` interface still contains a pre-existing
+    // `[k: string]: unknown` from the auth-operations schema — out of scope
+    // here, it is not part of any document type a server function returns.)
+    expect(compiled).toContain('JsonValue')
+    expect(compiled).toMatch(/metadata\?: JsonValue/)
+    expect(compiled).toMatch(/encoding\?: \{\s*\[k: string\]: JsonValue;?\s*\}/)
+    expect(compiled).not.toMatch(/metadata\?: \{[^}]*unknown/)
+  })
+
+  it('should bundle JsonValue into the standalone schema for a json field', () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [{ slug: 'posts', fields: [{ name: 'metadata', type: 'json' }] }],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const entity = sanitizedConfig.collections.find((collection) => collection.slug === 'posts')!
+
+    const schema = entityToStandaloneJSONSchema({
+      config: sanitizedConfig,
+      defaultIDType: 'text',
+      entity,
+    })
+
+    // The standalone schema must resolve its own `$ref`s: a dangling
+    // `#/$defs/JsonValue` would break consumers of the standalone schema.
+    expect(schema.$defs?.JsonValue).toBeDefined()
   })
 })

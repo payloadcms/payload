@@ -109,5 +109,31 @@ export function getTransformStateSchema({
 }: {
   transformers: readonly UploadTransformer[]
 }): JSONSchema4 {
-  return { anyOf: [getTransformStateObjectSchema({ transformers }), { type: 'null' }] }
+  const objectSchema = getTransformStateObjectSchema({ transformers })
+
+  // The generated `_transforms` type must be JSON-serialisable: TanStack
+  // Start's `createServerFn` rejects `unknown`, and the plain object schemas
+  // above compile to `{ [k: string]: unknown }` (fixes #19783).
+  // Transformer-owned keys and the `encoding` settings are JSON values, so
+  // they reference the shared recursive `JsonValue` definition (defined in
+  // `configToJSONSchema`'s top-level `$defs`) instead of `unknown`.
+  // This only affects the generated types: runtime validation still uses
+  // `getTransformStateObjectSchema`, which stays permissive.
+  return {
+    anyOf: [
+      {
+        ...objectSchema,
+        additionalProperties: { $ref: '#/$defs/JsonValue' },
+        properties: {
+          ...objectSchema.properties,
+          encoding: {
+            type: 'object',
+            additionalProperties: { $ref: '#/$defs/JsonValue' },
+            description: 'Encoding settings for the output format. Does not select the format.',
+          },
+        },
+      },
+      { type: 'null' },
+    ],
+  }
 }

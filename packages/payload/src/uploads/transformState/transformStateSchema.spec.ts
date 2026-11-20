@@ -32,6 +32,21 @@ describe('transformStateSchema', () => {
     for (const key of builtInKeys) {
       expect(objectSchema.properties![key]!.description).toBeTruthy()
     }
-    expect(objectSchema.additionalProperties).toBe(true)
+    // Other (transformer-owned) keys are allowed, typed as JSON values so the
+    // generated `_transforms` type stays serialisable (fixes #19783).
+    expect(objectSchema.additionalProperties).toStrictEqual({ $ref: '#/$defs/JsonValue' })
+  })
+
+  it('should type encoding settings as JSON values, not unknown', () => {
+    // @ts-expect-error partial config
+    const config: Config = { collections: [{ slug: 'media', fields: [], upload: true }] }
+
+    const { jsonSchema } = configToJSONSchema(sanitizeConfig(config), 'text')
+    const objectSchema = (jsonSchema.$defs?.UploadTransforms?.anyOf as JSONSchema4[])[0]!
+    const encoding = objectSchema.properties!.encoding as JSONSchema4
+
+    // Was `{ type: 'object' }`, which compiled to `{ [k: string]: unknown }`
+    // and broke TanStack Start's createServerFn serialisability check (#19783).
+    expect(encoding.additionalProperties).toStrictEqual({ $ref: '#/$defs/JsonValue' })
   })
 })
