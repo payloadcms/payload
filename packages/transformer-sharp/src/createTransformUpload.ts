@@ -15,11 +15,12 @@ import { sanitizeResizeConfig } from './sanitizeResizeConfig.js'
  * Sharp throws on truncated/header-only files. Returns `undefined` instead —
  * matching core's dependency-free probe — since unreadable dimensions shouldn't fail the upload.
  *
- * The probe deliberately runs WITHOUT `limitInputPixels`: Sharp enforces that
- * limit even on `metadata()`, so a capped probe could not read the dimensions
- * an over-cap source is refused for. `metadata()` only reads the header, so
- * the uncapped probe is cheap; the caller refuses from the dimensions it
- * returns, and every decode constructor still carries the cap.
+ * The probe deliberately runs with `limitInputPixels: false`: Sharp enforces
+ * that limit even on `metadata()`, and omitting the option only leaves
+ * Sharp's own 268M default in force, so a capped probe could not read the
+ * dimensions an over-cap source is refused for. `metadata()` only reads the
+ * header, so the uncapped probe is cheap; the caller refuses from the
+ * dimensions it returns, and every decode constructor still carries the cap.
  */
 async function tryProbe({
   file,
@@ -29,7 +30,11 @@ async function tryProbe({
   sharpDependency: SharpDependency
 }) {
   try {
-    const sharpFile = await createSharpFromFile({ file, sharpDependency })
+    const sharpFile = await createSharpFromFile({
+      file,
+      options: { limitInputPixels: false },
+      sharpDependency,
+    })
     const metadata = await sharpFile.metadata()
     return metadata.width && metadata.height ? metadata : undefined
   } catch {

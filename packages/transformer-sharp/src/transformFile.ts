@@ -177,9 +177,22 @@ async function transformCrop({
   }
 
   if (resizeOptions && !resizeOptions.withoutEnlargement) {
+    // When no extraction ran, `croppedFile` is the original source, so the
+    // resize decodes it under the same constructor options (including a
+    // stricter `limitInputPixels`) as the crop step. An encoded intermediate
+    // is smaller than the source, so it keeps only the pixel limit — replaying
+    // source options such as `page` onto it would be wrong. A `false` limit
+    // must not override the cap, so only a numeric limit is carried over.
+    const resizeSharpOptions: SharpOptions | undefined =
+      croppedFile === file
+        ? sharpOptions
+        : typeof constructorOptions?.limitInputPixels === 'number'
+          ? { limitInputPixels: constructorOptions.limitInputPixels }
+          : undefined
     const sharpFile = await createSharpFromFile({
       file: croppedFile,
       maxInputPixels,
+      options: resizeSharpOptions,
       sharpDependency,
     })
     const { data: resizedBuffer } = await sharpFile

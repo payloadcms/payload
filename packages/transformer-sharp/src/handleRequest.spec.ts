@@ -1,10 +1,13 @@
 import type { PayloadRequest } from 'payload'
 
 import { readFileSync } from 'fs'
+import { crc32, createDeflate } from 'node:zlib'
 import path from 'path'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { describe, expect, it, vi } from 'vitest'
+
+import type { SharpCollectionConfig } from './types.js'
 
 import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
@@ -13,6 +16,75 @@ import { DEFAULT_MAX_INPUT_PIXELS } from './types.js'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 // 200x200, 44 frames.
 const animatedWebp = readFileSync(path.resolve(dirname, '../../../test/uploads/animated.webp'))
+
+/**
+ * Builds a valid 1-bit grayscale PNG of the requested size without holding the
+ * raw image in memory: reaching Sharp's 268,402,689-pixel default limit needs
+ * a huge image, and a flat-colour PNG compresses to kilobytes. Each scanline
+ * is a filter byte plus zero bytes, streamed through zlib.
+ */
+const makeOversizedPng = async ({
+  height,
+  width,
+}: {
+  height: number
+  width: number
+}): Promise<Buffer> => {
+  const pngChunk = (type: string, data: Buffer): Buffer => {
+    const length = Buffer.alloc(4)
+    length.writeUInt32BE(data.length)
+    const typeAndData = Buffer.concat([Buffer.from(type), data])
+    const crc = Buffer.alloc(4)
+    crc.writeUInt32BE(crc32(typeAndData))
+    return Buffer.concat([length, typeAndData, crc])
+  }
+
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(width, 0)
+  ihdr.writeUInt32BE(height, 4)
+  ihdr[8] = 1 // 1-bit depth
+  ihdr[9] = 0 // grayscale
+
+  const row = Buffer.alloc(1 + Math.ceil(width / 8))
+  // Feed the deflater in ~1 MB chunks instead of one tiny write per row.
+  const rowsPerChunk = Math.max(1, Math.floor((1024 * 1024) / row.length))
+  const chunkBuffer = Buffer.alloc(row.length * rowsPerChunk)
+  const deflate = createDeflate({ level: 1 })
+  const parts: Buffer[] = []
+  deflate.on('data', (chunk) => parts.push(chunk as Buffer))
+  const finished = new Promise<void>((resolve, reject) => {
+    deflate.on('end', resolve)
+    deflate.on('error', reject)
+  })
+  for (let y = 0; y < height; y += rowsPerChunk) {
+    const rows = Math.min(rowsPerChunk, height - y)
+    const slice = rows === rowsPerChunk ? chunkBuffer : chunkBuffer.subarray(0, rows * row.length)
+    if (!deflate.write(slice)) {
+      await new Promise<void>((resolve) => deflate.once('drain', resolve))
+    }
+  }
+  deflate.end()
+  await finished
+
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk('IHDR', ihdr),
+    pngChunk('IDAT', Buffer.concat(parts)),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ])
+}
+
+const oversizedPngs = new Map<string, Promise<Buffer>>()
+const getOversizedPng = ({ height, width }: { height: number; width: number }): Promise<Buffer> => {
+  const key = `${width}x${height}`
+  const cached = oversizedPngs.get(key)
+  if (cached) {
+    return cached
+  }
+  const generated = makeOversizedPng({ height, width })
+  oversizedPngs.set(key, generated)
+  return generated
+}
 
 const makeReq = ({ query = '' }: { query?: string } = {}): PayloadRequest =>
   ({
@@ -33,12 +105,14 @@ const makeSourceImage = async ({
     .toBuffer()
 
 const resizeReal = async ({
+  collections = {},
   dynamicDefaults = resolveSharpDynamicDefaults(),
   maxInputPixels = DEFAULT_MAX_INPUT_PIXELS,
   mimeType = 'image/png',
   query,
   sourceBuffer,
 }: {
+  collections?: Partial<Record<string, SharpCollectionConfig>>
   dynamicDefaults?: ReturnType<typeof resolveSharpDynamicDefaults>
   maxInputPixels?: number
   mimeType?: string
@@ -46,6 +120,7 @@ const resizeReal = async ({
   sourceBuffer: Buffer
 }) => {
   const handleRequest = createHandleRequest({
+    collections,
     dynamicDefaults,
     maxInputPixels,
     sharpDependency: sharp,
@@ -198,6 +273,59 @@ describe('createHandleRequest', () => {
 
     expect(result.response?.status).toBe(400)
   })
+
+  it('should refuse a 20000x20000 source (400M pixels) with a 400 instead of failing the metadata probe', async () => {
+    // Sharp enforces its own 268,402,689-pixel default even on `metadata()`,
+    // so without an explicitly uncapped probe the handler would throw here
+    // instead of returning the required 400.
+    const sourceBuffer = await getOversizedPng({ height: 20000, width: 20000 })
+
+    const result = await resizeReal({
+      maxInputPixels: 50_000_000,
+      mimeType: 'image/png',
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+    // Generating the 20000x20000 fixture streams ~50 MB through zlib.
+  }, 30_000)
+
+  it("should refuse a dynamic resize whose source exceeds the collection's own maxInputPixels", async () => {
+    // 2000x2000 is 4,000,000 pixels — within the 50M global cap but over the
+    // media collection's 1,000,000 cap.
+    const sourceBuffer = await makeSourceImage({ height: 2000, width: 2000 })
+
+    const result = await resizeReal({
+      collections: { media: { maxInputPixels: 1_000_000 } },
+      maxInputPixels: DEFAULT_MAX_INPUT_PIXELS,
+      mimeType: 'image/png',
+      query: 'width=100',
+      sourceBuffer,
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
+  it('should honour a collection cap higher than the global cap', async () => {
+    // 12000x12000 is 144,000,000 pixels — over the 50M global cap but within
+    // the media collection's 200,000,000 cap.
+    const sourceBuffer = await getOversizedPng({ height: 12000, width: 12000 })
+
+    const metadata = await getOutputMetadata(
+      await resizeReal({
+        collections: { media: { maxInputPixels: 200_000_000 } },
+        maxInputPixels: DEFAULT_MAX_INPUT_PIXELS,
+        mimeType: 'image/png',
+        query: 'width=100',
+        sourceBuffer,
+      }),
+    )
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.height).toBe(100)
+    // Decodes a 144M-pixel source, and generating its fixture streams ~18 MB through zlib.
+  }, 60_000)
 
   it('should count every frame of an animated source against maxInputPixels', async () => {
     // 200x200 across 44 frames is 1,760,000 pixels — over a 1,000,000 cap,

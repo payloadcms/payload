@@ -1,7 +1,7 @@
 import type { HandleTransformRequestArgs, HandleTransformRequestResult } from 'payload'
 import type { SharpOptions } from 'sharp'
 
-import type { SharpDependency, SharpDynamicDefaults } from './types.js'
+import type { SharpCollectionConfig, SharpDependency, SharpDynamicDefaults } from './types.js'
 
 import { withInputPixelLimit } from './createSharpFromFile.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
@@ -17,15 +17,17 @@ const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
  * uncaught; Payload's orchestrator logs and aborts the pipeline.
  */
 export function createHandleRequest({
+  collections,
   dynamicDefaults,
   maxInputPixels,
   sharpDependency,
 }: {
+  collections: Partial<Record<string, SharpCollectionConfig>>
   dynamicDefaults: Required<SharpDynamicDefaults>
   maxInputPixels: number
   sharpDependency: SharpDependency
 }): (args: HandleTransformRequestArgs) => Promise<HandleTransformRequestResult> {
-  return async ({ getSourceFile, mimeType, req }) => {
+  return async ({ collectionSlug, getSourceFile, mimeType, req }) => {
     const parseResult = parseDynamicResize({
       limits: dynamicDefaults,
       searchParams: req.searchParams ?? new URLSearchParams(),
@@ -54,13 +56,25 @@ export function createHandleRequest({
 
     const sourceBuffer = Buffer.from(await source.arrayBuffer())
 
+    // The collection's own cap wins over the transformer's global one.
+    const effectiveMaxInputPixels = collections[collectionSlug]?.maxInputPixels ?? maxInputPixels
+
     const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
-    const probeOptions: SharpOptions = isAnimated ? { animated: true } : {}
-    // The resize constructor carries the cap as defence-in-depth, but the
-    // metadata probe must not: Sharp enforces `limitInputPixels` even on
-    // `metadata()`, so a capped probe could not read the dimensions an
-    // over-cap source is refused for. `metadata()` only reads the header.
-    const sharpOptions = withInputPixelLimit({ maxInputPixels, options: probeOptions })
+    // The metadata probe must not carry a pixel limit: Sharp enforces
+    // `limitInputPixels` even on `metadata()`, and omitting the option only
+    // leaves Sharp's own 268M default in force, so a capped probe could not
+    // read the dimensions an over-cap source is refused for. `metadata()`
+    // only reads the header. The resize constructor below is built from a
+    // separate base so the probe's `false` cannot override the decode cap.
+    const probeOptions: SharpOptions = {
+      ...(isAnimated ? { animated: true } : {}),
+      limitInputPixels: false,
+    }
+    // The resize constructor carries the cap as defence-in-depth.
+    const sharpOptions = withInputPixelLimit({
+      maxInputPixels: effectiveMaxInputPixels,
+      options: isAnimated ? { animated: true } : {},
+    })
 
     const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
 
@@ -77,7 +91,7 @@ export function createHandleRequest({
     const sourceHeight = isRotatedQuarterTurn ? metadata.width : frameHeight
     const sourcePixels = (sourceWidth ?? 0) * (sourceHeight ?? 0) * frameCount
 
-    if (sourcePixels > maxInputPixels) {
+    if (sourcePixels > effectiveMaxInputPixels) {
       const frameDescription = frameCount > 1 ? ` across ${frameCount} frames` : ''
 
       return {
@@ -85,7 +99,7 @@ export function createHandleRequest({
           {
             errors: [
               {
-                message: `Source image is ${sourceWidth}x${sourceHeight}${frameDescription} (${sourcePixels} pixels), which exceeds the maximum input size of ${maxInputPixels} pixels.`,
+                message: `Source image is ${sourceWidth}x${sourceHeight}${frameDescription} (${sourcePixels} pixels), which exceeds the maximum input size of ${effectiveMaxInputPixels} pixels.`,
               },
             ],
           },

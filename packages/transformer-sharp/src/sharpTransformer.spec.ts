@@ -1,6 +1,7 @@
 import type { Config, UploadCollectionSlug } from 'payload'
 
 import { describe, expect, it } from 'vitest'
+import sharp from 'sharp'
 
 import { resolveSharpDynamicDefaults, sharpTransformer } from './sharpTransformer.js'
 import { DEFAULT_MAX_INPUT_PIXELS } from './types.js'
@@ -38,6 +39,35 @@ describe('sharpTransformer', () => {
     })
 
     expect(result).toBe(false)
+  })
+
+  it("should apply the collection's maxInputPixels to dynamic resizes", async () => {
+    // 2000x2000 is 4,000,000 pixels — within the 50M global cap but over the
+    // media collection's 1,000,000 cap.
+    const sourceBuffer = await sharp({
+      create: { background: { b: 0, g: 128, r: 255 }, channels: 3, height: 2000, width: 2000 },
+    })
+      .png()
+      .toBuffer()
+    const transformer = sharpTransformer({
+      collections: { media: { maxInputPixels: 1_000_000 } },
+      dynamic: true,
+    })
+
+    const result = await transformer.handleRequest!({
+      collectionSlug: 'media',
+      documentID: '1',
+      filename: 'photo.png',
+      getSourceFile: async () => new Response(sourceBuffer),
+      mimeType: 'image/png',
+      req: {
+        headers: new Headers(),
+        method: 'GET',
+        searchParams: new URLSearchParams('width=100'),
+      },
+    } as never)
+
+    expect(result.response?.status).toBe(400)
   })
 
   it('should reject dynamic.collections that are unknown or not upload-enabled on init', () => {

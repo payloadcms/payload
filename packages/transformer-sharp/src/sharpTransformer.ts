@@ -89,7 +89,12 @@ export function sharpTransformer(
 
       return result.isRouted
     },
-    handleRequest: createHandleRequest({ dynamicDefaults, maxInputPixels, sharpDependency }),
+    handleRequest: createHandleRequest({
+      collections,
+      dynamicDefaults,
+      maxInputPixels,
+      sharpDependency,
+    }),
     init: (config) => {
       assertDynamicCollectionsExist({ config, dynamicOptions })
       assertCollectionsOwnedOnce({ collections, config, transformer })
