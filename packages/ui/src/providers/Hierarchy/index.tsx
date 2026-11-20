@@ -30,6 +30,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       routes: { admin: adminRoute, api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const [baseFilter, setBaseFilter] = useState<null | Where>(null)
@@ -299,7 +300,12 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
             : { [parentFieldName]: { equals: parentId } }
 
         const queryString = qs.stringify(
-          { limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
+          {
+            limit: treeLimit,
+            page: nextPage,
+            sort: getEntityConfig({ collectionSlug })?.defaultSort ?? useAsTitle ?? 'id',
+            where,
+          },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -349,6 +355,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     },
     [
       api,
+      getEntityConfig,
       collectionSlug,
       isLoadingMore,
       parentFieldName,
