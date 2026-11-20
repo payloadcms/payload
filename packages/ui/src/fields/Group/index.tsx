@@ -29,6 +29,7 @@ export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { className, description, hideGutter } = {}, fields, label },
+    forceRender,
     indexPath,
     parentPath,
     parentSchemaPath,
@@ -43,6 +44,8 @@ export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
 
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
+  // Eager children are needed for collapsed rows to measure their content when opened.
+  const forceRenderChildren = isWithinCollapsible && forceRender
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
@@ -111,6 +114,7 @@ export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
           {groupHasName(field) ? (
             <RenderFields
               fields={fields}
+              forceRender={forceRenderChildren}
               parentIndexPath=""
               parentPath={path}
               parentSchemaPath={schemaPath}
@@ -120,6 +124,7 @@ export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
           ) : (
             <RenderFields
               fields={fields}
+              forceRender={forceRenderChildren}
               parentIndexPath={indexPath}
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}
