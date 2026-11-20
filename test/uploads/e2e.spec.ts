@@ -898,6 +898,79 @@ describe('Uploads', () => {
     await expect(page.locator('.file-manager__selected-preview video.video-preview')).toBeVisible()
   })
 
+  test('should show a video frame thumbnail in the upload collection list', async () => {
+    await page.goto(mediaURL.list)
+
+    const videoCell = page.locator('tbody .cell-filename', {
+      hasText: exactText('christmas-mariachi-in-guadalajara.mp4'),
+    })
+
+    await expect(videoCell.locator('.thumbnail video')).toBeVisible()
+  })
+
+  test('should show a video frame thumbnail in the upload collection grid', async () => {
+    await page.goto(mediaURL.list)
+    await page.getByRole('radio', { name: 'Grid' }).check()
+
+    await expect(
+      page.locator('.document-card .document-card__thumbnail--video video'),
+    ).toBeVisible()
+  })
+
+  test('should show a video frame thumbnail in the upload field', async () => {
+    const {
+      docs: [videoDoc],
+    } = await payload.find({
+      collection: mediaSlug,
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      where: { mimeType: { equals: 'video/mp4' } },
+    })
+
+    const relationDoc = await payload.create({
+      collection: relationSlug,
+      data: { image: videoDoc?.id },
+      overrideAccess: true,
+    })
+
+    await page.goto(relationURL.edit(relationDoc.id))
+
+    await expect(
+      page.locator('#field-image .upload-relationship-details__thumbnail video'),
+    ).toBeVisible()
+  })
+
+  test('should show a video frame thumbnail in the bulk upload sidebar', async () => {
+    await page.goto(mediaURL.list)
+    await expect(page.locator('.list-header__title')).toBeVisible()
+
+    const bulkUploadButton = page.locator('.list-header__title-actions button', {
+      hasText: 'Bulk Upload',
+    })
+    const dropzoneInput = page.locator('.dropzone input[type="file"]')
+
+    // Retry until hydrated, as the button is inert before then
+    await expect(async () => {
+      await bulkUploadButton.click()
+      await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+    }).toPass({ intervals: [500], timeout: 5000 })
+
+    await dropzoneInput.setInputFiles([
+      path.resolve(dirname, './image.png'),
+      path.resolve(dirname, './christmas-mariachi-in-guadalajara.mp4'),
+    ])
+
+    const videoRow = page.locator('.file-selections__fileRowContainer', {
+      hasText: 'christmas-mariachi-in-guadalajara.mp4',
+    })
+
+    await expect(videoRow.locator('.file-selections__thumbnail img')).toHaveAttribute(
+      'src',
+      /^data:image\/jpeg;base64,/,
+    )
+  })
+
   test('should show the native audio player when selecting an audio file to upload', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './audio.mp3'))
