@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { getDocumentThumbnail } from './getDocumentThumbnail.js'
+import {
+  getDocumentThumbnail,
+  getDocumentVideoThumbnail,
+  isDocumentVideoPreviewAllowed,
+} from './getDocumentThumbnail.js'
 
 const image = {
   mimeType: 'image/png',
@@ -54,5 +58,93 @@ describe('getDocumentThumbnail', () => {
         doc: { mimeType: 'application/pdf', thumbnailURL: '/preview.png', url: '/document.pdf' },
       }),
     ).toBe('/preview.png')
+  })
+})
+
+describe('getDocumentVideoThumbnail', () => {
+  const video = { mimeType: 'video/mp4', url: '/clip.mp4' }
+
+  it.each([{ cover: video }, { cover: [video] }, { cover: { relationTo: 'media', value: video } }])(
+    'should resolve the video url from populated upload fields %j',
+    (doc) => {
+      expect(getDocumentVideoThumbnail({ doc, useAsThumbnail: 'cover' })).toBe('/clip.mp4')
+    },
+  )
+
+  it('should resolve the video url from the document itself', () => {
+    expect(getDocumentVideoThumbnail({ doc: video })).toBe('/clip.mp4')
+  })
+
+  it('should leave videos with an image preview to getDocumentThumbnail', () => {
+    const doc = { ...video, thumbnailURL: '/poster.jpg' }
+
+    expect(getDocumentVideoThumbnail({ doc })).toBeUndefined()
+    expect(getDocumentThumbnail({ doc })).toBe('/poster.jpg')
+  })
+
+  it('should return undefined for images', () => {
+    expect(getDocumentVideoThumbnail({ doc: image })).toBeUndefined()
+  })
+})
+
+describe('isDocumentVideoPreviewAllowed', () => {
+  const video = { mimeType: 'video/mp4', url: '/clip.mp4' }
+  const displayPreviewBySlug: Record<string, boolean | undefined> = {
+    hidden: false,
+    media: undefined,
+  }
+  const getUploadDisplayPreview = (collectionSlug: string) => displayPreviewBySlug[collectionSlug]
+
+  it('should use the collection option when the document is itself the upload', () => {
+    expect(
+      isDocumentVideoPreviewAllowed({
+        collectionSlug: 'hidden',
+        doc: video,
+        getUploadDisplayPreview,
+      }),
+    ).toBe(false)
+    expect(
+      isDocumentVideoPreviewAllowed({
+        collectionSlug: 'media',
+        doc: video,
+        getUploadDisplayPreview,
+      }),
+    ).toBe(true)
+  })
+
+  it('should use the related collection option for a populated upload field', () => {
+    expect(
+      isDocumentVideoPreviewAllowed({
+        collectionSlug: 'posts',
+        doc: { cover: video },
+        getUploadDisplayPreview,
+        thumbnailField: { relationTo: 'hidden' },
+        useAsThumbnail: 'cover',
+      }),
+    ).toBe(false)
+  })
+
+  it('should use the related collection of a polymorphic value', () => {
+    expect(
+      isDocumentVideoPreviewAllowed({
+        collectionSlug: 'posts',
+        doc: { cover: { relationTo: 'hidden', value: video } },
+        getUploadDisplayPreview,
+        thumbnailField: { relationTo: ['hidden', 'media'] },
+        useAsThumbnail: 'cover',
+      }),
+    ).toBe(false)
+  })
+
+  it('should let the field option override the collection option', () => {
+    expect(
+      isDocumentVideoPreviewAllowed({
+        collectionSlug: 'posts',
+        doc: { cover: video },
+        getUploadDisplayPreview,
+        thumbnailField: { displayPreview: true, relationTo: 'hidden' },
+        useAsThumbnail: 'cover',
+      }),
+    ).toBe(true)
   })
 })

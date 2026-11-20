@@ -9,11 +9,16 @@ import { DocumentCard } from '../../../elements/DocumentCard/index.js'
 import { useTableID } from '../../../elements/Table/TableIdentity.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
-import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
+import {
+  getDocumentThumbnail,
+  getDocumentVideoThumbnail,
+} from '../../../utilities/getDocumentThumbnail.js'
 import { getDocumentListItemURL } from '../getDocumentListItemURL.js'
 
 type DocumentGridProps = {
   readonly adminRoute: string
+  /** Whether a document's video upload may load a frame. Defaults to always. */
+  readonly canPreviewVideo?: (doc: Record<string, unknown>) => boolean
   readonly collectionLabel: string
   readonly collectionSlug: string
   readonly docs: Record<string, unknown>[]
@@ -47,6 +52,7 @@ const getDocumentTitle = ({
 export const DocumentGrid: React.FC<DocumentGridProps> = ({
   id,
   adminRoute,
+  canPreviewVideo,
   collectionLabel,
   collectionSlug,
   docs,
@@ -76,7 +82,11 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
       renderItem={(doc) => {
         const id = doc.id
         const documentID = getDocumentID(doc)
-        const thumbnailSrc = getDocumentThumbnail({ doc, useAsThumbnail })
+        const videoThumbnailSrc =
+          (canPreviewVideo?.(doc) ?? true)
+            ? getDocumentVideoThumbnail({ doc, useAsThumbnail })
+            : undefined
+        const thumbnailSrc = videoThumbnailSrc ?? getDocumentThumbnail({ doc, useAsThumbnail })
         const title = getDocumentTitle({ doc, useAsTitle })
 
         return (
@@ -101,7 +111,11 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
                 : undefined
             }
             placeholder={<DocumentIcon />}
-            thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
+            thumbnail={
+              thumbnailSrc
+                ? { alt: title, isVideo: Boolean(videoThumbnailSrc), src: thumbnailSrc }
+                : undefined
+            }
             title={title}
           />
         )

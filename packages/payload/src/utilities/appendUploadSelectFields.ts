@@ -20,6 +20,8 @@ export const appendUploadSelectFields = ({
   select.filename = true
   select.mimeType = true
   select.thumbnailURL = true
+  /** `url` is the source for images without variants and for video frames. */
+  select.url = true
 
   if (collectionConfig.upload.cacheTags) {
     select.updatedAt = true
@@ -49,7 +51,5 @@ export const appendUploadSelectFields = ({
         }
       }, {})
     }
-  } else {
-    select.url = true
   }
 }

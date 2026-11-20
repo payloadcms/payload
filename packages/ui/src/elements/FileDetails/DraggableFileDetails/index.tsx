@@ -2,6 +2,7 @@
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getVideoThumbnailSrc } from '../../../utilities/getVideoThumbnailSrc.js'
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import './index.css'
@@ -45,7 +46,9 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
     uploadConfig,
   } = props
 
-  const { id, filename, thumbnailURL, url } = doc
+  const { id, filename, mimeType, thumbnailURL, url } = doc
+  // The row keeps its thumbnail slot, so a hidden preview shows the file icon and loads no media
+  const isPreviewAllowed = uploadConfig.displayPreview !== false
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id,
@@ -85,8 +88,11 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
               className={`${baseClass}__thumbnail`}
               collectionSlug={collectionSlug}
               doc={doc}
-              fileSrc={thumbnailURL || url}
+              fileSrc={isPreviewAllowed ? thumbnailURL || url : undefined}
               imageCacheTag={imageCacheTag}
+              isVideo={
+                isPreviewAllowed && Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))
+              }
               uploadConfig={uploadConfig}
             />
           </div>

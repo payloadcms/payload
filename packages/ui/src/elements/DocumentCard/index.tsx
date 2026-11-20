@@ -2,15 +2,19 @@
 
 import React from 'react'
 
+import { useVideoFrame } from '../../hooks/useVideoFrame.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
+import { RenderIfInViewport } from '../RenderIfInViewport/index.js'
 import './index.css'
 
 const baseClass = 'document-card'
 
 export type DocumentCardThumbnail = {
   alt?: string
+  /** Render `src` as an early video frame instead of an image. */
+  isVideo?: boolean
   /** Use `lazy` for cards that may be hidden on load, so their image is only downloaded once shown. */
   loading?: 'eager' | 'lazy'
   src: string
@@ -111,22 +115,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         .filter(Boolean)
         .join(' ')}
     >
-      {thumbnail ? (
-        <img
-          alt={thumbnail.alt || ''}
-          className={`${baseClass}__thumbnail`}
-          decoding="async"
-          loading={thumbnail.loading}
-          src={thumbnail.src}
-        />
-      ) : (
-        <div
-          aria-hidden="true"
-          className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`}
-        >
-          {placeholder}
-        </div>
-      )}
+      <CardThumbnail placeholder={placeholder} thumbnail={thumbnail} />
       <div className={`${baseClass}__content`}>
         {href ? (
           <Link
@@ -148,5 +137,61 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         </span>
       ) : null}
     </div>
+  )
+}
+
+function CardThumbnail({
+  placeholder,
+  thumbnail,
+}: Pick<DocumentCardProps, 'placeholder' | 'thumbnail'>) {
+  if (thumbnail?.isVideo) {
+    // Videos have no native lazy loading, so every video card waits until it is near the viewport
+    return (
+      <RenderIfInViewport className={`${baseClass}__thumbnail ${baseClass}__thumbnail--video`}>
+        <CardVideoThumbnail
+          alt={thumbnail.alt}
+          key={thumbnail.src}
+          placeholder={placeholder}
+          src={thumbnail.src}
+        />
+      </RenderIfInViewport>
+    )
+  }
+
+  if (thumbnail) {
+    return (
+      <img
+        alt={thumbnail.alt || ''}
+        className={`${baseClass}__thumbnail`}
+        decoding="async"
+        loading={thumbnail.loading}
+        src={thumbnail.src}
+      />
+    )
+  }
+
+  return (
+    <div aria-hidden="true" className={`${baseClass}__thumbnail ${baseClass}__thumbnail--empty`}>
+      {placeholder}
+    </div>
+  )
+}
+
+function CardVideoThumbnail({
+  alt,
+  placeholder,
+  src,
+}: Pick<DocumentCardProps, 'placeholder'> & Pick<DocumentCardThumbnail, 'alt' | 'src'>) {
+  const { shouldRenderVideo, shouldShowFallback, videoProps } = useVideoFrame({ src })
+
+  return (
+    <>
+      {shouldRenderVideo && <video {...videoProps} aria-label={alt || undefined} muted />}
+      {shouldShowFallback && (
+        <div aria-hidden="true" className={`${baseClass}__thumbnail--empty`}>
+          {placeholder}
+        </div>
+      )}
+    </>
   )
 }

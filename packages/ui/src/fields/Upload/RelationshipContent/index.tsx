@@ -17,6 +17,7 @@ import './index.css'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getVideoThumbnailSrc } from '../../../utilities/getVideoThumbnailSrc.js'
 
 const baseClass = 'upload-relationship-details'
 
@@ -100,6 +101,7 @@ export function RelationshipContent(props: Props) {
 
   const metaText = withMeta ? generateMetaText(mimeType, byteSize) : ''
   const previewAllowed = displayPreview ?? collectionConfig?.upload?.displayPreview ?? true
+  const videoSrc = getVideoThumbnailSrc({ mimeType, thumbnailURL: thumbnailSrc, url: src })
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -109,8 +111,9 @@ export function RelationshipContent(props: Props) {
             alt={alt}
             className={`${baseClass}__thumbnail`}
             filename={filename}
-            fileSrc={thumbnailSrc}
+            fileSrc={videoSrc ?? thumbnailSrc}
             imageCacheTag={collectionConfig?.upload?.cacheTags && updatedAt}
+            isVideo={Boolean(videoSrc)}
             size="small"
           />
         )}

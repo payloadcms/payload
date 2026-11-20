@@ -2,6 +2,7 @@
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getVideoThumbnailSrc } from '../../../utilities/getVideoThumbnailSrc.js'
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { UploadActions } from '../../Upload/index.js'
@@ -52,6 +53,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             doc={doc}
             fileSrc={thumbnailURL || url}
             imageCacheTag={imageCacheTag}
+            isVideo={Boolean(getVideoThumbnailSrc({ mimeType, thumbnailURL, url }))}
             uploadConfig={uploadConfig}
           />
         )}

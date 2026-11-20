@@ -1,56 +1,146 @@
+import {
+  isVideoMimeType,
+  VIDEO_FRAME_TIME,
+  VIDEO_LOAD_TIMEOUT_MS,
+} from '../../utilities/getVideoThumbnailSrc.js'
+
+const maxDimension = 280
+
 /**
- * Create a thumbnail from a File object by drawing it onto an OffscreenCanvas
+ * Create a thumbnail from a File object by drawing it onto an OffscreenCanvas.
+ * Videos are drawn from an early frame.
  */
 export const createThumbnail = (file: File): Promise<string> => {
+  if (isVideoMimeType(file.type)) {
+    return createVideoThumbnail(file)
+  }
+
+  return createImageThumbnail(file)
+}
+
+function createImageThumbnail(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    img.src = URL.createObjectURL(file) // Use Object URL directly
+    const objectURL = URL.createObjectURL(file)
 
     img.onload = () => {
-      const maxDimension = 280
-      let drawHeight: number, drawWidth: number
+      // PNG keeps transparency and ignores quality; JPEG uses a higher quality
+      const isPNG = file.type === 'image/png'
 
-      // Calculate aspect ratio
-      const aspectRatio = img.height && img.width ? img.width / img.height : 1
-
-      // Determine dimensions to fit within maxDimension while maintaining aspect ratio
-      if (aspectRatio > 1) {
-        // Image is wider than tall
-        drawWidth = maxDimension
-        drawHeight = maxDimension / aspectRatio
-      } else {
-        // Image is taller than wide, or square
-        drawWidth = maxDimension * aspectRatio
-        drawHeight = maxDimension
-      }
-
-      const canvas = new OffscreenCanvas(drawWidth, drawHeight) // Create an OffscreenCanvas
-      const ctx = canvas.getContext('2d')
-
-      // Determine output format based on input file type
-      const outputFormat = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
-      const quality = file.type === 'image/png' ? undefined : 0.8 // PNG doesn't use quality, use higher quality for JPEG
-
-      // Draw the image onto the OffscreenCanvas with calculated dimensions
-      ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
-
-      // Convert the OffscreenCanvas to a Blob and free up memory
-      canvas
-        .convertToBlob({ type: outputFormat, ...(quality && { quality }) })
-        .then((blob) => {
-          URL.revokeObjectURL(img.src) // Release the Object URL
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string) // Resolve as data URL
-          reader.onerror = reject
-          reader.readAsDataURL(blob)
-        })
+      drawToDataURL({
+        outputFormat: isPNG ? 'image/png' : 'image/jpeg',
+        quality: isPNG ? undefined : 0.8,
+        source: img,
+        sourceHeight: img.height,
+        sourceWidth: img.width,
+      })
+        .then(resolve)
         .catch(reject)
+        .finally(() => URL.revokeObjectURL(objectURL))
     }
 
     img.onerror = (error) => {
-      URL.revokeObjectURL(img.src) // Release Object URL on error
+      URL.revokeObjectURL(objectURL)
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
       reject(error)
     }
+
+    img.src = objectURL
+  })
+}
+
+function createVideoThumbnail(file: File): Promise<string> {
+  const video = document.createElement('video')
+  const objectURL = URL.createObjectURL(file)
+  let timeoutID: ReturnType<typeof setTimeout> | undefined
+
+  const frame = new Promise<string>((resolve, reject) => {
+    // Some browsers never load or seek without user interaction, which would never settle
+    timeoutID = setTimeout(() => {
+      reject(new Error(`Timed out loading video "${file.name}" to create a thumbnail`))
+    }, VIDEO_LOAD_TIMEOUT_MS)
+
+    video.muted = true
+    video.playsInline = true
+    // The seek loads the frame, so the browser does not buffer the whole file
+    video.preload = 'metadata'
+
+    video.onloadedmetadata = () => {
+      // Duration is NaN or Infinity for some containers until fully buffered
+      const duration = Number.isFinite(video.duration) ? video.duration : VIDEO_FRAME_TIME
+      video.currentTime = Math.min(VIDEO_FRAME_TIME, duration)
+    }
+
+    video.onseeked = () => {
+      // A file with no decodable video track (audio only, or an unsupported codec such as HEVC)
+      // seeks with zero width and would encode an empty frame
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        reject(new Error(`Video "${file.name}" has no video frame to create a thumbnail`))
+        return
+      }
+
+      drawToDataURL({
+        outputFormat: 'image/jpeg',
+        quality: 0.8,
+        source: video,
+        sourceHeight: video.videoHeight,
+        sourceWidth: video.videoWidth,
+      })
+        .then(resolve)
+        .catch(reject)
+    }
+
+    video.onerror = () => {
+      reject(new Error(`Unable to load video "${file.name}" to create a thumbnail`))
+    }
+
+    video.src = objectURL
+  })
+
+  return frame.finally(() => {
+    clearTimeout(timeoutID)
+    // Browsers limit active media players, so release this one before GC does
+    video.removeAttribute('src')
+    video.load()
+    URL.revokeObjectURL(objectURL)
+  })
+}
+
+/** Fit the source within `maxDimension`, keep its aspect ratio, and encode it as a data URL. */
+async function drawToDataURL({
+  outputFormat,
+  quality,
+  source,
+  sourceHeight,
+  sourceWidth,
+}: {
+  outputFormat: 'image/jpeg' | 'image/png'
+  quality: number | undefined
+  source: CanvasImageSource
+  sourceHeight: number
+  sourceWidth: number
+}): Promise<string> {
+  // SVGs without intrinsic dimensions report 0, which would produce a NaN ratio
+  const aspectRatio = sourceHeight && sourceWidth ? sourceWidth / sourceHeight : 1
+  const isLandscape = aspectRatio > 1
+  const drawWidth = isLandscape ? maxDimension : maxDimension * aspectRatio
+  const drawHeight = isLandscape ? maxDimension / aspectRatio : maxDimension
+
+  const canvas = new OffscreenCanvas(drawWidth, drawHeight)
+  canvas.getContext('2d')?.drawImage(source, 0, 0, drawWidth, drawHeight)
+
+  const blob = await canvas.convertToBlob({ type: outputFormat, ...(quality && { quality }) })
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result)
+        return
+      }
+      reject(new Error('Unable to read thumbnail as a data URL'))
+    }
+    reader.onerror = () => reject(reader.error ?? new Error('Unable to read thumbnail'))
+    reader.readAsDataURL(blob)
   })
 }

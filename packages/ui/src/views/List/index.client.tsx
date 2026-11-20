@@ -21,6 +21,7 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableIdentityProvider } from '../../elements/Table/TableIdentity.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { useCanPreviewDocumentVideo } from '../../hooks/useCanPreviewDocumentVideo.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
@@ -128,6 +129,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const canPreviewVideo = useCanPreviewDocumentVideo({ collectionSlug })
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
     const preferencesKey = `collection-${collectionSlug}`
@@ -418,6 +420,7 @@ export function DefaultListView(props: ListViewClientProps) {
               ) : shouldRenderGrid ? (
                 <DocumentGrid
                   adminRoute={adminRoute}
+                  canPreviewVideo={canPreviewVideo}
                   collectionLabel={collectionLabel}
                   collectionSlug={collectionSlug}
                   docs={docs}

@@ -6,6 +6,7 @@ import React from 'react'
 
 import { GroupByPageControls } from '../../../elements/PageControls/GroupByPageControls.js'
 import { TableSection } from '../../../elements/TableSection/index.js'
+import { useCanPreviewDocumentVideo } from '../../../hooks/useCanPreviewDocumentVideo.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../../providers/Selection/index.js'
@@ -38,6 +39,7 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
   } = useConfig()
   const { query } = useListQuery()
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const canPreviewVideo = useCanPreviewDocumentVideo({ collectionSlug })
   const groupByFieldPath = query?.groupBy?.replace(/^-/, '') ?? ''
 
   return groups.map(({ data, heading, value }) => (
@@ -64,6 +66,7 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
         <TableSection.Content>
           <DocumentGrid
             adminRoute={adminRoute}
+            canPreviewVideo={canPreviewVideo}
             collectionLabel={heading}
             collectionSlug={collectionSlug}
             docs={data.docs}

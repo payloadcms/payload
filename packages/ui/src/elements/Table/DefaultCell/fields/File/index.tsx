@@ -10,6 +10,7 @@ import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import './index.css'
+import { getVideoThumbnailSrc } from '../../../../../utilities/getVideoThumbnailSrc.js'
 import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'
@@ -31,9 +32,14 @@ export const FileCell: React.FC<FileCellProps> = ({
 
   if (previewAllowed) {
     const isFileImage = isImage(rowData?.mimeType)
+    const videoSrc = getVideoThumbnailSrc({
+      mimeType: rowData?.mimeType,
+      thumbnailURL: rowData?.thumbnailURL,
+      url: rowData?.url,
+    })
     let fileSrc: string | undefined = isFileImage
       ? rowData?.thumbnailURL || rowData?.url
-      : rowData?.thumbnailURL
+      : (videoSrc ?? rowData?.thumbnailURL)
 
     if (isFileImage) {
       fileSrc = getBestFitFromSizes({
@@ -58,6 +64,7 @@ export const FileCell: React.FC<FileCellProps> = ({
           }}
           fileSrc={fileSrc}
           imageCacheTag={imageCacheTag}
+          isVideo={Boolean(videoSrc)}
           size="small"
           uploadConfig={uploadConfig}
         />

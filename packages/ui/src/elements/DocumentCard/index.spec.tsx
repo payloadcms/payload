@@ -105,3 +105,29 @@ test('should keep selection available without navigating when the href is null',
   await card.dblClick()
   expect(push).not.toHaveBeenCalled()
 })
+
+test('should show the placeholder when a video thumbnail fails to load', async () => {
+  const TestLink = ({ href, ...props }: LinkAdapterProps) => <a href={href} {...props} />
+
+  const screen = await render(
+    <RouterAdapterContext
+      value={{
+        Link: TestLink,
+        params: {},
+        pathname: '/',
+        router: { back: vi.fn(), push: vi.fn(), refresh: vi.fn(), replace: vi.fn() },
+        searchParams: new URLSearchParams(),
+      }}
+    >
+      <DocumentCard
+        placeholder="Preview"
+        thumbnail={{ alt: 'Clip', isVideo: true, src: '/missing-clip.mp4' }}
+        title="Example document"
+      />
+    </RouterAdapterContext>,
+  )
+
+  await expect.element(screen.getByText('Preview')).toBeInTheDocument()
+  expect(document.querySelector('.document-card__thumbnail--video video')).toBeNull()
+  expect(document.querySelector('img.document-card__thumbnail')).toBeNull()
+})

@@ -33,6 +33,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getVideoThumbnailSrc } from '../../../utilities/getVideoThumbnailSrc.js'
 import { getHierarchyListURL } from '../getHierarchyListURL.js'
 import { ChildNameCell } from './ChildNameCell.js'
 import { DateCell } from './DateCell.js'
@@ -575,7 +576,18 @@ export function HierarchyTable({
                     parentID: row.id,
                   })
                   const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
-                  const thumbnailSrc =
+                  // A video frame downloads part of the video, so `displayPreview: false` skips it
+                  const isVideoPreviewAllowed =
+                    !group.isChildren && config?.upload?.displayPreview !== false
+                  const videoThumbnailSrc = isVideoPreviewAllowed
+                    ? getVideoThumbnailSrc({
+                        mimeType,
+                        thumbnailURL:
+                          typeof row.thumbnailURL === 'string' ? row.thumbnailURL : undefined,
+                        url: typeof row.url === 'string' ? row.url : undefined,
+                      })
+                    : undefined
+                  const imageThumbnailSrc =
                     !group.isChildren && mimeType && isImage(mimeType)
                       ? getBestFitFromSizes({
                           sizes: row.sizes as Record<string, { url?: string; width?: number }>,
@@ -586,6 +598,7 @@ export function HierarchyTable({
                       : !group.isChildren && typeof row.thumbnailURL === 'string'
                         ? row.thumbnailURL
                         : undefined
+                  const thumbnailSrc = videoThumbnailSrc ?? imageThumbnailSrc
                   const isRowLocked = isLocked({ id: row.id, collectionSlug: group.slug })
 
                   return (
@@ -600,7 +613,11 @@ export function HierarchyTable({
                           <DocumentIcon />
                         )
                       }
-                      thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
+                      thumbnail={
+                        thumbnailSrc
+                          ? { alt: '', isVideo: Boolean(videoThumbnailSrc), src: thumbnailSrc }
+                          : undefined
+                      }
                       title={title}
                     >
                       {group.isChildren ? (

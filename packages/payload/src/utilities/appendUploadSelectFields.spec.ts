@@ -16,7 +16,19 @@ describe('appendUploadSelectFields', () => {
       filename: true,
       mimeType: true,
       thumbnailURL: true,
+      url: true,
       variants: { small: { filename: true, url: true, width: true } },
     })
+  })
+
+  it('should include the url for video frames when an admin thumbnail variant is set', () => {
+    const select = {}
+    const collectionConfig = {
+      upload: { adminThumbnail: 'small', variants: [{ name: 'small', width: 100 }] },
+    } as SanitizedCollectionConfig
+
+    appendUploadSelectFields({ collectionConfig, select })
+
+    expect(select).toMatchObject({ url: true, variants: { small: { filename: true } } })
   })
 })
