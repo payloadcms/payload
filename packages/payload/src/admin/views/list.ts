@@ -6,6 +6,7 @@ import type {
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
+import type { NestedDocRow } from '../../hierarchy/getNestedDocsTreeMetadata.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions, Where } from '../../types/index.js'
@@ -117,6 +118,8 @@ export type ListViewClientProps = {
    * @deprecated
    */
   listPreferences?: CollectionPreferences
+  nestedDocExpanded?: string[]
+  nestedDocRows?: Record<string, NestedDocRow>
   newDocumentURL: string
   /**
    * @deprecated
