@@ -116,8 +116,6 @@ export const buildJoinAggregation = async ({
     const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
     const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
-    const projectSort = sortProperty !== '_id' && sortProperty !== 'relationTo'
-
     const aliases: string[] = []
 
     const as = join.joinPath
@@ -166,9 +164,7 @@ export const buildJoinAggregation = async ({
             {
               $project: {
                 value: '$_id',
-                ...(projectSort && {
-                  [sortProperty]: 1,
-                }),
+                sortValue: `$${sortProperty}`,
                 relationTo: 1,
               },
             },
@@ -225,8 +221,8 @@ export const buildJoinAggregation = async ({
           $sortArray: {
             input: `$${as}.docs`,
             sortBy: {
-              [sortProperty]: sortDirection,
-              ...(sortProperty === 'relationTo' ? {} : { relationTo: 1 }),
+              sortValue: sortDirection,
+              relationTo: 1,
               value: 1,
             },
           },

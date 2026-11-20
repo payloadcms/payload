@@ -344,8 +344,11 @@ export async function resolveJoins({
       results.docs.sort((a, b) => {
         for (const [fieldName, sortOrder] of Object.entries(results.sort)) {
           const sort = sortOrder === 'asc' ? 1 : -1
-          const aValue = a[fieldName] as Date | number | string
-          const bValue = b[fieldName] as Date | number | string
+          const aValue = getSortValue({ doc: a, fieldName })
+          const bValue = getSortValue({ doc: b, fieldName })
+          if (aValue === undefined || bValue === undefined) {
+            return 0
+          }
           if (aValue < bValue) {
             return -1 * sort
           }
@@ -462,6 +465,27 @@ export async function resolveJoins({
       ref[segments[segments.length - 1]!] = value
     }
   }
+}
+
+function getSortValue({
+  doc,
+  fieldName,
+}: {
+  doc: Record<string, unknown>
+  fieldName: string
+}): Date | number | string | undefined {
+  let value: unknown = doc
+
+  for (const segment of (fieldName === '_id' ? 'id' : fieldName).split('.')) {
+    if (!value || typeof value !== 'object') {
+      return undefined
+    }
+    value = (value as Record<string, unknown>)[segment]
+  }
+
+  return value instanceof Date || typeof value === 'number' || typeof value === 'string'
+    ? value
+    : undefined
 }
 
 type SanitizedJoin = SanitizedJoins[string][number]
