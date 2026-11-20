@@ -19,6 +19,9 @@ const toolbarGroups = [
         return false
       },
       key: 'strikethrough',
+      label: ({ i18n }) => {
+        return i18n.t('lexical:strikethrough:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
       },
