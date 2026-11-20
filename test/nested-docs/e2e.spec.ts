@@ -35,4 +35,14 @@ test.describe('Nested document tree', () => {
 
     await expect(page.getByRole('radio', { name: 'Tree', exact: true })).toHaveCount(0)
   })
+
+  test('should expand one authorized branch in Tree', async ({ page }) => {
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+
+    await expect(page.getByRole('link', { name: 'Department 12', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Collapse: About us', exact: true }),
+    ).toBeVisible()
+  })
 })
