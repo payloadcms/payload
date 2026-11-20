@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getDocumentThumbnail } from './getDocumentThumbnail.js'
+import { getDocumentThumbnail, getDocumentVideoThumbnail } from './getDocumentThumbnail.js'
 
 const image = {
   mimeType: 'image/png',
@@ -54,5 +54,31 @@ describe('getDocumentThumbnail', () => {
         doc: { mimeType: 'application/pdf', thumbnailURL: '/preview.png', url: '/document.pdf' },
       }),
     ).toBe('/preview.png')
+  })
+})
+
+describe('getDocumentVideoThumbnail', () => {
+  const video = { mimeType: 'video/mp4', url: '/clip.mp4' }
+
+  it.each([{ cover: video }, { cover: [video] }, { cover: { relationTo: 'media', value: video } }])(
+    'should resolve the video url from populated upload fields %j',
+    (doc) => {
+      expect(getDocumentVideoThumbnail({ doc, useAsThumbnail: 'cover' })).toBe('/clip.mp4')
+    },
+  )
+
+  it('should resolve the video url from the document itself', () => {
+    expect(getDocumentVideoThumbnail({ doc: video })).toBe('/clip.mp4')
+  })
+
+  it('should leave videos with an image preview to getDocumentThumbnail', () => {
+    const doc = { ...video, thumbnailURL: '/poster.jpg' }
+
+    expect(getDocumentVideoThumbnail({ doc })).toBeUndefined()
+    expect(getDocumentThumbnail({ doc })).toBe('/poster.jpg')
+  })
+
+  it('should return undefined for images', () => {
+    expect(getDocumentVideoThumbnail({ doc: image })).toBeUndefined()
   })
 })

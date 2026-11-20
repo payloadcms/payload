@@ -9,7 +9,10 @@ import { DocumentCard } from '../../../elements/DocumentCard/index.js'
 import { useTableID } from '../../../elements/Table/TableIdentity.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useSelection } from '../../../providers/Selection/index.js'
-import { getDocumentThumbnail } from '../../../utilities/getDocumentThumbnail.js'
+import {
+  getDocumentThumbnail,
+  getDocumentVideoThumbnail,
+} from '../../../utilities/getDocumentThumbnail.js'
 import { getDocumentListItemURL } from '../getDocumentListItemURL.js'
 
 type DocumentGridProps = {
@@ -76,7 +79,8 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
       renderItem={(doc) => {
         const id = doc.id
         const documentID = getDocumentID(doc)
-        const thumbnailSrc = getDocumentThumbnail({ doc, useAsThumbnail })
+        const videoThumbnailSrc = getDocumentVideoThumbnail({ doc, useAsThumbnail })
+        const thumbnailSrc = videoThumbnailSrc ?? getDocumentThumbnail({ doc, useAsThumbnail })
         const title = getDocumentTitle({ doc, useAsTitle })
 
         return (
@@ -101,7 +105,11 @@ export const DocumentGrid: React.FC<DocumentGridProps> = ({
                 : undefined
             }
             placeholder={<DocumentIcon />}
-            thumbnail={thumbnailSrc ? { alt: title, src: thumbnailSrc } : undefined}
+            thumbnail={
+              thumbnailSrc
+                ? { alt: title, isVideo: Boolean(videoThumbnailSrc), src: thumbnailSrc }
+                : undefined
+            }
             title={title}
           />
         )
