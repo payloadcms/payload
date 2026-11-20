@@ -550,6 +550,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
     tableLayout: 'Táblázat',
+    treeLayout: 'Fa',
     takeOver: 'Átvétel',
     theme: 'Téma',
     thisLanguage: 'Magyar',

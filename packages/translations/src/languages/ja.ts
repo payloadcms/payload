@@ -541,6 +541,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} から {{total}} 件のうち {{count}} 件を正常に再インデックスし、{{skips}} 件の下書きをスキップしました。',
     tableLayout: 'テーブル',
+    treeLayout: 'ツリー',
     takeOver: '引き継ぐ',
     theme: 'テーマ',
     thisLanguage: 'Japanese',

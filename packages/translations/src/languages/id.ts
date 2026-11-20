@@ -544,6 +544,7 @@ export const idTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     tableLayout: 'Tabel',
+    treeLayout: 'Pohon',
     takeOver: 'Ambil alih',
     theme: 'Tema',
     thisLanguage: 'Bahasa Indonesia',

@@ -540,6 +540,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}, izlaisti {{skips}} melnraksti.',
     tableLayout: 'Tabula',
+    treeLayout: 'Koks',
     takeOver: 'Pārņemt',
     theme: 'Tēma',
     thisLanguage: 'Latviešu',

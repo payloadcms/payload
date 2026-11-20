@@ -554,6 +554,7 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
     tableLayout: 'Tableau',
+    treeLayout: 'Arbre',
     takeOver: 'Prendre en charge',
     theme: 'Thème',
     thisLanguage: 'Français',

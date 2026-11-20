@@ -529,6 +529,7 @@ export const arTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'تمت إعادة فهرسة {{count}} من أصل {{total}} مستند من {{collections}} وتخطي {{skips}} مسودة.',
     tableLayout: 'جدول',
+    treeLayout: 'شجرة',
     takeOver: 'تولي',
     theme: 'سمة',
     thisLanguage: 'العربية',

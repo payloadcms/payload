@@ -549,6 +549,7 @@ export const itTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sono stati reindicizzati con successo {{count}} dei {{total}} documenti da {{collections}}, e {{skips}} bozze sono state saltate.',
     tableLayout: 'Tabella',
+    treeLayout: 'Albero',
     takeOver: 'Prendi il controllo',
     theme: 'Tema',
     thisLanguage: 'Italiano',

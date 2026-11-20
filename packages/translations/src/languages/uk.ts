@@ -537,6 +537,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успішно переіндексовано {{count}} із {{total}} документів із {{collections}}, пропущено {{skips}} чернеток.',
     tableLayout: 'Таблиця',
+    treeLayout: 'Дерево',
     takeOver: 'Перехопити',
     theme: 'Тема',
     thisLanguage: 'Українська',

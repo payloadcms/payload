@@ -525,6 +525,7 @@ export const heTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'ביצוע מחדש של אינדקס בוצע בהצלחה על {{count}} מתוך {{total}} מסמכים מתוך {{collections}}, ו-{{skips}} טיוטות הושמטו.',
     tableLayout: 'טבלה',
+    treeLayout: 'עץ',
     takeOver: 'קח פיקוד',
     theme: 'ערכת עיצוב',
     thisLanguage: 'עברית',

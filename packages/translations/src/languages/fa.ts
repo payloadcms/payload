@@ -533,6 +533,7 @@ export const faTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'با موفقیت {{count}} از {{total}} سند از {{collections}} بازشاخص‌گذاری شد و {{skips}} پیش‌نویس رد شد.',
     tableLayout: 'جدول',
+    treeLayout: 'درخت',
     takeOver: 'ادامه ویرایش',
     theme: 'قالب',
     thisLanguage: 'فارسی',

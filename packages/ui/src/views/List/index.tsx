@@ -1,8 +1,6 @@
 import type {
   AdminViewServerProps,
-  CollectionPreferences,
   Column,
-  ColumnPreference,
   CurrentHierarchyItem,
   HierarchyViewData,
   ListQuery,
@@ -15,7 +13,7 @@ import type {
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { docAccessOperation } from 'payload'
+import { canReadNestedDocsTree, docAccessOperation } from 'payload'
 import {
   appendDateTimezoneSelectFields,
   combineWhereConstraints,
@@ -43,13 +41,14 @@ import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.j
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
-import { upsertPreferences } from '../../utilities/upsertPreferences.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
+import { getNestedDocsRootWhere } from './getNestedDocsRootWhere.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { resolveDocumentListItemURL } from './resolveDocumentListItemURL.js'
+import { resolveListPreferences } from './resolveListPreferences.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 import './index.css'
 
@@ -142,35 +141,36 @@ export const renderListView = async (
     throw new Error('not-found')
   }
 
-  const query: ListQuery = queryFromArgs || queryFromReq
-
-  const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
+  const query: ListQuery = { ...(queryFromArgs || queryFromReq) }
+  const hasTreeLayout =
+    canReadNestedDocsTree({ collectionConfig }) && viewType === 'list' && !drawerSlug
 
   query.queryByGroup =
     query?.queryByGroup && typeof query.queryByGroup === 'string'
       ? JSON.parse(query.queryByGroup)
       : query?.queryByGroup
 
-  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
-    key: `collection-${collectionSlug}`,
+  const { collectionPreferences, isSavedTreeLayout } = await resolveListPreferences({
+    collectionSlug,
+    hasTreeLayout,
+    query,
     req,
-    value: {
-      columns: columnsFromQuery,
-      groupBy: query?.groupBy,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: query?.preset,
-      sort: query?.sort as string,
-    },
   })
+  const documentLayout =
+    collectionPreferences?.documentLayout === 'tree' && !hasTreeLayout
+      ? 'table'
+      : collectionPreferences?.documentLayout
 
   let queryPreset: QueryPreset | undefined
   let queryPresetPermissions: SanitizedCollectionPermission | undefined =
     permissions?.collections?.['payload-query-presets']
 
-  if (collectionPreferences?.preset) {
+  const activePreset = isSavedTreeLayout ? query.preset : collectionPreferences?.preset
+
+  if (activePreset) {
     try {
       queryPreset = (await payload.findByID({
-        id: collectionPreferences?.preset,
+        id: activePreset,
         collection: 'payload-query-presets',
         depth: 0,
         overrideAccess: false,
@@ -196,7 +196,10 @@ export const renderListView = async (
   if (queryPreset?.where && !query.where) {
     query.where = queryPreset.where
   }
-  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+  query.groupBy =
+    query.groupBy ??
+    queryPreset?.groupBy ??
+    (isSavedTreeLayout ? undefined : collectionPreferences?.groupBy)
 
   const columnPreference = query.columns
     ? transformColumnsToPreferences(query.columns)
@@ -205,9 +208,13 @@ export const renderListView = async (
 
   query.page = isNumber(query?.page) ? Number(query.page) : 0
 
-  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+  query.limit =
+    (isSavedTreeLayout && isNumber(query.limit) ? Number(query.limit) : undefined) ||
+    collectionPreferences?.limit ||
+    collectionConfig.admin.pagination.defaultLimit
 
   query.sort =
+    (isSavedTreeLayout ? query.sort : undefined) ||
     collectionPreferences?.sort ||
     (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
@@ -217,7 +224,7 @@ export const renderListView = async (
     limit: query.limit,
     page: query.page,
     req,
-    sort: query.sort,
+    sort: Array.isArray(query.sort) ? query.sort.join(',') : query.sort,
   })
 
   let whereWithMergedSearch = mergeListSearchAndWhere({
@@ -321,15 +328,21 @@ export const renderListView = async (
     select._status = true
   }
 
-  // Check for hierarchy parent param
   const isHierarchyCollection = Boolean(collectionConfig.hierarchy) && !collectionConfig.nestedDocs
   const hierarchyParentFieldName =
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : 'parent'
   const isHierarchyView = viewType === 'hierarchy'
+  const nestedDocsRootWhere = getNestedDocsRootWhere({
+    documentLayout,
+    parentFieldName: hierarchyParentFieldName,
+    query,
+    where: whereWithMergedSearch,
+  })
   let hierarchyParentId: null | number | string = null
 
+  // Check for hierarchy parent param
   if (isHierarchyCollection) {
     const parentParam = searchParams?.[hierarchyParentFieldName]
     if (parentParam === 'null' || parentParam === undefined) {
@@ -429,7 +442,7 @@ export const renderListView = async (
         sort: query?.sort,
         trash,
         user,
-        where: whereWithMergedSearch,
+        where: nestedDocsRootWhere ?? whereWithMergedSearch,
       })
 
       // Enrich documents with correct display status for drafts
@@ -603,13 +616,14 @@ export const renderListView = async (
       disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
-      documentLayout: collectionPreferences?.documentLayout,
+      documentLayout,
       documentURLs,
       enableRowSelections,
       groupedData,
       hasCreatePermission,
       hasDeletePermission,
       hasTrashPermission,
+      hasTreeLayout,
       hierarchyData,
       HierarchyIcon,
       listPreferences: collectionPreferences,

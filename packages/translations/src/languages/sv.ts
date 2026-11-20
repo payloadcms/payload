@@ -543,6 +543,7 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Omindexerade {{count}} av {{total}} dokument från {{collections}}. {{skips}} utkast hoppades över.',
     tableLayout: 'Tabell',
+    treeLayout: 'Träd',
     takeOver: 'Ta över',
     theme: 'Tema',
     thisLanguage: 'Svenska',

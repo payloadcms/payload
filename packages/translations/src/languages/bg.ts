@@ -542,6 +542,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно преиндексирани {{count}} от общо {{total}} документа от {{collections}} и пропуснати {{skips}} чернови.',
     tableLayout: 'Таблица',
+    treeLayout: 'Дърво',
     takeOver: 'Поемане',
     theme: 'Тема',
     thisLanguage: 'Български',

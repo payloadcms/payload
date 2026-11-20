@@ -541,6 +541,7 @@ export const plTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Pomyślnie ponownie zindeksowano {{count}} z {{total}} dokumentów z {{collections}}, pomijając {{skips}} szkice.',
     tableLayout: 'Tabela',
+    treeLayout: 'Drzewo',
     takeOver: 'Przejąć',
     theme: 'Motyw',
     thisLanguage: 'Polski',

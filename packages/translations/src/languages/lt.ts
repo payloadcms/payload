@@ -546,6 +546,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
     tableLayout: 'Lentelė',
+    treeLayout: 'Medis',
     takeOver: 'Perimti',
     theme: 'Tema',
     thisLanguage: 'Lietuvių',

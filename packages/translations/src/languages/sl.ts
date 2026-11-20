@@ -540,6 +540,7 @@ export const slTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Uspešno je bilo ponovo indeksiranih {{count}} od skupno {{total}} dokumentov iz {{collections}}, in {{skips}} osnutkov je bilo preskočenih.',
     tableLayout: 'Tabela',
+    treeLayout: 'Drevo',
     takeOver: 'Prevzemi',
     theme: 'Tema',
     thisLanguage: 'Slovenščina',
