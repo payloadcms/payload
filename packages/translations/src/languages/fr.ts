@@ -484,6 +484,7 @@ export const frTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Écraser les données existantes du champ',
     pageNotFound: 'Page non trouvée',
     pageNumberRange: 'Saisissez un numéro de page de 1 à {{totalPages}}.',
+    parentDocument: 'Document parent',
     password: 'Mot de passe',
     pasteBelow: 'Coller ci-dessous',
     pasteField: 'Coller le champ',

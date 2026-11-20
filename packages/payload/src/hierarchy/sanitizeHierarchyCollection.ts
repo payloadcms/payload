@@ -80,6 +80,11 @@ export const sanitizeHierarchyCollection = (
       parentFieldName,
     })
 
+    if (collectionConfig.nestedDocs) {
+      parentField.label = ({ t }) => t('general:parentDocument')
+      parentField.filterOptions = ({ id }) => (id == null ? true : { id: { not_equals: id } })
+    }
+
     collectionConfig.fields.unshift(parentField)
   }
 
