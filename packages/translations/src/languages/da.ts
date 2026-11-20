@@ -470,6 +470,7 @@ export const daTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden blev ikke fundet',
     pageNumberRange: 'Indtast et sidetal fra 1 til {{totalPages}}.',
+    parentDocument: 'Overordnet dokument',
     password: 'Adgangskode',
     pasteBelow: 'Indsæt nedenfor',
     pasteField: 'Indsæt felt',

@@ -472,6 +472,7 @@ export const plTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Nadpisz istniejące dane pola',
     pageNotFound: 'Strona nie znaleziona',
     pageNumberRange: 'Wpisz numer strony od 1 do {{totalPages}}.',
+    parentDocument: 'Dokument nadrzędny',
     password: 'Hasło',
     pasteBelow: 'Wklej poniżej',
     pasteField: 'Wklej pole',

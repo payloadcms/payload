@@ -5,6 +5,7 @@ function createClientTranslationKeys<T extends DefaultTranslationKeys[]>(keys: T
 }
 
 export const clientTranslationKeys = createClientTranslationKeys([
+  'general:parentDocument',
   'authentication:account',
   'authentication:accountOfCurrentUser',
   'authentication:accountVerified',
