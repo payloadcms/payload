@@ -31,10 +31,11 @@
   "scripts": {
     "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
     "build:copy-docs": "node scripts/copy-migration-guide.mjs",
+    "build:package-list": "node ../../tools/releaser/scripts/generate-package-list.mjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo} src/payload-package-names.ts",
     "test": "vitest --run",
-    "typecheck": "tsc"
+    "typecheck": "pnpm build:package-list && tsc"
   },
   "dependencies": {
     "@clack/prompts": "1.2.0",

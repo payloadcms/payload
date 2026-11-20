@@ -16,11 +16,7 @@ import { resolveDefaultTag } from './defaultTag.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { renderReport } from './report.js'
 import { resolveVersions } from './resolveVersions.js'
-import {
-  isPayloadEslintPackage,
-  isPlaceholderSpec,
-  rewritePackageJson,
-} from './rewritePackageJson.js'
+import { isPayloadPackage, isPlaceholderSpec, rewritePackageJson } from './rewritePackageJson.js'
 import { runInstall } from './runInstall.js'
 import { MIGRATION_GUIDE_RELATIVE_PATH, RUNBOOK_RELATIVE_PATH } from './types.js'
 
@@ -179,12 +175,7 @@ function verifyResolution(
   const rows: VersionReportRow[] = []
   const deps = { ...asRecord(data.dependencies), ...asRecord(data.devDependencies) }
   for (const name of Object.keys(deps)) {
-    if (name !== 'payload' && !name.startsWith('@payloadcms/')) {
-      continue
-    }
-    // eslint packages are versioned independently, so they are not part of the
-    // lockstep-pinned set and cannot be verified against the payload version.
-    if (isPayloadEslintPackage(name)) {
+    if (!isPayloadPackage(name)) {
       continue
     }
     // Workspace/catalog/link specs were left unpinned, so there is no exact

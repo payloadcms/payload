@@ -72,13 +72,20 @@ describe('Payload project updates', () => {
     expect(fse.existsSync(path.join(projectDir, 'src/app'))).toBe(false)
   })
 
-  it('should update every installed Payload dependency to one version without a Next config', async () => {
+  it('should update only core release packages without a Next config', async () => {
     fse.writeJsonSync(path.join(projectDir, 'package.json'), {
       dependencies: {
         '@payloadcms/db-mongodb': '^3.0.0',
+        '@payloadcms/plugin-publication-workflows': '1.4.1',
         '@payloadcms/richtext-lexical': '^3.0.0',
         payload: '^3.0.0',
         react: '^19.0.0',
+      },
+      devDependencies: {
+        '@payloadcms/eslint-config': '1.0.0',
+        '@payloadcms/plugin-visual-editing': '1.0.0',
+        '@payloadcms/unknown-package': '1.0.0',
+        'create-payload-app': '^3.0.0',
       },
     })
 
@@ -96,9 +103,25 @@ describe('Payload project updates', () => {
         'payload@4.2.0',
         '@payloadcms/db-mongodb@4.2.0',
         '@payloadcms/richtext-lexical@4.2.0',
+        'create-payload-app@4.2.0',
       ],
       projectDir,
     })
+  })
+
+  it('should skip installation when only independently versioned packages differ', async () => {
+    fse.writeJsonSync(path.join(projectDir, 'package.json'), {
+      dependencies: {
+        '@payloadcms/plugin-publication-workflows': '1.4.1',
+        '@payloadcms/ui': '4.2.0',
+        payload: '4.2.0',
+      },
+    })
+
+    const result = await updatePayloadPackages({ projectDir, versionOrTag: 'beta' })
+
+    expect(result.success).toBe(true)
+    expect(mocks.installPackages).not.toHaveBeenCalled()
   })
 
   it('should update a stale Payload package when payload is already at the target version', async () => {

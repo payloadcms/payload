@@ -76,6 +76,7 @@ export default defineConfig({
             '.github/scripts/**/*.spec.mjs',
           ],
           name: 'unit',
+          globalSetup: ['tools/releaser/scripts/setup-package-lists.mjs'],
           environment: 'node',
           execArgv: ['--expose-gc'],
         },

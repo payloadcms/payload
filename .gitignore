@@ -378,3 +378,7 @@ test/payload.db
 test/evals/eval-results/index.html
 # Versioned eval run snapshots (local only — used for run comparison in dashboard)
 test/evals/eval-results/runs/
+
+# Generated core release lists bundled by the upgrade CLIs
+/packages/codemod/src/payload-package-names.ts
+/packages/create-payload-app/src/payload-package-names.ts

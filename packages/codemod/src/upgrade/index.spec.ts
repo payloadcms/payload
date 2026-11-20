@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
@@ -116,5 +116,44 @@ describe('runUpgrade', () => {
 
     expect(spawn).not.toHaveBeenCalled()
     expect(runTransforms).not.toHaveBeenCalled()
+  })
+
+  it('should verify core packages without requiring enterprise packages to match', async () => {
+    const dir = makeProject()
+
+    try {
+      writeFileSync(
+        join(dir, 'package.json'),
+        JSON.stringify({
+          dependencies: { payload: '^3.0.0', '@payloadcms/plugin-publication-workflows': '1.4.1' },
+        }),
+      )
+      mkdirSync(join(dir, 'node_modules/payload'), { recursive: true })
+      writeFileSync(
+        join(dir, 'node_modules/payload/package.json'),
+        JSON.stringify({
+          version: '4.0.0-canary.20',
+        }),
+      )
+      mkdirSync(join(dir, 'node_modules/@payloadcms/plugin-publication-workflows'), {
+        recursive: true,
+      })
+      writeFileSync(
+        join(dir, 'node_modules/@payloadcms/plugin-publication-workflows/package.json'),
+        JSON.stringify({
+          version: '1.4.1',
+        }),
+      )
+
+      const result = await runUpgrade(
+        { flags: { dry: false, force: true, tag: 'canary' }, path: dir },
+        makeDeps(),
+        { runTransforms: vi.fn().mockResolvedValue({ failed: false, results: [] }) },
+      )
+
+      expect(result.failed).toBe(false)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 })
