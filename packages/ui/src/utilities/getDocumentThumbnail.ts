@@ -108,25 +108,46 @@ function getThumbnailSource({
   doc,
   useAsThumbnail,
 }: GetDocumentThumbnailArgs): ThumbnailSource | undefined {
-  const value = useAsThumbnail ? doc[useAsThumbnail] : undefined
-  const firstValue = Array.isArray(value) ? value[0] : value
-  const candidate = Array.isArray(value)
-    ? firstValue
-    : firstValue && typeof firstValue === 'object'
-      ? firstValue
-      : doc
-  const isPolymorphic =
-    candidate && typeof candidate === 'object' && 'relationTo' in candidate && 'value' in candidate
-  const thumbnailDoc = isPolymorphic ? candidate.value : candidate
+  const candidate = getThumbnailCandidate({ doc, useAsThumbnail })
 
-  if (!thumbnailDoc || typeof thumbnailDoc !== 'object') {
+  if (!isRecord(candidate)) {
+    return undefined
+  }
+
+  if (candidate === doc) {
+    return { isFieldValue: false, upload: doc }
+  }
+
+  if (!('relationTo' in candidate && 'value' in candidate)) {
+    return { isFieldValue: true, upload: candidate }
+  }
+
+  if (!isRecord(candidate.value)) {
     return undefined
   }
 
   return {
-    isFieldValue: candidate !== doc,
-    relationTo:
-      isPolymorphic && typeof candidate.relationTo === 'string' ? candidate.relationTo : undefined,
-    upload: thumbnailDoc as Record<string, unknown>,
+    isFieldValue: true,
+    relationTo: typeof candidate.relationTo === 'string' ? candidate.relationTo : undefined,
+    upload: candidate.value,
   }
+}
+
+/** The first `useAsThumbnail` value, or the document itself when the field holds no object. */
+function getThumbnailCandidate({ doc, useAsThumbnail }: GetDocumentThumbnailArgs): unknown {
+  const value = useAsThumbnail ? doc[useAsThumbnail] : undefined
+
+  if (Array.isArray(value)) {
+    return value[0]
+  }
+
+  if (isRecord(value)) {
+    return value
+  }
+
+  return doc
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
