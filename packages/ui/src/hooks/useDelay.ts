@@ -20,7 +20,7 @@ export const useDelay = (delay: number, triggerOnMount = false): Result => {
 
   React.useEffect(() => {
     if (triggerOnMount) {
-      triggerDelay()
+      return triggerDelay()
     }
   }, [triggerDelay, triggerOnMount])
 
