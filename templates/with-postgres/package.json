@@ -19,17 +19,17 @@
     "ci": "payload migrate && pnpm build"
   },
   "dependencies": {
-    "@payloadcms/next": "3.94.0",
-    "@payloadcms/richtext-lexical": "3.94.0",
-    "@payloadcms/ui": "3.94.0",
+    "@payloadcms/next": "3.94.1",
+    "@payloadcms/richtext-lexical": "3.94.1",
+    "@payloadcms/ui": "3.94.1",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "16.4.6",
-    "payload": "3.94.0",
+    "payload": "3.94.1",
     "react": "19.2.9",
     "react-dom": "19.2.9",
     "sharp": "0.35.4",
-    "@payloadcms/db-postgres": "3.94.0"
+    "@payloadcms/db-postgres": "3.94.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
