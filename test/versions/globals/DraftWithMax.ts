@@ -52,6 +52,10 @@ const DraftWithMaxGlobal: GlobalConfig = {
       required: true,
       localized: true,
     },
+    {
+      name: 'description',
+      type: 'text',
+    },
   ],
 }
 

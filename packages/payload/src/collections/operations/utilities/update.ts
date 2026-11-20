@@ -116,6 +116,7 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const incomingData = deepCopyObjectSimple(data)
   const nextFileData =
     collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
       ? deepCopyObjectSimple(data)
@@ -529,6 +530,7 @@ export const updateDocument = async <
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,
+        draftData: incomingData,
         operation: 'update',
         payload,
         publish: isExplicitPublish,

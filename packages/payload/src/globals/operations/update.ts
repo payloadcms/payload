@@ -144,6 +144,7 @@ export const updateOperation = async <
     } = args
 
     let { data } = args
+    const incomingData = deepCopyObjectSimple(data)
 
     validateAllLocalesPublicationFlags({
       publishAllLocales: publishAllLocalesArg,
@@ -577,6 +578,7 @@ export const updateOperation = async <
         autosave,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,
+        draftData: incomingData,
         global: globalConfig,
         operation: 'update',
         payload,
