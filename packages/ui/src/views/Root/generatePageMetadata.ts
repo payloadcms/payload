@@ -18,8 +18,8 @@ const oneSegmentMetaKeys: Record<string, AdminViewKey> = {
   'create-first-user': 'createFirstUser',
   forgot: 'forgot',
   login: 'login',
-  logout: 'unauthorized',
-  'logout-inactivity': 'unauthorized',
+  logout: 'logout',
+  'logout-inactivity': 'logoutInactivity',
   unauthorized: 'unauthorized',
 }
 
