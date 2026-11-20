@@ -259,7 +259,11 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
           const isDisabling = clickState === 'disabled'
           child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
           if (isButton) {
-            child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+            if (isDisabling) {
+              child.setAttribute('disabled', 'disabled')
+            } else {
+              child.removeAttribute('disabled')
+            }
           }
         })
     }
