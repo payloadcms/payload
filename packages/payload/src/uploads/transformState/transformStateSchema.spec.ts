@@ -1,5 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
-
+import { compile } from 'json-schema-to-typescript'
 import { describe, expect, it } from 'vitest'
 
 import type { Config } from '../../config/types.js'
@@ -34,7 +34,9 @@ describe('transformStateSchema', () => {
     }
     // Other (transformer-owned) keys are allowed, typed as JSON values so the
     // generated `_transforms` type stays serialisable (fixes #19783).
-    expect(objectSchema.additionalProperties).toStrictEqual({ $ref: '#/$defs/JsonValue' })
+    expect(objectSchema.additionalProperties).toStrictEqual({
+      $ref: '#/$defs/payload.JsonValue',
+    })
   })
 
   it('should type encoding settings as JSON values, not unknown', () => {
@@ -47,6 +49,61 @@ describe('transformStateSchema', () => {
 
     // Was `{ type: 'object' }`, which compiled to `{ [k: string]: unknown }`
     // and broke TanStack Start's createServerFn serialisability check (#19783).
-    expect(encoding.additionalProperties).toStrictEqual({ $ref: '#/$defs/JsonValue' })
+    expect(encoding.additionalProperties).toStrictEqual({
+      $ref: '#/$defs/payload.JsonValue',
+    })
+  })
+
+  it('should type untyped custom transform values as JSON values, not unknown', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [{ slug: 'media', fields: [], upload: true }],
+      upload: {
+        transformers: [
+          {
+            slug: 'test-transformer',
+            mimeTypes: ['image/*'],
+            transformDefinitions: [
+              { key: 'custom', schema: { type: 'object' } },
+              {
+                key: 'nested',
+                schema: { type: 'object', properties: { meta: { type: 'object' } } },
+              },
+            ],
+          },
+        ],
+      },
+    }
+
+    const { jsonSchema } = configToJSONSchema(sanitizeConfig(config), 'text')
+    const objectSchema = (jsonSchema.$defs?.UploadTransforms?.anyOf as JSONSchema4[])[0]!
+
+    // A custom definition with an untyped object schema compiled to
+    // `{ [k: string]: unknown }`, which is not assignable to the `_transforms`
+    // `[k: string]: JsonValue` index signature, so the generated
+    // `UploadTransforms` interface failed to compile.
+    expect((objectSchema.properties!.custom as JSONSchema4).additionalProperties).toStrictEqual({
+      $ref: '#/$defs/payload.JsonValue',
+    })
+    expect(
+      ((objectSchema.properties!.nested as JSONSchema4).properties!.meta as JSONSchema4)
+        .additionalProperties,
+    ).toStrictEqual({ $ref: '#/$defs/payload.JsonValue' })
+
+    const compiled = await compile(jsonSchema, 'Config', {
+      bannerComment: '',
+      style: { singleQuote: true },
+      unreachableDefinitions: true,
+      cwd: process.cwd(),
+    })
+
+    expect(compiled).toMatch(/custom\?: \{\s*\[k: string\]: JsonValue;?\s*\}/)
+    // The `nested` shape keeps its declared `meta` property, and its
+    // open-ended values are JSON values too — an object without an
+    // `additionalProperties` rule compiles with a `[k: string]: unknown`
+    // index, which would break the `_transforms` index signature.
+    expect(compiled).toMatch(
+      /nested\?: \{\s*meta\?: \{\s*\[k: string\]: JsonValue;?\s*\};?\s*\[k: string\]: JsonValue;?\s*\}/,
+    )
   })
 })

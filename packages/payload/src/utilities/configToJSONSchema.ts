@@ -662,7 +662,7 @@ export function fieldsToJSONSchema({
             // serialisable (fixes #19783) instead of `{ [k: string]: unknown }`.
             fieldSchema = field.jsonSchema?.schema || {
               ...baseFieldSchema,
-              $ref: '#/$defs/JsonValue',
+              $ref: `#/$defs/${jsonValueDefinitionKey}`,
             }
 
             if (field.interfaceName && field.jsonSchema?.schema) {
@@ -1132,9 +1132,9 @@ export function entityToStandaloneJSONSchema({
     definitions.set('supportedTimezones', timezonesToJSONSchema(supportedTimezones))
   }
 
-  // JSON fields `$ref` JsonValue, which lives on the root config schema, so add it here.
-  if (schemaHasRef([schema, ...definitions.values()], '#/$defs/JsonValue')) {
-    definitions.set('JsonValue', jsonValueSchema)
+  // JSON fields `$ref` the shared definition, which lives on the root config schema, so add it here.
+  if (schemaHasRef([schema, ...definitions.values()], `#/$defs/${jsonValueDefinitionKey}`)) {
+    definitions.set(jsonValueDefinitionKey, jsonValueSchema)
   }
 
   return {
@@ -1496,8 +1496,17 @@ export function registerBlockInterface(
 }
 
 /**
+ * The `$defs` key of the shared `JsonValue` definition. `payload.`-prefixed
+ * keys are reserved for Payload's own definitions: an `interfaceName` becomes
+ * a TypeScript type name, so it cannot contain a `.`, which means a user
+ * `interfaceName` can never claim this key. It is listed last in the root
+ * `$defs` so no spread can replace it either.
+ */
+const jsonValueDefinitionKey = 'payload.JsonValue'
+
+/**
  * A recursive JSON value. Generated `json` fields reference this shared
- * definition (via `$ref: '#/$defs/JsonValue'`) so the generated types use a
+ * definition (via `$ref: '#/$defs/payload.JsonValue'`) so the generated types use a
  * serialisable `JsonValue` instead of `unknown`.
  *
  * `json-schema-to-typescript` compiles it to
@@ -1513,8 +1522,8 @@ const jsonValueSchema: JSONSchema4 = {
     { type: 'number' },
     { type: 'boolean' },
     { type: 'null' },
-    { type: 'array', items: { $ref: '#/$defs/JsonValue' } },
-    { type: 'object', additionalProperties: { $ref: '#/$defs/JsonValue' } },
+    { type: 'array', items: { $ref: `#/$defs/${jsonValueDefinitionKey}` } },
+    { type: 'object', additionalProperties: { $ref: `#/$defs/${jsonValueDefinitionKey}` } },
   ],
   title: 'JsonValue',
 }
@@ -1680,12 +1689,15 @@ export function configToJSONSchema(
 
   let jsonSchema: JSONSchema4 = {
     $defs: {
-      JsonValue: jsonValueSchema,
       supportedTimezones: timezoneDefinitions,
       ...entityDefinitions,
       ...widgetSchemas.definitions,
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,
+      // The shared `JsonValue` definition lives under its reserved key (see
+      // `jsonValueDefinitionKey`), listed last so a user `interfaceName` can
+      // never replace it — and it can never replace a user definition.
+      [jsonValueDefinitionKey]: jsonValueSchema,
     },
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     additionalProperties: false,

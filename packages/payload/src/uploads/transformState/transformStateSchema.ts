@@ -103,6 +103,109 @@ export function getTransformStateObjectSchema({
   }
 }
 
+/** `$ref` to the shared recursive `JsonValue` definition (see `configToJSONSchema`). */
+const jsonValueRef: JSONSchema4 = { $ref: '#/$defs/payload.JsonValue' }
+
+/**
+ * Rewrite a transformer-declared value schema so the type it compiles to is
+ * assignable to the `_transforms` `[k: string]: JsonValue` index signature.
+ *
+ * A declared schema such as `{ type: 'object' }` compiles to
+ * `{ [k: string]: unknown }`, and `unknown` is not assignable to `JsonValue`,
+ * so the generated `UploadTransforms` interface fails to compile. Object
+ * schemas without an `additionalProperties` rule get `JsonValue` additional
+ * properties instead, so their open-ended values stay JSON values — an object
+ * with declared properties keeps them, and the same rewrite applies to nested
+ * values. A schema with no constraining keywords at all accepts anything,
+ * which also compiles to `unknown`, so it becomes a `JsonValue` reference
+ * outright.
+ *
+ * This only affects the generated types: runtime validation still uses
+ * `getTransformStateObjectSchema`, which keeps the declared schema verbatim.
+ */
+function toSerialisableValueSchema(schema: JSONSchema4): JSONSchema4 {
+  const types = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : []
+
+  if (
+    schema.type === undefined &&
+    schema.properties === undefined &&
+    schema.additionalProperties === undefined &&
+    schema.items === undefined &&
+    schema.anyOf === undefined &&
+    schema.oneOf === undefined &&
+    schema.allOf === undefined &&
+    schema.$ref === undefined &&
+    schema.enum === undefined &&
+    schema.const === undefined &&
+    schema.format === undefined &&
+    schema.pattern === undefined
+  ) {
+    return { ...schema, $ref: jsonValueRef.$ref }
+  }
+
+  let next: JSONSchema4 = { ...schema }
+
+  const isObject =
+    types.includes('object') ||
+    schema.properties !== undefined ||
+    schema.additionalProperties !== undefined
+
+  if (isObject) {
+    const additionalProperties = schema.additionalProperties
+
+    if (additionalProperties === true) {
+      next = { ...next, additionalProperties: jsonValueRef }
+    } else if (additionalProperties === undefined) {
+      // An object without an `additionalProperties` rule compiles with a
+      // `[k: string]: unknown` index signature, which is not assignable to
+      // `JsonValue` — whether or not it declares `properties`. Type the
+      // extra values as JSON values instead. (An object with declared
+      // properties keeps them; only its open-ended values change.)
+      next = { ...next, additionalProperties: jsonValueRef }
+    } else if (typeof additionalProperties === 'object') {
+      next = {
+        ...next,
+        additionalProperties: toSerialisableValueSchema(additionalProperties),
+      }
+    }
+
+    if (schema.properties !== undefined) {
+      next = {
+        ...next,
+        properties: Object.fromEntries(
+          Object.entries(schema.properties).map(([key, value]) => [
+            key,
+            toSerialisableValueSchema(value as JSONSchema4),
+          ]),
+        ),
+      }
+    }
+  }
+
+  if (types.includes('array')) {
+    if (next.items === undefined) {
+      next = { ...next, items: jsonValueRef }
+    } else if (Array.isArray(next.items)) {
+      next = {
+        ...next,
+        items: next.items.map((item) => toSerialisableValueSchema(item as JSONSchema4)),
+      }
+    } else if (typeof next.items === 'object') {
+      next = { ...next, items: toSerialisableValueSchema(next.items as JSONSchema4) }
+    }
+  }
+
+  for (const key of ['anyOf', 'oneOf', 'allOf'] as const) {
+    const branches = next[key]
+
+    if (Array.isArray(branches)) {
+      next = { ...next, [key]: branches.map((branch) => toSerialisableValueSchema(branch)) }
+    }
+  }
+
+  return next
+}
+
 /** The `_transforms` field schema, which also allows `null`. */
 export function getTransformStateSchema({
   transformers,
@@ -116,19 +219,31 @@ export function getTransformStateSchema({
   // above compile to `{ [k: string]: unknown }` (fixes #19783).
   // Transformer-owned keys and the `encoding` settings are JSON values, so
   // they reference the shared recursive `JsonValue` definition (defined in
-  // `configToJSONSchema`'s top-level `$defs`) instead of `unknown`.
+  // `configToJSONSchema`'s top-level `$defs`, under the reserved
+  // `payload.JsonValue` key) instead of `unknown`.
   // This only affects the generated types: runtime validation still uses
   // `getTransformStateObjectSchema`, which stays permissive.
+  const properties: Record<string, JSONSchema4> = {}
+
+  for (const [key, schema] of Object.entries(objectSchema.properties ?? {})) {
+    // Built-in keys already have precise shapes. Transformer-declared keys are
+    // rewritten so the type they compile to stays assignable to the
+    // `_transforms` index signature.
+    properties[key] = builtInTransformKeys.includes(key)
+      ? schema
+      : toSerialisableValueSchema(schema)
+  }
+
   return {
     anyOf: [
       {
         ...objectSchema,
-        additionalProperties: { $ref: '#/$defs/JsonValue' },
+        additionalProperties: jsonValueRef,
         properties: {
-          ...objectSchema.properties,
+          ...properties,
           encoding: {
             type: 'object',
-            additionalProperties: { $ref: '#/$defs/JsonValue' },
+            additionalProperties: jsonValueRef,
             description: 'Encoding settings for the output format. Does not select the format.',
           },
         },
