@@ -76,7 +76,7 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
     '$',
 )
 
-const { afterAll, beforeAll, beforeEach, describe } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -1809,6 +1809,92 @@ describe('Uploads', () => {
       await expect(page.locator('.file-selections .file-selections__fileRowContainer')).toHaveCount(
         1,
       )
+    })
+
+    describe('on a 401 or 403', () => {
+      const uploadURL = /\/api\/bulk-uploads-hook-error(\?.*)?$/
+
+      afterEach(async () => {
+        await page.unroute(uploadURL)
+      })
+
+      for (const { name, errorToast, response } of [
+        {
+          name: '401',
+          errorToast: 'Unauthorized, you must be logged in to make this request.',
+          response: {
+            json: {
+              errors: [{ message: 'Unauthorized, you must be logged in to make this request.' }],
+            },
+            status: 401,
+          },
+        },
+        {
+          name: '403',
+          errorToast: 'You are not allowed to perform this action.',
+          response: {
+            json: { errors: [{ message: 'You are not allowed to perform this action.' }] },
+            status: 403,
+          },
+        },
+        {
+          name: '403 without a JSON body',
+          errorToast: 'Failed to save 2 files',
+          response: { body: '<html>Forbidden</html>', contentType: 'text/html', status: 403 },
+        },
+      ]) {
+        test(`should stop uploading and keep the remaining files on a ${name}`, async () => {
+          await page.goto(bulkUploadsHookErrorURL.list)
+
+          await expect(page.locator('.list-header__title')).toBeVisible()
+
+          const bulkUploadButton = page.locator('.list-header__title-actions button', {
+            hasText: 'Bulk Upload',
+          })
+          await expect(bulkUploadButton).toBeEnabled()
+
+          const dropzoneInput = page.locator('.dropzone input[type="file"]')
+          await expect(async () => {
+            await bulkUploadButton.click()
+            await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+          }).toPass({ intervals: [500], timeout: 5000 })
+
+          await dropzoneInput.setInputFiles([
+            path.resolve(dirname, './image.png'),
+            path.resolve(dirname, './small.png'),
+            path.resolve(dirname, './test-image.jpg'),
+          ])
+
+          let uploadCount = 0
+
+          await page.route(uploadURL, async (route) => {
+            if (route.request().method() !== 'POST') {
+              return route.fallback()
+            }
+
+            uploadCount += 1
+
+            if (uploadCount === 1) {
+              return route.continue()
+            }
+
+            return route.fulfill(response)
+          })
+
+          await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+            'Successfully saved 1 files',
+          )
+          await expect(
+            page.locator('.payload-toast-container .toast-error', { hasText: errorToast }),
+          ).toHaveCount(1)
+          await expect(
+            page.locator('.file-selections .file-selections__fileRowContainer'),
+          ).toHaveCount(2)
+          await expect.poll(() => uploadCount).toBe(2)
+        })
+      }
     })
   })
 
