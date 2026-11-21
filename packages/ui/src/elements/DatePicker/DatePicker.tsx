@@ -175,6 +175,7 @@ const DatePicker: React.FC<Props> = (props) => {
         dateFormat: overrides?.dateFormat ?? dateFormat,
         inputValue,
         locale: overrides?.locale,
+        rangeSeparator: (overrides as { rangeSeparator?: string } | undefined)?.rangeSeparator,
       })
     ) {
       const picker = datePickerRef.current
@@ -185,15 +186,36 @@ const DatePicker: React.FC<Props> = (props) => {
     }
     rejectedInputValueRef.current = undefined
 
-    if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
-      const tzOffset = incomingDate.getTimezoneOffset() / 60
-      newDate.setHours(12 - tzOffset, 0)
+    const normalizeSelectedDate = (dateValue: unknown) => {
+      if (!(dateValue instanceof Date)) {
+        return
+      }
+
+      if (['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
+        const tzOffset = dateValue.getTimezoneOffset() / 60
+        const targetHours = 12 - tzOffset
+        if (targetHours >= 0 && targetHours < 24) {
+          dateValue.setHours(targetHours, 0)
+        } else {
+          dateValue.setHours(12, 0)
+        }
+      }
+
+      if (!dateFormat.includes('SSS')) {
+        // Unless the dateFormat includes milliseconds, set milliseconds to 0
+        // This is to ensure that the timestamp is consistent with the displayFormat
+        dateValue.setMilliseconds(0)
+      }
     }
 
-    if (newDate instanceof Date && !dateFormat.includes('SSS')) {
-      // Unless the dateFormat includes milliseconds, set milliseconds to 0
-      // This is to ensure that the timestamp is consistent with the displayFormat
-      newDate.setMilliseconds(0)
+    if (Array.isArray(newDate)) {
+      newDate.forEach((dateValue, index) => {
+        const clonedDate = dateValue instanceof Date ? new Date(dateValue.getTime()) : dateValue
+        normalizeSelectedDate(clonedDate)
+        newDate[index] = clonedDate
+      })
+    } else {
+      normalizeSelectedDate(newDate)
     }
 
     if (typeof onChangeFromProps === 'function') {
