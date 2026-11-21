@@ -71,6 +71,27 @@ type Args = {
   triggerHooks?: boolean
 } & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
+/**
+ * A localized group/tab is stored as `{ [locale]: fields }`. With `flattenLocales: false` the
+ * value may instead already be flattened (e.g. live preview merges data that was flattened
+ * client-side), in which case its keys are field names and must not be traversed as locales.
+ */
+const isLocaleKeyedValue = (value: unknown, req: PayloadRequest): boolean => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return true
+  }
+
+  const localeCodes = req.payload.config.localization
+    ? req.payload.config.localization.localeCodes
+    : undefined
+
+  if (!localeCodes) {
+    return true
+  }
+
+  return Object.keys(value).every((key) => localeCodes.includes(key))
+}
+
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
@@ -689,7 +710,11 @@ export const promise = async ({
             ? (select?.[field.name] as SelectType)
             : undefined
 
-        if (shouldLocalizeField && !shouldHoistLocalizedValue) {
+        if (
+          shouldLocalizeField &&
+          !shouldHoistLocalizedValue &&
+          isLocaleKeyedValue(siblingDoc[field.name], req)
+        ) {
           Object.values(siblingDoc[field.name] || {}).forEach((localizedData) => {
             traverseFields({
               blockData,
@@ -898,7 +923,11 @@ export const promise = async ({
           typeof select?.[field.name] === 'object'
             ? (select?.[field.name] as SelectType)
             : undefined
-        if (shouldLocalizeField && !shouldHoistLocalizedValue) {
+        if (
+          shouldLocalizeField &&
+          !shouldHoistLocalizedValue &&
+          isLocaleKeyedValue(siblingDoc[field.name], req)
+        ) {
           Object.values(siblingDoc[field.name] || {}).forEach((localizedData) => {
             traverseFields({
               blockData,
