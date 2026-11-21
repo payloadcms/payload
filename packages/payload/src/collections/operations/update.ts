@@ -60,6 +60,10 @@ import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
+import {
+  readDataStatus,
+  resolveRequestedStatusAfterBeforeOperation,
+} from './utilities/resolveRequestedStatusAfterBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -135,6 +139,16 @@ export const updateOperation = async <
     })
 
     const initialCollectionConfig = args.collection.config
+    // Capture before normalizeAllLocalesPublicationStatus may write a generated `_status`
+    // (e.g. locale `all` defaulting to publish-all). Trash/restore base selection needs the
+    // caller's original intent (#19449).
+    const hasRequestedStatus =
+      typeof args.data === 'object' &&
+      args.data !== null &&
+      Object.prototype.hasOwnProperty.call(args.data, '_status')
+    const requestedStatus = hasRequestedStatus
+      ? (args.data as { _status?: unknown })._status
+      : undefined
     const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
@@ -150,6 +164,8 @@ export const updateOperation = async <
       data: args.data,
       status: initialAllLocalesPublicationStatus,
     })
+    // Capture after normalize so a generated `_status` is not treated as hook intent below.
+    const statusBeforeOperation = readDataStatus(args.data)
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -159,6 +175,13 @@ export const updateOperation = async <
       collection: args.collection.config,
       operation: 'update',
       overrideAccess: args.overrideAccess!,
+    })
+
+    const resolvedRequestedStatus = resolveRequestedStatusAfterBeforeOperation({
+      hasRequestedStatus,
+      requestedStatus,
+      statusAfterOperation: readDataStatus(args.data),
+      statusBeforeOperation,
     })
 
     const {
@@ -430,6 +453,7 @@ export const updateOperation = async <
           draftArg,
           fallbackLocale: fallbackLocale!,
           filesToUpload: generatedFileData.files,
+          hasRequestedStatus: resolvedRequestedStatus.hasRequestedStatus,
           locale: locale!,
           overrideAccess: overrideAccess!,
           overrideLock: overrideLock!,
@@ -437,6 +461,7 @@ export const updateOperation = async <
           populate,
           publishAllLocales,
           req: documentReq,
+          requestedStatus: resolvedRequestedStatus.requestedStatus,
           select: select!,
           shouldManageLocalFiles: true,
           showHiddenFields: showHiddenFields!,

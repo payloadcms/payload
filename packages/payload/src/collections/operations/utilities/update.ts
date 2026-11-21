@@ -35,6 +35,10 @@ import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { runLocalFileUpdate } from '../../../uploads/fileVersioning/archive.js'
+import {
+  getLocalizedUploadProperties,
+  restoreUploadDataFromDocument,
+} from '../../../uploads/sanitizeUploadData.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
@@ -51,8 +55,10 @@ import {
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 import { resolveLocalizedStatus } from '../../../versions/resolveLocalizedStatus.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
+import { resolveTrashRestoreDocs } from './resolveTrashRestoreDocs.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
@@ -64,6 +70,12 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   draftArg: boolean
   fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
+  /**
+   * True when `requestedStatus` was captured from the caller's data before publish-all /
+   * draft normalization. Distinguishes "caller omitted `_status`" from direct callers that
+   * do not pass these fields at all.
+   */
+  hasRequestedStatus?: boolean
   id: number | string
   locale: string
   overrideLock: boolean
@@ -71,6 +83,12 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   populate?: PopulateType
   publishAllLocales?: boolean
   req: PayloadRequest
+  /**
+   * Caller's `_status` before `normalizeAllLocalesPublicationStatus` / draft generation may
+   * rewrite `data._status`. Required for correct trash/restore base selection when locale
+   * `all` defaults to publish-all (#19449).
+   */
+  requestedStatus?: unknown
   select: SelectType
   shouldManageLocalFiles: boolean
   showHiddenFields: boolean
@@ -100,10 +118,11 @@ export const updateDocument = async <
   config,
   data,
   depth,
-  docWithLocales,
+  docWithLocales: incomingDocWithLocales,
   draftArg,
   fallbackLocale,
   filesToUpload,
+  hasRequestedStatus,
   locale,
   overrideAccess,
   overrideLock,
@@ -111,21 +130,26 @@ export const updateDocument = async <
   populate,
   publishAllLocales: publishAllLocalesArg,
   req,
+  requestedStatus: requestedStatusArg,
   select,
   shouldManageLocalFiles,
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-  const nextFileData =
-    collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
-      ? deepCopyObjectSimple(data)
-      : undefined
-
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
     unpublishAllLocales: unpublishAllLocalesArg,
   })
 
+  // updateByID / bulk update always pass hasRequestedStatus so we keep the pre-normalize
+  // intent (including "caller omitted `_status`"). Direct callers omit the flag and fall
+  // back to data._status before draft / publish-all generation below.
+  const requestedStatus =
+    typeof hasRequestedStatus === 'boolean'
+      ? hasRequestedStatus
+        ? requestedStatusArg
+        : undefined
+      : data._status
   const publishAllLocales = resolvePublishAllLocales({
     draft: draftArg,
     hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
@@ -145,9 +169,97 @@ export const updateDocument = async <
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
-  if (allLocalesPublicationStatus || isSavingDraft) {
+  // Implicit trash/restore only sends `deletedAt`. Locale `all` still defaults to publish-all and
+  // may already have written a generated `_status` upstream — drop it so we keep the main
+  // document's per-locale statuses instead of publishing every locale.
+  const isImplicitTrashOrRestore =
+    collectionConfig.trash &&
+    typeof data === 'object' &&
+    data !== null &&
+    'deletedAt' in data &&
+    typeof hasRequestedStatus === 'boolean' &&
+    !hasRequestedStatus &&
+    publishAllLocalesArg !== true &&
+    !unpublishAllLocales &&
+    !draftArg
+
+  if (isImplicitTrashOrRestore) {
+    if (
+      allLocalesPublicationStatus &&
+      Object.prototype.hasOwnProperty.call(data, '_status') &&
+      data._status === allLocalesPublicationStatus
+    ) {
+      delete data._status
+    }
+  } else if (allLocalesPublicationStatus || isSavingDraft) {
     data._status = allLocalesPublicationStatus ?? 'draft'
   }
+
+  let docWithLocales = incomingDocWithLocales
+  let versionDocWithLocales: (JsonObject & TypeWithID) | undefined
+
+  // Trash/restore of a published doc with a pending draft must keep published main content
+  // while still versioning from the latest draft (#19449). Draft-only trash still uses the
+  // latest version as the update base (#15981).
+  if (
+    collectionConfig.trash &&
+    hasDraftsEnabled(collectionConfig) &&
+    typeof data === 'object' &&
+    data !== null &&
+    'deletedAt' in data
+  ) {
+    const findOneArgs = {
+      collection: collectionConfig.slug,
+      locale,
+      req,
+      where: { id: { equals: id } },
+    }
+    const [mainDoc, latestVersionDoc] = await Promise.all([
+      payload.db.findOne<JsonObject & TypeWithID>(findOneArgs),
+      getLatestCollectionVersion<JsonObject & TypeWithID>({
+        id,
+        config: collectionConfig,
+        payload,
+        query: findOneArgs,
+        req,
+      }),
+    ])
+
+    const resolved = resolveTrashRestoreDocs({
+      data: data as JsonObject,
+      latestVersionDoc: latestVersionDoc ?? incomingDocWithLocales,
+      locale,
+      mainDoc,
+      publishAllLocales: publishAllLocalesArg === true,
+      requestedStatus,
+    })
+
+    docWithLocales = resolved.docWithLocales
+    versionDocWithLocales = resolved.versionDocWithLocales
+
+    // updateByID / bulk update prepare file identity from the latest version (often the pending
+    // draft). When the main write uses the published document instead, rebind upload fields to
+    // that document so trash/restore does not point the live record at the draft's file.
+    // Skip when a replacement file is being uploaded — generateFileData already set identity
+    // from the new file, and rebinding would silently drop it.
+    if (collectionConfig.upload && versionDocWithLocales && filesToUpload.length === 0) {
+      data = restoreUploadDataFromDocument(data, docWithLocales, {
+        locale:
+          locale === 'all' || !locale
+            ? config.localization
+              ? config.localization.defaultLocale
+              : undefined
+            : locale,
+        localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+      })
+    }
+  }
+
+  // Capture after trash/restore may rebind upload identity onto the published main document.
+  const nextFileData =
+    collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
+      ? deepCopyObjectSimple(data)
+      : undefined
 
   // /////////////////////////////////////
   // Handle potentially locked documents
@@ -516,17 +628,37 @@ export const updateDocument = async <
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
-      resultWithLocales = await saveVersion({
-        id,
-        autosave,
-        collection: collectionConfig,
-        docWithLocales: resultWithLocales,
-        draft: isSavingDraft,
-        operation: 'update',
-        payload,
-        req,
-        unpublish: shouldUnpublishAllLocales,
-      })
+      if (versionDocWithLocales) {
+        // Keep published content on the main document, but version from the pending draft so
+        // trash/restore only stamps deletedAt and leaves the draft as the latest version.
+        await saveVersion({
+          id,
+          autosave,
+          collection: collectionConfig,
+          docWithLocales: {
+            ...versionDocWithLocales,
+            deletedAt: resultWithLocales.deletedAt,
+          },
+          draft: false,
+          operation: 'update',
+          payload,
+          req,
+          returning: false,
+          unpublish: shouldUnpublishAllLocales,
+        })
+      } else {
+        resultWithLocales = await saveVersion({
+          id,
+          autosave,
+          collection: collectionConfig,
+          docWithLocales: resultWithLocales,
+          draft: isSavingDraft,
+          operation: 'update',
+          payload,
+          req,
+          unpublish: shouldUnpublishAllLocales,
+        })
+      }
     }
 
     // /////////////////////////////////////
