@@ -115,11 +115,11 @@ export const usePointerSafeArea = ({
         return
       }
       const pointer = { x: event.clientX, y: event.clientY }
-      const target = event.target as Node | null
+      const path = event.composedPath()
 
-      if (target && from.current?.contains(target)) {
+      if (from.current && path.includes(from.current)) {
         trackSource(pointer)
-      } else if (target && to.current?.contains(target)) {
+      } else if (to.current && path.includes(to.current)) {
         trackTarget(pointer)
       } else if (isProtected.current && !update({ pointer })) {
         release(pointer)
@@ -130,11 +130,11 @@ export const usePointerSafeArea = ({
         // Preserve tracking after clicks that keep either endpoint open, while
         // letting clicks elsewhere reach their target without sending a replacement event.
         const pointer = { x: event.clientX, y: event.clientY }
-        const target = event.target as Node | null
+        const path = event.composedPath()
 
-        if (target && from.current?.contains(target)) {
+        if (from.current && path.includes(from.current)) {
           trackSource(pointer)
-        } else if (target && to.current?.contains(target)) {
+        } else if (to.current && path.includes(to.current)) {
           trackTarget(pointer)
         } else {
           clear()
