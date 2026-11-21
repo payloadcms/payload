@@ -6,7 +6,9 @@ export const Pages: CollectionConfig = {
   slug: pagesSlug,
   access: {
     create: () => true,
-    delete: ({ req }) => req.context.denyPageDeletes !== true,
+    delete: ({ id, req }) =>
+      req.context.denyPageDeletes !== true &&
+      (req.context.denyDeleteID === undefined || id !== req.context.denyDeleteID),
     read: () => true,
     update: ({ data, req }) =>
       req.context.denyPageUpdates !== true &&
@@ -76,6 +78,23 @@ export const Pages: CollectionConfig = {
           }
         }
         return data
+      },
+    ],
+    beforeDelete: [
+      ({ id, req }) => {
+        if (req.context.failDeleteID !== undefined && req.context.failDeleteID === id) {
+          throw new Error('Delete hook rejected the child')
+        }
+        const trace = req.context.deleteTrace as
+          | { ids: (number | string)[]; targetIDs: (number | string)[] }
+          | undefined
+
+        if (trace?.targetIDs.includes(id)) {
+          trace.ids.push(id)
+          if (trace.ids.length === 2) {
+            throw new Error('Delete hook rejected the second child')
+          }
+        }
       },
     ],
   },

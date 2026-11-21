@@ -6,7 +6,8 @@ export const Articles: CollectionConfig = {
   slug: articlesSlug,
   access: {
     create: () => true,
-    delete: () => true,
+    delete: ({ id, req }) =>
+      req.context.denyDeleteID === undefined || id !== req.context.denyDeleteID,
     read: () => true,
     update: () => true,
   },

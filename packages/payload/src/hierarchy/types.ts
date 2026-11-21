@@ -1,6 +1,8 @@
 import type { PayloadComponent } from '../config/types.js'
 import type { JoinField } from '../fields/config/types.js'
 
+export type HierarchyDeleteStrategy = 'cascade' | 'reparent'
+
 /**
  * User-configurable options for the hierarchy join field.
  * Excludes properties that are auto-generated: type, collection, on, hasMany

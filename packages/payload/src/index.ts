@@ -45,6 +45,7 @@ import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
+import type { HierarchyDeleteStrategy } from './hierarchy/types.js'
 import type {
   ApplyDisableErrors,
   DraftTransformCollectionWithSelect,
@@ -1458,6 +1459,7 @@ type Payload = BasePayload
 
 interface RequestContext {
   [key: string]: unknown
+  hierarchyDeleteStrategy?: HierarchyDeleteStrategy
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -2007,6 +2009,7 @@ export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
 export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
 export type {
   HierarchyConfig,
+  HierarchyDeleteStrategy,
   SanitizedHierarchyConfig,
   SanitizedHierarchyRelatedCollection,
 } from './hierarchy/types.js'
