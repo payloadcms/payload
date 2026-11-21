@@ -42,10 +42,14 @@ import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
+import {
+  getTransactionSnapshot,
+  initTransaction,
+  isTransactionActive,
+} from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
+import { killOwnedTransaction, killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
@@ -98,6 +102,19 @@ export const updateOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
   const hasFileOperationScope = Boolean(args.collection.config.upload)
+  let operationTransactionID: number | string | undefined =
+    typeof args.req.transactionID === 'number' ||
+    (typeof args.req.transactionID === 'string' && args.req.transactionID !== '')
+      ? args.req.transactionID
+      : undefined
+  let operationTransactionHadSession = Boolean(
+    operationTransactionID !== undefined &&
+    args.req.payload.db.sessions &&
+    Object.prototype.hasOwnProperty.call(
+      args.req.payload.db.sessions,
+      String(operationTransactionID),
+    ),
+  )
 
   assertNoValidationWrite(args.req)
 
@@ -111,6 +128,23 @@ export const updateOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const operationTransactionSnapshot = await getTransactionSnapshot(args.req)
+    operationTransactionID = operationTransactionSnapshot.transactionID
+    operationTransactionHadSession = operationTransactionSnapshot.hadSession
+    const transactionSnapshot = !args.req.payload.db.bulkOperationsSingleTransaction
+      ? operationTransactionSnapshot
+      : { hadSession: false, transactionID: undefined }
+    const hasSharedTransaction = transactionSnapshot.transactionID !== undefined
+    const isSharedTransactionLost = async (targetReq: PayloadRequest): Promise<boolean> =>
+      hasSharedTransaction &&
+      !(await isTransactionActive({ ...transactionSnapshot, req: targetReq }))
+    const assertSharedTransactionActive = async (targetReq: PayloadRequest): Promise<void> => {
+      if (await isSharedTransactionLost(targetReq)) {
+        throw new Error(
+          `Transaction ${transactionSnapshot.transactionID} was rolled back before the bulk update completed.`,
+        )
+      }
+    }
 
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
@@ -463,12 +497,18 @@ export const updateOperation = async <
           updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
         }
 
+        await assertSharedTransactionActive(documentReq)
+
         if (docShouldCommit) {
           await commitTransaction(documentReq)
         }
 
         return updatedDoc
       } catch (error) {
+        if (await isSharedTransactionLost(documentReq)) {
+          throw error
+        }
+
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
         if (req.payload.db.bulkOperationsSingleTransaction) {
@@ -498,16 +538,18 @@ export const updateOperation = async <
     }
 
     // Upload processing may mutate its temp file while cropping, so each document must finish
-    // before the next document starts. This only applies when an actual file is being written
-    // (`req.file`); metadata-only bulk updates use isolated per-document request state and can
-    // stay parallel. Other bulk updates retain their existing parallel behavior.
+    // before the next document starts. Shared-transaction bulk updates also run sequentially so
+    // a hook rolling back the transaction stops later documents instead of writing outside it.
     const processSequentially =
-      req.payload.db.bulkOperationsSingleTransaction || Boolean(collectionConfig.upload && req.file)
+      req.payload.db.bulkOperationsSingleTransaction ||
+      hasSharedTransaction ||
+      Boolean(collectionConfig.upload && req.file)
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
     try {
       if (processSequentially) {
         awaitedDocs = []
         for (const doc of docs) {
+          await assertSharedTransactionActive(req)
           awaitedDocs.push(await processDocument(doc))
         }
       } else {
@@ -519,6 +561,8 @@ export const updateOperation = async <
         req.payload.logger.error({ err: error, msg: 'Failed to remove temp file' })
       })
     }
+
+    await assertSharedTransactionActive(req)
 
     await unlinkTempFiles({
       collectionConfig,
@@ -546,6 +590,8 @@ export const updateOperation = async <
       result,
     })
 
+    await assertSharedTransactionActive(req)
+
     if (shouldCommit) {
       await commitTransaction(req)
     }
@@ -564,7 +610,11 @@ export const updateOperation = async <
     }).catch((unlinkError) => {
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
-    await killTransaction(args.req)
+    await killOwnedTransaction({
+      hadSession: operationTransactionHadSession,
+      req: args.req,
+      transactionID: operationTransactionID,
+    })
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }
