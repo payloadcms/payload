@@ -1,0 +1,8 @@
+export const restoreConditionalGroupSlug = 'restore-conditional-group'
+export const restoreLocalizedArrayRowsSlug = 'restore-localized-array-rows'
+export const restoreLocalizedGroupSlug = 'restore-localized-group'
+export const restoreLocalizedTabSlug = 'restore-localized-tab'
+export const restoreNonLocalizedConditionSlug = 'restore-non-localized-condition'
+export const restorePointConditionSlug = 'restore-point-condition'
+export const restoreRequiredContainersSlug = 'restore-required-containers'
+export const restoreRichTextSlug = 'restore-rich-text'

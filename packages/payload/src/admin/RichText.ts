@@ -120,6 +120,8 @@ export type BeforeChangeRichTextHookArgs<
   previousSiblingDoc?: TSiblingData
   /** The previous value of the field, before changes */
   previousValue?: TValue
+  /** Apply full validation to empty localized arrays and blocks when restoring a version. */
+  shouldValidateLocalizedContainers?: boolean
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
@@ -256,6 +258,8 @@ type RichTextAdapterBase<
     siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
+  /** Reports whether a stored editor state is empty for required-field validation. */
+  isEmpty?: (value: null | undefined | Value) => boolean
   /**
    * Return the JSON schema for the field value. The JSON schema is read by
    * `json-schema-to-typescript` which is used to generate types for this richtext field
