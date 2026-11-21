@@ -172,7 +172,13 @@ export const runFileCreationPlan = async <T>({
     if (!hasStartedWrite) {
       await compensate({ attempt, req })
     } else if (await hasActiveTransaction({ req })) {
-      requestState.pending.push(attempt)
+      // Keep deferred cleanup for the failed attempt: the caller-owned
+      // transaction may commit later, and commit only runs attempt.cleanup,
+      // so without this the staged objects would leak unreferenced files.
+      requestState.pending.push({
+        ...attempt,
+        cleanup: () => cleanupStagedObjectsAfterWriteFailure({ attempt, req }),
+      })
     } else {
       await cleanupStagedObjectsAfterWriteFailure({ attempt, req })
     }

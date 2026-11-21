@@ -106,8 +106,12 @@ export const createOperation = async <
 
   assertNoValidationWrite(args.req)
 
+  // Hoisted so the catch block can tell whether this operation owns the
+  // transaction: only the owner may roll it back (see killTransaction docs).
+  let shouldCommit = false
+
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // Keep a remote URL only as an ephemeral file source, then strip all submitted generated
     // identity before untrusted create hooks run. The fetched file receives new server-owned
@@ -725,7 +729,9 @@ export const createOperation = async <
     }).catch((unlinkError) => {
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
-    await killTransaction(args.req)
+    if (shouldCommit) {
+      await killTransaction(args.req)
+    }
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }
