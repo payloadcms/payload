@@ -94,7 +94,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   const showPreferencesGroup = showThemeMenu || hasMultipleLanguages
 
   const logoutHref = formatAdminURL({ adminRoute, path: logoutRoute })
-  const accountHref = formatAdminURL({ adminRoute, path: accountRoute })
+  // The profile header is a plain anchor, not a router `Link`, so the base path is not added for us
+  const accountHref = formatAdminURL({ adminRoute, includeBasePath: true, path: accountRoute })
 
   return (
     <Popup
