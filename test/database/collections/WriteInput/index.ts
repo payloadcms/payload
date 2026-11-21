@@ -1,11 +1,25 @@
 import type { CollectionConfig } from 'payload'
 
-import { writeInputSlug } from '../../shared.js'
+import { postsSlug, writeInputSlug } from '../../shared.js'
 
 export const WriteInput: CollectionConfig = {
   slug: writeInputSlug,
   fields: [
     { name: 'title', type: 'text' },
+    {
+      name: 'links',
+      type: 'array',
+      fields: [
+        { name: 'label', type: 'text' },
+        { name: 'reference', type: 'relationship', relationTo: [postsSlug] },
+        {
+          name: 'localizedReference',
+          type: 'relationship',
+          relationTo: [postsSlug],
+          localized: true,
+        },
+      ],
+    },
     {
       name: 'layout',
       type: 'blocks',
