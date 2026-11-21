@@ -72,6 +72,9 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && Number.isFinite(id))
 
   if (!isValidID) {
+    if (disableErrors) {
+      return null!
+    }
     throw new NotFound(req.t)
   }
 
