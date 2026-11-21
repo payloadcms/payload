@@ -1,9 +1,6 @@
-import { validateJSONSchema } from '#validateJSONSchema'
-import ObjectIdImport from 'bson-objectid'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
-
 import type { TFunction } from '@payloadcms/translations'
+
+import { validateJSONSchema } from '#validateJSONSchema'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -35,6 +32,7 @@ import type {
 
 import { isNumber } from '../utilities/isNumber.js'
 import { isValidID } from '../utilities/isValidID.js'
+import { getObjectIdHex } from '../utilities/objectIdHex.js'
 
 export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -654,8 +652,11 @@ const validateFilterOptions: Validate<
           if (typeof val === 'object') {
             if (val?.value) {
               valueIDs.push(val.value)
-            } else if (ObjectId.isValid(val)) {
-              valueIDs.push(new ObjectId(val).toHexString())
+            } else {
+              const objectIdHex = getObjectIdHex(val)
+              if (objectIdHex) {
+                valueIDs.push(objectIdHex)
+              }
             }
           }
 
@@ -713,8 +714,9 @@ const validateFilterOptions: Validate<
           requestedID = val
         }
 
-        if (typeof val === 'object' && ObjectId.isValid(val)) {
-          requestedID = new ObjectId(val).toHexString()
+        const objectIdHex = getObjectIdHex(val)
+        if (objectIdHex) {
+          requestedID = objectIdHex
         }
       }
 

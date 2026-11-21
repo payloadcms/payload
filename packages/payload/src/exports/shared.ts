@@ -211,6 +211,11 @@ export {
   mergeListSearchAndWhere,
 } from '../utilities/mergeListSearchAndWhere.js'
 
+export {
+  generateObjectIdHex,
+  getObjectIdHex,
+  isValidObjectIdHex,
+} from '../utilities/objectIdHex.js'
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
 
 export { parseErrorResponse } from '../utilities/parseErrorResponse.js'
