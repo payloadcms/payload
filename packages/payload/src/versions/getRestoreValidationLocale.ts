@@ -1,9 +1,10 @@
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field } from '../fields/config/types.js'
+import type { Field, TabAsField } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
+import { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 import { traverseFields } from '../utilities/traverseFields.js'
 
 /**
@@ -44,9 +45,14 @@ export function getRestoreValidationLocale({
     callback: ({ field, parentIsLocalized, ref }) => {
       if (
         !fieldAffectsData(field) ||
-        !('required' in field && field.required) ||
+        !field.name ||
         !fieldShouldBeLocalized({ field, parentIsLocalized })
       ) {
+        return
+      }
+
+      const requiredDescendants = getRequiredDescendants({ field })
+      if (!('required' in field && field.required) && requiredDescendants.length === 0) {
         return
       }
 
@@ -57,7 +63,18 @@ export function getRestoreValidationLocale({
 
       const populatedLocales = localeCodes.filter((code) => {
         const value = (values as Record<string, unknown>)[code]
-        return value != null && value !== '' && (!Array.isArray(value) || value.length > 0)
+
+        return (
+          hasContent({ field, value }) &&
+          requiredDescendants.every(({ field, path }) => {
+            const descendant = path.reduce<unknown>(
+              (parent, key) => (parent as Record<string, unknown> | undefined)?.[key],
+              value,
+            )
+
+            return hasContent({ field, value: descendant })
+          })
+        )
       })
       if (populatedLocales.length > 0) {
         for (const candidate of candidates) {
@@ -83,4 +100,35 @@ export function getRestoreValidationLocale({
   }
 
   return allowedLocales.find((code) => candidates.has(code)) ?? defaultLocale
+}
+
+/** Named groups and tabs store the locale at the container, above their required fields. */
+function getRequiredDescendants({ field }: { field: Field | TabAsField }) {
+  if (field.type !== 'group' && field.type !== 'tab') {
+    return []
+  }
+
+  return flattenTopLevelFields(field.fields, { moveSubFieldsToTop: true }).flatMap((descendant) => {
+    if (
+      !fieldAffectsData(descendant) ||
+      !descendant.name ||
+      !('required' in descendant && descendant.required)
+    ) {
+      return []
+    }
+
+    return [{ field: descendant, path: (descendant.accessor ?? descendant.name).split('.') }]
+  })
+}
+
+function hasContent({ field, value }: { field: Field | TabAsField; value: unknown }): boolean {
+  if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
+    return false
+  }
+
+  if (field.type === 'richText' && field.editor && typeof field.editor !== 'function') {
+    return !field.editor.isEmpty?.(value)
+  }
+
+  return true
 }

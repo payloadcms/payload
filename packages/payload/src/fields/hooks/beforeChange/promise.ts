@@ -57,6 +57,7 @@ type Args = {
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
+  shouldValidateLocalizedContainers: boolean
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
@@ -95,6 +96,7 @@ export const promise = async ({
   parentPath,
   parentSchemaPath,
   req,
+  shouldValidateLocalizedContainers,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -136,7 +138,11 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
-    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
+    if (
+      !shouldValidateLocalizedContainers &&
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+      operationLocale !== defaultLocale
+    ) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name!] === null) {
         skipValidationFromHere = true
       }
@@ -454,6 +460,7 @@ export const promise = async ({
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
+              shouldValidateLocalizedContainers,
               siblingData: row as JsonObject,
               siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
               siblingDocWithLocales: getExistingRowDoc(
@@ -520,6 +527,7 @@ export const promise = async ({
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
+                shouldValidateLocalizedContainers,
                 siblingData: row as JsonObject,
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
@@ -565,6 +573,7 @@ export const promise = async ({
         parentPath,
         parentSchemaPath: schemaPath,
         req,
+        shouldValidateLocalizedContainers,
         siblingData,
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
@@ -637,6 +646,7 @@ export const promise = async ({
         parentPath: isNamedGroup ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
+        shouldValidateLocalizedContainers,
         siblingData: groupSiblingData,
         siblingDoc: groupSiblingDoc,
         siblingDocWithLocales: groupSiblingDocWithLocales!,
@@ -705,6 +715,7 @@ export const promise = async ({
             previousValue: siblingDoc[field.name],
             req,
             schemaPath: schemaPathSegments,
+            shouldValidateLocalizedContainers,
             siblingData,
             siblingDocWithLocales,
             skipValidation: skipValidationFromHere,
@@ -772,6 +783,7 @@ export const promise = async ({
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
+        shouldValidateLocalizedContainers,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales!,
@@ -807,6 +819,7 @@ export const promise = async ({
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
+        shouldValidateLocalizedContainers,
         siblingData,
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
