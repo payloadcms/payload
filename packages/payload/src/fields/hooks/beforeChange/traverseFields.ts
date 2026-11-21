@@ -46,6 +46,7 @@ type Args = {
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
+  shouldValidateLocalizedContainers?: boolean
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -90,6 +91,7 @@ export const traverseFields = async ({
   parentPath,
   parentSchemaPath,
   req,
+  shouldValidateLocalizedContainers = false,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -124,6 +126,7 @@ export const traverseFields = async ({
         parentPath,
         parentSchemaPath,
         req,
+        shouldValidateLocalizedContainers,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,

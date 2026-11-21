@@ -194,6 +194,8 @@ const result = await payload.findVersionByID({
 
 When restoring a collection version that requires validation, Payload prefers the default locale. If a required localized field is empty in the default locale, Payload can validate an existing translation from the version. The restore preserves the version's stored values for each locale.
 
+This also applies to required fields inside localized groups and named tabs. An empty Lexical paragraph counts as an empty translation.
+
 ```js
 // Result will be the restored document.
 const result = await payload.restoreVersion({

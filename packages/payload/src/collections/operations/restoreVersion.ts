@@ -326,6 +326,7 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req: reqWithValidationLocale,
+      shouldValidateLocalizedContainers: true,
       skipValidation,
     })
 
