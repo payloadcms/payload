@@ -137,6 +137,27 @@ test.describe('Group By', () => {
     }
   })
 
+  test('should omit fields inside arrays from the group-by popup', async () => {
+    await page.goto(url.list)
+
+    const { groupByContent } = await openGroupBy(page)
+
+    const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+    await fieldTrigger.click()
+
+    await expect(
+      page.locator('.popup-button-list__button', { hasText: exactText('Links > Label') }),
+    ).toHaveCount(0)
+  })
+
+  test('should ignore a group-by field inside an array instead of failing to render', async () => {
+    await page.goto(`${url.list}?groupBy=links.label`)
+
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+    await expect(page.locator('.collection-list .table tbody tr').first()).toBeVisible()
+    await expect(page.locator('#toggle-group-by')).not.toHaveClass(/btn--selected/)
+  })
+
   test('should properly group by field', async () => {
     await page.goto(url.list)
 
