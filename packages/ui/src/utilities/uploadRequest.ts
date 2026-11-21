@@ -17,6 +17,31 @@ export type UploadRequestArgs = {
 
 const NULL_BODY_STATUSES = new Set([101, 204, 205, 304])
 
+/** Request headers only the browser may set, from the Fetch standard. */
+const FORBIDDEN_REQUEST_HEADERS = new Set([
+  'accept-charset',
+  'accept-encoding',
+  'access-control-request-headers',
+  'access-control-request-method',
+  'connection',
+  'content-length',
+  'cookie',
+  'cookie2',
+  'date',
+  'dnt',
+  'expect',
+  'host',
+  'keep-alive',
+  'origin',
+  'referer',
+  'set-cookie',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+  'via',
+])
+
 /**
  * Sends an upload with `XMLHttpRequest`, because `fetch` cannot report upload progress, and
  * resolves to a standard `Response` so callers handle it like any other request. Non-2xx responses
@@ -90,7 +115,10 @@ const uploadWithXHR = ({
     xhr.withCredentials = withCredentials
 
     new Headers(headers).forEach((value, key) => {
-      xhr.setRequestHeader(key, value)
+      // The browser sets these itself. `fetch` drops them quietly, but XHR logs an error for each.
+      if (!isForbiddenRequestHeader({ name: key })) {
+        xhr.setRequestHeader(key, value)
+      }
     })
 
     if (onProgress) {
@@ -224,6 +252,16 @@ const parseResponseHeaders = ({ rawHeaders }: { rawHeaders: string }): Headers =
   }
 
   return headers
+}
+
+const isForbiddenRequestHeader = ({ name }: { name: string }): boolean => {
+  const lowerName = name.toLowerCase()
+
+  return (
+    FORBIDDEN_REQUEST_HEADERS.has(lowerName) ||
+    lowerName.startsWith('proxy-') ||
+    lowerName.startsWith('sec-')
+  )
 }
 
 const createAbortError = () => new DOMException('The upload was aborted.', 'AbortError')

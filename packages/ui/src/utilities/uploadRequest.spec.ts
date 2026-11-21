@@ -154,6 +154,25 @@ describe('uploadRequest', () => {
     expect(getXHR().withCredentials).toBe(true)
   })
 
+  it('should skip headers only the browser may set', () => {
+    void uploadRequest({
+      body: new Blob(['file']),
+      headers: {
+        'Content-Length': '4',
+        'Content-Type': 'video/mp4',
+        'Sec-Fetch-Mode': 'cors',
+        'x-amz-checksum-crc32': 'abc',
+      },
+      method: 'PUT',
+      url: 'https://bucket.example.com',
+    })
+
+    expect(getXHR().requestHeaders).toEqual({
+      'content-type': 'video/mp4',
+      'x-amz-checksum-crc32': 'abc',
+    })
+  })
+
   it('should report clamped, never decreasing progress once per frame and 100% on success', async () => {
     const events: UploadTransferProgress[] = []
     const request = uploadRequest({
