@@ -544,4 +544,52 @@ describe('confirmOrderHandler', () => {
       expect(args.req).toBe(harness.req)
     }
   })
+
+  it('should decrement inventory in deterministic collection and ID order regardless of cart line order', async () => {
+    const reversedHarness = createHarness({
+      adapter: coreAdapter,
+      transaction: {
+        amount: 1000,
+        currency: 'USD',
+        id: 'txn-123',
+        items: [
+          { product: 'product-1', quantity: 1, variant: 'variant-b' },
+          { product: 'product-b', quantity: 2 },
+          { product: 'product-a', quantity: 1 },
+          { product: 'product-1', quantity: 3, variant: 'variant-a' },
+        ],
+        order: null,
+        status: 'pending',
+      },
+    })
+    const forwardHarness = createHarness({
+      adapter: coreAdapter,
+      transaction: {
+        amount: 1000,
+        currency: 'USD',
+        id: 'txn-123',
+        items: [
+          { product: 'product-1', quantity: 3, variant: 'variant-a' },
+          { product: 'product-a', quantity: 1 },
+          { product: 'product-b', quantity: 2 },
+          { product: 'product-1', quantity: 1, variant: 'variant-b' },
+        ],
+        order: null,
+        status: 'pending',
+      },
+    })
+
+    const reversedRes = await runHandler(reversedHarness)
+    const forwardRes = await runHandler(forwardHarness)
+
+    expect(reversedRes.response.status).toBe(200)
+    expect(forwardRes.response.status).toBe(200)
+    expect(reversedHarness.state.inventoryUpdates).toEqual([
+      { collection: 'products', id: 'product-a', quantity: -1 },
+      { collection: 'products', id: 'product-b', quantity: -2 },
+      { collection: 'variants', id: 'variant-a', quantity: -3 },
+      { collection: 'variants', id: 'variant-b', quantity: -1 },
+    ])
+    expect(reversedHarness.state.inventoryUpdates).toEqual(forwardHarness.state.inventoryUpdates)
+  })
 })

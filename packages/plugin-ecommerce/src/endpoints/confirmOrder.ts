@@ -443,6 +443,25 @@ const finalizeTransactionOrder = async ({
   return order
 }
 
+const compareDocumentIDs = (a: DefaultDocumentIDType, b: DefaultDocumentIDType): number => {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a - b
+  }
+
+  const aStr = String(a)
+  const bStr = String(b)
+
+  if (aStr < bStr) {
+    return -1
+  }
+
+  if (aStr > bStr) {
+    return 1
+  }
+
+  return 0
+}
+
 const decrementInventory = async ({
   items,
   productsSlug,
@@ -457,6 +476,12 @@ const decrementInventory = async ({
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error('Inventory transaction items are missing or invalid.')
   }
+
+  const targets: {
+    collection: string
+    id: DefaultDocumentIDType
+    quantity: number
+  }[] = []
 
   for (const item of items) {
     if (
@@ -475,10 +500,30 @@ const decrementInventory = async ({
       throw new Error('Inventory item target is missing or invalid.')
     }
 
-    const updatedInventory = await req.payload.db.updateOne({
-      id,
+    targets.push({
       collection: hasVariant ? variantsSlug : productsSlug,
-      data: { inventory: { $inc: item.quantity * -1 } },
+      id,
+      quantity: item.quantity,
+    })
+  }
+
+  targets.sort((a, b) => {
+    if (a.collection < b.collection) {
+      return -1
+    }
+
+    if (a.collection > b.collection) {
+      return 1
+    }
+
+    return compareDocumentIDs(a.id, b.id)
+  })
+
+  for (const target of targets) {
+    const updatedInventory = await req.payload.db.updateOne({
+      id: target.id,
+      collection: target.collection,
+      data: { inventory: { $inc: target.quantity * -1 } },
       req,
     })
 
