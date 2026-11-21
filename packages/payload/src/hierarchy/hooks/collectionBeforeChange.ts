@@ -15,6 +15,8 @@ import type {
   PayloadRequest,
 } from '../../index.js'
 
+import { promoteHierarchyChildren } from '../promoteHierarchyChildren.js'
+
 type Args = {
   /**
    * The name of the field that contains the parent document ID
@@ -25,6 +27,10 @@ type Args = {
 export const hierarchyCollectionBeforeChange =
   ({ parentFieldName }: Args): CollectionBeforeChangeHook =>
   async ({ collection, data, operation, originalDoc, req }) => {
+    if (collection.trash && operation === 'update' && data.deletedAt && !originalDoc?.deletedAt) {
+      await promoteHierarchyChildren({ id: originalDoc.id, collection, parentFieldName, req })
+    }
+
     // Determine the new parent ID
     const newParentID =
       data[parentFieldName] !== undefined ? data[parentFieldName] : originalDoc?.[parentFieldName]

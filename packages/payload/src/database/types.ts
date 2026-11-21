@@ -581,8 +581,8 @@ export type UpdateVersionArgs<T extends JsonObject = JsonObject> = {
     latest?: boolean
     parent?: number | string
     publishedLocale?: string
-    updatedAt?: string
-    version: T
+    updatedAt?: null | string
+    version?: T
   }
 } & (
   | {
