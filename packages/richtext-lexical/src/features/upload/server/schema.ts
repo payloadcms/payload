@@ -179,6 +179,7 @@ export const createUploadNodeJSONSchema =
           version: versionSchema,
         },
         required: ['type'],
+        tsType: "{ type: 'upload'; /** @deprecated */ version: number; [k: string]: unknown }",
       }
     } else {
       const baseSchema: JSONSchema4 =
