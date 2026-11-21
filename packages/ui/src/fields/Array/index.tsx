@@ -406,7 +406,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
             {rows?.length > 0 && (
               <CollapseAllToggle
                 controls={rowsID}
-                isExpanded={rows.some((row) => !row.collapsed)}
+                isExpanded={rows.some((row) => !(row.collapsed ?? Boolean(row.isLoading)))}
                 label={getTranslation(label || labels?.plural || name, i18n)}
                 onClick={toggleCollapseAll}
               />

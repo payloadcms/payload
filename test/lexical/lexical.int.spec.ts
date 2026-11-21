@@ -2,12 +2,18 @@ import type {
   SerializedEditorState,
   SerializedLexicalNode,
   SerializedParagraphNode,
-  SerializedTextNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
+import type {
+  Block,
+  BlocksField,
+  BlockSlug,
+  Config,
+  FormState,
+  PaginatedDocs,
+  Payload,
+} from 'payload'
 
 import {
-  $createLinkNode,
   BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
@@ -15,7 +21,6 @@ import {
   lexicalEditor,
   type LexicalRichTextAdapter,
   LinkFeature,
-  LinkNode,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedListItemNode,
@@ -24,16 +29,6 @@ import {
   type SerializedUploadNode,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
-import {
-  $createParagraphNode,
-  $createTextNode,
-  $getNodeByKey,
-  $getRoot,
-  $getSelection,
-  COMMAND_PRIORITY_LOW,
-  HISTORY_MERGE_TAG,
-  SKIP_DOM_SELECTION_TAG,
-} from '@payloadcms/richtext-lexical/lexical'
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import {
   configToJSONSchema,
@@ -71,12 +66,11 @@ import {
 
 import { convertLexicalNodesToHTMLAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/index.js'
 import { convertLexicalNodesToHTML } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/index.js'
-import { $updateLinkFields } from '../../packages/richtext-lexical/src/features/link/client/updateLinkFields.js'
-import { UPDATE_EDITOR_STATE_COMMAND } from '../../packages/richtext-lexical/src/lexical/updateEditorState.js'
 
 // Diff converters
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
 import { ListItemDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/listitem/index.js'
+import { mergeNodeFields } from '../../packages/richtext-lexical/src/utilities/mergeNodeFields.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
@@ -164,76 +158,131 @@ test.suite('Lexical', { config: './config.ts' }, () => {
     ).docs[0].id
   })
 
-  test.describe('external link fields', () => {
-    test('should apply server fields while preserving node keys and selection', () => {
-      const { editor, key, value } = createLinkStateEditor()
-      const link = (value.root.children[0] as SerializedParagraphNode)
-        .children[0] as SerializedLinkNode
-
-      link.fields = {
-        ...link.fields,
-        newTab: true,
-        url: 'https://example.com/server',
-        custom: 'server',
+  test.describe('node field initialization', () => {
+    test('should replace returned object and array field values as a whole', () => {
+      const currentFields = {
+        metadata: { obsolete: true, keep: true },
+        items: [{ id: 'item-1', obsolete: true, keep: true }],
+        richText: { root: { children: [], type: 'root' }, obsolete: true },
+        restricted: 'Retained',
       }
 
-      const updates: Set<string>[] = []
-      const unregister = editor.registerUpdateListener(({ tags }) => updates.push(tags))
-      let wasHandled = false
+      const formState: FormState = {
+        metadata: { value: { keep: true } },
+        items: { value: [{ id: 'item-1', keep: true }] },
+        richText: { value: { root: { children: [], type: 'root' } } },
+      }
 
-      editor.update(
-        () => {
-          wasHandled = editor.dispatchCommand(UPDATE_EDITOR_STATE_COMMAND, value)
-        },
-        { discrete: true },
-      )
+      const originalFields = structuredClone(currentFields)
+      const originalState = structuredClone(formState)
 
-      expect(wasHandled).toBe(true)
-      expect(editor.getEditorState().toJSON()).toEqual(value)
-      editor.getEditorState().read(() => {
-        expect($getNodeByKey(key)).toBeInstanceOf(LinkNode)
-        expect($getSelection()?.getNodes()[0]?.getParent()?.getKey()).toBe(key)
+      const fields = mergeNodeFields({
+        currentFields,
+        formState,
       })
-      expect(updates).toHaveLength(1)
-      expect(updates[0]).toEqual(new Set([HISTORY_MERGE_TAG, SKIP_DOM_SELECTION_TAG]))
-      unregister()
+
+      expect(fields).toEqual({
+        metadata: { keep: true },
+        items: [{ id: 'item-1', keep: true }],
+        richText: { root: { children: [], type: 'root' } },
+        restricted: 'Retained',
+      })
+      expect(currentFields).toEqual(originalFields)
+      expect(formState).toEqual(originalState)
     })
 
-    test('should reject non-link changes without partially applying link fields', () => {
-      for (const change of ['text', 'structure', 'identity', 'paragraph']) {
-        const { editor, value } = createLinkStateEditor()
-        const before = editor.getEditorState().toJSON()
-        const paragraph = value.root.children[0] as SerializedParagraphNode
-        const link = paragraph.children[0] as SerializedLinkNode
-
-        link.fields.newTab = true
-
-        if (change === 'text') {
-          const text = link.children[0] as SerializedTextNode
-
-          text.text = 'server text'
-        } else if (change === 'structure') {
-          const newParagraph: SerializedParagraphNode = { ...paragraph, children: [] }
-
-          value.root.children.push(newParagraph)
-        } else if (change === 'identity') {
-          link.id = 'different-link'
-        } else {
-          paragraph.indent = 1
-        }
-
-        let wasHandled = true
-
-        editor.update(
-          () => {
-            wasHandled = editor.dispatchCommand(UPDATE_EDITOR_STATE_COMMAND, value)
-          },
-          { discrete: true },
-        )
-
-        expect(wasHandled).toBe(false)
-        expect(editor.getEditorState().toJSON()).toEqual(before)
+    test('should preserve omitted group fields while replacing returned child values', () => {
+      const formState: FormState = {
+        group: { disableFormData: true },
+        'group.metadata': { value: { keep: true } },
+        'group.title': { value: 'Initialized' },
       }
+
+      const fields = mergeNodeFields({
+        currentFields: {
+          group: {
+            metadata: { obsolete: true, keep: true },
+            restricted: 'Retained',
+            title: 'Original',
+          },
+        },
+        formState,
+      })
+
+      expect(fields).toEqual({
+        group: {
+          metadata: { keep: true },
+          restricted: 'Retained',
+          title: 'Initialized',
+        },
+      })
+    })
+
+    test('should preserve omitted row fields by ID without retaining removed JSON keys or rows', () => {
+      const formState: FormState = {
+        rows: {
+          disableFormData: true,
+          rows: [{ id: 'b' }, { id: 'a' }, { id: 'new' }],
+          value: 3,
+        },
+        'rows.0.id': { value: 'b' },
+        'rows.0.metadata': { value: { keep: 'B' } },
+        'rows.1.id': { value: 'a' },
+        'rows.1.metadata': { value: { keep: 'A' } },
+        'rows.2.id': { value: 'new' },
+        'rows.2.metadata': { value: { keep: 'New' } },
+      }
+
+      const fields = mergeNodeFields({
+        currentFields: {
+          rows: [
+            { id: 'a', metadata: { obsolete: true, keep: 'A' }, restricted: 'Secret A' },
+            { id: 'b', metadata: { obsolete: true, keep: 'B' }, restricted: 'Secret B' },
+            { id: 'removed', metadata: { keep: 'Removed' }, restricted: 'Removed secret' },
+          ],
+        },
+        formState,
+      })
+
+      expect(fields.rows).toEqual([
+        { id: 'b', metadata: { keep: 'B' }, restricted: 'Secret B' },
+        { id: 'a', metadata: { keep: 'A' }, restricted: 'Secret A' },
+        { id: 'new', metadata: { keep: 'New' } },
+      ])
+    })
+
+    test('should apply explicit clears without restoring stale descendant fields', () => {
+      const formState: FormState = {
+        emptyRows: { disableFormData: true, rows: [], value: 0 },
+        'emptyRows.0.id': { value: 'stale' },
+        nullRows: { disableFormData: false, rows: [], value: null },
+        'nullRows.0.id': { value: 'stale' },
+        metadata: { value: {} },
+        items: { value: [] },
+        optional: { value: null },
+        excluded: { disableFormData: true, value: 'Excluded' },
+      }
+
+      const fields = mergeNodeFields({
+        currentFields: {
+          emptyRows: [{ id: 'stale' }],
+          nullRows: [{ id: 'stale' }],
+          metadata: { obsolete: true },
+          items: [{ id: 'stale' }],
+          optional: { obsolete: true },
+          excluded: 'Retained',
+        },
+        formState,
+      })
+
+      expect(fields).toEqual({
+        emptyRows: [],
+        nullRows: null,
+        metadata: {},
+        items: [],
+        optional: null,
+        excluded: 'Retained',
+      })
     })
   })
 
@@ -2141,37 +2190,6 @@ function createParagraphRichText({ textNode }: { textNode: Record<string, unknow
       format: '',
       indent: 0,
     },
-  }
-}
-
-function createLinkStateEditor() {
-  const editor = createHeadlessEditor({ nodes: [LinkNode] })
-  let key = ''
-
-  editor.registerCommand(
-    UPDATE_EDITOR_STATE_COMMAND,
-    (value) => $updateLinkFields({ value }),
-    COMMAND_PRIORITY_LOW,
-  )
-
-  editor.update(
-    () => {
-      const link = $createLinkNode({
-        fields: { linkType: 'custom', newTab: false, url: 'https://example.com/client' },
-      })
-
-      link.append($createTextNode('Link'))
-      $getRoot().append($createParagraphNode().append(link))
-      link.selectEnd()
-      key = link.getKey()
-    },
-    { discrete: true },
-  )
-
-  return {
-    editor,
-    key,
-    value: JSON.parse(JSON.stringify(editor.getEditorState().toJSON())) as SerializedEditorState,
   }
 }
 

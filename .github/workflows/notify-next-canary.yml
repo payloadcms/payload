@@ -9,7 +9,9 @@ on:
     types: [opened, reopened, synchronize]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # `github.ref` is the base branch under `pull_request_target`, so key the
+  # group by PR number to avoid runs for different PRs cancelling each other.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:

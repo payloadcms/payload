@@ -84,13 +84,19 @@ test.describe('Lexical Link Feature Autosave', () => {
       await page.goto(editURL)
       await waitForFormReady(page)
 
-      const { uploadListDrawer } = await openUploadListDrawer({
+      const { lexical, uploadListDrawer } = await openUploadListDrawer({
         finalizedURL: 'https://example.com/media-picker',
         page,
       })
       const search = uploadListDrawer.getByRole('textbox', { name: 'Search', exact: true })
 
+      await expect(lexical.editor.locator('a', { hasText: 'custom link' })).toHaveAttribute(
+        'target',
+        '_blank',
+      )
+
       await search.fill('payload')
+      await expect(uploadListDrawer.getByRole('status')).toContainText('payload')
       await expect(uploadListDrawer.getByText('payload.jpg', { exact: true })).toBeVisible()
       await search.focus()
 
@@ -161,6 +167,92 @@ test.describe('Lexical Link Feature Autosave', () => {
         'href',
         finalizedURL,
       )
+    } finally {
+      releaseAutosave()
+      await page.unrouteAll({ behavior: 'wait' })
+    }
+  })
+
+  test('should initialize upload fields without committing drawer edits during parent autosave', async ({
+    page,
+  }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+
+    const { id, editURL } = await createAutosaveDoc({ page })
+    let releaseAutosave: () => void = () => {}
+    const autosaveReady = new Promise<void>((resolve) => {
+      releaseAutosave = resolve
+    })
+    let submittedFields: Record<string, unknown> | undefined
+
+    await page.route(`${collectionURL}/${id}?**`, async (route) => {
+      const request = route.request()
+
+      if (new URL(request.url()).searchParams.get('autosave') === 'true') {
+        const data = await new Response(request.postData(), {
+          headers: { 'content-type': request.headers()['content-type']! },
+        }).formData()
+        const document = JSON.parse(data.get('_payload') as string)
+
+        submittedFields = document.richText.root.children.find(
+          (node: { type: string }) => node.type === 'upload',
+        )?.fields
+        await autosaveReady
+      }
+
+      await route.continue()
+    })
+
+    try {
+      await page.goto(editURL)
+      await waitForFormReady(page)
+
+      const lexical = new LexicalHelpers(page)
+
+      await lexical.editor.fill('Upload fields')
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('Enter')
+      await lexical.slashCommand('upload', true, 'Upload')
+
+      const listDrawer = page.locator('dialog[id^=list-drawer_1_]').first()
+
+      await listDrawer.getByText('payload.jpg', { exact: true }).click()
+      await expect(listDrawer).toBeHidden()
+
+      const upload = page.locator('.LexicalEditorTheme__upload').first()
+
+      await upload.hover()
+      await upload
+        .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
+        .click({ timeout: 10000 })
+
+      const drawer = page.locator('dialog[id^=drawer_1_lexical-upload-drawer-]').first()
+      const caption = drawer.getByRole('textbox', { name: 'Caption', exact: true })
+
+      await expect(caption).toHaveValue('Server caption')
+      await caption.fill('Unsaved caption')
+      await expect(caption).toBeFocused()
+
+      const originalCaption = await caption.elementHandle()
+
+      releaseAutosave()
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(drawer).toBeVisible()
+      await expect(caption).toHaveValue('Unsaved caption')
+      await expect(caption).toBeFocused()
+      await expect
+        .poll(() => originalCaption!.evaluate((element) => element.isConnected))
+        .toBe(true)
+      await expect.poll(() => submittedFields).toEqual({ caption: 'Server caption' })
+
+      await drawer.getByRole('button', { name: 'Save changes', exact: true }).click()
+      await expect(drawer).toBeHidden()
+      await upload.hover()
+      await upload
+        .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
+        .click({ timeout: 10000 })
+      await expect(caption).toHaveValue('Unsaved caption')
     } finally {
       releaseAutosave()
       await page.unrouteAll({ behavior: 'wait' })
