@@ -1,6 +1,7 @@
 import type { Column } from 'drizzle-orm'
 
 import { type FlattenedField, getFieldByPath, type Where } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
@@ -9,6 +10,7 @@ import { isUUIDType } from '../utilities/isUUIDType.js'
 import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 
 export type ScalarWhereField = {
+  columnPath?: string
   field: FlattenedField
   isLocalized?: boolean
   isUUID: boolean
@@ -41,10 +43,12 @@ export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
 export const createPolymorphicJoinWherePlan = ({
   adapter,
   collections,
+  readDraftChildren,
   where,
 }: {
   adapter: DrizzleAdapter
   collections: string[]
+  readDraftChildren?: boolean
   where: Where
 }): PolymorphicJoinWherePlan => {
   const collectionContexts = collections.map((collection) => {
@@ -54,14 +58,19 @@ export const createPolymorphicJoinWherePlan = ({
       throw new Error(`Unknown polymorphic join collection "${collection}"`)
     }
 
-    const tableName = adapter.tableNameMap.get(toSnakeCase(collection))
+    const readLatestChildVersion = Boolean(readDraftChildren && hasDraftsEnabled(collectionConfig))
+    const tableName = adapter.tableNameMap.get(
+      readLatestChildVersion
+        ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}`
+        : toSnakeCase(collection),
+    )
     const table = tableName ? (adapter.tables[tableName] as GenericTable | undefined) : undefined
 
     if (!table) {
       throw new Error(`Polymorphic join collection "${collection}" has no database table`)
     }
 
-    return { collection, collectionConfig, table, tableName }
+    return { collection, collectionConfig, readLatestChildVersion, table, tableName }
   })
   const schemaPathsByColumnPath = new Map<string, Set<string>>()
   const schemaPaths = new Set(getWhereSchemaPaths(where))
@@ -84,14 +93,20 @@ export const createPolymorphicJoinWherePlan = ({
     let hasUnsupportedFieldShape = false
     const scalarQueryValueSignatures = new Set<string>()
 
-    for (const { collection, collectionConfig, table, tableName } of collectionContexts) {
+    for (const {
+      collection,
+      collectionConfig,
+      readLatestChildVersion,
+      table,
+      tableName,
+    } of collectionContexts) {
       const fieldAtPath = getFieldByPath({
         fields: collectionConfig.flattenedFields,
         path: schemaPath,
       })
 
       if (schemaPath === 'id') {
-        const idColumn = table['id'] as Column | undefined
+        const idColumn = table[readLatestChildVersion ? 'parent' : 'id'] as Column | undefined
 
         if (!idColumn) {
           hasUnsupportedFieldShape = true
@@ -99,6 +114,7 @@ export const createPolymorphicJoinWherePlan = ({
           scalarQueryValueSignatures.add(`id:${idColumn.getSQLType()}`)
           fieldsByCollection.set(collection, {
             type: 'scalar',
+            ...(readLatestChildVersion && { columnPath: 'parent' }),
             field:
               fieldAtPath?.field ??
               ({
@@ -149,7 +165,8 @@ export const createPolymorphicJoinWherePlan = ({
       const fieldTable = fieldAtPath.pathHasLocalized
         ? adapter.tables[`${tableName}${adapter.localesSuffix}`]
         : table
-      const fieldColumn = fieldTable?.[columnPath] as Column | undefined
+      const sourceColumnPath = readLatestChildVersion ? `version_${columnPath}` : columnPath
+      const fieldColumn = fieldTable?.[sourceColumnPath] as Column | undefined
 
       if (!fieldColumn) {
         hasUnsupportedFieldShape = true
@@ -158,6 +175,7 @@ export const createPolymorphicJoinWherePlan = ({
 
       fieldsByCollection.set(collection, {
         type: 'scalar',
+        ...(readLatestChildVersion && { columnPath: sourceColumnPath }),
         field: fieldAtPath.field,
         ...(fieldAtPath.pathHasLocalized && { isLocalized: true }),
         isUUID: fieldColumn.columnType === 'PgUUID',

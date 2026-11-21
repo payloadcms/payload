@@ -179,6 +179,7 @@ export const find: Find = async function find(
       adapter: this,
       collectionSlug,
       docs: result.docs as Record<string, unknown>[],
+      draftsEnabled,
       joins,
       locale,
     })
