@@ -12,6 +12,7 @@ export const createVersion: CreateVersion = async function createVersion(
     autosave,
     collectionSlug,
     createdAt,
+    latest: latestArg = true,
     parent,
     publishedLocale,
     req,
@@ -30,7 +31,7 @@ export const createVersion: CreateVersion = async function createVersion(
   const data = {
     autosave,
     createdAt,
-    latest: true,
+    latest: latestArg,
     parent,
     publishedLocale,
     snapshot,
@@ -68,30 +69,32 @@ export const createVersion: CreateVersion = async function createVersion(
     ],
   }
 
-  await Model.updateMany(
-    {
-      $and: [
-        {
-          _id: {
-            $ne: doc._id,
+  if (latestArg) {
+    await Model.updateMany(
+      {
+        $and: [
+          {
+            _id: {
+              $ne: doc._id,
+            },
           },
-        },
-        parentQuery,
-        {
-          latest: {
-            $eq: true,
+          parentQuery,
+          {
+            latest: {
+              $eq: true,
+            },
           },
-        },
-        {
-          updatedAt: {
-            $lt: new Date(doc.updatedAt),
+          {
+            updatedAt: {
+              $lt: new Date(doc.updatedAt),
+            },
           },
-        },
-      ],
-    },
-    { $unset: { latest: 1 } },
-    options,
-  )
+        ],
+      },
+      { $unset: { latest: 1 } },
+      options,
+    )
+  }
 
   if (returning === false) {
     return null

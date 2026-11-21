@@ -52,6 +52,29 @@ import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js
 import { resolveLocalizedStatus } from '../../versions/resolveLocalizedStatus.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { validateGlobalLocalWithLocaleKeyedData } from './local/validate.js'
+function omitDeniedFields(
+  data: Record<string, unknown>,
+  deniedPaths: Set<string>,
+  parentPath = '',
+): Record<string, unknown> {
+  if (deniedPaths.size === 0) {
+    return data
+  }
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data)) {
+    const currentPath = parentPath ? `${parentPath}.${key}` : key
+    if (deniedPaths.has(currentPath)) {
+      continue
+    }
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      result[key] = omitDeniedFields(value as Record<string, unknown>, deniedPaths, currentPath)
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
+
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -101,6 +124,13 @@ export const updateOperation = async <
     unpublishAllLocales: Boolean(args.unpublishAllLocales),
   })
 
+  const initialExplicitPublish =
+    args.data?._status === 'published' ||
+    Boolean(args.publishAllLocales) ||
+    (typeof args.data?._status === 'object' &&
+      args.data?._status !== null &&
+      Object.values(args.data._status).some((s) => s === 'published'))
+
   const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
     data: args.data,
     status: initialAllLocalesPublicationStatus,
@@ -144,6 +174,7 @@ export const updateOperation = async <
     } = args
 
     let { data } = args
+    const incomingData = deepCopyObjectSimple(data)
 
     validateAllLocalesPublicationFlags({
       publishAllLocales: publishAllLocalesArg,
@@ -213,14 +244,45 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const globalVersionResult = await getLatestGlobalVersion({
-      slug,
-      config: globalConfig,
-      locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
-      payload,
-      req,
-      where: query,
-    })
+    let globalVersionResult: { global: Document; globalExists: boolean } | undefined
+
+    const isExplicitPublish = initialExplicitPublish
+
+    const isNonDraftGlobalUpdate = !draftArg && !isExplicitPublish && hasDraftsEnabled(globalConfig)
+
+    if (isNonDraftGlobalUpdate) {
+      const mainGlobal = await payload.db.findGlobal({
+        slug,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        req,
+        where: query,
+      })
+
+      const isMainGlobalPublished =
+        typeof mainGlobal?._status === 'string'
+          ? mainGlobal._status === 'published'
+          : typeof mainGlobal?._status === 'object' && mainGlobal?._status !== null
+            ? Object.values(mainGlobal._status).some((s) => s === 'published')
+            : false
+
+      if (isMainGlobalPublished) {
+        globalVersionResult = {
+          global: mainGlobal!,
+          globalExists: Boolean(mainGlobal && Object.keys(mainGlobal).length > 0),
+        }
+      }
+    }
+
+    if (!globalVersionResult) {
+      globalVersionResult = await getLatestGlobalVersion({
+        slug,
+        config: globalConfig,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        payload,
+        req,
+        where: query,
+      })
+    }
     const { global, globalExists } = globalVersionResult || {}
 
     if (
@@ -270,6 +332,7 @@ export const updateOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
+    const deniedFieldPaths = new Set<string>()
     let statusFieldAccess = false
     const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
       doc: originalDoc,
@@ -288,6 +351,9 @@ export const updateOperation = async <
       onFieldAccess: ({ accessResult, path }) => {
         if (path === '_status') {
           statusFieldAccess = accessResult
+        }
+        if (!accessResult) {
+          deniedFieldPaths.add(path)
         }
       },
       operation: 'update',
@@ -536,14 +602,24 @@ export const updateOperation = async <
     // Create version
     // /////////////////////////////////////
     if (globalConfig.versions) {
+      const draftData =
+        incomingData && typeof incomingData === 'object'
+          ? (omitDeniedFields(
+              incomingData as Record<string, unknown>,
+              deniedFieldPaths,
+            ) as JsonObject)
+          : undefined
+
       const { globalType } = resultWithLocales
       resultWithLocales = await saveVersion({
         autosave,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,
+        draftData,
         global: globalConfig,
         operation: 'update',
         payload,
+        publish: isExplicitPublish,
         req,
         select,
         unpublish: shouldUnpublishAllLocales,
