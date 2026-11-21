@@ -5,6 +5,7 @@ import {
   lexicalEditor,
   LinkFeature,
   TreeViewFeature,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 
 import { lexicalLinkFeatureAutosaveSlug, lexicalLinkFeatureSlug, uploadsSlug } from '../../slugs.js'
@@ -41,7 +42,13 @@ const createLexicalLinkFeature = ({
 
               return [
                 ...modifiedFields,
-                { name: 'someText', type: 'text' },
+                {
+                  name: 'someText',
+                  type: 'text',
+                  access: {
+                    read: ({ req }) => req.headers.get('x-hide-lexical-fields') !== 'true',
+                  },
+                },
                 {
                   name: 'hyperlink',
                   type: 'blocks',
@@ -52,6 +59,9 @@ const createLexicalLinkFeature = ({
                         {
                           name: 'label',
                           type: 'text',
+                          access: {
+                            read: ({ req }) => req.headers.get('x-hide-lexical-fields') !== 'true',
+                          },
                         },
                         {
                           name: 'asset',
@@ -71,6 +81,13 @@ const createLexicalLinkFeature = ({
             },
           }),
           FixedToolbarFeature(),
+          UploadFeature({
+            collections: {
+              [uploadsSlug]: {
+                fields: [{ name: 'caption', type: 'text', defaultValue: 'Server caption' }],
+              },
+            },
+          }),
         ],
       }),
     },

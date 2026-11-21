@@ -12,6 +12,37 @@ export async function openNestedUploadDrawer({
   finalizedURL: string
   page: Page
 }) {
+  const { lexical, linkDrawer, assetLabelField, uploadListDrawer } = await openUploadListDrawer({
+    page,
+    finalizedURL,
+  })
+
+  await uploadListDrawer
+    .getByText(/payload.*\.jpg/)
+    .first()
+    .click()
+
+  const selectedFilename = linkDrawer.locator('.upload-relationship-details__filename')
+
+  await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
+  await linkDrawer
+    .locator('.upload-relationship-details')
+    .getByRole('button', { name: 'Edit', exact: true })
+    .click()
+
+  const uploadDocumentDrawer = page.locator(`dialog[id^=doc-drawer_${uploadsSlug}_2_]`).first()
+
+  await expect(uploadDocumentDrawer).toBeVisible()
+  return { lexical, linkDrawer, assetLabelField, selectedFilename, uploadDocumentDrawer }
+}
+
+export async function openUploadListDrawer({
+  page,
+  finalizedURL,
+}: {
+  finalizedURL: string
+  page: Page
+}) {
   const lexical = new LexicalHelpers(page)
 
   await lexical.editor.fill('custom link')
@@ -35,21 +66,6 @@ export async function openNestedUploadDrawer({
 
   const uploadListDrawer = page.locator('dialog[id^=list-drawer_2_]').first()
 
-  await uploadListDrawer
-    .getByText(/payload.*\.jpg/)
-    .first()
-    .click()
-
-  const selectedFilename = linkDrawer.locator('.upload-relationship-details__filename')
-
-  await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
-  await linkDrawer
-    .locator('.upload-relationship-details')
-    .getByRole('button', { name: 'Edit', exact: true })
-    .click()
-
-  const uploadDocumentDrawer = page.locator(`dialog[id^=doc-drawer_${uploadsSlug}_2_]`).first()
-
-  await expect(uploadDocumentDrawer).toBeVisible()
-  return { lexical, linkDrawer, assetLabelField, selectedFilename, uploadDocumentDrawer }
+  await expect(uploadListDrawer).toBeVisible()
+  return { lexical, linkDrawer, assetLabelField, uploadListDrawer }
 }
