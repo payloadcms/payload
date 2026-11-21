@@ -1,8 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 
-const fetchedURLs: string[] = []
-
 vi.mock('payload/shared', () => ({
   appendUploadSelectFields: () => {},
   formatAdminURL: ({ path }: { path: string }) => path,
@@ -33,46 +31,73 @@ import React from 'react'
 
 import { RelationshipProvider, useListRelationships } from './index.js'
 
-const RequestOnMount: React.FC<{ count: number }> = ({ count }) => {
-  const { getRelationships } = useListRelationships()
-  React.useEffect(() => {
-    getRelationships(
-      Array.from({ length: count }, (_, i) => ({ relationTo: 'organizations', value: i + 1 })),
-    )
-  }, [count, getRelationships])
+const idsIn = (url: string): number[] => {
+  const params = new URLSearchParams(url.split('?')[1])
+  return params.get('where[id][in]')!.split(',').map(Number)
+}
+
+type Outcome = { loaded: number; missing: number }
+
+// Asks for `count` values once and reports what the provider holds for them:
+// how many documents arrived and how many were stored as missing.
+const Cells: React.FC<{ count: number; onSettled: (outcome: Outcome) => void }> = ({
+  count,
+  onSettled,
+}) => {
+  const { documents, getRelationships } = useListRelationships()
+  const organisations = documents['organizations'] ?? {}
+  const asked = React.useRef<number[]>([])
+
+  if (asked.current.length === 0) {
+    asked.current = Array.from({ length: count }, (_, i) => i + 1)
+    getRelationships(asked.current.map((value) => ({ relationTo: 'organizations', value })))
+  }
+
+  const ids = asked.current
+  const stillWaiting = ids.some(
+    (id) => organisations[id] === null || organisations[id] === undefined,
+  )
+  if (!stillWaiting) {
+    const missing = ids.filter((id) => organisations[id] === false).length
+    onSettled({ loaded: ids.length - missing, missing })
+  }
+
   return null
 }
 
-const idsIn = (url: string): number => {
-  const params = new URLSearchParams(url.split('?')[1])
-  return params.get('where[id][in]')!.split(',').length
-}
-
 test('a page of cells asks for more documents than one request may carry', async () => {
-  fetchedURLs.length = 0
+  let outcome: Outcome | undefined
+  const requests: number[][] = []
+
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string) => {
-      fetchedURLs.push(url)
-      return { json: async () => ({ docs: [] }), ok: true }
+      const asked = idsIn(url)
+      requests.push(asked)
+      // Answer with a document for every id asked for, as the API does.
+      const docs = asked.map((id) => ({ id, title: `Organization ${id}` }))
+      return { json: async () => ({ docs }), ok: true }
     }),
   )
 
-  await render(
-    <RelationshipProvider>
-      <RequestOnMount count={300} />
-    </RelationshipProvider>,
-  )
+  try {
+    await render(
+      <RelationshipProvider>
+        <Cells count={300} onSettled={(result) => (outcome = result)} />
+      </RelationshipProvider>,
+    )
 
-  await vi.waitFor(() => {
-    const total = fetchedURLs.reduce((sum, url) => sum + idsIn(url), 0)
-    expect(total).toBe(300)
-  })
+    await vi.waitFor(() => expect(outcome).toBeDefined(), { timeout: 5000 })
 
-  // The provider reads 250 documents per request, so 300 values need two. One
-  // request would leave the last 50 stored as missing and shown as untitled.
-  expect(fetchedURLs.length).toBe(2)
-  fetchedURLs.forEach((url) => expect(idsIn(url)).toBeLessThanOrEqual(250))
+    // The provider reads 250 documents per request, so 300 values need two, and
+    // neither may carry more than 250.
+    expect(requests.length).toBe(2)
+    requests.forEach((ids) => expect(ids.length).toBeLessThanOrEqual(250))
 
-  vi.unstubAllGlobals()
+    // Every value has to reach a cell. A single request would leave the values
+    // past the 250th stored as missing, which a cell shows as untitled.
+    expect(outcome).toEqual({ loaded: 300, missing: 0 })
+  } finally {
+    vi.unstubAllGlobals()
+  }
 })
