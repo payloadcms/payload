@@ -493,7 +493,7 @@ export const traverseFields = ({
 
           const subQueryAlias = `${columnName}_alias`
 
-          const { newAliasTable } = getTableAlias({
+          const { newAliasTable, newAliasTableName } = getTableAlias({
             adapter,
             tableName: joinCollectionTableName,
           })
@@ -523,7 +523,13 @@ export const traverseFields = ({
           for (let key in selectFields) {
             const val = selectFields[key]
 
-            if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
+            // Alias-qualified keys from buildQuery must be renamed; otherwise draft joins
+            // select parent twice and Postgres errors with ambiguous parent_id.
+            if (
+              val.table &&
+              (getNameFromDrizzleTable(val.table) === joinCollectionTableName ||
+                getNameFromDrizzleTable(val.table) === newAliasTableName)
+            ) {
               delete selectFields[key]
               key = key.split('.').pop()
               selectFields[key] = newAliasTable[key]

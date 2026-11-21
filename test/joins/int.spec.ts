@@ -17,6 +17,8 @@ import {
   accessJoinParentsSlug,
   categoriesJoinRestrictedSlug,
   categoriesSlug,
+  draftAccessJoinDocsSlug,
+  draftAccessJoinParentsSlug,
   operatorHandlerJoinArticlesSlug,
   operatorHandlerJoinNotesSlug,
   operatorHandlerJoinParentsSlug,
@@ -846,6 +848,12 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'versions', overrideAccess: true, where: {} })
       await payload.delete({ collection: 'categories-versions', overrideAccess: true, where: {} })
+      await payload.delete({ collection: draftAccessJoinDocsSlug, overrideAccess: true, where: {} })
+      await payload.delete({
+        collection: draftAccessJoinParentsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should populate joins when versions on both sides draft false', async ({ payload }) => {
@@ -975,6 +983,44 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       })
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
+    })
+
+    test('should find draft joins when joined collection access where names id', async ({
+      payload,
+    }) => {
+      const parent = await payload.create({
+        collection: draftAccessJoinParentsSlug,
+        data: { name: 'hat' },
+        overrideAccess: true,
+      })
+
+      const doc = await payload.create({
+        collection: draftAccessJoinDocsSlug,
+        data: {
+          _status: 'published',
+          parent: parent.id,
+          title: 'accessible document',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.find({
+        collection: draftAccessJoinParentsSlug,
+        context: {
+          allowedDraftJoinDocID: doc.id,
+        },
+        depth: 0,
+        draft: true,
+        overrideAccess: false,
+        user,
+        where: {
+          id: { equals: parent.id },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0].documents.docs).toHaveLength(1)
+      expect(result.docs[0].documents.docs[0]).toBe(doc.id)
     })
   })
 

@@ -6,6 +6,10 @@ export const accessJoinNotesSlug = 'access-join-notes'
 
 export const accessJoinParentsSlug = 'access-join-parents'
 
+export const draftAccessJoinParentsSlug = 'draft-access-join-parents'
+
+export const draftAccessJoinDocsSlug = 'draft-access-join-docs'
+
 export const operatorHandlerJoinArticlesSlug = 'operator-handler-join-articles'
 
 export const operatorHandlerJoinNotesSlug = 'operator-handler-join-notes'
