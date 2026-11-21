@@ -19,7 +19,6 @@ import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../conf
 import { getBlockFromField } from '../../getBlockFromField.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
-import { getPointCoordinates } from '../../getPointCoordinates.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
 import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
@@ -64,13 +63,13 @@ type Args = {
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
+  runReadHooksAndPopulation?: boolean
   select?: SelectType
   selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
-  triggerHooks?: boolean
 } & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
 // This function is responsible for the following actions, in order:
@@ -106,13 +105,13 @@ export const promise = async ({
   populate,
   populationPromises,
   req,
+  runReadHooksAndPopulation = true,
   select,
   selectMode,
   showHiddenFields,
   siblingDoc,
   siblingFields,
   triggerAccessControl = true,
-  triggerHooks = true,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -227,7 +226,11 @@ export const promise = async ({
       break
     }
     case 'point': {
-      siblingDoc[field.name] = getPointCoordinates({ value: siblingDoc[field.name] })
+      const pointDoc = siblingDoc[field.name] as Record<string, unknown>
+      siblingDoc[field.name] =
+        Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2
+          ? pointDoc.coordinates
+          : undefined
       break
     }
 
@@ -276,7 +279,7 @@ export const promise = async ({
 
   if (fieldAffectsDataResult) {
     // Execute hooks
-    if (triggerHooks && 'hooks' in field && field.hooks?.afterRead) {
+    if (runReadHooksAndPopulation && 'hooks' in field && field.hooks?.afterRead) {
       for (const hook of field.hooks.afterRead) {
         if (shouldRunHookOnAllLocales) {
           const localesAndValues = Object.entries(siblingDoc[field.name])
@@ -344,6 +347,7 @@ export const promise = async ({
     }
 
     if (
+      runReadHooksAndPopulation &&
       'virtual' in field &&
       typeof field.virtual === 'string' &&
       (!field.hidden || showHiddenFields)
@@ -391,7 +395,8 @@ export const promise = async ({
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
-      typeof field.defaultValue !== 'undefined'
+      typeof field.defaultValue !== 'undefined' &&
+      (runReadHooksAndPopulation || typeof field.defaultValue !== 'function')
     ) {
       siblingDoc[field.name!] = await getDefaultValue({
         defaultValue: field.defaultValue,
@@ -402,7 +407,10 @@ export const promise = async ({
       })
     }
 
-    if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
+    if (
+      runReadHooksAndPopulation &&
+      (field.type === 'relationship' || field.type === 'upload' || field.type === 'join')
+    ) {
       populationPromises.push(
         relationshipPopulationPromise({
           currentDepth,
@@ -461,12 +469,12 @@ export const promise = async ({
             populate,
             populationPromises,
             req,
+            runReadHooksAndPopulation,
             select: typeof arraySelect === 'object' ? arraySelect : undefined,
             selectMode,
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
-            triggerHooks,
           })
         })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
@@ -497,10 +505,10 @@ export const promise = async ({
                 populate,
                 populationPromises,
                 req,
+                runReadHooksAndPopulation,
                 showHiddenFields,
                 siblingDoc: (row as JsonObject) || {},
                 triggerAccessControl,
-                triggerHooks,
               })
             })
           }
@@ -555,12 +563,12 @@ export const promise = async ({
               populate,
               populationPromises,
               req,
+              runReadHooksAndPopulation,
               select: typeof blockSelect === 'object' ? blockSelect : undefined,
               selectMode: blockSelectMode,
               showHiddenFields,
               siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
-              triggerHooks,
             })
           }
         })
@@ -597,10 +605,10 @@ export const promise = async ({
                   populate,
                   populationPromises,
                   req,
+                  runReadHooksAndPopulation,
                   showHiddenFields,
                   siblingDoc: (row as JsonObject) || {},
                   triggerAccessControl,
-                  triggerHooks,
                 })
               }
             })
@@ -641,12 +649,12 @@ export const promise = async ({
         populate,
         populationPromises,
         req,
+        runReadHooksAndPopulation,
         select,
         selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
-        triggerHooks,
       })
 
       break
@@ -685,12 +693,12 @@ export const promise = async ({
               populate,
               populationPromises,
               req,
+              runReadHooksAndPopulation,
               select: groupSelect,
               selectMode,
               showHiddenFields,
               siblingDoc: localizedData || {},
               triggerAccessControl,
-              triggerHooks,
             })
           })
         } else {
@@ -718,12 +726,12 @@ export const promise = async ({
             populate,
             populationPromises,
             req,
+            runReadHooksAndPopulation,
             select: groupSelect,
             selectMode,
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
-            triggerHooks,
           })
         }
       } else {
@@ -751,12 +759,12 @@ export const promise = async ({
           populate,
           populationPromises,
           req,
+          runReadHooksAndPopulation,
           select,
           selectMode,
           showHiddenFields,
           siblingDoc,
           triggerAccessControl,
-          triggerHooks,
         })
       }
 
@@ -774,7 +782,7 @@ export const promise = async ({
 
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.hooks?.afterRead?.length) {
+      if (runReadHooksAndPopulation && editor?.hooks?.afterRead?.length) {
         for (const hook of editor.hooks.afterRead) {
           if (shouldRunHookOnAllLocales) {
             const localesAndValues = Object.entries(siblingDoc[field.name])
@@ -808,7 +816,7 @@ export const promise = async ({
                   showHiddenFields,
                   siblingData: siblingDoc,
                   triggerAccessControl,
-                  triggerHooks,
+                  triggerHooks: runReadHooksAndPopulation,
                   value,
                 })
 
@@ -845,7 +853,7 @@ export const promise = async ({
               showHiddenFields,
               siblingData: siblingDoc,
               triggerAccessControl,
-              triggerHooks,
+              triggerHooks: runReadHooksAndPopulation,
               value: siblingDoc[field.name],
             })
 
@@ -894,12 +902,12 @@ export const promise = async ({
               populate,
               populationPromises,
               req,
+              runReadHooksAndPopulation,
               select: tabSelect,
               selectMode,
               showHiddenFields,
               siblingDoc: localizedData || {},
               triggerAccessControl,
-              triggerHooks,
             })
           })
         } else {
@@ -927,12 +935,12 @@ export const promise = async ({
             populate,
             populationPromises,
             req,
+            runReadHooksAndPopulation,
             select: tabSelect,
             selectMode,
             showHiddenFields,
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
-            triggerHooks,
           })
         }
       } else {
@@ -960,12 +968,12 @@ export const promise = async ({
           populate,
           populationPromises,
           req,
+          runReadHooksAndPopulation,
           select,
           selectMode,
           showHiddenFields,
           siblingDoc: tabDoc,
           triggerAccessControl,
-          triggerHooks,
         })
       }
 
@@ -997,12 +1005,12 @@ export const promise = async ({
         populate,
         populationPromises,
         req,
+        runReadHooksAndPopulation,
         select,
         selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
-        triggerHooks,
       })
 
       break

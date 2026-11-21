@@ -65,12 +65,15 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'required-caption': RequiredCaption;
+  };
   collections: {
     'restore-localized-group': RestoreLocalizedGroup;
     'restore-localized-tab': RestoreLocalizedTab;
     'restore-conditional-group': RestoreConditionalGroup;
     'restore-localized-array-rows': RestoreLocalizedArrayRow;
+    'restore-non-localized-condition': RestoreNonLocalizedCondition;
     'restore-point-condition': RestorePointCondition;
     'restore-required-containers': RestoreRequiredContainer;
     'restore-rich-text': RestoreRichText;
@@ -86,6 +89,7 @@ export interface Config {
     'restore-localized-tab': RestoreLocalizedTabSelect<false> | RestoreLocalizedTabSelect<true>;
     'restore-conditional-group': RestoreConditionalGroupSelect<false> | RestoreConditionalGroupSelect<true>;
     'restore-localized-array-rows': RestoreLocalizedArrayRowsSelect<false> | RestoreLocalizedArrayRowsSelect<true>;
+    'restore-non-localized-condition': RestoreNonLocalizedConditionSelect<false> | RestoreNonLocalizedConditionSelect<true>;
     'restore-point-condition': RestorePointConditionSelect<false> | RestorePointConditionSelect<true>;
     'restore-required-containers': RestoreRequiredContainersSelect<false> | RestoreRequiredContainersSelect<true>;
     'restore-rich-text': RestoreRichTextSelect<false> | RestoreRichTextSelect<true>;
@@ -128,6 +132,19 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-caption".
+ */
+export interface RequiredCaption {
+  enabled?: boolean | null;
+  details?: {
+    caption?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'required-caption';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -195,6 +212,32 @@ export interface RestoreLocalizedArrayRow {
           id?: string | null;
         }[]
       | null;
+  };
+  items?:
+    | {
+        sections?: RequiredCaption[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  sections?: RequiredCaption[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-non-localized-condition".
+ */
+export interface RestoreNonLocalizedCondition {
+  id: number;
+  enabled?: boolean | null;
+  entries?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  content?: {
+    title: string;
   };
   updatedAt: string;
   createdAt: string;
@@ -325,6 +368,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restore-localized-array-rows';
         value: number | RestoreLocalizedArrayRow;
+      } | null)
+    | ({
+        relationTo: 'restore-non-localized-condition';
+        value: number | RestoreNonLocalizedCondition;
       } | null)
     | ({
         relationTo: 'restore-point-condition';
@@ -461,6 +508,33 @@ export interface RestoreLocalizedArrayRowsSelect<T extends boolean = true> {
               title?: T;
               id?: T;
             };
+      };
+  items?:
+    | T
+    | {
+        sections?: T | {};
+        id?: T;
+      };
+  sections?: T | {};
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-non-localized-condition_select".
+ */
+export interface RestoreNonLocalizedConditionSelect<T extends boolean = true> {
+  enabled?: T;
+  entries?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  content?:
+    | T
+    | {
+        title?: T;
       };
   updatedAt?: T;
   createdAt?: T;
