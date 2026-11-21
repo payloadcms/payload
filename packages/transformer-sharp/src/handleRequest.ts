@@ -1,8 +1,9 @@
 import type { HandleTransformRequestArgs, HandleTransformRequestResult } from 'payload'
 import type { SharpOptions } from 'sharp'
 
-import type { SharpDependency, SharpDynamicDefaults } from './types.js'
+import type { SharpCollectionConfig, SharpDependency, SharpDynamicDefaults } from './types.js'
 
+import { withInputPixelLimit } from './createSharpFromFile.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
 
 // Must match generateFileData.ts's allow-list — the only MIME types Sharp auto-detects multi-frame animation for.
@@ -16,13 +17,17 @@ const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
  * uncaught; Payload's orchestrator logs and aborts the pipeline.
  */
 export function createHandleRequest({
+  collections,
   dynamicDefaults,
+  maxInputPixels,
   sharpDependency,
 }: {
+  collections: Partial<Record<string, SharpCollectionConfig>>
   dynamicDefaults: Required<SharpDynamicDefaults>
+  maxInputPixels: number
   sharpDependency: SharpDependency
 }): (args: HandleTransformRequestArgs) => Promise<HandleTransformRequestResult> {
-  return async ({ getSourceFile, mimeType, req }) => {
+  return async ({ collectionSlug, getSourceFile, mimeType, req }) => {
     const parseResult = parseDynamicResize({
       limits: dynamicDefaults,
       searchParams: req.searchParams ?? new URLSearchParams(),
@@ -51,10 +56,58 @@ export function createHandleRequest({
 
     const sourceBuffer = Buffer.from(await source.arrayBuffer())
 
+    // The collection's own cap wins over the transformer's global one.
+    const effectiveMaxInputPixels = collections[collectionSlug]?.maxInputPixels ?? maxInputPixels
+
     const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
-    const sharpOptions: SharpOptions = isAnimated ? { animated: true } : {}
+    // The metadata probe must not carry a pixel limit: Sharp enforces
+    // `limitInputPixels` even on `metadata()`, and omitting the option only
+    // leaves Sharp's own 268M default in force, so a capped probe could not
+    // read the dimensions an over-cap source is refused for. `metadata()`
+    // only reads the header. The resize constructor below is built from a
+    // separate base so the probe's `false` cannot override the decode cap.
+    const probeOptions: SharpOptions = {
+      ...(isAnimated ? { animated: true } : {}),
+      limitInputPixels: false,
+    }
+    // The resize constructor carries the cap as defence-in-depth.
+    const sharpOptions = withInputPixelLimit({
+      maxInputPixels: effectiveMaxInputPixels,
+      options: isAnimated ? { animated: true } : {},
+    })
 
     const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
+
+    // `metadata()` reads the header only, so the source pixel count is known before
+    // any pixel is decoded. Refuse a decompression bomb here, with a 400, rather
+    // than letting the resize below decode gigabytes. Animated sources decode
+    // every frame, so the budget counts them all.
+    const metadata = await sharpDependency(sourceBuffer, probeOptions).metadata()
+    const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
+    const frameHeight = metadata.pageHeight ?? metadata.height
+    // EXIF orientations 5-8 rotate the image by 90°, so `.rotate()` below swaps its axes.
+    const isRotatedQuarterTurn = [5, 6, 7, 8].includes(metadata.orientation!)
+    const sourceWidth = isRotatedQuarterTurn ? frameHeight : metadata.width
+    const sourceHeight = isRotatedQuarterTurn ? metadata.width : frameHeight
+    const sourcePixels = (sourceWidth ?? 0) * (sourceHeight ?? 0) * frameCount
+
+    if (sourcePixels > effectiveMaxInputPixels) {
+      const frameDescription = frameCount > 1 ? ` across ${frameCount} frames` : ''
+
+      return {
+        response: Response.json(
+          {
+            errors: [
+              {
+                message: `Source image is ${sourceWidth}x${sourceHeight}${frameDescription} (${sourcePixels} pixels), which exceeds the maximum input size of ${effectiveMaxInputPixels} pixels.`,
+              },
+            ],
+          },
+          { status: 400 },
+        ),
+        status: 'complete',
+      }
+    }
 
     // The output size is only known once the source is probed: with a single dimension
     // Sharp derives the other from the aspect ratio, `fit: 'outside'` can overflow the
@@ -66,16 +119,11 @@ export function createHandleRequest({
       parseResult.height === undefined ||
       dynamicDefaults.fit === 'outside'
     ) {
-      const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
-      const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
-      const frameHeight = metadata.pageHeight ?? metadata.height
-      // EXIF orientations 5-8 rotate the image by 90°, so `.rotate()` below swaps its axes.
-      const isRotatedQuarterTurn = [5, 6, 7, 8].includes(metadata.orientation!)
       const output = getOutputDimensions({
         fit: dynamicDefaults.fit,
         height: parseResult.height,
-        sourceHeight: isRotatedQuarterTurn ? metadata.width : frameHeight,
-        sourceWidth: isRotatedQuarterTurn ? frameHeight : metadata.width,
+        sourceHeight,
+        sourceWidth,
         width: parseResult.width,
         withoutEnlargement,
       })

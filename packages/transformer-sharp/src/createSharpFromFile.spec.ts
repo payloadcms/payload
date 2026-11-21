@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { SharpDependency } from './types.js'
 
-import { createSharpFromFile } from './createSharpFromFile.js'
+import { createSharpFromFile, withInputPixelLimit } from './createSharpFromFile.js'
 
 describe('createSharpFromFile', () => {
   it('passes a disk-backed File path directly to Sharp', async () => {
@@ -81,5 +81,54 @@ describe('createSharpFromFile', () => {
 
     expect(arrayBuffer).toHaveBeenCalledTimes(2)
     expect(String(sharpDependency.mock.calls[0]![0])).toBe('image-bytes')
+  })
+
+  it('should pass limitInputPixels to Sharp when a cap is given', async () => {
+    const file = new File(['image-bytes'], 'photo.png', { type: 'image/png' })
+    const sharpDependency = vi.fn<SharpDependency>(() => ({}) as Sharp)
+
+    await createSharpFromFile({
+      file,
+      maxInputPixels: 50_000_000,
+      options: { animated: true },
+      sharpDependency,
+    })
+
+    expect(sharpDependency.mock.calls[0]![1]).toEqual({
+      animated: true,
+      limitInputPixels: 50_000_000,
+    })
+  })
+
+  it('should let an explicit limitInputPixels in the options win over the cap', async () => {
+    const file = new File(['image-bytes'], 'photo.png', { type: 'image/png' })
+    const sharpDependency = vi.fn<SharpDependency>(() => ({}) as Sharp)
+
+    await createSharpFromFile({
+      file,
+      maxInputPixels: 50_000_000,
+      options: { limitInputPixels: 1_000 },
+      sharpDependency,
+    })
+
+    expect(sharpDependency.mock.calls[0]![1]).toEqual({ limitInputPixels: 1_000 })
+  })
+})
+
+describe('withInputPixelLimit', () => {
+  it('should leave options untouched without a cap', () => {
+    expect(withInputPixelLimit({ maxInputPixels: undefined, options: { animated: true } })).toEqual(
+      { animated: true },
+    )
+    expect(withInputPixelLimit({ maxInputPixels: undefined, options: undefined })).toBeUndefined()
+  })
+
+  it('should fill in the cap when the options do not set a limit', () => {
+    expect(
+      withInputPixelLimit({ maxInputPixels: 50_000_000, options: { animated: true } }),
+    ).toEqual({ animated: true, limitInputPixels: 50_000_000 })
+    expect(withInputPixelLimit({ maxInputPixels: 50_000_000, options: undefined })).toEqual({
+      limitInputPixels: 50_000_000,
+    })
   })
 })

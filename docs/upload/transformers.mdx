@@ -517,7 +517,7 @@ export default buildConfig({
 
 ### Upload-time image processing
 
-Per-collection Sharp settings — `variants` (image sizes), `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
+Per-collection Sharp settings — `variants` (image sizes), `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `maxInputPixels`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -554,6 +554,8 @@ export default buildConfig({
 ```
 
 At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, as `upload.variants`/`.crop`/`.focalPoint`. A `crop` or `focalPoint` set on `sharpTransformer` replaces the collection's own value; when it isn't set there, the collection's value is kept. So the Admin Panel, generated types, and the rest of core see the same sizes as before. Each generated size is stored on your documents under `variants.<name>`. `variants` exists only on the sanitized config: setting it (or the removed `imageSizes`) on the collection itself fails the build.
+
+Uploads are also capped by decoded source pixels. `maxInputPixels` (default `50,000,000`) is the maximum `width × height × frame count` Sharp may decode for an upload — a flat-colour image of a few kilobytes can decode to gigabytes, so the file-size limit alone cannot stop it. A source over the cap is refused with a `400` before any pixel is decoded, and Sharp is also told via `limitInputPixels`, so no decode can exceed it. Set it globally with `sharpTransformer({ maxInputPixels })` or per collection with `collections.<slug>.maxInputPixels`. `constructorOptions` applies to variants and crops as well as the main file; an explicit `limitInputPixels` there wins over `maxInputPixels`.
 
 You can register more than one `sharpTransformer` (each with its own `slug`), for example to give different collections different dynamic-resize defaults. Each upload is processed by the instance whose `collections` lists that collection. A collection listed in the `collections` of more than one instance throws at startup.
 
@@ -598,6 +600,7 @@ Recognized behavior:
 - Repeated occurrences of the same parameter are invalid and return `400`.
 - `withoutEnlargement` on its own, without `width` or `height`, returns `400`.
 - A request over `maxWidth`, `maxHeight`, or `maxPixels` (below) returns `400` rather than being clamped. With `fit: 'outside'`, or a single dimension, the limits are checked against the actual output size once the source is read.
+- The source itself is capped by `maxInputPixels` (default `50,000,000` decoded pixels, counting every frame of an animated source): a request for a source over the cap returns `400` before any pixel is decoded.
 - Unrelated query keys (`draft`, `depth`, `where`, `prefix`, and so on) are ignored — the request falls through as an ordinary read.
 - Specifying both `width` and `height` crops to that exact box, centered (`fit: 'cover'`), by default.
 - Specifying only one of `width`/`height` preserves the original aspect ratio.

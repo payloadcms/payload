@@ -289,4 +289,157 @@ describe('createTransformFile', () => {
       expect(sampleRawPixel({ ...raw, x: 40, y: 25 })).toEqual({ b: 0, g: 0, r: 255 })
     })
   })
+
+  describe('maxInputPixels', () => {
+    it('should refuse a variant whose source exceeds the cap', async () => {
+      // 400x400 is 160,000 pixels — over a 10,000 cap, so Sharp must throw
+      // `Input image exceeds pixel limit` before decoding it.
+      const buffer = await makeImageBuffer({ height: 400, width: 400 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      await expect(
+        transformFile({
+          file: new File([buffer], 'photo.png', { type: 'image/png' }),
+          options: {
+            collectionUpload: { maxInputPixels: 10_000 },
+            imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
+            kind: 'size',
+            originalDimensions: { height: 400, width: 400 },
+          } satisfies SharpUploadTaskOptions,
+          req: makeReq(),
+        }),
+      ).rejects.toThrow('Input image exceeds pixel limit')
+    })
+
+    it('should apply constructorOptions to variants, so a limit set there caps them too', async () => {
+      // Before the fix, `constructorOptions` reached only the main file and a
+      // variant decoded the source uncapped; now it caps the variant as well.
+      const buffer = await makeImageBuffer({ height: 400, width: 400 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      await expect(
+        transformFile({
+          file: new File([buffer], 'photo.png', { type: 'image/png' }),
+          options: {
+            collectionUpload: { constructorOptions: { limitInputPixels: 10_000 } },
+            imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
+            kind: 'size',
+            originalDimensions: { height: 400, width: 400 },
+          } satisfies SharpUploadTaskOptions,
+          req: makeReq(),
+        }),
+      ).rejects.toThrow('Input image exceeds pixel limit')
+    })
+
+    it('should refuse a crop whose source exceeds the cap', async () => {
+      const buffer = await makeImageBuffer({ height: 100, width: 100 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      await expect(
+        transformFile({
+          doc: { _transforms: { crop: { height: 40, width: 40, x: 25, y: 25 } } },
+          file: new File([buffer], 'photo.png', { type: 'image/png' }),
+          options: {
+            collectionUpload: { maxInputPixels: 100 },
+            kind: 'main',
+            originalDimensions: { height: 100, width: 100 },
+          } satisfies SharpUploadTaskOptions,
+          req: makeReq(),
+        }),
+      ).rejects.toThrow('Input image exceeds pixel limit')
+    })
+
+    it('should refuse a main file with adjustments whose source exceeds the cap', async () => {
+      const buffer = await makeImageBuffer({ height: 100, width: 100 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      await expect(
+        transformFile({
+          file: new File([buffer], 'photo.png', { type: 'image/png' }),
+          options: {
+            collectionUpload: {
+              maxInputPixels: 100,
+              resizeOptions: { height: 10, width: 10 },
+            },
+            kind: 'main',
+            originalDimensions: { height: 100, width: 100 },
+          } satisfies SharpUploadTaskOptions,
+          req: makeReq(),
+        }),
+      ).rejects.toThrow('Input image exceeds pixel limit')
+    })
+
+    it('should apply constructorOptions to the resize of a full-size crop, so a limit set there caps it too', async () => {
+      // The crop equals the original dimensions, so no extraction runs and
+      // the resize reads the original file — before the fix it decoded with
+      // the 50M default instead of the configured 500,000 limit.
+      const buffer = await makeImageBuffer({ height: 1000, width: 1000 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      await expect(
+        transformFile({
+          doc: { _transforms: { crop: { height: 1000, width: 1000, x: 0, y: 0 } } },
+          file: new File([buffer], 'photo.png', { type: 'image/png' }),
+          options: {
+            collectionUpload: {
+              constructorOptions: { limitInputPixels: 500_000 },
+              maxInputPixels: 50_000_000,
+              resizeOptions: { height: 500, width: 500 },
+            },
+            kind: 'main',
+            originalDimensions: { height: 1000, width: 1000 },
+          } satisfies SharpUploadTaskOptions,
+          req: makeReq(),
+        }),
+      ).rejects.toThrow('Input image exceeds pixel limit')
+    })
+
+    it('should still resize an actually-cropped file when constructorOptions are set', async () => {
+      // The crop output is an encoded intermediate, not the original source:
+      // it keeps only the pixel limit, never source options such as page
+      // selection, and the resize still runs.
+      const buffer = await makeImageBuffer({ height: 100, width: 100 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      const result = await transformFile({
+        doc: { _transforms: { crop: { height: 40, width: 40, x: 25, y: 25 } } },
+        file: new File([buffer], 'photo.png', { type: 'image/png' }),
+        options: {
+          collectionUpload: {
+            constructorOptions: { limitInputPixels: 50_000_000 },
+            resizeOptions: { height: 20, width: 20 },
+          },
+          kind: 'main',
+          originalDimensions: { height: 100, width: 100 },
+        } satisfies SharpUploadTaskOptions,
+        req: makeReq(),
+      })
+
+      const metadata = await sharp(await toBuffer(result.file!)).metadata()
+      expect(metadata.width).toBe(20)
+      expect(metadata.height).toBe(20)
+    })
+
+    it('should process a source within the cap', async () => {
+      const buffer = await makeImageBuffer({ height: 100, width: 100 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      const result = await transformFile({
+        file: new File([buffer], 'photo.png', { type: 'image/png' }),
+        options: {
+          collectionUpload: {
+            maxInputPixels: 50_000_000,
+            resizeOptions: { height: 10, width: 10 },
+          },
+          kind: 'main',
+          originalDimensions: { height: 100, width: 100 },
+        } satisfies SharpUploadTaskOptions,
+        req: makeReq(),
+      })
+
+      const metadata = await sharp(await toBuffer(result.file!)).metadata()
+      expect(metadata.width).toBe(10)
+      expect(metadata.height).toBe(10)
+    })
+  })
 })

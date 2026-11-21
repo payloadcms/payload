@@ -52,8 +52,14 @@ async function transformMain({
   const { collectionUpload, cropSize, originalDimensions } = options
   // A full-image selection saves no crop, but a request crop size still extracts from the corner.
   const crop = getSavedCrop({ doc }) ?? (cropSize ? { ...cropSize, x: 0, y: 0 } : undefined)
-  const { constructorOptions, formatOptions, resizeOptions, trimOptions, withMetadata } =
-    collectionUpload
+  const {
+    constructorOptions,
+    formatOptions,
+    maxInputPixels,
+    resizeOptions,
+    trimOptions,
+    withMetadata,
+  } = collectionUpload
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)
   const fileHasAdjustments = Boolean(
@@ -62,10 +68,12 @@ async function transformMain({
 
   if (crop && originalDimensions) {
     return transformCrop({
+      constructorOptions,
       crop,
       cropSize,
       file,
       fileIsAnimatedType,
+      maxInputPixels,
       originalDimensions,
       req,
       resizeOptions,
@@ -86,7 +94,7 @@ async function transformMain({
 
   // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
   let sharpFile = (
-    await createSharpFromFile({ file, options: sharpOptions, sharpDependency })
+    await createSharpFromFile({ file, maxInputPixels, options: sharpOptions, sharpDependency })
   ).rotate()
 
   if (resizeOptions) {
@@ -109,27 +117,40 @@ async function transformMain({
 }
 
 async function transformCrop({
+  constructorOptions,
   crop,
   cropSize,
   file,
   fileIsAnimatedType,
+  maxInputPixels,
   originalDimensions,
   req,
   resizeOptions,
   sharpDependency,
   withMetadata,
 }: {
+  constructorOptions: Extract<
+    SharpUploadTaskOptions,
+    { kind: 'main' }
+  >['collectionUpload']['constructorOptions']
   crop: Omit<Crop, 'unit'>
   cropSize: Extract<SharpUploadTaskOptions, { kind: 'main' }>['cropSize']
   file: File
   fileIsAnimatedType: boolean
+  maxInputPixels: number | undefined
   originalDimensions: { height: number; width: number }
   req: PayloadRequest
   resizeOptions: ResizeOptions | undefined
   sharpDependency: SharpDependency
   withMetadata: SharpUploadTaskOptions['collectionUpload']['withMetadata']
 }): Promise<TransformFileResult> {
-  const sharpOptions: SharpOptions = fileIsAnimatedType ? { animated: true } : {}
+  // `constructorOptions` used to reach only the main file; a crop decodes the same
+  // source, so it gets the same options (and the same input-pixel cap).
+  const sharpOptions: SharpOptions = { ...constructorOptions }
+
+  if (fileIsAnimatedType) {
+    sharpOptions.animated = true
+  }
 
   const newWidth = Number(cropSize?.width ?? crop.width)
   const newHeight = Number(cropSize?.height ?? crop.height)
@@ -148,7 +169,7 @@ async function transformCrop({
     }
 
     let cropped = (
-      await createSharpFromFile({ file, options: sharpOptions, sharpDependency })
+      await createSharpFromFile({ file, maxInputPixels, options: sharpOptions, sharpDependency })
     ).extract(formattedCropData)
     cropped = await optionallyAppendMetadata({ req, sharpFile: cropped, withMetadata })
     const { data } = await cropped.toBuffer({ resolveWithObject: true })
@@ -156,7 +177,24 @@ async function transformCrop({
   }
 
   if (resizeOptions && !resizeOptions.withoutEnlargement) {
-    const sharpFile = await createSharpFromFile({ file: croppedFile, sharpDependency })
+    // When no extraction ran, `croppedFile` is the original source, so the
+    // resize decodes it under the same constructor options (including a
+    // stricter `limitInputPixels`) as the crop step. An encoded intermediate
+    // is smaller than the source, so it keeps only the pixel limit — replaying
+    // source options such as `page` onto it would be wrong. A `false` limit
+    // must not override the cap, so only a numeric limit is carried over.
+    const resizeSharpOptions: SharpOptions | undefined =
+      croppedFile === file
+        ? sharpOptions
+        : typeof constructorOptions?.limitInputPixels === 'number'
+          ? { limitInputPixels: constructorOptions.limitInputPixels }
+          : undefined
+    const sharpFile = await createSharpFromFile({
+      file: croppedFile,
+      maxInputPixels,
+      options: resizeSharpOptions,
+      sharpDependency,
+    })
     const { data: resizedBuffer } = await sharpFile
       .resize({
         fit: resizeOptions.fit || 'cover',
@@ -193,13 +231,19 @@ async function transformSize({
 }): Promise<TransformFileResult> {
   const { canUseFocalPoint, collectionUpload, imageResizeConfig, originalDimensions } = options
   const focalPoint = canUseFocalPoint ? getSavedFocalPoint({ doc }) : undefined
-  const { withMetadata } = collectionUpload
+  const { constructorOptions, maxInputPixels, withMetadata } = collectionUpload
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)
-  const sharpOptions: SharpOptions = fileIsAnimatedType ? { animated: true } : {}
+  // `constructorOptions` used to reach only the main file; a variant decodes the same
+  // source, so it gets the same options (and the same input-pixel cap).
+  const sharpOptions: SharpOptions = { ...constructorOptions }
+
+  if (fileIsAnimatedType) {
+    sharpOptions.animated = true
+  }
 
   const sharpBase = (
-    await createSharpFromFile({ file, options: sharpOptions, sharpDependency })
+    await createSharpFromFile({ file, maxInputPixels, options: sharpOptions, sharpDependency })
   ).rotate()
   const originalImageMeta = await sharpBase.metadata()
 
