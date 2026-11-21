@@ -64,6 +64,9 @@
 
   .array-field__row-header {
     display: flex;
+    flex: 1 1 0%;
+    min-width: 0;
+    overflow: hidden;
     align-items: center;
     gap: var(--spacer-2);
     pointer-events: none;
