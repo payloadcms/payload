@@ -217,10 +217,18 @@
       content: '';
       position: absolute;
       inset-inline: 0;
-      top: calc(-1 * var(--stroke-width-small));
+      inset-block-start: calc(-1 * var(--stroke-width-small));
       height: var(--stroke-width-medium);
       background: var(--color-icon);
       border-radius: var(--stroke-width-small);
+      z-index: 1;
+    }
+  }
+
+  .column-selector__item--over-bottom {
+    &::before {
+      inset-block-start: auto;
+      inset-block-end: calc(-1 * var(--stroke-width-small));
     }
   }
 
