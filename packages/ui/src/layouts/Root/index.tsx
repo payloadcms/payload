@@ -9,7 +9,6 @@ import { DocumentRoot, RootProviders } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getRootLayoutData } from './getRootLayoutData.js'
 import { NestProviders } from './NestProviders.js'
-import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import ensures the consumer bundler resolves the full CSS chain
 import '@payloadcms/ui/css/app.css'
 
@@ -105,7 +104,6 @@ export const RootLayout = async ({
       suppressHydrationWarning={data.suppressHydrationWarning}
       theme={data.theme}
       themeSource={data.themeSource}
-      viewport={getViewportMeta(req.headers.get('user-agent') ?? undefined)}
     >
       <RootProviders data={data} RouterAdapter={RouterAdapter} serverFunction={serverFunction}>
         {Array.isArray(config.admin?.components?.providers) &&
