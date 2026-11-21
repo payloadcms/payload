@@ -27,7 +27,7 @@ export const baseClass = 'move-many'
 type MoveManyProps = {
   /** Current parent ID - modal will open expanded to this location */
   currentParentID?: null | number | string
-  /** The hierarchy collection slug (e.g., 'folders') */
+  /** The hierarchy collection slug */
   hierarchySlug: string
   /** Icon to display in the hierarchy modal */
   Icon?: React.ReactNode
@@ -72,6 +72,10 @@ export function MoveMany({
 
   const { getSelectionsWithMetadata } = useDocumentSelection()
   const hierarchyCollectionConfig = collections.find((c) => c.slug === hierarchySlug)
+  const hierarchyConfig =
+    hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
+      ? hierarchyCollectionConfig.hierarchy
+      : undefined
 
   const { relatedCollectionSlugs } = useMemo(
     () => getHierarchyCollectionRestrictions({ collectionConfig: hierarchyCollectionConfig }),
@@ -80,14 +84,14 @@ export function MoveMany({
 
   // Compute required collections from selection metadata
   // For related items: add their collection slug
-  // For folders: add their allowedCollections values
+  // For hierarchy items: add their allowedCollections values
   const inferredRequiredCollections = useMemo(() => {
     const selectionsWithMeta = getSelectionsWithMetadata()
     const required = new Set<string>()
 
     for (const [collectionSlug, { selections: items }] of Object.entries(selectionsWithMeta)) {
       if (collectionSlug === hierarchySlug) {
-        // For folders, add their allowedCollections to required set
+        // For hierarchy items, add their allowedCollections to required set
         for (const { metadata } of items) {
           for (const slug of getEffectiveHierarchyCollections({
             allowedCollections: metadata.allowedCollections,
@@ -107,7 +111,7 @@ export function MoveMany({
 
   const requiredCollections = requiredCollectionsProp ?? inferredRequiredCollections
 
-  // Folders being moved cannot be selected as destination (can't move into themselves)
+  // An item cannot be moved into itself.
   const disabledIds = useMemo(() => {
     const parentIds = selections[hierarchySlug]?.ids
     return parentIds?.length ? new Set(parentIds) : undefined
@@ -178,6 +182,17 @@ export function MoveMany({
             continue
           }
 
+          const fieldName =
+            collectionSlug === hierarchySlug
+              ? parentFieldName
+              : hierarchyConfig?.relatedCollections?.[collectionSlug]?.fieldName
+
+          if (!fieldName) {
+            hasErrors = true
+            toast.error(t('error:unknown'))
+            continue
+          }
+
           const queryString = qs.stringify(
             {
               locale,
@@ -192,7 +207,7 @@ export function MoveMany({
           })
 
           const response = await requests.patch(url, {
-            body: JSON.stringify({ [parentFieldName]: destination.id }),
+            body: JSON.stringify({ [fieldName]: destination.id }),
             headers: {
               'Accept-Language': i18n.language,
               'Content-Type': 'application/json',
@@ -254,7 +269,19 @@ export function MoveMany({
         setIsMoving(false)
       }
     },
-    [closeModal, selections, parentFieldName, locale, api, i18n, t, label, onSuccess],
+    [
+      closeModal,
+      selections,
+      hierarchySlug,
+      hierarchyConfig,
+      parentFieldName,
+      locale,
+      api,
+      i18n,
+      t,
+      label,
+      onSuccess,
+    ],
   )
 
   const handleModalSave = useCallback(
