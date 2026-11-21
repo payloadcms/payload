@@ -225,6 +225,11 @@ export const restoreVersionOperation = async <
       version: versionToRestoreWithLocales,
     })
 
+    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+    shareFileOperationScope({ owner: req, req: reqWithValidationLocale })
+    reqWithValidationLocale.fallbackLocale = null
+    reqWithValidationLocale.locale = validationLocale
+
     const originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
@@ -235,7 +240,7 @@ export const restoreVersionOperation = async <
       global: null,
       locale: validationLocale,
       overrideAccess: true,
-      req,
+      req: reqWithValidationLocale,
       showHiddenFields: true,
     })
 
@@ -250,7 +255,7 @@ export const restoreVersionOperation = async <
       global: null,
       locale: validationLocale,
       overrideAccess: true,
-      req,
+      req: reqWithValidationLocale,
       showHiddenFields: true,
     })
 
@@ -259,11 +264,6 @@ export const restoreVersionOperation = async <
     // /////////////////////////////////////
 
     req.context.isRestoringVersion = true
-
-    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
-    shareFileOperationScope({ owner: req, req: reqWithValidationLocale })
-    reqWithValidationLocale.fallbackLocale = null
-    reqWithValidationLocale.locale = validationLocale
 
     let data = await beforeValidate({
       id: parentDocID,

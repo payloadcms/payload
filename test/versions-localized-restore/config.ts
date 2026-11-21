@@ -4,6 +4,7 @@ import { lexicalEditor, ParagraphFeature } from '@payloadcms/richtext-lexical'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import {
+  restoreConditionalGroupSlug,
   restoreLocalizedGroupSlug,
   restoreLocalizedTabSlug,
   restoreRequiredContainersSlug,
@@ -69,7 +70,61 @@ export default buildConfigWithDefaults({
         fields: [
           {
             type: 'tabs',
-            tabs: [{ name: 'content', fields: [{ ...requiredTitle }], localized: true }],
+            tabs: [
+              {
+                name: 'content',
+                fields: [
+                  {
+                    ...requiredTitle,
+                    hooks: {
+                      afterRead: [
+                        ({ context, req, value }) => {
+                          if (Array.isArray(context.restoreReadLocales)) {
+                            context.restoreReadLocales.push({ locale: req.locale, value })
+                          }
+                        },
+                      ],
+                    },
+                  },
+                ],
+                localized: true,
+              },
+            ],
+          },
+        ],
+        versions: true,
+      },
+      {
+        slug: restoreConditionalGroupSlug,
+        fields: [
+          { name: 'heading', type: 'text', localized: true, required: true },
+          {
+            name: 'content',
+            type: 'group',
+            fields: [
+              {
+                type: 'tabs',
+                tabs: [
+                  {
+                    name: 'details',
+                    fields: [
+                      { name: 'enabled', type: 'checkbox' },
+                      {
+                        name: 'advanced',
+                        type: 'group',
+                        admin: {
+                          condition: (_, siblingData, { path }) =>
+                            siblingData.enabled !== false ||
+                            path.join('.') !== 'content.details.advanced',
+                        },
+                        fields: [requiredTitle],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            localized: true,
           },
         ],
         versions: true,

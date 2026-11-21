@@ -87,6 +87,7 @@ export interface Config {
   collections: {
     'restore-localized-group': RestoreLocalizedGroup;
     'restore-localized-tab': RestoreLocalizedTab;
+    'restore-conditional-group': RestoreConditionalGroup;
     'restore-required-containers': RestoreRequiredContainer;
     'restore-rich-text': RestoreRichText;
     'payload-kv': PayloadKv;
@@ -100,6 +101,7 @@ export interface Config {
   collectionsSelect: {
     'restore-localized-group': RestoreLocalizedGroupSelect<false> | RestoreLocalizedGroupSelect<true>;
     'restore-localized-tab': RestoreLocalizedTabSelect<false> | RestoreLocalizedTabSelect<true>;
+    'restore-conditional-group': RestoreConditionalGroupSelect<false> | RestoreConditionalGroupSelect<true>;
     'restore-required-containers': RestoreRequiredContainersSelect<false> | RestoreRequiredContainersSelect<true>;
     'restore-rich-text': RestoreRichTextSelect<false> | RestoreRichTextSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -248,6 +250,32 @@ export interface RestoreLocalizedTab {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-conditional-group".
+ */
+export interface RestoreConditionalGroup {
+  id: number;
+  heading: string;
+  content?: {
+    details?: {
+      enabled?: boolean | null;
+      advanced?: {
+        title: string;
+      };
+    };
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restore-required-containers".
  */
 export interface RestoreRequiredContainer {
@@ -330,6 +358,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restore-localized-tab';
         value: number | RestoreLocalizedTab;
+      } | null)
+    | ({
+        relationTo: 'restore-conditional-group';
+        value: number | RestoreConditionalGroup;
       } | null)
     | ({
         relationTo: 'restore-required-containers';
@@ -444,6 +476,31 @@ export interface RestoreLocalizedTabSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-conditional-group_select".
+ */
+export interface RestoreConditionalGroupSelect<T extends boolean = true> {
+  heading?: T;
+  content?:
+    | T
+    | {
+        details?:
+          | T
+          | {
+              enabled?: T;
+              advanced?:
+                | T
+                | {
+                    title?: T;
+                  };
+            };
       };
   createdBy?: T;
   updatedBy?: T;
@@ -607,6 +664,7 @@ export interface CollectionQueryWidget {
     relatedCollection:
       | 'restore-localized-group'
       | 'restore-localized-tab'
+      | 'restore-conditional-group'
       | 'restore-required-containers'
       | 'restore-rich-text'
       | 'users';
@@ -635,6 +693,7 @@ export interface ActivityWidget {
       | (
           | 'restore-localized-group'
           | 'restore-localized-tab'
+          | 'restore-conditional-group'
           | 'restore-required-containers'
           | 'restore-rich-text'
           | 'users'

@@ -3,16 +3,18 @@ import type { Field, TabAsField } from '../fields/config/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
+import { getFieldPaths } from '../fields/getFieldPaths.js'
 import { flattenValidationData } from '../fields/hooks/beforeChange/flattenValidationData.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
-import { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 import { traverseFields } from '../utilities/traverseFields.js'
+
+type FieldPath = { field: Field | TabAsField; path: string[] }
 
 /**
  * Selects the locale whose data is passed to the collection restore validators.
  * A version can have been published before the default translation was written.
  * Validating the stored translation lets the restore preserve each locale's values.
- * A missing value only affects locale selection when the field's condition allows validation.
+ * A required field inside a localized group or tab only affects selection when its conditions pass.
  */
 export function getRestoreValidationLocale({
   id,
@@ -90,7 +92,11 @@ export function getRestoreValidationLocale({
       }
 
       const isRequired = 'required' in field && field.required
-      const requiredDescendants = getRequiredDescendants({ field })
+      const fieldPath = [...dataScope.path, field.name]
+      const requiredDescendants =
+        field.type === 'group' || field.type === 'tab'
+          ? getRequiredDescendants({ fields: field.fields, parentPath: fieldPath.join('.') })
+          : []
       if (!isRequired && requiredDescendants.length === 0) {
         return
       }
@@ -100,17 +106,21 @@ export function getRestoreValidationLocale({
         return
       }
 
-      const fieldPath = [...dataScope.path, field.name]
       const { blockPath } = dataScope
       const eligibleLocales = localeCodes.filter((code) => {
         const value = (values as Record<string, unknown>)[code]
 
         const hasRequiredContent =
           (!isRequired || hasContent({ field, value })) &&
-          requiredDescendants.every(({ field, path }) => {
+          requiredDescendants.every(({ conditions, field, path }) => {
             return (
-              hasContent({ field, value: getValueAtPath({ data: value, path }) }) ||
-              isConditionInactive({ blockPath, code, field, path: [...fieldPath, ...path] })
+              hasContent({
+                field,
+                value: getValueAtPath({ data: value, path: path.slice(fieldPath.length) }),
+              }) ||
+              conditions.some(({ field, path }) =>
+                isConditionInactive({ blockPath, code, field, path }),
+              )
             )
           })
 
@@ -153,22 +163,56 @@ function getValueAtPath({ data, path }: { data: unknown; path: string[] }): unkn
   )
 }
 
-/** Named groups and tabs store the locale at the container, above their required fields. */
-function getRequiredDescendants({ field }: { field: Field | TabAsField }) {
-  if (field.type !== 'group' && field.type !== 'tab') {
-    return []
-  }
+/** Collects required fields together with the conditions that govern their validation. */
+function getRequiredDescendants({
+  fields,
+  parentConditions = [],
+  parentIndexPath = '',
+  parentPath,
+}: {
+  fields: (Field | TabAsField)[]
+  parentConditions?: FieldPath[]
+  parentIndexPath?: string
+  parentPath: string
+}): ({ conditions: FieldPath[] } & FieldPath)[] {
+  return fields.flatMap((field, index) => {
+    const { indexPath, path } = getFieldPaths({
+      field,
+      index,
+      parentIndexPath,
+      parentPath,
+      parentSchemaPath: '',
+    })
+    const fieldPath = { field, path: path.split('.') }
+    const conditions = field.admin?.condition ? [...parentConditions, fieldPath] : parentConditions
+    const isNamed = fieldAffectsData(field) && Boolean(field.name)
+    const required =
+      isNamed && 'required' in field && field.required ? [{ ...fieldPath, conditions }] : []
 
-  return flattenTopLevelFields(field.fields, { moveSubFieldsToTop: true }).flatMap((descendant) => {
-    if (
-      !fieldAffectsData(descendant) ||
-      !descendant.name ||
-      !('required' in descendant && descendant.required)
-    ) {
-      return []
+    switch (field.type) {
+      case 'collapsible':
+      case 'group':
+      case 'row':
+      case 'tab':
+        return [
+          ...required,
+          ...getRequiredDescendants({
+            fields: field.fields,
+            parentConditions: conditions,
+            parentIndexPath: indexPath,
+            parentPath: isNamed ? path : parentPath,
+          }),
+        ]
+      case 'tabs':
+        return getRequiredDescendants({
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          parentConditions: conditions,
+          parentIndexPath: indexPath,
+          parentPath: path,
+        })
+      default:
+        return required
     }
-
-    return [{ field: descendant, path: (descendant.accessor ?? descendant.name).split('.') }]
   })
 }
 
