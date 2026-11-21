@@ -62,6 +62,7 @@ export const getSchedulePublishTask = ({
           overrideAccess: user === null,
           publishAllLocales: _status === 'published' && isPublishAllLocales,
           req,
+          unpublishAllLocales: _status === 'draft' && isPublishAllLocales,
           user,
         })
       }
@@ -79,6 +80,7 @@ export const getSchedulePublishTask = ({
           overrideAccess: user === null,
           publishAllLocales: _status === 'published' && isPublishAllLocales,
           req,
+          unpublishAllLocales: _status === 'draft' && isPublishAllLocales,
           user,
         })
       }
