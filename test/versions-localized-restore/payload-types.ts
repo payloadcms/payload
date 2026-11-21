@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     'restore-localized-group': RestoreLocalizedGroup;
     'restore-localized-tab': RestoreLocalizedTab;
+    'restore-conditional-group': RestoreConditionalGroup;
     'restore-required-containers': RestoreRequiredContainer;
     'restore-rich-text': RestoreRichText;
     'payload-kv': PayloadKv;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsSelect: {
     'restore-localized-group': RestoreLocalizedGroupSelect<false> | RestoreLocalizedGroupSelect<true>;
     'restore-localized-tab': RestoreLocalizedTabSelect<false> | RestoreLocalizedTabSelect<true>;
+    'restore-conditional-group': RestoreConditionalGroupSelect<false> | RestoreConditionalGroupSelect<true>;
     'restore-required-containers': RestoreRequiredContainersSelect<false> | RestoreRequiredContainersSelect<true>;
     'restore-rich-text': RestoreRichTextSelect<false> | RestoreRichTextSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -153,6 +155,24 @@ export interface RestoreLocalizedTab {
   id: number;
   content: {
     title: string;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-conditional-group".
+ */
+export interface RestoreConditionalGroup {
+  id: number;
+  heading: string;
+  content?: {
+    details?: {
+      enabled?: boolean | null;
+      advanced?: {
+        title: string;
+      };
+    };
   };
   updatedAt: string;
   createdAt: string;
@@ -262,6 +282,10 @@ export interface PayloadLockedDocument {
         value: number | RestoreLocalizedTab;
       } | null)
     | ({
+        relationTo: 'restore-conditional-group';
+        value: number | RestoreConditionalGroup;
+      } | null)
+    | ({
         relationTo: 'restore-required-containers';
         value: number | RestoreRequiredContainer;
       } | null)
@@ -350,6 +374,29 @@ export interface RestoreLocalizedTabSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-conditional-group_select".
+ */
+export interface RestoreConditionalGroupSelect<T extends boolean = true> {
+  heading?: T;
+  content?:
+    | T
+    | {
+        details?:
+          | T
+          | {
+              enabled?: T;
+              advanced?:
+                | T
+                | {
+                    title?: T;
+                  };
+            };
       };
   updatedAt?: T;
   createdAt?: T;

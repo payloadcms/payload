@@ -7,6 +7,7 @@ import type { RestoreRichText } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
+  restoreConditionalGroupSlug,
   restoreLocalizedGroupSlug,
   restoreLocalizedTabSlug,
   restoreRequiredContainersSlug,
@@ -193,6 +194,117 @@ describe('Restore localized collection versions', () => {
     })
 
     expect(restored.sections).toMatchObject([{ caption: 'First caption' }, { caption: '' }])
+  })
+
+  it('should restore a locale with a required field inside an inactive parent group', async () => {
+    const collection = restoreConditionalGroupSlug
+    const post = await payload.create({
+      collection,
+      data: {
+        content: { details: { advanced: { title: 'English title' }, enabled: true } },
+        heading: 'English heading',
+      },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    created.push({ id: post.id, collection })
+
+    const [version] = (
+      await payload.findVersions({
+        collection,
+        locale: 'all',
+        overrideAccess: true,
+        where: { parent: { equals: post.id } },
+      })
+    ).docs
+
+    const content = {
+      de: { details: { advanced: { title: '' }, enabled: false } },
+      en: { details: { advanced: { title: 'English title' }, enabled: true } },
+    }
+    const heading = { de: 'German heading', en: '' }
+
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: { version: { ...version!.version, content, heading } },
+    })
+
+    const restoreOptions = {
+      id: version!.id,
+      collection,
+      locale: 'all' as const,
+      overrideAccess: true,
+    }
+    const restored = await payload.restoreVersion(restoreOptions)
+
+    expect(restored).toMatchObject({ content, heading })
+
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: {
+        version: {
+          ...version!.version,
+          content: { ...content, de: { details: { ...content.de.details, enabled: true } } },
+          heading,
+        },
+      },
+    })
+
+    await expect(payload.restoreVersion(restoreOptions)).rejects.toMatchObject({
+      data: { errors: [expect.objectContaining({ path: 'heading' })] },
+    })
+  })
+
+  it('should pass the validation locale to both preliminary afterRead hooks', async () => {
+    const collection = restoreLocalizedTabSlug
+    const post = await payload.create({
+      collection,
+      data: { content: { title: 'Original title' } },
+      locale: 'de',
+      overrideAccess: true,
+    })
+
+    created.push({ id: post.id, collection })
+
+    const [version] = (
+      await payload.findVersions({
+        collection,
+        overrideAccess: true,
+        where: { parent: { equals: post.id } },
+      })
+    ).docs
+
+    await payload.update({
+      id: post.id,
+      collection,
+      data: { content: { title: 'Current title' } },
+      locale: 'de',
+      overrideAccess: true,
+    })
+
+    const restoreReadLocales: { locale?: string; value: unknown }[] = []
+    const restored = await payload.restoreVersion({
+      id: version!.id,
+      collection,
+      context: { restoreReadLocales },
+      fallbackLocale: 'de',
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    expect(restoreReadLocales).toEqual([
+      { locale: 'de', value: 'Current title' },
+      { locale: 'de', value: 'Original title' },
+      { locale: 'en', value: 'Original title' },
+    ])
+    expect(restored.content?.title).toBe('Original title')
   })
 
   const emptyContainerCases = [
