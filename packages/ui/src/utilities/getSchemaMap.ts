@@ -5,10 +5,20 @@ import { cache } from 'react'
 
 import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
 
-let cachedSchemaMap = global._payload_schemaMap
+/**
+ * Field schema maps are cached per config object they were built from, then per entity.
+ * After a config reload in development, a request that is still rendering with the previous
+ * config must not fill the cache that later requests (with the new config) read from.
+ */
+type CachedSchemaMaps = WeakMap<SanitizedConfig, Map<string, FieldSchemaMap>>
 
-if (!cachedSchemaMap) {
-  cachedSchemaMap = global._payload_schemaMap = null
+const getCachedSchemaMaps = (): CachedSchemaMaps => {
+  if (!(global._payload_schemaMap instanceof WeakMap) || global._payload_doNotCacheSchemaMap) {
+    global._payload_schemaMap = new WeakMap()
+    global._payload_doNotCacheSchemaMap = false
+  }
+
+  return global._payload_schemaMap
 }
 
 export const getSchemaMap = cache(
@@ -20,19 +30,21 @@ export const getSchemaMap = cache(
     widgetSlug?: string
   }): FieldSchemaMap => {
     const { collectionSlug, config, globalSlug, i18n, widgetSlug } = args
+    const cachedSchemaMaps = getCachedSchemaMaps()
 
-    if (!cachedSchemaMap || global._payload_doNotCacheSchemaMap) {
-      cachedSchemaMap = new Map()
+    let schemaMapsForConfig = cachedSchemaMaps.get(config)
+
+    if (!schemaMapsForConfig) {
+      schemaMapsForConfig = new Map()
+      cachedSchemaMaps.set(config, schemaMapsForConfig)
     }
 
     const cacheKey = collectionSlug || globalSlug || `widget:${widgetSlug}`
-    let cachedEntityFieldMap = cachedSchemaMap.get(cacheKey)
+    const cachedEntityFieldMap = schemaMapsForConfig.get(cacheKey)
 
     if (cachedEntityFieldMap) {
       return cachedEntityFieldMap
     }
-
-    cachedEntityFieldMap = new Map()
 
     const { fieldSchemaMap: entityFieldMap } = buildFieldSchemaMap({
       collectionSlug,
@@ -42,11 +54,7 @@ export const getSchemaMap = cache(
       widgetSlug,
     })
 
-    cachedSchemaMap.set(cacheKey, entityFieldMap)
-
-    global._payload_schemaMap = cachedSchemaMap
-
-    global._payload_doNotCacheSchemaMap = false
+    schemaMapsForConfig.set(cacheKey, entityFieldMap)
 
     return entityFieldMap
   },
