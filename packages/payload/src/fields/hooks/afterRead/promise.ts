@@ -19,6 +19,7 @@ import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../conf
 import { getBlockFromField } from '../../getBlockFromField.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
+import { getPointCoordinates } from '../../getPointCoordinates.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
 import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
@@ -226,13 +227,7 @@ export const promise = async ({
       break
     }
     case 'point': {
-      const pointDoc = siblingDoc[field.name] as Record<string, unknown>
-      if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
-        siblingDoc[field.name] = pointDoc.coordinates
-      } else {
-        siblingDoc[field.name] = undefined
-      }
-
+      siblingDoc[field.name] = getPointCoordinates({ value: siblingDoc[field.name] })
       break
     }
 

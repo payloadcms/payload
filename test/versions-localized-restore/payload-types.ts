@@ -70,6 +70,8 @@ export interface Config {
     'restore-localized-group': RestoreLocalizedGroup;
     'restore-localized-tab': RestoreLocalizedTab;
     'restore-conditional-group': RestoreConditionalGroup;
+    'restore-localized-array-rows': RestoreLocalizedArrayRow;
+    'restore-point-condition': RestorePointCondition;
     'restore-required-containers': RestoreRequiredContainer;
     'restore-rich-text': RestoreRichText;
     'payload-kv': PayloadKv;
@@ -83,6 +85,8 @@ export interface Config {
     'restore-localized-group': RestoreLocalizedGroupSelect<false> | RestoreLocalizedGroupSelect<true>;
     'restore-localized-tab': RestoreLocalizedTabSelect<false> | RestoreLocalizedTabSelect<true>;
     'restore-conditional-group': RestoreConditionalGroupSelect<false> | RestoreConditionalGroupSelect<true>;
+    'restore-localized-array-rows': RestoreLocalizedArrayRowsSelect<false> | RestoreLocalizedArrayRowsSelect<true>;
+    'restore-point-condition': RestorePointConditionSelect<false> | RestorePointConditionSelect<true>;
     'restore-required-containers': RestoreRequiredContainersSelect<false> | RestoreRequiredContainersSelect<true>;
     'restore-rich-text': RestoreRichTextSelect<false> | RestoreRichTextSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -174,6 +178,39 @@ export interface RestoreConditionalGroup {
       };
     };
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-localized-array-rows".
+ */
+export interface RestoreLocalizedArrayRow {
+  id: number;
+  content?: {
+    rows?:
+      | {
+          enabled?: boolean | null;
+          title?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-point-condition".
+ */
+export interface RestorePointCondition {
+  id: number;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  origin?: [number, number] | null;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -284,6 +321,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restore-conditional-group';
         value: number | RestoreConditionalGroup;
+      } | null)
+    | ({
+        relationTo: 'restore-localized-array-rows';
+        value: number | RestoreLocalizedArrayRow;
+      } | null)
+    | ({
+        relationTo: 'restore-point-condition';
+        value: number | RestorePointCondition;
       } | null)
     | ({
         relationTo: 'restore-required-containers';
@@ -398,6 +443,35 @@ export interface RestoreConditionalGroupSelect<T extends boolean = true> {
                   };
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-localized-array-rows_select".
+ */
+export interface RestoreLocalizedArrayRowsSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              enabled?: T;
+              title?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-point-condition_select".
+ */
+export interface RestorePointConditionSelect<T extends boolean = true> {
+  origin?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
