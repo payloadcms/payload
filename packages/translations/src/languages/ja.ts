@@ -523,6 +523,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     selectValue: '値を選択',
     settings: '設定',
     showAllLabel: 'すべての{{label}}を表示する',
+    showingCurrentOfTotal: '{{total}}件中{{current}}件を表示',
     shownInTable: '表に表示',
     showSidebar: 'サイドバーを表示',
     skipToContent: 'コンテンツへスキップ',

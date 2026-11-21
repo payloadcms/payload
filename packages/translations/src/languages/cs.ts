@@ -519,6 +519,7 @@ export const csTranslations: DefaultTranslationsObject = {
     selectValue: 'Vyberte hodnotu',
     settings: 'Nastavení',
     showAllLabel: 'Zobrazit všechny {{label}}',
+    showingCurrentOfTotal: 'Zobrazeno {{current}} z {{total}}',
     shownInTable: 'Zobrazeno v tabulce',
     showSidebar: 'Zobrazit postranní panel',
     skipToContent: 'Přejít na obsah',

@@ -531,6 +531,7 @@ export const huTranslations: DefaultTranslationsObject = {
     selectValue: 'Válasszon ki egy értéket',
     settings: 'Beállítások',
     showAllLabel: 'Mutasd az összes {{címke}}',
+    showingCurrentOfTotal: '{{current}} / {{total}} megjelenítve',
     shownInTable: 'Táblázatban megjelenítve',
     showSidebar: 'Oldalsáv megjelenítése',
     skipToContent: 'Ugrás a tartalomhoz',

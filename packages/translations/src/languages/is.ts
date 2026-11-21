@@ -519,6 +519,7 @@ export const isTranslations: DefaultTranslationsObject = {
     selectValue: 'Veldu gildi',
     settings: 'Stillingar',
     showAllLabel: 'Sýna allar {{label}}',
+    showingCurrentOfTotal: 'Sýni {{current}} af {{total}}',
     shownInTable: 'Sýnt í töflu',
     showSidebar: 'Sýna hliðarstiku',
     skipToContent: 'Fara beint í efni',

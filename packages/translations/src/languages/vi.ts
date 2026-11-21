@@ -523,6 +523,7 @@ export const viTranslations: DefaultTranslationsObject = {
     selectValue: 'Chọn một giá trị',
     settings: 'Cài đặt',
     showAllLabel: 'Hiển thị tất cả {{label}}',
+    showingCurrentOfTotal: 'Đang hiển thị {{current}} trên {{total}}',
     shownInTable: 'Hiển thị trong bảng',
     showSidebar: 'Hiển thị thanh bên',
     skipToContent: 'Chuyển đến nội dung',
