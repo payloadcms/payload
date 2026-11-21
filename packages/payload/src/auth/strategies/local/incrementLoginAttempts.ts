@@ -144,7 +144,7 @@ export const incrementLoginAttempts = async ({
         await payload.db.updateOne({
           id: user.id,
           collection: collection.slug,
-          data: user,
+          data: { sessions: user.sessions, updatedAt: user.updatedAt },
           returning: false,
         })
       }
