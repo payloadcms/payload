@@ -5418,6 +5418,38 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           expect(esDoc._status).toContain('published')
           expect(allLocalesDoc._status.xx).not.toBe('published')
         })
+
+        test('should duplicate as draft in every locale', async ({ payload }) => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              _status: 'published',
+              text: 'Localized Metadata EN',
+            },
+            locale: defaultLocale,
+            overrideAccess: true,
+            publishAllLocales: true,
+          })
+
+          const duplicate = await payload.duplicate({
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+            locale: defaultLocale,
+            overrideAccess: true,
+          })
+
+          const allLocalesDuplicate = await payload.findByID({
+            id: duplicate.id,
+            collection: allFieldsLocalizedSlug,
+            draft: true,
+            locale: 'all',
+            overrideAccess: true,
+          })
+
+          expect(allLocalesDuplicate._status[defaultLocale]).toBe('draft')
+          expect(allLocalesDuplicate._status[spanishLocale]).toBe('draft')
+        })
       })
 
       test.describe('querying', () => {
