@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { Project } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
 import { runTransform } from '../../utils/test-helpers.js'
@@ -87,5 +88,35 @@ describe('add-override-access-true', () => {
     const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
 
     expect(result).toBe(output)
+  })
+
+  it('should report every Local API call it skips because of a spread or a non-literal argument', async () => {
+    const source = await fixture({ name: 'skipped.input.ts' })
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/skipped.ts', source)
+
+    const result = await addOverrideAccessTrue.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([
+      expect.stringMatching(/^\/skipped\.ts:4: `payload\.find\(\)` .*spread/),
+      expect.stringMatching(/^\/skipped\.ts:9: `req\.payload\.update\(\)` .*spread/),
+      expect.stringMatching(/^\/skipped\.ts:13: `payload\.findByID\(\)` .*not an object literal/),
+      expect.stringMatching(/^\/skipped\.ts:15: `payload\.count\(\)` .*not an object literal/),
+      expect.stringMatching(
+        /^\/skipped\.ts:17: `payload\.jobs\.queue\(\)` .*not an object literal/,
+      ),
+    ])
+  })
+
+  it('should not report anything when every call was handled', async () => {
+    const source = await fixture({ name: 'basic.input.ts' })
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/basic.ts', source)
+
+    const result = await addOverrideAccessTrue.apply({ packageJsons: [], project })
+
+    expect(result.notes).toBeUndefined()
   })
 })
