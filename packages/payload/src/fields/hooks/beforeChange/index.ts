@@ -25,6 +25,8 @@ export type Args<T extends JsonObject> = {
   operation: Operation
   overrideAccess?: boolean
   req: PayloadRequest
+  /** Validate empty localized arrays and blocks when restoring a version. */
+  shouldValidateLocalizedContainers?: boolean
   skipValidation?: boolean
 }
 
@@ -50,6 +52,7 @@ export const beforeChange = async <T extends JsonObject>({
   operation,
   overrideAccess,
   req,
+  shouldValidateLocalizedContainers = false,
   skipValidation,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
@@ -75,6 +78,7 @@ export const beforeChange = async <T extends JsonObject>({
     parentPath: '',
     parentSchemaPath: '',
     req,
+    shouldValidateLocalizedContainers,
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
