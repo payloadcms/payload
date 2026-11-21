@@ -49,6 +49,7 @@ import type {
   RequestContext,
   TypedAuthOperations,
   TypedCollection,
+  TypedCollectionInput,
   TypedCollectionSelect,
   TypedLocale,
 } from '../../index.js'
@@ -123,13 +124,30 @@ export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = Generate
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
-export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
+export type DataFromCollectionInputSlug<TSlug extends CollectionSlug> = [
+  TypedCollectionInput,
+] extends [never]
+  ? never
+  : TSlug extends keyof TypedCollectionInput
+    ? TypedCollectionInput[TSlug]
+    : never
+
+export type OptionalKeys<T> = [T] extends [never]
+  ? never
+  : {
+      [K in keyof T]-?: Record<string, never> extends Pick<T, K> ? K : never
+    }[keyof T]
+
+export type RequiredDataFromCollection<TData extends JsonObject, TInput = never> = MarkOptional<
   TData,
-  'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
+  Extract<
+    keyof TData,
+    'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt' | OptionalKeys<TInput>
+  >
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
-  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
+  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>, DataFromCollectionInputSlug<TSlug>>
 
 /**
  * Helper type for draft data INPUT (e.g., create operations) - makes all fields optional except system fields
