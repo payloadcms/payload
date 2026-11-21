@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Block, BlocksField, Field } from 'payload'
 
 import { lexicalEditor, ParagraphFeature } from '@payloadcms/richtext-lexical'
 
@@ -8,6 +8,7 @@ import {
   restoreLocalizedArrayRowsSlug,
   restoreLocalizedGroupSlug,
   restoreLocalizedTabSlug,
+  restoreNonLocalizedConditionSlug,
   restorePointConditionSlug,
   restoreRequiredContainersSlug,
   restoreRichTextSlug,
@@ -15,8 +16,37 @@ import {
 
 const requiredTitle: Field = { name: 'title', type: 'text', required: true }
 
+const requiredCaptionBlock: Block = {
+  slug: 'required-caption',
+  fields: [
+    { name: 'enabled', type: 'checkbox' },
+    {
+      name: 'details',
+      type: 'group',
+      fields: [
+        {
+          name: 'caption',
+          type: 'text',
+          admin: {
+            condition: (_, _siblingData, { blockData, path }) =>
+              blockData?.enabled !== false || path.at(-3) !== '0',
+          },
+          required: true,
+        },
+      ],
+    },
+  ],
+}
+
+const sectionsField: BlocksField = {
+  name: 'sections',
+  type: 'blocks',
+  blocks: ['required-caption'],
+}
+
 export default buildConfigWithDefaults({
   config: {
+    blocks: [requiredCaptionBlock],
     collections: [
       {
         slug: restoreLocalizedGroupSlug,
@@ -78,6 +108,7 @@ export default buildConfigWithDefaults({
                 fields: [
                   {
                     ...requiredTitle,
+                    admin: { condition: () => true },
                     hooks: {
                       afterRead: [
                         ({ context, req, value }) => {
@@ -152,6 +183,40 @@ export default buildConfigWithDefaults({
               },
             ],
             localized: true,
+          },
+          {
+            name: 'items',
+            type: 'array',
+            fields: [sectionsField],
+            localized: true,
+          },
+          { ...sectionsField, localized: true },
+        ],
+        versions: true,
+      },
+      {
+        slug: restoreNonLocalizedConditionSlug,
+        fields: [
+          { name: 'enabled', type: 'checkbox', localized: true },
+          {
+            name: 'entries',
+            type: 'array',
+            fields: [{ name: 'label', type: 'text' }],
+          },
+          {
+            name: 'content',
+            type: 'group',
+            admin: {
+              condition: (_, siblingData) => siblingData.enabled === true,
+            },
+            fields: [
+              {
+                ...requiredTitle,
+                admin: { condition: (data) => data.entries?.length === 0 },
+                localized: true,
+                minLength: 3,
+              },
+            ],
           },
         ],
         versions: true,

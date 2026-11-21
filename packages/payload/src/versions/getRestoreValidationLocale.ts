@@ -1,39 +1,40 @@
-import type { SanitizedConfig } from '../config/types.js'
-import type { Field, TabAsField } from '../fields/config/types.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { Condition, Field, TabAsField } from '../fields/config/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
 import { getFieldPaths } from '../fields/getFieldPaths.js'
-import { flattenValidationData } from '../fields/hooks/beforeChange/flattenValidationData.js'
+import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
-import { traverseFields } from '../utilities/traverseFields.js'
 
-type FieldPath = { field: Field | TabAsField; path: string[] }
+type FieldCondition = {
+  blockPath?: string[]
+  condition: Condition
+  path: string[]
+}
 
 /**
- * Selects the locale whose data is passed to the collection restore validators.
+ * Selects the locale whose stored data is passed to the collection restore validators.
  * A version can have been published before the default translation was written.
- * Validating the stored translation lets the restore preserve each locale's values.
- * Required fields only affect locale selection when their conditions pass.
  */
-export function getRestoreValidationLocale({
+export async function getRestoreValidationLocale({
   id,
-  config,
-  fields,
+  collection,
+  draft,
   locale,
+  req,
   skipValidation,
-  user,
   version,
 }: {
-  config: SanitizedConfig
-  fields: Field[]
+  collection: SanitizedCollectionConfig
+  draft: boolean
   id: number | string
   locale: string
+  req: PayloadRequest
   skipValidation: boolean
-  user: PayloadRequest['user']
   version: JsonObject
-}): string {
-  const { localization } = config
+}): Promise<string> {
+  const { localization } = req.payload.config
   if (!localization) {
     return locale
   }
@@ -48,96 +49,65 @@ export function getRestoreValidationLocale({
     return defaultLocale
   }
 
-  const documentsByLocale = new Map<string, JsonObject>()
-  const isConditionInactive = ({
-    blockPath,
-    code,
-    field,
-    path,
-  }: {
-    blockPath?: string[]
-    code: string
-    field: Field | TabAsField
-    path: string[]
-  }): boolean => {
-    const condition = field.admin?.condition
-    if (!condition) {
-      return false
-    }
-
-    let data = documentsByLocale.get(code)
-    if (!data) {
-      data = flattenValidationData({
-        config,
-        data: { ...version, id },
-        fields,
-        locale: code,
-        normalizePointFields: true,
-      })
-      documentsByLocale.set(code, data)
-    }
-
-    return !condition(data, getValueAtPath({ data, path: path.slice(0, -1) }) ?? {}, {
-      blockData: (blockPath ? getValueAtPath({ data, path: blockPath }) : undefined) as JsonObject,
-      operation: 'update',
-      path,
-      user,
+  const excludedLocalesByPath = new Map<string, Set<string>>()
+  for (const code of [defaultLocale, ...localeCodes.filter((code) => code !== defaultLocale)]) {
+    const requiredFields = getRequiredFields({
+      data: version,
+      fields: collection.fields,
+      locale: code,
+      parentPath: '',
+      req,
     })
+    let conditionData: JsonObject | undefined
+
+    for (const { conditions, field, localizedPath, value } of requiredFields) {
+      const excludedLocales = excludedLocalesByPath.get(localizedPath)
+      if (excludedLocales?.has(code) || hasContent({ field, value })) {
+        continue
+      }
+
+      if (conditions.length > 0) {
+        const data = (conditionData ??= await afterRead({
+          collection,
+          context: req.context,
+          depth: 0,
+          doc: deepCopyObjectSimple({ ...version, id }),
+          draft,
+          fallbackLocale: null,
+          global: null,
+          locale: code,
+          overrideAccess: true,
+          req,
+          runReadHooksAndPopulation: false,
+          showHiddenFields: true,
+        }))
+
+        if (conditions.some((condition) => isConditionInactive({ condition, data, req }))) {
+          continue
+        }
+      }
+
+      if (excludedLocales) {
+        excludedLocales.add(code)
+      } else {
+        excludedLocalesByPath.set(localizedPath, new Set([code]))
+      }
+    }
+
+    if (code === defaultLocale && excludedLocalesByPath.size === 0) {
+      return defaultLocale
+    }
   }
 
   const candidates = new Set(localeCodes)
-  traverseFields({
-    callback: ({ dataScope, field, parentIsLocalized, ref }) => {
-      if (
-        !dataScope ||
-        !fieldAffectsData(field) ||
-        !field.name ||
-        !fieldShouldBeLocalized({ field, parentIsLocalized })
-      ) {
-        return
+  for (const excludedLocales of excludedLocalesByPath.values()) {
+    // An empty required field in every locale cannot guide locale selection.
+    if (excludedLocales.size < localeCodes.length) {
+      for (const code of excludedLocales) {
+        candidates.delete(code)
       }
-
-      const isRequired = 'required' in field && field.required
-      if (!isRequired && field.type !== 'array' && field.type !== 'group' && field.type !== 'tab') {
-        return
-      }
-
-      const { name } = field
-      const values: unknown = (ref as JsonObject)[name]
-      if (!values || typeof values !== 'object' || Array.isArray(values)) {
-        return
-      }
-
-      const { blockPath } = dataScope
-      const parentPath = dataScope.path.join('.')
-      const eligibleLocales = localeCodes.filter((code) => {
-        const requiredFields = getRequiredFields({
-          data: { [name]: (values as Record<string, unknown>)[code] },
-          fields: [field],
-          parentPath,
-        })
-        return requiredFields.every(
-          ({ conditions, field, value }) =>
-            hasContent({ field, value }) ||
-            conditions.some(({ field, path }) =>
-              isConditionInactive({ blockPath, code, field, path }),
-            ),
-        )
-      })
-      if (eligibleLocales.length > 0) {
-        for (const candidate of candidates) {
-          if (!eligibleLocales.includes(candidate)) {
-            candidates.delete(candidate)
-          }
-        }
-      }
-    },
-    config,
-    dataScope: { path: [] },
-    fields,
-    fillEmpty: false,
-    ref: deepCopyObjectSimple(version),
-  })
+    }
+  }
 
   if (candidates.has(defaultLocale)) {
     return defaultLocale
@@ -151,6 +121,23 @@ export function getRestoreValidationLocale({
   return allowedLocales.find((code) => candidates.has(code)) ?? defaultLocale
 }
 
+function isConditionInactive({
+  condition: { blockPath, condition, path },
+  data,
+  req,
+}: {
+  condition: FieldCondition
+  data: JsonObject
+  req: PayloadRequest
+}): boolean {
+  return !condition(data, getValueAtPath({ data, path: path.slice(0, -1) }) ?? {}, {
+    blockData: (blockPath ? getValueAtPath({ data, path: blockPath }) : undefined) as JsonObject,
+    operation: 'update',
+    path,
+    user: req.user,
+  })
+}
+
 function getValueAtPath({ data, path }: { data: unknown; path: string[] }): unknown {
   return path.reduce<unknown>(
     (value, key) =>
@@ -161,18 +148,33 @@ function getValueAtPath({ data, path }: { data: unknown; path: string[] }): unkn
 
 /** Collects required fields and their conditions for the rows present in one translation. */
 function getRequiredFields({
+  blockPath,
   data,
   fields,
+  locale,
+  localizedPath,
   parentConditions = [],
   parentIndexPath = '',
+  parentIsLocalized = false,
   parentPath,
+  req,
 }: {
+  blockPath?: string[]
   data: unknown
   fields: (Field | TabAsField)[]
-  parentConditions?: FieldPath[]
+  locale: string
+  localizedPath?: string
+  parentConditions?: FieldCondition[]
   parentIndexPath?: string
+  parentIsLocalized?: boolean
   parentPath: string
-}): { conditions: FieldPath[]; field: Field | TabAsField; value: unknown }[] {
+  req: PayloadRequest
+}): {
+  conditions: FieldCondition[]
+  field: Field | TabAsField
+  localizedPath: string
+  value: unknown
+}[] {
   return fields.flatMap((field, index) => {
     const { indexPath, path } = getFieldPaths({
       field,
@@ -181,29 +183,64 @@ function getRequiredFields({
       parentPath,
       parentSchemaPath: '',
     })
-    const conditions = field.admin?.condition
-      ? [...parentConditions, { field, path: path.split('.') }]
+    const condition = field.admin?.condition
+    const conditions = condition
+      ? [...parentConditions, { blockPath, condition, path: path.split('.') }]
       : parentConditions
     const name = fieldAffectsData(field) ? field.name : undefined
-    const value = name ? getValueAtPath({ data, path: [name] }) : data
+    const storedValue = name ? getValueAtPath({ data, path: [name] }) : data
+    const hasLocaleMap =
+      name &&
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+      storedValue &&
+      typeof storedValue === 'object' &&
+      !Array.isArray(storedValue)
+    const value = hasLocaleMap ? getValueAtPath({ data: storedValue, path: [locale] }) : storedValue
+    const fieldLocalizedPath = localizedPath ?? (hasLocaleMap ? path : undefined)
     const required =
-      name && 'required' in field && field.required ? [{ conditions, field, value }] : []
+      name && fieldLocalizedPath && 'required' in field && field.required
+        ? [{ conditions, field, localizedPath: fieldLocalizedPath, value }]
+        : []
+    const childrenAreLocalized =
+      parentIsLocalized || ('localized' in field && field.localized === true)
 
     switch (field.type) {
       case 'array':
+      case 'blocks':
         if (!Array.isArray(value)) {
           return required
         }
         return [
           ...required,
-          ...value.flatMap((row, rowIndex) =>
-            getRequiredFields({
+          ...value.flatMap((row, rowIndex) => {
+            let rowFields: Field[] | undefined
+            if (field.type === 'array') {
+              rowFields = field.fields
+            } else if (typeof row?.blockType === 'string') {
+              const { blockType } = row
+              const block = field.blocks.find((block) =>
+                typeof block === 'string' ? block === blockType : block.slug === blockType,
+              )
+              rowFields = (typeof block === 'string' ? req.payload.blocks[block] : block)?.fields
+            }
+
+            if (!rowFields) {
+              return []
+            }
+
+            const rowPath = `${path}.${rowIndex}`
+            return getRequiredFields({
+              blockPath: field.type === 'blocks' ? rowPath.split('.') : blockPath,
               data: row,
-              fields: field.fields,
+              fields: rowFields,
+              locale,
+              localizedPath: fieldLocalizedPath,
               parentConditions: conditions,
-              parentPath: `${path}.${rowIndex}`,
-            }),
-          ),
+              parentIsLocalized: childrenAreLocalized,
+              parentPath: rowPath,
+              req,
+            })
+          }),
         ]
       case 'collapsible':
       case 'group':
@@ -212,20 +249,30 @@ function getRequiredFields({
         return [
           ...required,
           ...getRequiredFields({
+            blockPath,
             data: value,
             fields: field.fields,
+            locale,
+            localizedPath: fieldLocalizedPath,
             parentConditions: conditions,
             parentIndexPath: indexPath,
+            parentIsLocalized: childrenAreLocalized,
             parentPath: name ? path : parentPath,
+            req,
           }),
         ]
       case 'tabs':
         return getRequiredFields({
+          blockPath,
           data,
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          locale,
+          localizedPath: fieldLocalizedPath,
           parentConditions: conditions,
           parentIndexPath: indexPath,
+          parentIsLocalized: childrenAreLocalized,
           parentPath: path,
+          req,
         })
       default:
         return required

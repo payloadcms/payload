@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { RestoreRichText } from './payload-types.js'
 
@@ -8,6 +8,7 @@ import {
   restoreLocalizedArrayRowsSlug,
   restoreLocalizedGroupSlug,
   restoreLocalizedTabSlug,
+  restoreNonLocalizedConditionSlug,
   restorePointConditionSlug,
   restoreRequiredContainersSlug,
   restoreRichTextSlug,
@@ -353,6 +354,71 @@ test.suite('Restore localized collection versions', { config: './config.ts' }, (
     await payload.restoreVersion({ id: version!.id, collection, overrideAccess: true })
   })
 
+  for (const isNested of [false, true]) {
+    const location = isNested ? 'blocks nested in a localized array' : 'localized block rows'
+    test(`should check required fields in ${location}`, async ({ payload }) => {
+      const collection = restoreLocalizedArrayRowsSlug
+      const hiddenBlock = {
+        blockType: 'required-caption' as const,
+        details: { caption: '' },
+        enabled: false,
+      }
+      const activeBlock = {
+        blockType: 'required-caption' as const,
+        details: { caption: 'German caption' },
+        enabled: true,
+      }
+      const en = [hiddenBlock, { ...activeBlock, details: { caption: '' } }]
+      const de = [hiddenBlock, activeBlock]
+
+      const post = await payload.create({
+        collection,
+        data: isNested ? { items: [{ sections: [activeBlock] }] } : { sections: [activeBlock] },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const [version] = (
+        await payload.db.findVersions({
+          collection,
+          locale: 'all',
+          where: { parent: { equals: post.id } },
+        })
+      ).docs
+
+      const historicalData = isNested
+        ? { items: { de: [{ sections: de }], en: [{ sections: en }] } }
+        : { sections: { de, en } }
+
+      await payload.db.updateVersion({
+        id: version!.id,
+        collection,
+        locale: 'all',
+        returning: false,
+        versionData: { version: { ...version!.version, ...historicalData } },
+      })
+
+      const [snapshot] = (
+        await payload.db.findVersions({
+          collection,
+          locale: 'all',
+          where: { id: { equals: version!.id } },
+        })
+      ).docs
+
+      expect(snapshot?.version).toMatchObject(historicalData)
+
+      const restored = await payload.restoreVersion({
+        id: version!.id,
+        collection,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(restored).toMatchObject(historicalData)
+    })
+  }
+
   test('should use point coordinates when evaluating a field condition for locale selection', async ({
     payload,
   }) => {
@@ -392,6 +458,78 @@ test.suite('Restore localized collection versions', { config: './config.ts' }, (
 
     expect(restored).toMatchObject({ origin: [1, 2], title })
   })
+
+  const containerConditionCases = [
+    {
+      enabledInEnglish: false,
+      entries: [],
+      germanTitle: 'x',
+      name: 'honor a condition above a localized field',
+    },
+    {
+      enabledInEnglish: true,
+      entries: null,
+      germanTitle: 'German title',
+      name: 'evaluate conditions with the read shape of an empty array',
+    },
+  ]
+
+  for (const { enabledInEnglish, entries, germanTitle, name } of containerConditionCases) {
+    test(`should ${name}`, async ({ payload }) => {
+      const collection = restoreNonLocalizedConditionSlug
+      const post = await payload.create({
+        collection,
+        data: { content: { title: 'English title' }, enabled: true },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const [version] = (
+        await payload.db.findVersions({
+          collection,
+          locale: 'all',
+          where: { parent: { equals: post.id } },
+        })
+      ).docs
+
+      const content = { title: { de: germanTitle, en: '' } }
+      const enabled = { de: true, en: enabledInEnglish }
+      const historicalVersion = { ...version!.version, content, enabled, entries }
+
+      await payload.db.updateVersion({
+        id: version!.id,
+        collection,
+        locale: 'all',
+        returning: false,
+        versionData: { version: historicalVersion },
+      })
+
+      const snapshot = await payload.db.findVersions({
+        collection,
+        locale: 'all',
+        where: { id: { equals: version!.id } },
+      })
+
+      // Some adapters materialize absent arrays as an empty array before field reads.
+      const readVersion = vi.spyOn(payload.db, 'findVersions').mockResolvedValueOnce({
+        ...snapshot,
+        docs: snapshot.docs.map((doc) => ({ ...doc, version: { ...doc.version, entries } })),
+      })
+
+      try {
+        const restored = await payload.restoreVersion({
+          id: version!.id,
+          collection,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        expect(restored).toMatchObject({ content, enabled })
+      } finally {
+        readVersion.mockRestore()
+      }
+    })
+  }
 
   const emptyContainerCases = [
     {
