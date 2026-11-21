@@ -43,7 +43,7 @@ import {
   isTransactionActive,
 } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
+import { killOwnedTransaction, killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
@@ -71,6 +71,8 @@ export const deleteOperation = async <
   incomingArgs: Arguments,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+  let ownedTransactionID: number | string | undefined
+  let ownedTransactionHadSession = false
 
   assertNoValidationWrite(args.req)
 
@@ -94,6 +96,10 @@ export const deleteOperation = async <
     const transactionSnapshot = !args.req.payload.db.bulkOperationsSingleTransaction
       ? await getTransactionSnapshot(args.req)
       : { hadSession: false, transactionID: undefined }
+    if (shouldCommit) {
+      ownedTransactionID = transactionSnapshot.transactionID
+      ownedTransactionHadSession = transactionSnapshot.hadSession
+    }
     const hasSharedTransaction = transactionSnapshot.transactionID !== undefined
     const isSharedTransactionLost = async (targetReq: PayloadRequest): Promise<boolean> =>
       hasSharedTransaction &&
@@ -628,7 +634,11 @@ export const deleteOperation = async <
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killOwnedTransaction({
+      hadSession: ownedTransactionHadSession,
+      ownedTransactionID,
+      req: args.req,
+    })
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }

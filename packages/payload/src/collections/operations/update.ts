@@ -49,7 +49,7 @@ import {
 } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
+import { killOwnedTransaction, killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
@@ -102,6 +102,8 @@ export const updateOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
   const hasFileOperationScope = Boolean(args.collection.config.upload)
+  let ownedTransactionID: number | string | undefined
+  let ownedTransactionHadSession = false
 
   assertNoValidationWrite(args.req)
 
@@ -118,6 +120,14 @@ export const updateOperation = async <
     const transactionSnapshot = !args.req.payload.db.bulkOperationsSingleTransaction
       ? await getTransactionSnapshot(args.req)
       : { hadSession: false, transactionID: undefined }
+    if (shouldCommit) {
+      const ownedSnapshot =
+        transactionSnapshot.transactionID !== undefined
+          ? transactionSnapshot
+          : await getTransactionSnapshot(args.req)
+      ownedTransactionID = ownedSnapshot.transactionID
+      ownedTransactionHadSession = ownedSnapshot.hadSession
+    }
     const hasSharedTransaction = transactionSnapshot.transactionID !== undefined
     const isSharedTransactionLost = async (targetReq: PayloadRequest): Promise<boolean> =>
       hasSharedTransaction &&
@@ -594,7 +604,11 @@ export const updateOperation = async <
     }).catch((unlinkError) => {
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
-    await killTransaction(args.req)
+    await killOwnedTransaction({
+      hadSession: ownedTransactionHadSession,
+      ownedTransactionID,
+      req: args.req,
+    })
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }
