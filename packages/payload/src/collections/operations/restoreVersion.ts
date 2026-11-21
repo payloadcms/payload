@@ -216,10 +216,12 @@ export const restoreVersionOperation = async <
     // originalDoc with hoisted localized data
     const skipValidation = draftArg && !hasDraftValidationEnabled(collectionConfig)
     const validationLocale = getRestoreValidationLocale({
+      id: parentDocID,
       config: payload.config,
       fields: collectionConfig.fields,
       locale: locale!,
       skipValidation,
+      user: req.user,
       version: versionToRestoreWithLocales,
     })
 

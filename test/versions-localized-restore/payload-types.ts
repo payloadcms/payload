@@ -152,9 +152,11 @@ export interface UserAuthOperations {
  */
 export interface RestoreLocalizedGroup {
   id: number;
-  content: {
-    title: string;
+  content?: {
+    enabled?: boolean | null;
+    title?: string | null;
   };
+  sections?: ConditionalSection[] | null;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -165,6 +167,17 @@ export interface RestoreLocalizedGroup {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConditionalSection".
+ */
+export interface ConditionalSection {
+  enabled?: boolean | null;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'conditional-section';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -402,7 +415,20 @@ export interface RestoreLocalizedGroupSelect<T extends boolean = true> {
   content?:
     | T
     | {
+        enabled?: T;
         title?: T;
+      };
+  sections?:
+    | T
+    | {
+        'conditional-section'?:
+          | T
+          | {
+              enabled?: T;
+              caption?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   createdBy?: T;
   updatedBy?: T;

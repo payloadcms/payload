@@ -1,8 +1,9 @@
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, TabAsField } from '../fields/config/types.js'
-import type { JsonObject } from '../types/index.js'
+import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
+import { flattenValidationData } from '../fields/hooks/beforeChange/flattenValidationData.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 import { traverseFields } from '../utilities/traverseFields.js'
@@ -11,18 +12,23 @@ import { traverseFields } from '../utilities/traverseFields.js'
  * Selects the locale whose data is passed to the collection restore validators.
  * A version can have been published before the default translation was written.
  * Validating the stored translation lets the restore preserve each locale's values.
+ * A missing value only affects locale selection when the field's condition allows validation.
  */
 export function getRestoreValidationLocale({
+  id,
   config,
   fields,
   locale,
   skipValidation,
+  user,
   version,
 }: {
   config: SanitizedConfig
   fields: Field[]
+  id: number | string
   locale: string
   skipValidation: boolean
+  user: PayloadRequest['user']
   version: JsonObject
 }): string {
   const { localization } = config
@@ -40,10 +46,42 @@ export function getRestoreValidationLocale({
     return defaultLocale
   }
 
+  const documentsByLocale = new Map<string, JsonObject>()
+  const isConditionInactive = ({
+    blockPath,
+    code,
+    field,
+    path,
+  }: {
+    blockPath?: string[]
+    code: string
+    field: Field | TabAsField
+    path: string[]
+  }): boolean => {
+    const condition = field.admin?.condition
+    if (!condition) {
+      return false
+    }
+
+    let data = documentsByLocale.get(code)
+    if (!data) {
+      data = flattenValidationData({ config, data: { ...version, id }, fields, locale: code })
+      documentsByLocale.set(code, data)
+    }
+
+    return !condition(data, getValueAtPath({ data, path: path.slice(0, -1) }) ?? {}, {
+      blockData: (blockPath ? getValueAtPath({ data, path: blockPath }) : undefined) as JsonObject,
+      operation: 'update',
+      path,
+      user,
+    })
+  }
+
   const candidates = new Set(localeCodes)
   traverseFields({
-    callback: ({ field, parentIsLocalized, ref }) => {
+    callback: ({ dataScope, field, parentIsLocalized, ref }) => {
       if (
+        !dataScope ||
         !fieldAffectsData(field) ||
         !field.name ||
         !fieldShouldBeLocalized({ field, parentIsLocalized })
@@ -51,8 +89,9 @@ export function getRestoreValidationLocale({
         return
       }
 
+      const isRequired = 'required' in field && field.required
       const requiredDescendants = getRequiredDescendants({ field })
-      if (!('required' in field && field.required) && requiredDescendants.length === 0) {
+      if (!isRequired && requiredDescendants.length === 0) {
         return
       }
 
@@ -61,30 +100,34 @@ export function getRestoreValidationLocale({
         return
       }
 
-      const populatedLocales = localeCodes.filter((code) => {
+      const fieldPath = [...dataScope.path, field.name]
+      const { blockPath } = dataScope
+      const eligibleLocales = localeCodes.filter((code) => {
         const value = (values as Record<string, unknown>)[code]
 
-        return (
-          hasContent({ field, value }) &&
+        const hasRequiredContent =
+          (!isRequired || hasContent({ field, value })) &&
           requiredDescendants.every(({ field, path }) => {
-            const descendant = path.reduce<unknown>(
-              (parent, key) => (parent as Record<string, unknown> | undefined)?.[key],
-              value,
+            return (
+              hasContent({ field, value: getValueAtPath({ data: value, path }) }) ||
+              isConditionInactive({ blockPath, code, field, path: [...fieldPath, ...path] })
             )
-
-            return hasContent({ field, value: descendant })
           })
+
+        return (
+          hasRequiredContent || isConditionInactive({ blockPath, code, field, path: fieldPath })
         )
       })
-      if (populatedLocales.length > 0) {
+      if (eligibleLocales.length > 0) {
         for (const candidate of candidates) {
-          if (!populatedLocales.includes(candidate)) {
+          if (!eligibleLocales.includes(candidate)) {
             candidates.delete(candidate)
           }
         }
       }
     },
     config,
+    dataScope: { path: [] },
     fields,
     fillEmpty: false,
     ref: deepCopyObjectSimple(version),
@@ -100,6 +143,14 @@ export function getRestoreValidationLocale({
   }
 
   return allowedLocales.find((code) => candidates.has(code)) ?? defaultLocale
+}
+
+function getValueAtPath({ data, path }: { data: unknown; path: string[] }): unknown {
+  return path.reduce<unknown>(
+    (value, key) =>
+      value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined,
+    data,
+  )
 }
 
 /** Named groups and tabs store the locale at the container, above their required fields. */

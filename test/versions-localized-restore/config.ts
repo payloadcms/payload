@@ -21,8 +21,45 @@ export default buildConfigWithDefaults({
           {
             name: 'content',
             type: 'group',
-            fields: [requiredTitle],
+            fields: [
+              { name: 'enabled', type: 'checkbox', defaultValue: true },
+              {
+                ...requiredTitle,
+                admin: { condition: (_, siblingData) => siblingData.enabled !== false },
+                minLength: 3,
+              },
+            ],
             localized: true,
+          },
+          {
+            name: 'sections',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'conditional-section',
+                fields: [
+                  { name: 'enabled', type: 'checkbox', defaultValue: true },
+                  {
+                    name: 'caption',
+                    type: 'text',
+                    admin: {
+                      condition: (data, siblingData, { blockData, operation, path }) =>
+                        !(
+                          data.id !== undefined &&
+                          data.content?.enabled === false &&
+                          siblingData.enabled === false &&
+                          blockData?.enabled === false &&
+                          operation === 'update' &&
+                          path.join('.') === 'sections.1.caption'
+                        ),
+                    },
+                    localized: true,
+                    minLength: 3,
+                    required: true,
+                  },
+                ],
+              },
+            ],
           },
         ],
         versions: true,
