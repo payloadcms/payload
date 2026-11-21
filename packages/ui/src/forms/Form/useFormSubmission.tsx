@@ -13,6 +13,7 @@ import {
 } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type {
@@ -33,14 +34,17 @@ import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { createProgressToast } from '../../providers/UploadSessions/browser.js'
 import {
   UploadContinuesInBackgroundError,
   useOptionalUploadSessions,
 } from '../../providers/UploadSessions/index.js'
 import { requests } from '../../utilities/api.js'
+import { uploadRequest } from '../../utilities/uploadRequest.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
+import { trackSaveUploadProgress } from './trackSaveUploadProgress.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
@@ -91,8 +95,15 @@ export const useFormSubmission = ({
     waitForAutocomplete,
   } = props
 
-  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
-    useDocumentInfo()
+  const {
+    id,
+    collectionSlug,
+    docConfig,
+    docPermissions,
+    getDocPreferences,
+    globalSlug,
+    setUploadProgress,
+  } = useDocumentInfo()
   const locale = useLocale()?.code
   const operation = useOperation()
   const { getFormState } = useServerFunctions()
@@ -295,6 +306,9 @@ export const useFormSubmission = ({
       // create new toast promise which will resolve manually later
       let errorToast, successToast
       let promiseToastID: number | string | undefined
+      let saveUpload: ReturnType<typeof trackSaveUploadProgress> | undefined
+      // A save's own progress toast when it has no "Submitting…" toast to show progress in.
+      let uploadToast: ReturnType<typeof createProgressToast<string>> | undefined
       let preservePromiseToast = false
 
       const promise = new Promise((resolve, reject) => {
@@ -308,8 +322,10 @@ export const useFormSubmission = ({
       if (redirect || disableToast || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
-        successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
+        successToast = (data) =>
+          toast.success(data, uploadToast ? { id: uploadToast.getResultID() } : undefined)
+        errorToast = (data) =>
+          toast.error(data, uploadToast ? { id: uploadToast.getResultID() } : undefined)
       } else {
         const promiseToast = toast.promise(promise, {
           error: (data) => {
@@ -478,17 +494,57 @@ export const useFormSubmission = ({
             return
           }
 
+          const uploadFile = contextRef.current.fields?.file?.value
+
+          if (uploadFile instanceof File) {
+            if (promiseToastID === undefined) {
+              uploadToast = createProgressToast({ id: `save-upload-${uuidv4()}` })
+            }
+
+            saveUpload = trackSaveUploadProgress({
+              fileName: uploadFile.name,
+              onChange: setUploadProgress,
+              progressToast:
+                uploadToast ??
+                // The same id, not its string: Sonner matches ids strictly.
+                createProgressToast({ id: promiseToastID }),
+              t,
+              totalBytes: uploadFile.size,
+            })
+          }
+
           const formData = await contextRef.current.createFormData(overrides, {
             action: typeof actionArg === 'string' ? actionArg : undefined,
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+            onUploadProgress: saveUpload?.report,
           })
 
           if (!requestContext.isCurrent()) {
             return
           }
 
-          if (typeof actionArg === 'string') {
+          // Only a URL action has a method; a function action may have none.
+          const uploadMethod =
+            typeof actionArg === 'string' ? methodToUse?.toUpperCase() : undefined
+
+          if (
+            typeof actionArg === 'string' &&
+            formData.get('file') instanceof Blob &&
+            (uploadMethod === 'PATCH' || uploadMethod === 'POST' || uploadMethod === 'PUT')
+          ) {
+            // The file is in this request, so it reports how much of it is sent.
+            res = await uploadRequest({
+              body: formData,
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              method: uploadMethod,
+              onProgress: saveUpload?.report,
+              url: actionArg,
+              withCredentials: true,
+            })
+          } else if (typeof actionArg === 'string') {
             res = await requests[methodToUse.toLowerCase()](actionArg, {
               body: formData,
               headers: {
@@ -500,6 +556,9 @@ export const useFormSubmission = ({
           }
 
           if (requestContext.isCurrent()) {
+            // A replaced save leaves the progress to the newer one; `finally` stops it.
+            saveUpload?.settle({ isSuccessful: res?.status < 400 })
+
             if (res.status < 400 && !isModifiedWhileProcessing.current) {
               setIsModified(false)
             }
@@ -688,12 +747,17 @@ export const useFormSubmission = ({
       } catch (err) {
         // The form unmounted during a large upload; the upload coordinator finishes the save.
         if (err instanceof UploadContinuesInBackgroundError) {
+          saveUpload?.settle({ isSuccessful: true })
           preservePromiseToast = true
           successToast(t('upload:savingInBackground'))
           return
         }
 
         const isCurrentRequest = requestContext.isCurrent()
+
+        if (isCurrentRequest) {
+          saveUpload?.settle({ isSuccessful: false })
+        }
 
         if (!preservePromiseToast && !isCurrentRequest) {
           return
@@ -720,12 +784,33 @@ export const useFormSubmission = ({
         } else if (!preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
+
+        // A save that ended without a result, e.g. one replaced by a newer save, must not leave
+        // `uploadStatus` at `uploading`. A newer save's progress is left alone.
+        const abandonedProgress = saveUpload?.stop()
+
+        if (abandonedProgress) {
+          setUploadProgress?.((current) => (current === abandonedProgress ? undefined : current))
+        }
+
+        // Without a result toast, e.g. a create that redirects, the progress toast is removed.
+        const uploadToastID = uploadToast?.getResultID()
+
+        if (
+          uploadToastID !== undefined &&
+          toast
+            .getToasts()
+            .some((item) => item.id === uploadToastID && 'type' in item && item.type === 'loading')
+        ) {
+          toast.dismiss(uploadToastID)
+        }
       }
     },
     [
       applyFieldErrors,
       beforeSubmit,
       setIsBackgroundProcessing,
+      setUploadProgress,
       startRouteTransition,
       action,
       disableSuccessStatus,

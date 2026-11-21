@@ -541,6 +541,46 @@ export const MediaPreview: React.FC<UploadFilePreviewClientProps> = ({
 
 Component paths use the same syntax as other [Custom Components](../custom-components/overview#component-paths) — a string with `#ExportName`, or an object with `path` and `exportName`.
 
+## Upload Progress
+
+When a save includes a file, the Admin shows the transfer in the save's toast: "Uploading photo.png: 42%", then "Processing and saving photo.png…" once every byte is sent. The toast ends with the result of the save.
+
+Progress counts the bytes the browser has sent: to Payload for regular uploads, or to the storage provider for [client uploads](/docs/upload/storage-adapters#upload-instructions). It does not include image resizing, hooks, or database writes, which happen while the toast shows "Processing and saving". Reaching 100% does not mean the document is saved; a hook or validation error can still fail the save.
+
+Bulk uploads send files one at a time and show one toast for the batch, for example "3 of 10 · Uploading photo.png: 42%". The batch ends with one message: all uploaded, some uploaded and the rest need fixing, or all failed. Files that failed stay in the drawer so they can be fixed and saved again.
+
+Custom client upload handlers report progress through `onProgress`. See [Upload progress for custom handlers](/docs/upload/storage-adapters#custom-upload-progress). A handler that does not call it still works; the toast then shows the upload without a percentage.
+
+### Reading progress in custom components
+
+<Banner type="warning">
+  **Experimental:** The shape of `uploadProgress` may change in a minor release.
+</Banner>
+
+Custom Admin components can read the same progress the toast uses:
+
+- `useDocumentInfo().uploadProgress` is the upload of the current save: `status` (`'uploading'`, `'success'` or `'failed'`), `loadedBytes` and `totalBytes`. It is `undefined` until a save uploads a file. While `status` is `'uploading'` and `loadedBytes` equals `totalBytes`, the server is processing the file.
+- `useBulkUpload().uploadProgress` is the current or last bulk upload: `completed` (files saved), `total`, and `current`, which has the same fields plus `fileName`, `formID` and its one-based `index` in the batch.
+
+```tsx
+'use client'
+import { useDocumentInfo } from '@payloadcms/ui'
+
+export const UploadPercent = () => {
+  const { uploadProgress } = useDocumentInfo()
+
+  if (uploadProgress?.status !== 'uploading' || !uploadProgress.totalBytes) {
+    return null
+  }
+
+  const percent = Math.floor(
+    (uploadProgress.loadedBytes / uploadProgress.totalBytes) * 100,
+  )
+
+  return <progress max={100} value={percent} />
+}
+```
+
 ## Customizing the Upload UI
 
 You can completely customize the upload interface in the Admin Panel by swapping in your own React components. This allows you to modify how files are uploaded, add custom fields, integrate custom actions, or enhance the upload experience.
@@ -694,7 +734,7 @@ When building custom upload components, you have access to several useful hooks 
 | ------------------- | --------------------------------------------------------------------- |
 | `useDocumentInfo()` | Get collection slug, document config, and initial state               |
 | `useField()`        | Access and manipulate form field state                                |
-| `useBulkUpload()`   | Access bulk upload context                                            |
+| `useBulkUpload()`   | Access bulk upload context, including `uploadProgress`                |
 | `<Upload>`          | Main upload component with file selection, drag-and-drop, and preview |
 | `<Drawer>`          | Modal drawer for additional UI                                        |
 | `<DrawerToggler>`   | Button to open/close drawers                                          |

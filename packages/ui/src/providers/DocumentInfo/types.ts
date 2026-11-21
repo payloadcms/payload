@@ -8,12 +8,22 @@ import type {
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
+  UploadTransferProgress,
   User,
 } from 'payload'
 
 import React from 'react'
 
 import type { GetDocPermissions } from './useGetDocPermissions.js'
+
+/**
+ * Progress of the file upload in the current save. Processing is shown while `status` is
+ * `uploading` and all bytes are sent.
+ * @experimental
+ */
+export type UploadProgress = {
+  status: 'failed' | 'success' | 'uploading'
+} & UploadTransferProgress
 
 export type DocumentInfoProps = {
   readonly action?: string
@@ -88,10 +98,18 @@ export type DocumentInfoContext = {
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
+  /** @internal Set by Payload while a save uploads a file. */
+  setUploadProgress?: React.Dispatch<React.SetStateAction<undefined | UploadProgress>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docID: number | string, slug: string, user: User) => Promise<void>
+  /**
+   * Progress of the file upload in the current save. Undefined until a save uploads a file.
+   * @experimental
+   */
+  uploadProgress?: UploadProgress
+  /** `uploading` while a save uploads a file. */
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps

@@ -101,7 +101,7 @@ export {
   useBulkUploadModalSlug,
 } from '../../elements/BulkUpload/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
-export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
+export type { BulkUploadProgress, BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { APIKeyInput } from '../../elements/APIKeyInput/index.js'
 export type { APIKeyInputProps } from '../../elements/APIKeyInput/index.js'
 export { Banner } from '../../elements/Banner/index.js'
@@ -470,7 +470,11 @@ export {
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 export type { DocumentTitleContext } from '../../providers/DocumentTitle/index.js'
-export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
+export type {
+  DocumentInfoContext,
+  DocumentInfoProps,
+  UploadProgress,
+} from '../../providers/DocumentInfo/index.js'
 export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
@@ -589,6 +593,8 @@ export { parseSearchParams } from '../../utilities/parseSearchParams.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
 export { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
+export { uploadRequest } from '../../utilities/uploadRequest.js'
+export type { UploadRequestArgs } from '../../utilities/uploadRequest.js'
 export type {
   RenderFieldServerFnArgs,
   RenderFieldServerFnReturnType,

@@ -5,6 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import type { UploadSessionIntentData } from '../../utilities/uploadWithSession.js'
 
@@ -26,7 +27,7 @@ import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useTranslation } from '../Translation/index.js'
-import { createProgressToast } from './browser.js'
+import { createProgressToast, getUploadPercent } from './browser.js'
 import { useAnswerOtherTabs } from './otherTabs.js'
 import { useRecoverUploadSessions } from './useRecoverUploadSessions.js'
 
@@ -196,10 +197,19 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   )
 
   const showSaved = useCallback(
-    ({ id, collectionSlug }: { collectionSlug: string; id: number | string }) => {
+    ({
+      id,
+      collectionSlug,
+      toastID,
+    }: {
+      collectionSlug: string
+      id: number | string
+      /** The upload's progress toast, replaced in place. */
+      toastID?: string
+    }) => {
       // Persistent so keyboard and screen-reader users can reach the action (WCAG 2.2.1).
       toast.success(t('upload:uploadSavedInBackground'), {
-        id: trackToast({ id: `upload-session-saved-${collectionSlug}-${id}` }),
+        id: trackToast({ id: toastID ?? `upload-session-saved-${collectionSlug}-${id}` }),
         action: {
           label: t('general:open'),
           onClick: () => router.push(getDocumentURL({ id, collectionSlug })),
@@ -212,9 +222,9 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   )
 
   const showReadyToFinish = useCallback(
-    ({ session }: { session: ClientUploadSession }) => {
+    ({ session, toastID }: { session: ClientUploadSession; toastID?: string }) => {
       toast.info(t('upload:uploadReadyToFinishSaving', { filename: session.file.filename }), {
-        id: trackToast({ id: `upload-session-ready-${session.id}` }),
+        id: trackToast({ id: toastID ?? `upload-session-ready-${session.id}` }),
         action: {
           label: t('upload:finishSaving'),
           onClick: () => router.push(getFinishSavingURL({ session })),
@@ -226,21 +236,40 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [getFinishSavingURL, router, t, trackToast],
   )
 
-  /** Called once storage is complete for an upload whose form is gone. */
+  /**
+   * Called once storage is complete for an upload whose form is gone. Pass the upload's progress
+   * toast so the result replaces it instead of showing next to it.
+   */
   const finishInBackground = useCallback(
-    async ({ session }: { session: ClientUploadSession }) => {
+    async ({
+      progress,
+      session,
+      toastID,
+    }: {
+      progress?: ReturnType<typeof createProgressToast<string>>
+      session: ClientUploadSession
+      toastID?: string
+    }) => {
       if (!session.hasIntent) {
-        showReadyToFinish({ session })
+        showReadyToFinish({ session, toastID: progress?.getResultID() ?? toastID })
         return
       }
+
+      progress?.show(t('upload:processingAndSavingFile', { filename: session.file.filename }))
 
       try {
         const { doc } = await completeUploadSession({ id: session.id, ...requestArgs })
 
-        showSaved({ id: doc.id, collectionSlug: session.collectionSlug })
+        showSaved({
+          id: doc.id,
+          collectionSlug: session.collectionSlug,
+          toastID: progress?.getResultID() ?? toastID,
+        })
       } catch (err) {
+        const resultID = progress?.getResultID() ?? toastID
+
         toast.error(getErrorMessage({ err }), {
-          id: trackToast({ id: `upload-session-ready-${session.id}` }),
+          id: trackToast({ id: resultID ?? `upload-session-ready-${session.id}` }),
           action: {
             label: t('upload:finishSaving'),
             onClick: () => router.push(getFinishSavingURL({ session })),
@@ -275,7 +304,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       }
 
       const controller = new AbortController()
-      const toastID = trackToast({ id: `upload-session-${crypto.randomUUID()}` })
+      const toastID = trackToast({ id: `upload-session-${uuidv4()}` })
       let detach: UploadEntry['detach'] = () => {}
       const detached = new Promise<never>((_, reject) => {
         detach = reject
@@ -323,7 +352,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
             progress.show(
               t('upload:uploadingFileProgress', {
                 filename: file.name,
-                percent: Math.floor((loaded / total) * 100),
+                percent: getUploadPercent({ progress: { loadedBytes: loaded, totalBytes: total } }),
               }),
             ),
           retries: collectionConfig.upload.transfer?.retries,
@@ -364,17 +393,21 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         async () => {
           entry.isSettled = true
           releaseWaitingSave(entry)
-          toast.dismiss(toastID)
 
           if (!entry.isAttached) {
             removeEntry(entry)
             // `hasIntent` is final only once the intent request has settled.
             await entry.intentRequest
             await finishInBackground({
+              progress,
               session: { ...(await session), hasIntent: entry.hasIntent },
+              toastID,
             })
             return
           }
+
+          // The open form shows the save from here on.
+          toast.dismiss(toastID)
 
           // The form is still open and saves the document itself, so the stored data must not
           // be saved again later, e.g. by a recovery after that save failed.
