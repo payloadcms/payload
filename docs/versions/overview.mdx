@@ -192,8 +192,10 @@ const result = await payload.findVersionByID({
 
 ### Restore
 
+When restoring a collection version that requires validation, Payload prefers the default locale. If a required localized field is empty in the default locale, Payload can validate an existing translation from the version. The restore preserves the version's stored values for each locale.
+
 ```js
-// Result will be the restored global document.
+// Result will be the restored document.
 const result = await payload.restoreVersion({
   collection: 'posts', // required
   id: '507f1f77bcf86cd799439013', // required

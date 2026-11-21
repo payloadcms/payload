@@ -38,6 +38,7 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { getRestoreValidationLocale } from '../../versions/getRestoreValidationLocale.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -213,9 +214,14 @@ export const restoreVersionOperation = async <
     })
 
     // originalDoc with hoisted localized data
-    const validationLocale = payload.config.localization
-      ? payload.config.localization.defaultLocale
-      : locale!
+    const skipValidation = draftArg && !hasDraftValidationEnabled(collectionConfig)
+    const validationLocale = getRestoreValidationLocale({
+      config: payload.config,
+      fields: collectionConfig.fields,
+      locale: locale!,
+      skipValidation,
+      version: versionToRestoreWithLocales,
+    })
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
@@ -320,7 +326,7 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req: reqWithValidationLocale,
-      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
+      skipValidation,
     })
 
     // /////////////////////////////////////

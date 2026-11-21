@@ -1420,6 +1420,124 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       expect(restoredVersion.id).toStrictEqual(originalPost.id)
     })
 
+    test.describe('Restore localized versions', () => {
+      const createdPosts: {
+        collection: typeof draftCollectionSlug | typeof versionCollectionSlug
+        id: number | string
+      }[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const { id, collection } of createdPosts) {
+          await payload.delete({ id, collection, overrideAccess: true })
+        }
+        createdPosts.length = 0
+      })
+
+      const restoreCases = [
+        { collection: versionCollectionSlug, draft: false, mode: 'without drafts' },
+        { collection: draftCollectionSlug, draft: false, mode: 'as published' },
+        { collection: draftCollectionSlug, draft: true, mode: 'as a draft' },
+      ] as const
+
+      for (const { collection, draft, mode } of restoreCases) {
+        test(`should restore a version with a required localized field missing from the default locale ${mode}`, async ({
+          payload,
+          restClient,
+        }) => {
+          const originalTitle = `Original German title (${mode})`
+          const updatedTitle = `Updated German title (${mode})`
+
+          const post = await payload.create({
+            collection,
+            data: { description: 'original description', title: originalTitle },
+            fallbackLocale: false,
+            locale: 'de',
+            overrideAccess: true,
+          })
+
+          createdPosts.push({ id: post.id, collection })
+
+          const [version] = (
+            await payload.findVersions({
+              collection,
+              overrideAccess: true,
+              where: { parent: { equals: post.id } },
+            })
+          ).docs
+
+          await payload.update({
+            id: post.id,
+            collection,
+            data: { description: 'updated description', title: updatedTitle },
+            fallbackLocale: false,
+            locale: 'de',
+            overrideAccess: true,
+          })
+
+          await restClient.login({ slug: 'users', credentials: devUser })
+
+          const response = await restClient.POST(
+            `/${collection}/versions/${version!.id}?draft=${draft}`,
+          )
+
+          expect(response.status).toBe(200)
+
+          const restored = await payload.findByID({
+            id: post.id,
+            collection,
+            draft,
+            locale: 'all',
+            overrideAccess: true,
+          })
+
+          expect(restored.description).toBe('original description')
+          expect(restored.title).toMatchObject({ de: originalTitle })
+          expect(restored.title).not.toHaveProperty('en', expect.anything())
+          expect(restored.title).not.toHaveProperty('es', expect.anything())
+
+          const live = await payload.findByID({
+            id: post.id,
+            collection,
+            fallbackLocale: false,
+            locale: 'de',
+            overrideAccess: true,
+          })
+
+          expect(live.title).toBe(draft ? updatedTitle : originalTitle)
+        })
+      }
+
+      test('should reject a validated restore when a required localized field is missing in every locale', async ({
+        payload,
+      }) => {
+        const post = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'draft without a title' },
+          draft: true,
+          locale: 'de',
+          overrideAccess: true,
+        })
+
+        createdPosts.push({ id: post.id, collection: draftCollectionSlug })
+
+        const [version] = (
+          await payload.findVersions({
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+            where: { parent: { equals: post.id } },
+          })
+        ).docs
+
+        await expect(
+          payload.restoreVersion({
+            id: version!.id,
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+          }),
+        ).rejects.toMatchObject({ data: { errors: [{ path: 'title' }] } })
+      })
+    })
+
     test('findVersions - pagination should work correctly', async ({ payload }) => {
       const post = await payload.create({
         collection: draftCollectionSlug,
