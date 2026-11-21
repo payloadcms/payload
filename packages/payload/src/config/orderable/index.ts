@@ -20,6 +20,12 @@ import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
 import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
 import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
 
+/**
+ * The `beforeChange` hooks added below, so sanitizing the same collection config again (as a dev
+ * reload does for modules that didn't change) replaces the hook instead of adding another.
+ */
+const orderableBeforeChangeHooks = new WeakSet<BeforeChangeHook>()
+
 export const addOrderableFieldsAndHook = (
   collection: CollectionConfig,
   config: Config,
@@ -28,6 +34,15 @@ export const addOrderableFieldsAndHook = (
 ): void => {
   // 1. Add fields
   for (const orderableFieldName of orderableFieldNames) {
+    // The collection config may already have been sanitized, e.g. on a dev reload
+    const hasOrderableField = collection.fields.some(
+      (field) => 'name' in field && field.name === orderableFieldName,
+    )
+
+    if (hasOrderableField) {
+      continue
+    }
+
     const orderField: TextField = {
       name: orderableFieldName,
       type: 'text',
@@ -111,7 +126,11 @@ export const addOrderableFieldsAndHook = (
     return data
   }
 
-  collection.hooks.beforeChange.push(orderBeforeChangeHook)
+  orderableBeforeChangeHooks.add(orderBeforeChangeHook)
+  collection.hooks.beforeChange = [
+    ...collection.hooks.beforeChange.filter((hook) => !orderableBeforeChangeHooks.has(hook)),
+    orderBeforeChangeHook,
+  ]
 }
 
 /**

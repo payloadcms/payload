@@ -75,6 +75,13 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
   }
 }
 
+/**
+ * The orderable joins each collection config added to `orderableJoins` when it was sanitized. A
+ * collection config sanitized again (as a dev reload does for modules that didn't change) returns
+ * early without sanitizing its fields, so its orderable joins are added again from here.
+ */
+const orderableJoinsByCollection = new WeakMap<CollectionConfig, OrderableJoinInfo[]>()
+
 export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
@@ -86,6 +93,7 @@ export const sanitizeCollection = (
   orderableJoins?: OrderableJoinInfo[],
 ): SanitizedCollectionConfig => {
   if (collection._sanitized) {
+    orderableJoins?.push(...(orderableJoinsByCollection.get(collection) ?? []))
     return collection as SanitizedCollectionConfig
   }
 
@@ -200,6 +208,8 @@ export const sanitizeCollection = (
     }
   }
 
+  const orderableJoinsStart = orderableJoins?.length ?? 0
+
   sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
     config,
@@ -212,6 +222,10 @@ export const sanitizeCollection = (
     richTextSanitizers,
     validRelationships,
   })
+
+  if (orderableJoins) {
+    orderableJoinsByCollection.set(collection, orderableJoins.slice(orderableJoinsStart))
+  }
 
   if (sanitized.auth) {
     // disable duplicate for auth enabled collections by default
