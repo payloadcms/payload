@@ -38,6 +38,7 @@ import {
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertDataIsObject } from '../../utilities/assertDataIsObject.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
@@ -112,6 +113,13 @@ export const updateOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.data === undefined && Boolean(args.collection.config.upload && args.req.file)) {
+      args = {
+        ...args,
+        data: {} as typeof args.data,
+      }
+    }
+
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
       const data = sanitizeUploadData(args.data, 'update')
@@ -119,7 +127,7 @@ export const updateOperation = async <
       args = {
         ...args,
         data:
-          typeof data === 'object' && data !== null
+          typeof data === 'object' && data !== null && !Array.isArray(data)
             ? {
                 ...data,
                 ...(prefix !== undefined ? { prefix } : {}),
@@ -235,6 +243,8 @@ export const updateOperation = async <
         collectionConfig.access.update,
       )
     }
+
+    assertDataIsObject(bulkUpdateData, req, Boolean(collectionConfig.upload))
 
     await validateQueryPaths({
       collectionConfig,
