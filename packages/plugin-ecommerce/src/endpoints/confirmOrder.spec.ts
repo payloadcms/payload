@@ -19,6 +19,7 @@ type ConfirmArgs = Parameters<
 
 type State = {
   cart: Record<string, unknown>
+  untracked?: boolean
   inventoryUpdates: Array<{ collection: string; id: unknown; quantity: number }>
   order?: Record<string, unknown>
   reverseOrders?: Record<string, unknown>[]
@@ -71,6 +72,10 @@ const createHarness = ({
 
     if (collection === 'transactions' && id === state.transaction.id) {
       return { ...state.transaction }
+    }
+
+    if (collection === 'products' || collection === 'variants') {
+      return { id, inventory: state.untracked ? null : 10 }
     }
 
     return null
@@ -350,6 +355,16 @@ describe('confirmOrderHandler', () => {
       status: 'succeeded',
     })
     expect(payloadUtilities.commitTransaction).toHaveBeenCalledWith(harness.req)
+  })
+
+  it('should not decrement inventory for untracked products', async () => {
+    const harness = createHarness({ adapter: coreAdapter })
+    harness.state.untracked = true
+
+    const { response } = await runHandler(harness)
+
+    expect(response.status).toBe(200)
+    expect(harness.state.inventoryUpdates).toHaveLength(0)
   })
 
   it('should reject an adapter response for a different transaction than it finalized', async () => {
