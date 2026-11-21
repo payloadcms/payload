@@ -972,6 +972,12 @@ export interface ErrorOnUnpublish {
  */
 export interface LocalizedPost {
   id: string;
+  items?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
   text?: string | null;
   description?: string | null;
   blocks?: (Block_DBD0B346 | LocalizedTextBlock)[] | null;
@@ -2157,6 +2163,12 @@ export interface ErrorOnUnpublishSelect<T extends boolean = true> {
  * via the `definition` "localized-posts_select".
  */
 export interface LocalizedPostsSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
   text?: T;
   description?: T;
   blocks?:
