@@ -5,8 +5,10 @@ import { lexicalEditor, ParagraphFeature } from '@payloadcms/richtext-lexical'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import {
   restoreConditionalGroupSlug,
+  restoreLocalizedArrayRowsSlug,
   restoreLocalizedGroupSlug,
   restoreLocalizedTabSlug,
+  restorePointConditionSlug,
   restoreRequiredContainersSlug,
   restoreRichTextSlug,
 } from './slugs.js'
@@ -124,6 +126,43 @@ export default buildConfigWithDefaults({
                 ],
               },
             ],
+            localized: true,
+          },
+        ],
+        versions: true,
+      },
+      {
+        slug: restoreLocalizedArrayRowsSlug,
+        fields: [
+          {
+            name: 'content',
+            type: 'group',
+            fields: [
+              {
+                name: 'rows',
+                type: 'array',
+                fields: [
+                  { name: 'enabled', type: 'checkbox', defaultValue: true },
+                  {
+                    ...requiredTitle,
+                    admin: { condition: (_, siblingData) => siblingData.enabled !== false },
+                    minLength: 3,
+                  },
+                ],
+              },
+            ],
+            localized: true,
+          },
+        ],
+        versions: true,
+      },
+      {
+        slug: restorePointConditionSlug,
+        fields: [
+          { name: 'origin', type: 'point' },
+          {
+            ...requiredTitle,
+            admin: { condition: (data) => data.origin?.[0] > 0 },
             localized: true,
           },
         ],

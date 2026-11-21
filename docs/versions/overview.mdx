@@ -196,7 +196,7 @@ When restoring a collection version that requires validation, Payload prefers th
 
 This also applies to required fields inside localized groups and named tabs. An empty Lexical paragraph counts as an empty translation.
 
-Payload evaluates field conditions against the stored translation for each locale. An empty required field inside a localized group or tab only affects locale selection when the conditions on the field and its containing fields allow validation.
+Payload evaluates field conditions against the stored translation for each locale, with point fields represented as coordinate pairs. An empty required field inside a localized group, tab, or array row only affects locale selection when the conditions on the field and its containing fields allow validation. Payload checks every stored row. An optional empty array adds no row validation requirements.
 
 Field `afterRead` hooks that prepare data for validation receive the validation locale in `req.locale`. The restored document is returned in the requested locale using the requested fallback locale.
 

@@ -5,8 +5,10 @@ import type { RestoreRichText } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   restoreConditionalGroupSlug,
+  restoreLocalizedArrayRowsSlug,
   restoreLocalizedGroupSlug,
   restoreLocalizedTabSlug,
+  restorePointConditionSlug,
   restoreRequiredContainersSlug,
   restoreRichTextSlug,
 } from './slugs.js'
@@ -283,6 +285,112 @@ test.suite('Restore localized collection versions', { config: './config.ts' }, (
       { locale: 'en', value: 'Original title' },
     ])
     expect(restored.content?.title).toBe('Original title')
+  })
+
+  test('should check required fields in every active localized array row', async ({ payload }) => {
+    const collection = restoreLocalizedArrayRowsSlug
+    const post = await payload.create({
+      collection,
+      data: { content: { rows: [{ enabled: true, title: 'English title' }] } },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const [version] = (
+      await payload.db.findVersions({
+        collection,
+        locale: 'all',
+        where: { parent: { equals: post.id } },
+      })
+    ).docs
+
+    const content = {
+      de: {
+        rows: [
+          { enabled: false, title: '' },
+          { enabled: true, title: 'German title' },
+        ],
+      },
+      en: {
+        rows: [
+          { enabled: true, title: 'English title' },
+          { enabled: true, title: '' },
+        ],
+      },
+    }
+
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: { version: { ...version!.version, content } },
+    })
+
+    const restored = await payload.restoreVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(restored).toMatchObject({ content })
+
+    // An empty optional array adds no validation requirements for the default locale.
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: {
+        version: {
+          ...version!.version,
+          content: { de: { rows: [{ enabled: true, title: 'x' }] }, en: { rows: [] } },
+        },
+      },
+    })
+
+    await payload.restoreVersion({ id: version!.id, collection, overrideAccess: true })
+  })
+
+  test('should use point coordinates when evaluating a field condition for locale selection', async ({
+    payload,
+  }) => {
+    const collection = restorePointConditionSlug
+    const post = await payload.create({
+      collection,
+      data: { origin: [1, 2], title: 'English title' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const [version] = (
+      await payload.db.findVersions({
+        collection,
+        locale: 'all',
+        where: { parent: { equals: post.id } },
+      })
+    ).docs
+
+    expect(version!.version.origin).toMatchObject({ coordinates: [1, 2] })
+
+    const title = { de: 'German title', en: '' }
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: { version: { ...version!.version, title } },
+    })
+
+    const restored = await payload.restoreVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(restored).toMatchObject({ origin: [1, 2], title })
   })
 
   const emptyContainerCases = [
