@@ -75,9 +75,10 @@ type ColumnItemProps = {
   readonly id: string
   readonly labelText: string
   readonly onToggle: () => void
+  readonly shownCount: number
 }
 
-const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle }) => {
+const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle, shownCount }) => {
   const { t } = useTranslation()
   const {
     activeIndex,
@@ -93,15 +94,15 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
     id,
   })
 
-  const isOverBelow =
-    isOver &&
-    isSorting &&
-    !isDragging &&
+  const isSameSection =
     activeIndex !== undefined &&
     activeIndex >= 0 &&
     index !== undefined &&
     index >= 0 &&
-    activeIndex < index
+    activeIndex < shownCount === index < shownCount
+
+  const isOverItem = isOver && isSorting && !isDragging && isSameSection
+  const isOverBelow = isOverItem && activeIndex < index
 
   return (
     <div
@@ -109,7 +110,7 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
         `${baseClass}__item`,
         !active && `${baseClass}__item--inactive`,
         isDragging && `${baseClass}__item--dragging`,
-        isOver && isSorting && !isDragging && `${baseClass}__item--over`,
+        isOverItem && `${baseClass}__item--over`,
         isOverBelow && `${baseClass}__item--over-bottom`,
       ]
         .filter(Boolean)
@@ -337,6 +338,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
                   onToggle={() => {
                     void toggleColumn(item.accessor)
                   }}
+                  shownCount={columnItems.shown.length}
                 />
               ))}
             </div>
@@ -353,6 +355,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
                   onToggle={() => {
                     void toggleColumn(item.accessor)
                   }}
+                  shownCount={columnItems.shown.length}
                 />
               ))}
             </div>
