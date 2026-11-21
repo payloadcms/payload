@@ -38,7 +38,7 @@ export const VersionPillLabel: React.FC<{
     updatedAt?: string
     version: {
       [key: string]: unknown
-      _status: 'draft' | 'published'
+      _status?: 'draft' | 'published' | Record<string, 'draft' | 'published' | undefined>
       updatedAt: string
     }
   }
