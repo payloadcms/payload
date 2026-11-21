@@ -23,6 +23,7 @@ import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
+import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
 import {
@@ -149,9 +150,7 @@ export const traverseFields = ({
           }
         }
 
-        const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
-
-        if (adapter.tables[arrayTableNameWithLocales]) {
+        if (hasCompanionRelation({ adapter, relation: '_locales', tableName: arrayTableName })) {
           withArray.with._locales = {
             columns:
               typeof arraySelect === 'object'
@@ -289,7 +288,7 @@ export const traverseFields = ({
               }
             }
 
-            if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
+            if (hasCompanionRelation({ adapter, relation: '_locales', tableName })) {
               withBlock.with._locales = {
                 with: {},
               }

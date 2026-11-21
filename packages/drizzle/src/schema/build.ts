@@ -186,10 +186,16 @@ export const buildTable = ({
     indexes,
   }
 
+  // A table built earlier can already use this name: the `_locales` table of an array called
+  // `items` next to an array called `itemsLocales`, or an array table of another collection whose
+  // name matches this collection's `dbName`.
+  trackSubTableNameClash({ adapter, tableName })
+
   adapter.rawTables[tableName] = promoteLongInlineForeignKeys({ adapter, table })
 
   if (hasLocalizedField || localizedRelations.size) {
     const localeTableName = `${tableName}${adapter.localesSuffix}`
+    trackSubTableNameClash({ adapter, tableName: localeTableName })
     adapter.rawTables[localeTableName] = localesTable
 
     localesColumns.id = {
@@ -344,6 +350,7 @@ export const buildTable = ({
   if (isRoot) {
     if (hasManyTextField) {
       const textsTableName = `${rootTableName}_texts`
+      trackSubTableNameClash({ adapter, tableName: textsTableName })
       adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
@@ -450,6 +457,7 @@ export const buildTable = ({
 
     if (hasManyNumberField) {
       const numbersTableName = `${rootTableName}_numbers`
+      trackSubTableNameClash({ adapter, tableName: numbersTableName })
       adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
@@ -580,6 +588,7 @@ export const buildTable = ({
       }
 
       const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
+      trackSubTableNameClash({ adapter, tableName: relationshipsTableName })
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
@@ -798,6 +807,25 @@ export const buildTable = ({
     hasManyNumberField,
     hasManyTextField,
     relationsToBuild,
+  }
+}
+
+/**
+ * Companion tables (`_locales`, `_texts`, `_numbers`, `_rels`) are named by appending a suffix
+ * to the parent table name, so they can match an array, block or `hasMany` select table built
+ * before or after them. Writing the second table would silently replace the first, so the name is
+ * recorded instead and `buildRawSchema` builds the schema again with a distinct name for the
+ * sub-table.
+ */
+const trackSubTableNameClash = ({
+  adapter,
+  tableName,
+}: {
+  adapter: DrizzleAdapter
+  tableName: string
+}): void => {
+  if (adapter.rawTables[tableName]) {
+    adapter.subTableNameClashes?.add(tableName)
   }
 }
 
