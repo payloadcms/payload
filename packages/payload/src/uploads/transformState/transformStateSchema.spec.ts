@@ -106,4 +106,68 @@ describe('transformStateSchema', () => {
       /nested\?: \{\s*meta\?: \{\s*\[k: string\]: JsonValue;?\s*\};?\s*\[k: string\]: JsonValue;?\s*\}/,
     )
   })
+
+  it('should preserve boolean schemas, rewrite patternProperties, and map items: true to JsonValue', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [{ slug: 'media', fields: [], upload: true }],
+      upload: {
+        transformers: [
+          {
+            slug: 'test-transformer',
+            mimeTypes: ['image/*'],
+            transformDefinitions: [
+              {
+                key: 'blockedCase',
+                schema: {
+                  type: 'object',
+                  properties: { blocked: false },
+                  additionalProperties: false,
+                },
+              },
+              {
+                key: 'patternCase',
+                schema: { type: 'object', patternProperties: { '^x-': { type: 'object' } } },
+              },
+              { key: 'itemsTrue', schema: { type: 'array', items: true } },
+              { key: 'itemsFalse', schema: { type: 'array', items: false } },
+            ],
+          },
+        ],
+      },
+    }
+
+    const { jsonSchema } = configToJSONSchema(sanitizeConfig(config), 'text')
+    const objectSchema = (jsonSchema.$defs?.UploadTransforms?.anyOf as JSONSchema4[])[0]!
+    const props = objectSchema.properties!
+
+    // A `false` property schema prohibits the key at runtime, so the
+    // generated schema must keep it: replacing it with a JsonValue
+    // reference would let the generated type permit the key.
+    expect(((props.blockedCase as JSONSchema4).properties as any)?.blocked).toBe(false)
+    // A pattern value such as `{ type: 'object' }` is rewritten like a
+    // declared property, so it no longer compiles to an unknown-valued
+    // dictionary that is not assignable to JsonValue.
+    expect(
+      ((props.patternCase as JSONSchema4).patternProperties as any)?.['^x-'].additionalProperties,
+    ).toStrictEqual({ $ref: '#/$defs/payload.JsonValue' })
+    // `items: true` accepts any value, like an omitted `items`, so it maps
+    // to JsonValue; `items: false` stays, since it generates `never[]`,
+    // which is assignable to the `_transforms` index signature.
+    expect((props.itemsTrue as JSONSchema4).items).toStrictEqual({
+      $ref: '#/$defs/payload.JsonValue',
+    })
+    expect((props.itemsFalse as JSONSchema4).items).toBe(false)
+
+    const compiled = await compile(jsonSchema, 'Config', {
+      bannerComment: '',
+      style: { singleQuote: true },
+      unreachableDefinitions: true,
+      cwd: process.cwd(),
+    })
+
+    expect(compiled).toMatch(/blocked\?: never/)
+    expect(compiled).toMatch(/itemsTrue\?: JsonValue\[\]/)
+    expect(compiled).toMatch(/itemsFalse\?: never\[\]/)
+  })
 })

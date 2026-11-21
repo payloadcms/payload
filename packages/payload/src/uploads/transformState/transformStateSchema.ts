@@ -123,7 +123,16 @@ const jsonValueRef: JSONSchema4 = { $ref: '#/$defs/payload.JsonValue' }
  * This only affects the generated types: runtime validation still uses
  * `getTransformStateObjectSchema`, which keeps the declared schema verbatim.
  */
-function toSerialisableValueSchema(schema: JSONSchema4): JSONSchema4 {
+function toSerialisableValueSchema(schema: boolean | JSONSchema4): JSONSchema4 {
+  // Boolean schemas can appear as property, pattern-property, item, or
+  // branch values. `false` prohibits the value, so keep it: replacing it
+  // with a JsonValue reference would let the generated type permit a key
+  // runtime validation still forbids. `true` accepts anything, which
+  // compiles to `unknown`, so type it as a JSON value instead.
+  if (typeof schema === 'boolean') {
+    return schema ? jsonValueRef : (false as unknown as JSONSchema4)
+  }
+
   const types = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : []
 
   if (
@@ -148,6 +157,7 @@ function toSerialisableValueSchema(schema: JSONSchema4): JSONSchema4 {
   const isObject =
     types.includes('object') ||
     schema.properties !== undefined ||
+    schema.patternProperties !== undefined ||
     schema.additionalProperties !== undefined
 
   if (isObject) {
@@ -180,10 +190,25 @@ function toSerialisableValueSchema(schema: JSONSchema4): JSONSchema4 {
         ),
       }
     }
+
+    if (schema.patternProperties !== undefined) {
+      next = {
+        ...next,
+        patternProperties: Object.fromEntries(
+          Object.entries(schema.patternProperties).map(([pattern, value]) => [
+            pattern,
+            toSerialisableValueSchema(value as JSONSchema4),
+          ]),
+        ),
+      }
+    }
   }
 
   if (types.includes('array')) {
-    if (next.items === undefined) {
+    // `items: true` accepts any value, like an omitted `items`, so it maps
+    // to JsonValue too. `items: false` stays: it generates `never[]`,
+    // which is assignable to the `_transforms` index signature.
+    if (next.items === undefined || (next.items as unknown) === true) {
       next = { ...next, items: jsonValueRef }
     } else if (Array.isArray(next.items)) {
       next = {
