@@ -9,10 +9,8 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
-import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { EmptyCell } from '../../EmptyCell/index.js'
@@ -42,16 +40,13 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
 
   const { config, getEntityConfig } = useConfig()
   const { collections } = config
-  const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
   const { documents, getRelationships } = useListRelationships()
   const [hasRequested, setHasRequested] = useState(false)
   const { i18n, t } = useTranslation()
 
-  const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
-
   useEffect(() => {
-    if ((cellData || typeof cellData === 'number') && isAboveViewport && !hasRequested) {
+    if ((cellData || typeof cellData === 'number') && !hasRequested) {
       const formattedValues: Value[] = []
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData]
       arrayCellData
@@ -74,7 +69,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
       setHasRequested(true)
       setValues(formattedValues)
     }
-  }, [cellData, relationTo, collections, isAboveViewport, hasRequested, getRelationships])
+  }, [cellData, relationTo, collections, hasRequested, getRelationships])
 
   useEffect(() => {
     if (hasRequested) {
@@ -83,7 +78,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   }, [cellData])
 
   return (
-    <div className={baseClass} ref={intersectionRef}>
+    <div className={baseClass}>
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value]
         const relatedCollection = getEntityConfig({
