@@ -75,6 +75,126 @@ describe('Restore localized collection versions', () => {
     })
   }
 
+  it('should keep the default locale when its required field is hidden by a condition', async () => {
+    const collection = restoreLocalizedGroupSlug
+    const post = await payload.create({
+      collection,
+      data: { content: { enabled: false, title: '' } },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    created.push({ id: post.id, collection })
+
+    const [version] = (
+      await payload.findVersions({
+        collection,
+        locale: 'all',
+        overrideAccess: true,
+        where: { parent: { equals: post.id } },
+      })
+    ).docs
+
+    // The secondary translation was stored before the current minimum length applied.
+    const historicalContent = {
+      de: { enabled: true, title: 'x' },
+      en: { enabled: false, title: '' },
+    }
+
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: { version: { ...version!.version, content: historicalContent } },
+    })
+
+    const snapshot = await payload.findVersionByID({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(snapshot).toMatchObject({ version: { content: historicalContent } })
+
+    await payload.update({
+      id: post.id,
+      collection,
+      data: { content: { enabled: true, title: 'Current title' } },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    await payload.restoreVersion({ id: version!.id, collection, overrideAccess: true })
+
+    const restored = await payload.findByID({
+      id: post.id,
+      collection,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(restored).toMatchObject({ content: historicalContent })
+  })
+
+  it('should use the localized document and indexed block path for a field condition', async () => {
+    const collection = restoreLocalizedGroupSlug
+    const post = await payload.create({
+      collection,
+      data: {
+        content: { enabled: false, title: 'English title' },
+        sections: [
+          { blockType: 'conditional-section', caption: 'First caption', enabled: true },
+          { blockType: 'conditional-section', caption: 'Second caption', enabled: false },
+        ],
+      },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    created.push({ id: post.id, collection })
+
+    const [version] = (
+      await payload.findVersions({
+        collection,
+        locale: 'all',
+        overrideAccess: true,
+        where: { parent: { equals: post.id } },
+      })
+    ).docs
+
+    const historicalSections = version!.version.sections!.map((section, index) => ({
+      ...section,
+      caption: index === 1 ? { de: 'x', en: '' } : { de: 'German caption', en: 'First caption' },
+    }))
+
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection,
+      locale: 'all',
+      returning: false,
+      versionData: {
+        version: {
+          ...version!.version,
+          content: {
+            de: { enabled: true, title: 'German title' },
+            en: { enabled: false, title: 'English title' },
+          },
+          sections: historicalSections,
+        },
+      },
+    })
+
+    const restored = await payload.restoreVersion({
+      id: version!.id,
+      collection,
+      overrideAccess: true,
+    })
+
+    expect(restored.sections).toMatchObject([{ caption: 'First caption' }, { caption: '' }])
+  })
+
   const emptyContainerCases = [
     {
       field: 'items',

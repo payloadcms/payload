@@ -9,11 +9,17 @@ import {
 } from '../fields/config/types.js'
 import { expandOwnDottedKey } from './fieldPath.js'
 
+type DataScope = {
+  blockPath?: string[]
+  path: string[]
+}
+
 const traverseArrayOrBlocksField = ({
   callback,
   callbackStack,
   config,
   data,
+  dataScope,
   field,
   fillEmpty,
   leavesFirst,
@@ -25,6 +31,7 @@ const traverseArrayOrBlocksField = ({
   callbackStack: (() => ReturnType<TraverseFieldsCallback>)[]
   config?: Config | SanitizedConfig
   data: Record<string, unknown>[]
+  dataScope?: DataScope
   field: ArrayField | BlocksField
   fillEmpty: boolean
   leavesFirst: boolean
@@ -32,12 +39,15 @@ const traverseArrayOrBlocksField = ({
   parentPath: string
   parentRef?: unknown
 }) => {
+  const fieldScope = appendDataScope({ name: field.name, dataScope })
+
   if (fillEmpty) {
     if (field.type === 'array') {
       traverseFields({
         callback,
         callbackStack,
         config,
+        dataScope: fieldScope,
         fields: field.fields,
         isTopLevel: false,
         leavesFirst,
@@ -56,6 +66,7 @@ const traverseArrayOrBlocksField = ({
             callback,
             callbackStack,
             config,
+            dataScope: fieldScope,
             fields: block.fields,
             isTopLevel: false,
             leavesFirst,
@@ -68,7 +79,7 @@ const traverseArrayOrBlocksField = ({
     }
     return
   }
-  for (const ref of data) {
+  for (const [index, ref] of data.entries()) {
     let fields!: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
       // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
@@ -89,6 +100,11 @@ const traverseArrayOrBlocksField = ({
         callback,
         callbackStack,
         config,
+        dataScope: appendDataScope({
+          name: String(index),
+          block: field.type === 'blocks',
+          dataScope: fieldScope,
+        }),
         fields,
         fillEmpty,
         isTopLevel: false,
@@ -103,6 +119,8 @@ const traverseArrayOrBlocksField = ({
 }
 
 export type TraverseFieldsCallback = (args: {
+  /** Current sibling data path, with concrete array indices, and the nearest block path. */
+  dataScope?: DataScope
   /**
    * The current field
    */
@@ -127,6 +145,8 @@ type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
   callbackStack?: (() => ReturnType<TraverseFieldsCallback>)[]
   config?: Config | SanitizedConfig
+  /** Pass an empty path at the root to track the path through the document data. */
+  dataScope?: DataScope
   fields: (Field | TabAsField)[]
   fillEmpty?: boolean
   isTopLevel?: boolean
@@ -156,6 +176,7 @@ export const traverseFields = ({
   callback,
   callbackStack: _callbackStack = [],
   config,
+  dataScope,
   fields,
   fillEmpty = true,
   isTopLevel = true,
@@ -182,12 +203,13 @@ export const traverseFields = ({
     if (
       !leavesFirst &&
       callback &&
-      callback({ field, next, parentIsLocalized, parentPath, parentRef, ref })
+      callback({ dataScope, field, next, parentIsLocalized, parentPath, parentRef, ref })
     ) {
       return true
     } else if (leavesFirst) {
       callbackStack.push(() =>
         callback({
+          dataScope,
           field,
           next,
           parentIsLocalized,
@@ -235,6 +257,7 @@ export const traverseFields = ({
             callback &&
             !leavesFirst &&
             callback({
+              dataScope,
               field: { ...tab, type: 'tab' },
               next,
               parentIsLocalized,
@@ -247,6 +270,7 @@ export const traverseFields = ({
           } else if (leavesFirst) {
             callbackStack.push(() =>
               callback({
+                dataScope,
                 field: { ...tab, type: 'tab' },
                 next,
                 parentIsLocalized,
@@ -269,6 +293,10 @@ export const traverseFields = ({
                   callback,
                   callbackStack,
                   config,
+                  dataScope: appendDataScope({
+                    name: tabHasName(tab) ? tab.name : undefined,
+                    dataScope,
+                  }),
                   fields: tab.fields,
                   fillEmpty,
                   isTopLevel: false,
@@ -286,6 +314,7 @@ export const traverseFields = ({
             callback &&
             !leavesFirst &&
             callback({
+              dataScope,
               field: { ...tab, type: 'tab' },
               next,
               parentIsLocalized,
@@ -298,6 +327,7 @@ export const traverseFields = ({
           } else if (leavesFirst) {
             callbackStack.push(() =>
               callback({
+                dataScope,
                 field: { ...tab, type: 'tab' },
                 next,
                 parentIsLocalized,
@@ -314,6 +344,7 @@ export const traverseFields = ({
             callback,
             callbackStack,
             config,
+            dataScope: appendDataScope({ name: tabHasName(tab) ? tab.name : undefined, dataScope }),
             fields: tab.fields,
             fillEmpty,
             isTopLevel: false,
@@ -371,6 +402,7 @@ export const traverseFields = ({
                 callback,
                 callbackStack,
                 config,
+                dataScope: appendDataScope({ name: field.name, dataScope }),
                 fields: field.fields,
                 fillEmpty,
                 isTopLevel: false,
@@ -387,6 +419,7 @@ export const traverseFields = ({
             callback,
             callbackStack,
             config,
+            dataScope,
             fields: field.fields,
             fillEmpty,
             isTopLevel: false,
@@ -412,6 +445,7 @@ export const traverseFields = ({
               callbackStack,
               config,
               data: currentRef,
+              dataScope,
               field,
               fillEmpty,
               leavesFirst,
@@ -431,6 +465,7 @@ export const traverseFields = ({
                 callbackStack,
                 config,
                 data: localeData,
+                dataScope,
                 field,
                 fillEmpty,
                 leavesFirst,
@@ -446,6 +481,7 @@ export const traverseFields = ({
             callbackStack,
             config,
             data: currentRef as Record<string, unknown>[],
+            dataScope,
             field,
             fillEmpty,
             leavesFirst,
@@ -459,6 +495,10 @@ export const traverseFields = ({
           callback,
           callbackStack,
           config,
+          dataScope: appendDataScope({
+            name: fieldAffectsData(field) ? field.name : undefined,
+            dataScope,
+          }),
           fields: field.fields,
           fillEmpty,
           isTopLevel: false,
@@ -488,6 +528,7 @@ export const traverseFields = ({
           callback,
           callbackStack: _callbackStack,
           config,
+          dataScope,
           fields,
           fillEmpty,
           isTopLevel: false,
@@ -500,4 +541,21 @@ export const traverseFields = ({
       }
     })
   }
+}
+
+function appendDataScope({
+  name,
+  block,
+  dataScope,
+}: {
+  block?: boolean
+  dataScope?: DataScope
+  name?: string
+}): DataScope | undefined {
+  if (!dataScope || !name) {
+    return dataScope
+  }
+
+  const path = [...dataScope.path, name]
+  return { blockPath: block ? path : dataScope.blockPath, path }
 }

@@ -129,9 +129,19 @@ export interface UserAuthOperations {
  */
 export interface RestoreLocalizedGroup {
   id: number;
-  content: {
-    title: string;
+  content?: {
+    enabled?: boolean | null;
+    title?: string | null;
   };
+  sections?:
+    | {
+        enabled?: boolean | null;
+        caption?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'conditional-section';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -313,7 +323,20 @@ export interface RestoreLocalizedGroupSelect<T extends boolean = true> {
   content?:
     | T
     | {
+        enabled?: T;
         title?: T;
+      };
+  sections?:
+    | T
+    | {
+        'conditional-section'?:
+          | T
+          | {
+              enabled?: T;
+              caption?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

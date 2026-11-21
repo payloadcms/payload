@@ -162,6 +162,8 @@ When restoring a collection version that requires validation, Payload prefers th
 
 This also applies to required fields inside localized groups and named tabs. An empty Lexical paragraph counts as an empty translation.
 
+Payload evaluates field conditions against the stored translation for each locale. An empty value in a conditionally required field only affects locale selection when the condition enables validation.
+
 ```js
 // Result will be the restored document.
 const result = await payload.restoreVersion({
