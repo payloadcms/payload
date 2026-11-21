@@ -13,6 +13,7 @@ import type {
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
+  Where,
 } from 'payload'
 
 import { docAccessOperation } from 'payload'
@@ -144,6 +145,8 @@ export const renderListView = async (
 
   const query: ListQuery = queryFromArgs || queryFromReq
 
+  const sortFromQuery = query?.sort
+
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
   query.queryByGroup =
@@ -207,37 +210,46 @@ export const renderListView = async (
 
   query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
-  query.sort =
-    collectionPreferences?.sort ||
-    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+  const defaultSort =
+    typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined
 
-  const baseFilterConstraint = await (
-    collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
-  )?.({
-    limit: query.limit,
-    page: query.page,
-    req,
-    sort: query.sort,
-  })
+  query.sort = collectionPreferences?.sort || defaultSort
 
-  let whereWithMergedSearch = mergeListSearchAndWhere({
-    collectionConfig,
-    search: typeof query?.search === 'string' ? query.search : undefined,
-    where: combineWhereConstraints([query?.where, baseFilterConstraint]),
-  })
+  let baseFilterConstraint: undefined | Where
+  let whereWithMergedSearch: Where
 
-  if (trash === true) {
-    whereWithMergedSearch = {
-      and: [
-        whereWithMergedSearch,
-        {
-          deletedAt: {
-            exists: true,
+  // The base filter receives the sort, so this runs again if the sort changes below
+  const resolveWhere = async (sort: string | undefined) => {
+    baseFilterConstraint = await (
+      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+    )?.({
+      limit: query.limit,
+      page: query.page,
+      req,
+      sort,
+    })
+
+    whereWithMergedSearch = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: combineWhereConstraints([query?.where, baseFilterConstraint]),
+    })
+
+    if (trash === true) {
+      whereWithMergedSearch = {
+        and: [
+          whereWithMergedSearch,
+          {
+            deletedAt: {
+              exists: true,
+            },
           },
-        },
-      ],
+        ],
+      }
     }
   }
+
+  await resolveWhere(query.sort)
 
   let Table: React.ReactNode | React.ReactNode[] = null
   let groupedData: ListViewGroup[] | undefined
@@ -379,7 +391,7 @@ export const renderListView = async (
   // Hierarchy data for client-side rendering
   let hierarchyData: HierarchyViewData | undefined
 
-  try {
+  const fetchListData = async () => {
     if (query.groupBy) {
       ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
@@ -459,6 +471,31 @@ export const renderListView = async (
         useAsTitle: collectionConfig.admin.useAsTitle,
         viewType,
       }))
+    }
+  }
+
+  try {
+    try {
+      await fetchListData()
+    } catch (err) {
+      // A sort saved in the user's preferences can outlive its field, e.g. after the field becomes virtual.
+      // Fall back to the default sort instead of showing an empty list.
+      if (
+        err.name === 'QueryError' &&
+        !sortFromQuery &&
+        collectionPreferences?.sort &&
+        query.sort !== defaultSort
+      ) {
+        req.payload.logger.warn({
+          err,
+          msg: `Ignoring the saved sort "${query.sort}" for collection ${collectionSlug}, as it cannot be queried`,
+        })
+        query.sort = defaultSort
+        await resolveWhere(defaultSort)
+        await fetchListData()
+      } else {
+        throw err
+      }
     }
   } catch (err) {
     if (err.name !== 'QueryError') {

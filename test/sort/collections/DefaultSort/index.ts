@@ -17,6 +17,11 @@ export const DefaultSortCollection: CollectionConfig = {
       name: 'number',
       type: 'number',
     },
+    {
+      name: 'virtualText',
+      type: 'text',
+      virtual: true,
+    },
   ],
   versions: false,
 }
