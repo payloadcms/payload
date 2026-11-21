@@ -71,6 +71,10 @@ export async function createVersion<T extends JsonObject = JsonObject>(
   const table = this.tables[tableName]
 
   if (hasDraftsEnabled(collection)) {
+    const versionUpdatedAt = result.updatedAt || updatedAt
+
+    // Demote the versions that are older. When two versions have the same updatedAt, the one with the
+    // higher id wins, so that writers who cannot see each other never leave two (or zero) latest versions.
     await this.execute({
       db,
       sql: sql`
@@ -78,7 +82,27 @@ export async function createVersion<T extends JsonObject = JsonObject>(
         SET latest = false
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
-          AND ${table.updatedAt} < ${result.updatedAt || updatedAt}
+          AND (
+            ${table.updatedAt} < ${versionUpdatedAt}
+            OR (${table.updatedAt} = ${versionUpdatedAt} AND ${table.id} < ${result.id})
+          )
+      `,
+    })
+
+    // The new version loses the tie when a version with the same updatedAt and a higher id already exists.
+    // Ids do not always increase (uuid), so the new version can be the lower one.
+    await this.execute({
+      db,
+      sql: sql`
+        UPDATE ${table}
+        SET latest = false
+        WHERE ${table.id} = ${result.id}
+          AND EXISTS (
+            SELECT 1 FROM ${table}
+            WHERE ${table.parent} = ${parent}
+              AND ${table.updatedAt} = ${versionUpdatedAt}
+              AND ${table.id} > ${result.id}
+          )
       `,
     })
   }
