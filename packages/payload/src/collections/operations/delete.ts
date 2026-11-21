@@ -32,6 +32,7 @@ import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite
 import {
   checkDocumentLockStatus,
   deleteDocumentLocks,
+  deleteUserLocks,
   getLockedDocumentIds,
 } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -331,6 +332,26 @@ export const deleteOperation = async <
           })
         }
 
+        // /////////////////////////////////////
+        // Delete locks owned by the users and their preferences before the user
+        // rows are removed, so database cascades cannot orphan them
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          await deleteUserLocks({
+            collectionSlug: collectionConfig.slug,
+            ids: [doc.id],
+            req,
+          })
+
+          await deleteUserPreferences({
+            collectionConfig,
+            ids: [doc.id],
+            payload,
+            req,
+          })
+        }
+
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
           req,
@@ -457,6 +478,26 @@ export const deleteOperation = async <
       }
 
       // /////////////////////////////////////
+      // Delete locks owned by the users and their preferences before the user
+      // rows are removed, so database cascades cannot orphan them
+      // /////////////////////////////////////
+
+      if (collectionConfig.auth) {
+        await deleteUserLocks({
+          collectionSlug: collectionConfig.slug,
+          ids,
+          req,
+        })
+
+        await deleteUserPreferences({
+          collectionConfig,
+          ids,
+          payload,
+          req,
+        })
+      }
+
+      // /////////////////////////////////////
       // Delete documents
       // /////////////////////////////////////
 
@@ -529,7 +570,7 @@ export const deleteOperation = async <
     // Delete Preferences
     // /////////////////////////////////////
 
-    if (!didBatchDeleteFail) {
+    if (!collectionConfig.auth && !didBatchDeleteFail) {
       await deleteUserPreferences({
         collectionConfig,
         ids: docs.map(({ id }) => id),
