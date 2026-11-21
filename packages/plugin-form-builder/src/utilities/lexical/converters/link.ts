@@ -18,10 +18,14 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
       submissionData,
     })
 
+    const docValue = node.fields?.doc?.value
+    const docId =
+      typeof docValue === 'object' && docValue !== null ? docValue.id : docValue
+
     let href: string =
-      node.fields.linkType === 'custom'
-        ? (node.fields.url ?? '')
-        : (node.fields.doc?.value?.id ?? '')
+      node.fields?.linkType === 'custom'
+        ? (node.fields?.url != null ? String(node.fields.url) : '')
+        : (docId != null ? String(docId) : '')
 
     if (submissionData) {
       href = replaceDoubleCurlys(href, submissionData)
@@ -29,7 +33,7 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
 
     const safeHref = escapeHTML(sanitizeUrl(href))
 
-    return `<a href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
+    return `<a href="${safeHref}"${node.fields?.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
   },
   nodeTypes: ['autolink', 'link'],
 }
