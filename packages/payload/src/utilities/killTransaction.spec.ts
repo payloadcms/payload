@@ -165,8 +165,8 @@ describe('killTransaction', () => {
 
     await killOwnedTransaction({
       hadSession: true,
-      ownedTransactionID: 'tx-1',
       req,
+      transactionID: 'tx-1',
     })
 
     expect(rollbackTransaction).toHaveBeenCalledTimes(1)
@@ -176,5 +176,118 @@ describe('killTransaction', () => {
     expect(req.transactionID).toBe('tx-replacement')
     expect(observedFindTransactionIDs).toEqual([undefined])
     expect(deleteObject).toHaveBeenCalledTimes(1)
+  })
+
+  it('rolls back a joined transaction without rolling back a replacement transactionID', async () => {
+    const sessions: Record<string, { db: { name: string } }> = {
+      'tx-parent': { db: { name: 'tx-parent' } },
+      'tx-replacement': { db: { name: 'tx-replacement' } },
+    }
+    const rollbackTransaction = vi.fn(async (id: number | string) => {
+      delete sessions[String(id)]
+    })
+
+    const req = {
+      payload: {
+        db: {
+          rollbackTransaction,
+          sessions,
+        },
+        logger: {
+          error: vi.fn(),
+        },
+      },
+      transactionID: 'tx-replacement',
+    } as unknown as PayloadRequest
+
+    await killOwnedTransaction({
+      hadSession: true,
+      req,
+      transactionID: 'tx-parent',
+    })
+
+    expect(rollbackTransaction).toHaveBeenCalledTimes(1)
+    expect(rollbackTransaction).toHaveBeenCalledWith('tx-parent')
+    expect(sessions).not.toHaveProperty('tx-parent')
+    expect(sessions).toHaveProperty('tx-replacement')
+    expect(req.transactionID).toBe('tx-replacement')
+  })
+
+  it('does not roll back an unrelated hook transaction when no operation transaction was opened or joined', async () => {
+    const sessions: Record<string, { db: { name: string } }> = {
+      'tx-hook': { db: { name: 'tx-hook' } },
+    }
+    const rollbackTransaction = vi.fn(async (id: number | string) => {
+      delete sessions[String(id)]
+    })
+
+    const req = {
+      payload: {
+        db: {
+          rollbackTransaction,
+          sessions,
+        },
+        logger: {
+          error: vi.fn(),
+        },
+      },
+      transactionID: 'tx-hook',
+    } as unknown as PayloadRequest
+
+    await killOwnedTransaction({
+      hadSession: false,
+      req,
+      transactionID: undefined,
+    })
+
+    expect(rollbackTransaction).not.toHaveBeenCalled()
+    expect(sessions).toHaveProperty('tx-hook')
+    expect(req.transactionID).toBe('tx-hook')
+  })
+
+  it('handles adapters without a sessions map when req.transactionID is replaced or cleared', async () => {
+    const rollbackTransaction = vi.fn().mockResolvedValue(undefined)
+
+    const replacedReq = {
+      payload: {
+        db: {
+          rollbackTransaction,
+        },
+        logger: {
+          error: vi.fn(),
+        },
+      },
+      transactionID: 'tx-replacement',
+    } as unknown as PayloadRequest
+
+    await killOwnedTransaction({
+      hadSession: false,
+      req: replacedReq,
+      transactionID: 'tx-parent',
+    })
+
+    expect(rollbackTransaction).toHaveBeenCalledTimes(1)
+    expect(rollbackTransaction).toHaveBeenCalledWith('tx-parent')
+    expect(replacedReq.transactionID).toBe('tx-replacement')
+
+    const clearedReq = {
+      payload: {
+        db: {
+          rollbackTransaction,
+        },
+        logger: {
+          error: vi.fn(),
+        },
+      },
+    } as unknown as PayloadRequest
+
+    await killOwnedTransaction({
+      hadSession: false,
+      req: clearedReq,
+      transactionID: 'tx-parent',
+    })
+
+    expect(rollbackTransaction).toHaveBeenCalledTimes(1)
+    expect(clearedReq).not.toHaveProperty('transactionID')
   })
 })

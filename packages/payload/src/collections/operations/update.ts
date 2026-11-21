@@ -102,8 +102,19 @@ export const updateOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
   const hasFileOperationScope = Boolean(args.collection.config.upload)
-  let ownedTransactionID: number | string | undefined
-  let ownedTransactionHadSession = false
+  let operationTransactionID: number | string | undefined =
+    typeof args.req.transactionID === 'number' ||
+    (typeof args.req.transactionID === 'string' && args.req.transactionID !== '')
+      ? args.req.transactionID
+      : undefined
+  let operationTransactionHadSession = Boolean(
+    operationTransactionID !== undefined &&
+    args.req.payload.db.sessions &&
+    Object.prototype.hasOwnProperty.call(
+      args.req.payload.db.sessions,
+      String(operationTransactionID),
+    ),
+  )
 
   assertNoValidationWrite(args.req)
 
@@ -117,17 +128,12 @@ export const updateOperation = async <
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const operationTransactionSnapshot = await getTransactionSnapshot(args.req)
+    operationTransactionID = operationTransactionSnapshot.transactionID
+    operationTransactionHadSession = operationTransactionSnapshot.hadSession
     const transactionSnapshot = !args.req.payload.db.bulkOperationsSingleTransaction
-      ? await getTransactionSnapshot(args.req)
+      ? operationTransactionSnapshot
       : { hadSession: false, transactionID: undefined }
-    if (shouldCommit) {
-      const ownedSnapshot =
-        transactionSnapshot.transactionID !== undefined
-          ? transactionSnapshot
-          : await getTransactionSnapshot(args.req)
-      ownedTransactionID = ownedSnapshot.transactionID
-      ownedTransactionHadSession = ownedSnapshot.hadSession
-    }
     const hasSharedTransaction = transactionSnapshot.transactionID !== undefined
     const isSharedTransactionLost = async (targetReq: PayloadRequest): Promise<boolean> =>
       hasSharedTransaction &&
@@ -605,9 +611,9 @@ export const updateOperation = async <
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
     await killOwnedTransaction({
-      hadSession: ownedTransactionHadSession,
-      ownedTransactionID,
+      hadSession: operationTransactionHadSession,
       req: args.req,
+      transactionID: operationTransactionID,
     })
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })

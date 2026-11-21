@@ -71,8 +71,19 @@ export const deleteOperation = async <
   incomingArgs: Arguments,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
-  let ownedTransactionID: number | string | undefined
-  let ownedTransactionHadSession = false
+  let operationTransactionID: number | string | undefined =
+    typeof args.req.transactionID === 'number' ||
+    (typeof args.req.transactionID === 'string' && args.req.transactionID !== '')
+      ? args.req.transactionID
+      : undefined
+  let operationTransactionHadSession = Boolean(
+    operationTransactionID !== undefined &&
+    args.req.payload.db.sessions &&
+    Object.prototype.hasOwnProperty.call(
+      args.req.payload.db.sessions,
+      String(operationTransactionID),
+    ),
+  )
 
   assertNoValidationWrite(args.req)
 
@@ -93,13 +104,12 @@ export const deleteOperation = async <
       !args.disableTransaction &&
       !args.req.payload.db.bulkOperationsSingleTransaction &&
       (await initTransaction(args.req))
+    const operationTransactionSnapshot = await getTransactionSnapshot(args.req)
+    operationTransactionID = operationTransactionSnapshot.transactionID
+    operationTransactionHadSession = operationTransactionSnapshot.hadSession
     const transactionSnapshot = !args.req.payload.db.bulkOperationsSingleTransaction
-      ? await getTransactionSnapshot(args.req)
+      ? operationTransactionSnapshot
       : { hadSession: false, transactionID: undefined }
-    if (shouldCommit) {
-      ownedTransactionID = transactionSnapshot.transactionID
-      ownedTransactionHadSession = transactionSnapshot.hadSession
-    }
     const hasSharedTransaction = transactionSnapshot.transactionID !== undefined
     const isSharedTransactionLost = async (targetReq: PayloadRequest): Promise<boolean> =>
       hasSharedTransaction &&
@@ -635,9 +645,9 @@ export const deleteOperation = async <
     return result
   } catch (error: unknown) {
     await killOwnedTransaction({
-      hadSession: ownedTransactionHadSession,
-      ownedTransactionID,
+      hadSession: operationTransactionHadSession,
       req: args.req,
+      transactionID: operationTransactionID,
     })
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })

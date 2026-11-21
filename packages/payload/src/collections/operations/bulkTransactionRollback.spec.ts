@@ -17,12 +17,14 @@ const createHarness = ({
   afterDelete,
   beforeChange,
   beforeDelete,
+  beforeOperation,
   transactional = true,
 }: {
   afterChange?: NonNullable<NonNullable<Collection['config']['hooks']>['afterChange']>
   afterDelete?: NonNullable<NonNullable<Collection['config']['hooks']>['afterDelete']>
   beforeChange?: NonNullable<NonNullable<Collection['config']['hooks']>['beforeChange']>
   beforeDelete?: NonNullable<NonNullable<Collection['config']['hooks']>['beforeDelete']>
+  beforeOperation?: NonNullable<NonNullable<Collection['config']['hooks']>['beforeOperation']>
   transactional?: boolean
 } = {}) => {
   let txCounter = 0
@@ -99,7 +101,7 @@ const createHarness = ({
       afterRead: [],
       beforeChange: beforeChange ?? [],
       beforeDelete: beforeDelete ?? [],
-      beforeOperation: [],
+      beforeOperation: beforeOperation ?? [],
       beforeValidate: [],
     },
     lockDocuments: false,
@@ -328,6 +330,88 @@ describe('bulk operations with rolled-back shared transaction', () => {
       expect(req.transactionID).toBe('tx-replacement')
     })
 
+    it('rolls back only the joined parent transaction and preserves a replacement transactionID set by a hook', async () => {
+      const {
+        beginTransaction,
+        commitTransaction,
+        collection,
+        req,
+        rollbackTransaction,
+        sessions,
+        updatedCalls,
+      } = createHarness({
+        beforeChange: [
+          async ({ data, originalDoc, req: hookReq }) => {
+            if (originalDoc.id === 'doc-a') {
+              sessions['tx-replacement'] = { db: { name: 'tx-replacement' } }
+              hookReq.transactionID = 'tx-replacement'
+            }
+            return data
+          },
+        ],
+      })
+
+      sessions['tx-parent'] = { db: { name: 'tx-parent' } }
+      req.transactionID = 'tx-parent'
+
+      await expect(
+        updateOperation({
+          collection,
+          data: { title: 'updated' },
+          overrideAccess: true,
+          req,
+          where: { id: { exists: true } },
+        }),
+      ).rejects.toThrow('Transaction tx-parent is no longer active.')
+
+      expect(beginTransaction).not.toHaveBeenCalled()
+      expect(updatedCalls).toEqual([])
+      expect(rollbackTransaction).toHaveBeenCalledTimes(1)
+      expect(rollbackTransaction).toHaveBeenCalledWith('tx-parent')
+      expect(commitTransaction).not.toHaveBeenCalled()
+      expect(sessions).not.toHaveProperty('tx-parent')
+      expect(sessions).toHaveProperty('tx-replacement')
+      expect(req.transactionID).toBe('tx-replacement')
+    })
+
+    it('does not roll back a hook-installed transaction when started with disableTransaction', async () => {
+      const {
+        beginTransaction,
+        commitTransaction,
+        collection,
+        req,
+        rollbackTransaction,
+        sessions,
+        updatedCalls,
+      } = createHarness({
+        beforeOperation: [
+          async ({ req: hookReq }) => {
+            sessions['tx-hook'] = { db: { name: 'tx-hook' } }
+            hookReq.transactionID = 'tx-hook'
+            throw new Error('hook failed after opening tx-hook')
+          },
+        ],
+      })
+
+      await expect(
+        updateOperation({
+          collection,
+          data: { title: 'updated' },
+          disableTransaction: true,
+          overrideAccess: true,
+          req,
+          where: { id: { exists: true } },
+        }),
+      ).rejects.toThrow('hook failed after opening tx-hook')
+
+      expect(beginTransaction).not.toHaveBeenCalled()
+      expect(updatedCalls).toEqual([])
+      expect(rollbackTransaction).not.toHaveBeenCalled()
+      expect(commitTransaction).not.toHaveBeenCalled()
+      expect(sessions).toHaveProperty('tx-hook')
+      expect(req.transactionID).toBe('tx-hook')
+    })
+
     it('preserves per-document errors when a document fails without killing the shared transaction', async () => {
       const { commitTransaction, collection, req, rollbackTransaction, updatedCalls } =
         createHarness({
@@ -514,6 +598,85 @@ describe('bulk operations with rolled-back shared transaction', () => {
       expect(sessions).not.toHaveProperty('tx-1')
       expect(sessions).toHaveProperty('tx-replacement')
       expect(req.transactionID).toBe('tx-replacement')
+    })
+
+    it('rolls back only the joined parent transaction and preserves a replacement transactionID set by a hook', async () => {
+      const {
+        beginTransaction,
+        commitTransaction,
+        collection,
+        deletedBatches,
+        req,
+        rollbackTransaction,
+        sessions,
+      } = createHarness({
+        beforeDelete: [
+          async ({ id, req: hookReq }) => {
+            if (id === 'doc-a') {
+              sessions['tx-replacement'] = { db: { name: 'tx-replacement' } }
+              hookReq.transactionID = 'tx-replacement'
+            }
+          },
+        ],
+      })
+
+      sessions['tx-parent'] = { db: { name: 'tx-parent' } }
+      req.transactionID = 'tx-parent'
+
+      await expect(
+        deleteOperation({
+          collection,
+          overrideAccess: true,
+          req,
+          where: { id: { exists: true } },
+        }),
+      ).rejects.toThrow('Transaction tx-parent was rolled back before the bulk delete completed.')
+
+      expect(beginTransaction).not.toHaveBeenCalled()
+      expect(deletedBatches).toEqual([])
+      expect(rollbackTransaction).toHaveBeenCalledTimes(1)
+      expect(rollbackTransaction).toHaveBeenCalledWith('tx-parent')
+      expect(commitTransaction).not.toHaveBeenCalled()
+      expect(sessions).not.toHaveProperty('tx-parent')
+      expect(sessions).toHaveProperty('tx-replacement')
+      expect(req.transactionID).toBe('tx-replacement')
+    })
+
+    it('does not roll back a hook-installed transaction when started with disableTransaction', async () => {
+      const {
+        beginTransaction,
+        commitTransaction,
+        collection,
+        deletedBatches,
+        req,
+        rollbackTransaction,
+        sessions,
+      } = createHarness({
+        beforeOperation: [
+          async ({ req: hookReq }) => {
+            sessions['tx-hook'] = { db: { name: 'tx-hook' } }
+            hookReq.transactionID = 'tx-hook'
+            throw new Error('delete hook failed after opening tx-hook')
+          },
+        ],
+      })
+
+      await expect(
+        deleteOperation({
+          collection,
+          disableTransaction: true,
+          overrideAccess: true,
+          req,
+          where: { id: { exists: true } },
+        }),
+      ).rejects.toThrow('delete hook failed after opening tx-hook')
+
+      expect(beginTransaction).not.toHaveBeenCalled()
+      expect(deletedBatches).toEqual([])
+      expect(rollbackTransaction).not.toHaveBeenCalled()
+      expect(commitTransaction).not.toHaveBeenCalled()
+      expect(sessions).toHaveProperty('tx-hook')
+      expect(req.transactionID).toBe('tx-hook')
     })
 
     it('preserves per-document errors when a beforeDelete hook throws without killing the shared transaction', async () => {

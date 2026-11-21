@@ -35,14 +35,18 @@ export async function killTransaction(
 
 export async function killOwnedTransaction({
   hadSession,
-  ownedTransactionID,
   req,
+  transactionID,
 }: {
   hadSession?: boolean
-  ownedTransactionID: number | string | undefined
   req: MarkRequired<Partial<PayloadRequest>, 'payload'>
+  transactionID: number | string | undefined
 }): Promise<void> {
-  if (ownedTransactionID === undefined || req.transactionID === ownedTransactionID) {
+  if (transactionID === undefined) {
+    return
+  }
+
+  if (req.transactionID === transactionID) {
     await killTransaction(req)
     return
   }
@@ -51,7 +55,7 @@ export async function killOwnedTransaction({
   const sessionStillActive = hadSession
     ? Boolean(
         payload.db.sessions &&
-        Object.prototype.hasOwnProperty.call(payload.db.sessions, String(ownedTransactionID)),
+        Object.prototype.hasOwnProperty.call(payload.db.sessions, String(transactionID)),
       )
     : req.transactionID !== undefined
 
@@ -59,7 +63,7 @@ export async function killOwnedTransaction({
 
   try {
     if (sessionStillActive) {
-      await payload.db.rollbackTransaction(ownedTransactionID)
+      await payload.db.rollbackTransaction(transactionID)
     }
     delete req.transactionID
     try {
