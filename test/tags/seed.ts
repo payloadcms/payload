@@ -4,10 +4,12 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { mediaSlug, pagesSlug, postsSlug, tagsSlug } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const tagsDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'tags' })
 
 export const seed = async (payload: Payload): Promise<void> => {
   // Seasons
@@ -123,7 +125,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   // Load image file for media uploads
-  const imageFilePath = path.resolve(dirname, '../uploads/image.png')
+  const imageFilePath = path.resolve(tagsDir, '../uploads/image.png')
   const imageFile = await getFileByPath(imageFilePath)
 
   // Blog posts (recipes)

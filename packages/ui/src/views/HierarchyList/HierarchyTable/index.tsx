@@ -145,7 +145,7 @@ export function HierarchyTable({
   })
 
   // Get selection functions from context
-  const { isLocked, isSelected, toggleAllInCollection, toggleSelection } = useDocumentSelection()
+  const { isLocked, isSelected, toggleSelection } = useDocumentSelection()
 
   // Get the user who is locking a row (for SlotTable to show lock icon instead of checkbox)
   const getRowLockedUser = useCallback(
@@ -375,7 +375,6 @@ export function HierarchyTable({
     label: string
     onCheckboxChange: (row: TableRow) => void
     onPageChange: (page: number) => void
-    onSelectAllChange: () => void
     paginationData: PaginatedDocs
     slug: string
   }
@@ -401,7 +400,6 @@ export function HierarchyTable({
             },
           }),
         onPageChange: (page: number) => void handlePageChangeChildren(page),
-        onSelectAllChange: () => toggleAllInCollection({ collectionSlug }),
         paginationData: {
           docs: childDocs,
           hasNextPage: childPaginationData.hasNextPage || false,
@@ -446,7 +444,6 @@ export function HierarchyTable({
             metadata: {}, // Related items don't have allowedCollections - their collection slug is the constraint
           }),
         onPageChange: (page: number) => void handlePageChangeRelated(group.collectionSlug, page),
-        onSelectAllChange: () => toggleAllInCollection({ collectionSlug: group.collectionSlug }),
         paginationData: {
           docs: state.docs || [],
           hasNextPage: state.hasNextPage || false,
@@ -475,9 +472,35 @@ export function HierarchyTable({
     i18n,
     relatedGroups,
     relatedState,
-    toggleAllInCollection,
     toggleSelection,
   ])
+
+  const combinedRows = useMemo(() => allGroups.flatMap((group) => group.docs), [allGroups])
+
+  const handleCheckboxChange = useCallback(
+    (row: TableRow) => {
+      toggleSelection({
+        id: row.id,
+        collectionSlug: row._collectionSlug,
+        metadata: { allowedCollections: row._allowedCollections as string[] | undefined },
+      })
+    },
+    [toggleSelection],
+  )
+
+  const handleSelectAllChange = useCallback(
+    (checked: boolean) => {
+      for (const row of combinedRows) {
+        if (
+          !isLocked({ id: row.id, collectionSlug: row._collectionSlug }) &&
+          isSelected({ id: row.id, collectionSlug: row._collectionSlug }) !== checked
+        ) {
+          handleCheckboxChange(row)
+        }
+      }
+    },
+    [combinedRows, handleCheckboxChange, isLocked, isSelected],
+  )
 
   const hierarchyConfig = getEntityConfig({ collectionSlug })?.hierarchy
   const isFolder =
@@ -540,13 +563,55 @@ export function HierarchyTable({
 
   return (
     <div className={baseClass}>
-      {allGroups.map((group) => (
-        <TableSection key={group.slug}>
-          <TableSection.Header heading={group.label}>
-            <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
-          </TableSection.Header>
+      {layout === 'table' ? (
+        <TableSection>
           <TableSection.Content>
-            {layout === 'grid' ? (
+            <SlotTable
+              collectionSlug={collectionSlug}
+              columns={columns}
+              data={combinedRows}
+              enableCheckbox={true}
+              enableDragHandle={false}
+              enableHeader={true}
+              enableSelectAll={true}
+              getRowId={(row) => `${row._collectionSlug}:${row.id}`}
+              getRowLockedUser={getRowLockedUser}
+              mergeCheckboxHeader={false}
+              onCheckboxChange={handleCheckboxChange}
+              onSelectAllChange={handleSelectAllChange}
+              parentId={parentId}
+              selectedIds={
+                new Set(
+                  combinedRows
+                    .filter((row) =>
+                      isSelected({ id: row.id, collectionSlug: row._collectionSlug }),
+                    )
+                    .map((row) => `${row._collectionSlug}:${row.id}`),
+                )
+              }
+            />
+            <div className={`${baseClass}__plane-pagination`}>
+              {allGroups.map((group) => (
+                <div
+                  aria-label={group.label}
+                  className={`${baseClass}__plane-pagination-group`}
+                  key={group.slug}
+                  role="group"
+                >
+                  <span className={`${baseClass}__plane-pagination-label`}>{group.label}</span>
+                  <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
+                </div>
+              ))}
+            </div>
+          </TableSection.Content>
+        </TableSection>
+      ) : (
+        allGroups.map((group) => (
+          <TableSection key={group.slug}>
+            <TableSection.Header heading={group.label}>
+              <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
+            </TableSection.Header>
+            <TableSection.Content>
               <CardGrid
                 ariaLabel={group.label}
                 getItemClassName={(row) =>
@@ -614,32 +679,10 @@ export function HierarchyTable({
                   )
                 }}
               />
-            ) : (
-              <SlotTable
-                collectionSlug={group.slug}
-                columns={columns}
-                data={group.docs}
-                enableCheckbox={true}
-                enableDragHandle={false}
-                enableHeader={true}
-                enableSelectAll={true}
-                getRowLockedUser={getRowLockedUser}
-                mergeCheckboxHeader={false}
-                onCheckboxChange={group.onCheckboxChange}
-                onSelectAllChange={group.onSelectAllChange}
-                parentId={parentId}
-                selectedIds={
-                  new Set(
-                    group.docs
-                      .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
-                      .map((row) => row.id),
-                  )
-                }
-              />
-            )}
-          </TableSection.Content>
-        </TableSection>
-      ))}
+            </TableSection.Content>
+          </TableSection>
+        ))
+      )}
     </div>
   )
 }
