@@ -464,6 +464,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     remove: '移除',
     removeFilter: '移除篩選器',
     rename: '重新命名',
+    replace: '替換',
     replaceRow: '替換資料列',
     requiredFields: '標有 * 的欄位為必填項。',
     reset: '重設',

@@ -491,6 +491,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     remove: '削除',
     removeFilter: 'フィルターを削除',
     rename: '名前を変更する',
+    replace: '置換',
     replaceRow: '行を置換',
     requiredFields: '* が付いた項目は必須です。',
     reset: 'リセット',

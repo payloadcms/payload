@@ -496,6 +496,7 @@ export const huTranslations: DefaultTranslationsObject = {
     remove: 'Törlés',
     removeFilter: 'Szűrő eltávolítása',
     rename: 'Átnevez',
+    replace: 'Csere',
     replaceRow: 'Sor cseréje',
     requiredFields: 'A *-gal jelölt mezők kitöltése kötelező.',
     reset: 'Visszaállítás',

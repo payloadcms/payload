@@ -498,6 +498,7 @@ export const esTranslations: DefaultTranslationsObject = {
     remove: 'Eliminar',
     removeFilter: 'Eliminar filtro',
     rename: 'Renombrar',
+    replace: 'Reemplazar',
     replaceRow: 'Reemplazar fila',
     requiredFields: 'Los campos marcados con * son obligatorios.',
     reset: 'Restablecer',

@@ -1,0 +1,22 @@
+@layer payload-default {
+  .widget-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    overflow: hidden;
+    padding: var(--spacer-2);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .widget-preview__canvas {
+    flex: 0 0 auto;
+    inline-size: calc(var(--spacer-4) * 25);
+    min-block-size: calc(var(--spacer-6) * 4);
+    transform-origin: center;
+    container: widget-preview / inline-size;
+  }
+}

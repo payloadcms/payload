@@ -1,0 +1,8 @@
+@layer payload-default {
+  .dashboard-row-drop-targets {
+    position: absolute;
+    inset: 0;
+    z-index: calc(var(--z-modal) + 2);
+    pointer-events: none;
+  }
+}

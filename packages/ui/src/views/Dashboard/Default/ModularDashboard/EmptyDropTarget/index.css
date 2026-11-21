@@ -1,0 +1,12 @@
+@layer payload-default {
+  .dashboard-empty-drop {
+    min-block-size: calc(var(--spacer-6) * 4);
+    border: var(--stroke-width-medium) dashed var(--color-border);
+    border-radius: var(--radius-large);
+  }
+
+  .dashboard-empty-drop--active {
+    border-color: var(--color-border-selected);
+    background: var(--color-bg-selected);
+  }
+}

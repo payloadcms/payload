@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, TypeWithID } from 'payload'
 
-import React from 'react'
+import React, { useId } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -12,12 +12,18 @@ export type ThumbnailCardProps = {
   alignLabel?: 'center' | 'left'
   className?: string
   collection?: ClientCollectionConfig
+  description?: string
   doc?: { filename?: string } & TypeWithID
+  extraButtonProps?: {
+    ref?: React.Ref<HTMLButtonElement>
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>
   isSelected?: boolean
   label?: string
   onClick?: () => void
   onDoubleClick?: () => void
   onKeyDown?: () => void
+  /** Render a decorative thumbnail outside the button, allowing previews that contain controls. */
+  shouldRenderThumbnailOutsideButton?: boolean
   thumbnail: React.ReactNode
 }
 
@@ -28,14 +34,18 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     alignLabel,
     className,
     collection,
+    description,
     doc,
+    extraButtonProps,
     isSelected,
     label: labelFromProps,
     onClick,
     onDoubleClick,
+    shouldRenderThumbnailOutsideButton,
     thumbnail,
   } = props
 
+  const descriptionID = useId()
   const { config } = useConfig()
 
   const { i18n } = useTranslation()
@@ -62,17 +72,46 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     })
   }
 
-  return (
+  const button = (
     <button
-      aria-pressed={typeof isSelected === 'boolean' ? isSelected : undefined}
+      {...extraButtonProps}
+      aria-describedby={
+        [extraButtonProps?.['aria-describedby'], description ? descriptionID : undefined]
+          .filter(Boolean)
+          .join(' ') || undefined
+      }
+      aria-label={description ? title : undefined}
+      aria-pressed={
+        typeof isSelected === 'boolean' ? isSelected : extraButtonProps?.['aria-pressed']
+      }
       className={classes}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       title={title}
       type="button"
     >
-      <div className={`${baseClass}__thumbnail`}>{thumbnail}</div>
-      <div className={`${baseClass}__label`}>{title}</div>
+      <div className={`${baseClass}__thumbnail`}>
+        {shouldRenderThumbnailOutsideButton ? null : thumbnail}
+      </div>
+      <div className={`${baseClass}__details`}>
+        <div className={`${baseClass}__label`}>{title}</div>
+        {description && (
+          <div className={`${baseClass}__description`} id={descriptionID}>
+            {description}
+          </div>
+        )}
+      </div>
     </button>
+  )
+
+  return shouldRenderThumbnailOutsideButton ? (
+    <div className={`${baseClass}__wrapper`}>
+      {button}
+      <div aria-hidden="true" className={`${baseClass}__preview`} inert>
+        {thumbnail}
+      </div>
+    </div>
+  ) : (
+    button
   )
 }

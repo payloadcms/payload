@@ -9,6 +9,7 @@ import type { WidgetListItem } from '../WidgetCard/index.js'
 import type { CollectionFieldPaths } from './getCollectionFieldPaths.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
+import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { WidgetCard, WidgetList } from '../WidgetCard/index.js'
 import './index.css'
 import { getCollectionFieldPaths } from './getCollectionFieldPaths.js'
@@ -41,18 +42,33 @@ const emptyFieldPaths: CollectionFieldPaths = {
  * @internal - may change or be removed without a major version bump
  */
 export async function CollectionQueryWidget({
+  isPreview,
+  permissions,
   req,
   widgetData,
 }: WidgetServerProps<{ data?: CollectionQueryWidgetData }>) {
   const { i18n, payload, user } = req
   const {
-    relatedCollection,
+    relatedCollection: configuredCollection,
     sortDirection = 'desc',
     sortField,
     title: titleFromData,
     where,
   } = widgetData ?? {}
-  const limit = clampLimit(widgetData?.limit)
+  const relatedCollection =
+    configuredCollection ??
+    (isPreview
+      ? getVisibleEntities({ req }).collections.find(
+          (slug) => permissions?.collections?.[slug]?.read,
+        )
+      : undefined)
+  const limit = isPreview
+    ? Math.min(3, clampLimit(widgetData?.limit))
+    : clampLimit(widgetData?.limit)
+
+  if (isPreview && !relatedCollection) {
+    return null
+  }
   const collectionConfig = relatedCollection
     ? payload.collections[relatedCollection]?.config
     : undefined

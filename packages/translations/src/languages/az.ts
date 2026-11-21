@@ -493,6 +493,7 @@ export const azTranslations: DefaultTranslationsObject = {
     remove: 'Sil',
     removeFilter: 'Filtri sil',
     rename: 'Yenidən adlandırın',
+    replace: 'Əvəz et',
     replaceRow: 'Sətiri əvəz et',
     requiredFields: '* ilə işarələnmiş sahələr məcburidir.',
     reset: 'Yenidən başlat',

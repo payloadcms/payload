@@ -494,6 +494,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     remove: 'Удалить',
     removeFilter: 'Удалить фильтр',
     rename: 'Переименовать',
+    replace: 'Заменить',
     replaceRow: 'Заменить строку',
     requiredFields: 'Поля, отмеченные *, обязательны для заполнения.',
     reset: 'Сброс',

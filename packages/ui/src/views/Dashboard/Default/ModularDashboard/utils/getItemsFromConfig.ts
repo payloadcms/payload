@@ -1,11 +1,13 @@
 import type { DashboardConfig, PayloadRequest, Widget, WidgetInstance } from 'payload'
 
+import { getWidgetControlData } from 'payload/shared'
+
 import type { WidgetItem } from '../index.client.js'
 
 export async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
-  widgets: Pick<Widget, 'maxWidth' | 'minWidth' | 'slug'>[],
+  widgets: Pick<Widget, 'controls' | 'maxWidth' | 'minWidth' | 'slug'>[],
 ): Promise<WidgetItem[]> {
   let widgetInstances: WidgetInstance[]
   if (typeof defaultLayout === 'function') {
@@ -18,7 +20,8 @@ export async function getItemsFromConfig(
     const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
     return {
       id: `${widgetInstance.widgetSlug}-${index}`,
-      data: widgetInstance.data,
+      data: getWidgetControlData({ controls: widget?.controls, data: widgetInstance.data }),
+      ...(widgetInstance.startsNewRow ? { startsNewRow: true } : {}),
       maxWidth: widget?.maxWidth ?? 'full',
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',

@@ -490,6 +490,7 @@ export const svTranslations: DefaultTranslationsObject = {
     remove: 'Ta bort',
     removeFilter: 'Ta bort filter',
     rename: 'Byt namn',
+    replace: 'Ersätt',
     replaceRow: 'Ersätt rad',
     requiredFields: 'Fält markerade med * är obligatoriska.',
     reset: 'Återställ',

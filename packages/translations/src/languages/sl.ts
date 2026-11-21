@@ -488,6 +488,7 @@ export const slTranslations: DefaultTranslationsObject = {
     remove: 'Odstrani',
     removeFilter: 'Odstrani filter',
     rename: 'Preimenuj',
+    replace: 'Zamenjaj',
     replaceRow: 'Zamenjaj vrstico',
     requiredFields: 'Polja, označena z *, so obvezna.',
     reset: 'Ponastavi',

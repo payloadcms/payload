@@ -482,6 +482,7 @@ export const faTranslations: DefaultTranslationsObject = {
     remove: 'حذف',
     removeFilter: 'حذف فیلتر',
     rename: 'تغییر نام',
+    replace: 'جایگزینی',
     replaceRow: 'جایگزینی سطر',
     requiredFields: 'تکمیل فیلدهای دارای علامت * الزامی است.',
     reset: 'بازنشانی',

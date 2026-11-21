@@ -488,6 +488,7 @@ export const daTranslations: DefaultTranslationsObject = {
     remove: 'Fjern',
     removeFilter: 'Fjern filter',
     rename: 'Omdøb',
+    replace: 'Erstat',
     replaceRow: 'Erstat række',
     requiredFields: 'Felter markeret med * er obligatoriske.',
     reset: 'Nulstil',

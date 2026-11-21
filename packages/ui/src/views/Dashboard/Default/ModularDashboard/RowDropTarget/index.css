@@ -1,0 +1,20 @@
+@layer payload-default {
+  .dashboard-row-drop-target {
+    position: absolute;
+    inset-inline: var(--spacer-2-5);
+    height: calc(var(--spacer-4) * 2);
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+
+  .dashboard-row-drop-target--active::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 50%;
+    height: var(--stroke-width-medium);
+    translate: 0 -50%;
+    border-radius: var(--radius-full);
+    background: var(--color-border-selected-strong);
+  }
+}

@@ -17,6 +17,8 @@ type WidgetSlugFromWidget<TWidget extends { data?: unknown }> = {
 }[WidgetSlug]
 
 export type WidgetServerProps<TWidget extends { data?: unknown } | never = never> = {
+  /** True when rendering a non-interactive picker thumbnail. Avoid subscriptions or writes in this mode. */
+  isPreview?: boolean
   /**
    * Adapter-injected component renderer. Widget server components can use
    * this to render other import map components without importing a
@@ -28,6 +30,8 @@ export type WidgetServerProps<TWidget extends { data?: unknown } | never = never
     : WidgetDataFromWidget<Exclude<TWidget, never>> extends Record<string, unknown>
       ? WidgetDataFromWidget<Exclude<TWidget, never>>
       : Record<string, unknown>
+  /** Stable ID of this dashboard widget instance. */
+  widgetId?: string
   widgetSlug: [TWidget] extends [never]
     ? string
     : [WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>] extends [never]

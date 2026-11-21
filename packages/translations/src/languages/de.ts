@@ -502,6 +502,7 @@ export const deTranslations: DefaultTranslationsObject = {
     remove: 'Entfernen',
     removeFilter: 'Filter entfernen',
     rename: 'Umbenennen',
+    replace: 'Ersetzen',
     replaceRow: 'Zeile ersetzen',
     requiredFields: 'Mit * gekennzeichnete Felder sind Pflichtfelder.',
     reset: 'Zurücksetzen',

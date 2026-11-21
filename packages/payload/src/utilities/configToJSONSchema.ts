@@ -6,9 +6,10 @@ import { createHash } from 'crypto'
 import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { FieldAffectingData, FlattenedField, Option } from '../fields/config/types.js'
+import type { Field, FieldAffectingData, FlattenedField, Option } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
+import { getWidgetControlFields } from '../config/widgetControls.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData, fieldIsVirtual } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
@@ -213,11 +214,31 @@ function generateWidgetSchemas({
     })
     let dataSchema: JSONSchema4
 
-    if (widget.fields?.length) {
+    const controlFields: Field[] = getWidgetControlFields({
+      controls: widget.controls,
+    }).map((control) => {
+      if (control.type === 'switch') {
+        return { name: control.name, type: 'checkbox', defaultValue: control.defaultValue }
+      }
+      if (control.type === 'menu' || control.type === 'segment' || control.type === 'select') {
+        return {
+          name: control.name,
+          type: 'select',
+          defaultValue: control.defaultValue,
+          options: control.options.map((option) =>
+            typeof option === 'string' ? option : { label: option.label, value: option.value },
+          ),
+        }
+      }
+      return control
+    })
+    const widgetFields = [...(widget.fields ?? []), ...controlFields]
+
+    if (widgetFields.length) {
       const widgetFieldSchemas = fieldsToJSONSchema({
         collectionIDFieldTypes,
         config,
-        fields: flattenAllFields({ fields: widget.fields }),
+        fields: flattenAllFields({ fields: widgetFields }),
         forceInlineBlocks,
         i18n,
         interfaceNameDefinitions,
