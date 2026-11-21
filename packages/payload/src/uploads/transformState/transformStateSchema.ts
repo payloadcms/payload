@@ -138,6 +138,7 @@ function toSerialisableValueSchema(schema: boolean | JSONSchema4): JSONSchema4 {
   if (
     schema.type === undefined &&
     schema.properties === undefined &&
+    schema.patternProperties === undefined &&
     schema.additionalProperties === undefined &&
     schema.items === undefined &&
     schema.anyOf === undefined &&

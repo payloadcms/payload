@@ -129,6 +129,10 @@ describe('transformStateSchema', () => {
                 key: 'patternCase',
                 schema: { type: 'object', patternProperties: { '^x-': { type: 'object' } } },
               },
+              {
+                key: 'patternOnlyCase',
+                schema: { patternProperties: { '^x-': { type: 'object' } } },
+              },
               { key: 'itemsTrue', schema: { type: 'array', items: true } },
               { key: 'itemsFalse', schema: { type: 'array', items: false } },
             ],
@@ -150,6 +154,14 @@ describe('transformStateSchema', () => {
     // dictionary that is not assignable to JsonValue.
     expect(
       ((props.patternCase as JSONSchema4).patternProperties as any)?.['^x-'].additionalProperties,
+    ).toStrictEqual({ $ref: '#/$defs/payload.JsonValue' })
+    // The same rewrite must happen when the schema declares only
+    // `patternProperties`, with no `type: 'object'` — without it, the
+    // unconstrained-schema guard returns the schema with a parent
+    // JsonValue reference and never recurses into the pattern values.
+    expect(
+      ((props.patternOnlyCase as JSONSchema4).patternProperties as any)?.['^x-']
+        .additionalProperties,
     ).toStrictEqual({ $ref: '#/$defs/payload.JsonValue' })
     // `items: true` accepts any value, like an omitted `items`, so it maps
     // to JsonValue; `items: false` stays, since it generates `never[]`,
