@@ -1898,8 +1898,28 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const originalAfterChange = collectionHooks.afterChange
       const beforeChange = vitest.fn()
       const afterChange = vitest.fn()
-      const outerReq = { transactionID: 'outer-transaction' }
+      let expectedOuterTransactionID: number | string = 'outer-transaction'
       let shouldDisableEmail = false
+      const runWithOuterTransaction = async <T>(
+        fn: (outerReq: { transactionID: number | string }) => Promise<T>,
+      ): Promise<T> => {
+        const startedTransactionID = await payload.db.beginTransaction?.()
+        expectedOuterTransactionID = startedTransactionID ?? 'outer-transaction'
+        const outerReq = { transactionID: expectedOuterTransactionID }
+        try {
+          const result = await fn(outerReq)
+          expect(outerReq.transactionID).toBe(expectedOuterTransactionID)
+          if (startedTransactionID !== null && startedTransactionID !== undefined) {
+            await payload.db.commitTransaction(startedTransactionID)
+          }
+          return result
+        } catch (error) {
+          if (startedTransactionID !== null && startedTransactionID !== undefined) {
+            await payload.db.rollbackTransaction(startedTransactionID)
+          }
+          throw error
+        }
+      }
       collectionHooks.beforeOperation = [
         ...(originalBeforeOperation ?? []),
         ({ args }) => (shouldDisableEmail ? { ...args, disableEmail: true } : args),
@@ -1907,7 +1927,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       collectionHooks.beforeChange = [
         ...(originalBeforeChange ?? []),
         ({ data, req }) => {
-          beforeChange(req.transactionID === outerReq.transactionID)
+          beforeChange(req.transactionID === expectedOuterTransactionID)
           return data
         },
       ]
@@ -1921,12 +1941,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       authConfig.forgotPassword.minRequestInterval = 300000
 
       try {
-        const firstToken = await payload.forgotPassword({
-          collection: slug,
-          data: { email: users[0]!.email },
-          overrideAccess: true,
-          req: outerReq,
-        })
+        const firstToken = await runWithOuterTransaction((outerReq) =>
+          payload.forgotPassword({
+            collection: slug,
+            data: { email: users[0]!.email },
+            overrideAccess: true,
+            req: outerReq,
+          }),
+        )
         const secondToken = await payload.forgotPassword({
           collection: slug,
           data: { email: users[0]!.email },
@@ -1935,7 +1957,6 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         expect(firstToken).not.toBeNull()
         expect(beforeChange).toHaveBeenCalledWith(true)
         expect(afterChange).toHaveBeenCalledTimes(1)
-        expect(outerReq.transactionID).toBe('outer-transaction')
         expect(secondToken).toBeNull()
 
         const tokenWithDisabledEmail = await payload.forgotPassword({
@@ -1948,12 +1969,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
         beforeChange.mockClear()
         shouldDisableEmail = true
-        await payload.forgotPassword({
-          collection: slug,
-          data: { email: users[1]!.email },
-          overrideAccess: true,
-          req: outerReq,
-        })
+        await runWithOuterTransaction((outerReq) =>
+          payload.forgotPassword({
+            collection: slug,
+            data: { email: users[1]!.email },
+            overrideAccess: true,
+            req: outerReq,
+          }),
+        )
         expect(beforeChange).toHaveBeenCalledWith(true)
         shouldDisableEmail = false
         const tokenAfterDisabledEmail = await payload.forgotPassword({
