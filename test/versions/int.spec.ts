@@ -5279,6 +5279,67 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
   })
 
   test.describe('Scheduled Publish', () => {
+    test.options(
+      'should delete scheduled publish jobs when deleting a numeric-id document',
+      { db: (adapter) => adapter === 'postgres' || adapter === 'sqlite' },
+      async ({ payload }) => {
+        const draft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'hello',
+            title: 'my doc with a scheduled publish job',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: draftCollectionSlug,
+              value: String(draft.id),
+            },
+            type: 'publish',
+          },
+          overrideAccess: true,
+          task: 'schedulePublish',
+          waitUntil: new Date(Date.now() + 60_000),
+        })
+
+        const { docs: jobsBeforeDelete } = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            and: [
+              { taskSlug: { equals: 'schedulePublish' } },
+              { 'input.doc.value': { equals: String(draft.id) } },
+            ],
+          },
+        })
+
+        expect(jobsBeforeDelete).toHaveLength(1)
+
+        await payload.delete({
+          id: draft.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        const { docs: jobsAfterDelete } = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            and: [
+              { taskSlug: { equals: 'schedulePublish' } },
+              { 'input.doc.value': { equals: String(draft.id) } },
+            ],
+          },
+        })
+
+        expect(jobsAfterDelete).toHaveLength(0)
+      },
+    )
+
     test('should allow collection scheduled publish', async ({ payload }) => {
       const draft = await payload.create({
         collection: draftCollectionSlug,

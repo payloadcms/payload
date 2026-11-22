@@ -21,6 +21,13 @@ export const deleteScheduledPublishJobs = async ({
   payload,
   req,
 }: Args): Promise<void> => {
+  const documentIDs = ids ?? (id === undefined ? [] : [id])
+  const documentIDValues = documentIDs.flatMap((documentID) => {
+    const normalizedID = String(documentID)
+
+    return documentID === normalizedID ? [documentID] : [documentID, normalizedID]
+  })
+
   try {
     await payload.db.deleteMany({
       collection: jobsCollectionSlug,
@@ -38,19 +45,13 @@ export const deleteScheduledPublishJobs = async ({
               exists: false,
             },
           },
-          ids
-            ? {
-                or: ids.map((id) => ({
-                  'input.doc.value': {
-                    equals: id,
-                  },
-                })),
-              }
-            : {
-                'input.doc.value': {
-                  equals: id,
-                },
+          {
+            or: documentIDValues.map((documentID) => ({
+              'input.doc.value': {
+                equals: documentID,
               },
+            })),
+          },
           {
             'input.doc.relationTo': {
               equals: slug,
