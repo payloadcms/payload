@@ -250,6 +250,11 @@ export const renderListView = async (
     ? transformColumnsToSelect(columns)
     : undefined
 
+  /** Force select `useAsTitle` for accessible row-selection labels, even if its column is hidden. */
+  if (enableRowSelections && select && collectionConfig.admin.useAsTitle) {
+    select[collectionConfig.admin.useAsTitle] = true
+  }
+
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({
     collectionConfig,
