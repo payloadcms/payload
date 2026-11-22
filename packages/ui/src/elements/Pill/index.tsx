@@ -21,6 +21,7 @@ export type PillProps = {
   'aria-controls'?: string
   'aria-expanded'?: boolean
   'aria-label'?: string
+  'aria-pressed'?: boolean
   children?: React.ReactNode
   className?: string
   draggable?: boolean
@@ -83,6 +84,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
     'aria-controls': ariaControls,
     'aria-expanded': ariaExpanded,
     'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
     children,
     className,
     draggable,
@@ -135,6 +137,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-controls={ariaControls}
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
       className={classes}
       disabled={isButton ? !isHydrated : undefined}
       href={to || null}
