@@ -31,6 +31,36 @@ describe('defineTool input inference', () => {
       return { content: [] }
     })
   })
+
+  test('output schema does not change input inference', () => {
+    defineTool({
+      description: 'x',
+      input: z.object({ id: z.string() }),
+      output: z.object({ total: z.number() }),
+    }).handler(({ input }) => {
+      expect(input).type.toBe<IdSchemaInput>()
+      return {
+        content: [],
+        structuredContent: { total: 1 },
+      }
+    })
+  })
+
+  test('output accepts raw JSON Schema', () => {
+    defineTool({
+      description: 'x',
+      output: {
+        type: 'object',
+        properties: {
+          total: { type: 'number' },
+        },
+        required: ['total'],
+      },
+    }).handler(() => ({
+      content: [],
+      structuredContent: { total: 1 },
+    }))
+  })
 })
 
 describe('defineCollectionTool input inference', () => {

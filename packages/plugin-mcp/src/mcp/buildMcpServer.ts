@@ -49,21 +49,36 @@ export const buildMcpServer = ({
   /**
    * Wrap a tool handler's response with the tool's `overrideResponse`, then
    * strip the internal `doc` field so it doesn't leak onto the wire.
+   * A tool that declares `output` keeps the handler's `structuredContent`.
    */
   const finalizeToolResponse = async ({
     input,
+    keepStructuredContent = false,
     overrideResponse,
     response,
     toolName,
   }: {
     input: unknown
+    keepStructuredContent?: boolean
     overrideResponse?: MCPResponseOverride
     response: MCPToolResponse
     toolName: string
   }): Promise<MCPToolResponse> => {
-    let overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+    // Snapshot before overrides. They receive the handler response and can
+    // mutate `structuredContent` in place or replace it.
+    const structuredContent = keepStructuredContent
+      ? snapshotStructuredContent(response.structuredContent)
+      : undefined
+    const restoreStructuredContent = (next: MCPToolResponse): MCPToolResponse =>
+      keepStructuredContent ? applyStructuredContent({ response: next, structuredContent }) : next
+
+    let overridden = restoreStructuredContent(
+      overrideResponse?.(response, response.doc ?? {}, req) ?? response,
+    )
     for (const hook of pluginConfig.hooks?.afterToolCall ?? []) {
-      overridden = await hook({ input, req, response: overridden, toolName })
+      overridden = restoreStructuredContent(
+        await hook({ input, req, response: overridden, toolName }),
+      )
     }
     const { doc: _doc, ...rest } = overridden
     return rest
@@ -216,6 +231,7 @@ export const buildMcpServer = ({
               annotations: tool.annotations,
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
+              outputSchema: tool.output ? toStandardSchema(tool.output) : undefined,
             },
             async (input: unknown, ctx: ServerContext) => {
               const toolInput = (input ?? {}) as Record<string, unknown>
@@ -227,6 +243,7 @@ export const buildMcpServer = ({
               })
               return finalizeToolResponse({
                 input: toolInput,
+                keepStructuredContent: Boolean(tool.output),
                 overrideResponse: tool.overrideResponse,
                 response,
                 toolName: item.mcpName,
@@ -243,6 +260,33 @@ export const buildMcpServer = ({
   }
 
   return server
+}
+
+const snapshotStructuredContent = (
+  structuredContent: MCPToolResponse['structuredContent'],
+): MCPToolResponse['structuredContent'] =>
+  structuredContent === undefined ? undefined : structuredClone(structuredContent)
+
+const applyStructuredContent = ({
+  response,
+  structuredContent,
+}: {
+  response: MCPToolResponse
+  structuredContent: MCPToolResponse['structuredContent']
+}): MCPToolResponse => {
+  if (structuredContent === undefined) {
+    if (!Object.hasOwn(response, 'structuredContent')) {
+      return response
+    }
+
+    const { structuredContent: _structuredContent, ...rest } = response
+    return rest
+  }
+
+  return {
+    ...response,
+    structuredContent,
+  }
 }
 
 const withSlugInput = ({ input }: { input?: ToolInputSchema }): ToolInputSchema => {

@@ -1068,6 +1068,15 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(diceRoll.inputSchema.properties.sides).toBeDefined()
         expect(diceRoll.inputSchema.properties.sides.minimum).toBe(2)
         expect(diceRoll.inputSchema.properties.sides.maximum).toBe(1000)
+        expect(diceRoll.outputSchema).toBeUndefined()
+        const scoredRoll = toolsByName['scoredRoll']
+        expect(scoredRoll).toBeDefined()
+        expect(scoredRoll.outputSchema.type).toBe('object')
+        expect(scoredRoll.outputSchema.properties.result).toBeDefined()
+        expect(scoredRoll.outputSchema.properties.sides).toBeDefined()
+        expect(scoredRoll.outputSchema.required).toEqual(
+          expect.arrayContaining(['result', 'sides']),
+        )
       })
       it('should return config info', async ({ mcp, getApiKey }) => {
         const apiKey = await getApiKey()
@@ -1357,6 +1366,19 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(roll?.result).toBeDefined()
         // @ts-expect-error - doc.user is a string | User
         expect(roll?.user?.id).toBe(userId)
+      })
+      it('should advertise outputSchema and keep structuredContent', async ({ mcp, getApiKey }) => {
+        const apiKey = await getApiKey()
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
+            sides: 6,
+          },
+          name: 'scoredRoll',
+        })
+        expect(callResponse.isError).not.toBe(true)
+        expect(getToolText(callResponse)).toBe('hook replaced the text')
+        expect(callResponse.structuredContent).toEqual({ result: 4, sides: 6 })
       })
     })
     test.describe('Collections', () => {
