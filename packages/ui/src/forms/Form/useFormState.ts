@@ -297,6 +297,9 @@ export const useFormState = ({
         return
       }
 
+      // Used to detect local changes made while the request was pending.
+      const fieldsAtRequest = contextRef.current.fields
+
       const formState = isReset
         ? undefined
         : deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields ?? {}, {
@@ -541,10 +544,15 @@ export const useFormState = ({
             return
           }
 
+          // If fields changed while a refresh was pending, the merged state already
+          // includes those edits. Updating the baseline would hide them from the debounced
+          // refresh effect, so it stays unchanged and one more refresh is queued instead.
+          const shouldSetPrevState = !isRefresh || contextRef.current.fields === fieldsAtRequest
+
           dispatchFieldsWithoutIncrementingFormSequence({
             type: 'MERGE_SERVER_STATE',
             acceptValues,
-            prevStateRef: prevFormStateRef,
+            prevStateRef: shouldSetPrevState ? prevFormStateRef : undefined,
             serverState: successResponse.state,
           })
 
