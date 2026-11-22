@@ -174,6 +174,7 @@ export const updateDocument = async <
     req,
     showHiddenFields: true,
   })
+  const isTrashing = Boolean(collectionConfig.trash && data?.deletedAt)
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
   const isUnpublishingSingleLocale =
     hasLocalizeStatusEnabled(collectionConfig) &&
@@ -181,7 +182,8 @@ export const updateDocument = async <
     data?._status === 'draft' &&
     Boolean(locale && locale !== 'all')
   const shouldLimitValidationToSubmittedFields =
-    (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
+    isTrashing ||
+    (collectionConfig.trash && isRestoringDraftFromTrash) ||
     unpublishAllLocales ||
     isUnpublishingSingleLocale
   const submittedTopLevelFieldNames = shouldLimitValidationToSubmittedFields
@@ -308,7 +310,8 @@ export const updateDocument = async <
     data: { ...data, id },
     doc: publicationHookDoc,
     docWithLocales,
-    fieldsToValidate: data._status === 'published' ? undefined : submittedTopLevelFieldNames,
+    fieldsToValidate:
+      !isTrashing && data._status === 'published' ? undefined : submittedTopLevelFieldNames,
     global: null,
     operation: 'update',
     overrideAccess,
