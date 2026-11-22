@@ -106,7 +106,10 @@ export const getDocumentPermissions = async (args: {
   if (globalConfig) {
     try {
       docPermissions = await docAccessOperationGlobal({
-        data,
+        data: {
+          ...data,
+          _status: 'draft',
+        },
         globalConfig,
         req,
       })
