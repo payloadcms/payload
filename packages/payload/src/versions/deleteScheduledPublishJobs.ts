@@ -46,11 +46,9 @@ export const deleteScheduledPublishJobs = async ({
             },
           },
           {
-            or: documentIDValues.map((documentID) => ({
-              'input.doc.value': {
-                equals: documentID,
-              },
-            })),
+            'input.doc.value': {
+              in: documentIDValues,
+            },
           },
           {
             'input.doc.relationTo': {
