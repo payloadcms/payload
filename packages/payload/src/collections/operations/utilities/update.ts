@@ -54,7 +54,23 @@ import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePu
 import { resolveLocalizedStatus } from '../../../versions/resolveLocalizedStatus.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 
-function omitDeniedFields(
+function omitDeniedValue(
+  value: unknown,
+  deniedPaths: Set<string>,
+  currentPath: string,
+): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item, index) =>
+      omitDeniedValue(item, deniedPaths, `${currentPath}.${index}`),
+    )
+  }
+  if (value && typeof value === 'object' && !(value instanceof Date) && !(value instanceof RegExp)) {
+    return omitDeniedFields(value as Record<string, unknown>, deniedPaths, currentPath)
+  }
+  return value
+}
+
+export function omitDeniedFields(
   data: Record<string, unknown>,
   deniedPaths: Set<string>,
   parentPath = '',
@@ -68,11 +84,7 @@ function omitDeniedFields(
     if (deniedPaths.has(currentPath)) {
       continue
     }
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      result[key] = omitDeniedFields(value as Record<string, unknown>, deniedPaths, currentPath)
-    } else {
-      result[key] = value
-    }
+    result[key] = omitDeniedValue(value, deniedPaths, currentPath)
   }
   return result
 }

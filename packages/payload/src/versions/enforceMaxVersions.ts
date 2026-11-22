@@ -82,7 +82,7 @@ export const enforceMaxVersions = async ({
     }
 
     const where: Where = {}
-    if (collection) {
+    if (collection && id !== undefined) {
       where.parent = {
         equals: id,
       }
@@ -132,7 +132,7 @@ export const enforceMaxVersions = async ({
         },
       ]
 
-      if (collection) {
+      if (collection && id !== undefined) {
         deleteConditions.push({
           parent: {
             equals: id,
@@ -140,12 +140,14 @@ export const enforceMaxVersions = async ({
         })
       }
 
-      if (latestDraftId !== undefined) {
-        deleteConditions.push({
-          id: {
-            not_equals: latestDraftId,
-          },
-        })
+      if (draftsEnabled) {
+        if (latestDraftId !== undefined) {
+          deleteConditions.push({
+            id: {
+              not_equals: latestDraftId,
+            },
+          })
+        }
         deleteConditions.push({
           or: [
             {

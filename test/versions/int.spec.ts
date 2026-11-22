@@ -8,6 +8,7 @@ import fs from 'fs'
 import path from 'path'
 import {
   createPayloadRequest,
+  enforceMaxVersions,
   Forbidden,
   getFileByPath,
   mergeDraftData,
@@ -16,6 +17,7 @@ import {
   saveVersion,
   ValidationError,
 } from 'payload'
+import { omitDeniedFields } from '../../packages/payload/src/collections/operations/utilities/update.js'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -1918,6 +1920,18 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(draftAfterExplicitFalse._status).toBe('draft')
         expect(draftAfterExplicitFalse.description).toBe('pending draft desc')
 
+        // Exactly one version should remain latest: true (the draft version)
+        const versionsAfterExplicitFalse = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: {
+            parent: { equals: publishedWithDraft.id },
+          },
+        })
+        const latestVersions = versionsAfterExplicitFalse.docs.filter((v) => v.latest === true)
+        expect(latestVersions).toHaveLength(1)
+        expect(latestVersions[0]?.version._status).toBe('draft')
+
         // 3. Explicit publishing with pending draft
         await payload.update({
           id: publishedWithDraft.id,
@@ -2283,6 +2297,49 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedFinal.description).toBe('pending localized draft desc')
       })
 
+      test('issue #19670 / enforceMaxVersions: should preserve latest draft during unscoped pruning (id === undefined)', async ({
+        payload,
+      }) => {
+        // Create document with maxPerDoc: 1
+        const published = await payload.create({
+          collection: draftWithMaxCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'unscoped test published',
+            title: 'unscoped test',
+          },
+          overrideAccess: true,
+        })
+
+        // Save a draft version
+        await payload.update({
+          id: published.id,
+          collection: draftWithMaxCollectionSlug,
+          data: {
+            description: 'unscoped test draft latest',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Execute enforceMaxVersions without id (unscoped pruning)
+        await enforceMaxVersions({
+          collection: payload.collections[draftWithMaxCollectionSlug].config,
+          max: 1,
+          payload,
+        })
+
+        // Verify that the pending draft still exists and is latest
+        const draftAfter = await payload.findByID({
+          id: published.id,
+          collection: draftWithMaxCollectionSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        expect(draftAfter._status).toBe('draft')
+        expect(draftAfter.description).toBe('unscoped test draft latest')
+      })
+
       test('issue #19670 / Finding 1: should preserve nested id in draftData while ignoring root id', () => {
         const target: Record<string, unknown> = {
           id: 'root-id-preserved',
@@ -2310,6 +2367,44 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect((target.nested as Record<string, unknown>).name).toBe('new-name')
       })
 
+      test('issue #19670 / Finding 1 extended: should preserve nested id, _status, and updatedAt in draftData while ignoring root system fields', () => {
+        const target: Record<string, unknown> = {
+          _status: 'draft',
+          id: 'root-id-preserved',
+          updatedAt: '2020-01-01T00:00:00.000Z',
+          metadata: {
+            _status: 'custom-sub-status-old',
+            id: 'nested-item-old',
+            updatedAt: '2020-01-01T00:00:00.000Z',
+          },
+        }
+
+        mergeDraftData({
+          incoming: {
+            _status: 'published',
+            id: 'root-id-overwrite-attempt',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+            metadata: {
+              _status: 'custom-sub-status-new',
+              id: 'nested-item-new',
+              updatedAt: '2025-01-01T00:00:00.000Z',
+            },
+          },
+          target,
+        })
+
+        // Root system fields are excluded at depth 0
+        expect(target.id).toBe('root-id-preserved')
+        expect(target._status).toBe('draft')
+        expect(target.updatedAt).toBe('2020-01-01T00:00:00.000Z')
+
+        // Nested system fields at depth > 0 are preserved and updated
+        const meta = target.metadata as Record<string, unknown>
+        expect(meta.id).toBe('nested-item-new')
+        expect(meta._status).toBe('custom-sub-status-new')
+        expect(meta.updatedAt).toBe('2025-01-01T00:00:00.000Z')
+      })
+
       test('issue #19670 / Finding 2: empty object on unlocalized field should not be inferred as localized', () => {
         const target: Record<string, unknown> = {
           emptyJson: {},
@@ -2318,6 +2413,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
         mergeDraftData({
           incoming: {
+            emptyJson: {},
             title: 'updated',
           },
           locale: 'en',
@@ -2328,6 +2424,67 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         // emptyJson must remain {} and not be converted to a localized { en: ... } map
         expect(target.emptyJson).toEqual({})
         expect(target.title).toBe('updated')
+      })
+
+      test('issue #19670 / Finding 2 extended: transparent layout containers (row, collapsible, tabs) should resolve field schema and keep non-localized JSON {} non-localized', () => {
+        const fields = [
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'rowJson',
+                type: 'json',
+              },
+            ],
+          },
+          {
+            type: 'collapsible',
+            label: 'Collapsible Section',
+            fields: [
+              {
+                name: 'collapsibleJson',
+                type: 'json',
+              },
+            ],
+          },
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                label: 'Unnamed Tab',
+                fields: [
+                  {
+                    name: 'tabJson',
+                    type: 'json',
+                  },
+                ],
+              },
+            ],
+          },
+        ] as any
+
+        const target: Record<string, unknown> = {
+          collapsibleJson: {},
+          rowJson: {},
+          tabJson: {},
+        }
+
+        mergeDraftData({
+          fields,
+          incoming: {
+            collapsibleJson: {},
+            rowJson: {},
+            tabJson: {},
+          },
+          locale: 'en',
+          localeCodes: ['en', 'es', 'de'],
+          target,
+        })
+
+        // Non-localized JSON fields inside transparent containers must remain non-localized {}
+        expect(target.rowJson).toEqual({})
+        expect(target.collapsibleJson).toEqual({})
+        expect(target.tabJson).toEqual({})
       })
 
       test('issue #19670 / Finding 3: should partially merge localized group properties without wiping sibling properties in pending draft', () => {
@@ -2374,6 +2531,159 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         const groupEs = (target.group as Record<string, unknown>).es as Record<string, unknown>
         expect(groupEs.fieldA).toBe('existing-es-a')
         expect(groupEs.fieldB).toBe('existing-es-b')
+      })
+
+      test('issue #19670 / Finding 3 extended: replacement semantics for scalar, array, and JSON fields vs group partial merge', () => {
+        const fields = [
+          {
+            name: 'metaGroup',
+            type: 'group',
+            localized: true,
+            fields: [
+              { name: 'summary', type: 'text' },
+              { name: 'title', type: 'text' },
+            ],
+          },
+          {
+            name: 'localizedScalar',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'localizedArray',
+            type: 'array',
+            localized: true,
+            fields: [{ name: 'item', type: 'text' }],
+          },
+          {
+            name: 'unlocalizedJson',
+            type: 'json',
+          },
+        ] as any
+
+        const target: Record<string, unknown> = {
+          localizedArray: {
+            en: [{ item: 'old-1' }, { item: 'old-2' }],
+            es: [{ item: 'es-1' }],
+          },
+          localizedScalar: {
+            en: 'old-scalar-en',
+            es: 'scalar-es',
+          },
+          metaGroup: {
+            en: {
+              summary: 'preserved-summary-en',
+              title: 'old-title-en',
+            },
+            es: {
+              summary: 'summary-es',
+              title: 'title-es',
+            },
+          },
+          unlocalizedJson: {
+            keyA: 'valueA',
+            keyB: 'valueB',
+          },
+        }
+
+        mergeDraftData({
+          fields,
+          incoming: {
+            localizedArray: [{ item: 'new-1' }],
+            localizedScalar: 'new-scalar-en',
+            metaGroup: {
+              title: 'updated-title-en',
+            },
+            unlocalizedJson: {
+              keyA: 'replacedA',
+            },
+          },
+          locale: 'en',
+          localeCodes: ['en', 'es', 'de'],
+          target,
+        })
+
+        // Localized group: partial update merges into 'en' locale, preserves untouched 'summary', preserves 'es'
+        const metaEn = (target.metaGroup as any).en
+        expect(metaEn.title).toBe('updated-title-en')
+        expect(metaEn.summary).toBe('preserved-summary-en')
+        expect((target.metaGroup as any).es.title).toBe('title-es')
+
+        // Localized scalar: replaces 'en', preserves 'es'
+        expect((target.localizedScalar as any).en).toBe('new-scalar-en')
+        expect((target.localizedScalar as any).es).toBe('scalar-es')
+
+        // Localized array: replaces array in 'en', preserves 'es'
+        expect((target.localizedArray as any).en).toEqual([{ item: 'new-1' }])
+        expect((target.localizedArray as any).es).toEqual([{ item: 'es-1' }])
+
+        // Unlocalized JSON: replaces object completely (does not merge keyB)
+        expect(target.unlocalizedJson).toEqual({ keyA: 'replacedA' })
+      })
+
+      test('issue #19670 / omitDeniedFields: should filter denied subfields inside array and block rows', () => {
+        const data = {
+          items: [
+            { id: '1', secret: 'hush-0', title: 'item-0' },
+            { id: '2', secret: 'hush-1', title: 'item-1' },
+          ],
+          layout: [
+            { blockType: 'hero', heading: 'hero title', secret: 'hide-hero' },
+            { blockType: 'cta', label: 'click me', secret: 'hide-cta' },
+          ],
+          nestedArrays: [
+            {
+              subItems: [
+                { id: 's1', secret: 'hide-sub', text: 'sub-0' },
+              ],
+            },
+          ],
+          title: 'main document',
+        }
+
+        const deniedPaths = new Set([
+          'items.0.secret',
+          'layout.0.secret',
+          'nestedArrays.0.subItems.0.secret',
+        ])
+
+        const filtered = omitDeniedFields(data, deniedPaths)
+
+        expect(filtered).toEqual({
+          items: [
+            { id: '1', title: 'item-0' },
+            { id: '2', secret: 'hush-1', title: 'item-1' },
+          ],
+          layout: [
+            { blockType: 'hero', heading: 'hero title' },
+            { blockType: 'cta', label: 'click me', secret: 'hide-cta' },
+          ],
+          nestedArrays: [
+            {
+              subItems: [
+                { id: 's1', text: 'sub-0' },
+              ],
+            },
+          ],
+          title: 'main document',
+        })
+      })
+
+      test('issue #19670 / omitDeniedFields: should omit top-level denied fields and handle empty deniedPaths early return', () => {
+        const data = {
+          items: [{ title: 'item-1' }],
+          secretRoot: 'hide-root',
+          title: 'main',
+        }
+
+        // Empty set returns original data
+        expect(omitDeniedFields(data, new Set())).toBe(data)
+
+        // Whole array or top-level field denied
+        const filtered = omitDeniedFields(data, new Set(['items', 'secretRoot']))
+        expect(filtered).toEqual({
+          title: 'main',
+        })
       })
 
       test('issue #19670 / Finding 4: should not write unauthorized fields to pending draft during non-draft update', async ({
