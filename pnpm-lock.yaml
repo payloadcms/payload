@@ -318,9 +318,9 @@ importers:
       '@sindresorhus/slugify':
         specifier: ^1.1.0
         version: 1.1.2
-      '@swc/core':
-        specifier: 1.15.3
-        version: 1.15.3(@swc/helpers@0.5.23)
+      '@swc-next/parser':
+        specifier: ^0.8.0
+        version: 0.8.0
       arg:
         specifier: ^5.0.0
         version: 5.0.2
@@ -2384,7 +2384,7 @@ importers:
         version: link:../packages/email-resend
       '@payloadcms/figma':
         specifier: latest
-        version: 1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)
+        version: 1.0.0-beta.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -6713,15 +6713,15 @@ packages:
     resolution: {integrity: sha512-7FNeNl8NCE7aINx7WXiKQrPYZWC/hvrTsmk6zmxbI7LTXE7hVek/n8AfVgpe2y82zl3w0HvCHN0bVKMBoJcC0w==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@1.0.0-beta.1':
-    resolution: {integrity: sha512-C2XcRfqqU69V/+Nb4PU08ikRJs9AezERrrcoEPfsPkUSQW6bcAhzu5QgCEnrlNf4Ndire8ScOD2unlAf/Fg1kw==}
+  '@payloadcms/figma@1.0.0-beta.2':
+    resolution: {integrity: sha512-G25gRKvFLvFDnAvKJ1mkBlGTntAvAMfYjMJ2T+qqzXKMsndXfIikzRVP3GYTVbKixo4U6m76WIMtojElkweciQ==}
     hasBin: true
     peerDependencies:
-      '@payloadcms/plugin-cloud-storage': '>=4.0.0-beta.0 <4.0.0-internal'
-      '@payloadcms/richtext-lexical': '>=4.0.0-beta.0 <4.0.0-internal'
-      '@payloadcms/translations': '>=4.0.0-beta.0 <4.0.0-internal'
-      '@payloadcms/ui': '>=4.0.0-beta.0 <4.0.0-internal'
-      payload: '>=4.0.0-beta.0 <4.0.0-internal'
+      '@payloadcms/plugin-cloud-storage': '>=4.0.0-beta.8 <4.0.0-internal'
+      '@payloadcms/richtext-lexical': '>=4.0.0-beta.8 <4.0.0-internal'
+      '@payloadcms/translations': '>=4.0.0-beta.8 <4.0.0-internal'
+      '@payloadcms/ui': '>=4.0.0-beta.8 <4.0.0-internal'
+      payload: '>=4.0.0-beta.8 <4.0.0-internal'
       react: 19.3.1
     peerDependenciesMeta:
       '@payloadcms/plugin-cloud-storage':
@@ -8028,6 +8028,90 @@ packages:
   '@stripe/stripe-js@7.3.1':
     resolution: {integrity: sha512-pTzb864TQWDRQBPLgSPFRoyjSDUqpCkbEgTzpsjiTjGz1Z5SxZNXJek28w1s6Dyry4CyW4/Izj5jHE/J9hCJYQ==}
     engines: {node: '>=12.16'}
+
+  '@swc-next/parser-binding-darwin-arm64@0.8.0':
+    resolution: {integrity: sha512-zk19ELlyzRAYta8Q/u5dnz42dzhf+JSsyh4rTtyFb+iWzCxw4lTMHL5aFhSmD2jQXNoiid44yqiDRHsPb/bK3A==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@swc-next/parser-binding-darwin-x64@0.8.0':
+    resolution: {integrity: sha512-sLZDapRt+YAgyb30TjU1xD+BQtJdrsc3yOqT9KyTcOQUxzqmW0UPD1/e1/INxC9GheRFCrf8DSfSvp6R+SZRiw==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@swc-next/parser-binding-linux-arm-gnueabihf@0.8.0':
+    resolution: {integrity: sha512-M7eZrCbC8lQJRwIsLg/jgpDhhrqavEToStiArtUxRvFl7ES5lu0f06nvsWT4+cEUVMZgBLscjsxmfzJratyLrA==}
+    cpu: [arm]
+    os: [linux]
+
+  '@swc-next/parser-binding-linux-arm64-gnu@0.8.0':
+    resolution: {integrity: sha512-xU5z7GhgParMTXQP120+gwfryo3Nd61q+atmTMD3agxlvfSM0S+G2h6xJS/ZHW//02iD/KrMxnDT5VSNJ8ebOw==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@swc-next/parser-binding-linux-arm64-musl@0.8.0':
+    resolution: {integrity: sha512-JIwfCfdrhi21CeKWJWhRODmWJ7Aq6tXGemjgcvBlvii8Z95eHMj4xsVEUYx6Z2j7/BZI8dQwm+fZziuOOG1Rbw==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@swc-next/parser-binding-linux-ppc64-gnu@0.8.0':
+    resolution: {integrity: sha512-cU8vtFQ8xPDt1hFb6o7wT9LhxrQeXDc7dC8LThv+KjUjs92TzE9oBiLIcN0pZ9gJEdXB40e+guiq8xJEchfPNg==}
+    cpu: [ppc64]
+    os: [linux]
+    libc: [glibc]
+
+  '@swc-next/parser-binding-linux-riscv64-gnu@0.8.0':
+    resolution: {integrity: sha512-ko649k2RwWge5LgaRDubPhbzVnoQmdLhCVMZZ0q6HsmmhAbEfklNhVzojjmnRPsmBv10Ej1An+NsN2eyREG56g==}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [glibc]
+
+  '@swc-next/parser-binding-linux-riscv64-musl@0.8.0':
+    resolution: {integrity: sha512-L3DrOAluBkBlOtXjS4YZj8mQfZ/6ol47ZottTuoGYKALyotIwaWgM2m1S4ia1FxV2H33jFdwMpJqDo20fLd6hw==}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [musl]
+
+  '@swc-next/parser-binding-linux-s390x-gnu@0.8.0':
+    resolution: {integrity: sha512-eUWo2UEkzVySq3bcWm/bKLT7pn9XuhL90rzbMG43j4Qni8D3/NNGO5DA5ZKf2ctwWehy0xKqx936A3vVy+sHgg==}
+    cpu: [s390x]
+    os: [linux]
+    libc: [glibc]
+
+  '@swc-next/parser-binding-linux-x64-gnu@0.8.0':
+    resolution: {integrity: sha512-EnvUbOmvRImVYb5AvS+XwqsGRD++r6thbG3yfL9/x+ag4Y3xX8VSQDrTqMRm7rcjfGGpkCWMXU1sBNIsLtZZkg==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@swc-next/parser-binding-linux-x64-musl@0.8.0':
+    resolution: {integrity: sha512-KmVkizeINDtlGPnsm+XM+a2k4vNQ4kYzfDnGblM1t5H1f/IucpcbseZw7eXuNBxwSSU4vUpDcwFQKlC6dvgsVw==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@swc-next/parser-binding-win32-arm64-msvc@0.8.0':
+    resolution: {integrity: sha512-bB16Hb7R0iUiZUepzsZ7Xl4tpEidpvW/iezx82MhHvzoL6+nn03e5Qaax47kOtndbo3MYM6bezffX0b0TEF/VA==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@swc-next/parser-binding-win32-x64-msvc@0.8.0':
+    resolution: {integrity: sha512-p4TNAnG2SZTAPRtL3zwVN1V/zzEHHPzQ4cgR5QuIda4O5a6mqT8mk5V+4uxGzxJHyZBGcvHen7yZlhU2fa8BGg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@swc-next/parser@0.8.0':
+    resolution: {integrity: sha512-7WDlE/UcA1VLu9w9DhMJ8qtEXJX2MXzMNi8QkE02gYmwqDofZsS6NHur/VgSzff1XqRmnpbGPl1bq/P49TVs9Q==}
+    peerDependencies:
+      '@swc-next/parser-binding-wasm': 0.8.0
+    peerDependenciesMeta:
+      '@swc-next/parser-binding-wasm':
+        optional: true
+
+  '@swc-next/types@0.8.0':
+    resolution: {integrity: sha512-jOJPYignF5ArrD7OFZb3E4JKEP+0XVVhVWECutnu1yv3++J5D6c1KdDZtDOaQ6bWubGyOR8LBRMGniCb+ZqiDA==}
 
   '@swc-node/core@1.15.0':
     resolution: {integrity: sha512-WAerrrl087WgenB92XG4Th2t0NQFfMNLYSe0sW2cEMMqM/LQmP4rozsDJl0vuzTrbewjpKQryxFXI+aYig/dBg==}
@@ -15085,11 +15169,6 @@ packages:
   util-extend@1.0.3:
     resolution: {integrity: sha512-mLs5zAK+ctllYBj+iAQvlDCwoxU/WDOUaJkcFudeiAX6OajC6BKXJUa9a+tbtkC11dz2Ufb7h0lyvIOVn4LADA==}
 
-  uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
-    hasBin: true
-
   uuid@14.0.0:
     resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
     hasBin: true
@@ -19809,7 +19888,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.6.0
     optional: true
 
-  '@payloadcms/figma@1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)':
+  '@payloadcms/figma@1.0.0-beta.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@cloudflare/workers-types': 5.20260716.1
@@ -19837,7 +19916,6 @@ snapshots:
       tar: 7.5.22
       terminal-link: 5.0.0
       ts-morph: 21.0.1
-      uuid: 10.0.0
     optionalDependencies:
       '@payloadcms/plugin-cloud-storage': link:packages/plugin-cloud-storage
       '@payloadcms/richtext-lexical': link:packages/richtext-lexical
@@ -21334,6 +21412,65 @@ snapshots:
   '@stripe/stripe-js@4.10.0': {}
 
   '@stripe/stripe-js@7.3.1': {}
+
+  '@swc-next/parser-binding-darwin-arm64@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-darwin-x64@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-arm-gnueabihf@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-arm64-gnu@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-arm64-musl@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-ppc64-gnu@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-riscv64-gnu@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-riscv64-musl@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-s390x-gnu@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-x64-gnu@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-linux-x64-musl@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-win32-arm64-msvc@0.8.0':
+    optional: true
+
+  '@swc-next/parser-binding-win32-x64-msvc@0.8.0':
+    optional: true
+
+  '@swc-next/parser@0.8.0':
+    dependencies:
+      '@swc-next/types': 0.8.0
+    optionalDependencies:
+      '@swc-next/parser-binding-darwin-arm64': 0.8.0
+      '@swc-next/parser-binding-darwin-x64': 0.8.0
+      '@swc-next/parser-binding-linux-arm-gnueabihf': 0.8.0
+      '@swc-next/parser-binding-linux-arm64-gnu': 0.8.0
+      '@swc-next/parser-binding-linux-arm64-musl': 0.8.0
+      '@swc-next/parser-binding-linux-ppc64-gnu': 0.8.0
+      '@swc-next/parser-binding-linux-riscv64-gnu': 0.8.0
+      '@swc-next/parser-binding-linux-riscv64-musl': 0.8.0
+      '@swc-next/parser-binding-linux-s390x-gnu': 0.8.0
+      '@swc-next/parser-binding-linux-x64-gnu': 0.8.0
+      '@swc-next/parser-binding-linux-x64-musl': 0.8.0
+      '@swc-next/parser-binding-win32-arm64-msvc': 0.8.0
+      '@swc-next/parser-binding-win32-x64-msvc': 0.8.0
+
+  '@swc-next/types@0.8.0': {}
 
   '@swc-node/core@1.15.0(@swc/core@1.15.3(@swc/helpers@0.5.23))(@swc/types@0.1.28)':
     dependencies:
@@ -29584,8 +29721,6 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   util-extend@1.0.3: {}
-
-  uuid@10.0.0: {}
 
   uuid@14.0.0: {}
 
