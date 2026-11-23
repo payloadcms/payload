@@ -133,6 +133,17 @@ test('should show the placeholder when a video thumbnail fails to load', async (
   await expect.element(screen.getByText('Preview')).toBeInTheDocument()
   expect(document.querySelector('.document-card__thumbnail--video video')).toBeNull()
   expect(document.querySelector('img.document-card__thumbnail')).toBeNull()
+  expect(document.querySelector('.document-card__video-badge')).toBeNull()
+})
+
+test('should mark a loaded video thumbnail with a play badge', async () => {
+  const src = URL.createObjectURL(await createTestVideo())
+  await renderLoadedVideoCard(src)
+
+  const badge = document.querySelector('.document-card__video-badge')
+  expect(badge?.getAttribute('aria-hidden')).toBe('true')
+  expect(badge?.querySelector('.icon--play')).not.toBeNull()
+  URL.revokeObjectURL(src)
 })
 
 test('should play a video thumbnail while hovered and return to its frame after', async () => {

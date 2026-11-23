@@ -4,6 +4,7 @@ import React from 'react'
 
 import { useVideoFrame } from '../../hooks/useVideoFrame.js'
 import { useVideoPreviewPlayback } from '../../hooks/useVideoPreviewPlayback.js'
+import { PlayIcon } from '../../icons/Play/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
@@ -224,7 +225,7 @@ function CardVideoThumbnail({
 }: { isPreviewActive: boolean } & Pick<DocumentCardProps, 'placeholder'> &
   Pick<DocumentCardThumbnail, 'alt' | 'src'>) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
-  const { shouldRenderVideo, shouldShowFallback, videoProps } = useVideoFrame({ src })
+  const { isLoaded, shouldRenderVideo, shouldShowFallback, videoProps } = useVideoFrame({ src })
 
   useVideoPreviewPlayback({ isActive: isPreviewActive, videoRef })
 
@@ -232,6 +233,12 @@ function CardVideoThumbnail({
     <>
       {shouldRenderVideo && (
         <video {...videoProps} aria-label={alt || undefined} loop muted ref={videoRef} />
+      )}
+      {/* Marks the card as a video, which a still frame alone does not. Hidden until the frame loads */}
+      {isLoaded && (
+        <span aria-hidden="true" className={`${baseClass}__video-badge`}>
+          <PlayIcon />
+        </span>
       )}
       {shouldShowFallback && (
         <div aria-hidden="true" className={`${baseClass}__thumbnail--empty`}>

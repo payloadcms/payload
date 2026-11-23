@@ -32,6 +32,8 @@
     }
   }
   .document-card__thumbnail--video {
+    position: relative;
+
     video {
       display: block;
       width: 100%;
@@ -43,6 +45,20 @@
       height: 100%;
       min-height: 0;
     }
+  }
+  /* Semi-transparent, so the frame shows through and the badge stays readable on light and dark frames */
+  .document-card__video-badge {
+    position: absolute;
+    inset-block-end: var(--spacer-2);
+    inset-inline-start: var(--spacer-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacer-1);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-bg-inverse) 70%, transparent);
+    color: var(--color-text-oninverse);
+    pointer-events: none;
   }
   .document-card__content {
     padding: var(--spacer-2-5);

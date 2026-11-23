@@ -9,6 +9,8 @@ import { useDelay } from './useDelay.js'
 type VideoFrameStatus = 'error' | 'loaded' | 'loading'
 
 type UseVideoFrameResult = {
+  /** `true` once a frame is decoded and the video is visible. */
+  isLoaded: boolean
   /** `true` while loading, until the timeout passes. */
   isLoading: boolean
   /** `false` after a load error. A video that loads after the timeout still replaces the fallback. */
@@ -36,6 +38,7 @@ export const useVideoFrame = ({
   const isPending = status === 'loading'
 
   return {
+    isLoaded: status === 'loaded',
     isLoading: isPending && !hasTimedOut,
     shouldRenderVideo: status !== 'error',
     shouldShowFallback: status === 'error' || (isPending && hasTimedOut),
