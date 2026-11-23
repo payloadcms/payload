@@ -1,20 +1,36 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { useLayoutEffect } from 'react'
+import { useEffect } from 'react'
 
 import { getActiveModal } from '../../utilities/getActiveModal.js'
+import { getComposedParent, getRootNode } from '../../utilities/shadowDom.js'
 
 /** Keeps the page and lower modal layers out of navigation while the top modal is open. */
 export function ModalAccessibility() {
-  const { modalState } = useModal()
+  const { containerRef, modalState } = useModal()
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!Object.values(modalState).some((modal) => modal.isOpen)) {
       return
     }
 
     const restoredInert = new Map<HTMLElement, BackgroundState>()
+    const observedRoots = new Set<Document | ShadowRoot>()
+    const observer = new MutationObserver(() => update())
+    const observeRoot = ({ root }: { root: Document | ShadowRoot }) => {
+      if (observedRoots.has(root)) {
+        return
+      }
+
+      observedRoots.add(root)
+      observer.observe(root instanceof Document ? root.body : root, {
+        attributeFilter: ['open'],
+        attributes: true,
+        childList: true,
+        subtree: true,
+      })
+    }
 
     const restore = () => {
       for (const [element, wasInert] of restoredInert) {
@@ -24,18 +40,28 @@ export function ModalAccessibility() {
     }
 
     const update = () => {
-      const activeModal = getActiveModal({ modalState })
+      const root = getRootNode({ element: containerRef.current })
+      const activeModal = getActiveModal({ modalState, root })
+
+      observeRoot({ root })
 
       const background = new Set<HTMLElement>()
-      let current = activeModal
+      let current: Element | null | undefined = activeModal
 
       while (current && current !== document.body) {
-        for (const sibling of current.parentElement?.children ?? []) {
+        observeRoot({ root: getRootNode({ element: current }) })
+
+        const parent = getComposedParent({ element: current })
+        const siblings = current.assignedSlot
+          ? current.assignedSlot.assignedElements()
+          : current.parentNode?.children
+
+        for (const sibling of siblings ?? []) {
           if (sibling !== current && sibling instanceof HTMLElement) {
             background.add(sibling)
           }
         }
-        current = current.parentElement
+        current = parent
       }
 
       for (const [element, wasInert] of restoredInert) {
@@ -48,7 +74,7 @@ export function ModalAccessibility() {
         if (!restoredInert.has(element)) {
           restoredInert.set(element, {
             ariaHidden: element.getAttribute('aria-hidden'),
-            inert: element.inert,
+            inert: element.getAttribute('inert'),
           })
           element.inert = true
           element.setAttribute('aria-hidden', 'true')
@@ -57,25 +83,17 @@ export function ModalAccessibility() {
     }
 
     update()
-    // Drawers render asynchronously; also isolate siblings inserted after opening.
-    const observer = new MutationObserver(update)
-    observer.observe(document.body, {
-      attributeFilter: ['open'],
-      attributes: true,
-      childList: true,
-      subtree: true,
-    })
 
     return () => {
       observer.disconnect()
       restore()
     }
-  }, [modalState])
+  }, [containerRef, modalState])
 
   return null
 }
 
-type BackgroundState = { ariaHidden: null | string; inert: boolean }
+type BackgroundState = { ariaHidden: null | string; inert: null | string }
 
 function restoreBackgroundElement({
   element,
@@ -84,7 +102,11 @@ function restoreBackgroundElement({
   element: HTMLElement
   state: BackgroundState
 }) {
-  element.inert = state.inert
+  if (state.inert === null) {
+    element.removeAttribute('inert')
+  } else {
+    element.setAttribute('inert', state.inert)
+  }
   if (state.ariaHidden === null) {
     element.removeAttribute('aria-hidden')
   } else {

@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-react'
 
 import { Modal } from '../../elements/Modal/index.js'
 import { Popup, PopupList } from '../../elements/Popup/index.js'
+import { ModalProvider as PayloadModalProvider } from '../Modal/index.js'
 import { ModalFocusProvider, useModalFocus } from './index.js'
 
 test.each([false, true])(
@@ -39,6 +40,70 @@ test.each([false, true])(
     expect(targets).toEqual(expectedTargets)
   },
 )
+
+test('should restore shadow background attributes when the modal provider unmounts', async () => {
+  const host = document.createElement('div')
+  const shadow = host.attachShadow({ mode: 'open' })
+  const mount = document.createElement('div')
+  const background = document.createElement('button')
+
+  background.setAttribute('aria-hidden', 'false')
+  shadow.append(mount, background)
+  document.body.append(host)
+
+  const screen = await render(
+    <PayloadModalProvider>
+      <Modal openOnInit slug="unmount-shadow-modal">
+        <h2>Unmount shadow modal</h2>
+        <button type="button">Modal action</button>
+      </Modal>
+      <ModalContainer />
+    </PayloadModalProvider>,
+    { container: mount },
+  )
+  let hasUnmounted = false
+
+  try {
+    await expect.poll(() => background.inert).toBe(true)
+    await expect.poll(() => background.getAttribute('aria-hidden')).toBe('true')
+    await screen.unmount()
+    hasUnmounted = true
+    expect(background.hasAttribute('inert')).toBe(false)
+    expect(background.getAttribute('aria-hidden')).toBe('false')
+  } finally {
+    if (!hasUnmounted) {
+      await screen.unmount()
+    }
+    host.remove()
+  }
+})
+
+test('should release shadow focus listeners when focus leaves their tree', async () => {
+  const host = document.createElement('div')
+  const shadow = host.attachShadow({ mode: 'open' })
+  const button = document.createElement('button')
+
+  button.textContent = 'Shadow opener'
+  shadow.append(button)
+  document.body.append(host)
+
+  const removeListener = vi.spyOn(shadow, 'removeEventListener')
+  const screen = await render(
+    <ModalFocusProvider>
+      <button type="button">Outside shadow</button>
+    </ModalFocusProvider>,
+  )
+
+  try {
+    button.focus()
+    await screen.getByRole('button', { name: 'Outside shadow' }).click()
+    expect(removeListener.mock.calls.some(([type]) => type === 'focusin')).toBe(true)
+  } finally {
+    await screen.unmount()
+    host.remove()
+    vi.restoreAllMocks()
+  }
+})
 
 test('should share opener listeners as closed modals mount and remove them on unmount', async () => {
   const addListener = vi.spyOn(document, 'addEventListener')

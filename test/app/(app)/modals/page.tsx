@@ -1,7 +1,13 @@
-import '@payloadcms/ui/css/app.css'
+import '@payloadcms/ui/css/tokens'
 
 import { StandaloneModals } from '../../../a11y/components/StandaloneModals/index.js'
 
-export default function Page() {
-  return <StandaloneModals />
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ shadow?: string }>
+}) {
+  const { shadow } = await searchParams
+
+  return <StandaloneModals isShadow={shadow === 'true'} />
 }
