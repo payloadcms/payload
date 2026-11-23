@@ -128,7 +128,7 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-The `doc` may not include every field. For example, populated documents only include the fields selected by [`defaultPopulate`](../queries/select#defaultpopulate-collection-config-property), so make sure it selects the fields your path needs.
+The `doc` may not include every field. For example, populated documents only include the fields selected by [`defaultPopulate`](../queries/select#defaultpopulate-collection-config-property), so make sure it selects the fields your path needs. If a path is missing, add those fields to `defaultPopulate` or [`populate`](../queries/select#populate) instead of raising `depth`, which populates every relationship in the document and can get expensive.
 
 You can also call it from your own code with the Local API:
 
