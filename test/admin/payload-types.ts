@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A6C43894".
+ * via the `definition` "LexicalNodes_EC517269".
  */
-export type LexicalNodes_A6C43894 =
+export type LexicalNodes_EC517269 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A6C43894>
+  | SerializedParagraphNode<LexicalNodes_EC517269>
   | SerializedRelationshipNode<
       | 'posts'
       | 'users'
@@ -285,6 +285,8 @@ export interface Config {
   locale: 'es' | 'en';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -317,6 +319,14 @@ export interface UserAuthOperations {
 export interface Upload {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -328,7 +338,7 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
+  variants?: {
     thumbnail?: {
       url?: string | null;
       width?: number | null;
@@ -341,11 +351,55 @@ export interface Upload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  textField?: string | null;
+  sidebarField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads-two".
  */
 export interface UploadsTwo {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -369,7 +423,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: LexicalRichText<LexicalNodes_A6C43894> | null;
+  richText?: LexicalRichText<LexicalNodes_EC517269> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -402,36 +456,17 @@ export interface Post {
   someGroup?: {
     disableListColumnTextInGroup?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  textField?: string | null;
-  sidebarField?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -440,6 +475,14 @@ export interface User {
 export interface HiddenCollection {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -450,6 +493,14 @@ export interface HiddenCollection {
 export interface NotInViewCollection {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -459,6 +510,14 @@ export interface NotInViewCollection {
  */
 export interface CollectionNoApiView {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -469,6 +528,14 @@ export interface CollectionNoApiView {
 export interface CustomDocumentControl {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -480,6 +547,14 @@ export interface CustomDocumentControl {
 export interface CustomViewsOne {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -490,6 +565,14 @@ export interface CustomViewsOne {
 export interface CustomViewsTwo {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -500,6 +583,14 @@ export interface CustomViewsTwo {
 export interface CustomCollectionView {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -510,6 +601,14 @@ export interface CustomCollectionView {
 export interface ReorderTab {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -520,6 +619,7 @@ export interface ReorderTab {
 export interface CustomField {
   id: string;
   customTextServerField?: string | null;
+  fieldWithUndefinedComponents?: string | null;
   customTextClientField?: string | null;
   /**
    * Static field description.
@@ -544,6 +644,14 @@ export interface CustomField {
     textTwo?: string | null;
   };
   radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -564,6 +672,14 @@ export interface BlockFields {
 export interface GroupOneCollectionOne {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -574,6 +690,14 @@ export interface GroupOneCollectionOne {
 export interface GroupOneCollectionTwo {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -584,6 +708,14 @@ export interface GroupOneCollectionTwo {
 export interface GroupTwoCollectionOne {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -594,6 +726,14 @@ export interface GroupTwoCollectionOne {
 export interface GroupTwoCollectionTwo {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -608,6 +748,14 @@ export interface Geo {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -623,6 +771,14 @@ export interface Array {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -633,6 +789,14 @@ export interface Array {
 export interface DisableDuplicate {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -643,6 +807,14 @@ export interface DisableDuplicate {
 export interface DisableCopyToLocale {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -653,6 +825,14 @@ export interface DisableCopyToLocale {
 export interface EditMenuItem {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -664,6 +844,14 @@ export interface FormatDocUrl {
   id: string;
   title: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -676,6 +864,14 @@ export interface FormatDocUrl {
 export interface BaseListFilter {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -687,6 +883,14 @@ export interface With300Document {
   id: string;
   text?: string | null;
   selfRelation?: (string | null) | With300Document;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -699,6 +903,14 @@ export interface WithListDrawer {
   title?: string | null;
   description?: string | null;
   number?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -712,6 +924,14 @@ export interface Placeholder {
   placeholderSelect?: 'option1' | null;
   defaultRelationship?: (string | null) | Post;
   placeholderRelationship?: (string | null) | Post;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -722,6 +942,14 @@ export interface Placeholder {
 export interface UseAsTitleGroupField {
   id: string;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -731,6 +959,14 @@ export interface UseAsTitleGroupField {
  */
 export interface DisableBulkEdit {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -740,6 +976,14 @@ export interface DisableBulkEdit {
  */
 export interface CustomListDrawer {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -754,6 +998,14 @@ export interface ListViewSelectApi {
   group?: {
     groupNameField?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -767,6 +1019,14 @@ export interface Virtual {
   textField?: string | null;
   virtualText?: string | null;
   post?: (string | null) | Post;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -777,6 +1037,14 @@ export interface Virtual {
 export interface NoTimestamp {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -785,6 +1053,14 @@ export interface NoTimestamp {
 export interface Localized {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -826,6 +1102,14 @@ export interface FullyFeatured {
   isFeatured?: boolean | null;
   publishedDate?: string | null;
   authors?: (string | User)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1104,6 +1388,8 @@ export interface PayloadMigration {
  */
 export interface UploadsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1115,7 +1401,7 @@ export interface UploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
+  variants?:
     | T
     | {
         thumbnail?:
@@ -1136,6 +1422,8 @@ export interface UploadsSelect<T extends boolean = true> {
  */
 export interface UploadsTwoSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1194,6 +1482,8 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         disableListColumnTextInGroup?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1205,6 +1495,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   textField?: T;
   sidebarField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1212,6 +1504,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1228,6 +1521,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface HiddenCollectionSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1237,6 +1532,8 @@ export interface HiddenCollectionSelect<T extends boolean = true> {
  */
 export interface NotInViewCollectionSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1245,6 +1542,8 @@ export interface NotInViewCollectionSelect<T extends boolean = true> {
  * via the `definition` "collection-no-api-view_select".
  */
 export interface CollectionNoApiViewSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1254,6 +1553,8 @@ export interface CollectionNoApiViewSelect<T extends boolean = true> {
  */
 export interface CustomDocumentControlsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1264,6 +1565,8 @@ export interface CustomDocumentControlsSelect<T extends boolean = true> {
  */
 export interface CustomViewsOneSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1273,6 +1576,8 @@ export interface CustomViewsOneSelect<T extends boolean = true> {
  */
 export interface CustomViewsTwoSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1282,6 +1587,8 @@ export interface CustomViewsTwoSelect<T extends boolean = true> {
  */
 export interface CustomCollectionViewSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1291,6 +1598,8 @@ export interface CustomCollectionViewSelect<T extends boolean = true> {
  */
 export interface ReorderTabsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1300,6 +1609,7 @@ export interface ReorderTabsSelect<T extends boolean = true> {
  */
 export interface CustomFieldsSelect<T extends boolean = true> {
   customTextServerField?: T;
+  fieldWithUndefinedComponents?: T;
   customTextClientField?: T;
   descriptionAsString?: T;
   descriptionAsFunction?: T;
@@ -1333,6 +1643,8 @@ export interface CustomFieldsSelect<T extends boolean = true> {
         textTwo?: T;
       };
   radioFieldWithBeforeAfterInputs?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1342,6 +1654,8 @@ export interface CustomFieldsSelect<T extends boolean = true> {
  */
 export interface GroupOneCollectionOnesSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1351,6 +1665,8 @@ export interface GroupOneCollectionOnesSelect<T extends boolean = true> {
  */
 export interface GroupOneCollectionTwosSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1360,6 +1676,8 @@ export interface GroupOneCollectionTwosSelect<T extends boolean = true> {
  */
 export interface GroupTwoCollectionOnesSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1369,6 +1687,8 @@ export interface GroupTwoCollectionOnesSelect<T extends boolean = true> {
  */
 export interface GroupTwoCollectionTwosSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1378,6 +1698,8 @@ export interface GroupTwoCollectionTwosSelect<T extends boolean = true> {
  */
 export interface GeoSelect<T extends boolean = true> {
   point?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1392,6 +1714,8 @@ export interface ArraySelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1401,6 +1725,8 @@ export interface ArraySelect<T extends boolean = true> {
  */
 export interface DisableDuplicateSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1410,6 +1736,8 @@ export interface DisableDuplicateSelect<T extends boolean = true> {
  */
 export interface DisableCopyToLocaleSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1419,6 +1747,8 @@ export interface DisableCopyToLocaleSelect<T extends boolean = true> {
  */
 export interface EditMenuItemsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1429,6 +1759,8 @@ export interface EditMenuItemsSelect<T extends boolean = true> {
 export interface FormatDocUrlSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1440,6 +1772,8 @@ export interface FormatDocUrlSelect<T extends boolean = true> {
  */
 export interface BaseListFiltersSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1450,6 +1784,8 @@ export interface BaseListFiltersSelect<T extends boolean = true> {
 export interface With300DocumentsSelect<T extends boolean = true> {
   text?: T;
   selfRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1461,6 +1797,8 @@ export interface WithListDrawerSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   number?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1473,6 +1811,8 @@ export interface PlaceholderSelect<T extends boolean = true> {
   placeholderSelect?: T;
   defaultRelationship?: T;
   placeholderRelationship?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1482,6 +1822,8 @@ export interface PlaceholderSelect<T extends boolean = true> {
  */
 export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1490,6 +1832,8 @@ export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
  * via the `definition` "disable-bulk-edit_select".
  */
 export interface DisableBulkEditSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1498,6 +1842,8 @@ export interface DisableBulkEditSelect<T extends boolean = true> {
  * via the `definition` "custom-list-drawer_select".
  */
 export interface CustomListDrawerSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1513,6 +1859,8 @@ export interface ListViewSelectApiSelect<T extends boolean = true> {
     | {
         groupNameField?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1525,6 +1873,8 @@ export interface VirtualsSelect<T extends boolean = true> {
   textField?: T;
   virtualText?: T;
   post?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1534,6 +1884,8 @@ export interface VirtualsSelect<T extends boolean = true> {
  */
 export interface NoTimestampsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1541,6 +1893,8 @@ export interface NoTimestampsSelect<T extends boolean = true> {
  */
 export interface LocalizedSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1632,6 +1986,8 @@ export interface FullyFeaturedSelect<T extends boolean = true> {
   isFeatured?: T;
   publishedDate?: T;
   authors?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1683,6 +2039,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface HiddenGlobal {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1693,6 +2057,14 @@ export interface HiddenGlobal {
 export interface NotInViewGlobal {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1702,6 +2074,14 @@ export interface NotInViewGlobal {
  */
 export interface GlobalNoApiView {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1713,6 +2093,14 @@ export interface Global {
   id: string;
   title?: string | null;
   sidebarField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1724,6 +2112,14 @@ export interface Global {
 export interface CustomGlobalDocumentControl {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1735,6 +2131,14 @@ export interface CustomGlobalDocumentControl {
 export interface CustomGlobalViewsOne {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1745,6 +2149,14 @@ export interface CustomGlobalViewsOne {
 export interface CustomGlobalViewsTwo {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1755,6 +2167,14 @@ export interface CustomGlobalViewsTwo {
 export interface GroupGlobalsOne {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1765,6 +2185,14 @@ export interface GroupGlobalsOne {
 export interface GroupGlobalsTwo {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1775,6 +2203,14 @@ export interface GroupGlobalsTwo {
 export interface Setting {
   id: string;
   canAccessProtected?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1784,6 +2220,8 @@ export interface Setting {
  */
 export interface HiddenGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1794,6 +2232,8 @@ export interface HiddenGlobalSelect<T extends boolean = true> {
  */
 export interface NotInViewGlobalSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1803,6 +2243,8 @@ export interface NotInViewGlobalSelect<T extends boolean = true> {
  * via the `definition` "global-no-api-view_select".
  */
 export interface GlobalNoApiViewSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1814,6 +2256,8 @@ export interface GlobalNoApiViewSelect<T extends boolean = true> {
 export interface GlobalSelect<T extends boolean = true> {
   title?: T;
   sidebarField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1825,6 +2269,8 @@ export interface GlobalSelect<T extends boolean = true> {
  */
 export interface CustomGlobalDocumentControlsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1836,6 +2282,8 @@ export interface CustomGlobalDocumentControlsSelect<T extends boolean = true> {
  */
 export interface CustomGlobalViewsOneSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1846,6 +2294,8 @@ export interface CustomGlobalViewsOneSelect<T extends boolean = true> {
  */
 export interface CustomGlobalViewsTwoSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1856,6 +2306,8 @@ export interface CustomGlobalViewsTwoSelect<T extends boolean = true> {
  */
 export interface GroupGlobalsOneSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1866,6 +2318,8 @@ export interface GroupGlobalsOneSelect<T extends boolean = true> {
  */
 export interface GroupGlobalsTwoSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1876,6 +2330,8 @@ export interface GroupGlobalsTwoSelect<T extends boolean = true> {
  */
 export interface SettingsSelect<T extends boolean = true> {
   canAccessProtected?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1889,6 +2345,112 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'uploads'
+      | 'uploads-two'
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'fully-featured';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'uploads'
+          | 'uploads-two'
+          | 'posts'
+          | 'users'
+          | 'hidden-collection'
+          | 'not-in-view-collection'
+          | 'collection-no-api-view'
+          | 'custom-document-controls'
+          | 'custom-views-one'
+          | 'custom-views-two'
+          | 'custom-collection-view'
+          | 'reorder-tabs'
+          | 'custom-fields'
+          | 'group-one-collection-ones'
+          | 'group-one-collection-twos'
+          | 'group-two-collection-ones'
+          | 'group-two-collection-twos'
+          | 'geo'
+          | 'array'
+          | 'disable-duplicate'
+          | 'disable-copy-to-locale'
+          | 'edit-menu-items'
+          | 'format-doc-url'
+          | 'base-list-filters'
+          | 'with300documents'
+          | 'with-list-drawer'
+          | 'placeholder'
+          | 'use-as-title-group-field'
+          | 'disable-bulk-edit'
+          | 'custom-list-drawer'
+          | 'list-view-select-api'
+          | 'virtuals'
+          | 'no-timestamps'
+          | 'localized'
+          | 'fully-featured'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1982,7 +2544,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

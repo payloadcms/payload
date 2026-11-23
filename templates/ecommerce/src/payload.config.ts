@@ -2,11 +2,11 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import {
   BoldFeature,
-  EXPERIMENTAL_TableFeature,
   IndentFeature,
   ItalicFeature,
   LinkFeature,
   OrderedListFeature,
+  TableFeature,
   UnderlineFeature,
   UnorderedListFeature,
   lexicalEditor,
@@ -32,9 +32,25 @@ export default buildConfig({
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
-      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
+    },
+    dashboard: {
+      // The `GettingStarted` widget renders the onboarding steps below the welcome heading.
+      // Feel free to delete this at any time. Remove the widget and its `defaultLayout` entry.
+      widgets: [
+        {
+          slug: 'getting-started',
+          Component: '@/components/GettingStarted#GettingStarted',
+          label: 'Getting Started',
+          minWidth: 'full',
+        },
+      ],
+      // Repeats the built-in default layout with `getting-started` inserted after `welcome`.
+      defaultLayout: [
+        { widgetSlug: 'welcome', width: 'full' },
+        { widgetSlug: 'getting-started', width: 'full' },
+        { widgetSlug: 'activity', width: 'full' },
+        { widgetSlug: 'collections', width: 'full' },
+      ],
     },
     user: Users.slug,
   },
@@ -73,7 +89,7 @@ export default buildConfig({
           },
         }),
         IndentFeature(),
-        EXPERIMENTAL_TableFeature(),
+        TableFeature(),
       ]
     },
   }),

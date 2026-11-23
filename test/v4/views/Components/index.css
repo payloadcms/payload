@@ -21,7 +21,6 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.15s ease;
 }
 
 .components-view__back:hover {
@@ -128,6 +127,19 @@
   min-height: var(--spacer-6);
 }
 
+.components-view__popup-menu {
+  flex: 1;
+  width: 100%;
+}
+
+.components-view__popup-menu .popup__trigger-wrap {
+  width: 100%;
+}
+
+.components-view__popup-menu .popup__trigger-wrap > div {
+  width: 100%;
+}
+
 /* Tooltip trigger */
 .components-view__tooltip-trigger {
   position: relative;
@@ -202,7 +214,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
   background: var(--color-bg);
-  transition: border-color 0.15s ease;
   min-width: 100px;
   overflow: hidden;
 }

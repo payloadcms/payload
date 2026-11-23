@@ -62,7 +62,7 @@ export function UploadComponentHasOne(props: Props) {
 
   if (isImage(value.mimeType)) {
     thumbnailSrc = getBestFitFromSizes({
-      sizes: value.sizes,
+      sizes: value.variants,
       thumbnailURL: thumbnailSrc,
       url: src,
       width: value.width,

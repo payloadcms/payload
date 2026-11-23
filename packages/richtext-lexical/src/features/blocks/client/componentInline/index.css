@@ -29,7 +29,6 @@
     outline: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     max-width: var(--inline-block-max-width);
-    font-family: var(--font-body);
     display: flex;
     align-items: center;
     cursor: pointer;

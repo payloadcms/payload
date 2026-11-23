@@ -75,7 +75,7 @@ export async function buildEvalConfig(config: SanitizedConfig): Promise<EvalConf
     collections[collection.slug] = safeObject({
       ...collectionConfig,
       fields: safeRecord(fieldSchemaMapToFields(fieldSchemaMap, collection.slug)),
-    }) as EvalCollectionConfig
+    })
   }
 
   const globals: Record<string, EvalGlobalConfig> = {}
@@ -90,14 +90,14 @@ export async function buildEvalConfig(config: SanitizedConfig): Promise<EvalConf
     globals[global.slug] = safeObject({
       ...globalConfig,
       fields: safeRecord(fieldSchemaMapToFields(fieldSchemaMap, global.slug)),
-    }) as EvalGlobalConfig
+    })
   }
 
   return safeObject({
     collections: safeRecord(collections),
     globals: safeRecord(globals),
     raw: config,
-  }) as EvalConfig
+  })
 }
 
 export function missingEvalConfig(): EvalConfig {

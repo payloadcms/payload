@@ -96,4 +96,18 @@ describe('checkFileAccess', () => {
       ).rejects.toThrow()
     })
   })
+
+  describe('fast path for fully public collections', () => {
+    it('should not query the database when access is unconditionally granted and no prefix is given', async () => {
+      vi.mocked(executeAccess).mockResolvedValueOnce(true)
+
+      const findOne = makeFindOne()
+      const req = makeReq(findOne)
+      const collection = makeCollection()
+
+      await checkFileAccess({ collection, filename: 'logo.png', req })
+
+      expect(findOne).not.toHaveBeenCalled()
+    })
+  })
 })

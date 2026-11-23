@@ -1,10 +1,12 @@
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
-import type { JoinQuery, PayloadRequest } from '../types/index.js'
+import type { JoinQuery, PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from './queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from './sanitizeWhereQuery.js'
 
 type Args = {
@@ -42,7 +44,10 @@ const sanitizeJoinFieldQuery = async ({
   const joinCollectionConfig = req.payload.collections[collectionSlug]!.config
 
   const accessResult = !overrideAccess
-    ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
+    ? await executeAccess(
+        { slug: joinCollectionConfig.slug, disableErrors: true, req },
+        joinCollectionConfig.access.read,
+      )
     : true
 
   if (accessResult === false) {
@@ -61,7 +66,7 @@ const sanitizeJoinFieldQuery = async ({
   }
 
   if (join.field.where) {
-    joinQuery.where = combineQueries(joinQuery.where, join.field.where)
+    joinQuery.where = combineQueries(joinQuery.where, deepCopyObjectSimple(join.field.where))
   }
 
   promises.push(
@@ -73,6 +78,12 @@ const sanitizeJoinFieldQuery = async ({
       req,
       // incoming where input, but we shouldn't validate generated from the access control.
       where: joinQuery.where,
+    }),
+    validateSortQuery({
+      collectionConfig: joinCollectionConfig,
+      overrideAccess,
+      req,
+      sort: joinQuery.sort || join.field.defaultSort || joinCollectionConfig.defaultSort,
     }),
   )
 
@@ -123,17 +134,46 @@ export const sanitizeJoinQuery = async ({
   }
 
   for (const join of collectionConfig.polymorphicJoins) {
+    const joinQuery = joinsQuery[join.joinPath]
+
+    // Preserve joins explicitly disabled by the caller.
+    if (joinQuery === false) {
+      continue
+    }
+
+    const readableCollections: Where[] = []
+
     for (const collectionSlug of join.field.collection) {
+      const collectionJoins: JoinQuery = {
+        [join.joinPath]: deepCopyObjectSimple(joinQuery || {}),
+      }
+
       await sanitizeJoinFieldQuery({
         collectionSlug,
         errors,
         join,
-        joinsQuery,
+        joinsQuery: collectionJoins,
         overrideAccess,
         promises,
         req,
       })
+
+      const collectionQuery = collectionJoins[join.joinPath]
+
+      // Include only targets the current user can read.
+      if (collectionQuery !== false) {
+        readableCollections.push(
+          combineQueries(collectionQuery?.where || {}, {
+            relationTo: { equals: collectionSlug },
+          }),
+        )
+      }
     }
+
+    // Disable the join when none of its targets are readable.
+    joinsQuery[join.joinPath] = readableCollections.length
+      ? { ...joinQuery, where: { or: readableCollections } }
+      : false
   }
 
   await Promise.all(promises)

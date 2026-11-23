@@ -41,6 +41,10 @@ export const AddNewButton = ({
   const isPolymorphic = Array.isArray(relationTo)
 
   if (!isPolymorphic) {
+    if (!permissions?.collections?.[relationTo]?.create) {
+      return null
+    }
+
     return (
       <Button
         buttonStyle={buttonStyle}
@@ -62,6 +66,7 @@ export const AddNewButton = ({
         }
         buttonType="custom"
         horizontalAlign="center"
+        popupType="menu"
         render={({ close: closePopup }) => (
           <PopupList.ButtonGroup>
             {relationTo.map((relatedCollection) => {

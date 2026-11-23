@@ -1,5 +1,3 @@
-import path from 'path'
-
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 
 import { APIError } from '../../errors/APIError.js'
@@ -7,14 +5,18 @@ import { isEligibleRequest } from './isEligibleRequest.js'
 import { processMultipart } from './processMultipart.js'
 import { debugLog } from './utilities.js'
 
+const DEFAULT_REQUEST_SIZE_LIMIT = 50 * 1024 * 1024
+
 const DEFAULT_UPLOAD_OPTIONS: FetchAPIFileUploadOptions = {
-  abortOnLimit: false,
+  abortOnLimit: true,
   createParentPath: false,
   debug: false,
   defParamCharset: 'utf8',
   limitHandler: false,
+  limits: { fields: 20, fieldSize: 1024 * 1024, files: 3, fileSize: 20 * 1024 * 1024 },
   parseNested: false,
   preserveExtension: false,
+  requestSizeLimit: DEFAULT_REQUEST_SIZE_LIMIT,
   responseOnLimit: 'File size limit has been reached',
   safeFileNames: false,
   tempFileDir: 'tmp', // Relative path is created inside current workdir.
@@ -58,7 +60,33 @@ export const processMultipartFormdata: FetchAPIFileUpload = async ({
   options: incomingOptions,
   request,
 }) => {
-  const options: FetchAPIFileUploadOptions = { ...DEFAULT_UPLOAD_OPTIONS, ...incomingOptions }
+  const requestSizeLimit =
+    incomingOptions?.requestSizeLimit === undefined
+      ? DEFAULT_REQUEST_SIZE_LIMIT
+      : incomingOptions.requestSizeLimit
+
+  if (
+    requestSizeLimit !== Infinity &&
+    (!Number.isSafeInteger(requestSizeLimit) || requestSizeLimit < 0)
+  ) {
+    throw new TypeError(
+      'requestSizeLimit must be Infinity or a non-negative safe integer representing bytes',
+    )
+  }
+
+  const options: FetchAPIFileUploadOptions = {
+    ...DEFAULT_UPLOAD_OPTIONS,
+    ...incomingOptions,
+    abortOnLimit: incomingOptions?.abortOnLimit ?? DEFAULT_UPLOAD_OPTIONS.abortOnLimit,
+    limits: { ...DEFAULT_UPLOAD_OPTIONS.limits },
+    requestSizeLimit,
+  }
+
+  for (const [key, value] of Object.entries(incomingOptions?.limits || {})) {
+    if (value !== undefined) {
+      options.limits![key as keyof NonNullable<FetchAPIFileUploadOptions['limits']>] = value
+    }
+  }
 
   if (!isEligibleRequest(request)) {
     debugLog(options, 'Request is not eligible for file upload!')

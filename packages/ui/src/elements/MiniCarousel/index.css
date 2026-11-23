@@ -1,21 +1,23 @@
 @layer payload-default {
   .mini-carousel {
+    --carousel-item-width: 48px;
+    --carousel-item-height: 48px;
+    --carousel-divider-height: 48px;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
     gap: var(--spacer-3);
     padding: var(--spacer-2-5);
-    height: 100%;
+    width: 100%;
+    height: auto;
     flex-shrink: 0;
-    overflow-y: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     background: var(--color-bg-secondary);
-    border-right: var(--stroke-width-small) solid var(--color-border);
-    /* Honor the scroll-driven height below instead of stretching to the flex line. */
-    align-self: flex-start;
-    /* Scroll-driven: grow to fill the gap as the header scrolls away. Falls back to static height. */
-    animation: mini-carousel-fill-scrolled-chrome linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
+    border-top: var(--stroke-width-small) solid var(--color-border);
+    /* Stacked layout: no scroll-driven growth, fill via stretch instead. */
+    align-self: stretch;
+    animation: none;
   }
 
   @keyframes mini-carousel-fill-scrolled-chrome {
@@ -36,8 +38,8 @@
     background: var(--color-bg-secondary);
     cursor: pointer;
     overflow: hidden;
-    width: 48px;
-    height: 48px;
+    width: var(--carousel-item-width);
+    height: var(--carousel-item-height);
   }
 
   .mini-carousel__item img {
@@ -55,40 +57,40 @@
   }
 
   .mini-carousel__divider {
-    width: 100%;
-    height: var(--stroke-width-small);
+    width: var(--stroke-width-small);
+    height: var(--carousel-divider-height);
+    margin: 0 var(--spacer-2);
     background: var(--color-border);
     flex-shrink: 0;
   }
 
-  /* Stacked layout: disable scroll-driven growth and fill via stretch. */
-  @container edit-main (max-width: 1024px) {
+  @container edit-main (min-width: 768px) {
     .mini-carousel {
-      align-self: stretch;
-      height: auto;
-      animation: none;
-    }
-  }
-
-  @container edit-main (max-width: 768px) {
-    .mini-carousel {
-      flex-direction: row;
-      align-items: center;
-      width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      border-right: 0;
-      border-top: var(--stroke-width-small) solid var(--color-border);
-    }
-
-    .mini-carousel__item {
-      width: 48px;
+      flex-direction: column;
+      align-items: stretch;
+      width: auto;
+      overflow-x: visible;
+      overflow-y: auto;
+      border-top: none;
+      border-right: var(--stroke-width-small) solid var(--color-border);
     }
 
     .mini-carousel__divider {
-      width: var(--stroke-width-small);
-      height: 48px;
-      margin: 0 var(--spacer-2);
+      width: 100%;
+      height: var(--stroke-width-small);
+      margin: 0;
+    }
+  }
+
+  @container edit-main (min-width: 1024px) {
+    .mini-carousel {
+      height: 100%;
+      /* Honor the scroll-driven height below instead of stretching to the flex line. */
+      align-self: flex-start;
+      /* Scroll-driven: grow to fill the gap as the header scrolls away. Falls back to static height. */
+      animation: mini-carousel-fill-scrolled-chrome linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
     }
   }
 }

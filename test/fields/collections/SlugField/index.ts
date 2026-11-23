@@ -1,6 +1,4 @@
-import type { CollectionConfig, TextField } from 'payload'
-
-import { slugField } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import { slugFieldSlug } from './shared.js'
 
@@ -15,34 +13,48 @@ const SlugField: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    slugField(),
+    { name: 'slug', type: 'slug', useAsSlug: 'title' },
     {
       name: 'localizedTitle',
       type: 'text',
       localized: true,
     },
-    slugField({
-      slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+    {
       name: 'customSlugify',
-      checkboxName: 'generateCustomSlug',
-    }),
-    slugField({
-      useAsSlug: 'localizedTitle',
+      type: 'slug',
+      slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+      useAsSlug: 'title',
+      required: true,
+    },
+    {
       name: 'localizedSlug',
+      type: 'slug',
+      useAsSlug: 'localizedTitle',
       localized: true,
       required: false,
-      checkboxName: 'generateLocalizedSlug',
-    }),
-    slugField({
-      name: 'readOnlySlug',
-      checkboxName: 'generateReadOnlySlug',
+    },
+    {
+      // A localized slug fed by a non-localized source — every locale shares the same source value.
+      name: 'localizedSharedSlug',
+      type: 'slug',
+      useAsSlug: 'title',
+      localized: true,
       required: false,
-      overrides: (defaultField) => {
-        ;(defaultField.fields[1] as TextField).admin!.readOnly = true
-
-        return defaultField
+    },
+    {
+      name: 'readOnlySlug',
+      type: 'slug',
+      useAsSlug: 'title',
+      required: false,
+      admin: {
+        readOnly: true,
       },
-    }),
+    },
+    {
+      name: 'sourcelessSlug',
+      type: 'slug',
+      required: false,
+    },
     {
       type: 'text',
       name: 'test',

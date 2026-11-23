@@ -1,4 +1,4 @@
-import type { ClientUser } from 'payload'
+import type { AuthenticatedUser, User } from 'payload'
 
 export interface HandleTakeOverParams {
   clearRouteCache?: () => void
@@ -6,20 +6,20 @@ export interface HandleTakeOverParams {
   documentLockStateRef: React.RefObject<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   }>
   globalSlug?: string
   id: number | string
   isLockingEnabled: boolean
   isWithinDoc: boolean
-  setCurrentEditor: (value: React.SetStateAction<ClientUser | number | string>) => void
+  setCurrentEditor: (value: React.SetStateAction<number | string | User>) => void
   setIsReadOnlyForIncomingUser?: (value: React.SetStateAction<boolean>) => void
   updateDocumentEditor: (
     docID: number | string,
     slug: string,
-    user: ClientUser | number | string,
+    user: number | string | User,
   ) => Promise<void>
-  user: ClientUser | number | string
+  user: AuthenticatedUser | number | string
 }
 
 export const handleTakeOver = async ({

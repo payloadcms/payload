@@ -25,7 +25,6 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { slugField } from 'payload'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -217,7 +216,11 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
-    slugField(),
+    {
+      name: 'slug',
+      type: 'slug',
+      useAsSlug: 'title',
+    },
   ],
   hooks: {
     afterChange: [revalidatePost],

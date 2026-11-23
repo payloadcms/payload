@@ -20,14 +20,18 @@ export type UseHierarchyModalArgs = {
 }
 
 export type HierarchyModalProps = {
+  readonly confirmLabel?: string
   readonly hasMany?: boolean
   readonly initialSelections?: (number | string)[]
+  /** Disables the confirm and move to root actions while a save is running */
+  readonly isBusy?: boolean
   readonly onMoveToRoot?: () => void
   readonly onSave: (params: {
     closeModal: () => void
     selections: Map<number | string, SelectionWithPath>
   }) => void
   readonly showMoveToRoot?: boolean
+  readonly title?: string
 }
 
 export type HierarchyModalInternalProps = {

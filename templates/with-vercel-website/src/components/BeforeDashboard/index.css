@@ -1,0 +1,20 @@
+.dashboard .before-dashboard {
+  margin-bottom: var(--spacer-5);
+}
+
+.dashboard .before-dashboard__banner h4 {
+  margin: 0;
+}
+
+.dashboard .before-dashboard__instructions {
+  list-style: decimal;
+  margin-bottom: var(--spacer-2);
+}
+
+.dashboard .before-dashboard__instructions li {
+  width: 100%;
+}
+
+.dashboard .before-dashboard a:hover {
+  opacity: 0.85;
+}

@@ -2,7 +2,7 @@
 import { PublishButton } from '@payloadcms/ui'
 import * as React from 'react'
 
-import classes from './index.module.scss'
+import classes from './index.module.css'
 
 export function CustomPublishButton() {
   return (

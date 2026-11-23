@@ -19,7 +19,7 @@ export type ThumbnailProps = {
   height?: number
   imageCacheTag?: false | string
   size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
-  uploadConfig?: SanitizedCollectionConfig['upload']
+  uploadConfig?: Omit<SanitizedCollectionConfig['upload'], 'uploadInstructions'>
   width?: number
 }
 

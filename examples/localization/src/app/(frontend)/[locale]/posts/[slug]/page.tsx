@@ -88,6 +88,7 @@ const queryPost = cache(async ({ slug, locale }: { slug: string; locale: TypedLo
 
   const result = await payload.find({
     collection: 'posts',
+    depth: 2,
     draft,
     limit: 1,
     overrideAccess: draft,

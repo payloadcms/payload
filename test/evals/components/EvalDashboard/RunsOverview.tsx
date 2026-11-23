@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { RunGroup } from './configuration.js'
 
-import { configStats } from './configuration.js'
+import { configStats, formatLocalTimestamp } from './configuration.js'
 
 type Props = {
   onSelect: (runKey: string) => void
@@ -145,13 +145,8 @@ export function RunsOverview({ onSelect, runs }: Props) {
             >
               <span style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ color: 'var(--theme-elevation-800)', fontSize: '0.78rem' }}>
-                  {run.timestamp ? run.timestamp.slice(0, 16).replace('T', ' ') : '—'}
+                  {formatLocalTimestamp(run.timestamp)}
                 </span>
-                {run.isLegacy && (
-                  <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.66rem' }}>
-                    pre-run-tracking
-                  </span>
-                )}
               </span>
               <ConfigBadges
                 model={run.config.model}

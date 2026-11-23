@@ -41,6 +41,7 @@ type CreateConstraintArgs = {
   alias?: string
   operator: string
   pathSegments: string[]
+  rootColumn?: string
   treatAsArray?: string[]
   value: boolean | number | string
 }
@@ -49,6 +50,7 @@ const createConstraint = ({
   alias,
   operator,
   pathSegments,
+  rootColumn,
   value,
 }: CreateConstraintArgs): string => {
   const newAlias = `${pathSegments[0]}_alias_${pathSegments.length - 1}`
@@ -63,7 +65,7 @@ const createConstraint = ({
 
   if (operator === 'exists') {
     if (pathSegments.length === 1) {
-      return `EXISTS (SELECT 1 FROM json_each("${sanitizePathSegment(pathSegments[0])}") AS ${newAlias})`
+      return `EXISTS (SELECT 1 FROM json_each(${rootColumn ?? `"${sanitizePathSegment(pathSegments[0])}"`}) AS ${newAlias})`
     }
 
     return `EXISTS (
@@ -75,7 +77,7 @@ const createConstraint = ({
 
   if (operator === 'not_exists') {
     if (pathSegments.length === 1) {
-      return `NOT EXISTS (SELECT 1 FROM json_each("${sanitizePathSegment(pathSegments[0])}") AS ${newAlias})`
+      return `NOT EXISTS (SELECT 1 FROM json_each(${rootColumn ?? `"${sanitizePathSegment(pathSegments[0])}"`}) AS ${newAlias})`
     }
 
     return `NOT EXISTS (
@@ -98,7 +100,7 @@ const createConstraint = ({
   }
 
   if (pathSegments.length === 1) {
-    return `EXISTS (SELECT 1 FROM json_each("${sanitizePathSegment(pathSegments[0])}") AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
+    return `EXISTS (SELECT 1 FROM json_each(${rootColumn ?? `"${sanitizePathSegment(pathSegments[0])}"`}) AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
   }
 
   return `EXISTS (
@@ -123,7 +125,7 @@ export const createJSONQuery = ({
     for (const [i, v] of value.entries()) {
       sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, rawColumn, table, treatAsArray, treatRootAsArray, value: v })} ${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
     }
-    return sql
+    return `(${sql})`
   }
 
   if (treatAsArray?.includes(pathSegments[1]) && table) {
@@ -140,6 +142,7 @@ export const createJSONQuery = ({
     alias: table,
     operator,
     pathSegments,
+    rootColumn: typeof column === 'string' ? column : column ? `"${column.name}"` : undefined,
     treatAsArray,
     value: value as CreateConstraintArgs['value'],
   })

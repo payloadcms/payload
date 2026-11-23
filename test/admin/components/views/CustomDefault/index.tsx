@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation.js'
 import React from 'react'
 
 import { customViewPath } from '../../../shared.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'custom-default-view'
 

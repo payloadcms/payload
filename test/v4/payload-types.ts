@@ -648,11 +648,17 @@ export interface Config {
     defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsSelect: {
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -692,16 +698,25 @@ export interface User {
   id: string;
   name?: string | null;
   roles?: ('admin' | 'user')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
   apiKey?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -724,6 +739,14 @@ export interface DocControl {
   content?: string | null;
   test?: string | null;
   parent?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -737,6 +760,14 @@ export interface Folder {
   id: string;
   parent?: (string | null) | Folder;
   name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -781,6 +812,14 @@ export interface Drawer {
   content?: LexicalRichText<LexicalNodes_861F9846> | null;
   status?: ('draft' | 'published') | null;
   publishedAt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -818,6 +857,14 @@ export interface TextField {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -830,6 +877,14 @@ export interface Tag {
   _h_tags?: (string | null) | Tag;
   name: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -878,6 +933,14 @@ export interface RelationshipField {
         relationTo: 'text-fields';
         value: string | TextField;
       } | null);
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -996,6 +1059,14 @@ export interface Orderable {
   _order?: string | null;
   title: string;
   priority?: ('high' | 'medium' | 'low') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1010,6 +1081,14 @@ export interface SearchBarTest {
   category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
   status?: ('draft' | 'published' | 'archived') | null;
   priority?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1149,6 +1228,14 @@ export interface Talk {
    * Sort priority (1–10).
    */
   priority?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1160,6 +1247,14 @@ export interface Talk {
 export interface Upload {
   id: string;
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1244,6 +1339,14 @@ export interface TalkQa {
 export interface UnauthorizedTest {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1304,6 +1407,14 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1323,6 +1434,14 @@ export interface BlocksField {
   blocksWithMinRows?: TestBlock[] | null;
   readOnlyBlocks?: TestBlock[] | null;
   nestedBlocksField?: OuterBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1427,6 +1546,14 @@ export interface CheckboxField {
   enableFeature?: boolean | null;
   enableFeatureRequired: boolean;
   enableFeatureDisabled?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1460,6 +1587,14 @@ export interface CodeField {
    * This field is disabled
    */
   disabled?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1475,6 +1610,14 @@ export interface CollapsibleField {
   innerText?: string | null;
   collapsedField?: string | null;
   describedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1503,6 +1646,14 @@ export interface DateField {
   withTimezoneDisabled_tz?: SupportedTimezones;
   withTimezoneReadOnly?: string | null;
   withTimezoneReadOnly_tz?: SupportedTimezones;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1524,6 +1675,14 @@ export interface EmailField {
    * The primary contact email for this account
    */
   emailAddressDisabled?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1556,6 +1715,14 @@ export interface GroupField {
   unnamedGroup: {
     unnamedGroupField: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1567,7 +1734,7 @@ export interface JoinField {
   id: string;
   name: string;
   /**
-   * Posts related to this category
+   * This is a join field description. It’s pretty long so I can see how the spacing looks when the text reaches all the way across and is below the other controls.
    */
   relatedPosts?: {
     docs?: (string | JoinPost)[];
@@ -1616,6 +1783,14 @@ export interface JoinField {
       totalDocs?: number;
     };
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1630,6 +1805,14 @@ export interface JoinPost {
    * The parent category (used by join fields)
    */
   category?: (string | null) | JoinField;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1688,6 +1871,14 @@ export interface JsonField {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1721,6 +1912,14 @@ export interface NumberField {
    * Listed prices in USD, excluding tax
    */
   pricesReadOnly?: number[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1748,6 +1947,14 @@ export interface PasswordField {
   passwordWithDefault?: string | null;
   confirmPassword?: string | null;
   confirmPasswordDisabled?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1776,6 +1983,14 @@ export interface PointField {
    * @maxItems 2
    */
   locationDisabled?: [number, number] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1817,6 +2032,14 @@ export interface RadioField {
    * Read-only vertical radio field with description text.
    */
   contentTypeVerticalReadOnly?: ('article' | 'video' | 'podcast') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1846,6 +2069,14 @@ export interface RichTextField {
    * Rich text list field used to validate description spacing.
    */
   lists?: LexicalRichText<LexicalNodes_493FC43B> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1878,6 +2109,14 @@ export interface RowField {
   billingCity?: string | null;
   shippingStreet?: string | null;
   shippingCity?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1919,6 +2158,14 @@ export interface SelectField {
    * Has many values to test wrapping
    */
   tagsWithManyValues?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1930,49 +2177,33 @@ export interface SlugField {
   id: string;
   title?: string | null;
   /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  /**
    * This is the default slug field
    */
   slug: string;
   requiredTitle: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateRequiredSlug?: boolean | null;
   requiredSlug: string;
   readOnlyTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateReadOnlySlug?: boolean | null;
   readOnlySlug: string;
   longTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateLongSlug?: boolean | null;
   /**
    * This slug has a long value to test text-overflow behavior
    */
   longSlug: string;
   placeholderTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generatePlaceholderSlug?: boolean | null;
   placeholderSlug: string;
   lockedTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateLockedSlug?: boolean | null;
   /**
    * This slug starts with a value to show the locked state
    */
   lockedSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2008,6 +2239,14 @@ export interface TabsField {
   pushNotifications?: boolean | null;
   autoBackup?: boolean | null;
   backupFrequency?: ('daily' | 'weekly' | 'monthly') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2033,6 +2272,14 @@ export interface TextareaField {
    * This field is disabled
    */
   contentDisabled?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2044,6 +2291,14 @@ export interface FolderItem {
   id: string;
   title: string;
   parent?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2056,6 +2311,14 @@ export interface TagItem {
   title: string;
   description?: string | null;
   _h_tags?: (string | Tag)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2066,6 +2329,14 @@ export interface TagItem {
 export interface Rubbish {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -2077,6 +2348,14 @@ export interface Rubbish {
 export interface RubbishWithDraft {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -2093,6 +2372,14 @@ export interface UploadField {
   heroImageReadOnly?: (string | null) | Upload;
   heroImageHasMany?: (string | Upload)[] | null;
   heroImageHasManyReadOnly?: (string | Upload)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2103,6 +2390,14 @@ export interface UploadField {
 export interface Autosave {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2161,6 +2456,14 @@ export interface VersionsDiff {
   tabNumber?: number | null;
   upload?: (string | null) | Upload;
   uploadMany?: (string | Upload)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2194,6 +2497,14 @@ export interface DraftVersion {
   title: string;
   content?: string | null;
   author?: (string | null) | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2242,6 +2553,15 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   totalTried?: number | null;
   /**
@@ -2269,7 +2589,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug: 'inline' | 'schedulePublish';
         taskID: string;
-        input?:
+        input:
           | {
               [k: string]: unknown;
             }
@@ -2297,13 +2617,22 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?: ('inline' | 'schedulePublish') | null;
+          taskID?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
   taskSlug?: ('inline' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2576,16 +2905,19 @@ export interface PayloadQueryPreset {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
   apiKey?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -2605,6 +2937,8 @@ export interface DocControlsSelect<T extends boolean = true> {
   content?: T;
   test?: T;
   parent?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -2702,6 +3036,8 @@ export interface DrawersSelect<T extends boolean = true> {
   content?: T;
   status?: T;
   publishedAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2713,6 +3049,8 @@ export interface OrderableSelect<T extends boolean = true> {
   _order?: T;
   title?: T;
   priority?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2726,6 +3064,8 @@ export interface SearchBarTestSelect<T extends boolean = true> {
   category?: T;
   status?: T;
   priority?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2844,6 +3184,8 @@ export interface TalksSelect<T extends boolean = true> {
   isVirtual?: T;
   attendeeCount?: T;
   priority?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2854,6 +3196,8 @@ export interface TalksSelect<T extends boolean = true> {
  */
 export interface UnauthorizedTestSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2910,6 +3254,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         name?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3044,6 +3390,8 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3055,6 +3403,8 @@ export interface CheckboxFieldsSelect<T extends boolean = true> {
   enableFeature?: T;
   enableFeatureRequired?: T;
   enableFeatureDisabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3069,6 +3419,8 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   typescript?: T;
   readOnly?: T;
   disabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3083,6 +3435,8 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
   innerText?: T;
   collapsedField?: T;
   describedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3107,6 +3461,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   withTimezoneDisabled_tz?: T;
   withTimezoneReadOnly?: T;
   withTimezoneReadOnly_tz?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3118,6 +3474,8 @@ export interface EmailFieldsSelect<T extends boolean = true> {
   emailAddress?: T;
   emailAddressRequired?: T;
   emailAddressDisabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3148,6 +3506,8 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         unnamedGroupField?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3167,6 +3527,8 @@ export interface JoinFieldsSelect<T extends boolean = true> {
     | {
         groupedPosts?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3177,6 +3539,8 @@ export interface JoinFieldsSelect<T extends boolean = true> {
 export interface JoinPostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3190,6 +3554,8 @@ export interface JsonFieldsSelect<T extends boolean = true> {
   jsonRequired?: T;
   jsonReadOnly?: T;
   jsonDisabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3204,6 +3570,8 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   priceReadOnly?: T;
   prices?: T;
   pricesReadOnly?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3218,6 +3586,8 @@ export interface PasswordFieldsSelect<T extends boolean = true> {
   passwordWithDefault?: T;
   confirmPassword?: T;
   confirmPasswordDisabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3229,6 +3599,8 @@ export interface PointFieldsSelect<T extends boolean = true> {
   location?: T;
   locationRequired?: T;
   locationDisabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3245,6 +3617,8 @@ export interface RadioFieldsSelect<T extends boolean = true> {
   contentTypeVerticalRequired?: T;
   contentTypeVerticalDisabled?: T;
   contentTypeVerticalReadOnly?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3260,6 +3634,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   authorDisabled?: T;
   authorReadOnly?: T;
   polymorphic?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3273,6 +3649,8 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
   code?: T;
   typography?: T;
   lists?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3304,6 +3682,8 @@ export interface RowFieldsSelect<T extends boolean = true> {
   billingCity?: T;
   shippingStreet?: T;
   shippingCity?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3320,6 +3700,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
   tagsRequired?: T;
   tagsReadOnly?: T;
   tagsWithManyValues?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3329,23 +3711,19 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
-  generateSlug?: T;
   slug?: T;
   requiredTitle?: T;
-  generateRequiredSlug?: T;
   requiredSlug?: T;
   readOnlyTitle?: T;
-  generateReadOnlySlug?: T;
   readOnlySlug?: T;
   longTitle?: T;
-  generateLongSlug?: T;
   longSlug?: T;
   placeholderTitle?: T;
-  generatePlaceholderSlug?: T;
   placeholderSlug?: T;
   lockedTitle?: T;
-  generateLockedSlug?: T;
   lockedSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3382,6 +3760,8 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   pushNotifications?: T;
   autoBackup?: T;
   backupFrequency?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3396,6 +3776,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
   textReadOnly?: T;
   _h_tags?: T;
   relatedFrom?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3408,6 +3790,8 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
   contentRequired?: T;
   contentReadOnly?: T;
   contentDisabled?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3418,6 +3802,8 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
 export interface FoldersSelect<T extends boolean = true> {
   parent?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -3430,6 +3816,8 @@ export interface FoldersSelect<T extends boolean = true> {
 export interface FolderItemsSelect<T extends boolean = true> {
   title?: T;
   parent?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3441,6 +3829,8 @@ export interface TagsSelect<T extends boolean = true> {
   _h_tags?: T;
   name?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -3455,6 +3845,8 @@ export interface TagItemsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   _h_tags?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3464,6 +3856,8 @@ export interface TagItemsSelect<T extends boolean = true> {
  */
 export interface RubbishSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -3474,6 +3868,8 @@ export interface RubbishSelect<T extends boolean = true> {
  */
 export interface RubbishWithDraftsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -3485,6 +3881,8 @@ export interface RubbishWithDraftsSelect<T extends boolean = true> {
  */
 export interface UploadsSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -3507,6 +3905,8 @@ export interface UploadFieldsSelect<T extends boolean = true> {
   heroImageReadOnly?: T;
   heroImageHasMany?: T;
   heroImageHasManyReadOnly?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3516,6 +3916,8 @@ export interface UploadFieldsSelect<T extends boolean = true> {
  */
 export interface AutosaveSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3580,6 +3982,8 @@ export interface VersionsDiffSelect<T extends boolean = true> {
   tabNumber?: T;
   upload?: T;
   uploadMany?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3592,6 +3996,8 @@ export interface DraftVersionsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   author?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3611,6 +4017,7 @@ export interface PayloadKvSelect<T extends boolean = true> {
 export interface PayloadJobsSelect<T extends boolean = true> {
   input?: T;
   taskStatus?: T;
+  meta?: T;
   completedAt?: T;
   totalTried?: T;
   hasError?: T;
@@ -3626,12 +4033,20 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         output?: T;
         state?: T;
         error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         id?: T;
       };
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3706,6 +4121,34 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -3713,6 +4156,124 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'uploads'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'doc-controls'
+          | 'drawers'
+          | 'orderable'
+          | 'search-bar-test'
+          | 'talks'
+          | 'unauthorized-test'
+          | 'array-fields'
+          | 'blocks-fields'
+          | 'checkbox-fields'
+          | 'code-fields'
+          | 'collapsible-fields'
+          | 'date-fields'
+          | 'email-fields'
+          | 'group-fields'
+          | 'join-fields'
+          | 'join-posts'
+          | 'json-fields'
+          | 'number-fields'
+          | 'password-fields'
+          | 'point-fields'
+          | 'radio-fields'
+          | 'relationship-fields'
+          | 'rich-text-fields'
+          | 'row-fields'
+          | 'select-fields'
+          | 'slug-fields'
+          | 'tabs-fields'
+          | 'text-fields'
+          | 'textarea-fields'
+          | 'folders'
+          | 'folder-items'
+          | 'tags'
+          | 'tag-items'
+          | 'rubbish'
+          | 'rubbish-with-drafts'
+          | 'uploads'
+          | 'upload-fields'
+          | 'autosave'
+          | 'versions-diff'
+          | 'draft-versions'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3727,7 +4288,10 @@ export interface TaskSchedulePublish {
       value: string | DocControl;
     } | null;
     global?: string | null;
-    user?: (string | null) | User;
+    user?: {
+      relationTo: 'users';
+      value: string | User;
+    } | null;
   };
   output?: unknown;
 }

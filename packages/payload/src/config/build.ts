@@ -1,5 +1,7 @@
 import type { Config, SanitizedConfig } from './types.js'
 
+import { validateTransformers } from '../uploads/transformers/validateTransformers.js'
+import { assertNoLegacySharpConfig } from './assertNoLegacySharpConfig.js'
 import { sanitizeConfig } from './sanitize.js'
 
 /**
@@ -16,6 +18,23 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
     }
   }
 
+  // Runs after plugins so removed Sharp settings a plugin adds are caught too.
+  assertNoLegacySharpConfig({ config })
+
+  if (Array.isArray(config.upload?.transformers) && config.upload.transformers.length > 0) {
+    validateTransformers({ transformers: config.upload.transformers })
+
+    for (const transformer of config.upload.transformers) {
+      if (typeof transformer.init === 'function') {
+        config = await transformer.init(config)
+      }
+    }
+
+    if (Array.isArray(config.upload?.transformers) && config.upload.transformers.length > 0) {
+      validateTransformers({ transformers: config.upload.transformers })
+    }
+  }
+
   if (Array.isArray(config.storage)) {
     for (const adapter of config.storage) {
       if (typeof adapter?.init !== 'function') {
@@ -29,5 +48,5 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
     }
   }
 
-  return await sanitizeConfig(config)
+  return sanitizeConfig(config)
 }

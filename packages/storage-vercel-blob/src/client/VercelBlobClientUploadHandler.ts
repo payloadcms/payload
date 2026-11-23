@@ -1,59 +1,20 @@
 'use client'
-import { createClientUploadHandler, getFileKey } from '@payloadcms/plugin-cloud-storage/client'
-import { upload } from '@vercel/blob/client'
-import { formatAdminURL } from 'payload/shared'
+import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { put } from '@vercel/blob/client'
 
-export type VercelBlobClientUploadHandlerExtra = {
-  addRandomSuffix: boolean
-  useCompositePrefixes: boolean
-}
+export const VercelBlobClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToVercelBlob',
+  handler: async ({ data, file }) => {
+    const { pathname, token } = data as { pathname: string; token: string }
 
-/** Last path segment only (POSIX), for keys like `folder/sub/file.png`. */
-function posixBasename(key: string): string {
-  const normalized = key.replace(/^\/+/, '')
-  const lastSlash = normalized.lastIndexOf('/')
-  return lastSlash === -1 ? normalized : normalized.slice(lastSlash + 1)
-}
+    const result = await put(pathname, file, {
+      access: 'public',
+      contentType: file.type,
+      token,
+    })
 
-export const VercelBlobClientUploadHandler =
-  createClientUploadHandler<VercelBlobClientUploadHandlerExtra>({
-    handler: async ({
-      apiRoute,
-      collectionSlug,
-      docPrefix,
-      extra: { addRandomSuffix, useCompositePrefixes = false },
-      file,
-      prefix,
-      serverHandlerPath,
-      serverURL,
-      updateFilename,
-    }) => {
-      const endpointRoute = formatAdminURL({
-        apiRoute,
-        path: serverHandlerPath,
-        serverURL,
-      })
-      const { fileKey: pathname, sanitizedDocPrefix } = getFileKey({
-        collectionPrefix: prefix,
-        docPrefix,
-        filename: file.name,
-        useCompositePrefixes,
-      })
-
-      // upload the file directly to Vercel Blob using the signed URL
-      const result = await upload(pathname, file, {
-        access: 'public',
-        clientPayload: collectionSlug,
-        contentType: file.type,
-        handleUploadUrl: endpointRoute,
-      })
-
-      // Match server uploadFile: document `filename` is basename only; prefixes are separate.
-      if (addRandomSuffix) {
-        const pathname = result.pathname.replace(/^\/+/, '')
-        updateFilename(decodeURIComponent(posixBasename(pathname)))
-      }
-
-      return { prefix: sanitizedDocPrefix }
-    },
-  })
+    if (decodeURIComponent(result.pathname) !== decodeURIComponent(pathname)) {
+      throw new Error('The uploaded file was stored at an unexpected location')
+    }
+  },
+})

@@ -1,0 +1,187 @@
+import type { ImageSize, PayloadRequest, ProbedImageSize, UploadCollectionSlug } from 'payload'
+import type { FitEnum, ResizeOptions, Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
+
+/**
+ * Params sent to the sharp `toFormat()` function
+ * @link https://sharp.pixelplumbing.com/api-output#toformat
+ */
+export type ImageUploadFormatOptions = {
+  format: Parameters<Sharp['toFormat']>[0]
+  options?: Parameters<Sharp['toFormat']>[1]
+}
+
+/**
+ * Params sent to the sharp trim() function
+ * @link https://sharp.pixelplumbing.com/api-resize#trim
+ */
+export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
+
+export type WithMetadata =
+  | ((options: { metadata: SharpMetadata; req: PayloadRequest }) => Promise<boolean>)
+  | boolean
+
+/**
+ * Image size options implemented by Payload's default Sharp image processor.
+ */
+export type SharpImageSizeOptions = {
+  /**
+   * @deprecated prefer position
+   */
+  crop?: string // comes from sharp package
+  formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
+  /** Image sizes generated for each upload, stored under the document's `variants`. */
+  variants?: ImageSize[]
+  /**
+   * When an uploaded image is smaller than the defined image size, we have 3 options:
+   *
+   * `undefined | false | true`
+   *
+   * 1. `undefined` [default]: uploading images with smaller width AND height than the image size will return null
+   * 2. `false`: always enlarge images to the image size
+   * 3. `true`: if the image is smaller than the image size, return the original image
+   */
+  withoutEnlargement?: ResizeOptions['withoutEnlargement']
+} & Omit<ResizeOptions, 'withoutEnlargement'>
+
+declare module 'payload' {
+  interface RegisteredImageSizeOptions {
+    sharp: SharpImageSizeOptions
+  }
+}
+
+/**
+ * A collection's Sharp-owned upload-time settings, authored via
+ * `sharpTransformer({ collections: { <slug>: {...} } })`. `init()` writes a
+ * narrowed, Sharp-agnostic projection of `variants`/`crop`/`focalPoint`
+ * back onto the sanitized collection's `upload` config for core's own use (Admin UI,
+ * field generation); this richer shape is what the transformer itself reads.
+ */
+export type SharpCollectionConfig = {
+  constructorOptions?: SharpOptions
+  crop?: boolean
+  focalPoint?: boolean
+  formatOptions?: ImageUploadFormatOptions
+  resizeOptions?: ResizeOptions
+  trimOptions?: ImageUploadTrimOptions
+  /** Image sizes generated for each upload, stored under the document's `variants`. */
+  variants?: ImageSize[]
+  withMetadata?: WithMetadata
+}
+
+/**
+ * Matches core's (soon-removed) `SharpDependency` shape, for advanced injection
+ * of a compatible custom Sharp build or version via `sharpTransformer({ sharp })`.
+ */
+export type SharpDependency = (
+  input?:
+    | ArrayBuffer
+    | Buffer
+    | Float32Array
+    | Float64Array
+    | Int8Array
+    | Int16Array
+    | Int32Array
+    | string
+    | Uint8Array
+    | Uint8ClampedArray
+    | Uint16Array
+    | Uint32Array,
+  options?: SharpOptions,
+) => Sharp
+
+export type SharpDynamicDefaults = {
+  /** @default 'cover' */
+  fit?: keyof FitEnum
+  /** @default 4096 */
+  maxHeight?: number
+  /**
+   * Total output pixels, counted across every frame of an animated image.
+   * @default 16_777_216
+   */
+  maxPixels?: number
+  /** @default 4096 */
+  maxWidth?: number
+  /** @default 'center' */
+  position?: ResizeOptions['position']
+  /** @default false */
+  withoutEnlargement?: boolean
+}
+
+/**
+ * Enables request-time resizing and tunes its limits. `collections` restricts it
+ * to the listed upload collections; omit it to allow every upload collection.
+ */
+export type SharpDynamicOptions = {
+  collections?: UploadCollectionSlug[]
+} & SharpDynamicDefaults
+
+/**
+ * The result of parsing a request's dynamic resize query parameters.
+ * `isRouted: false` means none of the recognized parameters were present at
+ * all — an ordinary file read, not a dynamic transformation attempt.
+ */
+export type DynamicResizeParseResult =
+  | {
+      error: string
+      isRouted: true
+      valid: false
+    }
+  | {
+      height?: number
+      isRouted: true
+      valid: true
+      width?: number
+      withoutEnlargement?: boolean
+    }
+  | {
+      isRouted: false
+    }
+
+export type SharpTransformerOptions = {
+  /** Per-collection upload-time image processing settings. */
+  collections?: Partial<Record<UploadCollectionSlug, SharpCollectionConfig>>
+  /**
+   * Request-time resizing via `?width=`/`?height=` on the file endpoint. `true`
+   * enables it with default limits for every upload collection; an object enables
+   * it with custom limits, optionally restricted to specific collections.
+   *
+   * @default false
+   */
+  dynamic?: boolean | SharpDynamicOptions
+  /** Inject a compatible custom Sharp build or version. Defaults to the bundled dependency. */
+  sharp?: SharpDependency
+  /** @default 'sharp' */
+  slug?: string
+}
+
+/**
+ * `options` for the one-file-in/one-file-out `transformFile` primitive, computed
+ * by `createTransformUpload` for each task it hands to the injected `transform`
+ * callback: the main file, or one named legacy image size. The crop and focal point
+ * are not options: `transformFile` reads them from `doc._transforms`.
+ */
+export type SharpUploadTaskOptions =
+  | {
+      /**
+       * Whether this size may be cut around a focal point: the focal point is enabled, and the
+       * size's `fit` allows a cut. `transformFile` cuts around it only when one is saved, and
+       * otherwise resizes with the size's own config.
+       */
+      canUseFocalPoint?: boolean
+      collectionUpload: SharpCollectionConfig
+      imageResizeConfig: ImageSize
+      kind: 'size'
+      originalDimensions: ProbedImageSize
+    }
+  | {
+      collectionUpload: SharpCollectionConfig
+      /**
+       * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
+       * `heightInPixels`). It replaces the saved crop's size for this upload only.
+       */
+      cropSize?: { height: number; width: number }
+      kind: 'main'
+      /** The original's size. Without it, the saved crop cannot be applied. */
+      originalDimensions?: ProbedImageSize
+    }

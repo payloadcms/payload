@@ -1,65 +1,63 @@
 import type {
+  AdminContext,
+  createPayloadRequest,
   DefaultServerFunctionArgs,
-  ServerAdapter,
+  ImportMap,
+  SanitizedConfig,
   ServerFunction,
   ServerFunctionHandler,
 } from 'payload'
 
-import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
-import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
-import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
-import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
-import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
-import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { buildFormStateHandler } from './buildFormState.js'
-import { buildTableStateHandler } from './buildTableState.js'
-import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
-import { initReq } from './initReq.js'
-import { schedulePublishHandler } from './schedulePublishHandler.js'
-import { slugifyHandler } from './slugify.js'
-import { switchLanguageHandler } from './switchLanguageHandler.js'
+import { sharedServerFunctions } from './serverFunctionRegistry.js'
 
-const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
-  'copy-data-from-locale': copyDataFromLocaleHandler,
-  'form-state': buildFormStateHandler,
-  'get-default-layout': getDefaultLayoutHandler,
-  'render-document': renderDocumentHandler,
-  'render-document-slots': renderDocumentSlotsHandler,
-  'render-field': _internal_renderFieldHandler,
-  'render-list': renderListHandler,
-  'render-tab': renderTabHandler,
-  'render-widget': renderWidgetHandler,
-  'schedule-publish': schedulePublishHandler,
-  slugify: slugifyHandler,
-  'switch-language': switchLanguageHandler,
-  'table-state': buildTableStateHandler,
+type InitAdminContextFn = (args: {
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig
+  importMap: ImportMap
+  overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
+}) => Promise<AdminContext>
+
+type CreateServerFunctionHandlerArgs = {
+  /**
+   * Framework-specific admin context creation. The adapter closes over its own
+   * `ServerAdapter` / request source (Next.js: `initAdminContext` + `nextServerAdapter`;
+   * TanStack Start: its `getRequest()`-based `initAdminContext`).
+   */
+  initAdminContext: InitAdminContextFn
+  /**
+   * Additional handlers registered alongside `sharedServerFunctions`. Reserved
+   * for adapter-specific functions; today both adapters run the shared set only.
+   */
+  serverFunctions?: Record<string, ServerFunction<any, any>>
 }
 
 /**
- * Factory for the framework-agnostic `handleServerFunctions` entry point. The
- * caller (a framework adapter, e.g. `@payloadcms/next`) supplies the
- * `ServerAdapter` once, and the returned handler can be wired directly into
- * the framework's server-action dispatcher.
+ * Factory for the framework-agnostic `handleServerFunctions` entry point.
+ *
+ * All adapters dispatch from the shared registry (`sharedServerFunctions`) and
+ * inject their own admin context. Each framework owns its native response transport.
  */
 export const createServerFunctionHandler = ({
-  serverAdapter,
-}: {
-  serverAdapter: ServerAdapter
-}): ServerFunctionHandler => {
+  initAdminContext,
+  serverFunctions,
+}: CreateServerFunctionHandlerArgs): ServerFunctionHandler => {
+  const baseServerFunctions: Record<string, ServerFunction<any, any>> = serverFunctions
+    ? { ...sharedServerFunctions, ...serverFunctions }
+    : sharedServerFunctions
+
   return async (args) => {
     const {
       name: fnKey,
       args: fnArgs,
       config: configPromise,
       importMap,
+      locale: requestLocale,
       serverFunctions: extraServerFunctions,
     } = args
 
-    const { cookies, locale, permissions, req } = await initReq({
+    const { cookies, locale, permissions, req, user } = await initAdminContext({
       configPromise,
       importMap,
-      key: 'RootLayout',
-      serverAdapter,
+      overrides: requestLocale !== undefined ? { locale: requestLocale } : undefined,
     })
 
     const augmentedArgs: DefaultServerFunctionArgs = {
@@ -69,6 +67,7 @@ export const createServerFunctionHandler = ({
       locale,
       permissions,
       req,
+      user,
     }
 
     const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
@@ -77,6 +76,6 @@ export const createServerFunctionHandler = ({
       throw new Error(`Unknown Server Function: ${fnKey}`)
     }
 
-    return fn(augmentedArgs)
+    return await fn(augmentedArgs)
   }
 }

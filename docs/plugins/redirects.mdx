@@ -28,6 +28,8 @@ For example, if you have a page at `/about` and you want to change it to `/about
   - includes a `from` and `to` fields
   - allows `to` to be a document reference
 
+The `redirects` collection tracks [authorship](../configuration/collections#authorship) by default (`createdBy` / `updatedBy`); set `authorship: false` in `overrides` to disable it.
+
 ## Installation
 
 Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
@@ -97,7 +99,7 @@ redirectsPlugin({
 
 It's important to note that this plugin only manages the redirects within the Payload Admin Panel and database. It does not handle the redirect itself.
 
-You will need to implement the actual redirect logic in your front-end application (e.g., Next.js, Express, etc.) by querying the `redirects` collection and handling the redirects based on your application's routing logic.
+You will need to implement the actual redirect logic in your front-end application by querying the `redirects` collection and handling the redirects based on your application's routing logic.
 
 A good example of how to implement this can be found in the [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website).
 

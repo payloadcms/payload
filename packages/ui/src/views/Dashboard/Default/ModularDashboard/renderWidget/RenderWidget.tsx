@@ -40,7 +40,7 @@ export const RenderWidget: React.FC<{
           args: {
             widgetData,
             widgetSlug,
-          } as RenderWidgetServerFnArgs,
+          },
         })) as RenderWidgetServerFnReturnType
 
         if (requestID !== requestIDRef.current) {
@@ -61,11 +61,11 @@ export const RenderWidget: React.FC<{
             'div',
             {
               style: {
-                background: 'var(--theme-error-50)',
-                border: 'var(--stroke-width-small) solid var(--theme-error-200)',
-                borderRadius: '4px',
+                background: 'var(--color-bg-danger-tertiary)',
+                border: 'var(--stroke-width-small) solid var(--color-border-danger)',
+                borderRadius: 'var(--radius-medium)',
                 color: 'var(--color-text-danger)',
-                padding: '20px',
+                padding: 'var(--spacer-3)',
                 textAlign: 'center',
               },
             },

@@ -83,16 +83,17 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
 
       dispatchField({
         type: 'UPDATE',
-        disableFormData: disableFormData || (hasRows && val > 0),
+        disableFormData,
         path,
         value: val,
+        ...(hasRows && !Array.isArray(field?.rows) ? { rows: [] } : {}),
       })
 
       if (!disableModifyingForm) {
         setModified(true)
       }
     },
-    [setModified, path, dispatchField, disableFormData, hasRows],
+    [setModified, path, dispatchField, disableFormData, hasRows, field?.rows],
   )
 
   // Store result from hook as ref
@@ -193,7 +194,7 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
             value,
           }
 
-          if (disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false)) {
+          if (disableFormData) {
             update.disableFormData = true
           }
 
@@ -268,7 +269,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // We intentionally guard this hook call with a mode that is fixed on first render.
   // The order is consistent across renders. Silence the linter’s false positive.
 
-  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/rule-suppression
   // eslint-disable-next-line react-hooks/rules-of-hooks
   return useFieldInForm<TValue>(options)
 }

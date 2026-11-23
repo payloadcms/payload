@@ -5,6 +5,7 @@ import { useElementHeightVariable } from '../../../hooks/useElementHeightVariabl
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { CropIcon } from '../../../icons/Crop/index.js'
 import { DownloadIcon } from '../../../icons/Download/index.js'
+import { LinkIcon } from '../../../icons/Link/index.js'
 import { NewTabIcon } from '../../../icons/NewTab/index.js'
 import { SwapIcon } from '../../../icons/Swap/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -49,13 +50,14 @@ export const FileToolbar: React.FC<Props> = ({
         ) : (
           <Popup
             button={
-              <span className={`${baseClass}__filename-btn`}>
+              <button className={`${baseClass}__filename-btn`} type="button">
                 <span className={`${baseClass}__filename-text`}>{filename}</span>
                 <ChevronIcon size={16} />
-              </span>
+              </button>
             }
             buttonType="custom"
             horizontalAlign="left"
+            popupType="menu"
             portalClassName={`${baseClass}__filename-popup`}
             size="fit-content"
             verticalAlign="bottom"
@@ -70,7 +72,13 @@ export const FileToolbar: React.FC<Props> = ({
       </div>
 
       <div className={`${baseClass}__right`}>
-        {fileUrl && <CopyToClipboard value={fileUrl} />}
+        {fileUrl && (
+          <CopyToClipboard
+            defaultMessage={t('upload:copyLinkToFile')}
+            icon={<LinkIcon />}
+            value={fileUrl}
+          />
+        )}
         {isAdjustable && (
           <Button
             aria-label={t('upload:editImage')}

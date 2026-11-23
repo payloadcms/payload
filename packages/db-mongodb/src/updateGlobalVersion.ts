@@ -50,12 +50,12 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
   const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
-    new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: flattenedFields,
       select,
     }),
+    returnDocument: 'after',
   }
 
   if (returning === false) {

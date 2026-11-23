@@ -1,7 +1,6 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
-  ClientUser,
   Data,
   DocumentPreferences,
   FormState,
@@ -59,27 +58,24 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
-  currentEditor?: ClientUser | null | number | string
+  currentEditor?: null | number | string | User
   data?: Data
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   documentLockState: React.RefObject<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   } | null>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
   hasScheduledPublish: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
+  /** `true` once a form-state request finds the document was changed by someone else since it loaded. */
+  isStale: boolean
   preferencesKey?: string
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `data` instead.
-   */
-  savedDocumentData?: Data
-  setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
+  setCurrentEditor?: React.Dispatch<React.SetStateAction<User>>
   setData: (data: Data) => void
   setDocFieldPreferences: (
     field: string,
@@ -88,18 +84,14 @@ export type DocumentInfoContext = {
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
   setHasScheduledPublish: React.Dispatch<React.SetStateAction<boolean>>
+  setIsStale: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
-  updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * Use `setData` instead.
-   */
-  updateSavedDocumentData: (data: Data) => void
+  updateDocumentEditor: (docID: number | string, slug: string, user: User) => Promise<void>
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps

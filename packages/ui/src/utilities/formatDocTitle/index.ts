@@ -73,7 +73,7 @@ export const formatDocTitle = ({
   }
 
   if (!title) {
-    title = typeof fallback === 'string' ? fallback : `[${i18n.t('general:untitled')}]`
+    title = typeof fallback === 'string' ? fallback : i18n.t('general:untitled')
   }
 
   return title

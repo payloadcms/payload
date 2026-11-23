@@ -22,17 +22,23 @@ export type Configuration = {
 export type RunGroup = {
   config: Configuration
   entries: EvalEntry[]
-  /** True for entries cached before run-tracking — bucketed per configuration as a fallback. */
-  isLegacy: boolean
-  /** Stable id: the runId, or `legacy:<configKey>` for untracked entries. */
+  /** Stable run id. */
   key: string
-  /** ISO timestamp for sorting: the runId for tracked runs, else the latest createdAt. */
+  /** ISO timestamp for sorting. */
   timestamp: string
 }
 
-/** The run a result belongs to: its runId, or a per-configuration legacy bucket. */
-export function runKeyOf(result: EvalResult): string {
-  return result.runId ?? `legacy:${getConfiguration(result).key}`
+export function runKeyOf(result: { runId: string } & EvalResult): string {
+  return result.runId
+}
+
+/** Formats an ISO timestamp in the computer's local timezone. */
+export function formatLocalTimestamp(timestamp: string): string {
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) {
+    return timestamp
+  }
+  return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 /** Strips the provider prefix (llm: `anthropic.messages/x` → `x`) or CLI version (agent: `claude-code/x/1.2` → `x`). */
@@ -76,18 +82,12 @@ export function groupByRun(entries: EvalEntry[]): RunGroup[] {
       group = {
         config: getConfiguration(entry.result),
         entries: [],
-        isLegacy: !entry.result.runId,
         key,
-        timestamp: entry.result.runId ?? '',
+        timestamp: entry.result.runId,
       }
       map.set(key, group)
     }
     group.entries.push(entry)
-  }
-  for (const group of map.values()) {
-    if (group.isLegacy) {
-      group.timestamp = group.entries.reduce((m, e) => (e.createdAt > m ? e.createdAt : m), '')
-    }
   }
   return [...map.values()].sort((a, b) => b.timestamp.localeCompare(a.timestamp))
 }

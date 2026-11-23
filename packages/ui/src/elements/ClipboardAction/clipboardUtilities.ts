@@ -3,11 +3,55 @@ import type {
   ClipboardPasteActionArgs,
   ClipboardPasteActionValidateArgs,
   ClipboardPasteData,
+  ClipboardPasteEligibilityArgs,
 } from './types.js'
 
 import { isClipboardDataValid } from './isClipboardDataValid.js'
 
 const localStorageClipboardKey = '_payloadClipboard'
+
+/**
+ * Reads and parses the clipboard data from localStorage.
+ *
+ * @note This function doesn't use the Clipboard API, but localStorage. See rationale in #11513
+ */
+function readClipboardData(): ClipboardPasteData | null {
+  try {
+    const jsonFromClipboard = localStorage.getItem(localStorageClipboardKey)
+
+    if (!jsonFromClipboard) {
+      return null
+    }
+
+    return JSON.parse(jsonFromClipboard)
+  } catch (_err) {
+    return null
+  }
+}
+
+/**
+ * Whether the clipboard contents can be pasted into the target field.
+ *
+ * Returns `false` when the clipboard is empty or its schema is incompatible
+ * with the target. Used to disable paste actions when they would fail.
+ */
+export function canPasteClipboardData(args: ClipboardPasteEligibilityArgs): boolean {
+  const dataToPaste = readClipboardData()
+
+  if (!dataToPaste) {
+    return false
+  }
+
+  const { path, ...schemaArgs } = args
+
+  const dataToValidate = {
+    ...dataToPaste,
+    ...schemaArgs,
+    fieldPath: path,
+  } as ClipboardPasteActionValidateArgs
+
+  return isClipboardDataValid(dataToValidate)
+}
 
 /**
  * @note This function doesn't use the Clipboard API, but localStorage. See rationale in #11513
@@ -37,17 +81,9 @@ export function clipboardPaste({
   t,
   ...args
 }: ClipboardPasteActionArgs): string | true {
-  let dataToPaste: ClipboardPasteData
+  const dataToPaste = readClipboardData()
 
-  try {
-    const jsonFromClipboard = localStorage.getItem(localStorageClipboardKey)
-
-    if (!jsonFromClipboard) {
-      return t('error:invalidClipboardData')
-    }
-
-    dataToPaste = JSON.parse(jsonFromClipboard)
-  } catch (_err) {
+  if (!dataToPaste) {
     return t('error:invalidClipboardData')
   }
 

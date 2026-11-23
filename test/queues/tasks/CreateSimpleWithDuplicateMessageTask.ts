@@ -32,6 +32,7 @@ export const CreateSimpleWithDuplicateMessageTask: TaskConfig<'CreateSimpleWithD
         data: {
           title: input.message + input.message,
         },
+        overrideAccess: true,
       })
       return {
         output: {

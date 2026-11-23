@@ -1,6 +1,7 @@
 'use client'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useId, useState } from 'react'
 
+import { useTranslation } from '../../providers/Translation/index.js'
 import { ClickableArrow } from './ClickableArrow/index.js'
 import './index.css'
 
@@ -15,6 +16,7 @@ export type PaginationProps = {
   onChange?: (page: number) => void
   page?: number
   prevPage?: number
+  tableId?: string
   totalPages?: number
 }
 
@@ -26,9 +28,12 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     onChange,
     page: currentPage = 1,
     prevPage = null,
+    tableId,
     totalPages = 1,
   } = props
 
+  const pageDescriptionID = useId()
+  const { t } = useTranslation()
   const [inputValue, setInputValue] = useState(String(currentPage))
 
   // Sync input value when currentPage changes externally
@@ -86,26 +91,29 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     }
   }
 
-  if (!totalPages || totalPages <= 1) {
-    return null
-  }
+  const isSinglePage = !totalPages || totalPages <= 1
 
   return (
     <div className={baseClass}>
       <ClickableArrow
+        ariaControls={tableId}
         direction="left"
-        isDisabled={!hasPrevPage}
+        isDisabled={isSinglePage || !hasPrevPage}
         updatePage={() => updatePage(prevPage ?? Math.max(1, currentPage - 1))}
       />
       <ClickableArrow
+        ariaControls={tableId}
         direction="right"
-        isDisabled={!hasNextPage}
+        isDisabled={isSinglePage || !hasNextPage}
         updatePage={() => updatePage(nextPage ?? currentPage + 1)}
       />
       <div className={`${baseClass}__page-input-wrapper`}>
         <input
-          aria-label="Go to page"
+          aria-controls={tableId}
+          aria-describedby={pageDescriptionID}
+          aria-label={t('general:goToPage')}
           className={`${baseClass}__page-input`}
+          disabled={isSinglePage}
           inputMode="numeric"
           max={totalPages}
           min={1}
@@ -116,7 +124,12 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
           type="text"
           value={inputValue}
         />
-        <span className={`${baseClass}__page-total`}>of {totalPages}</span>
+        <span className="sr-only" id={pageDescriptionID}>
+          {t('general:pageNumberRange', { totalPages: isSinglePage ? 1 : totalPages })}
+        </span>
+        <span className={`${baseClass}__page-total`}>
+          {t('general:of')} {isSinglePage ? 1 : totalPages}
+        </span>
       </div>
     </div>
   )

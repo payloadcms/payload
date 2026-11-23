@@ -4,6 +4,7 @@ import type { RunnerKind } from './runner/types.js'
 import type { SuiteOptions } from './suites/types.js'
 
 import { MODELS } from './models.js'
+import { RUNNER_CAPABILITIES } from './runner/types.js'
 
 const DEFAULT_AGENT_MODEL = 'claude-opus-4-6'
 
@@ -49,6 +50,7 @@ export function resolveVariantOptions(): SuiteOptions {
     const agentModel = model ?? DEFAULT_AGENT_MODEL
     return {
       agentModel,
+      capabilities: RUNNER_CAPABILITIES[runner],
       kind: 'claude-code',
       labelSuffix: ` (claude-code/${agentModel}${skillOn ? '' : ', no skill'})`,
       skillInstall: skillOn ? 'embedded' : 'none',
@@ -66,6 +68,7 @@ export function resolveVariantOptions(): SuiteOptions {
   }
 
   return {
+    capabilities: RUNNER_CAPABILITIES[runner],
     kind: 'llm',
     labelSuffix: skillOn ? '' : ' (baseline)',
     // Undefined falls back to DEFAULT_RUNNER_MODEL (key-based) in runCodegenCase.

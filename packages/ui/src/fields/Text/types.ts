@@ -1,4 +1,4 @@
-import type { StaticDescription, StaticLabel } from 'payload'
+import type { BrowserAutoComplete, StaticDescription, StaticLabel } from 'payload'
 import type { ChangeEvent, JSX } from 'react'
 import type React from 'react'
 
@@ -23,11 +23,12 @@ export type TextInputProps = {
   readonly Error?: React.ReactNode
   readonly htmlAttributes?: {
     'aria-label'?: JSX.IntrinsicElements['input']['aria-label']
-    autoComplete?: JSX.IntrinsicElements['input']['autoComplete']
+    autoComplete?: BrowserAutoComplete
     readOnly?: JSX.IntrinsicElements['input']['readOnly']
   }
   /**
-   * Overrides the input `id` and label `htmlFor`. Defaults to 'field-' + path.
+   * Overrides the input `id` and default label `htmlFor`. The generated ID is
+   * scoped to the field path, edit depth, and form UUID.
    * Use to avoid duplicate IDs when two inputs share a path.
    */
   readonly id?: string

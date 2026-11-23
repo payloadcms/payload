@@ -1,4 +1,3 @@
-import { slugField } from 'payload'
 import type { CollectionConfig } from 'payload'
 
 import { adminOnly } from '@/access/adminOnly'
@@ -21,8 +20,11 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    slugField({
-      position: undefined,
-    }),
+    {
+      name: 'slug',
+      type: 'slug',
+      useAsSlug: 'title',
+      admin: { position: undefined },
+    },
   ],
 }

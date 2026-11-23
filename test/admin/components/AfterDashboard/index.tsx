@@ -2,7 +2,7 @@ import type { PayloadServerReactComponent, SanitizedConfig } from 'payload'
 
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'after-dashboard'
 

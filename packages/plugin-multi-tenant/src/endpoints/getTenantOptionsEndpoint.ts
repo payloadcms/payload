@@ -1,4 +1,4 @@
-import type { Endpoint } from 'payload'
+import type { Endpoint, OptionObject } from 'payload'
 
 import { APIError } from 'payload'
 
@@ -6,7 +6,12 @@ import type { MultiTenantPluginConfig } from '../types.js'
 
 import { getTenantOptions } from '../utilities/getTenantOptions.js'
 
-export const getTenantOptionsEndpoint = <ConfigType>({
+export type GetTenantOptionsResponse = {
+  hasAccessToAllTenants: boolean
+  tenantOptions: OptionObject[]
+}
+
+export const getTenantOptionsEndpoint = ({
   tenantsArrayFieldName,
   tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
@@ -17,9 +22,7 @@ export const getTenantOptionsEndpoint = <ConfigType>({
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }): Endpoint => ({
   handler: async (req) => {
     const { payload, user } = req
@@ -28,17 +31,20 @@ export const getTenantOptionsEndpoint = <ConfigType>({
       throw new APIError('Unauthorized', 401)
     }
 
+    const hasAccessToAllTenants = userHasAccessToAllTenants(user)
     const tenantOptions = await getTenantOptions({
+      hasAccessToAllTenants,
       payload,
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
       useAsTitle,
       user,
-      userHasAccessToAllTenants,
     })
 
-    return new Response(JSON.stringify({ tenantOptions }))
+    const result: GetTenantOptionsResponse = { hasAccessToAllTenants, tenantOptions }
+
+    return new Response(JSON.stringify(result))
   },
   method: 'get',
   path: '/populate-tenant-options',

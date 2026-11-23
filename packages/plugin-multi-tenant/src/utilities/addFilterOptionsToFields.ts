@@ -1,13 +1,12 @@
-import type { Block, Config, Field, RelationshipField, SanitizedConfig } from 'payload'
+import type { Block, Field, RelationshipField } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
 import { defaults } from '../defaults.js'
 import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
 
-type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
+type AddFilterOptionsToFieldsArgs = {
   blockReferencesWithFilters: string[]
-  config: Config | SanitizedConfig
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
@@ -15,14 +14,11 @@ type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 
-export function addFilterOptionsToFields<ConfigType = unknown>({
+export function addFilterOptionsToFields({
   blockReferencesWithFilters,
-  config,
   fields,
   tenantEnabledCollectionSlugs,
   tenantEnabledGlobalSlugs,
@@ -31,7 +27,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterOptionsToFieldsArgs<ConfigType>): Field[] {
+}: AddFilterOptionsToFieldsArgs): Field[] {
   const newFields = []
   for (const field of fields) {
     let newField: Field = { ...field }
@@ -65,7 +61,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
 
       if (hasTenantRelationsips) {
         newField = addRelationshipFilter({
-          field: newField as RelationshipField,
+          field: newField,
           tenantEnabledCollectionSlugs,
           tenantFieldName,
           tenantsArrayFieldName,
@@ -84,7 +80,6 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
     ) {
       newField.fields = addFilterOptionsToFields({
         blockReferencesWithFilters,
-        config,
         fields: newField.fields,
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
@@ -105,18 +100,15 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
         if (typeof _block === 'string') {
           isReference = true
           if (!blockReferencesWithFilters.includes(_block)) {
-            block = config?.blocks?.find((b) => b.slug === _block)
             blockReferencesWithFilters.push(_block)
           }
         } else {
-          // Create a shallow copy to avoid mutating the original block reference
           block = { ..._block }
         }
 
         if (block?.fields) {
           block.fields = addFilterOptionsToFields({
             blockReferencesWithFilters,
-            config,
             fields: block.fields,
             tenantEnabledCollectionSlugs,
             tenantEnabledGlobalSlugs,
@@ -138,7 +130,6 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
         const newTab = { ...tab }
         newTab.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
-          config,
           fields: tab.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
@@ -158,18 +149,16 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   return newFields
 }
 
-type AddFilterArgs<ConfigType = unknown> = {
+type AddFilterArgs = {
   field: RelationshipField
   tenantEnabledCollectionSlugs: string[]
   tenantFieldName: string
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
-function addRelationshipFilter<ConfigType = unknown>({
+function addRelationshipFilter({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,
@@ -177,48 +166,50 @@ function addRelationshipFilter<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterArgs<ConfigType>): Field {
+}: AddFilterArgs): RelationshipField {
   // User specified filter
   const originalFilter = field.filterOptions
-  field.filterOptions = async (args) => {
-    const originalFilterResult =
-      typeof originalFilter === 'function' ? await originalFilter(args) : (originalFilter ?? true)
 
-    // If the relationTo is not a tenant enabled collection, return early
-    if (args.relationTo && !tenantEnabledCollectionSlugs.includes(args.relationTo)) {
-      return originalFilterResult
-    }
+  return {
+    ...field,
+    filterOptions: async (args) => {
+      const originalFilterResult =
+        typeof originalFilter === 'function' ? await originalFilter(args) : (originalFilter ?? true)
 
-    // If the original filtr returns false, return early
-    if (originalFilterResult === false) {
-      return false
-    }
+      // If the relationTo is not a tenant enabled collection, return early
+      if (args.relationTo && !tenantEnabledCollectionSlugs.includes(args.relationTo)) {
+        return originalFilterResult
+      }
 
-    // Custom tenant filter
-    const tenantFilterResults = filterDocumentsByTenants({
-      docTenantID: args.data?.[tenantFieldName],
-      filterFieldName: tenantFieldName,
-      req: args.req,
-      tenantsArrayFieldName,
-      tenantsArrayTenantFieldName,
-      tenantsCollectionSlug,
-      userHasAccessToAllTenants,
-    })
+      // If the original filter returns false, return early
+      if (originalFilterResult === false) {
+        return false
+      }
 
-    // If the tenant filter returns null, meaning no tenant filter, just use the original filter
-    if (tenantFilterResults === null) {
-      return originalFilterResult
-    }
+      // Custom tenant filter
+      const tenantFilterResults = filterDocumentsByTenants({
+        docTenantID: args.data?.[tenantFieldName],
+        filterFieldName: tenantFieldName,
+        req: args.req,
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
+        tenantsCollectionSlug,
+        userHasAccessToAllTenants,
+      })
 
-    // If the original filter returns true, just use the tenant filter
-    if (originalFilterResult === true) {
-      return tenantFilterResults
-    }
+      // If the tenant filter returns null, meaning no tenant filter, just use the original filter
+      if (tenantFilterResults === null) {
+        return originalFilterResult
+      }
 
-    return {
-      and: [originalFilterResult, tenantFilterResults],
-    }
+      // If the original filter returns true, just use the tenant filter
+      if (originalFilterResult === true) {
+        return tenantFilterResults
+      }
+
+      return {
+        and: [originalFilterResult, tenantFilterResults],
+      }
+    },
   }
-
-  return field
 }

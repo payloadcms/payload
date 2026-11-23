@@ -5,13 +5,13 @@ import type { Block, BlockSlug, CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   defaultEditorFeatures,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   getEnabledNodes,
   HeadingFeature,
   lexicalEditor,
   LinkFeature,
   sanitizeServerEditorConfig,
+  TableFeature,
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
@@ -122,6 +122,37 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
         },
         type: 'select',
         options: ['value1', 'value2', 'value3'],
+      },
+      {
+        name: 'showServerRequired',
+        type: 'checkbox',
+      },
+      {
+        name: 'serverRequired',
+        type: 'text',
+        access: {
+          read: ({ siblingData }) => Boolean(siblingData?.showServerRequired),
+        },
+        validate: (value, { siblingData }) =>
+          !siblingData?.showServerRequired || Boolean(value) || 'Server-required value missing',
+      },
+      {
+        name: 'showRequiredGroup',
+        type: 'checkbox',
+      },
+      {
+        name: 'requiredGroup',
+        type: 'group',
+        admin: {
+          condition: (_, siblingData) => Boolean(siblingData?.showRequiredGroup),
+        },
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            required: true,
+          },
+        ],
       },
     ],
   } satisfies Block,
@@ -283,7 +314,7 @@ export const getLexicalFieldsCollection: (args: {
         blocks,
         inlineBlocks,
       }),
-      EXPERIMENTAL_TableFeature(),
+      TableFeature(),
     ],
   }
   return {
@@ -377,8 +408,8 @@ export const getLexicalFieldsCollection: (args: {
         type: 'textarea',
         hooks: {
           afterRead: [
-            async ({ data, req, siblingData }) => {
-              const yourSanitizedEditorConfig = await sanitizeServerEditorConfig(
+            ({ data, req, siblingData }) => {
+              const yourSanitizedEditorConfig = sanitizeServerEditorConfig(
                 editorConfig,
                 req.payload.config,
               )

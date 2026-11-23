@@ -15,7 +15,6 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--theme-elevation-700);
-  transition: all 0.15s ease;
 }
 
 .custom-dashboard__tab:hover {

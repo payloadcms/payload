@@ -1,15 +1,18 @@
 @layer payload-default {
   .field-error.tooltip {
-    --tooltip-x: 0%;
-    left: auto;
-    max-width: 75%;
-    right: 0;
+    --field-error-max-width: calc(100vw - var(--spacer-6) * 2);
+    --tooltip-max-width: var(--field-error-max-width);
+
+    display: block;
+    max-inline-size: min(var(--field-error-max-width), var(--tooltip-max-width));
+    white-space: normal;
+    overflow-wrap: anywhere;
     color: var(--field-color-error-text);
     background-color: var(--field-color-error-bg);
+  }
 
-    &::after {
-      border-top-color: var(--field-color-error-bg);
-      border-bottom-color: var(--field-color-error-bg);
-    }
+  .field-error.tooltip:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
   }
 }

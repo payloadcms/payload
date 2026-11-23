@@ -27,6 +27,7 @@
     overflow: hidden;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .bulk-upload-modal.drawer {
       padding: 0;
@@ -40,6 +41,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .bulk-upload-modal .document-fields__edit {
       padding-top: var(--spacer-4);

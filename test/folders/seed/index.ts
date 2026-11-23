@@ -1,10 +1,9 @@
 import type { Config, Payload } from 'payload'
 
-import { folderSlug } from '../shared.js'
-
 import type { Post } from '../payload-types.js'
 
 import { devUser } from '../../credentials.js'
+import { folderSlug } from '../shared.js'
 
 async function createPost(
   payload: Payload,
@@ -16,6 +15,7 @@ async function createPost(
       title,
       folder,
     },
+    overrideAccess: true,
   })
 }
 
@@ -29,6 +29,7 @@ async function createFolder(
       name,
       folder,
     },
+    overrideAccess: true,
   })
 }
 
@@ -39,6 +40,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   for (let i = 0; i < 12; i++) {

@@ -34,7 +34,7 @@ export function DashboardInfo() {
 
         {/* Eval Results */}
         <Card
-          body="Browse every cached result — filter by pass/fail, category, or type. Expand any row to read the full answer, scorer reasoning, and per-call token usage."
+          body="Browse every run result — filter by pass/fail, category, or type. Expand any row to read the full answer, scorer reasoning, and per-call token usage."
           title="Eval Results"
         />
 

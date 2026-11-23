@@ -20,7 +20,6 @@
     border-radius: var(--field-border-radius);
     background: var(--color-bg-secondary);
     color: var(--field-color-text);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -37,11 +36,15 @@
     &:focus-visible {
       outline: none;
     }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   }
 
   .paginator__page-total {
     color: var(--color-text);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

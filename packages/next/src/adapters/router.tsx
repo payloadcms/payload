@@ -23,9 +23,8 @@ type LinkComponent = React.FC<
   } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
 >
 
-const NextLink: LinkComponent = ('default' in NextLinkImport
-  ? NextLinkImport.default
-  : NextLinkImport) as unknown as LinkComponent
+const NextLink: LinkComponent =
+  'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
 
 const NextLinkAdapter: React.FC<LinkAdapterProps> = ({
   children,
@@ -55,6 +54,7 @@ export const NextRouterAdapter: React.FC<{ children: React.ReactNode }> = ({ chi
       push: nextRouter.push,
       refresh: nextRouter.refresh,
       replace: nextRouter.replace,
+      replaceState: (url) => window.history.replaceState(null, '', url),
     }),
     [nextRouter],
   )
@@ -62,7 +62,7 @@ export const NextRouterAdapter: React.FC<{ children: React.ReactNode }> = ({ chi
   const value = React.useMemo<RouterAdapterContextValue>(
     () => ({
       Link: NextLinkAdapter,
-      params: params as Record<string, string | string[]>,
+      params,
       pathname,
       router,
       searchParams,

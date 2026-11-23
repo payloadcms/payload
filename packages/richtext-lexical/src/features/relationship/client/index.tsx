@@ -2,7 +2,7 @@
 
 import { $isNodeSelection } from 'lexical'
 
-import type { RelationshipFeatureProps } from '../server/index.js'
+import type { RelationshipFeatureClientProps } from '../server/index.js'
 
 import { RelationshipIcon } from '../../../lexical/ui/icons/Relationship/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
@@ -12,7 +12,7 @@ import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands.js'
 import { $isRelationshipNode, RelationshipNode } from './nodes/RelationshipNode.js'
 import { RelationshipPlugin } from './plugins/index.js'
 
-export const RelationshipFeatureClient = createClientFeature<RelationshipFeatureProps>({
+export const RelationshipFeatureClient = createClientFeature<RelationshipFeatureClientProps>({
   nodes: [RelationshipNode],
   plugins: [
     {

@@ -77,30 +77,25 @@ async function build() {
     bundle: true,
     minify: true,
     outdir: 'dist-styles',
+    loader: { '.svg': 'dataurl' },
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
 
   try {
-    // The esbuild pass above bundles only component styles. The design tokens
-    // live in `src/css/*.css` (referenced via `src/styles.css`'s `@import`
-    // chain). `copyfiles` also copies `src/styles.css` to `dist/styles.css`,
-    // but the write below would overwrite it — dropping the tokens entirely.
-    // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
-    // export, and `scss/app.scss`'s `@import '../styles.css'`) would then get
-    // components with no CSS custom properties, so every `var(--spacer-*)`
-    // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
-    // chain so the published `styles.css` is a complete, self-contained sheet.
-    // Read the tokens straight from `src/css/*.css` so this works regardless of
-    // `directoryArg` (e.g. `dist` for the normal build, `esbuild` for the
-    // bundle-size analysis build, which `copyfiles` does not populate).
+    // Writing esbuild's component styles alone would overwrite the base stylesheet copied by copyfiles.
+    // Include the entry's imports and global rules so published styles retain the tokens that prevent controls from collapsing.
+    // Read from source because copyfiles does not populate alternative output directories such as esbuild.
     const stylesEntry = fs.readFileSync('src/styles.css', 'utf8')
-    const tokenCss = [...stylesEntry.matchAll(/@import\s+['"]\.\/(css\/[^'"]+)['"]/g)]
-      .map((match) => fs.readFileSync(path.join('src', match[1]), 'utf8'))
-      .join('\n')
+
+    const baseCss = stylesEntry.replace(
+      /@import\s+['"]\.\/(css\/[^'"]+)['"];?/g,
+      (_import, relativePath) => fs.readFileSync(path.join('src', relativePath), 'utf8'),
+    )
+
     const componentCss = fs.readFileSync('dist-styles/index.css', 'utf8')
 
-    fs.writeFileSync(`${directoryArg}/styles.css`, `${tokenCss}\n${componentCss}`, 'utf8')
+    fs.writeFileSync(`${directoryArg}/styles.css`, `${baseCss}\n${componentCss}`, 'utf8')
     fs.rmSync('dist-styles', { recursive: true })
   } catch (err) {
     console.error(`Error while bundling styles.css and removing dist-styles: ${err}`)
@@ -108,20 +103,10 @@ async function build() {
   }
 
   console.log('styles.css bundled successfully')
-  // Plugin to externalize all internal relative imports that point outside the
-  // exports/ directory. This prevents the barrel from inlining provider/context
-  // modules, ensuring that both the barrel export and subpath exports resolve to
-  // the same physical files (avoiding duplicate React context instances).
-  const externalizeInternalModules = {
-    name: 'externalize-internal-modules',
-    setup(build) {
-      build.onResolve({ filter: /^\.\.\/\.\.\//, namespace: 'file' }, (args) => {
-        return { external: true, path: args.path }
-      })
-    },
-  }
 
-  // Bundle `client.ts`
+  // Bundle `client.ts`. Admin code must import client code from this barrel only:
+  // subpaths like `@payloadcms/ui/elements/Link` stay unbundled for apps outside the
+  // admin panel, and hold their own copies of providers and contexts.
   const resultClient = await esbuild.build({
     entryPoints: ['dist/exports/client/index.js'],
     bundle: true,
@@ -164,11 +149,8 @@ function require(m) {
       'next',
       'crypto',
       // `sonner` owns a module-level toast event bus that the mounted `<Toaster>`
-      // (in the externalized ToastContainer provider) subscribes to. If the barrel
-      // inlines its own sonner copy, the `toast` it re-exports dispatches to a
-      // different bus than the one `<Toaster>` listens on, so toasts fired from
-      // consumer code imported via `@payloadcms/ui` never render. Keep it external
-      // so every consumer shares the single node_modules instance.
+      // subscribes to. Keep it external so code that imports `sonner` directly
+      // dispatches to the same bus as the barrel's `<Toaster>`.
       'sonner',
     ],
     //packages: 'external',
@@ -178,7 +160,6 @@ function require(m) {
 
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
-      externalizeInternalModules,
       removeCSSImports,
       useClientPlugin, // required for banner to work
       /*commonjs({
@@ -186,8 +167,8 @@ function require(m) {
         }),*/
     ],
     sourcemap: true,
-    // 24.15.0 is the lowest version of node supported by Payload
-    target: 'node24.15.0',
+    // 24.22.3 is the lowest version of node supported by Payload
+    target: 'node24.22.3',
   })
   console.log('client.ts bundled successfully')
 
@@ -225,8 +206,8 @@ function require(m) {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [removeCSSImports, commonjs()],
     sourcemap: true,
-    // 24.15.0 is the lowest version of node supported by Payload
-    target: 'node24.15.0',
+    // 24.22.3 is the lowest version of node supported by Payload
+    target: 'node24.22.3',
   })
   console.log('shared.ts bundled successfully')
 

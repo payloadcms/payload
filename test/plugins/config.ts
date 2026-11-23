@@ -13,8 +13,11 @@ export type ReaderPluginOptions = {
   items: Array<{ name: string }>
 }
 
+export type OptionalSettingsPluginOptions = { items: string[] } | undefined
+
 declare module 'payload' {
   interface RegisteredPlugins {
+    'optional-settings': OptionalSettingsPluginOptions
     'priority-reader': ReaderPluginOptions
   }
 }
@@ -26,12 +29,27 @@ declare module 'payload' {
 const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'priority-reader',
   order: 10,
-  plugin: ({ config, items }): Config => ({
+  plugin: ({ config, options }): Config => ({
     ...config,
     custom: {
       ...(config.custom || {}),
+      readerItems: options.items.map((i) => i.name),
       readerSawValue: (config.custom?.writerValue as string) ?? null,
-      readerItems: items.map((i) => i.name),
+    },
+  }),
+})
+
+/**
+ * Plugin registered without options. The writer replaces its options with a new object.
+ */
+const optionalSettingsPlugin = definePlugin<OptionalSettingsPluginOptions>({
+  slug: 'optional-settings',
+  order: 10,
+  plugin: ({ config, options }): Config => ({
+    ...config,
+    custom: {
+      ...(config.custom || {}),
+      optionalSettingsItems: options?.items ?? [],
     },
   }),
 })
@@ -49,6 +67,11 @@ const writerPlugin = definePlugin({
       reader.options.items.push({ name: 'injected-by-writer' })
     }
 
+    const optionalSettings = plugins['optional-settings']
+    if (optionalSettings) {
+      optionalSettings.options = { items: ['set-by-writer'] }
+    }
+
     return {
       ...config,
       custom: {
@@ -60,50 +83,55 @@ const writerPlugin = definePlugin({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'plugins',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'users',
+        auth: true,
+        fields: [],
+        versions: false,
+      },
+    ],
+    plugins: [
+      (config) => ({
+        ...config,
+        collections: [
+          ...(config.collections || []),
+          {
+            slug: pagesSlug,
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+              },
+            ],
+            versions: false,
+          },
+        ],
+      }),
+      // Intentionally listed BEFORE the writer to verify order sorting works
+      readerPlugin({ items: [{ name: 'user-provided' }] }),
+      optionalSettingsPlugin(),
+      writerPlugin(),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'users',
-      auth: true,
-      fields: [],
-      versions: false,
-    },
-  ],
-  plugins: [
-    (config) => ({
-      ...config,
-      collections: [
-        ...(config.collections || []),
-        {
-          slug: pagesSlug,
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-            },
-          ],
-          versions: false,
-        },
-      ],
-    }),
-    // Intentionally listed BEFORE the writer to verify order sorting works
-    readerPlugin({ items: [{ name: 'user-provided' }] }),
-    writerPlugin(),
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

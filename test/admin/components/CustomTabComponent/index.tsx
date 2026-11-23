@@ -3,7 +3,7 @@ import type { DocumentTabServerProps } from 'payload'
 import React from 'react'
 
 import { CustomTabComponentClient } from './client.js'
-import './index.scss'
+import './index.css'
 
 type CustomTabComponentProps = {
   label: string

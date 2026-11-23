@@ -20,7 +20,7 @@ export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
       key === 'where' &&
       typeof value === 'object' &&
       value !== null &&
-      !Object.keys(value as Where).length
+      !Object.keys(value).length
     ) {
       delete sanitized[key]
     }

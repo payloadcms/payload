@@ -1,3 +1,4 @@
+import type { File } from '@payloadcms/plugin-cloud-storage/types'
 import type { S3StorageOptions } from '@payloadcms/storage-s3'
 import type { StorageAdapter } from 'payload'
 
@@ -5,44 +6,71 @@ import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { azureStorage } from '@payloadcms/storage-azure'
 import { gcsStorage } from '@payloadcms/storage-gcs'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
+import { MediaWithDisabledPlugin } from './collections/MediaWithDisabledPlugin.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
+import { ReferencedCloudMedia } from './collections/ReferencedCloudMedia.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
+import { UnversionedCloudMedia } from './collections/UnversionedCloudMedia.js'
 import { Users } from './collections/Users.js'
+import { VersionedCloudMedia } from './collections/VersionedCloudMedia.js'
+import { VersionedConvertedCloudMedia } from './collections/VersionedConvertedCloudMedia.js'
+import { VersionedPublicCloudMedia } from './collections/VersionedPublicCloudMedia.js'
+import { VersionedPublicVariantCloudMedia } from './collections/VersionedPublicVariantCloudMedia.js'
+import { VersionedS3Media } from './collections/VersionedS3Media.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
   mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
+  mediaWithDisabledPluginSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
   mediaWithThrowingHookSlug,
   prefix,
+  referencedCloudMediaSlug,
   restrictedMediaSlug,
   testMetadataSlug,
+  unversionedCloudMediaSlug,
+  versionedCloudMediaSlug,
+  versionedConvertedCloudMediaSlug,
+  versionedPublicCloudMediaSlug,
+  versionedPublicVariantCloudMediaSlug,
+  versionedS3MediaSlug,
 } from './shared.js'
-import { createTestBucket } from './utils.js'
+import {
+  publicVersionedCloudAdapter,
+  referencedVersionedCloudAdapter,
+  versionedCloudAdapter,
+} from './versionedCloudStorage.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+export const uploadedTestFiles = new Map<string, { prefix?: string } & File>()
 
 export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
   useCompositePrefixes: boolean
 }
+
+export const recordedCleanupTargets: Array<{ filename: string; storageFilePath: string }> = []
 
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
@@ -123,6 +151,7 @@ export function buildPluginCloudStorageIntConfig({
         },
         [mediaWithThrowingHookSlug]: true,
         [restrictedMediaSlug]: true,
+        [versionedS3MediaSlug]: { prefix: collectionPrefix },
       },
       config: {
         credentials: {
@@ -158,17 +187,49 @@ export function buildPluginCloudStorageIntConfig({
     })
   }
 
+  const disabledStoragePlugin = cloudStoragePlugin({
+    collections: {
+      [mediaWithDisabledPluginSlug]: {
+        adapter: null,
+      },
+    },
+    enabled: false,
+  })
+
   const testMetadataPlugin = cloudStoragePlugin({
     collections: {
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: () => Promise.resolve(),
-          handleUpload: ({ data, file }) => {
+          copyFile: ({ from, to }) => {
+            const source = uploadedTestFiles.get(from)
+
+            if (!source || uploadedTestFiles.has(to)) {
+              throw new Error('Cannot copy test storage file')
+            }
+
+            uploadedTestFiles.set(to, { ...source, filename: path.posix.basename(to) })
+            return Promise.resolve()
+          },
+          deleteFile: ({ storageFilePath }) => {
+            recordedCleanupTargets.push({
+              filename: path.posix.basename(storageFilePath),
+              storageFilePath,
+            })
+            uploadedTestFiles.delete(storageFilePath)
+          },
+          handleDelete: ({ filename, storageFilePath }) => {
+            recordedCleanupTargets.push({ filename, storageFilePath })
+            uploadedTestFiles.delete(storageFilePath)
+          },
+          handleUpload: ({ data, file, storageFilePath }) => {
+            uploadedTestFiles.set(storageFilePath, { ...file, prefix: data.prefix })
+            const uploadData = data as Record<string, unknown>
+            uploadData.customStorageId = `storage-${Date.now()}`
+
             const metadata = {
               ...data,
               bucketName: 'test-bucket',
-              customStorageId: `storage-${Date.now()}`,
               objectKey: data.filename || file.filename,
               processingStatus: 'completed',
               storageProvider: 'test-adapter',
@@ -179,66 +240,102 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
+        prefix: 'test-metadata',
+      },
+    },
+  })
+
+  const versionedCloudPlugin = cloudStoragePlugin({
+    collections: {
+      [referencedCloudMediaSlug]: { adapter: referencedVersionedCloudAdapter },
+      [unversionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
+      [versionedCloudMediaSlug]: { adapter: versionedCloudAdapter },
+      [versionedConvertedCloudMediaSlug]: { adapter: versionedCloudAdapter },
+      [versionedPublicCloudMediaSlug]: {
+        adapter: publicVersionedCloudAdapter,
+        disablePayloadAccessControl: true,
+      },
+      [versionedPublicVariantCloudMediaSlug]: {
+        adapter: publicVersionedCloudAdapter,
+        disablePayloadAccessControl: true,
       },
     },
   })
 
   return buildConfigWithDefaults({
-    admin: {
-      importMap: {
-        baseDir: path.resolve(dirname),
+    config: {
+      admin: {
+        importMap: {
+          baseDir: path.resolve(dirname),
+        },
+      },
+      collections: [
+        Media,
+        MediaWithCompositePrefixes,
+        MediaWithCustomURL,
+        MediaWithDisabledPlugin,
+        MediaWithGenerateFileURL,
+        MediaWithOverwrite,
+        MediaWithPrefix,
+        MediaWithThrowingHook,
+        ReferencedCloudMedia,
+        RestrictedMedia,
+        TestMetadata,
+        UnversionedCloudMedia,
+        Users,
+        VersionedCloudMedia,
+        VersionedConvertedCloudMedia,
+        VersionedPublicCloudMedia,
+        VersionedPublicVariantCloudMedia,
+        VersionedS3Media,
+      ],
+      endpoints: r2UploadEndpoints,
+      plugins: [testMetadataPlugin, versionedCloudPlugin, disabledStoragePlugin],
+      storage: storagePlugin ? [storagePlugin] : [],
+      typescript: {
+        outputFile: path.resolve(dirname, 'payload-types.ts'),
+      },
+      upload: {
+        ...uploadOptions,
+        transformers: [
+          sharpTransformer({
+            collections: {
+              [mediaSlug]: storageMediaSharpOptions,
+              [mediaWithOverwriteSlug]: storageMediaSharpOptions,
+              [testMetadataSlug]: {
+                formatOptions: { format: 'webp' },
+                variants: [{ name: 'thumbnail', width: 300 }],
+              },
+              [versionedConvertedCloudMediaSlug]: {
+                formatOptions: { format: 'jpeg' },
+              },
+              [versionedPublicVariantCloudMediaSlug]: {
+                variants: [{ name: 'small', width: 100 }],
+              },
+              [versionedS3MediaSlug]: {
+                variants: [{ name: 'small', width: 100 }],
+              },
+            },
+          }),
+        ],
       },
     },
-    collections: [
-      Media,
-      MediaWithCompositePrefixes,
-      MediaWithCustomURL,
-      MediaWithGenerateFileURL,
-      MediaWithOverwrite,
-      MediaWithPrefix,
-      MediaWithThrowingHook,
-      RestrictedMedia,
-      TestMetadata,
-      Users,
-    ],
-    onInit: async (payload) => {
-      /*const client = new AWS.S3({
-      endpoint: process.env.S3_ENDPOINT,
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      },
-    })
-
-    const makeBucketRes = await client.send(
-      new AWS.CreateBucketCommand({ Bucket: 'payload-bucket' }),
-    )
-
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
-    }*/
-
+    seed: async (payload) => {
       await payload.create({
         collection: 'users',
         data: {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
-
-      await createTestBucket()
 
       payload.logger.info(
         `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
       )
     },
-    plugins: [testMetadataPlugin],
-    storage: storagePlugin ? [storagePlugin] : [],
-    typescript: {
-      outputFile: path.resolve(dirname, 'payload-types.ts'),
-    },
-    upload: uploadOptions,
+    suite: useCompositePrefixes
+      ? 'plugin-cloud-storage-composite-prefixes'
+      : 'plugin-cloud-storage',
   })
 }

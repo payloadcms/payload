@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { APIError, type FlattenedField } from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { expandOwnDottedKey, fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -68,6 +68,7 @@ type Args = {
    */
   parentTableName: string
   path: string
+  pathPrefixesToDelete: RowToInsert['pathPrefixesToDelete']
   relationships: Record<string, unknown>[]
   relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -105,6 +106,7 @@ export const traverseFields = ({
   parentIsLocalized,
   parentTableName,
   path,
+  pathPrefixesToDelete,
   relationships,
   relationshipsToAppend,
   relationshipsToDelete,
@@ -141,7 +143,12 @@ export const traverseFields = ({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      if (fieldData === undefined) {
+        return
+      }
+
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
+      const arrayPathPrefix = `${path || ''}${field.name}.`
 
       if (isLocalized) {
         const value = data[field.name]
@@ -160,6 +167,11 @@ export const traverseFields = ({
             }
 
             if (Array.isArray(localeData)) {
+              // A `$push` only appends rows, so existing path-keyed rows must be left alone
+              if (!push && !insideArrayOrBlock) {
+                pathPrefixesToDelete.add(arrayPathPrefix)
+              }
+
               const newRows = transformArray({
                 adapter,
                 arrayTableName,
@@ -173,6 +185,7 @@ export const traverseFields = ({
                 numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
+                pathPrefixesToDelete,
                 relationships,
                 relationshipsToDelete,
                 selects,
@@ -198,9 +211,14 @@ export const traverseFields = ({
       } else {
         let value = data[field.name]
         let push = false
-        if (typeof value === 'object' && '$push' in value) {
+        if (value !== null && typeof value === 'object' && '$push' in value) {
           value = Array.isArray(value.$push) ? value.$push : [value.$push]
           push = true
+        }
+
+        // A `$push` only appends rows, so existing path-keyed rows must be left alone
+        if (!push && !insideArrayOrBlock) {
+          pathPrefixesToDelete.add(arrayPathPrefix)
         }
 
         const newRows = transformArray({
@@ -215,6 +233,7 @@ export const traverseFields = ({
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToDelete,
           selects,
@@ -254,10 +273,19 @@ export const traverseFields = ({
         )
       })
 
+      // Block rows are replaced in full like array rows, so their path-keyed rows are cleared by
+      // prefix too. Only the outermost array or blocks field registers one, as it covers every
+      // nested path.
+      const blocksPathPrefix = `${path || ''}${field.name}.`
+
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!insideArrayOrBlock) {
+                pathPrefixesToDelete.add(blocksPathPrefix)
+              }
+
               transformBlocks({
                 adapter,
                 baseTableName,
@@ -270,6 +298,7 @@ export const traverseFields = ({
                 numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
+                pathPrefixesToDelete,
                 relationships,
                 relationshipsToDelete,
                 selects,
@@ -281,6 +310,10 @@ export const traverseFields = ({
           })
         }
       } else if (isArrayOfRows(fieldData)) {
+        if (!insideArrayOrBlock) {
+          pathPrefixesToDelete.add(blocksPathPrefix)
+        }
+
         transformBlocks({
           adapter,
           baseTableName,
@@ -292,6 +325,7 @@ export const traverseFields = ({
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToDelete,
           selects,
@@ -332,6 +366,7 @@ export const traverseFields = ({
               parentIsLocalized: parentIsLocalized || field.localized,
               parentTableName,
               path: `${path || ''}${field.name}.`,
+              pathPrefixesToDelete,
               relationships,
               relationshipsToAppend,
               relationshipsToDelete,
@@ -368,6 +403,7 @@ export const traverseFields = ({
             parentIsLocalized: parentIsLocalized || field.localized,
             parentTableName,
             path: `${path || ''}${field.name}.`,
+            pathPrefixesToDelete,
             relationships,
             relationshipsToAppend,
             relationshipsToDelete,
@@ -696,6 +732,10 @@ export const traverseFields = ({
     }
 
     if (field.type === 'select' && field.hasMany) {
+      if (fieldData === undefined) {
+        return
+      }
+
       const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) {
         selects[selectTableName] = []
@@ -816,23 +856,7 @@ export const traverseFields = ({
   // Handle dot-notation paths when no fields matched
   if (!fieldsMatched) {
     Object.keys(data).forEach((key) => {
-      if (key.includes('.')) {
-        // Split on first dot only
-        const firstDotIndex = key.indexOf('.')
-        const fieldName = key.substring(0, firstDotIndex)
-        const remainingPath = key.substring(firstDotIndex + 1)
-
-        // Create nested structure for this field
-        if (!data[fieldName]) {
-          data[fieldName] = {}
-        }
-
-        const nestedData = data[fieldName] as Record<string, unknown>
-
-        // Move the value to the nested structure
-        nestedData[remainingPath] = data[key]
-        delete data[key]
-
+      if (expandOwnDottedKey({ key, target: data })) {
         // Recursively process the newly created nested structure
         // The field traversal will naturally handle it if the field exists in the schema
         traverseFields({
@@ -856,6 +880,7 @@ export const traverseFields = ({
           parentIsLocalized,
           parentTableName,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToAppend,
           relationshipsToDelete,

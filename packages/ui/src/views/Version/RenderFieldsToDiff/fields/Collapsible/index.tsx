@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldDiffClientComponent } from 'payload'
+import type { CollapsibleFieldDiffClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -11,12 +11,12 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'collapsible-diff'
 
-export const Collapsible: CollapsibleFieldDiffClientComponent = ({
+export const Collapsible: React.FC<CollapsibleFieldDiffClientProps> = ({
   baseVersionField,
-  comparisonValue: valueFrom,
   field,
   parentIsLocalized,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()

@@ -101,6 +101,7 @@ export const getVersions = async ({
             depth: 0,
             limit: 1,
             locale: locale || undefined,
+            overrideAccess: true,
             pagination: false,
             select: {
               updatedAt: true,
@@ -144,6 +145,7 @@ export const getVersions = async ({
           depth: 0,
           limit: 1,
           locale,
+          overrideAccess: true,
           select: {
             autosave: true,
           },
@@ -164,6 +166,7 @@ export const getVersions = async ({
         ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
           collection: collectionConfig.slug,
           locale,
+          overrideAccess: true,
           user,
           where: combineQueries(
             {
@@ -204,6 +207,7 @@ export const getVersions = async ({
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
       locale,
+      overrideAccess: true,
       user,
       where: combineQueries(
         countVersionsWhere,
@@ -222,6 +226,7 @@ export const getVersions = async ({
           slug: globalConfig.slug,
           depth: 0,
           locale,
+          overrideAccess: true,
           select: {
             _status: true,
             updatedAt: true,
@@ -239,6 +244,7 @@ export const getVersions = async ({
           slug: globalConfig.slug,
           limit: 1,
           locale,
+          overrideAccess: true,
           select: {
             autosave: true,
           },
@@ -258,6 +264,7 @@ export const getVersions = async ({
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
           global: globalConfig.slug,
           locale,
+          overrideAccess: true,
           user,
           where: combineQueries(
             {
@@ -283,6 +290,7 @@ export const getVersions = async ({
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
       global: globalConfig.slug,
       locale,
+      overrideAccess: true,
       user,
     }))
   }

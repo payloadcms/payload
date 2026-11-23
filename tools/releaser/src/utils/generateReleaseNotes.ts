@@ -2,7 +2,6 @@ import type { GitCommit } from 'changelogen'
 
 import { execSync } from 'child_process'
 import minimist from 'minimist'
-import open from 'open'
 import semver from 'semver'
 
 import { getLatestCommits } from './getLatestCommits.js'
@@ -12,7 +11,11 @@ type Args = {
   bump?: 'major' | 'minor' | 'patch' | 'prerelease'
   dryRun?: boolean
   fromVersion?: string
-  openReleaseUrl?: boolean
+  /**
+   * Version (with 'v' prefix) that labels the notes. Set it when the range ends
+   * before its tag exists; bump derivation is skipped.
+   */
+  releaseTag?: string
   toVersion?: string
 }
 
@@ -36,27 +39,34 @@ type ChangelogResult = {
 }
 
 export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogResult> => {
-  const { bump, dryRun, openReleaseUrl, toVersion = 'HEAD' } = args
+  const { bump, dryRun, toVersion = 'HEAD' } = args
 
   const fromVersion =
     args.fromVersion || execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
 
-  const tag = fromVersion.match(/-(\w+)\.\d+$/)?.[1] || 'latest'
+  const isTaggedRelease = toVersion.startsWith('v') && semver.valid(toVersion) !== null
+  const knownReleaseTag = args.releaseTag || (isTaggedRelease ? toVersion : undefined)
+  const tag = (knownReleaseTag || fromVersion).match(/-(\w+)\.\d+$/)?.[1] || 'latest'
 
-  const recommendedBump =
-    tag !== 'latest' ? 'prerelease' : await getRecommendedBump(fromVersion, toVersion)
+  let recommendedBump: Awaited<ReturnType<typeof getRecommendedBump>> | undefined
+  if (!knownReleaseTag) {
+    recommendedBump =
+      tag !== 'latest' ? 'prerelease' : await getRecommendedBump(fromVersion, toVersion)
+  }
 
-  if (bump && bump !== recommendedBump) {
+  if (bump && recommendedBump && bump !== recommendedBump) {
     console.log(`WARNING: Recommended bump is '${recommendedBump}', but you specified '${bump}'`)
   }
 
   const calculatedBump = bump || recommendedBump
 
-  if (!calculatedBump) {
-    throw new Error('Could not determine bump type')
+  let proposedReleaseVersion = knownReleaseTag
+  if (!proposedReleaseVersion) {
+    if (!calculatedBump) {
+      throw new Error('Could not determine bump type')
+    }
+    proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
   }
-
-  const proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
 
   console.log(`Generating release notes for ${fromVersion} to ${toVersion}...`)
 
@@ -68,7 +78,12 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     toVersion,
   })
 
-  const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
+  // Release bump commits are never changelog items, so a HEAD preview and the
+  // tagged range it becomes produce the same notes.
+  const conventionalCommits = (await getLatestCommits(fromVersion, toVersion)).filter(
+    (commit) =>
+      !(commit.type === 'chore' && commit.scope === 'release' && semver.valid(commit.description)),
+  )
 
   const commitTypesForChangelog = [
     'feat',
@@ -132,6 +147,10 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     {} as Record<Section, GitCommit[]>,
   )
 
+  if (knownReleaseTag && !Object.values(sections).some((commits) => commits.length > 0)) {
+    console.log(`WARNING: No changelog items between ${fromVersion} and ${toVersion}`)
+  }
+
   // Sort commits by scope, unscoped first
   Object.values(sections).forEach((section) => {
     section.sort((a, b) => (a.scope || '').localeCompare(b.scope || ''))
@@ -163,9 +182,6 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   let releaseUrl = `https://github.com/payloadcms/payload/releases/new?tag=${proposedReleaseVersion}&title=${proposedReleaseVersion}&body=${encodeURIComponent(releaseNotes)}`
   if (tag !== 'latest') {
     releaseUrl += `&prerelease=1`
-  }
-  if (!openReleaseUrl) {
-    await open(releaseUrl)
   }
 
   return {
@@ -314,36 +330,69 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
   })
 
   if (isBreaking && includeBreakingNotes) {
-    // Parse breaking change notes from commit body
-    const [rawNotes, _] = commit.body.split('\n\n')
-    let notes =
-      `  ` +
-      rawNotes
-        ?.split('\n')
-        .map((l) => `  ${l}`) // Indent notes
-        .join('\n')
-        .trim()
-
-    // Remove random trailing quotes that sometimes appear
-    if (notes.endsWith('"')) {
-      notes = notes.slice(0, -1)
+    const notes = getBreakingChangeNotes(commit)
+    if (notes) {
+      // Indent so the notes render inside the list item
+      formatted += `\n\n${notes
+        .split('\n')
+        .map((line) => `  ${line}`)
+        .join('\n')}\n\n`
     }
-
-    formatted += `\n\n${notes}\n\n`
   }
 
   return formatted
 }
 
+const BREAKING_HEADING_PATTERN = /^##\s*breaking\b/i
+const SECTION_END_PATTERN = /^(?:#{1,2}\s|-{3,}\s*$)/
+const CODE_FENCE_PATTERN = /^\s*(?:```|~~~)/
+/** changelogen runs `git log --name-status`, which appends `M\tpath` lines to each body */
+const NAME_STATUS_PATTERN = /^[ACDMRTUXB]\d*\t/
+
+/**
+ * Returns the text under the body's `## Breaking Changes` heading, up to the next
+ * H1/H2 or horizontal rule (GitHub puts one before squash trailers). Uses the first
+ * paragraph when the heading is missing.
+ */
+function getBreakingChangeNotes(commit: GitCommit): string {
+  const lines = commit.body.split('\n')
+  const headingIndex = lines.findIndex((line) => BREAKING_HEADING_PATTERN.test(line))
+
+  if (headingIndex === -1) {
+    console.log(
+      `WARNING: Breaking commit ${commit.shortHash} has no '## Breaking Changes' section, using first paragraph`,
+    )
+    const firstParagraph = commit.body.split('\n\n')[0]?.trim() ?? ''
+    // Remove random trailing quotes that sometimes appear
+    return firstParagraph.endsWith('"') ? firstParagraph.slice(0, -1) : firstParagraph
+  }
+
+  const sectionLines: string[] = []
+  let isInCodeFence = false
+  for (const line of lines.slice(headingIndex + 1)) {
+    if (NAME_STATUS_PATTERN.test(line)) {
+      break
+    }
+    if (CODE_FENCE_PATTERN.test(line)) {
+      isInCodeFence = !isInCodeFence
+    }
+    if (!isInCodeFence && SECTION_END_PATTERN.test(line)) {
+      break
+    }
+    sectionLines.push(line)
+  }
+
+  return sectionLines.join('\n').trim()
+}
+
 // module import workaround for ejs
 if (import.meta.url === `file://${process.argv[1]}`) {
   // This module is being run directly
-  const { bump, fromVersion, openReleaseUrl, toVersion } = minimist(process.argv.slice(2))
+  const { bump, fromVersion, toVersion } = minimist(process.argv.slice(2))
   generateReleaseNotes({
     bump,
     dryRun: false,
     fromVersion,
-    openReleaseUrl,
     toVersion,
   })
     .then(() => {

@@ -1,5 +1,5 @@
 'use client'
-import type { FormField, FormState, Row } from 'payload'
+import type { FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
@@ -60,7 +60,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         },
         [path]: {
           ...state[path],
-          disableFormData: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -207,7 +206,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, rows),
         [path]: {
           ...state[path],
-          disableFormData: true,
           rows: newRows,
           value: rows.length,
         },
@@ -225,7 +223,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         incomingState: serverState,
       })
 
-      prevStateRef.current = newState
+      if (prevStateRef) {
+        prevStateRef.current = newState
+      }
 
       return newState
     }
@@ -277,7 +277,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...remainingFields,
         [path]: {
           ...state[path],
-          disableFormData: rows.length > 0,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -316,7 +315,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, siblingRows),
         [path]: {
           ...state[path],
-          disableFormData: true,
           rows: rowsMetadata,
           value: siblingRows.length,
         },
@@ -354,17 +352,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return newState
       }
 
-      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
-      if (action.sanitize) {
-        for (const field of Object.values(action.state)) {
-          if (field.valid !== false) {
-            field.valid = true
-          }
-          if (field.passesCondition !== false) {
-            field.passesCondition = true
-          }
+      for (const field of Object.values(action.state)) {
+        if (field.valid !== false) {
+          field.valid = true
+        }
+        if (field.passesCondition !== false) {
+          field.passesCondition = true
         }
       }
+
       // If we're not optimizing, just set the state to the new state
       return action.state
     }
@@ -396,49 +392,31 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'UPDATE': {
-      const newField = Object.entries(action).reduce(
-        (field, [key, value]) => {
-          if (
-            [
-              'disableFormData',
-              'errorMessage',
-              'initialValue',
-              'rows',
-              'valid',
-              'validate',
-              'value',
-            ].includes(key)
-          ) {
-            return {
-              ...field,
-              [key]: value,
-              ...(key === 'value' ? { isModified: true } : {}),
-            }
+      const newField = Object.entries(action).reduce((field, [key, value]) => {
+        if (
+          [
+            'disableFormData',
+            'errorMessage',
+            'initialValue',
+            'rows',
+            'valid',
+            'validate',
+            'value',
+          ].includes(key)
+        ) {
+          return {
+            ...field,
+            [key]: value,
           }
+        }
 
-          return field
-        },
-        state?.[action.path] || ({} as FormField),
-      )
+        return field
+      }, state?.[action.path] || {})
 
-      const newState = {
+      return {
         ...state,
         [action.path]: newField,
       }
-
-      // reset `isModified` in all other fields
-      // Use destructuring instead of delete to avoid mutating field objects
-      // shared with the previous state (shallow copy shares references)
-      if ('value' in action) {
-        for (const [path, field] of Object.entries(newState)) {
-          if (path !== action.path && 'isModified' in field) {
-            const { isModified: _, ...fieldWithoutIsModified } = field
-            newState[path] = fieldWithoutIsModified as typeof field
-          }
-        }
-      }
-
-      return newState
     }
 
     case 'UPDATE_MANY': {

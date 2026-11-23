@@ -101,6 +101,18 @@ export const ToolbarDropdown = ({
   label?: string
 }) => {
   const { items, key: groupKey } = group
+  const { i18n } = useTranslation<Record<string, never>, string>()
+  const {
+    fieldProps: { featureClientSchemaMap, schemaPath },
+  } = useEditorConfigContext()
+  const activeItemLabels = groupState.activeItems.map((item) =>
+    typeof item.label === 'function'
+      ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+      : item.label || item.key,
+  )
+  const dropdownLabel = groupKey === 'text' ? i18n.t('lexical:general:textStyle') : undefined
+  const buttonAriaLabel =
+    [...new Set([label, ...activeItemLabels, dropdownLabel].filter(Boolean))].join(', ') || groupKey
 
   const renderedItems = useMemo(() => {
     return items?.length
@@ -120,7 +132,7 @@ export const ToolbarDropdown = ({
 
   return (
     <DropDown
-      buttonAriaLabel={`${groupKey} dropdown`}
+      buttonAriaLabel={buttonAriaLabel}
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}

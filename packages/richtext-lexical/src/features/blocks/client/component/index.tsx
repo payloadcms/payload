@@ -1,5 +1,7 @@
 'use client'
 
+import type { FormProps } from '@payloadcms/ui'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
@@ -22,6 +24,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
+  useOperation,
   useServerFunctions,
   useTranslation,
   XIcon,
@@ -34,7 +37,7 @@ import {
   type CollapsedPreferences,
   type FormState,
 } from 'payload'
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents, getDataFromFormState } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -49,13 +52,15 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
+import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
   type BlockCollapsibleWithErrorProps,
   BlockContent,
   useBlockComponentContext,
 } from './BlockContent.js'
-import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
+import { BlockReordering } from './BlockReordering/index.js'
 
 export type BlockComponentProps<TFormData extends Record<string, unknown> = BlockFields> = {
   /**
@@ -75,13 +80,7 @@ export type BlockComponentProps<TFormData extends Record<string, unknown> = Bloc
    * Will be rendered with useBlockComponentContext hook.
    */
   readonly CustomLabel?: React.FC<ViewMapBlockComponentProps>
-  /**
-   * The block's form data (field values).
-   */
   readonly formData: TFormData
-  /**
-   * The unique key identifying this block node in the current editor instance.
-   */
   readonly nodeKey: string
 }
 
@@ -108,7 +107,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   } = useEditorConfigContext()
 
   const { fields: parentDocumentFields } = useDocumentForm()
-  const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
 
@@ -126,43 +124,53 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
 
   const blockType = formData.blockType
+
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
+
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
+    componentMapRenderedBlockPath
+  ]?.[0] as BlocksFieldClient | undefined
+
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
     // Initial form state that was calculated server-side. May have stale values
-    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    const cachedState = initialLexicalFormState?.[formData.id]
+    const cachedFormState = cachedState?.formState
     if (!cachedFormState) {
       return false
     }
 
-    // Merge current formData values into the cached form state
-    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    const mergedState = Object.fromEntries(
-      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
-        fieldName,
-        fieldName in formData
-          ? {
-              ...fieldState,
-              initialValue: formData[fieldName],
-              value: formData[fieldName],
-            }
-          : fieldState,
-      ]),
-    )
-
-    // Manually add blockName, as it's not part of cachedFormState
-    mergedState.blockName = {
-      initialValue: formData.blockName,
-      passesCondition: true,
-      valid: true,
-      value: formData.blockName,
+    const matchingCachedState = getCachedFormStateIfDataMatches({
+      cachedFormState,
+      cachedSchemaPath: cachedState.schemaPath,
+      currentSchemaPath: schemaFieldsPath,
+      formData,
+    })
+    if (!matchingCachedState) {
+      return false
     }
 
-    return mergedState
+    // Manually add blockName, as it's not part of cachedFormState
+    return {
+      ...matchingCachedState,
+      blockName: {
+        initialValue: formData.blockName,
+        passesCondition: true,
+        valid: true,
+        value: formData.blockName,
+      },
+    }
   })
 
   const hasMounted = useRef(false)
@@ -210,7 +218,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )
@@ -227,7 +235,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )
@@ -251,12 +259,10 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -271,17 +277,16 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           value: formData.blockName,
         }
 
-        const newFormStateData: BlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
-        ) as BlockFields
-
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
           () => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              const newData = newFormStateData
+              const newData = mergeNodeFields({
+                currentFields: node.getFields(),
+                formState: state,
+              })
+
               newData.blockType = blockType
 
               node.setFields(newData, true)
@@ -302,7 +307,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -323,67 +328,26 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    operation,
     parentDocumentFields,
     blockType,
+    clientBlock,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
     initialLexicalFormState?.[formData.id]?.collapsed ?? false,
   )
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
-
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient | undefined
-
-  const blockOrSlug = blocksField?.blocks?.[0]
-  const clientBlock: ClientBlock | undefined =
-    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
-
   const { i18n, t } = useTranslation<object, string>()
 
-  const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state: newFormState } = await getFormState({
-        id,
-        collectionSlug,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
-        formState: prevFormState,
-        globalSlug,
-        initialBlockFormState: prevFormState,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: submit ? true : false,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!newFormState) {
-        return prevFormState
-      }
-
+  const applyServerState = useCallback(
+    (newFormState: FormState, prevFormState: FormState) => {
       if (prevFormState.blockName) {
         newFormState.blockName = prevFormState.blockName
       }
 
-      const newFormStateData: BlockFields = reduceFieldsToValues(
-        removeEmptyArrayValues({
-          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
-        }),
+      const newFormStateData = getDataFromFormState(
+        deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
         true,
       ) as BlockFields
 
@@ -402,49 +366,26 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           { tag: SKIP_DOM_SELECTION_TAG },
         )
       }, 0)
-
-      if (submit) {
-        if (!CustomLabelFromProps) {
-          setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
-        }
-        if (!CustomBlockFromProps) {
-          setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
-        }
-
-        let rowErrorCount = 0
-        for (const formField of Object.values(newFormState)) {
-          if (formField?.valid === false) {
-            rowErrorCount++
-          }
-        }
-        setErrorCount(rowErrorCount)
-      }
-
-      return newFormState
     },
-
-    [
-      getFormState,
-      id,
-      collectionSlug,
-      getDocPreferences,
-      globalSlug,
-      schemaFieldsPath,
-      blockType,
-      parentDocumentFields,
-      isEditable,
-      editor,
-      nodeKey,
-      CustomBlockFromProps,
-      CustomLabelFromProps,
-    ],
+    [blockType, editor, nodeKey],
   )
 
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
+  const onChange = useCallback<NonNullable<FormProps['onChange']>[number]>(
+    ({ formState, submitted }) => {
+      applyServerState(formState, formState)
+
+      if (submitted) {
+        if (!CustomLabelFromProps) {
+          setCustomLabel(formState._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(formState._components?.customComponents?.Block ?? undefined)
+        }
+        setErrorCount(Object.values(formState).filter((field) => field.valid === false).length)
+      }
+    },
+    [applyServerState, CustomLabelFromProps, CustomBlockFromProps],
+  )
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
@@ -558,7 +499,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const BlockCollapsible = useMemo(
     () =>
-      ({
+      function BlockCollapsible({
         Actions,
         children,
         className,
@@ -572,122 +513,187 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         removeButton,
         showDragHandle = true,
         showRowNumber = true,
-      }: BlockCollapsibleWithErrorProps) => {
+      }: BlockCollapsibleWithErrorProps) {
         return (
-          <div className={`${baseClass}__container ${baseClass}-${blockType}`}>
-            <Collapsible
-              actions={
-                typeof Actions !== 'undefined' ? (
-                  Actions
-                ) : isEditable ? (
-                  <Popup
-                    button={<MoreIcon />}
-                    buttonClassName={`${baseClass}__actions-button`}
-                    caret={false}
-                    horizontalAlign="right"
-                    render={({ close }) => (
-                      <PopupList.ButtonGroup buttonSize="medium">
-                        {((resolvedCustomBlock && editButton !== false) ||
-                          (!resolvedCustomBlock && editButton)) && (
-                          <PopupList.Button
-                            onClick={() => {
-                              toggleDrawer()
-                              close()
-                            }}
-                          >
-                            {t('general:edit')}
-                          </PopupList.Button>
-                        )}
-                        {removeButton !== false && (
-                          <PopupList.Button
-                            onClick={() => {
-                              removeBlock()
-                              close()
-                            }}
-                          >
-                            <XIcon />
-                            {t('general:remove')}
-                          </PopupList.Button>
-                        )}
-                      </PopupList.ButtonGroup>
-                    )}
-                    size="large"
-                  />
-                ) : null
-              }
-              className={[
-                `${baseClass}__row`,
-                fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-                className,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-              dragHandleProps={
-                showDragHandle
-                  ? {
-                      id: nodeKey,
-                      attributes: { role: 'button', tabIndex: 0 },
-                      listeners: {},
-                    }
-                  : undefined
-              }
-              header={
-                <div className={`${baseClass}__block-header`}>
-                  {typeof Label !== 'undefined' ? (
-                    Label
-                  ) : typeof resolvedCustomLabel !== 'undefined' ? (
-                    resolvedCustomLabel
-                  ) : (
-                    <div className={`${baseClass}__block-label`}>
-                      {showRowNumber && (
-                        <span className={`${baseClass}__block-number`}>
-                          {String(rowIndex + 1).padStart(2, '0')}
-                        </span>
-                      )}
-                      {typeof CustomPill !== 'undefined' ? (
-                        CustomPill
-                      ) : (
-                        <Pill
-                          className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
-                          pillStyle="white"
-                          size="small"
-                        >
-                          {blockDisplayName ?? blockType}
-                        </Pill>
-                      )}
-                      {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
-                        <SectionTitle path="blockName" readOnly={!isEditable} />
-                      )}
+          <BlockReordering editor={editor} nodeKey={nodeKey}>
+            {({ isReordering, move, onBlur, onKeyDown, reorderInstructionsID, targetIndex }) => (
+              <div
+                className={`${baseClass}__container ${baseClass}-${blockType}`}
+                onKeyDownCapture={(event) => {
+                  const target = event.target as HTMLElement
 
-                      {fieldHasErrors && (
-                        <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                  if (
+                    event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    target.closest('.collapsible')?.parentElement !== event.currentTarget
+                  ) {
+                    return
+                  }
+                  // Handle controls before Lexical consumes keys using its retained text selection.
+                  if (
+                    target.matches('.collapsible__drag') &&
+                    (event.key !== 'Escape' || isReordering) &&
+                    [' ', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Tab'].includes(event.key)
+                  ) {
+                    onKeyDown(event)
+                    event.stopPropagation()
+                  } else if (event.key === 'Tab' && target.matches('.collapsible__toggle')) {
+                    event.stopPropagation()
+                  }
+                }}
+              >
+                <Collapsible
+                  actions={
+                    typeof Actions !== 'undefined' ? (
+                      Actions
+                    ) : isEditable ? (
+                      <Popup
+                        button={<MoreIcon />}
+                        buttonAriaLabel={t('general:moreOptions')}
+                        buttonClassName={`${baseClass}__actions-button`}
+                        caret={false}
+                        horizontalAlign="right"
+                        popupType="menu"
+                        render={({ close }) => (
+                          <PopupList.ButtonGroup buttonSize="medium">
+                            <PopupList.Button
+                              onClick={() => {
+                                close()
+                                move({ direction: -1 })
+                              }}
+                            >
+                              {t('general:moveUp')}
+                            </PopupList.Button>
+                            <PopupList.Button
+                              onClick={() => {
+                                close()
+                                move({ direction: 1 })
+                              }}
+                            >
+                              {t('general:moveDown')}
+                            </PopupList.Button>
+                            {((resolvedCustomBlock && editButton !== false) ||
+                              (!resolvedCustomBlock && editButton)) && (
+                              <PopupList.Button
+                                onClick={() => {
+                                  toggleDrawer()
+                                  close()
+                                }}
+                              >
+                                {t('general:edit')}
+                              </PopupList.Button>
+                            )}
+                            {removeButton !== false && (
+                              <PopupList.Button
+                                onClick={() => {
+                                  removeBlock()
+                                  close()
+                                }}
+                              >
+                                <XIcon />
+                                {t('general:remove')}
+                              </PopupList.Button>
+                            )}
+                          </PopupList.ButtonGroup>
+                        )}
+                        size="large"
+                      />
+                    ) : null
+                  }
+                  className={[
+                    `${baseClass}__row`,
+                    fieldHasErrors
+                      ? `${baseClass}__row--has-errors`
+                      : `${baseClass}__row--no-errors`,
+                    className,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+                  dragHandleProps={
+                    showDragHandle && isEditable
+                      ? {
+                          id: nodeKey,
+                          attributes: {
+                            'aria-describedby': reorderInstructionsID,
+                            'aria-pressed': isReordering,
+                            role: 'button',
+                            tabIndex: 0,
+                          },
+                          draggable: true,
+                          listeners: { onBlur },
+                        }
+                      : undefined
+                  }
+                  header={
+                    <div className={`${baseClass}__block-header`}>
+                      {typeof Label !== 'undefined' ? (
+                        Label
+                      ) : typeof resolvedCustomLabel !== 'undefined' ? (
+                        resolvedCustomLabel
+                      ) : (
+                        <div className={`${baseClass}__block-label`}>
+                          {showRowNumber && (
+                            <span className={`${baseClass}__block-number`}>
+                              {String(rowIndex + 1).padStart(2, '0')}
+                            </span>
+                          )}
+                          {typeof CustomPill !== 'undefined' ? (
+                            CustomPill
+                          ) : (
+                            <Pill
+                              className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                              pillStyle="white"
+                              size="small"
+                            >
+                              {blockDisplayName ?? blockType}
+                            </Pill>
+                          )}
+                          {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
+                            <SectionTitle path="blockName" readOnly={!isEditable} />
+                          )}
+
+                          {fieldHasErrors && <BlockErrorPill count={errorCount ?? 0} />}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              }
-              isCollapsed={isCollapsed}
-              key={0}
-              onToggle={(incomingCollapsedState) => {
-                onCollapsedChange(incomingCollapsedState)
-                setIsCollapsed(incomingCollapsedState)
-              }}
-              {...(collapsibleProps || {})}
-            >
-              {children}
-            </Collapsible>
-          </div>
+                  }
+                  isCollapsed={isCollapsed}
+                  key={0}
+                  onToggle={(incomingCollapsedState) => {
+                    onCollapsedChange(incomingCollapsedState)
+                    setIsCollapsed(incomingCollapsedState)
+                  }}
+                  {...(collapsibleProps || {})}
+                  AfterCollapsible={
+                    <>
+                      {collapsibleProps?.AfterCollapsible}
+                      <span className="sr-only" role="status">
+                        {isReordering ? `${t('general:order')}: ${(targetIndex ?? 0) + 1}` : ''}
+                      </span>
+                    </>
+                  }
+                >
+                  <span className="sr-only" id={reorderInstructionsID}>
+                    Space / Enter · {t('general:moveUp')} ↑ · {t('general:moveDown')} ↓ ·{' '}
+                    {t('general:cancel')} Escape
+                  </span>
+                  {children}
+                </Collapsible>
+              </div>
+            )}
+          </BlockReordering>
         )
       },
     [
+      editor,
       resolvedCustomBlock,
       resolvedCustomLabel,
       blockDisplayName,
       baseClass,
       clientBlock?.admin?.disableBlockName,
       blockType,
-      i18n,
       isCollapsed,
       onCollapsedChange,
       isEditable,
@@ -754,24 +760,19 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     return (
       <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
         <Form
-          beforeSubmit={[
-            async ({ formState }) => {
-              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-              return await onChange({ formState, submit: true })
-            },
-          ]}
           el="div"
           fields={clientBlock?.fields ?? []}
           initialState={initialState}
           onChange={[onChange]}
-          onSubmit={(formState, newData) => {
+          onSubmit={(formState) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+            const newData = getDataFromFormState(formState, true) as BlockFields
             newData.blockType = blockType
             editor.update(
               () => {
                 const node = $getNodeByKey(nodeKey)
                 if (node && $isBlockNode(node)) {
-                  node.setFields(newData as BlockFields, true)
+                  node.setFields(newData, true)
                 }
               },
               // Without this, the outer editor's reconciler resets DOM selection
@@ -780,6 +781,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
             )
             toggleDrawer()
           }}
+          readOnly={!isEditable}
+          schemaPath={schemaFieldsPath}
           submitted={submitted}
           uuid={formUuid}
         >
@@ -816,6 +819,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     formUuid,
     initialState,
     nodeKey,
+    schemaFieldsPath,
+    isEditable,
     onChange,
     submitted,
   ])
@@ -831,4 +836,15 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   }
 
   return Block
+}
+
+/**
+ * Reads `i18n` itself so `BlockCollapsible` does not depend on it. `BlockCollapsible` is created in
+ * a `useMemo`, so each new `i18n` object (e.g. once the date-fns locale is set after mount) would
+ * remount the whole block, closing its open menus and dropping focus.
+ */
+const BlockErrorPill: React.FC<{ readonly count: number }> = ({ count }) => {
+  const { i18n } = useTranslation()
+
+  return <ErrorPill count={count} i18n={i18n} withMessage />
 }

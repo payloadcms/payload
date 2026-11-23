@@ -32,9 +32,9 @@ export const assignTenantModalSlug = 'assign-tenant-field-modal'
 export const AssignTenantFieldTrigger: React.FC = () => {
   const { openModal } = useModal()
   const { t } = useTranslation<PluginMultiTenantTranslations, PluginMultiTenantTranslationKeys>()
-  const { options } = useTenantSelection()
+  const { hasAccessToAllTenants, options } = useTenantSelection()
 
-  if (options.length <= 1) {
+  if (options.length === 0 || (options.length === 1 && !hasAccessToAllTenants)) {
     return null
   }
 
@@ -46,8 +46,8 @@ export const AssignTenantFieldTrigger: React.FC = () => {
 }
 
 export const AssignTenantFieldModal: React.FC<{
-  afterModalClose: () => void
-  afterModalOpen: () => void
+  afterModalClose?: () => void
+  afterModalOpen?: () => void
   children: React.ReactNode
   onCancel?: () => void
   onConfirm?: () => void

@@ -37,6 +37,7 @@ type BlocksFieldProps = {
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
   pasteRow: (rowIndex: number) => void
+  pasteRowBelow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
@@ -67,6 +68,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   moveRow,
   parentPath,
   pasteRow,
+  pasteRowBelow,
   path,
   permissions,
   readOnly,
@@ -75,6 +77,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   rowCount,
   rowIndex,
   schemaPath,
+  setActivatorNodeRef,
   setCollapse,
   setNodeRef,
   transform,
@@ -84,6 +87,11 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
 
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+
+  const pasteData = React.useMemo(
+    () => ({ path, schemaBlocks: blocks as ClientBlock[] }),
+    [path, blocks],
+  )
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
@@ -158,7 +166,9 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              pasteData={pasteData}
               pasteRow={pasteRow}
+              pasteRowBelow={pasteRowBelow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
@@ -173,6 +183,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                 id: row.id,
                 attributes,
                 listeners,
+                setActivatorNodeRef,
               }
             : undefined
         }
@@ -207,7 +218,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             </div>
           )
         }
-        isCollapsed={row.collapsed}
+        isCollapsed={row.collapsed ?? Boolean(row.isLoading)}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >

@@ -4,7 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -12,6 +12,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -63,8 +64,14 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
+  const { reportUpdate } = useDocumentEvents()
 
   const modalSlug = `delete-${id}`
+  const descriptionID = `${modalSlug}-description`
+  const focusTrapOptions = useMemo(
+    () => ({ initialFocus: () => document.getElementById(`${modalSlug}-cancel`) ?? false }),
+    [modalSlug],
+  )
 
   const [deletePermanently, setDeletePermanently] = useState(false)
 
@@ -113,7 +120,19 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }) || json.message,
         )
 
+        // A trashed document also disappears from default queries, so both permanent
+        // deletes and trashing report as a `delete` event.
+        const deleteEvent = {
+          id,
+          entitySlug: collectionSlug,
+          operation: 'delete' as const,
+          updatedAt: new Date().toISOString(),
+        }
+
         if (redirectAfterDelete) {
+          // Navigating away tears this surface down, so just notify other surfaces.
+          reportUpdate(deleteEvent)
+
           return startRouteTransition(() =>
             router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
           )
@@ -122,6 +141,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         if (typeof onDelete === 'function') {
           await onDelete({ id, collectionConfig })
         }
+
+        reportUpdate(deleteEvent)
 
         return
       }
@@ -155,37 +176,36 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     onDelete,
     collectionConfig,
     startRouteTransition,
+    reportUpdate,
   ])
 
   if (id) {
     return (
       <Fragment>
-        <PopupList.Button
-          id={buttonId}
-          onClick={() => {
-            openModal(modalSlug)
-          }}
-        >
+        <PopupList.Button id={buttonId} onClick={() => openModal(modalSlug)}>
           {t('general:delete')}
         </PopupList.Button>
         <ConfirmationModal
+          aria-describedby={descriptionID}
           body={
             <Fragment>
-              <Translation
-                elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey={
-                  collectionConfig.trash && hasTrashPermission
-                    ? 'general:aboutToTrash'
-                    : 'general:aboutToDelete'
-                }
-                t={t}
-                variables={{
-                  label: getTranslation(singularLabel, i18n),
-                  title: titleFromProps || title || id,
-                }}
-              />
+              <span id={descriptionID}>
+                <Translation
+                  elements={{
+                    '1': ({ children }) => <strong>{children}</strong>,
+                  }}
+                  i18nKey={
+                    collectionConfig.trash && hasTrashPermission
+                      ? 'general:aboutToTrash'
+                      : 'general:aboutToDelete'
+                  }
+                  t={t}
+                  variables={{
+                    label: getTranslation(singularLabel, i18n),
+                    title: titleFromProps || title || id,
+                  }}
+                />
+              </span>
               {collectionConfig.trash && hasTrashPermission && hasDeletePermission && (
                 <CheckboxInput
                   checked={deletePermanently}
@@ -199,9 +219,11 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }
           className={baseClass}
           confirmingLabel={t('general:deleting')}
+          focusTrapOptions={focusTrapOptions}
           heading={t('general:confirmDeletion')}
           modalSlug={modalSlug}
           onConfirm={handleDelete}
+          role="alertdialog"
         />
       </Fragment>
     )

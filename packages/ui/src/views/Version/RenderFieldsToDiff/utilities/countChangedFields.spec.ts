@@ -278,7 +278,7 @@ describe('countChangedFields', () => {
     expect(result).toBe(5)
   })
 
-  it('should count changed fields between blocks with different slugs', () => {
+  it('should count source and replacement fields between blocks with different slugs', () => {
     const fields: ClientField[] = [
       {
         name: 'blocks',
@@ -311,7 +311,7 @@ describe('countChangedFields', () => {
     }
 
     const result = countChangedFields({ valueFrom, fields, valueTo, locales })
-    expect(result).toBe(3)
+    expect(result).toBe(6)
   })
 
   describe('localized fields', () => {
@@ -536,5 +536,59 @@ describe('countChangedFieldsInRows', () => {
       valueToRows,
     })
     expect(result).toBe(2)
+  })
+
+  it('should count source and replacement block fields separately', () => {
+    const field: ClientField = {
+      name: 'myBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'source',
+          fields: [
+            {
+              type: 'row',
+              fields: [{ name: 'sourceRow', type: 'text' }],
+            },
+            {
+              type: 'collapsible',
+              label: 'Source details',
+              fields: [{ name: 'sourceDetails', type: 'text' }],
+            },
+          ],
+        },
+        {
+          slug: 'replacement',
+          fields: [
+            {
+              type: 'row',
+              fields: [{ name: 'replacementRow', type: 'text' }],
+            },
+            {
+              type: 'collapsible',
+              label: 'Replacement details',
+              fields: [{ name: 'replacementDetails', type: 'text' }],
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = countChangedFieldsInRows({
+      field,
+      locales: undefined,
+      valueFromRows: [
+        { blockType: 'source', sourceDetails: 'original details', sourceRow: 'original row' },
+      ],
+      valueToRows: [
+        {
+          blockType: 'replacement',
+          replacementDetails: 'replacement details',
+          replacementRow: 'replacement row',
+        },
+      ],
+    })
+
+    expect(result).toBe(4)
   })
 })

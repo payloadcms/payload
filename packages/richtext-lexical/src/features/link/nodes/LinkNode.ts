@@ -72,26 +72,10 @@ export class LinkNode extends ElementNode {
     }
   }
 
-  static override importJSON(serializedNode: SerializedLinkNode): LinkNode {
-    const node = $createLinkNode({}).updateFromJSON(serializedNode)
-
-    /**
-     * @todo remove this in 4.0
-     */
-    if (
-      serializedNode.version === 1 &&
-      typeof serializedNode.fields?.doc?.value === 'object' &&
-      serializedNode.fields?.doc?.value?.id
-    ) {
-      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
-      serializedNode.version = 2
-    }
-
-    if (serializedNode.version === 2 && !serializedNode.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
-      serializedNode.version = 3
-    }
-    return node
+  static override importJSON(
+    serializedNode: Record<string, unknown> & SerializedLinkNode,
+  ): LinkNode {
+    return $createLinkNode({}).updateFromJSON(serializedNode)
   }
 
   override canBeEmpty(): false {
@@ -136,7 +120,6 @@ export class LinkNode extends ElementNode {
       ...super.exportJSON(),
       type: 'link',
       fields,
-      version: 3,
     }
     const id = this.getID()
     if (id) {
@@ -217,8 +200,18 @@ export class LinkNode extends ElementNode {
   override updateDOM(prevNode: this, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
-    if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
-      anchor.href = url
+    if (url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
+      if (url == null) {
+        anchor.removeAttribute('href')
+      } else {
+        try {
+          const parsedURL = new URL(url, anchor.ownerDocument.baseURI)
+
+          anchor.href = SUPPORTED_URL_PROTOCOLS.has(parsedURL.protocol) ? url : 'about:blank'
+        } catch {
+          anchor.href = 'about:blank'
+        }
+      }
     }
     if (this.__fields?.linkType === 'internal' && prevNode.__fields?.linkType === 'custom') {
       anchor.removeAttribute('href')

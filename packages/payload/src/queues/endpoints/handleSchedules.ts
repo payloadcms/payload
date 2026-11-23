@@ -1,6 +1,8 @@
 import type { Endpoint } from '../../config/types.js'
 
+import { defaultAccess } from '../../auth/defaultAccess.js'
 import { handleSchedules } from '../operations/handleSchedules/index.js'
+import { ignoreCrossSiteNavigationUser } from './ignoreCrossSiteNavigationUser.js'
 import { configHasJobs } from './run.js'
 
 /**
@@ -21,7 +23,9 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    const accessFn = jobsConfig.access?.run ?? (() => true)
+    ignoreCrossSiteNavigationUser(req)
+
+    const accessFn = jobsConfig.access?.run ?? defaultAccess
 
     const hasAccess = await accessFn({ req })
 
@@ -35,7 +39,7 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
     }
 
     if (!jobsConfig.scheduling) {
-      // There is no reason to call the handleSchedules endpoint if the stats global is not enabled (= no schedules defined)
+      // There is no reason to call the handleSchedules endpoint when no schedules are defined.
       return Response.json(
         {
           message:

@@ -8,12 +8,12 @@ type Args = {
   collectionSlug: CollectionSlug
   docID?: number | string
   globalSlugs: string[]
-  tenantArrayFieldName: string
-  tenantArrayTenantFieldName: string
   tenantFieldName: string
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
   viewType: ViewTypes
 } & ServerProps
 
@@ -33,8 +33,8 @@ export const GlobalViewRedirect = async (args: Args) => {
       payload: args.payload,
       server: args.server,
       tenantFieldName: args.tenantFieldName,
-      tenantsArrayFieldName: args.tenantArrayFieldName,
-      tenantsArrayTenantFieldName: args.tenantArrayTenantFieldName,
+      tenantsArrayFieldName: args.tenantsArrayFieldName,
+      tenantsArrayTenantFieldName: args.tenantsArrayTenantFieldName,
       tenantsCollectionSlug: args.tenantsCollectionSlug,
       useAsTitle: args.useAsTitle,
       user: args.user,

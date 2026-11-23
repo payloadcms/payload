@@ -1,4 +1,4 @@
-import type { AdminViewServerPropsOnly, ClientUser, Locale, ServerProps } from 'payload'
+import type { AdminViewServerPropsOnly, Locale, ServerProps, User } from 'payload'
 
 import React from 'react'
 
@@ -26,7 +26,7 @@ export type DashboardViewClientProps = {
 
 export type DashboardViewServerPropsOnly = {
   globalData: Array<{
-    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: number | string | User }
     lockDuration?: number
     slug: string
   }>

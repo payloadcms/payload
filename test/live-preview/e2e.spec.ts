@@ -9,8 +9,6 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
@@ -30,6 +28,8 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -43,7 +43,9 @@ import {
   collectionLevelConfigSlug,
   customLivePreviewSlug,
   desktopBreakpoint,
+  forbiddenURLSlug,
   mobileBreakpoint,
+  openByDefaultSlug,
   pagesSlug,
   postsSlug,
   renderedPageTitleID,
@@ -71,7 +73,7 @@ describe('Live Preview', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
     postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
@@ -80,10 +82,7 @@ describe('Live Preview', () => {
     ssrAutosavePagesURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     user = await payload
       .login({
@@ -92,6 +91,7 @@ describe('Live Preview', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((res) => res.user) // TODO: this type is wrong
   })
@@ -105,10 +105,25 @@ describe('Live Preview', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'livePreviewTest',
     })
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test('should not load Payload admin assets on the TanStack frontend', async () => {
+    // eslint-disable-next-line playwright/no-skipped-test -- this route belongs to the TanStack-only fixture
+    test.skip(process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start')
+
+    await page.goto(`${serverURL}/live-preview/`)
+
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue('--font-family-sans').trim(),
+        ),
+      )
+      .toBe('')
+    await expect(page.locator('link[href*="fonts.googleapis.com"]')).toHaveCount(0)
   })
 
   test('collection — renders toggler', async () => {
@@ -119,6 +134,99 @@ describe('Live Preview', () => {
     await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+  })
+
+  test('should hide collection fields while live preview is expanded', async () => {
+    await navigateToDoc(page, pagesURLUtil)
+    await toggleLivePreview(page, { targetState: 'on' })
+
+    const titleField = page.locator('#field-title')
+    const expandButton = page.getByRole('button', { name: 'Expand' })
+
+    await expect(titleField).toBeVisible()
+    await expandButton.focus()
+    await page.keyboard.press('Enter')
+
+    const collapseButton = page.getByRole('button', { name: 'Collapse' })
+
+    await expect(collapseButton).toBeFocused()
+    await expect(titleField).toBeHidden()
+    await collapseButton.click()
+    await expect(titleField).toBeVisible()
+  })
+
+  test('should keep collection live preview controls in the viewport while expanded', async () => {
+    await navigateToDoc(page, pagesURLUtil)
+    await toggleLivePreview(page, { targetState: 'on' })
+
+    await page.getByRole('button', { name: 'Expand' }).click()
+
+    const collapseButton = page.getByRole('button', { name: 'Collapse' })
+    const openInNewWindowButton = page.getByRole('button', {
+      name: 'Open in new window',
+    })
+
+    await expect(collapseButton).toBeVisible()
+    await expect(openInNewWindowButton).toBeVisible()
+
+    for (const button of [collapseButton, openInNewWindowButton]) {
+      const box = await button.boundingBox()
+      const viewport = page.viewportSize()
+
+      expect(box).not.toBeNull()
+      expect(viewport).not.toBeNull()
+      expect(box!.x).toBeGreaterThanOrEqual(0)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width)
+    }
+  })
+
+  test('should hide collection fields while live previewing at narrow viewport widths', async () => {
+    const originalViewport = page.viewportSize()
+
+    try {
+      await page.setViewportSize({ height: 900, width: 940 })
+      await navigateToDoc(page, pagesURLUtil)
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const titleField = page.locator('#field-title')
+
+      await expect(titleField).toBeHidden()
+      await toggleLivePreview(page, { targetState: 'off' })
+      await expect(titleField).toBeVisible()
+    } finally {
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport)
+      }
+    }
+  })
+
+  test('should keep initial collection live preview controls in a narrow viewport', async () => {
+    const originalViewport = page.viewportSize()
+
+    try {
+      await page.setViewportSize({ height: 900, width: 940 })
+      await navigateToDoc(page, pagesURLUtil)
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const expandButton = page.getByRole('button', { name: 'Expand' })
+      const openInNewWindowButton = page.getByRole('button', {
+        name: 'Open in new window',
+      })
+
+      for (const button of [expandButton, openInNewWindowButton]) {
+        const box = await button.boundingBox()
+        const viewport = page.viewportSize()
+
+        expect(box).not.toBeNull()
+        expect(viewport).not.toBeNull()
+        expect(box!.x).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width)
+      }
+    } finally {
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport)
+      }
+    }
   })
 
   test('collection — does not render live preview when creating a new doc', async () => {
@@ -147,9 +255,9 @@ describe('Live Preview', () => {
 
   test('saves live preview state to preferences and loads it on next visit', async () => {
     await deletePreferences({
+      key: `collection-${pagesSlug}`,
       payload,
       user,
-      key: `collection-${pagesSlug}`,
     })
 
     await navigateToDoc(page, pagesURLUtil)
@@ -180,11 +288,43 @@ describe('Live Preview', () => {
     await expect(iframe).toBeHidden()
   })
 
-  test('collection — defers iframe render until toggled and keeps it mounted after toggling off', async () => {
+  test('collection — opens live preview by default on first visit when openByDefault is set', async () => {
+    const openByDefaultURL = new AdminUrlUtil(serverURL, openByDefaultSlug)
+
     await deletePreferences({
+      key: `collection-${openByDefaultSlug}`,
       payload,
       user,
+    })
+
+    await page.goto(openByDefaultURL.create)
+    await page.locator('#field-title').fill('Open By Default')
+    await saveDocAndAssert(page)
+
+    const toggler = page.locator('button#live-preview-toggler')
+    await expect(toggler).toBeVisible()
+
+    // No stored preference exists, so openByDefault should auto-open the panel
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    const { iframe } = await getLivePreviewIframe(page)
+    await expect(iframe).toBeVisible()
+
+    // Once the user toggles off, their stored preference wins over openByDefault
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await page.reload()
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(iframe).toBeHidden()
+  })
+
+  test('collection — defers iframe render until toggled and keeps it mounted after toggling off', async () => {
+    await deletePreferences({
       key: `collection-${pagesSlug}`,
+      payload,
+      user,
     })
 
     await navigateToDoc(page, pagesURLUtil)
@@ -265,6 +405,39 @@ describe('Live Preview', () => {
     await expect(iframe).toBeHidden()
   })
 
+  describe('URL validation', () => {
+    const documentIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const id of documentIDs) {
+        await payload.delete({ id, collection: forbiddenURLSlug, overrideAccess: true })
+      }
+      documentIDs.length = 0
+    })
+
+    test('should omit preview controls for unsupported URLs', async () => {
+      const urlUtil = new AdminUrlUtil(serverURL, forbiddenURLSlug)
+      const doc = await payload.create({
+        collection: forbiddenURLSlug,
+        data: {},
+        overrideAccess: true,
+      })
+
+      documentIDs.push(doc.id)
+
+      await page.goto(urlUtil.edit(doc.id))
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      const { iframe } = await getLivePreviewIframe(page)
+      const toggler = page.locator('#live-preview-toggler')
+      const previewButton = page.locator('#preview-button')
+
+      await expect(toggler).toBeHidden()
+      await expect(iframe).toBeHidden()
+      await expect(previewButton).toBeHidden()
+    })
+  })
+
   test('collection — does not render preview button when url is null', async () => {
     const noURL = new AdminUrlUtil(serverURL, 'conditional-url')
     await page.goto(noURL.create)
@@ -289,6 +462,38 @@ describe('Live Preview', () => {
 
     // Button is gone
     await expect(previewButton).toBeHidden()
+  })
+
+  test('collection — preview button copies the preview URL to the clipboard', async () => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    await previewButton.hover()
+    await expect(page.locator('#preview-button-tooltip')).toHaveText('Copy')
+
+    await previewButton.click()
+    await expect(page.locator('#preview-button-tooltip')).toHaveText('Copied')
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toMatch(/\/live-preview/)
+  })
+
+  test('collection — cmd/ctrl + click opens the preview URL in a new tab', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    const [newTab] = await Promise.all([
+      context.waitForEvent('page'),
+      previewButton.click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    await expect.poll(() => newTab.url()).toMatch(/\/live-preview/)
+    await newTab.close()
   })
 
   test('collection — retains static URL across edits', async () => {
@@ -394,12 +599,13 @@ describe('Live Preview', () => {
     const testDoc = await payload.create({
       collection: pagesSlug,
       data: {
-        title: initialTitle,
         slug: 'csr-test',
         hero: {
           type: 'none',
         },
+        title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(pagesURLUtil.edit(testDoc.id))
@@ -536,12 +742,13 @@ describe('Live Preview', () => {
     const testDoc = await payload.create({
       collection: ssrAutosavePagesSlug,
       data: {
-        title: initialTitle,
         slug: 'ssr-test',
         hero: {
           type: 'none',
         },
+        title: initialTitle,
       },
+      overrideAccess: true,
     })
 
     await page.goto(ssrAutosavePagesURLUtil.edit(testDoc.id))
@@ -552,7 +759,7 @@ describe('Live Preview', () => {
 
     const titleField = page.locator('#field-title')
 
-    const { iframe, frame } = await getLivePreviewIframe(page, {
+    const { frame, iframe } = await getLivePreviewIframe(page, {
       expectIframeSrcToMatch: new RegExp(`/live-preview/${ssrAutosavePagesSlug}/${testDoc.slug}`),
     })
 
@@ -603,13 +810,12 @@ describe('Live Preview', () => {
     await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
 
     const newTitleValue = 'SSR Home (Edited)'
-    // eslint-disable-next-line payload/no-wait-function
+
     await wait(1000)
 
     await titleField.clear()
     await titleField.pressSequentially(newTitleValue)
 
-    // eslint-disable-next-line payload/no-wait-function
     await wait(1000)
 
     await waitForAutoSaveToRunAndComplete(page)
@@ -829,23 +1035,20 @@ describe('Live Preview', () => {
   })
 
   describe.skip('A11y', () => {
-    test.fixme(
-      'Live preview and edit view should have no accessibility violations',
-      async ({}, testInfo) => {
-        await goToCollectionLivePreview(page, pagesURLUtil)
-        const { iframe } = await getLivePreviewIframe(page)
-        await expect(iframe).toBeVisible()
-        await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
+    test.fixme('Live preview and edit view should have no accessibility violations', async ({}, testInfo) => {
+      await goToCollectionLivePreview(page, pagesURLUtil)
+      const { iframe } = await getLivePreviewIframe(page)
+      await expect(iframe).toBeVisible()
+      await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
 
-        const scanResults = await runAxeScan({
-          page,
-          testInfo,
-          include: ['.collection-edit'],
-          exclude: ['.document-fields__main'], // we don't need to test fields here
-        })
+      const scanResults = await runAxeScan({
+        exclude: ['.document-fields__main'], // we don't need to test fields here
+        include: ['.collection-edit'],
+        page,
+        testInfo,
+      })
 
-        expect(scanResults.violations.length).toBe(0)
-      },
-    )
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

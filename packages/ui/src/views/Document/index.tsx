@@ -69,6 +69,7 @@ export const renderDocument = async ({
   redirectAfterDuplicate,
   redirectAfterRestore,
   searchParams,
+  user: userWithReadAccess,
   versions,
   viewType,
 }: {
@@ -249,6 +250,7 @@ export const renderDocument = async ({
       req,
       schemaPath: collectionSlug || globalSlug,
       skipValidation: true,
+      user: userWithReadAccess,
     }),
     getHasScheduledPublish({
       id: idFromArgs,
@@ -256,7 +258,6 @@ export const renderDocument = async ({
       globalConfig,
       hasPublishPermission,
       payload,
-      user,
     }),
   ])
 
@@ -274,7 +275,7 @@ export const renderDocument = async ({
     routeSegments: segments,
     searchParams,
     server: req.server,
-    user,
+    user: userWithReadAccess,
     versions,
   }
 
@@ -361,7 +362,9 @@ export const renderDocument = async ({
       draft: true,
       fallbackLocale: false,
       locale: locale?.code,
-      req,
+      overrideAccess: false,
+      // Navigation renders concurrently and must not join this create transaction.
+      req: req.transactionID ? req : isolateObjectProperty(req, 'transactionID'),
       user,
     })
 
@@ -382,15 +385,16 @@ export const renderDocument = async ({
     }
   }
 
-  const documentSlots = renderDocumentSlots({
+  const documentSlots = await renderDocumentSlots({
     id,
     collectionConfig,
-    doc: doc as Record<string, unknown>,
+    doc,
     globalConfig,
     hasSavePermission,
     locale,
     permissions,
     req,
+    user: userWithReadAccess,
   })
 
   // Extract Description from documentSlots to pass to DocumentHeader
@@ -457,7 +461,9 @@ export const renderDocument = async ({
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={Boolean(
-            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+            (entityPreferences?.value?.editViewType === undefined
+              ? livePreviewConfig?.openByDefault
+              : entityPreferences.value.editViewType === 'live-preview') && livePreviewURL,
           )}
           isPreviewEnabled={Boolean(isPreviewEnabled)}
           previewURL={previewURL}
@@ -471,6 +477,7 @@ export const renderDocument = async ({
               globalConfig={globalConfig}
               permissions={permissions}
               req={req}
+              user={userWithReadAccess}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

@@ -1,20 +1,25 @@
+import type { LinkNode } from '@payloadcms/richtext-lexical/client'
+import type { LexicalEditor } from '@payloadcms/richtext-lexical/lexical'
+
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, waitForFormReady } from '../../../__helpers/e2e/helpers.js'
+import { waitForFormReady } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
+import { openNestedUploadDrawer } from './utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-// Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
+// Keep these tests read-only so they can run in parallel.
 // PLEASE do not reset the database or perform any operations that modify it in this file.
 // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
 // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
@@ -27,7 +32,6 @@ const { serverURL } = await initPayloadE2ENoConfig({
 describe('Lexical Link Feature', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     await ensureCompilationIsDone({ browser, serverURL })
   })
@@ -51,7 +55,7 @@ describe('Lexical Link Feature', () => {
 
     await linkButton.click()
 
-    const customField = lexical.drawer.locator('#field-someText')
+    const customField = lexical.drawer.locator('input[name="someText"]')
 
     await expect(customField).toBeVisible()
   })
@@ -93,7 +97,7 @@ describe('Lexical Link Feature', () => {
 
     const longUrl =
       'https://example.com/some/very/long/path/that/should/cause/the/tooltip/to/overflow/when/displayed/in/the/editor/with/many/more/segments/to/make/it/even/longer'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(longUrl)
@@ -111,9 +115,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -161,7 +165,7 @@ describe('Lexical Link Feature', () => {
 
     const longUrl =
       'https://example.com/some/very/long/path/that/should/cause/the/tooltip/to/overflow/when/displayed/in/the/editor/with/many/more/segments/to/make/it/even/longer'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(longUrl)
@@ -179,9 +183,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -226,7 +230,7 @@ describe('Lexical Link Feature', () => {
     await linkButton.click()
 
     const shortUrl = 'https://google.com'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(shortUrl)
@@ -244,9 +248,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -294,7 +298,7 @@ describe('Lexical Link Feature', () => {
     await linkButton.click()
 
     const shortUrl = 'https://google.com'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(shortUrl)
@@ -313,9 +317,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -342,5 +346,152 @@ describe('Lexical Link Feature', () => {
         return tooltipRect.width < editorWidth * 0.5
       })
       .toBe(true)
+  })
+
+  test('should sanitize updated link URLs while preserving supported and relative links', async ({
+    page,
+  }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Protocol test link')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await lexical.save('drawer')
+
+    const link = lexical.editor.getByRole('link', { name: 'Protocol test link' })
+    const originalLink = await link.elementHandle()
+
+    for (const [url, expected] of [
+      ['javascript:alert(1)', 'about:blank'],
+      ['data:text/html,test', 'about:blank'],
+      ['http://[', 'about:blank'],
+      ['https://example.com/updated', 'https://example.com/updated'],
+      ['http://example.com/updated', 'http://example.com/updated'],
+      ['mailto:test@example.com', 'mailto:test@example.com'],
+      ['tel:+15555555555', 'tel:+15555555555'],
+      ['sms:+15555555555', 'sms:+15555555555'],
+      ['/relative/path', '/relative/path'],
+      ['//example.com/path', '//example.com/path'],
+      ['#section', '#section'],
+    ] as const) {
+      await link.dispatchEvent('mouseover')
+      await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+      await drawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(url)
+      await lexical.save('drawer')
+      await expect(link).toHaveAttribute('href', expected)
+      await expect.poll(() => originalLink!.evaluate((element) => element.isConnected)).toBe(true)
+    }
+  })
+
+  test('should remove the previous href when a link URL is omitted', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Link without a URL')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await lexical.save('drawer')
+
+    const anchor = lexical.editor.locator('a')
+    const originalAnchor = await anchor.elementHandle()
+
+    await lexical.editor.evaluate((element) => {
+      const editor = (element as { __lexicalEditor: LexicalEditor } & HTMLElement).__lexicalEditor
+
+      editor.update(() => {
+        const node = [...editor.getEditorState()._nodeMap.values()].find(
+          (node) => node.getType() === 'link',
+        ) as LinkNode
+        const { url: _url, ...fields } = node.getFields()
+
+        node.setFields(fields)
+      })
+    })
+
+    await expect(anchor).not.toHaveAttribute('href')
+    await expect.poll(() => originalAnchor!.evaluate((element) => element.isConnected)).toBe(true)
+  })
+
+  test('should retain link fields omitted by drawer read access', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Restricted link')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await drawer.locator('input[name="someText"]').fill('Stored restricted value')
+    await drawer.getByRole('button', { name: 'Add Hyperlink' }).click()
+
+    const blockDrawer = page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('heading', { name: 'Add Hyperlink' }) })
+
+    await blockDrawer.getByRole('button', { name: 'Asset Link Block', exact: true }).click()
+    await blockDrawer.getByRole('button', { name: 'Insert', exact: true }).click()
+    await drawer.getByLabel('Label', { exact: true }).fill('Stored row value')
+    await lexical.save('drawer')
+
+    await page.setExtraHTTPHeaders({ 'x-hide-lexical-fields': 'true' })
+    await lexical.editor.getByRole('link', { name: 'Restricted link' }).dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(drawer.getByRole('textbox', { name: 'Enter a URL', exact: true })).toBeVisible()
+    await expect(drawer.locator('input[name="someText"]')).toHaveValue('')
+    await expect(drawer.getByLabel('Label', { exact: true })).toHaveValue('')
+    await drawer.getByRole('button', { name: 'Close' }).first().click()
+    await page.setExtraHTTPHeaders({})
+
+    await lexical.editor.getByRole('link', { name: 'Restricted link' }).dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(drawer.locator('input[name="someText"]')).toHaveValue('Stored restricted value')
+    await expect(drawer.getByLabel('Label', { exact: true })).toHaveValue('Stored row value')
+  })
+
+  test('should preserve unsaved link fields when resizing with a nested upload drawer open', async ({
+    page,
+  }) => {
+    const finalizedURL = 'https://example.com/nested-link'
+    const { lexical, linkDrawer, assetLabelField, selectedFilename, uploadDocumentDrawer } =
+      await openNestedUploadDrawer({ page, finalizedURL })
+
+    await page.setViewportSize({ width: 1100, height: 800 })
+    await expect(uploadDocumentDrawer).toBeVisible()
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
+
+    await uploadDocumentDrawer.getByRole('button', { name: 'Close' }).first().click()
+    await expect(uploadDocumentDrawer).toBeHidden()
+    await linkDrawer.getByRole('button', { name: 'Save changes', exact: true }).click()
+    await expect(lexical.editor.getByRole('link', { name: 'custom link' })).toHaveAttribute(
+      'href',
+      finalizedURL,
+    )
+
+    const createdLink = lexical.editor.getByRole('link', { name: 'custom link' })
+
+    await createdLink.dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
+    await assetLabelField.fill('Discard this edit')
+    await page.keyboard.press('Escape')
+    await expect(linkDrawer).toBeHidden()
+    await createdLink.dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(linkDrawer.getByRole('textbox', { name: 'Enter a URL', exact: true })).toHaveValue(
+      finalizedURL,
+    )
   })
 })

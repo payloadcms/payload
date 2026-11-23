@@ -1,6 +1,7 @@
+import type { PayloadRequest } from 'payload'
+
 import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
-import { APIError, type PayloadRequest } from 'payload'
-import { z } from 'zod'
+import { APIError, strictObject, z } from 'payload'
 
 import type {
   AuthorizedMCP,
@@ -17,14 +18,14 @@ import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
 /**
- * Transport-agnostic core: registers every authorized MCP item onto a fresh
- * `McpServer` and returns it. The caller is responsible for picking a transport
- * (`WebStandardStreamableHTTPServerTransport`, `StdioServerTransport`, …) and
- * calling `server.connect(transport)`.
+ * Serving-entry-agnostic core: registers every authorized MCP item onto a fresh
+ * `McpServer` and returns it. The HTTP and stdio entry point callers provide fresh
+ * instances from this builder while they own the transport and protocol-era
+ * decision.
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
- * synthesized one built via `createLocalReq`.
+ * synthesized one built via `createPayloadRequest`.
  */
 export const buildMcpServer = ({
   authorizedMCP,
@@ -35,6 +36,8 @@ export const buildMcpServer = ({
   pluginConfig: SanitizedMCPPluginConfig
   req: PayloadRequest
 }): McpServer => {
+  z.config(z.locales.en())
+
   const serverOptions = pluginConfig.mcp?.serverOptions || {}
   const server = new McpServer(
     { name: 'Payload MCP Server', version: '1.0.0', ...serverOptions.serverInfo },
@@ -47,18 +50,28 @@ export const buildMcpServer = ({
    * Wrap a tool handler's response with the tool's `overrideResponse`, then
    * strip the internal `doc` field so it doesn't leak onto the wire.
    */
-  const finalizeToolResponse = (
-    response: MCPToolResponse,
-    overrideResponse?: MCPResponseOverride,
-  ): MCPToolResponse => {
-    const overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+  const finalizeToolResponse = async ({
+    input,
+    overrideResponse,
+    response,
+    toolName,
+  }: {
+    input: unknown
+    overrideResponse?: MCPResponseOverride
+    response: MCPToolResponse
+    toolName: string
+  }): Promise<MCPToolResponse> => {
+    let overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+    for (const hook of pluginConfig.hooks?.afterToolCall ?? []) {
+      overridden = await hook({ input, req, response: overridden, toolName })
+    }
     const { doc: _doc, ...rest } = overridden
     return rest
   }
 
   /**
    * Runs a collection/global tool call:
-   * - reads `collectionSlug` / `globalSlug` from the input
+   * - reads `slug` from the input
    * - runs access control: errors if `authorizedMCP.items` has no entry for this tool + slug
    * - runs the tool handler and finalizes its response
    */
@@ -72,16 +85,15 @@ export const buildMcpServer = ({
     serverContext: ServerContext
   }): Promise<MCPToolResponse> => {
     const entity = item.type === 'collectionTool' ? 'collection' : 'global'
-    const slugKey = item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug'
     const toolInput = (input ?? {}) as Record<string, unknown>
-    const slug = toolInput[slugKey] as string | undefined
+    const slug = toolInput.slug as string | undefined
 
     if (!slug) {
       return {
         content: [
           {
             type: 'text',
-            text: `Error: "${item.mcpName}" requires ${slugKey}. Use getConfigInfo to inspect ${entity} slugs.`,
+            text: `Error: "${item.mcpName}" requires slug. Use getConfigInfo to inspect ${entity} slugs.`,
           },
         ],
         isError: true,
@@ -116,10 +128,15 @@ export const buildMcpServer = ({
       serverContext,
     }
     const response = await (match.type === 'collectionTool'
-      ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
-      : match.tool.handler({ ...handlerArgs, globalSlug: slug }))
+      ? match.tool.handler({ ...handlerArgs, slug })
+      : match.tool.handler({ ...handlerArgs, slug }))
 
-    return finalizeToolResponse(response, match.tool.overrideResponse)
+    return finalizeToolResponse({
+      input: toolInput,
+      overrideResponse: match.tool.overrideResponse,
+      response,
+      toolName: match.mcpName,
+    })
   }
 
   try {
@@ -134,10 +151,7 @@ export const buildMcpServer = ({
           }
           registeredEntityTools.add(item.mcpName)
 
-          const inputSchema = withSlugInput({
-            name: item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug',
-            input: item.tool.input,
-          })
+          const inputSchema = withSlugInput({ input: item.tool.input })
 
           server.registerTool(
             item.mcpName,
@@ -203,16 +217,21 @@ export const buildMcpServer = ({
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
-            async (input: unknown, ctx: ServerContext) =>
-              finalizeToolResponse(
-                await tool.handler({
-                  authorizedMCP,
-                  input: (input ?? {}) as Record<string, unknown>,
-                  req,
-                  serverContext: ctx,
-                }),
-                tool.overrideResponse,
-              ),
+            async (input: unknown, ctx: ServerContext) => {
+              const toolInput = (input ?? {}) as Record<string, unknown>
+              const response = await tool.handler({
+                authorizedMCP,
+                input: toolInput,
+                req,
+                serverContext: ctx,
+              })
+              return finalizeToolResponse({
+                input: toolInput,
+                overrideResponse: tool.overrideResponse,
+                response,
+                toolName: item.mcpName,
+              })
+            },
           )
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
@@ -226,39 +245,50 @@ export const buildMcpServer = ({
   return server
 }
 
-const withSlugInput = ({
-  name,
-  input,
-}: {
-  input?: ToolInputSchema
-  name: 'collectionSlug' | 'globalSlug'
-}): ToolInputSchema => {
-  const description = name === 'collectionSlug' ? 'The collection slug' : 'The global slug'
-  const slugSchema = z.string().describe(description)
+const withSlugInput = ({ input }: { input?: ToolInputSchema }): ToolInputSchema => {
+  const description = 'The target slug.'
+  const slugSchema = z.string().check(z.describe(description))
 
   if (!input) {
-    return z.object({ [name]: slugSchema })
+    return strictObject({ slug: slugSchema })
   }
 
-  if (input instanceof z.ZodObject) {
-    return input.extend({ [name]: slugSchema })
+  if (typeof input === 'object' && input !== null && '~standard' in input) {
+    const schema = input['~standard'].jsonSchema.input({ target: 'draft-2020-12' })
+    const properties = schema.properties as Record<string, unknown> | undefined
+
+    if (properties?.slug) {
+      return input
+    }
+
+    return addSlugToJSONSchema({ description, schema })
   }
 
-  const schema = input as {
+  return addSlugToJSONSchema({ description, schema: input })
+}
+
+const addSlugToJSONSchema = ({
+  description,
+  schema,
+}: {
+  description: string
+  schema: JsonSchemaType
+}): JsonSchemaType => {
+  const objectSchema = schema as {
     properties?: Record<string, JsonSchemaType>
     required?: string[]
   } & JsonSchemaType
 
   return {
-    ...schema,
+    ...objectSchema,
     type: 'object',
     properties: {
-      ...schema.properties,
-      [name]: {
+      ...objectSchema.properties,
+      slug: {
         type: 'string',
         description,
       },
     },
-    required: Array.from(new Set([name, ...(schema.required ?? [])])),
+    required: Array.from(new Set(['slug', ...(objectSchema.required ?? [])])),
   }
 }

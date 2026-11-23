@@ -1,0 +1,146 @@
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { FlattenedField } from '../../config/types.js'
+import type { Slugify } from './types.js'
+
+import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
+import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
+import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
+import { fieldIsVirtual } from '../../config/types.js'
+import { getSlugFallbackValue } from './getSlugFallbackValue.js'
+import { hasValue } from './hasValue.js'
+
+type Args = {
+  collection: SanitizedCollectionConfig
+  /** The post-`beforeChange` data, with localized fields already keyed by locale. */
+  data: JsonObject
+  overrideAccess?: boolean
+  req: PayloadRequest
+}
+
+/**
+ * On create, seed every locale of a localized slug field so switching locales never lands on an
+ * empty slug. Each empty locale derives from its own source value — a non-localized source applies
+ * to every locale, so they follow it just like the active locale did — and falls back to a per-locale
+ * `<singular>-<N>` only when that locale has no source. Both are deduped within the locale, so one
+ * document never claims another's per-locale value. Required localized fields must be translated
+ * before their locale is seeded; otherwise SQL would insert an incomplete locale row.
+ *
+ * Runs after field `beforeChange` (similar to the localized `_status` treatment). The slug field hook
+ * only sees the active locale, so the other locales are filled here at the operation level. A slug
+ * is static once set, so this is create-only; per-locale edits afterward stay scoped to their locale.
+ */
+export const fillEmptyLocalizedSlugs = async ({
+  collection,
+  data,
+  overrideAccess = false,
+  req,
+}: Args): Promise<JsonObject> => {
+  const { localization } = req.payload.config
+
+  if (!localization || localization.localeCodes.length < 2) {
+    return data
+  }
+
+  const draftsEnabled = hasDraftsEnabled(collection)
+  const incompleteLocales = new Set(
+    localization.localeCodes.filter((locale) =>
+      isMissingRequiredLocalizedFields({ data, fields: collection.flattenedFields, locale }),
+    ),
+  )
+
+  for (const field of collection.flattenedFields) {
+    if (field.type !== 'slug' || !field.localized) {
+      continue
+    }
+
+    const customSlugify = field.custom?.slugify as Slugify | undefined
+
+    const slugify = (valueToSlugify: unknown) =>
+      customSlugify
+        ? customSlugify({ data, req, valueToSlugify })
+        : defaultSlugify(valueToSlugify as string)
+
+    // The source value for a given locale: a non-localized source is shared across all locales, a
+    // localized one is read per-locale (only the locales present in this create have a value).
+    const sourceField = field.useAsSlug
+      ? collection.flattenedFields.find((f) => f.name === field.useAsSlug)
+      : undefined
+    const source = field.useAsSlug ? data[field.useAsSlug] : undefined
+
+    const localeValues = (data[field.name] ?? {}) as Record<string, unknown>
+
+    for (const locale of localization.localeCodes) {
+      if (hasValue(localeValues[locale]) || incompleteLocales.has(locale)) {
+        continue
+      }
+
+      const sourceForLocale = sourceField?.localized
+        ? (source as Record<string, unknown> | undefined)?.[locale]
+        : source
+
+      const derived = sourceForLocale ? await slugify(sourceForLocale) : undefined
+
+      localeValues[locale] = hasValue(derived)
+        ? await getUniqueFieldValue({
+            collection: collection.slug,
+            draftsEnabled,
+            field: field.name,
+            locale,
+            overrideAccess,
+            req,
+            value: derived as string,
+          })
+        : await getSlugFallbackValue({
+            collection,
+            field: field.name,
+            locale,
+            overrideAccess,
+            req,
+            slugify,
+          })
+    }
+
+    data[field.name] = localeValues
+  }
+
+  return data
+}
+
+const isMissingRequiredLocalizedFields = ({
+  data,
+  fields,
+  isTopLevel = true,
+  locale,
+  parentIsLocalized = false,
+}: {
+  data: JsonObject | undefined
+  fields: FlattenedField[]
+  isTopLevel?: boolean
+  locale: string
+  parentIsLocalized?: boolean
+}): boolean =>
+  fields.some((field) => {
+    // Only top-level slugs are seeded together. Missing required nested slugs block their locale.
+    if ((isTopLevel && field.type === 'slug') || fieldIsVirtual(field) || field.admin?.condition) {
+      return false
+    }
+
+    const isLocalized = parentIsLocalized || field.localized
+    const value =
+      field.localized && !parentIsLocalized
+        ? (data?.[field.name] as JsonObject | undefined)?.[locale]
+        : data?.[field.name]
+
+    if (field.type === 'group' || field.type === 'tab') {
+      return isMissingRequiredLocalizedFields({
+        data: value as JsonObject | undefined,
+        fields: field.flattenedFields,
+        isTopLevel: false,
+        locale,
+        parentIsLocalized: isLocalized,
+      })
+    }
+
+    return Boolean(isLocalized && 'required' in field && field.required && !hasValue(value))
+  })

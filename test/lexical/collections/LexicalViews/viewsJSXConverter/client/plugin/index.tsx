@@ -5,7 +5,7 @@ import type { PluginComponent } from '@payloadcms/richtext-lexical'
 import { useLexicalComposerContext } from '@payloadcms/richtext-lexical/lexical/react/LexicalComposerContext'
 import { defaultJSXConverters, RichText } from '@payloadcms/richtext-lexical/react'
 
-import './style.scss'
+import './style.css'
 
 import { useEffect, useState } from 'react'
 

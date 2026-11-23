@@ -1,0 +1,70 @@
+@layer payload-default {
+  .activity-widget__add-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-block-size: var(--activity-row-height);
+    padding: var(--spacer-2);
+    border: var(--stroke-width-small) dashed var(--color-border);
+    border-radius: var(--radius-large);
+    background: var(--color-bg);
+    text-align: center;
+  }
+
+  .activity-widget__pin {
+    position: absolute;
+    inset-block-start: var(--spacer-2-5);
+    inset-inline-end: var(--spacer-2-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+    cursor: pointer;
+    opacity: 0;
+  }
+
+  .activity-widget .document-card .document-card__metadata .activity-widget__pin {
+    position: absolute;
+  }
+
+  .activity-widget__item:hover .activity-widget__pin,
+  .activity-widget__item:focus-within .activity-widget__pin {
+    opacity: 1;
+  }
+
+  .activity-widget__pin-icon {
+    display: flex;
+    color: var(--color-icon-secondary);
+  }
+
+  .activity-widget__pin-filled {
+    color: var(--color-icon-favorite);
+  }
+
+  .activity-widget__pin-remove {
+    display: none;
+  }
+
+  .activity-widget__pin:is(:hover, :focus-visible):not(:disabled) .activity-widget__pin-filled {
+    display: none;
+  }
+
+  .activity-widget__pin:is(:hover, :focus-visible):not(:disabled) .activity-widget__pin-remove {
+    display: block;
+  }
+
+  .activity-widget__pin:disabled {
+    cursor: progress;
+  }
+
+  .activity-widget__pin:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+}

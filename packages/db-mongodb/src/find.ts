@@ -154,7 +154,7 @@ export const find: Find = async function find(
     query,
   })
 
-  if (aggregate || sortAggregation.length > 0) {
+  if (aggregate.length > 0 || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,

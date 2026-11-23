@@ -103,7 +103,7 @@ export const MyRSCComponent = async ({
 
 The `lexicalHTMLField()` helper converts JSON to HTML and saves it in a field that is updated every time you read it via an `afterRead` hook. It's generally not recommended, as it creates a column with duplicate content in another format.
 
-Consider using the [on-demand HTML converter above](/docs/rich-text/converting-html#on-demand-recommended) or the [JSX converter](/docs/rich-text/converting-jsx) unless you have a good reason.
+Consider using the [on-demand HTML converter above](/docs/rich-text/converting-html#on-demand) or the [JSX converter](/docs/rich-text/converting-jsx) unless you have a good reason.
 
 ```ts
 import type { HTMLConvertersFunction } from '@payloadcms/richtext-lexical/html'
@@ -239,7 +239,7 @@ import {
 import { JSDOM } from 'jsdom'
 
 const lexicalJSON = convertHTMLToLexical({
-  editorConfig: await editorConfigFactory.default({
+  editorConfig: editorConfigFactory.default({
     config, // Your Payload Config
   }),
   html: '<p>text</p>',
@@ -269,6 +269,7 @@ const payload = await getPayload({ config })
 // Step 1: Upload the image to Payload
 const uploadedMedia = await payload.create({
   collection: 'media', // Your upload collection slug
+  overrideAccess: true,
   data: {
     alt: 'My image description',
   },
@@ -289,7 +290,7 @@ const htmlWithImage = `
 
 // Step 3: Convert to Lexical
 const lexicalJSON = convertHTMLToLexical({
-  editorConfig: await editorConfigFactory.default({ config }),
+  editorConfig: editorConfigFactory.default({ config }),
   html: htmlWithImage,
   JSDOM,
 })
@@ -337,6 +338,7 @@ async function convertHTMLWithImageUpload(htmlString: string) {
       // Upload to Payload
       const uploadedMedia = await payload.create({
         collection: 'media',
+        overrideAccess: true,
         data: {
           alt: img.getAttribute('alt') || '',
         },
@@ -363,7 +365,7 @@ async function convertHTMLWithImageUpload(htmlString: string) {
   const updatedHTML = dom.window.document.body.innerHTML
 
   return convertHTMLToLexical({
-    editorConfig: await editorConfigFactory.default({ config }),
+    editorConfig: editorConfigFactory.default({ config }),
     html: updatedHTML,
     JSDOM,
   })
@@ -402,6 +404,7 @@ const lexicalJSON = buildEditorState({
 // Save to your collection
 await payload.create({
   collection: 'pages',
+  overrideAccess: true,
   data: {
     title: 'My Page',
     content: lexicalJSON,

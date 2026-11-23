@@ -1,17 +1,12 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.11",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
-    "plugin",
     "mcp",
-    "model context protocol"
+    "model context protocol",
+    "plugin"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-mcp"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -21,7 +16,22 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-mcp"
+  },
+  "bin": {
+    "payload-mcp": "./bin.js"
+  },
+  "files": [
+    "src",
+    "dist",
+    "bin.js"
+  ],
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -39,46 +49,19 @@
       "default": "./src/stdio.ts"
     },
     "./internal": {
-      "import": "./src/internal.ts",
-      "types": "./src/internal.ts",
-      "default": "./src/internal.ts"
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "bin": {
-    "payload-mcp": "./bin.js"
-  },
-  "files": [
-    "src",
-    "dist",
-    "bin.js"
-  ],
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "pack:plugin": "pnpm build && pnpm pack"
-  },
-  "dependencies": {
-    "@cfworker/json-schema": "^4.1.1",
-    "@modelcontextprotocol/server": "2.0.0-alpha.2",
-    "tsx": "4.22.4",
-    "zod": "^4.0.0"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "workspace:*"
-  },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
@@ -96,17 +79,39 @@
         "default": "./dist/stdio.js"
       },
       "./internal": {
-        "import": "./dist/internal.js",
-        "types": "./dist/internal.d.ts",
-        "default": "./dist/internal.js"
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
+      },
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
       }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "pack:plugin": "pnpm build && pnpm pack"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
   },
   "//deps_notes": {
-    "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
-    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk",
     "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
   },
   "homepage:": "https://payloadcms.com"

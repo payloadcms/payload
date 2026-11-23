@@ -1,14 +1,14 @@
 import type {
   BuildFormStateArgs,
   ClientConfig,
-  ClientUser,
   ErrorResult,
   FormState,
   ServerFunction,
+  User,
 } from 'payload'
 
 import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
-import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState, getSelectMode } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
@@ -23,7 +23,7 @@ import { handleStaleDataCheck } from './handleStaleDataCheck.js'
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
-  user?: ClientUser | number | string
+  user?: number | string | User
 }
 
 export type StaleDataState = {
@@ -31,7 +31,7 @@ export type StaleDataState = {
   isStale: boolean
 }
 
-type BuildFormStateSuccessResult = {
+export type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string
@@ -120,6 +120,7 @@ export const buildFormState = async (
     skipClientConfigAuth,
     skipValidation,
     updateLastEdited,
+    user,
   } = args
 
   const selectMode = select ? getSelectMode(select) : undefined
@@ -172,18 +173,18 @@ export const buildFormState = async (
 
   // If there is form state but no data, deduce data from that form state, e.g. on initial load
   // Otherwise, use the incoming data as the source of truth, e.g. on subsequent saves
-  const data = incomingData || reduceFieldsToValues(formState, true)
+  const data = incomingData || getDataFromFormState(formState, true)
 
   let documentData = undefined
 
   if (documentFormState) {
-    documentData = reduceFieldsToValues(documentFormState, true)
+    documentData = getDataFromFormState(documentFormState, true)
   }
 
   let blockData = initialBlockData
 
   if (initialBlockFormState) {
-    blockData = reduceFieldsToValues(initialBlockFormState, true)
+    blockData = getDataFromFormState(initialBlockFormState, true)
   }
 
   /**
@@ -224,7 +225,7 @@ export const buildFormState = async (
     previousFormState: formState,
     readOnly,
     renderAllFields,
-    renderFieldFn: renderField,
+    renderFieldFn: (args) => renderField({ ...args, user }),
     req,
     schemaPath,
     select,

@@ -6,6 +6,8 @@ import type { HTMLConverterAsync, HTMLConvertersAsync } from '../async/types.js'
 import type { HTMLConverter, HTMLConverters } from '../sync/types.js'
 import type { ProvidedCSS } from './types.js'
 
+import { getExplicitDirection } from '../../utilities/getExplicitDirection.js'
+
 export function findConverterForNode<
   TConverters extends HTMLConverters | HTMLConvertersAsync,
   TConverter extends HTMLConverter | HTMLConverterAsync,
@@ -24,6 +26,7 @@ export function findConverterForNode<
 }): {
   converterForNode: TConverter | undefined
   providedCSSString: string
+  providedDirAttribute: string
   providedStyleTag: string
 } {
   let converterForNode: TConverter | undefined
@@ -62,20 +65,19 @@ export function findConverterForNode<
           style['text-align'] = 'center'
           break
         case 'end':
-          style['text-align'] = 'right'
+          style['text-align'] = 'end'
           break
         case 'justify':
           style['text-align'] = 'justify'
           break
         case 'left':
-          //style['text-align'] = 'left'
-          // Do nothing, as left is the default
+          style['text-align'] = 'left'
           break
         case 'right':
           style['text-align'] = 'right'
           break
         case 'start':
-          style['text-align'] = 'left'
+          style['text-align'] = 'start'
           break
       }
     }
@@ -98,9 +100,13 @@ export function findConverterForNode<
   }
   const providedStyleTag = providedCSSString?.length ? ` style="${providedCSSString}"` : ''
 
+  const direction = getExplicitDirection({ node })
+  const providedDirAttribute = direction ? ` dir="${direction}"` : ''
+
   return {
     converterForNode: converterForNode ?? unknownConverter,
     providedCSSString,
+    providedDirAttribute,
     providedStyleTag,
   }
 }

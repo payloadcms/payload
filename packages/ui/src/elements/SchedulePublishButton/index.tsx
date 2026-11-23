@@ -44,9 +44,9 @@ export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabl
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
-      hasPublishPermission &&
-      (globalSlug || (collectionSlug && id)) &&
-      (hasAutosave || !modified),
+    hasPublishPermission &&
+    (globalSlug || (collectionSlug && id)) &&
+    (hasAutosave || !modified),
   )
 
   const drawerSlug = `schedule-publish-${id}`
@@ -66,8 +66,10 @@ export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabl
         style={{ position: 'relative' }}
       >
         <Button
+          aria-label={label}
           buttonStyle="ghost"
           disabled={disabled}
+          extraButtonProps={{ title: undefined }}
           icon={<ScheduleIcon active={hasScheduledPublish} />}
           id="schedule-publish-button"
           onClick={() => toggleModal(drawerSlug)}

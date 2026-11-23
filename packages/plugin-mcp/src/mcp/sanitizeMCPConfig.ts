@@ -99,9 +99,12 @@ export const sanitizeMCPConfig = ({
   }
 
   return {
+    access: pluginConfig.access,
     disabled: pluginConfig.disabled,
+    hooks: pluginConfig.hooks,
     items,
     mcp: pluginConfig.mcp,
+    oauth: pluginConfig.oauth === false ? undefined : (pluginConfig.oauth ?? { type: 'builtin' }),
     overrideGetAuthorizedMCP: pluginConfig.overrideGetAuthorizedMCP,
   }
 }
@@ -126,12 +129,15 @@ const sanitizeCollectionConfig = ({
 
   for (const [
     toolKey,
-    { mcpName, requiresDuplicateEnabled, requiresVersions, tool },
+    { mcpName, requiresDuplicateEnabled, requiresUpload, requiresVersions, tool },
   ] of COLLECTION_BUILTIN_ENTRIES) {
     if (requiresVersions && !collection.versions) {
       continue
     }
     if (requiresDuplicateEnabled && isDuplicateDisabled) {
+      continue
+    }
+    if (requiresUpload && !collection.upload) {
       continue
     }
     const matchedConfigEntry = collectionPluginConfig?.tools?.[toolKey]

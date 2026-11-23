@@ -39,6 +39,7 @@ type ArrayRowProps = {
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly parentPath: string
   readonly pasteRow: (rowIndex: number) => void
+  readonly pasteRowBelow: (rowIndex: number) => void
   readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly?: boolean
@@ -70,6 +71,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   moveRow,
   parentPath,
   pasteRow,
+  pasteRowBelow,
   path,
   permissions,
   readOnly,
@@ -79,6 +81,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   rowIndex,
   schemaPath,
   scrollIdPrefix,
+  setActivatorNodeRef,
   setCollapse,
   setNodeRef,
   transform,
@@ -88,6 +91,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+
+  const pasteData = React.useMemo(() => ({ path, schemaFields: fields }), [path, fields])
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
     2,
@@ -125,8 +130,11 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               hasMaxRows={hasMaxRows}
               index={rowIndex}
               isSortable={isSortable}
+              label={fallbackLabel}
               moveRow={moveRow}
+              pasteData={pasteData}
               pasteRow={pasteRow}
+              pasteRowBelow={pasteRowBelow}
               removeRow={removeRow}
               rowCount={rowCount}
             />
@@ -140,6 +148,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
                 id: row.id,
                 attributes,
                 listeners,
+                setActivatorNodeRef,
               }
             : undefined
         }
@@ -158,7 +167,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
-        isCollapsed={row.collapsed}
+        isCollapsed={row.collapsed ?? Boolean(row.isLoading)}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         {isLoading ? (

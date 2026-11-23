@@ -61,11 +61,8 @@ type BuildNodes<T> =
  * ```
  */
 export function buildEditorState<
-  T extends
-    | null
-    | SerializedLexicalNode
-    | TypedEditorState<SerializedLexicalNode>
-    | undefined = DefaultNodeTypes,
+  T extends null | SerializedLexicalNode | TypedEditorState<SerializedLexicalNode> | undefined =
+    DefaultNodeTypes,
 >({
   nodes,
   text,
@@ -77,7 +74,7 @@ export function buildEditorState<
     root: {
       type: 'root',
       children: [],
-      direction: 'ltr',
+      direction: null,
       format: '',
       indent: 0,
       version: 1,
@@ -98,7 +95,7 @@ export function buildEditorState<
           version: 1,
         },
       ],
-      direction: 'ltr',
+      direction: null,
       format: '',
       indent: 0,
       textFormat: 0,
@@ -117,7 +114,7 @@ export function buildEditorState<
     editorJSON.root.children.push({
       type: 'paragraph',
       children: [],
-      direction: 'ltr',
+      direction: null,
       format: '',
       indent: 0,
       textFormat: 0,

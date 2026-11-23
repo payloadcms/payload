@@ -78,8 +78,16 @@ async function main() {
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
-      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template.
-      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver', 'mongodb-memory-server', '@swc/core'],
+      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template;
+      // bufferutil: vercel-postgres templates.
+      allowBuilds: [
+        'esbuild',
+        'sharp',
+        'unrs-resolver',
+        'mongodb-memory-server',
+        '@swc/core',
+        'bufferutil',
+      ],
       overrides: fileSpecByPackageName,
     }),
   )
@@ -93,13 +101,6 @@ DATABASE_URL=${databaseConnection}
 POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
-  // Important: run generate:types and generate:importmap first
-  if (templateName !== 'plugin') {
-    // TODO: fix in a separate PR - these commands currently fail in the plugin template
-    execSync('pnpm run generate:types', execOpts)
-    execSync('pnpm run generate:importmap', execOpts)
-  }
-
   await runBuildWithWarningsCheck({ cwd: templatePath, allowWarnings })
 
   header(`\n🎉 Done!`)

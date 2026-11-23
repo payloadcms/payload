@@ -1,5 +1,5 @@
 'use client'
-import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
+import type { TextareaFieldClientProps, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -18,7 +18,7 @@ import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
-const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
+const TextareaFieldComponent: React.FC<TextareaFieldClientProps> = (props) => {
   const {
     field,
     field: {
