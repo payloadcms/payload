@@ -104,7 +104,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
         nodeViews,
       }),
       onError: (error: Error) => {
-        throw error
+        console.error(error)
       },
       theme: editorConfig.lexical.theme,
     }
