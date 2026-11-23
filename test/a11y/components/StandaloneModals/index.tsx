@@ -1,6 +1,8 @@
 'use client'
 
-import { ConfirmationModal, ModalContainer, ModalProvider, useModal } from '@payloadcms/ui'
+import { ConfirmationModal } from '@payloadcms/ui/elements/ConfirmationModal'
+import { useModal } from '@payloadcms/ui/elements/Modal'
+import { ModalContainer, ModalProvider } from '@payloadcms/ui/providers/Modal'
 import React, { useState } from 'react'
 
 export function StandaloneModals() {
