@@ -2472,10 +2472,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(meta.updatedAt).toBe('2025-01-01T00:00:00.000Z')
       })
 
-      test('issue #19670 / Security: should reject prototype pollution keys in mergeDraftData', () => {
+      test('issue #19670 / Security: should reject __proto__ but preserve permitted constructor and prototype fields in mergeDraftData', () => {
         const target: Record<string, unknown> = {}
         const incoming = JSON.parse(
-          '{"__proto__": {"polluted": true}, "constructor": {"prototype": {"polluted": true}}, "normalField": "safe"}',
+          '{"__proto__": {"polluted": true}, "constructor": "Ferrari", "prototype": "DesignSystemV1", "normalField": "safe"}',
         )
 
         mergeDraftData({
@@ -2484,6 +2484,8 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
 
         expect(target.normalField).toBe('safe')
+        expect(target.constructor).toBe('Ferrari')
+        expect(target.prototype).toBe('DesignSystemV1')
         expect((target as any).polluted).toBeUndefined()
         expect(({} as any).polluted).toBeUndefined()
       })
