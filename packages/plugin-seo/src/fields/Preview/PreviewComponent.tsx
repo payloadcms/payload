@@ -58,7 +58,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   useEffect(() => {
     const endpoint = formatAdminURL({
       apiRoute: api,
-      path: '/plugin-seo/generate-url',
+      path: `/plugin-seo/generate-url${locale?.code ? `?${new URLSearchParams({ locale: locale.code })}` : ''}`,
     })
 
     const getHref = async () => {

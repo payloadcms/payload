@@ -16,6 +16,7 @@ export const PagesWithImportedFields: CollectionConfig = {
     singular: 'Page with imported fields',
     plural: 'Pages with imported fields',
   },
+  generateFrontendPath: ({ doc, req }) => `/${req.locale}/${doc.slug ?? ''}`,
   admin: {
     useAsTitle: 'title',
   },

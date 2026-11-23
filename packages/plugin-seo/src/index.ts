@@ -45,7 +45,11 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
           ]
         : []),
       PreviewField({
-        hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
+        hasGenerateFn:
+          typeof pluginConfig?.generateURL === 'function' ||
+          [...(config.collections ?? []), ...(config.globals ?? [])].some(
+            (entity) => typeof entity.generateFrontendPath === 'function',
+          ),
       }),
     ]
 
@@ -334,14 +338,27 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
               req,
             })
 
-            const result = pluginConfig.generateURL
-              ? await pluginConfig.generateURL({
-                  ...data,
-                  collectionConfig,
-                  globalConfig,
-                  req,
-                } satisfies Parameters<GenerateURL>[0])
-              : ''
+            let result = ''
+
+            if (pluginConfig.generateURL) {
+              result = await pluginConfig.generateURL({
+                ...data,
+                collectionConfig,
+                globalConfig,
+                req,
+              } satisfies Parameters<GenerateURL>[0])
+            } else if (collectionConfig || globalConfig) {
+              const frontendPath = await req.payload.generateFrontendPath({
+                ...(collectionConfig
+                  ? { collection: collectionConfig.slug }
+                  : { global: globalConfig!.slug }),
+                doc: data.doc,
+                req,
+              })
+
+              result = frontendPath === null ? '' : `${req.payload.config.serverURL}${frontendPath}`
+            }
+
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',

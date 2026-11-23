@@ -36,6 +36,7 @@ export const Pages: CollectionConfig = {
   versions: {
     drafts: true,
   },
+  generateFrontendPath: ({ doc, req }) => `/${req.locale}/${doc.slug ?? ''}`,
   fields: [
     {
       type: 'tabs',

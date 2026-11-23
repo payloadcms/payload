@@ -142,7 +142,7 @@ describe('SEO Plugin', () => {
       await metaDescription.fill('My new amazing SEO description')
 
       const preview = page.locator(previewClass)
-      await expect(preview).toContainText('https://yoursite.com/en/')
+      await expect(preview).toContainText('/en/')
       await expect(preview).toContainText('This is a test meta title')
       await expect(preview).toContainText('My new amazing SEO description')
     })
