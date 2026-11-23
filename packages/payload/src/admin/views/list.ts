@@ -35,6 +35,18 @@ export type HierarchyViewData = {
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
   childrenData: PaginatedDocs
+  childrenWhere?: Where
+  joinedDocuments?: {
+    docs: ({
+      _collectionSlug: string
+      _isLocked?: boolean
+      _userEditing?: { id: string }
+      id: number | string
+    } & Record<string, unknown>)[]
+    hasNextPage: boolean
+    page: number
+    totalDocs: number
+  }
   /** The current parent document data (for display and collectionSpecific field access) */
   parent: null | (Record<string, unknown> & TypeWithID)
   /** The parent field name for building queries */
