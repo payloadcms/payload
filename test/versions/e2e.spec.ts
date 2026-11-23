@@ -1561,6 +1561,42 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('global title')
     })
 
+    test('should show changed status and published actions after autosaving and reloading a global', async () => {
+      await payload.updateGlobal({
+        slug: autoSaveGlobalSlug,
+        data: { _status: 'published', title: 'published global' },
+      })
+
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await waitForFormReady(page)
+      await expect(page.locator('.doc-controls__status .status__value')).toHaveText('Published')
+
+      const autosaved = page.waitForResponse((response) => {
+        const responseURL = new URL(response.url())
+
+        return (
+          response.request().method() === 'POST' &&
+          responseURL.pathname.endsWith(`/globals/${autoSaveGlobalSlug}`) &&
+          responseURL.searchParams.get('autosave') === 'true' &&
+          response.ok()
+        )
+      })
+
+      await page.locator('#field-title').fill('autosaved draft')
+      await autosaved
+      await page.reload()
+
+      await expect(page.locator('#field-title')).toHaveValue('autosaved draft')
+      await expect(page.locator('.doc-controls__status .status__value')).toHaveText('Changed')
+      await expect(
+        page.getByRole('button', { name: 'Revert to published', exact: true }),
+      ).toBeVisible()
+      await openDocControls(page)
+      await expect(page.getByRole('button', { name: 'Unpublish', exact: true })).toBeVisible()
+    })
+
     test('globals — should hide publish button when access control prevents update', async () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
