@@ -5,8 +5,9 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import type { UpgradePlan } from '../upgrade-shared/index.js'
+import type { ResolvedVersions } from '../upgrade-shared/toolchain.js'
 import type { ReportModel, VersionReportRow } from './report.js'
-import type { PackageManager, ResolvedVersions, UpgradeDeps } from './types.js'
+import type { PackageManager, UpgradeDeps } from './types.js'
 
 import { transforms as registry } from '../registry.js'
 import { runTransforms as defaultRunTransforms } from '../runner.js'
@@ -15,14 +16,16 @@ import {
   createRegistryClient,
   readInstalledVersion,
 } from '../upgrade-shared/index.js'
-import { assertMigrationNodeVersion } from '../upgrade-shared/toolchain.js'
+import {
+  assertMigrationNodeVersion,
+  resolveVersions,
+  writeFloors,
+} from '../upgrade-shared/toolchain.js'
 import { loadPackageJsons, serializePackageJson } from '../utils/packageJson.js'
 import { loadProject } from '../utils/project.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { prepareUpgrade } from './prepare.js'
 import { renderReport } from './report.js'
-import { resolveVersions } from './resolveVersions.js'
-import { writeFloors } from './rewritePackageJson.js'
 import { runInstall } from './runInstall.js'
 import { resolveSelfCommand } from './selfCommand.js'
 import { MIGRATION_GUIDE_RELATIVE_PATH, RUNBOOK_RELATIVE_PATH } from './types.js'

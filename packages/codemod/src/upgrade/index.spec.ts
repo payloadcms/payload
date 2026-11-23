@@ -3,11 +3,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { RegistryPackument, UpgradeDeps } from './types.js'
+import type { RegistryPackage } from '../upgrade-shared/index.js'
+import type { UpgradeDeps } from './types.js'
 
 import { runUpgrade } from './index.js'
 
-const packuments: Record<string, RegistryPackument> = {
+const packuments: Record<string, RegistryPackage> = {
   '@payloadcms/next': {
     'dist-tags': { canary: '4.0.0-canary.20' },
     versions: { '4.0.0-canary.20': { peerDependencies: { next: '>=16.2.6 <17.0.0' } } },

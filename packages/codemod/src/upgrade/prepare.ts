@@ -11,9 +11,12 @@ import {
   resolveTargets,
 } from '../upgrade-shared/index.js'
 import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
-import { assertMigrationNodeVersion, formatMigrationPreview } from '../upgrade-shared/toolchain.js'
+import {
+  assertMigrationNodeVersion,
+  formatMigrationPreview,
+  resolveVersions,
+} from '../upgrade-shared/toolchain.js'
 import { resolveDefaultTag } from './defaultTag.js'
-import { resolveVersions } from './resolveVersions.js'
 
 /** Resolve and preview the package plan before any install, transform, or agent starts. */
 export async function prepareUpgrade({

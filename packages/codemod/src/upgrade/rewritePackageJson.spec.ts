@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { ResolvedVersions } from './types.js'
+import type { ResolvedVersions } from '../upgrade-shared/toolchain.js'
 
-import { writeFloors } from './rewritePackageJson.js'
+import { writeFloors } from '../upgrade-shared/toolchain.js'
 
 const resolved: ResolvedVersions = {
   enginesNode: '^24.22.3 || >=26.13.1',

@@ -1,7 +1,4 @@
-import type { FetchRegistry, RegistryPackage } from '../upgrade-shared/index.js'
-
-export type RegistryPackument = RegistryPackage
-export type { FetchRegistry }
+import type { FetchRegistry } from '../upgrade-shared/index.js'
 
 export type Spawn = (
   command: string,
@@ -11,15 +8,11 @@ export type Spawn = (
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type { ResolvedVersions } from '../upgrade-shared/toolchain.js'
-
 export type UpgradeDeps = {
   exists: (path: string) => boolean
   fetchRegistry: FetchRegistry
   spawn: Spawn
 }
-
-export { TS_FLOOR } from '../upgrade-shared/toolchain.js'
 
 /** Path (relative to dist/) of the bundled runbook the command points users to. */
 export const RUNBOOK_RELATIVE_PATH = 'runbook/payload-v4-upgrade.md'
