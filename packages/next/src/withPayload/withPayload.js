@@ -261,8 +261,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
  */
 function getAdminRouteSource({ adminRoute = '/admin' }) {
   const routeWithoutTrailingSlash = adminRoute.replace(/\/+$/, '')
+  // Escape characters that Next.js reads as route pattern syntax, so the route is matched literally
+  const escapedRoute = routeWithoutTrailingSlash.replace(/([\\(){}:*+?])/g, '\\$1')
 
-  return `${routeWithoutTrailingSlash}/:path*`
+  return `${escapedRoute}/:path*`
 }
 
 export default withPayload

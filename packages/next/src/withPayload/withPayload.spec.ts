@@ -142,6 +142,8 @@ describe('withPayload', () => {
       ['/cms', '/cms/:path*'],
       ['/cms/', '/cms/:path*'],
       ['/', '/:path*'],
+      ['/admin(beta)', '/admin\\(beta\\)/:path*'],
+      ['/cms:v2+', '/cms\\:v2\\+/:path*'],
     ])(
       'should send the color scheme client hint headers on adminRoute %s',
       async (adminRoute, source) => {
