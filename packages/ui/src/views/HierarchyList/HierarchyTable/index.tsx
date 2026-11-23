@@ -448,6 +448,10 @@ export function HierarchyTable({
   ])
 
   const combinedRows = useMemo(() => allGroups.flatMap((group) => group.docs), [allGroups])
+  const documentRows = useMemo(
+    () => combinedRows.filter((row) => row._collectionSlug !== collectionSlug),
+    [collectionSlug, combinedRows],
+  )
 
   const handleCheckboxChange = useCallback(
     (row: TableRow) => {
@@ -505,6 +509,66 @@ export function HierarchyTable({
     ],
     [t],
   )
+
+  const getGridItemClassName = (row: TableRow) =>
+    isSelected({ id: row.id, collectionSlug: row._collectionSlug })
+      ? 'card-grid__item--selected'
+      : undefined
+
+  const getGridItemKey = (row: TableRow) => `${row._collectionSlug}:${row.id}`
+
+  const renderGridCard = (row: TableRow) => {
+    const isHierarchyItem = row._collectionSlug === collectionSlug
+    const config = getEntityConfig({ collectionSlug: row._collectionSlug })
+    const titleField = config?.admin?.useAsTitle || 'id'
+    const rawTitle = row[titleField]
+    const title =
+      typeof rawTitle === 'string' || typeof rawTitle === 'number'
+        ? String(rawTitle)
+        : String(row.id)
+    const editURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${row._collectionSlug}/${encodeURIComponent(String(row.id))}`,
+    })
+    const hierarchyURL = getHierarchyListURL({
+      adminRoute,
+      collectionSlug,
+      parentFieldName: hierarchyParentFieldName,
+      parentID: row.id,
+    })
+    const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
+    const thumbnailSrc =
+      !isHierarchyItem && mimeType && isImage(mimeType)
+        ? getBestFitFromSizes({
+            sizes: row.sizes as Record<string, { url?: string; width?: number }>,
+            thumbnailURL: row.thumbnailURL as string,
+            url: row.url as string,
+            width: row.width as number,
+          })
+        : !isHierarchyItem && typeof row.thumbnailURL === 'string'
+          ? row.thumbnailURL
+          : undefined
+    const isRowLocked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+
+    return (
+      <DocumentCard
+        href={isHierarchyItem ? hierarchyURL : editURL}
+        isSelected={isSelected({ id: row.id, collectionSlug: row._collectionSlug })}
+        onSelect={isRowLocked ? undefined : () => handleCheckboxChange(row)}
+        placeholder={isHierarchyItem ? (row._hierarchyIcon ?? <DocumentIcon />) : <DocumentIcon />}
+        thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
+        title={title}
+      >
+        {isHierarchyItem ? (
+          <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
+            {t('general:edit')}
+          </Link>
+        ) : (
+          row._collectionLabel
+        )}
+      </DocumentCard>
+    )
+  }
 
   if (!hasChildren && !hasRelated) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
@@ -582,70 +646,34 @@ export function HierarchyTable({
       ) : (
         <TableSection>
           <TableSection.Content>
-            <CardGrid
-              ariaLabel={hierarchyLabel}
-              getItemClassName={(row) =>
-                isSelected({ id: row.id, collectionSlug: row._collectionSlug })
-                  ? 'card-grid__item--selected'
-                  : undefined
-              }
-              getKey={(row) => `${row._collectionSlug}:${row.id}`}
-              items={combinedRows}
-              renderItem={(row) => {
-                const isHierarchyItem = row._collectionSlug === collectionSlug
-                const config = getEntityConfig({ collectionSlug: row._collectionSlug })
-                const titleField = config?.admin?.useAsTitle || 'id'
-                const rawTitle = row[titleField]
-                const title =
-                  typeof rawTitle === 'string' || typeof rawTitle === 'number'
-                    ? String(rawTitle)
-                    : String(row.id)
-                const editURL = formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${row._collectionSlug}/${encodeURIComponent(String(row.id))}`,
-                })
-                const hierarchyURL = getHierarchyListURL({
-                  adminRoute,
-                  collectionSlug,
-                  parentFieldName: hierarchyParentFieldName,
-                  parentID: row.id,
-                })
-                const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
-                const thumbnailSrc =
-                  !isHierarchyItem && mimeType && isImage(mimeType)
-                    ? getBestFitFromSizes({
-                        sizes: row.sizes as Record<string, { url?: string; width?: number }>,
-                        thumbnailURL: row.thumbnailURL as string,
-                        url: row.url as string,
-                        width: row.width as number,
-                      })
-                    : !isHierarchyItem && typeof row.thumbnailURL === 'string'
-                      ? row.thumbnailURL
-                      : undefined
-                const isRowLocked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
-
-                return (
-                  <DocumentCard
-                    href={isHierarchyItem ? hierarchyURL : editURL}
-                    isSelected={isSelected({ id: row.id, collectionSlug: row._collectionSlug })}
-                    onSelect={isRowLocked ? undefined : () => handleCheckboxChange(row)}
-                    placeholder={
-                      isHierarchyItem ? (row._hierarchyIcon ?? <DocumentIcon />) : <DocumentIcon />
-                    }
-                    thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
-                    title={title}
-                  >
-                    {isHierarchyItem ? (
-                      <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
-                        {t('general:edit')}
-                      </Link>
-                    ) : (
-                      row._collectionLabel
-                    )}
-                  </DocumentCard>
-                )
-              }}
-            />
+            {hasChildren && (
+              <div className={`${baseClass}__grid-section`}>
+                <h2 className={`${baseClass}__grid-heading ${baseClass}__group-label`}>
+                  {childrenLabel}
+                </h2>
+                <CardGrid
+                  ariaLabel={childrenLabel}
+                  getItemClassName={getGridItemClassName}
+                  getKey={getGridItemKey}
+                  items={childTableData}
+                  renderItem={renderGridCard}
+                />
+              </div>
+            )}
+            {hasRelated && (
+              <div className={`${baseClass}__grid-section`}>
+                <h2 className={`${baseClass}__grid-heading ${baseClass}__group-label`}>
+                  {t('general:documents')}
+                </h2>
+                <CardGrid
+                  ariaLabel={t('general:documents')}
+                  getItemClassName={getGridItemClassName}
+                  getKey={getGridItemKey}
+                  items={documentRows}
+                  renderItem={renderGridCard}
+                />
+              </div>
+            )}
             {pagination}
           </TableSection.Content>
         </TableSection>

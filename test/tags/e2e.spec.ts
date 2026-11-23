@@ -177,7 +177,7 @@ test.describe('Tags', () => {
     await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0)
   })
 
-  test('should show tag members from different collections in one grid', async () => {
+  test('should separate hierarchy items from related documents in grid view', async () => {
     const { docs: italianTags } = await payload.find({
       collection: tagsSlug,
       overrideAccess: true,
@@ -197,18 +197,29 @@ test.describe('Tags', () => {
 
     await page.getByRole('radio', { name: 'Grid' }).click()
 
-    const grid = page.getByRole('list', { name: 'Tags' })
+    const hierarchyGrid = page.getByRole('list', { name: 'Tags' })
+    const documentGrid = page.getByRole('list', { name: 'Documents' })
 
-    await expect(grid).toHaveCount(1)
-    await expect(grid.getByRole('link', { name: 'Italian Grid Subtag', exact: true })).toBeVisible()
-    await expect(grid.getByRole('link', { name: 'Traditional Tiramisu' })).toBeVisible()
-    await expect(grid.getByRole('link', { name: 'Guide to Italian Cuisine' })).toBeVisible()
-    await expect(grid.getByRole('link', { name: /mushroom-risotto.png/ })).toBeVisible()
     await expect(
-      grid.locator('.document-card', { hasText: 'mushroom-risotto.png' }).locator('img'),
+      page.locator('.hierarchy-tables').getByRole('heading', { name: 'Tags' }),
+    ).toBeVisible()
+    await expect(
+      page.locator('.hierarchy-tables').getByRole('heading', { name: 'Documents' }),
+    ).toBeVisible()
+    await expect(hierarchyGrid).toHaveCount(1)
+    await expect(documentGrid).toHaveCount(1)
+    await expect(
+      hierarchyGrid.getByRole('link', { name: 'Italian Grid Subtag', exact: true }),
+    ).toBeVisible()
+    await expect(hierarchyGrid.locator('.card-grid__item')).toHaveCount(1)
+    await expect(documentGrid.getByRole('link', { name: 'Traditional Tiramisu' })).toBeVisible()
+    await expect(documentGrid.getByRole('link', { name: 'Guide to Italian Cuisine' })).toBeVisible()
+    await expect(documentGrid.getByRole('link', { name: /mushroom-risotto.png/ })).toBeVisible()
+    await expect(
+      documentGrid.locator('.document-card', { hasText: 'mushroom-risotto.png' }).locator('img'),
     ).toHaveAttribute('src', /mushroom-risotto/)
 
-    const postCard = grid.locator('.document-card', { hasText: 'Traditional Tiramisu' })
+    const postCard = documentGrid.locator('.document-card', { hasText: 'Traditional Tiramisu' })
 
     await postCard.click()
     await expect(postCard).toHaveAttribute('aria-pressed', 'true')

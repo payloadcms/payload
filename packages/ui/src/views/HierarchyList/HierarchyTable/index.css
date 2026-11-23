@@ -66,6 +66,23 @@
     min-width: 100px;
   }
 
+  .hierarchy-tables__grid-section {
+    padding-block-start: var(--spacer-3);
+
+    .card-grid {
+      padding-block-start: var(--spacer-2);
+    }
+  }
+
+  .hierarchy-tables__grid-section + .hierarchy-tables__grid-section {
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .hierarchy-tables__grid-heading {
+    margin: 0;
+    padding-inline: var(--gutter-h);
+  }
+
   .hierarchy-tables__section-title {
     margin: 0;
     font-weight: var(--text-body-medium-bold-font-weight);
