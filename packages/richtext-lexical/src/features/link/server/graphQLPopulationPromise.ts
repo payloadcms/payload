@@ -3,6 +3,8 @@ import type { LinkFeatureServerProps } from './index.js'
 import type { SerializedLinkNode } from './schema.js'
 
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
+import { chainPopulationPromises } from '../../../utilities/chainPopulationPromises.js'
+import { attachFrontendPath } from './frontendPath.js'
 
 export const linkPopulationPromiseHOC = (
   props: LinkFeatureServerProps,
@@ -45,7 +47,10 @@ export const linkPopulationPromiseHOC = (
         flattenLocales,
         overrideAccess,
         parentIsLocalized: parentIsLocalized || field.localized || false,
-        populationPromises,
+        populationPromises: chainPopulationPromises({
+          afterPopulate: () => attachFrontendPath({ node, req }),
+          populationPromises,
+        }),
         req,
         showHiddenFields,
         siblingDoc: node.fields,

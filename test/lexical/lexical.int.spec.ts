@@ -46,6 +46,7 @@ import type { LexicalField, LexicalListsFeature, RichTextField } from './payload
 
 // Sync converters
 import {
+  convertLexicalToHTML,
   HeadingHTMLConverter,
   LinkHTMLConverter,
   ListHTMLConverter,
@@ -504,6 +505,74 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       const linkNode: SerializedLinkNode = (lexical.root.children[1] as SerializedParagraphNode)
         .children[3] as SerializedLinkNode
       expect(linkNode.fields.doc.value.text).toStrictEqual(textDoc.text)
+    })
+
+    test('should render populated internal links with their frontend path', async ({ payload }) => {
+      const richTextDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 1,
+        overrideAccess: true,
+      })
+
+      const frontendPath = `/${textFieldsSlug}/${createdTextDocID}`
+      const linkNode = (richTextDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode)
+        .children[3] as SerializedLinkNode
+
+      expect(linkNode.fields.doc?.frontendPath).toBe(frontendPath)
+      expect(convertLexicalToHTML({ data: richTextDoc.lexicalCustomFields })).toContain(
+        `href="${frontendPath}"`,
+      )
+    })
+
+    test('should add the frontend path to internal links in GraphQL', async ({ restClient }) => {
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              RichTextField(id: ${JSON.stringify(createdRichTextDocID)}) {
+                lexicalCustomFields(depth: 1)
+              }
+            }`,
+          }),
+        })
+        .then((res) => res.json())
+
+      const linkNode = data.RichTextField.lexicalCustomFields.root.children[1].children[3]
+
+      expect(linkNode.fields.doc.frontendPath).toBe(`/${textFieldsSlug}/${createdTextDocID}`)
+    })
+
+    test('should not save the frontend path of internal links', async ({ payload }) => {
+      const richTextDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNodeToSave = (
+        richTextDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode
+      ).children[3] as SerializedLinkNode
+
+      linkNodeToSave.fields.doc!.frontendPath = '/stale-path'
+
+      await payload.update({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        data: { lexicalCustomFields: richTextDoc.lexicalCustomFields },
+        overrideAccess: true,
+      })
+
+      const savedDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNode = (savedDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode)
+        .children[3] as SerializedLinkNode
+
+      expect(linkNode.fields.doc).not.toHaveProperty('frontendPath')
     })
 
     test('should populate relationship node', async ({ payload }) => {

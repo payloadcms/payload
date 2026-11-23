@@ -205,6 +205,14 @@ export type AfterReadNodeHook<T extends SerializedLexicalNode> = (
   args: AfterReadNodeHookArgs<T> & BaseNodeHookArgs<T>,
 ) => Promise<T> | T
 
+/**
+ * Runs in the REST and Local API each time a population of the node's sub-fields finishes, so the
+ * node can read its populated data. It mutates the node in place.
+ */
+export type AfterPopulateNodeHook<T extends SerializedLexicalNode> = (
+  args: BaseNodeHookArgs<T>,
+) => Promise<void> | void
+
 export type AfterChangeNodeHook<T extends SerializedLexicalNode> = (
   args: AfterChangeNodeHookArgs<T> & BaseNodeHookArgs<T>,
 ) => Promise<T> | T
@@ -278,6 +286,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    */
   hooks?: {
     afterChange?: Array<AfterChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    afterPopulate?: Array<AfterPopulateNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
     afterRead?: Array<AfterReadNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
     beforeChange?: Array<BeforeChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
     beforeValidate?: Array<BeforeValidateNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
@@ -386,6 +395,7 @@ export type SanitizedServerFeatures = {
   markdownTransformers: Transformer[]
   nodeHooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
+    afterPopulate?: Map<string, Array<AfterPopulateNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>

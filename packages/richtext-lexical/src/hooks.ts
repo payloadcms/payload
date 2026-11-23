@@ -10,6 +10,7 @@ import {
 
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 
+import { chainPopulationPromises } from './utilities/chainPopulationPromises.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 
 export const getLexicalHooks: (args: {
@@ -235,6 +236,10 @@ export const getLexicalHooks: (args: {
             const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
 
             if (subFields?.length) {
+              const afterPopulateHooksForNode = editorConfig.features.nodeHooks?.afterPopulate?.get(
+                node.type,
+              )
+
               afterReadTraverseFields({
                 blockData: nodeSiblingData,
                 collection,
@@ -256,7 +261,22 @@ export const getLexicalHooks: (args: {
                 parentPath: path.join('.'),
                 parentSchemaPath: schemaPath.join('.'),
                 populate,
-                populationPromises: populationPromises!,
+                populationPromises: afterPopulateHooksForNode?.length
+                  ? chainPopulationPromises({
+                      afterPopulate: async () => {
+                        for (const hook of afterPopulateHooksForNode) {
+                          await hook({
+                            context,
+                            node,
+                            parentRichTextFieldPath: path,
+                            parentRichTextFieldSchemaPath: schemaPath,
+                            req,
+                          })
+                        }
+                      },
+                      populationPromises: populationPromises!,
+                    })
+                  : populationPromises!,
                 req,
                 showHiddenFields: showHiddenFields!,
                 siblingDoc: nodeSiblingData,

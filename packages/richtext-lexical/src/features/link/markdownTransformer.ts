@@ -24,6 +24,9 @@ export type CreatePayloadLinkTransformerArgs = {
    * internal links store a doc reference rather than a URL.
    *
    * Without this, internal links will export as `[text]()` with an empty href.
+   *
+   * @deprecated Add `generateFrontendPath` to the linked collections instead. Internal links then
+   * use `fields.doc.frontendPath`. Will be removed in v5.
    */
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
 }
@@ -63,10 +66,12 @@ export const createPayloadLinkTransformer = (
     if (fields.linkType === 'internal') {
       if (args?.internalDocToHref) {
         url = sanitizeUrl(args.internalDocToHref({ linkNode: node.exportJSON() }))
+      } else if (typeof fields.doc?.frontendPath === 'string') {
+        url = sanitizeUrl(fields.doc.frontendPath)
       } else {
         // eslint-disable-next-line no-console
         console.warn(
-          'Lexical → Markdown converter: found internal link but internalDocToHref is not provided — link will have an empty href',
+          'Lexical → Markdown converter: found internal link without a frontend path, so the link will have an empty href. Add generateFrontendPath to the linked collection and populate the link',
         )
         url = ''
       }

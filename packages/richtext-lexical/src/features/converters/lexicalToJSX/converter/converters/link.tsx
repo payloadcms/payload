@@ -2,6 +2,10 @@ import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../
 import type { JSXConverters } from '../types.js'
 
 export const LinkJSXConverter: (args: {
+  /**
+   * @deprecated Add `generateFrontendPath` to the linked collections instead. Internal links then
+   * use `fields.doc.frontendPath`. Will be removed in v5.
+   */
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
 }) => JSXConverters<SerializedAutoLinkNode | SerializedLinkNode> = ({ internalDocToHref }) => ({
   autolink: ({ node, nodesToJSX }) => {
@@ -30,9 +34,11 @@ export const LinkJSXConverter: (args: {
     if (node.fields.linkType === 'internal') {
       if (internalDocToHref) {
         href = internalDocToHref({ linkNode: node })
+      } else if (typeof node.fields.doc?.frontendPath === 'string') {
+        href = node.fields.doc.frontendPath
       } else {
         console.error(
-          'Lexical => JSX converter: Link converter: found internal link, but internalDocToHref is not provided',
+          'Lexical => JSX converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and populate the link',
         )
         href = '#' // fallback
       }

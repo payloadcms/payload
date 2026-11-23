@@ -17,6 +17,7 @@ import { createNode } from '../../typeUtilities.js'
 import { createPayloadLinkTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
+import { attachFrontendPath, stripFrontendPath } from './frontendPath.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import {
@@ -76,6 +77,9 @@ export type LinkFeatureServerProps = {
    * Resolves an internal link node to a URL string for use in the markdown converter.
    * Internal links store a doc reference rather than a URL, so without this the markdown
    * output will have an empty href: `[link text]()`.
+   *
+   * @deprecated Add `generateFrontendPath` to the linked collections instead. Internal links then
+   * use `fields.doc.frontendPath`. Will be removed in v5.
    */
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
   /**
@@ -189,6 +193,10 @@ export const LinkFeature = createServerFeature<
             return node?.fields
           },
           graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
+          hooks: {
+            afterPopulate: [attachFrontendPath],
+            beforeChange: [stripFrontendPath],
+          },
           jsonSchema: createLinkNodeJSONSchema(sanitizedFieldsWithoutText),
           node: LinkNode,
           validations: [linkValidation(props, sanitizedFieldsWithoutText)],

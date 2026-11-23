@@ -32,56 +32,30 @@ If you want to share the same node rendering logic between the admin panel and y
 
 ### Internal Links
 
-By default, Payload doesn't know how to convert **internal** links to JSX, as it doesn't know what the corresponding URL of the internal link is. You'll notice that you get a "found internal link, but internalDocToHref is not provided" error in the console when you try to render content with internal links.
+Internal links store a reference to a document, not a URL. To render them, add [`generateFrontendPath`](../configuration/collections#frontend-path) to the linked collections:
 
-To fix this, you need to pass the `internalDocToHref` prop to `LinkJSXConverter`. This prop is a function that receives the link node and returns the URL of the document.
+```ts
+import type { CollectionConfig } from 'payload'
 
-```tsx
-import type {
-  DefaultNodeTypes,
-  SerializedLinkNode,
-} from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-import {
-  type JSXConvertersFunction,
-  LinkJSXConverter,
-  RichText,
-} from '@payloadcms/richtext-lexical/react'
-import React from 'react'
-
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { relationTo, value } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
-  }
-  const slug = value.slug
-
-  switch (relationTo) {
-    case 'posts':
-      return `/posts/${slug}`
-    case 'categories':
-      return `/category/${slug}`
-    case 'pages':
-      return `/${slug}`
-    default:
-      return `/${relationTo}/${slug}`
-  }
-}
-
-const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
-  defaultConverters,
-}) => ({
-  ...defaultConverters,
-  ...LinkJSXConverter({ internalDocToHref }),
-})
-
-export const MyComponent: React.FC<{
-  lexicalData: SerializedEditorState
-}> = ({ lexicalData }) => {
-  return <RichText converters={jsxConverters} data={lexicalData} />
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  generateFrontendPath: ({ doc }) => `/posts/${doc.slug}`,
+  fields: [
+    // ...
+  ],
 }
 ```
+
+When the link is populated (`depth` of 1 or more), Payload adds the path to `fields.doc.frontendPath`, and the JSX, HTML and Markdown converters use it as the `href`. If the linked document only populates some fields through `defaultPopulate`, make sure it includes the fields your path needs.
+
+Without a frontend path, the converters log an error and fall back to `#` (or an empty href in Markdown).
+
+<Banner type="warning">
+  The `internalDocToHref` prop of `LinkJSXConverter`, `LinkHTMLConverter`,
+  `LinkHTMLConverterAsync` and `LinkFeature` is deprecated and will be removed
+  in v5. If you pass it, it still takes precedence over
+  `fields.doc.frontendPath`.
+</Banner>
 
 ### Lexical Blocks
 
