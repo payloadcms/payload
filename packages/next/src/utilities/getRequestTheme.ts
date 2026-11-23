@@ -1,19 +1,33 @@
+import type { Theme } from '@payloadcms/ui'
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 import type { SanitizedConfig } from 'payload'
 
-import { defaultTheme, type Theme } from '@payloadcms/ui'
+import { defaultTheme } from '@payloadcms/ui/shared'
 
-type GetRequestLanguageArgs = {
+type GetRequestThemeArgs = {
   config: SanitizedConfig
   cookies: Map<string, string> | ReadonlyRequestCookies
   headers: Request['headers']
 }
 
+export type RequestThemeSource = 'config' | 'cookie' | 'default' | 'header'
+
+export type RequestThemeResult = {
+  /** The request's resolved theme. */
+  theme: Theme
+  /** The input used to resolve the theme. */
+  themeSource: RequestThemeSource
+}
+
 const acceptedThemes: Theme[] = ['dark', 'light']
 
-export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguageArgs): Theme => {
+export const getRequestTheme = ({
+  config,
+  cookies,
+  headers,
+}: GetRequestThemeArgs): RequestThemeResult => {
   if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
-    return config.admin.theme
+    return { theme: config.admin.theme, themeSource: 'config' }
   }
 
   const themeCookie = cookies.get(`${config.cookiePrefix || 'payload'}-theme`)
@@ -23,14 +37,14 @@ export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguage
   ) as Theme
 
   if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
-    return themeFromCookie
+    return { theme: themeFromCookie, themeSource: 'cookie' }
   }
 
   const themeFromHeader = headers.get('Sec-CH-Prefers-Color-Scheme') as Theme
 
   if (themeFromHeader && acceptedThemes.includes(themeFromHeader)) {
-    return themeFromHeader
+    return { theme: themeFromHeader, themeSource: 'header' }
   }
 
-  return defaultTheme
+  return { theme: defaultTheme, themeSource: 'default' }
 }
