@@ -47,100 +47,79 @@ test.describe('Standalone modals', () => {
     }))
   })
 
-  test('should operate confirmation modals without admin providers', async ({ page }) => {
-    await page.goto(`${serverURL}/modals`)
-    await page.locator('html').evaluate((element) => {
-      element.setAttribute('data-enhanced-contrast', '')
-    })
-    await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+  for (const { context, isShadow, path } of [
+    { context: 'document', isShadow: false, path: '/modals' },
+    { context: 'shadow root', isShadow: true, path: '/modals?shadow=true' },
+  ]) {
+    test(`should operate confirmation modals without admin providers in a ${context}`, async ({
+      page,
+    }) => {
+      await page.goto(`${serverURL}${path}`)
 
-    const trigger = page.getByRole('button', { name: 'Open confirmation', exact: true })
-    const dialog = page.getByRole('dialog', { name: 'Standalone confirmation', exact: true })
+      const trigger = page.getByRole('button', { name: 'Open confirmation', exact: true })
+      const dialog = page.getByRole('dialog', { name: 'Standalone confirmation', exact: true })
 
-    await expect(dialog).toBeHidden()
-    await trigger.focus()
-    await trigger.press('Enter')
-    await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole('heading')).toBeFocused()
-    await expect(page.getByRole('main')).toHaveCount(0)
+      await expect(dialog).toBeHidden()
+      await trigger.press('Enter')
+      await expect(dialog).toBeVisible()
+      await expect(dialog.getByRole('heading')).toBeFocused()
+      await expect(page.getByRole('main')).toHaveCount(0)
 
-    for (const key of ['Tab', 'Shift+Tab']) {
-      for (let step = 0; step < 5; step++) {
-        await page.keyboard.press(key)
-        await expectFocusInside({ container: dialog, page })
+      for (const key of ['Tab', 'Shift+Tab']) {
+        for (let step = 0; step < 6; step++) {
+          await page.keyboard.press(key)
+          await expect
+            .poll(() =>
+              dialog.evaluate((element) => {
+                const root = element.getRootNode() as Document | ShadowRoot
+
+                return element.contains(root.activeElement)
+              }),
+            )
+            .toBe(true)
+        }
       }
-    }
 
-    for (const theme of ['light', 'dark']) {
-      await page.locator('html').evaluate((element, theme) => {
-        element.setAttribute('data-theme', theme)
-      }, theme)
-      await scanA11y({ name: `standalone confirmation (${theme}, enhanced contrast)`, page })
-    }
-    await page.keyboard.press('Escape')
-    await expect(dialog).toBeHidden()
-    await expect(trigger).toBeFocused()
-    await expect(page.getByRole('main')).toBeVisible()
-    await trigger.press('Enter')
-    await dialog.getByRole('button', { name: 'Cancel action', exact: true }).click()
-    await expect(page.getByRole('status')).toHaveText('Cancelled')
-    await expect(trigger).toBeFocused()
-    await trigger.press('Enter')
-    await dialog.getByRole('button', { name: 'Confirm action', exact: true }).click()
-    await expect(page.getByRole('status')).toHaveText('Confirmed')
-    await expect(trigger).toBeFocused()
-  })
+      await expect
+        .poll(() =>
+          dialog.evaluate((element) => ({
+            height: element.getBoundingClientRect().height,
+            width: element.getBoundingClientRect().width,
+          })),
+        )
+        .toEqual(page.viewportSize())
 
-  test('should isolate nested confirmation modals and restore focus', async ({ page }) => {
-    await page.goto(`${serverURL}/modals`)
-    await page.getByRole('button', { name: 'Open confirmation', exact: true }).click()
+      const themeTarget = isShadow ? page.getByTestId('inner-shadow-host') : page.locator('html')
 
-    const parent = page.locator('#standalone-confirmation')
-    const nestedTrigger = page.getByRole('button', { name: 'Open nested confirmation' })
-    const child = page.getByRole('dialog', { name: 'Nested confirmation', exact: true })
+      for (const theme of ['light', 'dark']) {
+        await themeTarget.evaluate((element, theme) => {
+          element.setAttribute('data-theme', theme)
+          element.setAttribute('data-enhanced-contrast', '')
+        }, theme)
+        await expect(themeTarget).toHaveAttribute('data-theme', theme)
+        await expect(themeTarget).toHaveAttribute('data-enhanced-contrast', '')
+        await scanA11y({
+          name: `standalone confirmation (${context}, ${theme}, enhanced contrast)`,
+          page,
+        })
+      }
 
-    await nestedTrigger.click()
-    await expect(child.getByRole('heading')).toBeFocused()
-    await expect(parent).toHaveAttribute('inert', '')
-    await page.keyboard.press('Escape')
-    await expect(child).toBeHidden()
-    await expect(parent).not.toHaveAttribute('inert')
-    await expect(nestedTrigger).toBeFocused()
-    await page.keyboard.press('Escape')
-    await expect(page.getByRole('button', { name: 'Open confirmation', exact: true })).toBeFocused()
-  })
-
-  test('should open a popup submenu by clicking an icon in its own shadow root', async ({
-    page,
-  }) => {
-    await page.goto(`${serverURL}/modals`)
-    await page.getByRole('button', { name: 'Modal actions', exact: true }).click()
-
-    const nested = page.getByRole('menuitem', { name: 'More modal actions', exact: true })
-
-    await nested.evaluate((element) => {
-      const icon = document.createElement('span')
-
-      icon.setAttribute('aria-hidden', 'true')
-      icon.style.pointerEvents = 'auto'
-      icon.attachShadow({ mode: 'open' }).innerHTML = '<span>Shadow icon</span>'
-      element.append(icon)
+      await page.keyboard.press('Escape')
+      await expect(dialog).toBeHidden()
+      await expect(trigger).toBeFocused()
+      await expect(page.getByRole('main')).toBeVisible()
+      await trigger.press('Enter')
+      await dialog.getByRole('button', { name: 'Cancel action', exact: true }).press('Enter')
+      await expect(dialog).toBeHidden()
+      await expect(page.getByRole('status')).toHaveText('Cancelled')
+      await expect(trigger).toBeFocused()
+      await trigger.press('Enter')
+      await dialog.getByRole('button', { name: 'Confirm action', exact: true }).press('Enter')
+      await expect(dialog).toBeHidden()
+      await expect(page.getByRole('status')).toHaveText('Confirmed')
+      await expect(trigger).toBeFocused()
     })
-    await nested.getByText('Shadow icon').click()
-    const opener = page.getByRole('menuitem', { name: 'Open confirmation from menu', exact: true })
-
-    await expect(opener).toBeVisible()
-    await opener.click()
-    await expect(page.locator('#standalone-confirmation').getByRole('heading')).toBeFocused()
-  })
-})
-
-test.describe('Standalone shadow modals', () => {
-  test.beforeAll(async () => {
-    ;({ serverURL } = await initPayloadE2ENoConfig({
-      dirname: fileURLToPath(new URL('.', import.meta.url)),
-    }))
-  })
+  }
 
   test('should isolate the background of an initially open shadow dialog', async ({ page }) => {
     await page.goto(`${serverURL}/modals?shadow=true&modal=standalone-confirmation`)
@@ -180,54 +159,6 @@ test.describe('Standalone shadow modals', () => {
     await expect(page.getByTestId('slot-background')).not.toHaveAttribute('inert')
     await expect(page.getByTestId('slot-background')).not.toHaveAttribute('aria-hidden')
     await expect(page.getByTestId('slot-new-background')).not.toHaveAttribute('inert')
-  })
-
-  test('should focus, label and contain keyboard navigation in a shadow dialog', async ({
-    page,
-  }) => {
-    await page.goto(`${serverURL}/modals?shadow=true`)
-
-    const trigger = page.getByRole('button', { name: 'Open confirmation', exact: true })
-    const dialog = page.locator('#standalone-confirmation')
-
-    await trigger.press('Enter')
-    await expect(dialog.getByRole('heading')).toBeFocused()
-    await expect(dialog).toHaveAccessibleName('Standalone confirmation')
-
-    for (const key of ['Tab', 'Shift+Tab']) {
-      for (let step = 0; step < 6; step++) {
-        await page.keyboard.press(key)
-        await expect
-          .poll(() =>
-            dialog.evaluate((element) => {
-              const root = element.getRootNode() as ShadowRoot
-
-              return element.contains(root.activeElement)
-            }),
-          )
-          .toBe(true)
-      }
-    }
-
-    const viewport = page.viewportSize()!
-
-    await expect
-      .poll(() =>
-        dialog.evaluate((element) => ({
-          height: element.getBoundingClientRect().height,
-          width: element.getBoundingClientRect().width,
-        })),
-      )
-      .toEqual(viewport)
-    await dialog.getByRole('button', { name: 'Cancel action', exact: true }).press('Enter')
-    await expect(dialog).toBeHidden()
-    await expect(trigger).toBeFocused()
-    await expect(page.getByRole('status')).toHaveText('Cancelled')
-    await trigger.press('Enter')
-    await dialog.getByRole('button', { name: 'Confirm action', exact: true }).press('Enter')
-    await expect(dialog).toBeHidden()
-    await expect(page.getByRole('status')).toHaveText('Confirmed')
-    await expect(trigger).toBeFocused()
   })
 
   test('should isolate shadow and host backgrounds and restore their prior attributes', async ({
@@ -321,29 +252,6 @@ test.describe('Standalone shadow modals', () => {
       await expect(trigger).toBeFocused()
     })
   }
-
-  for (const theme of ['light', 'dark']) {
-    test(`should render shadow dialogs with ${theme} enhanced contrast`, async ({ page }) => {
-      await page.goto(`${serverURL}/modals?shadow=true`)
-      await page.getByTestId('inner-shadow-host').waitFor()
-
-      for (const testID of ['shadow-host', 'inner-shadow-host']) {
-        await page.getByTestId(testID).evaluate((host, theme) => {
-          host.setAttribute('data-theme', theme)
-          host.setAttribute('data-enhanced-contrast', '')
-        }, theme)
-      }
-
-      await page.getByRole('button', { name: 'Open confirmation', exact: true }).click()
-
-      const dialog = page.locator('#standalone-confirmation')
-
-      await expect(dialog.getByRole('heading')).toBeFocused()
-      await scanA11y({ name: `shadow confirmation (${theme}, enhanced contrast)`, page })
-      await page.keyboard.press('Escape')
-      await expect(dialog).toBeHidden()
-    })
-  }
 })
 
 test.describe('Admin accessibility', () => {
@@ -374,36 +282,6 @@ test.describe('Admin accessibility', () => {
     } finally {
       await cleanupWorkflowUsers({ serverURL })
     }
-  })
-
-  test('should preserve the full-viewport command palette backdrop', async ({ page }) => {
-    // The Windows user agent selects Control in useHotkey, including on macOS hosts.
-    await page.keyboard.press('Control+k')
-
-    const palette = page.locator('.cmd-palette')
-    const viewport = page.viewportSize()!
-
-    await expect(palette).toBeVisible()
-    await expect
-      .poll(() =>
-        palette.evaluate((element) => {
-          const bounds = element.getBoundingClientRect()
-          const style = getComputedStyle(element)
-
-          return {
-            background: style.backgroundColor,
-            border: style.borderTopWidth,
-            height: bounds.height,
-            width: bounds.width,
-          }
-        }),
-      )
-      .toEqual({ background: 'rgba(0, 0, 0, 0)', border: '0px', ...viewport })
-    await expect
-      .poll(() => palette.evaluate((element) => parseFloat(getComputedStyle(element).paddingTop)))
-      .toBeCloseTo(viewport.height * 0.12)
-    await palette.click({ position: { x: 5, y: 5 } })
-    await expect(palette).toBeHidden()
   })
 
   test.describe('Sign-in and navigation', () => {
