@@ -71,7 +71,7 @@ export const createPayloadLinkTransformer = (
       } else {
         // eslint-disable-next-line no-console
         console.warn(
-          'Lexical → Markdown converter: found internal link without a frontend path, so the link will have an empty href. Add generateFrontendPath to the linked collection and populate the link',
+          'Lexical → Markdown converter: found internal link without a frontend path, so the link will have an empty href. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
         )
         url = ''
       }

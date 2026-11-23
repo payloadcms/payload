@@ -34,7 +34,7 @@ export const LinkHTMLConverter: (args: {
       } else {
         // eslint-disable-next-line no-console
         console.error(
-          'Lexical => HTML converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and populate the link',
+          'Lexical => HTML converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
         )
         href = '#' // fallback
       }

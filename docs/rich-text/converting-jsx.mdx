@@ -46,7 +46,7 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-When the link is populated (`depth` of 1 or more), Payload adds the path to `fields.doc.frontendPath`, and the JSX, HTML and Markdown converters use it as the `href`. If the linked document only populates some fields through `defaultPopulate`, make sure it includes the fields your path needs.
+When the link is populated, Payload adds the path to `fields.doc.frontendPath`, and the JSX, HTML and Markdown converters use it as the `href`. The default `depth` of 1 already populates links, so you don't need to raise it. Raising `depth` populates every relationship in the document and can get expensive. To keep links cheap, set [`defaultPopulate`](../queries/select#defaultpopulate-collection-config-property) on the linked collection to only the fields your path needs, like `{ slug: true }`, or pass [`populate`](../queries/select#populate) per query.
 
 Without a frontend path, the converters log an error and fall back to `#` (or an empty href in Markdown).
 
