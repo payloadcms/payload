@@ -17,11 +17,7 @@ import React, {
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useModalFocus } from '../../providers/ModalFocus/index.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
-import {
-  getDeepestActiveElement,
-  getRootNode,
-  isComposedDescendant,
-} from '../../utilities/shadowDom.js'
+import { isComposedDescendant } from '../../utilities/shadowDom.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
 import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
@@ -263,10 +259,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   )
 
   const closeFromPointer = useCallback(() => {
-    const hasFocus = isComposedDescendant({
-      ancestor: popupRef.current,
-      element: getDeepestActiveElement(),
-    })
+    const hasFocus = popupRef.current?.matches(':focus-within')
     const trigger = triggerRef.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')
 
     closePopup({ restoreFocus: false })
@@ -286,8 +279,16 @@ export const Popup: React.FC<PopupProps> = (props) => {
         viaPointer: true,
       }),
     onSafeAreaExpire: ({ x, y }) => {
-      const target = getRootNode({ element: popupRef.current }).elementFromPoint(x, y)
       const parentContent = parentPopup?.popupRef.current
+
+      const root = parentContent?.getRootNode() as
+        | ({ elementFromPoint?: Document['elementFromPoint'] } & Node)
+        | undefined
+
+      const target =
+        typeof root?.elementFromPoint === 'function'
+          ? root.elementFromPoint(x, y)
+          : parentContent?.ownerDocument.elementFromPoint(x, y)
 
       if (parentContent && target?.closest(POPUP_CONTENT_SELECTOR) === parentContent) {
         const trigger = target
@@ -505,13 +506,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const handleClickOutside = useEffectEvent((e: MouseEvent) => {
     const path = e.composedPath()
-    const isOutsidePopup = !path.includes(popupRef.current!)
-    const isOutsideTrigger = !path.includes(triggerRef.current!)
+    const isOutsidePopup = !path.some((target) => target === popupRef.current)
+    const isOutsideTrigger = !path.some((target) => target === triggerRef.current)
 
     // Check if click is inside a popup portal
     const clickedPopupContent = path.find(
-      (node): node is HTMLElement =>
-        node instanceof HTMLElement && node.classList.contains('popup__content'),
+      (target): target is Element =>
+        target instanceof Element && target.classList.contains('popup__content'),
     )
 
     // If the clicked popup contains this popup's trigger, it's a parent popup
@@ -541,8 +542,17 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
-    const activeElement = getDeepestActiveElement()
-    const activePopup = activeElement?.closest(`.${baseClass}__content`)
+    // Navigation candidates and their focused element must share a DOM root.
+    const root = popup.getRootNode() as Document | ShadowRoot
+    const activeElement = root.activeElement
+
+    const activePopup = e
+      .composedPath()
+      .find(
+        (target): target is Element =>
+          target instanceof Element && target.classList.contains(`${baseClass}__content`),
+      )
+
     if (activePopup && activePopup !== popup) {
       return
     }
@@ -555,10 +565,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     if (e.key === 'ArrowRight' && popupRole === 'menu') {
-      const trigger = (activeElement as HTMLElement | null)?.closest<HTMLElement>(
-        `.${baseClass}__trigger-wrap`,
-      )
+      const trigger = activeElement?.closest<HTMLElement>(`.${baseClass}__trigger-wrap`)
+
       const nestedTrigger = trigger?.querySelector<HTMLElement>('button, [role="menuitem"]')
+
       if (nestedTrigger) {
         e.preventDefault()
         nestedTrigger.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }))
@@ -589,6 +599,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         e.preventDefault()
 
         const currentIndex = menuItems.findIndex((item) => item === activeElement)
+
         const nextIndex =
           e.key === 'Home'
             ? 0
@@ -640,23 +651,28 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // /////////////////////////////////////
 
   const handleActionableClick = useEffectEvent((e: MouseEvent) => {
-    const target = e.target as HTMLElement
+    const path = e
+      .composedPath()
+      .filter((target): target is Element => (target as Node).nodeType === Node.ELEMENT_NODE)
+    const popupIndex = popupRef.current ? path.indexOf(popupRef.current) : -1
 
-    // Allow opting out with data-popup-prevent-close attribute on element or ancestor
-    if (target.closest('[data-popup-prevent-close]')) {
+    if (popupIndex < 0 || path.some((target) => target.hasAttribute('data-popup-prevent-close'))) {
       return
     }
 
-    // Check if the clicked element or any ancestor is an actionable element
-    const actionable = target.closest('button, a[href], [role="button"], [role="menuitem"]')
-    if (actionable && popupRef.current?.contains(actionable)) {
-      if (actionable.closest(`.${baseClass}__content`) !== popupRef.current) {
-        return
-      }
-      // Don't close if clicking a nested popup's trigger — it will manage its own open state
-      if (actionable.closest(`.${baseClass}__trigger-wrap`)) {
-        return
-      }
+    const contentPath = path.slice(0, popupIndex)
+    const actionable = contentPath.find((target) =>
+      target.matches('button, a[href], [role="button"], [role="menuitem"]'),
+    )
+
+    // A nested popup or trigger handles its own activation.
+    const isNestedInteraction = contentPath.some(
+      (target) =>
+        target.matches(POPUP_CONTENT_SELECTOR) ||
+        target.classList.contains(`${baseClass}__trigger-wrap`),
+    )
+
+    if (actionable && !isNestedInteraction) {
       closePopup()
     }
   })
@@ -733,17 +749,47 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // - keydown: handle keyboard navigation
     // /////////////////////////////////////
 
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
-    document.addEventListener('mousedown', handleClickOutside)
+    const ownerDocument = popup.ownerDocument
+    const ownerWindow = ownerDocument.defaultView
+    const scrollRoots: ShadowRoot[] = []
+    let ancestor: Node | null = popup
+
+    // Scroll events stay within their root, so every enclosing root needs a listener.
+    while (ancestor) {
+      if (ancestor.nodeType === Node.DOCUMENT_FRAGMENT_NODE && 'host' in ancestor) {
+        const root = ancestor as ShadowRoot
+
+        scrollRoots.push(root)
+        ancestor = root.host
+      } else {
+        const slot =
+          ancestor.nodeType === Node.ELEMENT_NODE ? (ancestor as Element).assignedSlot : null
+
+        ancestor = slot ?? ancestor.parentNode
+      }
+    }
+
+    ownerWindow?.addEventListener('resize', updatePosition)
+    ownerWindow?.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+
+    for (const root of scrollRoots) {
+      root.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+    }
+
+    ownerDocument.addEventListener('mousedown', handleClickOutside)
     popup.addEventListener('keydown', handleKeyDown)
     popup.addEventListener('click', handleActionableClick)
 
     return () => {
       cancelAnimationFrame(rafId)
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, { capture: true })
-      document.removeEventListener('mousedown', handleClickOutside)
+      ownerWindow?.removeEventListener('resize', updatePosition)
+      ownerWindow?.removeEventListener('scroll', updatePosition, { capture: true })
+
+      for (const root of scrollRoots) {
+        root.removeEventListener('scroll', updatePosition, { capture: true })
+      }
+
+      ownerDocument.removeEventListener('mousedown', handleClickOutside)
       popup.removeEventListener('keydown', handleKeyDown)
       popup.removeEventListener('click', handleActionableClick)
       if (popup.matches(':popover-open')) {

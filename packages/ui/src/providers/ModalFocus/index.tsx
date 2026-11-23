@@ -4,7 +4,8 @@ import type { ReactNode } from 'react'
 
 import { createContext, use, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 
-import { getComposedParent, getDeepestActiveElement } from '../../utilities/shadowDom.js'
+import { getActiveElement } from '../../utilities/getActiveElement.js'
+import { getComposedParent } from '../../utilities/shadowDom.js'
 
 type PopupRegistration = {
   container: HTMLElement
@@ -39,7 +40,8 @@ export function ModalFocusProvider({ children }: { children: ReactNode }) {
     const shadowRoots = new Set<ShadowRoot>()
     const rememberPopupTriggers = (event?: Event) => {
       const target = event?.composedPath()[0]
-      const opener = target instanceof Element ? target : getDeepestActiveElement()
+      const opener =
+        target instanceof Element ? target : getActiveElement({ element: document.documentElement })
 
       if (!opener || opener === document.body) {
         for (const root of shadowRoots) {
@@ -111,9 +113,12 @@ export function ModalFocusProvider({ children }: { children: ReactNode }) {
     rememberPopupTriggers()
     document.addEventListener('focusin', rememberPopupTriggers)
     document.addEventListener('pointerdown', rememberPopupTriggers, true)
+    // Keyboard activation can follow focus changes hidden by nested shadow roots.
+    document.addEventListener('click', rememberPopupTriggers, true)
     return () => {
       document.removeEventListener('focusin', rememberPopupTriggers)
       document.removeEventListener('pointerdown', rememberPopupTriggers, true)
+      document.removeEventListener('click', rememberPopupTriggers, true)
       for (const root of shadowRoots) {
         root.removeEventListener('focusin', rememberPopupTriggers)
       }

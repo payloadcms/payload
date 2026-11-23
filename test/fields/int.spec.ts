@@ -2784,6 +2784,33 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect(doc.localized).toMatchObject(arrayDefaultValue)
     })
 
+    test('should keep nested array rows under their parent row when an earlier row has none', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection,
+        data: {
+          items: [{ text: 'first' }, { subArray: [{ text: 'P' }, { text: 'U' }], text: 'second' }],
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: created.id,
+        collection,
+        overrideAccess: true,
+      })
+
+      expect(created.items[1].subArray.map(({ text }) => text)).toStrictEqual(['P', 'U'])
+      expect(result.items[1].subArray.map(({ text }) => text)).toStrictEqual(['P', 'U'])
+
+      await payload.delete({
+        id: created.id,
+        collection,
+        overrideAccess: true,
+      })
+    })
+
     test('should create and update localized subfields with versions', async ({ payload }) => {
       const doc = await payload.create({
         collection,

@@ -11,8 +11,6 @@ import type {
 import type React from 'react'
 import type { Dispatch } from 'react'
 
-import type { AcceptValues } from './mergeServerFormState.js'
-
 export type Preferences = {
   [key: string]: unknown
 }
@@ -28,8 +26,17 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
-    /** Returns false after the form resets or unmounts, so callbacks can skip updates to the form. */
+    /**
+     * Returns `true` while this submission still matches the current form state and form instance.
+     * Local field value changes, resetting or replacing the form, and unmounting invalidate the submission.
+     * Recheck after awaiting work before applying response-driven state changes.
+     */
     isCurrent?: () => boolean
+    /**
+     * Returns `true` after the form's request queue is reset, including form replacement or unmounting.
+     * Field value changes alone leave this `false`.
+     */
+    isQueueReset?: () => boolean
   },
 ) => Promise<void> | void
 
@@ -75,6 +82,10 @@ export type FormProps = {
    */
   onChange?: ((args: { formState: FormState; submitted: boolean }) => void)[]
   onSubmit?: (fields: FormState, data: Data) => void
+  /**
+   * Handles successful submissions, including stale explicit document saves that still need metadata updates.
+   * Check `ctx.isCurrent()` before applying response values.
+   */
   onSuccess?: FormOnSuccess
   /** Persistent read-only state used when rendering fields on the server. */
   readOnly?: boolean
@@ -100,7 +111,8 @@ export type FormProps = {
 )
 
 export type SubmitOptions<C = Record<string, unknown>> = {
-  acceptValues?: AcceptValues
+  /** Accept server values and row structure; defaults to preserving existing local values and rows. */
+  acceptValues?: boolean
   action?: string
   /**
    * If you want to pass additional data to the onSuccess callback, you can use this context object.
@@ -119,6 +131,8 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    */
   disableSuccessStatus?: boolean
   method?: string
+  /** @internal Reconcile an autosave invalidated by edits in the current form. */
+  onStaleRequest?: () => void
   overrides?: ((formState) => FormData) | Record<string, unknown>
   /**
    * When true, will skip validation before submitting the form.
@@ -221,7 +235,7 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  acceptValues?: AcceptValues
+  acceptValues?: boolean
   prevStateRef?: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
