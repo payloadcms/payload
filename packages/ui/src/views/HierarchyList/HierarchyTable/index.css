@@ -15,13 +15,6 @@
     flex-grow: 1;
   }
 
-  .hierarchy-tables__name-cell {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-1);
-    min-width: 0;
-  }
-
   .hierarchy-tables__name-link {
     display: flex;
     align-items: center;
