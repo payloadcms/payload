@@ -713,7 +713,9 @@ export class BasePayload {
    * @description Returns the frontend path of a document or global using its `generateFrontendPath` config
    * @returns the path, or `null` when there is no frontend page
    */
-  generateFrontendPath = async (options: GenerateFrontendPathOptions): Promise<null | string> => {
+  generateFrontendPath = async <TSlug extends CollectionSlug, TGlobalSlug extends GlobalSlug>(
+    options: GenerateFrontendPathOptions<TSlug, TGlobalSlug>,
+  ): Promise<null | string> => {
     return generateFrontendPathLocal(this, options)
   }
 

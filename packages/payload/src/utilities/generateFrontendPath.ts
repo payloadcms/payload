@@ -1,13 +1,15 @@
 import type { DataFromCollectionSlug } from '../collections/config/types.js'
 import type { DataFromGlobalSlug } from '../globals/config/types.js'
 import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
-import type { JsonObject, PayloadRequest } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
 import { createPayloadRequest } from './createPayloadRequest.js'
 
-export type GenerateFrontendPathOptions = {
-  doc: JsonObject
+export type GenerateFrontendPathOptions<
+  TSlug extends CollectionSlug = CollectionSlug,
+  TGlobalSlug extends GlobalSlug = GlobalSlug,
+> = {
   /**
    * The `PayloadRequest` object. Pass it from hooks or endpoints so that `generateFrontendPath`
    * receives the current locale, user and transaction.
@@ -15,18 +17,23 @@ export type GenerateFrontendPathOptions = {
   req?: Partial<PayloadRequest>
 } & (
   | {
-      collection: CollectionSlug
+      collection: TSlug
+      doc: Partial<DataFromCollectionSlug<TSlug>>
       global?: never
     }
   | {
       collection?: never
-      global: GlobalSlug
+      doc: Partial<DataFromGlobalSlug<TGlobalSlug>>
+      global: TGlobalSlug
     }
 )
 
-export async function generateFrontendPathLocal(
+export async function generateFrontendPathLocal<
+  TSlug extends CollectionSlug,
+  TGlobalSlug extends GlobalSlug,
+>(
   payload: Payload,
-  options: GenerateFrontendPathOptions,
+  options: GenerateFrontendPathOptions<TSlug, TGlobalSlug>,
 ): Promise<null | string> {
   const { collection: collectionSlug, doc, global: globalSlug } = options
 
@@ -46,7 +53,7 @@ export async function generateFrontendPathLocal(
     return (
       (await collection.generateFrontendPath({
         collection,
-        doc: doc as DataFromCollectionSlug<CollectionSlug>,
+        doc: doc as Partial<DataFromCollectionSlug<CollectionSlug>>,
         req,
       })) ?? null
     )
@@ -66,7 +73,7 @@ export async function generateFrontendPathLocal(
 
   return (
     (await global.generateFrontendPath({
-      doc: doc as DataFromGlobalSlug<GlobalSlug>,
+      doc: doc as Partial<DataFromGlobalSlug<GlobalSlug>>,
       global,
       req,
     })) ?? null

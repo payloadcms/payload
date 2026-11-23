@@ -39,8 +39,8 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
 export type GenerateGlobalFrontendPath<TSlug extends GlobalSlug = any> = (args: {
-  /** May not include every field, for example in previews, which pass the unsaved form state. */
-  doc: IsAny<TSlug> extends true ? any : DataFromGlobalSlug<TSlug>
+  /** Partial because previews pass the unsaved form state. */
+  doc: IsAny<TSlug> extends true ? any : Partial<DataFromGlobalSlug<TSlug>>
   global: SanitizedGlobalConfig
   req: PayloadRequest
 }) => null | Promise<null | string | undefined> | string | undefined

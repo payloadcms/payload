@@ -78,10 +78,10 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> =
 export type GenerateCollectionFrontendPath<TSlug extends CollectionSlug = any> = (args: {
   collection: SanitizedCollectionConfig
   /**
-   * May not include every field: populated docs only have the fields selected by `defaultPopulate`,
-   * and previews pass the unsaved form state.
+   * Partial because it may not include every field: populated docs only have the fields selected
+   * by `defaultPopulate`, and previews pass the unsaved form state.
    */
-  doc: IsAny<TSlug> extends true ? any : DataFromCollectionSlug<TSlug>
+  doc: IsAny<TSlug> extends true ? any : Partial<DataFromCollectionSlug<TSlug>>
   req: PayloadRequest
 }) => null | Promise<null | string | undefined> | string | undefined
 
