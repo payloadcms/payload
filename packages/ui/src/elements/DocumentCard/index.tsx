@@ -225,6 +225,7 @@ function CardVideoThumbnail({
 }: { isPreviewActive: boolean } & Pick<DocumentCardProps, 'placeholder'> &
   Pick<DocumentCardThumbnail, 'alt' | 'src'>) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
+  const [isPlaying, setIsPlaying] = React.useState(false)
   const { isLoaded, shouldRenderVideo, shouldShowFallback, videoProps } = useVideoFrame({ src })
 
   useVideoPreviewPlayback({ isActive: isPreviewActive, videoRef })
@@ -232,10 +233,18 @@ function CardVideoThumbnail({
   return (
     <>
       {shouldRenderVideo && (
-        <video {...videoProps} aria-label={alt || undefined} loop muted ref={videoRef} />
+        <video
+          {...videoProps}
+          aria-label={alt || undefined}
+          loop
+          muted
+          onPause={() => setIsPlaying(false)}
+          onPlaying={() => setIsPlaying(true)}
+          ref={videoRef}
+        />
       )}
-      {/* Marks the card as a video, which a still frame alone does not. Hidden until the frame loads */}
-      {isLoaded && (
+      {/* Marks a still frame as a video. Hidden until the frame loads, and while the video plays */}
+      {isLoaded && !isPlaying && (
         <span aria-hidden="true" className={`${baseClass}__video-badge`}>
           <PlayIcon />
         </span>

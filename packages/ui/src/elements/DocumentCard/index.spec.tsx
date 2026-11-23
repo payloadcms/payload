@@ -150,13 +150,18 @@ test('should play a video thumbnail while hovered and return to its frame after'
   const src = URL.createObjectURL(await createTestVideo())
   const { card, video } = await renderLoadedVideoCard(src)
 
+  const getBadge = () => document.querySelector('.document-card__video-badge')
+  expect(getBadge()).not.toBeNull()
+
   await card.hover()
   await expect.poll(() => video.paused).toBe(false)
   expect(video.muted).toBe(true)
+  await expect.poll(getBadge).toBeNull()
 
   await userEvent.unhover(card)
   expect(video.paused).toBe(true)
   expect(video.currentTime).toBeCloseTo(VIDEO_FRAME_TIME)
+  await expect.poll(getBadge).not.toBeNull()
   URL.revokeObjectURL(src)
 })
 
