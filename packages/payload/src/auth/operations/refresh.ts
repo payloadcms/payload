@@ -89,6 +89,13 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
       const existingSession = user.sessions.find(({ id }: { id: number }) => id === sid)
 
+      // The session may have been revoked between JWT authentication and this
+      // re-read of the user. A missing session is a forbidden refresh, not a
+      // server error.
+      if (!existingSession) {
+        throw new Forbidden(args.req.t)
+      }
+
       const now = new Date()
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
       existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
