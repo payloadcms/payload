@@ -31,10 +31,11 @@
   "scripts": {
     "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
     "build:copy-docs": "node scripts/copy-migration-guide.mjs",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc": "pnpm prepare:upgrade && swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "prepare:upgrade": "node ../../tools/upgrade/prepare.mjs codemod",
     "test": "vitest --run",
-    "typecheck": "tsc"
+    "typecheck": "pnpm prepare:upgrade && tsc"
   },
   "dependencies": {
     "@clack/prompts": "1.2.0",

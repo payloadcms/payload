@@ -3,6 +3,7 @@ import type { PackageManager, Spawn } from './types.js'
 type RunInstallArgs = {
   packageManager: PackageManager
   path: string
+  shouldAllowTransitionalPeers?: boolean
   spawn: Spawn
 }
 
@@ -14,10 +15,18 @@ type RunInstallArgs = {
 export function runInstall({
   packageManager,
   path,
+  shouldAllowTransitionalPeers = false,
   spawn,
 }: RunInstallArgs): Promise<{ code: number }> {
-  return spawn(packageManager, ['install'], {
-    cwd: path,
-    env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' },
-  })
+  return spawn(
+    packageManager,
+    [
+      'install',
+      ...(shouldAllowTransitionalPeers && packageManager === 'npm' ? ['--legacy-peer-deps'] : []),
+    ],
+    {
+      cwd: path,
+      env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' },
+    },
+  )
 }

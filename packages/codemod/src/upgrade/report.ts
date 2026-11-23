@@ -1,5 +1,7 @@
 import type { TransformRunResult } from '../runner.js'
 
+import { V4_MIGRATION_GUIDE_URL } from '../upgrade-shared/toolchain.js'
+
 export type VersionReportRow = {
   name: string
   ok: boolean
@@ -9,6 +11,7 @@ export type VersionReportRow = {
 
 export type ReportModel = {
   floorsWritten: string[]
+  hasNext?: boolean
   /** Absolute path to the bundled migration guide, when it shipped with this build. */
   migrationGuidePath?: string
   nextTarget: null | string
@@ -63,14 +66,17 @@ export function renderReport(model: ReportModel): string {
   }
   lines.push('')
 
-  lines.push('Next.js: not upgraded by this command')
-  lines.push(`  Target Next version: ${model.nextTarget ?? '(see @payloadcms/next peer range)'}`)
-  lines.push(
-    '  The unmet @payloadcms/next peer is expected until you upgrade Next — that is the immediate next step.',
-  )
-  lines.push('')
+  if (model.hasNext !== false) {
+    lines.push('Next.js: not upgraded by this command')
+    lines.push(`  Target Next version: ${model.nextTarget ?? '(see @payloadcms/next peer range)'}`)
+    lines.push(
+      '  The unmet @payloadcms/next peer is expected until you upgrade Next — that is the immediate next step.',
+    )
+    lines.push('')
+  }
 
   lines.push('Not done by this command. See these for the remaining steps:')
+  lines.push(`  online guide: ${V4_MIGRATION_GUIDE_URL}`)
   lines.push(`  runbook: ${model.runbookPath}`)
   if (model.migrationGuidePath) {
     lines.push(`  migration guide: ${model.migrationGuidePath}`)

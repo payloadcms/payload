@@ -25,10 +25,7 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getTanStackAppDetails } from './lib/tanstack/detect.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
-import {
-  updatePayloadInNextProject,
-  updatePayloadInTanStackProject,
-} from './lib/update-payload-in-project.js'
+import { hasPayloadDependency, upgradeProject } from './lib/upgrade-project.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
@@ -103,12 +100,6 @@ export class Main {
         process.env.DEBUG = 'true'
       }
 
-      const LATEST_VERSION = await resolvePackageVersion({
-        debug: debugFlag,
-        packageName: 'payload',
-        versionOrTag: this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
-      })
-
       if (this.args['--help']) {
         helpMessage()
         process.exit(0)
@@ -131,6 +122,24 @@ export class Main {
         return
       }
 
+      const existingProjectDir =
+        appFramework.kind === 'next'
+          ? path.dirname(appFramework.appDetails.nextConfigPath!)
+          : appFramework.kind === 'tanstack'
+            ? appFramework.appDetails.projectDir
+            : process.cwd()
+      if (hasPayloadDependency({ projectDir: existingProjectDir })) {
+        await upgradeProject({
+          cliArgs: this.args,
+          nextAppDetails: appFramework.kind === 'next' ? appFramework.appDetails : undefined,
+          projectDir: existingProjectDir,
+          tanStackAppDetails:
+            appFramework.kind === 'tanstack' ? appFramework.appDetails : undefined,
+        })
+        p.outro(feedbackOutro())
+        return
+      }
+
       if (appFramework.kind === 'unsupported-tanstack') {
         p.log.warn(appFramework.reason)
         p.outro(feedbackOutro())
@@ -145,39 +154,11 @@ export class Main {
         process.exit(0)
       }
 
-      const hasPayload = appFramework.kind !== 'none' && appFramework.appDetails.isPayloadInstalled
-
-      if (hasPayload) {
-        p.log.warn(`Payload installation detected in current project.`)
-        const shouldUpdate = await p.confirm({
-          initialValue: false,
-          message: chalk.bold(`Upgrade Payload in this project?`),
-        })
-
-        if (!p.isCancel(shouldUpdate) && shouldUpdate) {
-          const versionOrTag = this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG
-          const updateResult =
-            appFramework.kind === 'next'
-              ? await updatePayloadInNextProject({
-                  appDetails: appFramework.appDetails,
-                  versionOrTag,
-                })
-              : await updatePayloadInTanStackProject({
-                  appDetails: appFramework.appDetails,
-                  versionOrTag,
-                })
-
-          const { message, success: updateSuccess } = updateResult
-          if (updateSuccess) {
-            info(message)
-          } else {
-            error(message)
-          }
-        }
-
-        p.outro(feedbackOutro())
-        return
-      }
+      const LATEST_VERSION = await resolvePackageVersion({
+        debug: debugFlag,
+        packageName: 'payload',
+        versionOrTag: this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
+      })
 
       if (appFramework.kind === 'next') {
         this.args['--name'] = slugify(
@@ -389,6 +370,7 @@ export class Main {
       p.outro(feedbackOutro())
     } catch (err: unknown) {
       error(err instanceof Error ? err.message : 'An error occurred')
+      process.exitCode = 1
     }
   }
 }

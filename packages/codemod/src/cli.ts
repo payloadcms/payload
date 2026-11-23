@@ -13,6 +13,7 @@ import { transforms as registry } from './registry.js'
 import { runTransforms } from './runner.js'
 import { runDispatch } from './upgrade/dispatch.js'
 import { runUpgrade } from './upgrade/index.js'
+import { prepareUpgrade } from './upgrade/prepare.js'
 import { renderUpgradePrompt } from './upgrade/prompt.js'
 import { resolveSelfCommand } from './upgrade/selfCommand.js'
 import { loadPackageJsons, serializePackageJson } from './utils/packageJson.js'
@@ -29,13 +30,39 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
 
   if (flags.command === 'upgrade') {
     if (flags.upgrade === 'prompt') {
-      console.log(renderUpgradePrompt({ command: resolveSelfCommand() }))
+      try {
+        const plan = await prepareUpgrade({ path: flags.path, tag: flags.tag })
+        if (plan) {
+          console.log(
+            renderUpgradePrompt({
+              command: resolveSelfCommand(),
+              currentVersion: plan.project.currentVersion,
+              hasNext: plan.project.dependencies.some(
+                ({ name }) => name === 'next' || name === '@payloadcms/next',
+              ),
+              kind: plan.kind,
+              packageManager: flags.packageManager,
+              targetVersion: plan.targetVersion,
+              ...(flags.yes ? { yes: true } : {}),
+            }),
+          )
+        }
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : String(error))
+        process.exitCode = 1
+      }
       return
     }
 
     if (flags.upgrade === 'run') {
       const { failed } = await runUpgrade({
-        flags: { dry: flags.dry, force: flags.force, tag: flags.tag },
+        flags: {
+          dry: flags.dry,
+          force: flags.force,
+          packageManager: flags.packageManager,
+          tag: flags.tag,
+          ...(flags.yes ? { yes: true } : {}),
+        },
         path: flags.path,
       })
       if (failed) {
@@ -47,7 +74,13 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     const { failed } = await runDispatch({
       agentFlag: flags.agent,
       path: flags.path,
-      upgradeFlags: { dry: flags.dry, force: flags.force, tag: flags.tag },
+      upgradeFlags: {
+        dry: flags.dry,
+        force: flags.force,
+        packageManager: flags.packageManager,
+        tag: flags.tag,
+        ...(flags.yes ? { yes: true } : {}),
+      },
     })
     if (failed) {
       process.exitCode = 1
