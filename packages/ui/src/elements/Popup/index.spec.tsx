@@ -1,7 +1,9 @@
+import type { LinkAdapterProps } from 'payload'
 import type { CSSProperties, ReactNode } from 'react'
 
 import type { PopupProps } from './index.js'
 
+import { Popup, PopupList } from '@payloadcms/ui/elements/Popup'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -13,8 +15,8 @@ import {
   expectFocus,
   PopupTestRoot,
 } from '../../../../../test/__helpers/components/PopupTestRoot/index.js'
+import { RouterAdapterContext } from '../../providers/RouterAdapter/index.js'
 import { useTheme } from '../../providers/Theme/index.js'
-import { Popup, PopupList } from './index.js'
 
 describe('document', () => runPopupTests({ isShadowRoot: false }))
 describe('shadow root', () => runPopupTests({ isShadowRoot: true }))
@@ -52,6 +54,12 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
         }
       })
       .toEqual({ leftInset: 8, padding: '0px', topInset: 8 })
+
+    const optionStyle = getComputedStyle(option.element())
+
+    expect(optionStyle.borderWidth).toBe('0px')
+    expect(optionStyle.padding).toBe('0px')
+    expect(optionStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)')
   })
 
   test('should return focus to the submenu trigger when hovering a sibling item', async () => {
@@ -124,6 +132,229 @@ function runPopupTests({ isShadowRoot }: { isShadowRoot: boolean }) {
     await screen.getByRole('menuitem', { name: 'Select', exact: true }).click()
 
     expect(onSelect).toHaveBeenCalledOnce()
+  })
+
+  test('should forward native attributes and hover callbacks to an action', async () => {
+    const onEnter = vi.fn()
+    const onLeave = vi.fn()
+    const onSelect = vi.fn()
+    const screen = await render(
+      <Popup button="Actions" popupType="menu">
+        <PopupList.Button
+          aria-label="Move row up"
+          data-row-action="moveUp"
+          onClick={onSelect}
+          onMouseEnter={(event) => onEnter(event.currentTarget)}
+          onMouseLeave={onLeave}
+          title="Move up"
+        >
+          Move up
+        </PopupList.Button>
+      </Popup>,
+      { wrapper: Root },
+    )
+    const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+    await trigger.click()
+    const action = screen.getByRole('menuitem', { name: 'Move row up' })
+
+    await expect.element(action).toHaveAttribute('title', 'Move up')
+    await expect.element(action).toHaveAttribute('data-row-action', 'moveUp')
+    await action.hover()
+    expect(onEnter).toHaveBeenCalledOnce()
+    expect(onEnter).toHaveBeenCalledWith(action.element())
+    await trigger.hover()
+    expect(onLeave).toHaveBeenCalledOnce()
+    expect(onSelect).not.toHaveBeenCalled()
+    await action.click()
+    expect(onSelect).toHaveBeenCalledOnce()
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test.each(['action', 'link', 'anchor'] as const)(
+    'should keep a disabled $0 focusable without previewing, activating or closing',
+    async (kind) => {
+      const onEnter = vi.fn()
+      const onLeave = vi.fn()
+      const onSelect = vi.fn()
+      const screen = await render(
+        <Popup button="Actions" popupType="menu">
+          <PopupList.Button
+            aria-label="Unavailable action"
+            disabled
+            el={kind === 'anchor' ? 'anchor' : undefined}
+            href={kind === 'action' ? undefined : '/admin'}
+            onClick={onSelect}
+            onClickCapture={onSelect}
+            onFocus={onSelect}
+            onKeyDownCapture={onSelect}
+            onMouseEnter={onEnter}
+            onMouseLeave={onLeave}
+            onMouseOver={onEnter}
+            onPointerEnter={onEnter}
+            title="Unavailable"
+          >
+            Unavailable
+          </PopupList.Button>
+          <PopupList.Button onClick={() => {}}>Next action</PopupList.Button>
+        </Popup>,
+        { wrapper: Root },
+      )
+      const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+      trigger.element().focus()
+      await userEvent.keyboard('{Enter}')
+      const action = screen.getByRole('menuitem', { name: 'Unavailable action' })
+
+      await expectFocus({ locator: action })
+      await expect.element(action).toHaveAttribute('aria-disabled', 'true')
+      await expect.element(action).toHaveAttribute('title', 'Unavailable')
+      await expect.element(action).not.toHaveAttribute('href')
+      await action.hover()
+      await trigger.hover()
+      expect(onEnter).not.toHaveBeenCalled()
+      expect(onLeave).not.toHaveBeenCalled()
+      await action.click({ force: true })
+      action.element().focus()
+      await userEvent.keyboard('{Enter} ')
+      expect(onSelect).not.toHaveBeenCalled()
+      await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+      await userEvent.keyboard('{ArrowDown}')
+      await expectFocus({ locator: screen.getByRole('menuitem', { name: 'Next action' }) })
+      await userEvent.keyboard('{Escape}')
+      await expectFocus({ locator: trigger })
+    },
+  )
+
+  test.each([true, 'true'] as const)(
+    'should prevent activation and navigation when aria-disabled is $0',
+    async (ariaDisabled) => {
+      const onSelect = vi.fn()
+      const screen = await render(
+        <Popup button="Actions" popupType="menu">
+          <PopupList.Button
+            aria-disabled={ariaDisabled}
+            el="anchor"
+            href="/admin"
+            onClick={onSelect}
+          >
+            Dashboard
+          </PopupList.Button>
+        </Popup>,
+        { wrapper: Root },
+      )
+      const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+      await trigger.click()
+      const link = screen.getByRole('menuitem', { name: 'Dashboard' })
+
+      await expect.element(link).toHaveAttribute('aria-disabled', 'true')
+      await expect.element(link).not.toHaveAttribute('href')
+      await link.click({ force: true })
+      link.element().focus()
+      await userEvent.keyboard('{Enter} ')
+      expect(onSelect).not.toHaveBeenCalled()
+      await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+    },
+  )
+
+  test.each(['pointer', 'keyboard'] as const)(
+    'should follow a native anchor without routing providers using the $0',
+    async (input) => {
+      const onEnter = vi.fn()
+      const onLeave = vi.fn()
+      const onSelect = vi.fn()
+      const frameName = `popup-navigation-${isShadowRoot}-${input}`
+      const screen = await render(
+        <>
+          <Popup button="Actions" popupType="menu">
+            <PopupList.Button
+              aria-current="page"
+              el="anchor"
+              href="about:blank#dashboard"
+              onClick={onSelect}
+              onMouseEnter={onEnter}
+              onMouseLeave={onLeave}
+              rel="author"
+              target={frameName}
+              title="Open dashboard"
+            >
+              Dashboard
+            </PopupList.Button>
+          </Popup>
+          <iframe data-testid="navigation-target" name={frameName} title="Navigation target" />
+        </>,
+        { wrapper: Root },
+      )
+      const trigger = screen.getByRole('button', { name: 'Actions', exact: true })
+
+      await trigger.click()
+      const link = screen.getByRole('menuitem', { name: 'Dashboard' })
+
+      expect(link.element().tagName).toBe('A')
+      await expect.element(link).toHaveAttribute('aria-current', 'page')
+      await expect.element(link).toHaveAttribute('title', 'Open dashboard')
+      await expect.element(link).toHaveAttribute('rel', 'author')
+      await expect.element(link).not.toHaveAttribute('prefetch')
+      await link.hover()
+      expect(onEnter).toHaveBeenCalledOnce()
+      await trigger.hover()
+      expect(onLeave).toHaveBeenCalledOnce()
+
+      if (input === 'pointer') {
+        await link.click()
+      } else {
+        link.element().focus()
+        await userEvent.keyboard('{Enter}')
+      }
+
+      expect(onSelect).toHaveBeenCalledOnce()
+      expect(onSelect.mock.calls[0][0].defaultPrevented).toBe(false)
+      await expect
+        .poll(
+          () =>
+            (screen.getByTestId('navigation-target').element() as HTMLIFrameElement).contentWindow
+              ?.location.href,
+        )
+        .toBe('about:blank#dashboard')
+      await expect.element(trigger).toHaveAttribute('aria-expanded', 'false')
+      await expectFocus({ locator: trigger })
+    },
+  )
+
+  test('should keep router navigation as the default for href items', async () => {
+    const push = vi.fn()
+    const onSelect = vi.fn()
+    const TestLink = ({ prefetch, ...props }: LinkAdapterProps) => (
+      <a {...props} data-prefetch={String(prefetch)} />
+    )
+    const screen = await render(
+      <RouterAdapterContext
+        value={{
+          Link: TestLink,
+          params: {},
+          pathname: '/',
+          router: { back: vi.fn(), push, refresh: vi.fn(), replace: vi.fn() },
+          searchParams: new URLSearchParams(),
+        }}
+      >
+        <Popup button="Actions" popupType="menu">
+          <PopupList.Button href="/admin" onClick={onSelect} title="Open dashboard">
+            Dashboard
+          </PopupList.Button>
+        </Popup>
+      </RouterAdapterContext>,
+      { wrapper: Root },
+    )
+
+    await screen.getByRole('button', { name: 'Actions', exact: true }).click()
+    const link = screen.getByRole('menuitem', { name: 'Dashboard' })
+
+    await expect.element(link).toHaveAttribute('title', 'Open dashboard')
+    await expect.element(link).toHaveAttribute('data-prefetch', 'false')
+    await link.click()
+    expect(onSelect).toHaveBeenCalledOnce()
+    expect(push).toHaveBeenCalledWith('/admin', { scroll: undefined })
   })
 
   test('should close after activating an embedded action', async () => {
