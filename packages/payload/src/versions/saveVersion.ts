@@ -77,6 +77,9 @@ export function mergeDraftData({
   target: Record<string, unknown>
 }): void {
   for (const [key, value] of Object.entries(incoming)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue
+    }
     if (depth === 0 && SYSTEM_FIELDS.has(key)) {
       continue
     }
@@ -125,6 +128,9 @@ export function mergeDraftData({
             target[key] = {}
           }
           for (const [loc, locVal] of Object.entries(value)) {
+            if (loc === '__proto__' || loc === 'constructor' || loc === 'prototype') {
+              continue
+            }
             const targetLocaleVal = (target[key] as Record<string, unknown>)[loc]
             if (isGroup && isPlainObject(targetLocaleVal) && isPlainObject(locVal)) {
               mergeDraftData({

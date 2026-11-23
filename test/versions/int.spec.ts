@@ -2472,6 +2472,22 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(meta.updatedAt).toBe('2025-01-01T00:00:00.000Z')
       })
 
+      test('issue #19670 / Security: should reject prototype pollution keys in mergeDraftData', () => {
+        const target: Record<string, unknown> = {}
+        const incoming = JSON.parse(
+          '{"__proto__": {"polluted": true}, "constructor": {"prototype": {"polluted": true}}, "normalField": "safe"}',
+        )
+
+        mergeDraftData({
+          incoming,
+          target,
+        })
+
+        expect(target.normalField).toBe('safe')
+        expect((target as any).polluted).toBeUndefined()
+        expect(({} as any).polluted).toBeUndefined()
+      })
+
       test('issue #19670 / Finding 2: empty object on unlocalized field should not be inferred as localized', () => {
         const target: Record<string, unknown> = {
           emptyJson: {},
