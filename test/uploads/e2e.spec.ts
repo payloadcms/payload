@@ -2328,7 +2328,8 @@ describe('Uploads', () => {
     })
 
     test('should surround only the list items and not the list controls', async () => {
-      await page.goto(uploadsTwo.list)
+      // The seed creates media documents, so the list renders a table
+      await page.goto(mediaURL.list)
 
       const dropzone = page.locator('.list-file-dropzone')
 
