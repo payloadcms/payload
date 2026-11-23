@@ -170,6 +170,7 @@ const DatePicker: React.FC<Props> = (props) => {
           : undefined
 
     if (
+      newDate instanceof Date &&
       hasAmbiguousYearInput({
         date: newDate,
         dateFormat: overrides?.dateFormat ?? dateFormat,
