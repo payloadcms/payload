@@ -1,14 +1,16 @@
 import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
+import type { FlattenedJoinField, Where } from 'payload'
 
 import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
-import { type FlattenedJoinField, type Where } from 'payload'
+import { getFieldByPath } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
+import { resolveRelationshipPath } from '../queries/resolveRelationshipPath.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
 import { createPolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
@@ -21,6 +23,7 @@ type BuildPolymorphicJoinQueryArgs = {
   locale?: string
   page?: number
   pageSize?: number
+  parentCollectionSlug?: string
   path: string
   shouldCount: boolean
   sort?: string | string[]
@@ -40,8 +43,8 @@ type PolymorphicJoinQuery = {
  * with different schemas can still share one ordered union.
  *
  * `field.collection` must contain at least one configured collection. Each mapped table must have
- * an `id` column and the column named by `field.on`. The supplied `limit` is used as-is; callers can
- * include an extra look-ahead row and supply the original `pageSize` for offset calculation.
+ * an `id` column and either a direct relationship column or a matching relationship table. The
+ * supplied `limit` can include a look-ahead row. `pageSize` controls the offset.
  *
  * @returns The stable projection name, the document projection, and the count projection when
  * `shouldCount` is true.
@@ -56,6 +59,7 @@ export const buildPolymorphicJoinQuery = ({
   locale,
   page,
   pageSize = limit,
+  parentCollectionSlug,
   path,
   shouldCount,
   sort,
@@ -78,7 +82,9 @@ export const buildPolymorphicJoinQuery = ({
   const db = adapter.drizzle as LibSQLDatabase
   const onPath = field.on.split('.').join('_')
   const collectionTables = collections.map((collection) => {
-    if (!adapter.payload.collections[collection]) {
+    const target = adapter.payload.collections[collection]
+
+    if (!target) {
       throw new Error(`Unknown polymorphic join collection "${collection}"`)
     }
 
@@ -93,11 +99,54 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "id" column`)
     }
 
-    if (!table[onPath]) {
+    const fields = target.config.flattenedFields
+    const membership = getFieldByPath({ fields, path: field.on })?.field
+
+    if (
+      membership?.type === 'relationship' &&
+      membership.hasMany &&
+      typeof membership.relationTo === 'string'
+    ) {
+      const relationshipTable = adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]
+      const relationshipPath = resolveRelationshipPath({
+        adapter,
+        fields,
+        locale,
+        parentIsLocalized: false,
+        path: field.on,
+      })
+      const parentColumn = relationshipTable?.[`${membership.relationTo}ID`]
+
+      if (
+        !relationshipTable ||
+        !relationshipPath ||
+        relationshipPath.path !== field.on ||
+        !parentColumn ||
+        (parentCollectionSlug && membership.relationTo !== parentCollectionSlug)
+      ) {
+        throw new Error(
+          `Polymorphic join collection "${collection}" has no supported relationship at "${field.on}"`,
+        )
+      }
+
+      const relationshipLocale = relationshipPath.locale
+      const membershipCondition = and(
+        eq(table['id'], relationshipTable.parent),
+        eq(relationshipTable.path, relationshipPath.path),
+        relationshipPath.isLocalized && relationshipLocale && relationshipLocale !== 'all'
+          ? eq(relationshipTable.locale, relationshipLocale)
+          : undefined,
+      )
+
+      return { collection, membershipCondition, parentColumn, relationshipTable, table }
+    }
+
+    const parentColumn = table[onPath]
+    if (!parentColumn) {
       throw new Error(`Polymorphic join collection "${collection}" has no "${onPath}" column`)
     }
 
-    return { collection, table }
+    return { collection, parentColumn, table }
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
@@ -107,11 +156,17 @@ export const buildPolymorphicJoinQuery = ({
     : new Map()
   let unionQuery: null | SQLiteSelect = null
 
-  for (const { collection, table } of collectionTables) {
+  for (const {
+    collection,
+    membershipCondition,
+    parentColumn,
+    relationshipTable,
+    table,
+  } of collectionTables) {
     const sortColumn = table[sortPath]
     const selectFields = {
       id: table['id'],
-      parent: sql`${table[onPath]}`.as(onPath),
+      parent: sql`${parentColumn}`.as('parent'),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
@@ -131,12 +186,17 @@ export const buildPolymorphicJoinQuery = ({
 
       return collectionField?.type === 'scalar' && collectionField.isLocalized
     })
-    const shouldDeduplicate = hasLocalizedWhere && (!locale || locale === 'all')
+    const shouldDeduplicate =
+      Boolean(relationshipTable) || (hasLocalizedWhere && (!locale || locale === 'all'))
     let collectionQuery = (
       shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
     )
       .from(table)
       .$dynamic()
+
+    if (relationshipTable) {
+      collectionQuery = collectionQuery.innerJoin(relationshipTable, membershipCondition)
+    }
 
     if (hasLocalizedWhere) {
       const localesTable = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`]
@@ -162,18 +222,14 @@ export const buildPolymorphicJoinQuery = ({
   }
 
   const subQueryAlias = `${columnName}_subquery`
-  const parentConstraint = eq(
-    sql.raw(`"${currentTableName}"."id"`),
-    sql.raw(`"${subQueryAlias}"."${onPath}"`),
-  )
+  const parentID = sql`${sql.identifier(currentTableName)}."id"`
+  const parentConstraint = eq(parentID, sql`${sql.identifier(subQueryAlias)}."parent"`)
   const countExpression = shouldCount
     ? sql`${db
         .select({ count: count() })
         .from(sql`${unionQuery.as(subQueryAlias)}`)
         .where(parentConstraint)}`.as(`${columnName}_count`)
     : undefined
-
-  unionQuery = unionQuery.orderBy(sortOrder(sql`"sortPath"`))
 
   const sortedUnionAlias = `${columnName}_sorted`
   let limitOffsetSQL = sql.empty()
@@ -190,7 +246,7 @@ export const buildPolymorphicJoinQuery = ({
     }
   }
 
-  const parentWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
+  const parentWhere = eq(sql`${sql.identifier(sortedUnionAlias)}."parent"`, parentID)
   const documents = sql`(
     SELECT ${jsonAggBuildObject(adapter, {
       id: sql.raw(`"${subQueryAlias}"."id"`),
@@ -198,7 +254,8 @@ export const buildPolymorphicJoinQuery = ({
     })}
     FROM (
       SELECT * FROM ${sql`${unionQuery.as(sortedUnionAlias)}`}
-      WHERE ${parentWhere}${limitOffsetSQL}
+      WHERE ${parentWhere}
+      order by ${sortOrder(sql`"sortPath"`)}, ${asc(sql`"relationTo"`)}, ${asc(sql`"id"`)}${limitOffsetSQL}
     ) AS ${sql.raw(`"${subQueryAlias}"`)}
   )`.as(columnName)
 

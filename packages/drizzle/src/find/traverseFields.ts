@@ -416,6 +416,7 @@ export const traverseFields = ({
             locale,
             page,
             pageSize: limitArg,
+            parentCollectionSlug: collectionSlug,
             path,
             shouldCount,
             sort,
