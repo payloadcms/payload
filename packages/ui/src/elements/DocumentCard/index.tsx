@@ -3,6 +3,7 @@
 import React from 'react'
 
 import { useVideoFrame } from '../../hooks/useVideoFrame.js'
+import { useVideoPreviewPlayback } from '../../hooks/useVideoPreviewPlayback.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
@@ -42,6 +43,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   const router = useRouter()
   const { t } = useTranslation()
   const selectionStatusID = React.useId()
+  const { isVideoPreviewActive, videoPreviewTriggerProps } = useVideoPreviewTrigger()
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!onSelect || event.detail === 0) {
@@ -107,6 +109,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   return (
     <div
       {...cardInteractionProps}
+      {...(thumbnail?.isVideo ? videoPreviewTriggerProps : {})}
       className={[
         baseClass,
         !onSelect && href && `${baseClass}--link`,
@@ -115,7 +118,11 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         .filter(Boolean)
         .join(' ')}
     >
-      <CardThumbnail placeholder={placeholder} thumbnail={thumbnail} />
+      <CardThumbnail
+        isVideoPreviewActive={isVideoPreviewActive}
+        placeholder={placeholder}
+        thumbnail={thumbnail}
+      />
       <div className={`${baseClass}__content`}>
         {href ? (
           <Link
@@ -140,16 +147,48 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   )
 }
 
+/** Mouse hover and visible keyboard focus play a video thumbnail. A touch only selects or opens the card. */
+function useVideoPreviewTrigger() {
+  const [isHovered, setIsHovered] = React.useState(false)
+  const [isFocused, setIsFocused] = React.useState(false)
+
+  const videoPreviewTriggerProps: React.HTMLAttributes<HTMLDivElement> = {
+    onBlur: (event) => {
+      const isFocusInCard =
+        event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)
+
+      if (!isFocusInCard) {
+        setIsFocused(false)
+      }
+    },
+    onFocus: (event) => {
+      if (event.target instanceof Element && event.target.matches(':focus-visible')) {
+        setIsFocused(true)
+      }
+    },
+    onPointerEnter: (event) => {
+      if (event.pointerType === 'mouse') {
+        setIsHovered(true)
+      }
+    },
+    onPointerLeave: () => setIsHovered(false),
+  }
+
+  return { isVideoPreviewActive: isHovered || isFocused, videoPreviewTriggerProps }
+}
+
 function CardThumbnail({
+  isVideoPreviewActive,
   placeholder,
   thumbnail,
-}: Pick<DocumentCardProps, 'placeholder' | 'thumbnail'>) {
+}: { isVideoPreviewActive: boolean } & Pick<DocumentCardProps, 'placeholder' | 'thumbnail'>) {
   if (thumbnail?.isVideo) {
     // Videos have no native lazy loading, so every video card waits until it is near the viewport
     return (
       <RenderIfInViewport className={`${baseClass}__thumbnail ${baseClass}__thumbnail--video`}>
         <CardVideoThumbnail
           alt={thumbnail.alt}
+          isPreviewActive={isVideoPreviewActive}
           key={thumbnail.src}
           placeholder={placeholder}
           src={thumbnail.src}
@@ -179,14 +218,21 @@ function CardThumbnail({
 
 function CardVideoThumbnail({
   alt,
+  isPreviewActive,
   placeholder,
   src,
-}: Pick<DocumentCardProps, 'placeholder'> & Pick<DocumentCardThumbnail, 'alt' | 'src'>) {
+}: { isPreviewActive: boolean } & Pick<DocumentCardProps, 'placeholder'> &
+  Pick<DocumentCardThumbnail, 'alt' | 'src'>) {
+  const videoRef = React.useRef<HTMLVideoElement>(null)
   const { shouldRenderVideo, shouldShowFallback, videoProps } = useVideoFrame({ src })
+
+  useVideoPreviewPlayback({ isActive: isPreviewActive, videoRef })
 
   return (
     <>
-      {shouldRenderVideo && <video {...videoProps} aria-label={alt || undefined} muted />}
+      {shouldRenderVideo && (
+        <video {...videoProps} aria-label={alt || undefined} loop muted ref={videoRef} />
+      )}
       {shouldShowFallback && (
         <div aria-hidden="true" className={`${baseClass}__thumbnail--empty`}>
           {placeholder}
