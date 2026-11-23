@@ -177,7 +177,7 @@ test.describe('Tags', () => {
     await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0)
   })
 
-  test('should separate hierarchy items from related documents in grid view', async () => {
+  test('should render hierarchy items and related documents as separate grids', async () => {
     const { docs: italianTags } = await payload.find({
       collection: tagsSlug,
       overrideAccess: true,
@@ -199,10 +199,7 @@ test.describe('Tags', () => {
 
     const hierarchyGrid = page.getByRole('list', { name: 'Tags' })
     const documentGrid = page.getByRole('list', { name: 'Documents' })
-    const gridSections = page.locator('.hierarchy-tables__grid-section')
 
-    await expect(gridSections).toHaveCount(2)
-    await expect(gridSections.nth(1)).toHaveCSS('border-top-width', '1px')
     await expect(hierarchyGrid).toHaveCount(1)
     await expect(documentGrid).toHaveCount(1)
     await expect(

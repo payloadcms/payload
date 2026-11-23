@@ -66,16 +66,6 @@
     min-width: 100px;
   }
 
-  .hierarchy-tables__grid-section + .hierarchy-tables__grid-section {
-    border-block-start: var(--stroke-width-small) solid var(--color-border);
-  }
-
-  .hierarchy-tables__section-title {
-    margin: 0;
-    font-weight: var(--text-body-medium-bold-font-weight);
-    color: var(--color-text);
-  }
-
   .hierarchy-tables__group-label {
     color: var(--color-text);
     letter-spacing: var(--text-body-large-letter-spacing);

@@ -647,26 +647,22 @@ export function HierarchyTable({
         <TableSection>
           <TableSection.Content>
             {hasChildren && (
-              <div className={`${baseClass}__grid-section`}>
-                <CardGrid
-                  ariaLabel={childrenLabel}
-                  getItemClassName={getGridItemClassName}
-                  getKey={getGridItemKey}
-                  items={childTableData}
-                  renderItem={renderGridCard}
-                />
-              </div>
+              <CardGrid
+                ariaLabel={childrenLabel}
+                getItemClassName={getGridItemClassName}
+                getKey={getGridItemKey}
+                items={childTableData}
+                renderItem={renderGridCard}
+              />
             )}
             {hasRelated && (
-              <div className={`${baseClass}__grid-section`}>
-                <CardGrid
-                  ariaLabel={t('general:documents')}
-                  getItemClassName={getGridItemClassName}
-                  getKey={getGridItemKey}
-                  items={documentRows}
-                  renderItem={renderGridCard}
-                />
-              </div>
+              <CardGrid
+                ariaLabel={t('general:documents')}
+                getItemClassName={getGridItemClassName}
+                getKey={getGridItemKey}
+                items={documentRows}
+                renderItem={renderGridCard}
+              />
             )}
             {pagination}
           </TableSection.Content>
