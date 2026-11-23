@@ -39,6 +39,9 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       expect(query.docs[0].breadcrumbs[2].url).toStrictEqual(
         '/parent-page/child-page/grandchild-page',
       )
+      expect(query.docs[0].breadcrumbs[2].path).toStrictEqual(
+        '/parent-page/child-page/grandchild-page',
+      )
     })
 
     test('should update more than 10 (default limit) breadcrumbs', async ({ payload }) => {

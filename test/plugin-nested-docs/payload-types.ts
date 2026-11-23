@@ -162,6 +162,7 @@ export interface Page {
     | {
         doc?: (string | null) | Page;
         url?: string | null;
+        path?: string | null;
         label?: string | null;
         id?: string | null;
       }[]
@@ -239,6 +240,7 @@ export interface Category {
     | {
         doc?: (string | null) | Category;
         url?: string | null;
+        path?: string | null;
         label?: string | null;
         test?: string | null;
         id?: string | null;
@@ -483,6 +485,7 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         doc?: T;
         url?: T;
+        path?: T;
         label?: T;
         id?: T;
       };
@@ -503,6 +506,7 @@ export interface CategoriesSelect<T extends boolean = true> {
     | {
         doc?: T;
         url?: T;
+        path?: T;
         label?: T;
         test?: T;
         id?: T;

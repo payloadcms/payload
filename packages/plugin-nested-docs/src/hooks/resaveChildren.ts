@@ -80,6 +80,7 @@ export const resaveChildren =
               generateURL: pluginConfig.generateURL,
               parentFieldName: pluginConfig.parentFieldSlug,
               req,
+              slugFieldName: pluginConfig.slugFieldSlug,
             }),
             depth: 0,
             draft: isDraft,

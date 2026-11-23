@@ -11,6 +11,7 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'fullTitle',
   },
+  generateFrontendPath: ({ doc }) => doc.breadcrumbs?.at(-1)?.path ?? null,
   versions: {
     drafts: {
       schedulePublish: true,

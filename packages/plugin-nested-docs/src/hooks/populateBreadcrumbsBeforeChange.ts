@@ -16,4 +16,5 @@ export const populateBreadcrumbsBeforeChange =
       originalDoc,
       parentFieldName: pluginConfig.parentFieldSlug,
       req,
+      slugFieldName: pluginConfig.slugFieldSlug,
     })

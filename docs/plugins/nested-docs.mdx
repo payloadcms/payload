@@ -64,6 +64,7 @@ const config = buildConfig({
   collections: [
     {
       slug: 'pages',
+      generateFrontendPath: ({ doc }) => doc.breadcrumbs?.at(-1)?.path ?? null,
       fields: [
         {
           name: 'title',
@@ -80,8 +81,6 @@ const config = buildConfig({
     nestedDocsPlugin({
       collections: ['pages'],
       generateLabel: (_, doc) => String(doc.title),
-      generateURL: (docs) =>
-        docs.reduce((url, doc) => `${url}/${String(doc.slug)}`, ''),
     }),
   ],
 })
@@ -104,7 +103,8 @@ level and stores the following fields.
 | Field   | Description                                                                                                                                                                                                                                                                                  |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `label` | The label of the breadcrumb. This field is automatically set to either the `collection.admin.useAsTitle` (if defined) or is set to the `ID` of the document. You can also dynamically define the `label` by passing a function to the options property of [`generateLabel`](#generatelabel). |
-| `url`   | The URL of the breadcrumb. By default, this field is undefined. You can manually define this field by passing a property called function to the plugin options property of [`generateURL`](#generateurl).                                                                                    |
+| `path`  | The slugs of the document and its parents joined with `/`, such as `/about-us/company/our-team`. It is undefined when any of them has no slug. The slug field can be changed with [`slugFieldSlug`](#slugfieldslug).                                                                         |
+| `url`   | The URL of the breadcrumb. By default, it is the result of the collection's [`generateFrontendPath`](../configuration/collections#frontend-path), which receives the document with its computed breadcrumbs, so it can return `doc.breadcrumbs.at(-1).path`.                                 |
 
 ### Options
 
@@ -138,9 +138,14 @@ The function takes four arguments and returns a string:
 
 #### `generateURL`
 
-A function that allows you to dynamically generate each breadcrumb `url`. Each `breadcrumb` has an optional `url` field
-which is undefined by default. For example, you might want to format a full URL to contain all breadcrumbs up to
-that point, like `/about-us/company/our-team`.
+<Banner type="warning">
+  `generateURL` is deprecated and will be removed in v5. Add
+  [`generateFrontendPath`](../configuration/collections#frontend-path) to your
+  collections instead.
+</Banner>
+
+A function that allows you to dynamically generate each breadcrumb `url`. When set, it is used instead of the
+collection's `generateFrontendPath`.
 
 ```ts
 // payload.config.ts
@@ -157,6 +162,10 @@ nestedDocsPlugin({
 | `doc`        | `Object`         | The current document being edited             |
 | `collection` | `Object`         | The collection config of the current document |
 | `req`        | `PayloadRequest` | The Payload request object                    |
+
+#### `slugFieldSlug`
+
+The name of the field used to build the `path` of each breadcrumb. Defaults to `slug`.
 
 #### `parentFieldSlug`
 
