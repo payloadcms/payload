@@ -4,39 +4,51 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 
 import type { Post } from '../../../payload-types'
 
-export const revalidatePost: CollectionAfterChangeHook<Post> = ({
+export const revalidatePost: CollectionAfterChangeHook<Post> = async ({
   doc,
   previousDoc,
-  req: { payload, context },
+  req,
 }) => {
+  const { context, payload } = req
+
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
-      const path = `/posts/${doc.slug}`
+      const path = await payload.generateFrontendPath({ collection: 'posts', doc, req })
 
-      payload.logger.info(`Revalidating post at path: ${path}`)
+      if (path) {
+        payload.logger.info(`Revalidating post at path: ${path}`)
 
-      revalidatePath(path)
+        revalidatePath(path)
+      }
       revalidateTag('posts-sitemap', 'max')
     }
 
     // If the post was previously published, we need to revalidate the old path
     if (previousDoc._status === 'published' && doc._status !== 'published') {
-      const oldPath = `/posts/${previousDoc.slug}`
+      const oldPath = await payload.generateFrontendPath({
+        collection: 'posts',
+        doc: previousDoc,
+        req,
+      })
 
-      payload.logger.info(`Revalidating old post at path: ${oldPath}`)
+      if (oldPath) {
+        payload.logger.info(`Revalidating old post at path: ${oldPath}`)
 
-      revalidatePath(oldPath)
+        revalidatePath(oldPath)
+      }
       revalidateTag('posts-sitemap', 'max')
     }
   }
   return doc
 }
 
-export const revalidateDelete: CollectionAfterDeleteHook<Post> = ({ doc, req: { context } }) => {
-  if (!context.disableRevalidate) {
-    const path = `/posts/${doc?.slug}`
+export const revalidateDelete: CollectionAfterDeleteHook<Post> = async ({ doc, req }) => {
+  if (!req.context.disableRevalidate) {
+    const path = await req.payload.generateFrontendPath({ collection: 'posts', doc, req })
 
-    revalidatePath(path)
+    if (path) {
+      revalidatePath(path)
+    }
     revalidateTag('posts-sitemap', 'max')
   }
 

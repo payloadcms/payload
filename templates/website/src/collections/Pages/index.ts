@@ -38,22 +38,17 @@ export const Pages: CollectionConfig = {
     title: true,
     slug: true,
   },
+  generateFrontendPath: ({ doc }) => {
+    if (!doc.slug) return null
+
+    return doc.slug === 'home' ? '/' : `/${encodeURIComponent(doc.slug)}`
+  },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) =>
-        generatePreviewPath({
-          slug: data?.slug,
-          collection: 'pages',
-          req,
-        }),
+      url: ({ frontendPath }) => generatePreviewPath({ path: frontendPath }),
     },
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        slug: data?.slug as string,
-        collection: 'pages',
-        req,
-      }),
+    preview: (_doc, { frontendPath }) => generatePreviewPath({ path: frontendPath }),
     useAsTitle: 'title',
   },
   fields: [

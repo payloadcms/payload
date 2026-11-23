@@ -1,9 +1,9 @@
 import type React from 'react'
-import type { Page, Post } from '@/payload-types'
 
-import { getCachedDocument } from '@/utilities/getDocument'
+import configPromise from '@payload-config'
 import { getCachedRedirects } from '@/utilities/getRedirects'
 import { notFound, redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 
 interface Props {
   disableNotFound?: boolean
@@ -21,25 +21,26 @@ export const PayloadRedirects: React.FC<Props> = async ({ disableNotFound, url }
       redirect(redirectItem.to.url)
     }
 
-    let redirectUrl: string
+    const reference = redirectItem.to?.reference
 
-    if (typeof redirectItem.to?.reference?.value === 'string') {
-      const collection = redirectItem.to?.reference?.relationTo
-      const id = redirectItem.to?.reference?.value
+    if (reference) {
+      const payload = await getPayload({ config: configPromise })
+      const document =
+        typeof reference.value === 'object'
+          ? reference.value
+          : await payload.findByID({
+              id: reference.value,
+              collection: reference.relationTo,
+              depth: 0,
+              disableErrors: true,
+            })
 
-      const document = (await getCachedDocument(collection, id)()) as Page | Post
-      redirectUrl = `${redirectItem.to?.reference?.relationTo !== 'pages' ? `/${redirectItem.to?.reference?.relationTo}` : ''}/${
-        document?.slug
-      }`
-    } else {
-      redirectUrl = `${redirectItem.to?.reference?.relationTo !== 'pages' ? `/${redirectItem.to?.reference?.relationTo}` : ''}/${
-        typeof redirectItem.to?.reference?.value === 'object'
-          ? redirectItem.to?.reference?.value?.slug
-          : ''
-      }`
+      const redirectUrl = document
+        ? await payload.generateFrontendPath({ collection: reference.relationTo, doc: document })
+        : null
+
+      if (redirectUrl) redirect(redirectUrl)
     }
-
-    if (redirectUrl) redirect(redirectUrl)
   }
 
   if (disableNotFound) return null

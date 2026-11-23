@@ -31,16 +31,16 @@ const getPostsSitemap = unstable_cache(
 
     const dateFallback = new Date().toISOString()
 
-    const sitemap = results.docs
-      ? results.docs
-          .filter((post) => Boolean(post?.slug))
-          .map((post) => ({
-            loc: `${SITE_URL}/posts/${post?.slug}`,
-            lastmod: post.updatedAt || dateFallback,
-          }))
-      : []
+    const sitemap = await Promise.all(
+      results.docs.map(async (post) => ({
+        loc: await payload.generateFrontendPath({ collection: 'posts', doc: post }),
+        lastmod: post.updatedAt || dateFallback,
+      })),
+    )
 
-    return sitemap
+    return sitemap.flatMap(({ loc, lastmod }) =>
+      loc ? [{ loc: `${SITE_URL}${loc}`, lastmod }] : [],
+    )
   },
   ['posts-sitemap'],
   {
