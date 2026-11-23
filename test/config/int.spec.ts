@@ -130,6 +130,14 @@ test.suite('Config', { config: './config.ts' }, () => {
       const [collection] = payload.config.collections
       expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Page' })
     })
+
+    test('should generate the frontend path of a document', async ({ payload }) => {
+      expect(
+        await payload.generateFrontendPath({ collection: 'pages', doc: { title: 'hello' } }),
+      ).toBe('/pages/hello')
+      expect(await payload.generateFrontendPath({ collection: 'pages', doc: {} })).toBeNull()
+      expect(await payload.generateFrontendPath({ collection: 'users', doc: {} })).toBeNull()
+    })
   })
 
   test.describe('global config', () => {
@@ -152,6 +160,10 @@ test.suite('Config', { config: './config.ts' }, () => {
       expect(field.custom).toEqual({
         description: 'The title of my global',
       })
+    })
+
+    test('should generate the frontend path of a global', async ({ payload }) => {
+      expect(await payload.generateFrontendPath({ global: 'my-global', doc: {} })).toBe('/')
     })
   })
 

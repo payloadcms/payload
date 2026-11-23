@@ -54,6 +54,7 @@ import type {
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { ValidationResult } from './types/validation.js'
+import type { GenerateFrontendPathOptions } from './utilities/generateFrontendPath.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
@@ -167,6 +168,7 @@ import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
+import { generateFrontendPathLocal } from './utilities/generateFrontendPath.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { defaultNextJsDevReloadStrategy } from './utilities/nextJsDevReloadStrategy.js'
@@ -705,6 +707,14 @@ export class BasePayload {
     options: ForgotPasswordOptions<TSlug>,
   ): Promise<ForgotPasswordResult> => {
     return forgotPasswordLocal<TSlug>(this, options)
+  }
+
+  /**
+   * @description Returns the frontend path of a document or global using its `generateFrontendPath` config
+   * @returns the path, or `null` when there is no frontend page
+   */
+  generateFrontendPath = async (options: GenerateFrontendPathOptions): Promise<null | string> => {
+    return generateFrontendPathLocal(this, options)
   }
 
   getAdminURL = (): string =>
@@ -1547,6 +1557,7 @@ export type {
   CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
+  GenerateCollectionFrontendPath,
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
@@ -1962,6 +1973,7 @@ export type {
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
   DataFromGlobalSlug,
+  GenerateGlobalFrontendPath,
   GlobalAccess,
   GlobalAdminOptions,
   GlobalConfig,
@@ -2143,6 +2155,7 @@ export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
+export type { GenerateFrontendPathOptions } from './utilities/generateFrontendPath.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getFieldByPath } from './utilities/getFieldByPath.js'

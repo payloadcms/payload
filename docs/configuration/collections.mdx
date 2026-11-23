@@ -60,36 +60,37 @@ export const Posts: CollectionConfig = {
 
 The following options are available:
 
-| Option               | Description                                                                                                                                                                                                                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `admin`              | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                                                                                     |
-| `access`             | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                                                                                 |
-| `auth`               | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                                                                                                                           |
-| `authorship`         | Automatically track the user that created and last updated each document via polymorphic `createdBy` / `updatedBy` fields. Enabled by default. Set to `false` to disable, or to `{ createdBy: false }` / `{ updatedBy: false }` to toggle each field. [More details](#authorship). |
-| `custom`             | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
-| `disableDuplicate`   | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                                                                                |
-| `defaultSort`        | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order. Multiple fields can be specified by using a string array.                                                               |
-| `dbName`             | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined.                                                                                                                                                                        |
-| `endpoints`          | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                                        |
-| `fields` \*          | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview).                                                                                                                            |
-| `graphQL`            | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                                                                                            |
-| `hooks`              | Entry point for Hooks. [More details](../hooks/collections).                                                                                                                                                                                                                       |
-| `hierarchy`          | Enable hierarchical tree structure with automatic parent-child relationships and path generation. [More details](../hierarchy/overview).                                                                                                                                           |
-| `orderable`          | If true, enables custom ordering for the collection, and documents can be reordered via drag and drop. Uses [orderable](#orderable) for efficient reordering.                                                                                                                      |
-| `labels`             | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                                                                                     |
-| `enableQueryPresets` | Enable query presets for this Collection. [More details](../query-presets/overview).                                                                                                                                                                                               |
-| `lockDocuments`      | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                                                                                     |
-| `slug` \*            | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                                                                                    |
-| `timestamps`         | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                                                                                 |
-| `trash`              | A boolean to enable soft deletes for this collection. Defaults to `false`. [More details](../trash/overview).                                                                                                                                                                      |
-| `typescript`         | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                                                |
-| `upload`             | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                                                                                      |
-| `versions`           | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                                                                                |
-| `defaultPopulate`    | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                                                                              |
-| `indexes`            | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                                                                                             |
-| `select`             | Function that receives the current `operation`, `req`, and caller's `select`, and returns the final `select` to apply. Useful for forcing fields to be populated for hooks / access control. [More details](../queries/select#entity-level-select-config).                         |
-| `disableBulkDelete`  | Disable the bulk delete operation for the collection in the admin panel and the REST API                                                                                                                                                                                           |
-| `disableBulkEdit`    | Disable the bulk edit operation for the collection in the admin panel and the REST API                                                                                                                                                                                             |
+| Option                 | Description                                                                                                                                                                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `admin`                | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                                                                                     |
+| `access`               | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                                                                                 |
+| `auth`                 | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                                                                                                                           |
+| `authorship`           | Automatically track the user that created and last updated each document via polymorphic `createdBy` / `updatedBy` fields. Enabled by default. Set to `false` to disable, or to `{ createdBy: false }` / `{ updatedBy: false }` to toggle each field. [More details](#authorship). |
+| `custom`               | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
+| `disableDuplicate`     | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                                                                                |
+| `defaultSort`          | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order. Multiple fields can be specified by using a string array.                                                               |
+| `dbName`               | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined.                                                                                                                                                                        |
+| `endpoints`            | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                                        |
+| `fields` \*            | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview).                                                                                                                            |
+| `generateFrontendPath` | Function that returns the frontend path of a document, like `/posts/hello`. [More details](#frontend-path).                                                                                                                                                                        |
+| `graphQL`              | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                                                                                            |
+| `hooks`                | Entry point for Hooks. [More details](../hooks/collections).                                                                                                                                                                                                                       |
+| `hierarchy`            | Enable hierarchical tree structure with automatic parent-child relationships and path generation. [More details](../hierarchy/overview).                                                                                                                                           |
+| `orderable`            | If true, enables custom ordering for the collection, and documents can be reordered via drag and drop. Uses [orderable](#orderable) for efficient reordering.                                                                                                                      |
+| `labels`               | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                                                                                     |
+| `enableQueryPresets`   | Enable query presets for this Collection. [More details](../query-presets/overview).                                                                                                                                                                                               |
+| `lockDocuments`        | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                                                                                     |
+| `slug` \*              | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                                                                                    |
+| `timestamps`           | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                                                                                 |
+| `trash`                | A boolean to enable soft deletes for this collection. Defaults to `false`. [More details](../trash/overview).                                                                                                                                                                      |
+| `typescript`           | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                                                |
+| `upload`               | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                                                                                      |
+| `versions`             | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                                                                                |
+| `defaultPopulate`      | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                                                                              |
+| `indexes`              | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                                                                                             |
+| `select`               | Function that receives the current `operation`, `req`, and caller's `select`, and returns the final `select` to apply. Useful for forcing fields to be populated for hooks / access control. [More details](../queries/select#entity-level-select-config).                         |
+| `disableBulkDelete`    | Disable the bulk delete operation for the collection in the admin panel and the REST API                                                                                                                                                                                           |
+| `disableBulkEdit`      | Disable the bulk edit operation for the collection in the admin panel and the REST API                                                                                                                                                                                             |
 
 _\* An asterisk denotes that a property is required._
 
@@ -104,6 +105,40 @@ Fields define the schema of the Documents within a Collection. To learn more, go
 ### Hooks
 
 [Collection Hooks](../hooks/collections) allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
+
+### Frontend Path
+
+Use `generateFrontendPath` to tell Payload where each document lives on your frontend. It receives `collection`, `doc` and `req`, and returns a path relative to your frontend, or `null` / `undefined` when the document has no page. Define it once, and Payload and plugins can reuse it wherever they need a link to the document.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  generateFrontendPath: ({ doc, req }) => {
+    if (!doc.slug) {
+      return null
+    }
+
+    return `/${req.locale}/posts/${doc.slug}`
+  },
+  fields: [
+    // ...
+  ],
+}
+```
+
+The `doc` may not include every field. For example, populated documents only include the fields selected by [`defaultPopulate`](../queries/select#defaultpopulate-collection-config-property), so make sure it selects the fields your path needs.
+
+You can also call it from your own code with the Local API:
+
+```ts
+const path = await payload.generateFrontendPath({
+  collection: 'posts',
+  doc: post,
+  req,
+})
+```
 
 ### Orderable
 
