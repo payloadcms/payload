@@ -179,6 +179,7 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {
     'autosave-global': AutosaveGlobal;
+    'autosave-without-localization-global': AutosaveWithoutLocalizationGlobal;
     'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobal;
     'draft-global': DraftGlobal;
     'draft-with-max-global': DraftWithMaxGlobal;
@@ -190,6 +191,7 @@ export interface Config {
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    'autosave-without-localization-global': AutosaveWithoutLocalizationGlobalSelect<false> | AutosaveWithoutLocalizationGlobalSelect<true>;
     'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobalSelect<false> | AutosaveWithDraftButtonGlobalSelect<true>;
     'draft-global': DraftGlobalSelect<false> | DraftGlobalSelect<true>;
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
@@ -203,6 +205,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -1542,6 +1545,17 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-without-localization-global".
+ */
+export interface AutosaveWithoutLocalizationGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-with-draft-button-global".
  */
 export interface AutosaveWithDraftButtonGlobal {
@@ -1634,6 +1648,17 @@ export interface SimpleDraftGlobal {
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-without-localization-global_select".
+ */
+export interface AutosaveWithoutLocalizationGlobalSelect<T extends boolean = true> {
   title?: T;
   _status?: T;
   updatedAt?: T;
@@ -1782,6 +1807,42 @@ export interface CollectionQueryWidget {
     sortField?: string | null;
     sortDirection?: ('asc' | 'desc') | null;
     limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'disable-publish'
+          | 'posts'
+          | 'autosave-posts'
+          | 'autosave-with-draft-button-posts'
+          | 'autosave-multi-select-posts'
+          | 'autosave-with-validate-posts'
+          | 'draft-posts'
+          | 'drafts-no-read-versions'
+          | 'draft-with-max-posts'
+          | 'draft-posts-with-change-hook'
+          | 'drafts-with-custom-unpublish'
+          | 'draft-with-validate-posts'
+          | 'error-on-unpublish'
+          | 'localized-posts'
+          | 'version-posts'
+          | 'custom-ids'
+          | 'diff'
+          | 'text'
+          | 'draft-with-upload'
+          | 'draft-with-upload-cloud-storage'
+          | 'media'
+          | 'media2'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

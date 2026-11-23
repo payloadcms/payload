@@ -30,6 +30,7 @@ import Posts from './collections/Posts.js'
 import { TextCollection } from './collections/Text.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
+import { AutosaveWithoutLocalization } from './globals/AutosaveWithoutLocalization.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
@@ -76,6 +77,7 @@ export default buildConfigWithDefaults({
   ],
   globals: [
     AutosaveGlobal,
+    AutosaveWithoutLocalization,
     AutosaveWithDraftButtonGlobal,
     DraftGlobal,
     DraftWithMaxGlobal,
