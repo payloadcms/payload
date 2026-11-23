@@ -278,10 +278,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
    * their `readOnly` prop from these permissions.
    */
   const initializeSharedFormState = React.useCallback(
-    async ({ docPermissions }: { docPermissions: SanitizedDocumentPermissions }) => {
-      // FETCH AND SET THE DOCUMENT SLOTS HERE!
-      const documentSlots = await getDocumentSlots({ collectionSlug })
-
+    async ({
+      docPermissions,
+      documentSlots,
+    }: {
+      docPermissions: SanitizedDocumentPermissions
+      documentSlots: DocumentSlots
+    }) => {
       try {
         const { state: formStateWithoutFiles } = await getFormState({
           collectionSlug,
@@ -318,12 +321,12 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         return null
       }
     },
-    [getDocumentSlots, collectionSlug, getFormState, code, folderFieldName],
+    [collectionSlug, getFormState, code, folderFieldName],
   )
 
   /**
-   * Loads the document permissions, then builds the shared form state with them.
-   * Callers for the same collection share one request, so files added during
+   * Loads the document permissions and document slots, then builds the shared form state
+   * with them. Callers for the same collection share one request, so files added during
    * initialization do not start a second one.
    */
   const initializeCollection = React.useCallback((): Promise<FormState | null> => {
@@ -332,13 +335,21 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     }
 
     const promise = (async () => {
-      const docPermissions = await initializeSharedDocPermissions()
+      try {
+        const [docPermissions, documentSlots] = await Promise.all([
+          initializeSharedDocPermissions(),
+          getDocumentSlots({ collectionSlug }),
+        ])
 
-      if (!docPermissions) {
+        if (!docPermissions) {
+          return null
+        }
+
+        return await initializeSharedFormState({ docPermissions, documentSlots })
+      } catch (_err) {
+        // Callers treat `null` as a failed start-up: they hide their loading overlay and can try again.
         return null
       }
-
-      return initializeSharedFormState({ docPermissions })
     })()
 
     initializingCollectionRef.current = { slug: collectionSlug, promise }
@@ -349,10 +360,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         initializingCollectionRef.current = null
       }
     }
-    void promise.then(forgetIfFailed, () => forgetIfFailed())
+    void promise.then(forgetIfFailed)
 
     return promise
-  }, [collectionSlug, initializeSharedDocPermissions, initializeSharedFormState])
+  }, [collectionSlug, getDocumentSlots, initializeSharedDocPermissions, initializeSharedFormState])
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
     (index: number) => {

@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -110,8 +111,18 @@ test.describe('Tags', () => {
     return createdTag
   }
 
-  /** Open the bulk upload drawer from a list view, add one file, and return the Tags button. */
-  const openBulkUploadTagsButton = async (collectionURL: AdminUrlUtil): Promise<Locator> => {
+  const imagePath = path.resolve(dirname, '../uploads/image.png')
+  const secondImagePath = path.resolve(dirname, '../uploads/2mb.jpg')
+
+  const getBulkUploadTagsButton = (): Locator =>
+    page.locator('.bulk-upload--file-manager').getByRole('button', { name: 'Select Tags' })
+
+  /** Open the bulk upload drawer from a list view and return its file input. */
+  const openBulkUploadDrawer = async ({
+    collectionURL,
+  }: {
+    collectionURL: AdminUrlUtil
+  }): Promise<Locator> => {
     await page.goto(collectionURL.list)
     await expect(page.locator('.list-header__title')).toBeVisible()
 
@@ -125,9 +136,7 @@ test.describe('Tags', () => {
       await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
     }).toPass({ intervals: [500], timeout: 5000 })
 
-    await dropzoneInput.setInputFiles(path.resolve(dirname, '../uploads/image.png'))
-
-    return page.locator('.bulk-upload--file-manager').getByRole('button', { name: 'Select Tags' })
+    return dropzoneInput
   }
 
   test.beforeAll(async ({ browser }, testInfo) => {
@@ -226,17 +235,43 @@ test.describe('Tags', () => {
     })
 
     test('should allow selecting tags in the bulk upload drawer', async () => {
-      const browseButton = await openBulkUploadTagsButton(mediaURL)
+      const dropzoneInput = await openBulkUploadDrawer({ collectionURL: mediaURL })
 
-      await expect(browseButton).toBeVisible()
-      await expect(browseButton).toBeEnabled()
+      await dropzoneInput.setInputFiles(imagePath)
+
+      await expect(getBulkUploadTagsButton()).toBeVisible()
+      await expect(getBulkUploadTagsButton()).toBeEnabled()
     })
 
     test('should keep the Tags field read-only in the bulk upload drawer without create access', async () => {
-      const browseButton = await openBulkUploadTagsButton(restrictedMediaURL)
+      const dropzoneInput = await openBulkUploadDrawer({ collectionURL: restrictedMediaURL })
 
-      await expect(browseButton).toBeVisible()
-      await expect(browseButton).toBeDisabled()
+      await dropzoneInput.setInputFiles(imagePath)
+
+      await expect(getBulkUploadTagsButton()).toBeVisible()
+      await expect(getBulkUploadTagsButton()).toBeDisabled()
+    })
+
+    test('should hide the loading overlay and allow a retry when the bulk upload permissions request fails', async () => {
+      const accessRoute = `**/api/${mediaSlug}/access**`
+
+      await page.route(accessRoute, (route) =>
+        route.fulfill({ body: '<html>Server error</html>', contentType: 'text/html', status: 500 }),
+      )
+
+      const dropzoneInput = await openBulkUploadDrawer({ collectionURL: mediaURL })
+
+      await dropzoneInput.setInputFiles(imagePath)
+
+      // The overlay appears only after a 1 second delay, so wait past it before checking.
+      await wait(1500)
+      await expect(page.locator('.loading-overlay')).toHaveCount(0)
+
+      await page.unroute(accessRoute)
+      // Use a different file: selecting the same file again does not fire a change event.
+      await dropzoneInput.setInputFiles(secondImagePath)
+
+      await expect(getBulkUploadTagsButton()).toBeEnabled()
     })
   })
 
