@@ -103,7 +103,12 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
         editorConfig,
         nodeViews,
       }),
-      onError: (error: Error) => {
+      onError: (error: Error, editor: LexicalEditor) => {
+        // Before mount, errors come from parsing the initial value. Throw them so a partially parsed document is never loaded.
+        if (!editor.getRootElement()) {
+          throw error
+        }
+
         console.error(error)
       },
       theme: editorConfig.lexical.theme,
