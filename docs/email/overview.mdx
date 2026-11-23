@@ -232,9 +232,17 @@ await payload.sendEmail({
 
 If you store files in a Payload collection with `upload: true`, you can attach them to emails by fetching the document and using its file data.
 
+For local storage, resolve the document's `filename` against the collection's
+`upload.staticDir`. The document's `url` is an HTTP URL, not a filesystem path,
+even when Payload stores the file locally. These examples must run on a server
+with access to that upload directory; they do not apply when local storage is
+disabled.
+
 **Example: Attaching a file from a Media collection**
 
 ```ts
+import path from 'node:path'
+
 const mediaDoc = await payload.findByID({
   collection: 'media',
   overrideAccess: true,
@@ -242,6 +250,14 @@ const mediaDoc = await payload.findByID({
 })
 
 // For local storage adapter
+const uploadConfig = payload.collections.media.config.upload
+
+if (!uploadConfig || uploadConfig.disableLocalStorage || !mediaDoc.filename) {
+  throw new Error('A local upload collection and filename are required.')
+}
+
+const localFilePath = path.resolve(uploadConfig.staticDir, mediaDoc.filename)
+
 await payload.sendEmail({
   to: 'user@example.com',
   subject: 'Your document',
@@ -249,7 +265,7 @@ await payload.sendEmail({
   attachments: [
     {
       filename: mediaDoc.filename,
-      path: mediaDoc.url, // Local file path when using local storage
+      path: localFilePath,
       contentType: mediaDoc.mimeType,
     },
   ],
@@ -276,6 +292,9 @@ await payload.sendEmail({
 ### With Resend adapter:
 
 ```ts
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
 const mediaDoc = await payload.findByID({
   collection: 'media',
   overrideAccess: true,
@@ -296,8 +315,14 @@ await payload.sendEmail({
 })
 
 // For local storage, read the file and convert to Base64
-import { readFile } from 'node:fs/promises'
-const fileBuffer = await readFile(mediaDoc.url)
+const uploadConfig = payload.collections.media.config.upload
+
+if (!uploadConfig || uploadConfig.disableLocalStorage || !mediaDoc.filename) {
+  throw new Error('A local upload collection and filename are required.')
+}
+
+const localFilePath = path.resolve(uploadConfig.staticDir, mediaDoc.filename)
+const fileBuffer = await readFile(localFilePath)
 
 await payload.sendEmail({
   to: 'user@example.com',
