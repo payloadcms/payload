@@ -101,32 +101,8 @@ export function mergeDraftData({
         ? fieldConfig.fields
         : undefined
 
-    if (isLocalized && locale) {
-      if (
-        isPlainObject(value) &&
-        localeCodes &&
-        Object.keys(value).length > 0 &&
-        Object.keys(value).every((k) => localeCodes.includes(k))
-      ) {
-        if (!isPlainObject(target[key])) {
-          target[key] = {}
-        }
-        for (const [loc, locVal] of Object.entries(value)) {
-          const targetLocaleVal = (target[key] as Record<string, unknown>)[loc]
-          if (isGroup && isPlainObject(targetLocaleVal) && isPlainObject(locVal)) {
-            mergeDraftData({
-              depth: depth + 1,
-              fields: nestedFields,
-              incoming: locVal as Record<string, unknown>,
-              locale: loc,
-              localeCodes,
-              target: targetLocaleVal as Record<string, unknown>,
-            })
-          } else {
-            ;(target[key] as Record<string, unknown>)[loc] = locVal
-          }
-        }
-      } else {
+    if (isLocalized) {
+      if (locale && locale !== 'all') {
         if (!isPlainObject(target[key])) {
           target[key] = {}
         }
@@ -143,12 +119,37 @@ export function mergeDraftData({
         } else {
           ;(target[key] as Record<string, unknown>)[locale] = value
         }
+      } else {
+        if (isPlainObject(value)) {
+          if (!isPlainObject(target[key])) {
+            target[key] = {}
+          }
+          for (const [loc, locVal] of Object.entries(value)) {
+            const targetLocaleVal = (target[key] as Record<string, unknown>)[loc]
+            if (isGroup && isPlainObject(targetLocaleVal) && isPlainObject(locVal)) {
+              mergeDraftData({
+                depth: depth + 1,
+                fields: nestedFields,
+                incoming: locVal as Record<string, unknown>,
+                locale: loc,
+                localeCodes,
+                target: targetLocaleVal as Record<string, unknown>,
+              })
+            } else {
+              ;(target[key] as Record<string, unknown>)[loc] = locVal
+            }
+          }
+        } else {
+          target[key] = value
+        }
       }
     } else if (
       (isGroup || (!fieldConfig && depth > 0)) &&
-      isPlainObject(target[key]) &&
       isPlainObject(value)
     ) {
+      if (!isPlainObject(target[key])) {
+        target[key] = {}
+      }
       mergeDraftData({
         depth: depth + 1,
         fields: nestedFields,
@@ -156,6 +157,22 @@ export function mergeDraftData({
         locale,
         localeCodes,
         target: target[key] as Record<string, unknown>,
+      })
+    } else if (Array.isArray(value) && Array.isArray(target[key])) {
+      const existingArray = target[key] as unknown[]
+      target[key] = value.map((incomingItem) => {
+        if (isPlainObject(incomingItem) && 'id' in incomingItem && incomingItem.id) {
+          const existingItem = existingArray.find(
+            (item) => isPlainObject(item) && 'id' in item && item.id === incomingItem.id,
+          )
+          if (isPlainObject(existingItem)) {
+            return {
+              ...existingItem,
+              ...incomingItem,
+            }
+          }
+        }
+        return incomingItem
       })
     } else {
       target[key] = value
@@ -351,7 +368,53 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       }
 
       if (pendingDraftDoc) {
-        const updatedPendingDraftData = deepCopyObjectSimple(pendingDraftDoc)
+        const unlocalizedReq = req ? ({ ...req, locale: undefined } as PayloadRequest) : undefined
+        if (collection && id !== undefined) {
+          const currentLatest = await getLatestCollectionVersion({
+            id,
+            config: collection,
+            payload,
+            query: { collection: collection.slug, locale: 'all', where: { id: { equals: id } } },
+            req: unlocalizedReq,
+          })
+          if (currentLatest) {
+            const currentStatus = currentLatest._status
+            const isDraft =
+              typeof currentStatus === 'string'
+                ? currentStatus === 'draft'
+                : typeof currentStatus === 'object' && currentStatus !== null
+                  ? Object.values(currentStatus).some((s) => s === 'draft')
+                  : false
+            if (isDraft) {
+              pendingDraftDoc = currentLatest
+            }
+          }
+        } else if (global) {
+          const { global: currentLatest } = await getLatestGlobalVersion({
+            slug: global.slug,
+            config: global,
+            locale: 'all',
+            payload,
+            req: unlocalizedReq,
+            where: {},
+          })
+          if (currentLatest && Object.keys(currentLatest).length > 0) {
+            const currentStatus = currentLatest._status
+            const isDraft =
+              typeof currentStatus === 'string'
+                ? currentStatus === 'draft'
+                : typeof currentStatus === 'object' && currentStatus !== null
+                  ? Object.values(currentStatus).some((s) => s === 'draft')
+                  : false
+            if (isDraft) {
+              pendingDraftDoc = currentLatest as JsonObject
+            }
+          }
+        }
+
+        const updatedPendingDraftData: JsonObject = deepCopyObjectSimple(
+          pendingDraftDoc as JsonObject,
+        )
 
         if (draftData && typeof draftData === 'object') {
           const localeCodes = payload.config.localization

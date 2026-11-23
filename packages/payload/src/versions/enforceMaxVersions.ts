@@ -81,6 +81,35 @@ export const enforceMaxVersions = async ({
       }
     }
 
+    if (collection && id === undefined) {
+      const distinctParentsQuery = await payload.db.findVersions({
+        collection: collection.slug,
+        limit: 0,
+        pagination: false,
+        req,
+        select: {
+          parent: true,
+        },
+      })
+      const parentIds = Array.from(
+        new Set(
+          distinctParentsQuery.docs
+            .map((doc: any) => doc.parent)
+            .filter((p: any) => p !== undefined && p !== null),
+        ),
+      )
+      for (const parentId of parentIds) {
+        await enforceMaxVersions({
+          id: parentId,
+          collection,
+          max,
+          payload,
+          req,
+        })
+      }
+      return
+    }
+
     const where: Where = {}
     if (collection && id !== undefined) {
       where.parent = {

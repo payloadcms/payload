@@ -2340,6 +2340,73 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(draftAfter.description).toBe('unscoped test draft latest')
       })
 
+      test('issue #19670 / enforceMaxVersions: should prune versions per parent independently when id is undefined', async ({
+        payload,
+      }) => {
+        // Parent A: create published doc + 1 non-draft update (2 published versions total)
+        const parentA = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'parent A initial',
+            title: 'parent A',
+          },
+          overrideAccess: true,
+        })
+        await payload.update({
+          id: parentA.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'parent A update 1',
+          },
+          overrideAccess: true,
+        })
+
+        // Parent B: create published doc + 4 non-draft updates (newer timestamps, 5 versions total)
+        const parentB = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'parent B initial',
+            title: 'parent B',
+          },
+          overrideAccess: true,
+        })
+        for (let i = 1; i <= 4; i++) {
+          await payload.update({
+            id: parentB.id,
+            collection: draftCollectionSlug,
+            data: {
+              description: `parent B update ${i}`,
+            },
+            overrideAccess: true,
+          })
+        }
+
+        // Run unscoped enforceMaxVersions with max: 2
+        await enforceMaxVersions({
+          collection: payload.collections[draftCollectionSlug].config,
+          max: 2,
+          payload,
+        })
+
+        // Parent A should retain its 2 versions (not wiped out by Parent B's newer timestamps)
+        const versionsA = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: { parent: { equals: parentA.id } },
+        })
+        expect(versionsA.docs).toHaveLength(2)
+
+        // Parent B should retain exactly max: 2 versions
+        const versionsB = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: { parent: { equals: parentB.id } },
+        })
+        expect(versionsB.docs).toHaveLength(2)
+      })
+
       test('issue #19670 / Finding 1: should preserve nested id in draftData while ignoring root id', () => {
         const target: Record<string, unknown> = {
           id: 'root-id-preserved',
@@ -2621,6 +2688,102 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(target.unlocalizedJson).toEqual({ keyA: 'replacedA' })
       })
 
+      test('issue #19670 / Finding 3: should initialize absent group before recursive merging and map localized child fields', () => {
+        const fields = [
+          {
+            name: 'settings',
+            type: 'group',
+            fields: [
+              {
+                name: 'caption',
+                type: 'text',
+                localized: true,
+              },
+            ],
+          },
+        ] as any
+
+        const target: Record<string, unknown> = {}
+
+        mergeDraftData({
+          fields,
+          incoming: {
+            settings: {
+              caption: 'new caption en',
+            },
+          },
+          locale: 'en',
+          localeCodes: ['en', 'es', 'de'],
+          target,
+        })
+
+        expect(target.settings).toBeDefined()
+        const settings = target.settings as Record<string, unknown>
+        expect(settings.caption).toEqual({ en: 'new caption en' })
+      })
+
+      test('issue #19670 / Finding 3: should preserve submitted JSON value matching locale codes during single-locale write', () => {
+        const fields = [
+          {
+            name: 'configPayload',
+            type: 'json',
+            localized: true,
+          },
+        ] as any
+
+        const target: Record<string, unknown> = {}
+
+        mergeDraftData({
+          fields,
+          incoming: {
+            configPayload: {
+              de: 'de-config-content',
+              en: 'en-config-content',
+              es: 'es-config-content',
+            },
+          },
+          locale: 'en',
+          localeCodes: ['en', 'es', 'de'],
+          target,
+        })
+
+        // In single-locale write ('en'), the entire object is stored under 'en', NOT unpacked into target.configPayload.de/es
+        expect(target.configPayload).toEqual({
+          en: {
+            de: 'de-config-content',
+            en: 'en-config-content',
+            es: 'es-config-content',
+          },
+        })
+      })
+
+      test('issue #19670 / Finding 4: should preserve denied fields in matching array rows while applying permitted updates', () => {
+        const target: Record<string, unknown> = {
+          items: [
+            { id: 'item-1', secret: 'retained-secret-1', title: 'old-title-1' },
+            { id: 'item-2', secret: 'retained-secret-2', title: 'old-title-2' },
+          ],
+        }
+
+        mergeDraftData({
+          incoming: {
+            items: [
+              // Submitted row has permitted title update, but secret was denied and omitted
+              { id: 'item-1', title: 'updated-title-1' },
+            ],
+          },
+          target,
+        })
+
+        const items = target.items as Array<Record<string, unknown>>
+        expect(items).toHaveLength(1)
+        expect(items[0]).toEqual({
+          id: 'item-1',
+          secret: 'retained-secret-1',
+          title: 'updated-title-1',
+        })
+      })
+
       test('issue #19670 / omitDeniedFields: should filter denied subfields inside array and block rows', () => {
         const data = {
           items: [
@@ -2848,6 +3011,184 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(draftAfter.title.en).toBe('updated global en 19670')
         expect(draftAfter.title.es).toBe('updated global es 19670')
         expect(draftAfter.description).toBe('pending draft desc 19670')
+      })
+
+      test('issue #19670 / Finding 5: explicit _status: "published" should publish pending draft when updating global with locale: all', async ({
+        payload,
+      }) => {
+        // Create published global
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'published desc scenario 2',
+            title: {
+              de: 'initial de 2',
+              en: 'initial en 2',
+              es: 'initial es 2',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Save a pending draft
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'pending draft desc scenario 2',
+          },
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Explicit publish update with _status: 'published'
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            _status: 'published',
+            title: {
+              de: 'explicitly published de 2',
+              en: 'explicitly published en 2',
+              es: 'explicitly published es 2',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Both published and draft view should now reflect published status and merged draft description
+        const publishedAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toEqual({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+        })
+        expect(publishedAfter.title.en).toBe('explicitly published en 2')
+        expect(publishedAfter.description).toBe('pending draft desc scenario 2')
+      })
+
+      test('issue #19670 / Finding 5: explicit publishAllLocales: true should publish pending draft when updating global with locale: all', async ({
+        payload,
+      }) => {
+        // Create published global
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'published desc scenario 3',
+            title: {
+              de: 'initial de 3',
+              en: 'initial en 3',
+              es: 'initial es 3',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Save a pending draft
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'pending draft desc scenario 3',
+          },
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Explicit publish update with publishAllLocales: true
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: {
+              de: 'explicitly published de 3',
+              en: 'explicitly published en 3',
+              es: 'explicitly published es 3',
+            },
+          },
+          locale: 'all',
+          publishAllLocales: true,
+          overrideAccess: true,
+        })
+
+        // Both published and draft view should reflect published status and merged draft description
+        const publishedAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toEqual({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+        })
+        expect(publishedAfter.title.en).toBe('explicitly published en 3')
+        expect(publishedAfter.description).toBe('pending draft desc scenario 3')
+      })
+
+      test('issue #19670 / Finding 5: ordinary update with locale: all without pending draft should update published global directly', async ({
+        payload,
+      }) => {
+        // Create published global
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'published desc scenario 4',
+            title: {
+              de: 'initial de 4',
+              en: 'initial en 4',
+              es: 'initial es 4',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        // Ordinary update with locale: 'all' when NO pending draft exists
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            description: 'updated desc scenario 4',
+            title: {
+              de: 'updated de 4',
+              en: 'updated en 4',
+              es: 'updated es 4',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        const publishedAfter = await payload.findGlobal({
+          slug: draftGlobalSlug,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(publishedAfter._status).toEqual({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+        })
+        expect(publishedAfter.title.en).toBe('updated en 4')
+        expect(publishedAfter.description).toBe('updated desc scenario 4')
+
+        // Verify version history: single latest version
+        const versions = await payload.findGlobalVersions({
+          slug: draftGlobalSlug,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        const latestVersions = versions.docs.filter((v) => v.latest === true)
+        expect(latestVersions).toHaveLength(1)
+        expect(latestVersions[0]?.version.title.en).toBe('updated en 4')
       })
 
       test('should have correct updatedAt timestamps when saving drafts', async ({ payload }) => {
