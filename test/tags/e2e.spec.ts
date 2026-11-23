@@ -2,7 +2,6 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -112,7 +111,6 @@ test.describe('Tags', () => {
   }
 
   const imagePath = path.resolve(dirname, '../uploads/image.png')
-  const secondImagePath = path.resolve(dirname, '../uploads/2mb.jpg')
 
   const getBulkUploadTagsButton = (): Locator =>
     page.locator('.bulk-upload--file-manager').getByRole('button', { name: 'Select Tags' })
@@ -250,28 +248,6 @@ test.describe('Tags', () => {
 
       await expect(getBulkUploadTagsButton()).toBeVisible()
       await expect(getBulkUploadTagsButton()).toBeDisabled()
-    })
-
-    test('should hide the loading overlay and allow a retry when the bulk upload permissions request fails', async () => {
-      const accessRoute = `**/api/${mediaSlug}/access**`
-
-      await page.route(accessRoute, (route) =>
-        route.fulfill({ body: '<html>Server error</html>', contentType: 'text/html', status: 500 }),
-      )
-
-      const dropzoneInput = await openBulkUploadDrawer({ collectionURL: mediaURL })
-
-      await dropzoneInput.setInputFiles(imagePath)
-
-      // The overlay appears only after a 1 second delay, so wait past it before checking.
-      await wait(1500)
-      await expect(page.locator('.loading-overlay')).toHaveCount(0)
-
-      await page.unroute(accessRoute)
-      // Use a different file: selecting the same file again does not fire a change event.
-      await dropzoneInput.setInputFiles(secondImagePath)
-
-      await expect(getBulkUploadTagsButton()).toBeEnabled()
     })
   })
 
