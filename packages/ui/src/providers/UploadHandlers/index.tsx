@@ -4,11 +4,19 @@ import type { UploadCollectionSlug, UploadInstructions } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { UploadSessionIntentData } from '../../utilities/uploadWithSession.js'
+
+import { shouldUseUploadSession, uploadWithSession } from '../../utilities/uploadWithSession.js'
 import { useConfig } from '../Config/index.js'
+import { useOptionalUploadSessions } from '../UploadSessions/index.js'
 
 type UploadHandler = (args: {
   docPrefix?: string
   file: File
+  /** The document data being saved, kept with a running upload so the save survives navigation. */
+  intent?: UploadSessionIntentData
+  /** The document whose file is replaced. Omitted when creating a document. */
+  targetID?: number | string
 }) => Promise<UploadInstructions['file']>
 
 export type UploadHandlersContext = {
@@ -19,17 +27,46 @@ const Context = React.createContext<null | UploadHandlersContext>(null)
 
 export const UploadHandlersProvider = ({ children }) => {
   const { config, getEntityConfig } = useConfig()
+  // Optional, so this public provider still works when rendered on its own, without upload
+  // sessions; files then upload when the document is saved.
+  const uploadSessions = useOptionalUploadSessions()
+  // A failed save submits the same File again, which then resumes its session instead of
+  // starting another one that would hold a filename and a quota slot until it expires.
+  const sessionIDsByFile = React.useRef(new WeakMap<File, number | string>())
   const uploadInstructionsURL = formatAdminURL({
     apiRoute: config.routes.api,
     path: '/upload-instructions',
     serverURL: config.serverURL,
   })
   const getUploadHandler: UploadHandlersContext['getUploadHandler'] = ({ collectionSlug }) => {
-    if (!getEntityConfig({ collectionSlug })?.upload?.uploadInstructions.useInAdmin) {
+    const collectionConfig = getEntityConfig({ collectionSlug })
+
+    if (!collectionConfig?.upload?.uploadInstructions.useInAdmin) {
       return null
     }
 
-    return async ({ docPrefix, file }) => {
+    return async ({ docPrefix, file, intent, targetID }) => {
+      // The upload may already be running since the file was picked; the save waits for it.
+      const runningUpload = uploadSessions?.getUploadedFile({ docPrefix, file, intent }) ?? null
+
+      if (runningUpload !== null) {
+        return runningUpload
+      }
+
+      if (shouldUseUploadSession({ collectionConfig, file })) {
+        return uploadWithSession({
+          apiRoute: config.routes.api,
+          collectionSlug,
+          docPrefix,
+          file,
+          onSession: (session) => sessionIDsByFile.current.set(file, session.id),
+          retries: collectionConfig.upload.transfer?.retries,
+          reusableSessionID: sessionIDsByFile.current.get(file),
+          serverURL: config.serverURL,
+          targetID,
+        })
+      }
+
       const response = await fetch(uploadInstructionsURL, {
         body: JSON.stringify({
           collectionSlug,

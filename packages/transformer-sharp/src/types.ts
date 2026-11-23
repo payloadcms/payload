@@ -157,7 +157,7 @@ export type SharpTransformerOptions = {
 
 /**
  * `options` for the one-file-in/one-file-out `transformFile` primitive, computed
- * by `prepareLegacyUpload` for each task it hands to the injected `transform`
+ * by `createTransformUpload` for each task it hands to the injected `transform`
  * callback: the main file, or one named legacy image size. The crop and focal point
  * are not options: `transformFile` reads them from `doc._transforms`.
  */

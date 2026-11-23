@@ -81,6 +81,23 @@ export const baseConfig: Partial<Config> = {
       },
     },
   },
+  endpoints: [
+    {
+      path: '/unassign-tenant/:id',
+      method: 'post',
+      handler: async (req) => {
+        // Bypass tenant validation to simulate content created before the multi-tenant plugin was installed.
+        await req.payload.db.updateOne({
+          collection: menuItemsSlug,
+          id: String(req.routeParams?.id),
+          data: { tenant: null },
+          returning: false,
+        })
+
+        return Response.json({ success: true })
+      },
+    },
+  ],
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),

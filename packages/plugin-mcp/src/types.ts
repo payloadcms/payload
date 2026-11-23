@@ -267,6 +267,19 @@ export type MCPPluginGlobalConfig = {
  * actually works with.
  */
 export type MCPPluginConfig = {
+  /**
+   * Decides who can use MCP at all. Runs on every MCP request once the user is authenticated,
+   * before the `access` callbacks of tools, prompts, and resources, and when a user allows an MCP
+   * client on the built-in OAuth server's sign-in page. Return `false` to answer MCP requests with
+   * `403` and to refuse to sign the client in. This is skipped when `overrideAccess` is enabled.
+   * `overrideGetAuthorizedMCP` replaces it on MCP requests.
+   *
+   * It only applies to MCP, not to Payload's REST or GraphQL APIs, so it doesn't replace access
+   * control on collections and globals.
+   *
+   * @default no check, so tools, prompts, and resources decide on their own
+   */
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   collections?: {
     [Slug in CollectionSlug]?: MCPPluginCollectionConfig<Slug>
   }
@@ -301,8 +314,9 @@ export type MCPPluginConfig = {
   /**
    * Replace the default MCP authorization resolver.
    *
-   * This hook replaces the default authentication flow. It must set `req.user` to the
-   * authenticated Payload user, or to `null` for an anonymous caller, before returning.
+   * This hook replaces the default authentication flow, including the plugin's `access`. It must
+   * set `req.user` to the authenticated Payload user, or to `null` for an anonymous caller, before
+   * returning.
    */
   overrideGetAuthorizedMCP?: (
     args: {
@@ -407,7 +421,7 @@ export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
   /** `undefined` when OAuth is turned off. */
   oauth?: MCPOAuthConfig
-} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
+} & Pick<MCPPluginConfig, 'access' | 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: McpServerOptions

@@ -19,6 +19,8 @@ import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServ
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
+import { hasRowPathChanged } from '../../packages/ui/src/forms/Form/rowHelpers.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildNullifyLocaleFieldUpdate } from '../../packages/ui/src/forms/NullifyField/index.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { reduceFieldsToValuesWithValidation } from '../../packages/ui/src/utilities/reduceFieldsToValuesWithValidation.js'
@@ -1015,6 +1017,146 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         isModified: true,
       },
     })
+  })
+
+  test('should remove descendants when the server clears an array', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        items: { rows: [{ id: 'first' }], value: 1 },
+        'items.0.text': { value: 'Removed on the server' },
+      },
+      incomingState: { items: { rows: [], value: 0 } },
+    })
+
+    expect(state.items?.rows).toEqual([])
+    expect(state.items?.value).toBe(0)
+    expect(state.items?.disableFormData).toBeUndefined()
+    expect(state['items.0.text']).toBeUndefined()
+  })
+
+  test('should discard cached components when authoritative state hides a field', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        title: {
+          customComponents: { Field: DummyReactComponent },
+          lastRenderedPath: 'title',
+          value: 'Hidden title',
+        },
+      },
+      incomingState: { title: { passesCondition: false, value: 'Hidden title' } },
+    })
+
+    expect(state.title.customComponents).toBeUndefined()
+    expect(state.title.lastRenderedPath).toBeUndefined()
+    expect(state.title.value).toBe('Hidden title')
+  })
+
+  test.for([
+    { path: 'title', changed: false },
+    { path: 'blocks', changed: false },
+    { path: 'blocks.0', changed: true },
+    { path: 'blocks.0.title', changed: true },
+    { path: 'blocks.2', changed: false },
+    { path: 'blocks.2.title', changed: false },
+    { path: 'blocks.0.items.0.title', changed: true },
+    { path: 'blocks.2.items.0', changed: true },
+    { path: 'blocks.2.items.0.title', changed: true },
+    { path: 'blocks.2.items.2.title', changed: false },
+    { path: 'array.0.title', changed: false },
+    { path: 'removed.0.title', changed: true },
+    { path: 'replaced.0.title', changed: true },
+    { path: 'group.2026.title', changed: false },
+  ])('should identify whether row ownership changed at $path', ({ changed, path }) => {
+    const formState: FormState = {
+      blocks: {
+        rows: [
+          { id: 'first', blockType: 'two' },
+          { id: 'second', blockType: 'two' },
+          { id: 'kept', blockType: 'one' },
+        ],
+      },
+      'blocks.0.items': { rows: [{ id: 'shared-child' }] },
+      'blocks.2.items': { rows: [{ id: 'child-1' }, { id: 'child-2' }, { id: 'child-kept' }] },
+      array: { rows: [{ id: 'array-row' }] },
+      removed: { rows: [{ id: 'removed' }] },
+      replaced: { rows: [{ id: 'same', blockType: 'one' }] },
+    }
+    const data = {
+      blocks: [
+        { id: 'second', blockType: 'two', items: [{ id: 'shared-child' }] },
+        { id: 'first', blockType: 'two' },
+        {
+          id: 'kept',
+          blockType: 'one',
+          items: [{ id: 'child-2' }, { id: 'child-1' }, { id: 'child-kept' }],
+        },
+      ],
+      array: [{ id: 'array-row', blockType: 'ordinary array data' }],
+      removed: [],
+      replaced: [{ id: 'same', blockType: 'two' }],
+      group: { 2026: { title: 'Numeric field name' } },
+    }
+
+    expect(hasRowPathChanged({ data, formState, path })).toBe(changed)
+  })
+
+  test('should remove old fields when the server changes a block type', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        blocks: { rows: [{ blockType: 'text', id: 'block' }], value: 1 },
+        'blocks.0.text': { value: 'Old block content' },
+      },
+      incomingState: {
+        blocks: { rows: [{ blockType: 'number', id: 'block' }], value: 1 },
+        'blocks.0.number': { addedByServer: true, value: 42 },
+      },
+    })
+
+    expect(state.blocks?.rows).toEqual([{ blockType: 'number', id: 'block' }])
+    expect(state['blocks.0.text']).toBeUndefined()
+    expect(state['blocks.0.number']?.value).toBe(42)
+  })
+
+  test('should keep local fields and collapsed state with surviving nested row IDs', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        groups: {
+          rows: [
+            { id: 'removed-group', collapsed: true },
+            { id: 'kept-group', collapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.0.localState': { disableFormData: true, value: 'Removed' },
+        'groups.1.items': {
+          rows: [
+            { id: 'removed-item', collapsed: true },
+            { id: 'kept-item', collapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.1.items.1.localState': { disableFormData: true, value: 'Kept' },
+      },
+      incomingState: {
+        groups: { rows: [{ id: 'kept-group' }], value: 1 },
+        // Moving the parent can make the server reapply initCollapsed at the new nested path.
+        'groups.0.items': {
+          addedByServer: true,
+          rows: [{ id: 'kept-item', collapsed: true }],
+          value: 1,
+        },
+      },
+    })
+
+    expect(state.groups?.rows).toEqual([{ id: 'kept-group', collapsed: false }])
+    expect(state['groups.0.items']?.rows).toEqual([{ id: 'kept-item', collapsed: false }])
+    expect(state['groups.0.items.0.localState']).toEqual({ disableFormData: true, value: 'Kept' })
+    expect(state['groups.0.localState']).toBeUndefined()
+    expect(Object.keys(state).some((path) => path.startsWith('groups.1.'))).toBe(false)
   })
 
   test.for([

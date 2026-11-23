@@ -70,6 +70,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     conditions: Condition;
+    'draft-posts': DraftPost;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     conditions: ConditionsSelect<false> | ConditionsSelect<true>;
+    'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -162,6 +164,7 @@ export interface Post {
       | null;
   };
   selectWithAsyncFilterOptions?: ('allowed' | 'excluded') | null;
+  sortedBlocks?: (One | Two | Three)[] | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -192,6 +195,44 @@ export interface Number {
   id?: string | null;
   blockName?: string | null;
   blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "One".
+ */
+export interface One {
+  title?: string | null;
+  order?: number | null;
+  content?: {
+    text?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'one';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Two".
+ */
+export interface Two {
+  title?: string | null;
+  order?: number | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'two';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Three".
+ */
+export interface Three {
+  title?: string | null;
+  order?: number | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'three';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -236,6 +277,8 @@ export interface AutosavePost {
   title?: string | null;
   computedTitle?: string | null;
   restrictedValue?: string | null;
+  showConditionalField?: boolean | null;
+  conditionalField?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -258,6 +301,7 @@ export interface Condition {
   conditionalCustomField?: string | null;
   conditionalRowField?: string | null;
   conditionalCollapsibleField?: string | null;
+  clientValidatedValue?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -268,6 +312,25 @@ export interface Condition {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts".
+ */
+export interface DraftPost {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -304,6 +367,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditions';
         value: string | Condition;
+      } | null)
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
       } | null)
     | ({
         relationTo: 'users';
@@ -402,6 +469,41 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   selectWithAsyncFilterOptions?: T;
+  sortedBlocks?:
+    | T
+    | {
+        one?:
+          | T
+          | {
+              title?: T;
+              order?: T;
+              content?:
+                | T
+                | {
+                    text?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        two?:
+          | T
+          | {
+              title?: T;
+              order?: T;
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        three?:
+          | T
+          | {
+              title?: T;
+              order?: T;
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -415,6 +517,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
   restrictedValue?: T;
+  showConditionalField?: T;
+  conditionalField?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -430,10 +534,23 @@ export interface ConditionsSelect<T extends boolean = true> {
   conditionalCustomField?: T;
   conditionalRowField?: T;
   conditionalCollapsibleField?: T;
+  clientValidatedValue?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts_select".
+ */
+export interface DraftPostsSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -517,7 +634,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'users';
+    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -539,7 +656,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

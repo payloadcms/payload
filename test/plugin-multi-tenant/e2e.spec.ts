@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -308,6 +308,156 @@ test.describe('Multi Tenant', () => {
 
       return expected
     }
+  })
+
+  test.describe('Single tenant selection', () => {
+    test.beforeEach(async () => {
+      const tenants = await payload.find({
+        collection: tenantsSlug,
+        overrideAccess: true,
+      })
+
+      for (const tenant of tenants.docs) {
+        if (tenant.name !== 'Blue Dog') {
+          await payload.delete({
+            collection: tenantsSlug,
+            id: String(tenant.id),
+            overrideAccess: true,
+          })
+        }
+      }
+
+      await page.context().clearCookies({ name: 'payload-tenant' })
+    })
+
+    test('should leave the tenant filter empty for users with access to all tenants', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await openNav(page)
+
+      const selector = page.locator('.tenant-selector')
+
+      await expect(selector).toBeVisible()
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBeFalsy()
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeUndefined()
+    })
+
+    test('should prompt for a tenant when a hasMany tenant field is empty', async () => {
+      const post = await payload.create({
+        collection: multiTenantPostsSlug,
+        data: { title: 'Unassigned draft', tenant: [] },
+        draft: true,
+        overrideAccess: true,
+      })
+      const postsURL = new AdminUrlUtil(serverURL, multiTenantPostsSlug)
+
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(postsURL.edit(post.id))
+
+      await expect(page.locator('#assign-tenant-field-modal')).toBeVisible()
+    })
+
+    test('should keep the only tenant clearable after selection and navigation', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await openNav(page)
+
+      const selector = page.locator('.tenant-selector')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Blue Dog',
+        page,
+        selectLocator: selector,
+      })
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBe('Blue Dog')
+
+      await clearSelectInput({ selectLocator: selector })
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBeFalsy()
+
+      await page.goto(menuItemsURL.list)
+      await openNav(page)
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBeFalsy()
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeUndefined()
+    })
+
+    test('should let an admin assign the only tenant to a legacy document', async () => {
+      const item = await payload.find({
+        collection: menuItemsSlug,
+        overrideAccess: true,
+        where: { name: { equals: 'Spicy Mac' } },
+      })
+      const itemID = String(item.docs[0]?.id)
+
+      // Simulate content created before tenant validation was installed.
+      const response = await page.request.post(
+        formatAdminURL({ apiRoute: '/api', path: `/unassign-tenant/${itemID}`, serverURL }),
+      )
+
+      expect(response.ok()).toBeTruthy()
+
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await expect(page.locator('#assign-tenant-field-modal')).toBeVisible()
+      await selectDocumentTenant({ page, payload, tenant: 'Blue Dog' })
+      await saveDocAndAssert(page)
+
+      const updatedItem = await payload.find({
+        collection: menuItemsSlug,
+        overrideAccess: true,
+        where: { id: { equals: itemID } },
+      })
+
+      expect(updatedItem.docs[0]?.tenant).toBeTruthy()
+    })
+
+    test('should auto-select the only tenant for an assigned user', async () => {
+      await loginClientSide({ data: credentials.blueDog, page, serverURL })
+      await page.goto(menuItemsURL.list)
+
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeDefined()
+      await expect(page.locator('.tenant-selector')).toHaveCount(0)
+    })
+
+    test('should select a tenant when opening a tenant-global document', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.context().clearCookies({ name: 'payload-tenant' })
+      await page.goto(globalMenuURL.list)
+
+      await expect(page).toHaveURL(new RegExp(`${globalMenuURL.list}/[^/]+$`))
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeDefined()
+    })
   })
 
   test.describe('Filters', () => {

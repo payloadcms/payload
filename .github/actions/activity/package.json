@@ -2,7 +2,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "pnpm build:typecheck && pnpm build:popular-issues:ncc && pnpm build:new-issues:ncc",
+    "build": "pnpm build:typecheck && pnpm build:popular-issues:ncc && pnpm build:new-issues:ncc && pnpm build:issue-engagement:ncc",
+    "build:issue-engagement:ncc": "ncc build src/issue-engagement.ts -m -o dist/issue-engagement",
     "build:new-issues:ncc": "ncc build src/new-issues.ts -m -o dist/new-issues",
     "build:popular-issues:ncc": "ncc build src/popular-issues.ts -m -o dist/popular-issues",
     "build:typecheck": "tsc",

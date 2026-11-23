@@ -6,10 +6,10 @@ import bundledSharp from 'sharp'
 
 import type { SharpDynamicDefaults, SharpDynamicOptions, SharpTransformerOptions } from './types.js'
 
+import { createTransformUpload } from './createTransformUpload.js'
 import { createHandleRequest } from './handleRequest.js'
 import { initSharpCollections } from './initSharpCollections.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
-import { createPrepareLegacyUpload } from './prepareLegacyUpload.js'
 import { createTransformFile } from './transformFile.js'
 
 const DEFAULT_MIME_TYPES = [
@@ -97,9 +97,9 @@ export function sharpTransformer(
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {
       handlesCollection,
-      prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency }),
+      transformUpload: createTransformUpload({ collections, sharpDependency }),
     },
-    // `options` here is always what this transformer computed via `prepareUpload`'s
+    // `options` here is always what this transformer computed via `transformUpload`'s
     // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.
     transformFile: createTransformFile({ sharpDependency }) as (
       args: TransformFileArgs,

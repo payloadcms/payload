@@ -1,4 +1,3 @@
-/* eslint-disable perfectionist/sort-object-types  */ // Need to disable this rule because the order of the overloads is important
 'use client'
 import type {
   ClientCollectionConfig,
@@ -12,6 +11,7 @@ import React, { createContext, use, useCallback, useEffect, useMemo } from 'reac
 
 import { useControllableState } from '../../hooks/useControllableState.js'
 
+// The order of the overloads is important: TypeScript picks the first signature that matches
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
   // @todo remove "{} |" in 4.0, which would be a breaking change

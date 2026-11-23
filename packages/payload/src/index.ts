@@ -1356,9 +1356,12 @@ export const getPayload = async (
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
+  options = { ...options }
+
+  const cacheKey = options.key ?? 'default'
   let alreadyCachedSameConfig = false
 
-  let cached = _cached.get(options.key ?? 'default')
+  let cached = _cached.get(cacheKey)
   if (!cached) {
     cached = {
       devReloadCleanup: null,
@@ -1368,7 +1371,7 @@ export const getPayload = async (
       promise: null,
       reload: false,
     }
-    _cached.set(options.key ?? 'default', cached)
+    _cached.set(cacheKey, cached)
   } else {
     alreadyCachedSameConfig = true
   }
@@ -1433,6 +1436,12 @@ export const getPayload = async (
     connectDevReload({ cached, strategyFromOptions: options.devReloadStrategy })
   } catch (e) {
     cached.promise = null
+
+    // A failed attempt must not cause the next initialization to skip onInit.
+    if (_cached.get(cacheKey) === cached) {
+      _cached.delete(cacheKey)
+    }
+
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
     ;(e as { payloadInitError?: boolean }).payloadInitError = true
     throw e
@@ -2069,6 +2078,7 @@ export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { registerUploadVariants } from './uploads/registerUploadVariants.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
+export type * from './uploads/sessions/types.js'
 export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
@@ -2159,6 +2169,8 @@ export type { PayloadLogger } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+export { parseErrorResponse } from './utilities/parseErrorResponse.js'
+export type { ParsedErrorResponse, ParsedNonFieldError } from './utilities/parseErrorResponse.js'
 export { parseParams } from './utilities/parseParams/index.js'
 export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'

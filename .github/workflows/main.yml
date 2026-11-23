@@ -889,7 +889,7 @@ jobs:
   # Test content-api integration with packed packages. Each job runs its own
   # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
   # service container, a Valkey container (required at startup for rate
-  # limiting), and a LocalStack container for S3 storage tests. This
+  # limiting and stale collections), and a LocalStack container for S3 storage tests. This
   # gives each run an isolated sandbox, avoiding data collisions between
   # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
@@ -954,7 +954,7 @@ jobs:
           restore-build: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
           aws-region: us-west-2
@@ -988,7 +988,7 @@ jobs:
       # figma/figma image skip the ~55s ECR pull.
       - name: Cache Content API image
         id: cache-content-api-image
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: /tmp/content-api-image.tar
           key: content-api-image-${{ steps.resolve-image.outputs.tag }}
@@ -1015,6 +1015,7 @@ jobs:
             -e S3_ENDPOINT=http://localhost:4566 \
             -e RATE_LIMIT_VALKEY_URL=redis://localhost:6379 \
             -e VALKEY_URL=redis://localhost:6379 \
+            -e STALE_COLLECTION_VALKEY_URL=redis://localhost:6379 \
             "$IMAGE"
 
       - name: Wait for Content API to be ready
@@ -1065,18 +1066,6 @@ jobs:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
         run: exit 1
 
-  publish-canary:
-    name: Publish Canary
-    runs-on: ubuntu-26.04
-    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
-    needs:
-      - all-green
-
-    steps:
-      # debug github.ref output
-      - run: |
-          echo github.ref: ${{ github.ref }}
-          echo isV3: ${{ github.ref == 'refs/heads/main' }}
   analyze:
     runs-on: ubuntu-26.04
     needs: [changes, build]
@@ -1100,6 +1089,6 @@ jobs:
       - name: Analyze esbuild bundle size
         # Temporarily disable this for community PRs until this can be implemented in a separate workflow
         if: github.event.pull_request.head.repo.fork == false
-        uses: exoego/esbuild-bundle-analyzer@42795b5c2540f6c622dc3445103fabbb7776a6f9 # v1.5.5
+        uses: exoego/esbuild-bundle-analyzer@7a1880abea0c4034922134617078f75cf1bf1a28 # v2.1.0
         with:
           metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
