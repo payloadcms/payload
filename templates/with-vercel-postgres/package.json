@@ -19,17 +19,17 @@
     "ci": "payload migrate && pnpm build"
   },
   "dependencies": {
-    "@payloadcms/next": "4.0.0-beta.10",
-    "@payloadcms/richtext-lexical": "4.0.0-beta.10",
-    "@payloadcms/ui": "4.0.0-beta.10",
+    "@payloadcms/next": "4.0.0-beta.11",
+    "@payloadcms/richtext-lexical": "4.0.0-beta.11",
+    "@payloadcms/ui": "4.0.0-beta.11",
     "cross-env": "10.1.0",
     "graphql": "^16.8.1",
     "next": "16.4.6",
-    "payload": "4.0.0-beta.10",
+    "payload": "4.0.0-beta.11",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "@payloadcms/db-vercel-postgres": "4.0.0-beta.10",
-    "@payloadcms/storage-vercel-blob": "4.0.0-beta.10"
+    "@payloadcms/db-vercel-postgres": "4.0.0-beta.11",
+    "@payloadcms/storage-vercel-blob": "4.0.0-beta.11"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

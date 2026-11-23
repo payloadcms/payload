@@ -3,7 +3,15 @@ import type {
   SerializedLexicalNode,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
+import type {
+  Block,
+  BlocksField,
+  BlockSlug,
+  Config,
+  FormState,
+  PaginatedDocs,
+  Payload,
+} from 'payload'
 
 import {
   BlocksFeature,
@@ -62,6 +70,7 @@ import { convertLexicalNodesToHTML } from '../../packages/richtext-lexical/src/f
 // Diff converters
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
 import { ListItemDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/listitem/index.js'
+import { mergeNodeFields } from '../../packages/richtext-lexical/src/utilities/mergeNodeFields.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
@@ -147,6 +156,134 @@ test.suite('Lexical', { config: './config.ts' }, () => {
         },
       })
     ).docs[0].id
+  })
+
+  test.describe('node field initialization', () => {
+    test('should replace returned object and array field values as a whole', () => {
+      const currentFields = {
+        metadata: { obsolete: true, keep: true },
+        items: [{ id: 'item-1', obsolete: true, keep: true }],
+        richText: { root: { children: [], type: 'root' }, obsolete: true },
+        restricted: 'Retained',
+      }
+
+      const formState: FormState = {
+        metadata: { value: { keep: true } },
+        items: { value: [{ id: 'item-1', keep: true }] },
+        richText: { value: { root: { children: [], type: 'root' } } },
+      }
+
+      const originalFields = structuredClone(currentFields)
+      const originalState = structuredClone(formState)
+
+      const fields = mergeNodeFields({
+        currentFields,
+        formState,
+      })
+
+      expect(fields).toEqual({
+        metadata: { keep: true },
+        items: [{ id: 'item-1', keep: true }],
+        richText: { root: { children: [], type: 'root' } },
+        restricted: 'Retained',
+      })
+      expect(currentFields).toEqual(originalFields)
+      expect(formState).toEqual(originalState)
+    })
+
+    test('should preserve omitted group fields while replacing returned child values', () => {
+      const formState: FormState = {
+        group: { disableFormData: true },
+        'group.metadata': { value: { keep: true } },
+        'group.title': { value: 'Initialized' },
+      }
+
+      const fields = mergeNodeFields({
+        currentFields: {
+          group: {
+            metadata: { obsolete: true, keep: true },
+            restricted: 'Retained',
+            title: 'Original',
+          },
+        },
+        formState,
+      })
+
+      expect(fields).toEqual({
+        group: {
+          metadata: { keep: true },
+          restricted: 'Retained',
+          title: 'Initialized',
+        },
+      })
+    })
+
+    test('should preserve omitted row fields by ID without retaining removed JSON keys or rows', () => {
+      const formState: FormState = {
+        rows: {
+          disableFormData: true,
+          rows: [{ id: 'b' }, { id: 'a' }, { id: 'new' }],
+          value: 3,
+        },
+        'rows.0.id': { value: 'b' },
+        'rows.0.metadata': { value: { keep: 'B' } },
+        'rows.1.id': { value: 'a' },
+        'rows.1.metadata': { value: { keep: 'A' } },
+        'rows.2.id': { value: 'new' },
+        'rows.2.metadata': { value: { keep: 'New' } },
+      }
+
+      const fields = mergeNodeFields({
+        currentFields: {
+          rows: [
+            { id: 'a', metadata: { obsolete: true, keep: 'A' }, restricted: 'Secret A' },
+            { id: 'b', metadata: { obsolete: true, keep: 'B' }, restricted: 'Secret B' },
+            { id: 'removed', metadata: { keep: 'Removed' }, restricted: 'Removed secret' },
+          ],
+        },
+        formState,
+      })
+
+      expect(fields.rows).toEqual([
+        { id: 'b', metadata: { keep: 'B' }, restricted: 'Secret B' },
+        { id: 'a', metadata: { keep: 'A' }, restricted: 'Secret A' },
+        { id: 'new', metadata: { keep: 'New' } },
+      ])
+    })
+
+    test('should apply explicit clears without restoring stale descendant fields', () => {
+      const formState: FormState = {
+        emptyRows: { disableFormData: true, rows: [], value: 0 },
+        'emptyRows.0.id': { value: 'stale' },
+        nullRows: { disableFormData: false, rows: [], value: null },
+        'nullRows.0.id': { value: 'stale' },
+        metadata: { value: {} },
+        items: { value: [] },
+        optional: { value: null },
+        excluded: { disableFormData: true, value: 'Excluded' },
+      }
+
+      const fields = mergeNodeFields({
+        currentFields: {
+          emptyRows: [{ id: 'stale' }],
+          nullRows: [{ id: 'stale' }],
+          metadata: { obsolete: true },
+          items: [{ id: 'stale' }],
+          optional: { obsolete: true },
+          excluded: 'Retained',
+        },
+        formState,
+      })
+
+      expect(fields).toEqual({
+        emptyRows: [],
+        nullRows: null,
+        metadata: {},
+        items: [],
+        optional: null,
+        excluded: 'Retained',
+      })
+    })
   })
 
   test.describe('basic', () => {
