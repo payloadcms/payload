@@ -71,6 +71,7 @@ export interface Config {
     posts: Post;
     pages: Page;
     media: Media;
+    'restricted-media': RestrictedMedia;
     tags: Tag;
     'payload-kv': PayloadKv;
     users: User;
@@ -84,6 +85,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -274,6 +276,46 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-media".
+ */
+export interface RestrictedMedia {
+  id: string;
+  _h_tags?: (string | Tag)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -311,6 +353,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'restricted-media';
+        value: string | RestrictedMedia;
       } | null)
     | ({
         relationTo: 'tags';
@@ -425,6 +471,41 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-media_select".
+ */
+export interface RestrictedMediaSelect<T extends boolean = true> {
+  _h_tags?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
@@ -520,7 +601,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'categories' | 'posts' | 'pages' | 'media' | 'tags' | 'users';
+    relatedCollection: 'categories' | 'posts' | 'pages' | 'media' | 'restricted-media' | 'tags' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -542,7 +623,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('categories' | 'posts' | 'pages' | 'media' | 'tags' | 'users')[] | null;
+    excludedCollections?: ('categories' | 'posts' | 'pages' | 'media' | 'restricted-media' | 'tags' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

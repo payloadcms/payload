@@ -13,7 +13,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug, tagsSlug } from './config.js'
+import { mediaSlug, postsSlug, restrictedMediaSlug, tagsSlug } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,7 +23,9 @@ let serverURL: string
 
 test.describe('Tags', () => {
   let page: Page
+  let mediaURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
+  let restrictedMediaURL: AdminUrlUtil
   let tagsURL: AdminUrlUtil
 
   const createdTagIds: Tag['id'][] = []
@@ -108,6 +110,26 @@ test.describe('Tags', () => {
     return createdTag
   }
 
+  /** Open the bulk upload drawer from a list view, add one file, and return the Tags button. */
+  const openBulkUploadTagsButton = async (collectionURL: AdminUrlUtil): Promise<Locator> => {
+    await page.goto(collectionURL.list)
+    await expect(page.locator('.list-header__title')).toBeVisible()
+
+    const bulkUploadButton = page.locator('.list-header__title-actions button', {
+      hasText: 'Bulk Upload',
+    })
+    const dropzoneInput = page.locator('.dropzone input[type="file"]')
+
+    await expect(async () => {
+      await bulkUploadButton.click()
+      await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+    }).toPass({ intervals: [500], timeout: 5000 })
+
+    await dropzoneInput.setInputFiles(path.resolve(dirname, '../uploads/image.png'))
+
+    return page.locator('.bulk-upload--file-manager').getByRole('button', { name: 'Select Tags' })
+  }
+
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
@@ -116,7 +138,9 @@ test.describe('Tags', () => {
 
     payload = payloadFromInit
     serverURL = serverFromInit
+    mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
+    restrictedMediaURL = new AdminUrlUtil(serverURL, restrictedMediaSlug)
     tagsURL = new AdminUrlUtil(serverURL, tagsSlug)
 
     const context = await browser.newContext()
@@ -199,6 +223,20 @@ test.describe('Tags', () => {
       await tagsField.locator('.rs__input').fill('Spring')
 
       await expect(page.locator('.rs__option')).toContainText('Seasons / Spring')
+    })
+
+    test('should allow selecting tags in the bulk upload drawer', async () => {
+      const browseButton = await openBulkUploadTagsButton(mediaURL)
+
+      await expect(browseButton).toBeVisible()
+      await expect(browseButton).toBeEnabled()
+    })
+
+    test('should keep the Tags field read-only in the bulk upload drawer without create access', async () => {
+      const browseButton = await openBulkUploadTagsButton(restrictedMediaURL)
+
+      await expect(browseButton).toBeVisible()
+      await expect(browseButton).toBeDisabled()
     })
   })
 
