@@ -10,13 +10,27 @@ const handleDragOver = (e: DragEvent) => {
 
 const baseClass = 'dropzone'
 
+const isFileDrag = (e: DragEvent) => Boolean(e.dataTransfer?.types.includes('Files'))
+
 export type Props = {
   readonly children?: React.ReactNode
   readonly className?: string
   readonly disabled?: boolean
-  readonly dropzoneStyle?: 'default' | 'none'
+  /**
+   * - `default`: a dashed box with a background
+   * - `none`: no styles
+   * - `outline`: no styles until files are dragged over it, then a dashed outline. Use it to make a
+   *   large area, such as a list or a modal, a drop target. Dropzones nested inside it still get the drag.
+   * @default 'default'
+   */
+  readonly dropzoneStyle?: 'default' | 'none' | 'outline'
   readonly hasError?: boolean
   readonly isFocusable?: boolean
+  /**
+   * When false, the dropzone does not take files pasted into it, so paste works as normal in inputs inside it.
+   * @default true
+   */
+  readonly isPasteEnabled?: boolean
   readonly multipleFiles?: boolean
   readonly onChange: (e: FileList) => void
 }
@@ -28,6 +42,7 @@ export function Dropzone({
   dropzoneStyle = 'default',
   hasError = false,
   isFocusable = true,
+  isPasteEnabled = true,
   multipleFiles,
   onChange,
 }: Props) {
@@ -59,22 +74,41 @@ export function Dropzone({
     [addFiles],
   )
 
+  /**
+   * The elements the current drag has entered. The browser fires `dragleave` on a child when the
+   * drag moves to its parent or a sibling, so `dragging` turns off only when no entered element is left.
+   */
+  const enteredTargetsRef = React.useRef<EventTarget[]>([])
+
   const handleDragEnter = React.useCallback((e: DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setDragging(true)
+
+    if (isFileDrag(e)) {
+      enteredTargetsRef.current = [...enteredTargetsRef.current, e.target]
+      setDragging(true)
+    }
   }, [])
 
   const handleDragLeave = React.useCallback((e: DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setDragging(false)
+
+    const div = dropRef.current
+    enteredTargetsRef.current = enteredTargetsRef.current.filter(
+      (target) => target !== e.target && target instanceof Node && div?.contains(target),
+    )
+
+    if (enteredTargetsRef.current.length === 0) {
+      setDragging(false)
+    }
   }, [])
 
   const handleDrop = React.useCallback(
     (e: DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
+      enteredTargetsRef.current = []
       setDragging(false)
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -100,7 +134,9 @@ export function Dropzone({
       div.addEventListener('dragleave', handleDragLeave)
       div.addEventListener('dragover', handleDragOver)
       div.addEventListener('drop', handleDrop)
-      div.addEventListener('paste', handlePaste)
+      if (isPasteEnabled) {
+        div.addEventListener('paste', handlePaste)
+      }
 
       return () => {
         div.removeEventListener('dragenter', handleDragEnter)
@@ -112,7 +148,7 @@ export function Dropzone({
     }
 
     return () => null
-  }, [disabled, handleDragEnter, handleDragLeave, handleDrop, handlePaste])
+  }, [disabled, handleDragEnter, handleDragLeave, handleDrop, handlePaste, isPasteEnabled])
 
   const classes = [
     baseClass,

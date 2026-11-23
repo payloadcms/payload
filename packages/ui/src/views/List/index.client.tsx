@@ -37,6 +37,7 @@ import { getHierarchyListURL } from '../HierarchyList/getHierarchyListURL.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { DocumentGrid } from './DocumentGrid/index.js'
 import { GroupedDocumentGrid } from './GroupedDocumentGrid/index.js'
+import { ListFileDropzone } from './ListFileDropzone/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
 
@@ -145,6 +146,13 @@ export function DefaultListView(props: ListViewClientProps) {
   const isUploadCollection = Boolean(upload)
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  const canDropFilesToUpload =
+    hasCreatePermission &&
+    isBulkUploadEnabled &&
+    !upload.hideFileInputOnCreate &&
+    viewType !== 'trash' &&
+    !isInDrawer
 
   const isTrashEnabled = Boolean(collectionConfig.trash)
 
@@ -372,104 +380,106 @@ export function DefaultListView(props: ListViewClientProps) {
               )}
             </div>
             {BeforeListTable}
-            {hierarchyData ? (
-              <DocumentSelectionProvider
-                collectionData={{
-                  [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-                  ...Object.fromEntries(
-                    Object.entries(hierarchyData.relatedDocumentsByCollection).map(
-                      ([slug, related]) => [slug, { docs: related.result.docs }],
+            <ListFileDropzone collectionConfig={collectionConfig} isEnabled={canDropFilesToUpload}>
+              {hierarchyData ? (
+                <DocumentSelectionProvider
+                  collectionData={{
+                    [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+                    ...Object.fromEntries(
+                      Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                        ([slug, related]) => [slug, { docs: related.result.docs }],
+                      ),
                     ),
-                  ),
-                }}
-              >
-                <HierarchyTable
-                  childrenData={hierarchyData.childrenData}
-                  collectionSlug={collectionSlug}
-                  hierarchyLabel={collectionLabel}
-                  key={hierarchyData.parentId}
-                  parentId={hierarchyData.parentId}
-                  relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
-                    ([slug, related]) => ({
-                      collectionSlug: slug,
-                      data: related.result,
-                      fieldName: related.fieldName,
-                      hasMany: related.hasMany,
-                      label: related.label,
-                    }),
-                  )}
-                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-                />
-                <DocumentListSelection
-                  disableBulkDelete={disableBulkDelete}
-                  disableBulkEdit={disableBulkEdit}
-                />
-              </DocumentSelectionProvider>
-            ) : docs?.length > 0 ? (
-              shouldRenderGrid && isDataGrouped ? (
-                <GroupedDocumentGrid
-                  collectionSlug={collectionSlug}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  groups={groupedData}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  viewType={viewType}
-                />
-              ) : shouldRenderGrid ? (
-                <DocumentGrid
-                  adminRoute={adminRoute}
-                  collectionLabel={collectionLabel}
-                  collectionSlug={collectionSlug}
-                  docs={docs}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  useAsThumbnail={collectionConfig.admin.useAsThumbnail}
-                  useAsTitle={collectionConfig.admin.useAsTitle}
-                  viewType={viewType}
-                />
-              ) : (
-                <RelationshipProvider>{Table}</RelationshipProvider>
-              )
-            ) : null}
-            {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
-            {docs?.length === 0 &&
-              (NoResults ?? (
-                <NoListResults
-                  Actions={
-                    hasCreatePermission && newDocumentURL && viewType !== 'trash'
-                      ? [
-                          isInDrawer ? (
-                            <Button
-                              el="button"
-                              key="create"
-                              onClick={() => openModal(createNewDrawerSlug)}
-                            >
-                              {i18n.t('general:createNewLabel', {
-                                label: getTranslation(labels?.singular, i18n),
-                              })}
-                            </Button>
-                          ) : (
-                            <Button el="link" key="create" to={newDocumentURL}>
-                              {i18n.t('general:createNewLabel', {
-                                label: getTranslation(labels?.singular, i18n),
-                              })}
-                            </Button>
-                          ),
-                        ]
-                      : []
-                  }
-                  description={
-                    viewType === 'trash'
-                      ? i18n.t('general:noTrashResults', {
-                          label: getTranslation(labels?.plural, i18n),
-                        })
-                      : i18n.t('general:noResultsDescription')
-                  }
-                  title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
-                  withMargin
-                />
-              ))}
+                  }}
+                >
+                  <HierarchyTable
+                    childrenData={hierarchyData.childrenData}
+                    collectionSlug={collectionSlug}
+                    hierarchyLabel={collectionLabel}
+                    key={hierarchyData.parentId}
+                    parentId={hierarchyData.parentId}
+                    relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                      ([slug, related]) => ({
+                        collectionSlug: slug,
+                        data: related.result,
+                        fieldName: related.fieldName,
+                        hasMany: related.hasMany,
+                        label: related.label,
+                      }),
+                    )}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  />
+                  <DocumentListSelection
+                    disableBulkDelete={disableBulkDelete}
+                    disableBulkEdit={disableBulkEdit}
+                  />
+                </DocumentSelectionProvider>
+              ) : docs?.length > 0 ? (
+                shouldRenderGrid && isDataGrouped ? (
+                  <GroupedDocumentGrid
+                    collectionSlug={collectionSlug}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    groups={groupedData}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    viewType={viewType}
+                  />
+                ) : shouldRenderGrid ? (
+                  <DocumentGrid
+                    adminRoute={adminRoute}
+                    collectionLabel={collectionLabel}
+                    collectionSlug={collectionSlug}
+                    docs={docs}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                    useAsTitle={collectionConfig.admin.useAsTitle}
+                    viewType={viewType}
+                  />
+                ) : (
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                )
+              ) : null}
+              {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
+              {docs?.length === 0 &&
+                (NoResults ?? (
+                  <NoListResults
+                    Actions={
+                      hasCreatePermission && newDocumentURL && viewType !== 'trash'
+                        ? [
+                            isInDrawer ? (
+                              <Button
+                                el="button"
+                                key="create"
+                                onClick={() => openModal(createNewDrawerSlug)}
+                              >
+                                {i18n.t('general:createNewLabel', {
+                                  label: getTranslation(labels?.singular, i18n),
+                                })}
+                              </Button>
+                            ) : (
+                              <Button el="link" key="create" to={newDocumentURL}>
+                                {i18n.t('general:createNewLabel', {
+                                  label: getTranslation(labels?.singular, i18n),
+                                })}
+                              </Button>
+                            ),
+                          ]
+                        : []
+                    }
+                    description={
+                      viewType === 'trash'
+                        ? i18n.t('general:noTrashResults', {
+                            label: getTranslation(labels?.plural, i18n),
+                          })
+                        : i18n.t('general:noResultsDescription')
+                    }
+                    title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
+                    withMargin
+                  />
+                ))}
+            </ListFileDropzone>
             {AfterListTable}
             {AfterList}
             {docs?.length > 0 && !isGroupingBy && (

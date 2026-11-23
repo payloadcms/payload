@@ -80,9 +80,6 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
           {t('dashboard:widgetUploadFiles')}
         </Button>
       </div>
-      <p className="upload-dropzone-widget__drag-message">
-        {t('dashboard:widgetDropFilesToUpload')}
-      </p>
     </Dropzone>
   )
 }

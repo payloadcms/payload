@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { readFileSync, statSync } from 'fs'
@@ -2273,6 +2273,208 @@ describe('Uploads', () => {
     })
   })
 
+  describe('list view file drop', () => {
+    test('should open bulk upload with the dropped files', async () => {
+      await page.goto(uploadsTwo.list)
+
+      const dropzone = page.locator('.list-file-dropzone')
+
+      await dispatchDragEvent({
+        files: [{ name: 'dropped.png', type: 'image/png' }],
+        locator: dropzone,
+        type: 'drop',
+      })
+
+      const bulkUploadModal = page.locator('#uploads-2-bulk-upload-modal-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+      await expect(bulkUploadModal.getByText('dropped.png')).toBeVisible()
+    })
+
+    test('should show the new document in the list after saving dropped files', async () => {
+      await page.goto(uploadsTwo.list)
+
+      const dropzone = page.locator('.list-file-dropzone')
+      const imageBase64 = readFileSync(path.resolve(dirname, './image.png')).toString('base64')
+
+      await dropzone.evaluate((element, base64) => {
+        const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))
+        const transfer = new DataTransfer()
+        transfer.items.add(new File([bytes], 'list-drop.png', { type: 'image/png' }))
+        element.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: transfer }))
+      }, imageBase64)
+
+      const bulkUploadModal = page.locator('#uploads-2-bulk-upload-modal-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+      await bulkUploadModal.locator('input[name="prefix"]').fill('dropped')
+      await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await expect(bulkUploadModal).toBeHidden()
+
+      await expect(page.locator('tbody .cell-filename', { hasText: 'list-drop' })).toBeVisible()
+    })
+
+    test('should show the drop message while files are dragged over the list view', async () => {
+      await page.goto(uploadsTwo.list)
+
+      const dropzone = page.locator('.list-file-dropzone')
+
+      await dispatchDragEvent({
+        files: [{ name: 'dropped.png', type: 'image/png' }],
+        locator: dropzone,
+        type: 'dragenter',
+      })
+
+      await expect(dropzone).toHaveClass(/dragging/)
+      await expect(dropzone.getByText('Drag and drop a file')).toBeVisible()
+    })
+
+    test('should surround only the list items and not the list controls', async () => {
+      await page.goto(uploadsTwo.list)
+
+      const dropzone = page.locator('.list-file-dropzone')
+
+      await expect(dropzone.locator('table')).toBeVisible()
+      await expect(dropzone.locator('#search-filter-input')).toHaveCount(0)
+      await expect(dropzone.locator('.list-header')).toHaveCount(0)
+    })
+
+    test('should keep the drop message while a real file drag moves over the list', async () => {
+      await page.goto(bulkUploadsURL.list)
+
+      const dropzone = page.locator('.list-file-dropzone')
+      await expect(dropzone).toBeVisible()
+      const box = await dropzone.boundingBox()
+      const drag = await startRealFileDrag({
+        filePaths: [path.resolve(dirname, './image.png')],
+        page,
+      })
+
+      try {
+        for (const [offsetX, offsetY] of [
+          [300, 30],
+          [400, 120],
+          [500, 200],
+        ]) {
+          await drag.moveTo({ x: box.x + offsetX, y: box.y + offsetY })
+          await expect(dropzone).toHaveClass(/dragging/)
+        }
+
+        // Moving the drag out of the list, onto the nav, removes the drop message
+        await drag.moveTo({ x: box.x / 2, y: box.y + 200 })
+        await expect(dropzone).not.toHaveClass(/dragging/)
+      } finally {
+        await drag.cancel()
+      }
+    })
+
+    test('should not show the drop message when content that is not a file is dragged', async () => {
+      await page.goto(uploadsTwo.list)
+
+      const dropzone = page.locator('.list-file-dropzone')
+
+      await dispatchDragEvent({ locator: dropzone, text: 'some text', type: 'dragenter' })
+
+      await expect(dropzone).not.toHaveClass(/dragging/)
+    })
+
+    test('should show an error and keep bulk upload closed when no dropped file is accepted', async () => {
+      await page.goto(pdfOnlyURL.list)
+
+      await dispatchDragEvent({
+        files: [{ name: 'dropped.png', type: 'image/png' }],
+        locator: page.locator('.list-file-dropzone'),
+        type: 'drop',
+      })
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Invalid file type',
+      )
+      await expect(page.locator('#pdf-only-bulk-upload-modal-slug-1')).toBeHidden()
+      await closeAllToasts(page)
+    })
+
+    test('should not accept dropped files when bulk upload is hidden on the list view', async () => {
+      await page.goto(hideFileInputOnCreateURL.list)
+      await expect(page.locator('.list-header')).toBeVisible()
+
+      await expect(page.locator('.list-file-dropzone')).toHaveCount(0)
+    })
+
+    test('should keep paste working in the list search input', async () => {
+      await page.goto(uploadsTwo.list)
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('pasted search')
+      })
+
+      const searchInput = page.locator('#search-filter-input')
+      await searchInput.click()
+      await page.keyboard.press('ControlOrMeta+V')
+
+      await expect(searchInput).toHaveValue('pasted search')
+    })
+  })
+
+  describe('bulk upload modal file drop', () => {
+    test('should add files dropped on the bulk upload modal', async () => {
+      const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
+
+      await dispatchDragEvent({
+        files: [{ name: 'second.png', type: 'image/png' }],
+        locator: bulkUploadModal.locator('.bulk-upload--file-manager__dropzone'),
+        type: 'drop',
+      })
+
+      await expect(bulkUploadModal.locator('.file-selections__fileRowContainer')).toHaveCount(2)
+      await expect(bulkUploadModal.getByText('second.png')).toBeVisible()
+    })
+
+    test('should outline the bulk upload modal while files are dragged over it', async () => {
+      const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
+
+      const dropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
+      const box = await dropzone.boundingBox()
+      const drag = await startRealFileDrag({
+        filePaths: [path.resolve(dirname, './image.png')],
+        page,
+      })
+
+      try {
+        for (const [offsetX, offsetY] of [
+          [40, 20],
+          [120, 150],
+          [box.width / 2, box.height / 2],
+        ]) {
+          await drag.moveTo({ x: box.x + offsetX, y: box.y + offsetY })
+          await expect(dropzone).toHaveClass(/dragging/)
+        }
+      } finally {
+        await drag.cancel()
+      }
+    })
+
+    test('should let an upload field in the bulk upload form take files dragged over it', async () => {
+      const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsOne.list, page })
+
+      const modalDropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
+      const fieldDropzone = bulkUploadModal.locator('#field-hasManyUpload .dropzone')
+      await fieldDropzone.scrollIntoViewIfNeeded()
+      const box = await fieldDropzone.boundingBox()
+      const drag = await startRealFileDrag({
+        filePaths: [path.resolve(dirname, './image.png')],
+        page,
+      })
+
+      try {
+        await drag.moveTo({ x: box.x + box.width / 2, y: box.y + box.height / 2 })
+
+        await expect(fieldDropzone).toHaveClass(/dragging/)
+        await expect(modalDropzone).not.toHaveClass(/dragging/)
+      } finally {
+        await drag.cancel()
+      }
+    })
+  })
+
   describe('remote url fetching', () => {
     let testFileServer: TestFileServer | undefined
 
@@ -3361,3 +3563,84 @@ describe('Uploads', () => {
     })
   })
 })
+
+/**
+ * Dispatches a synthetic drag event, because Playwright cannot drag files from the operating system.
+ */
+async function dispatchDragEvent({
+  files = [],
+  locator,
+  text,
+  type,
+}: {
+  files?: Array<{ name: string; type: string }>
+  locator: Locator
+  text?: string
+  type: 'dragenter' | 'dragleave' | 'drop'
+}) {
+  await locator.evaluate(
+    (element, { files, text, type }) => {
+      const transfer = new DataTransfer()
+      for (const file of files) {
+        transfer.items.add(new File(['content'], file.name, { type: file.type }))
+      }
+      if (text) {
+        transfer.setData('text/plain', text)
+      }
+      element.dispatchEvent(
+        new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: transfer }),
+      )
+    },
+    { files, text, type },
+  )
+}
+
+/**
+ * Opens bulk upload from a list view with one file added, and returns the bulk upload modal.
+ */
+async function openBulkUploadFromList({ listURL, page }: { listURL: string; page: Page }) {
+  await page.goto(listURL)
+
+  const bulkUploadButton = page.locator('.list-header__title-actions button', {
+    hasText: 'Bulk Upload',
+  })
+  const dropzoneInput = page.locator('.dropzone input[type="file"]')
+
+  // Click and retry until the dropzone appears (handles hydration timing)
+  await expect(async () => {
+    await bulkUploadButton.click()
+    await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+  }).toPass({ intervals: [500], timeout: 5000 })
+
+  await dropzoneInput.setInputFiles(path.resolve(dirname, './image.png'))
+
+  const bulkUploadModal = page.locator('.bulk-upload--file-manager')
+  await expect(bulkUploadModal.locator('.file-selections__fileRowContainer')).toHaveCount(1)
+
+  return bulkUploadModal
+}
+
+/**
+ * Starts a real browser file drag through the Chrome DevTools Protocol. Unlike a synthetic event,
+ * the browser runs hit-testing, so `dragenter` and `dragleave` fire on the elements under the pointer.
+ */
+async function startRealFileDrag({ filePaths, page }: { filePaths: string[]; page: Page }) {
+  const cdp = await page.context().newCDPSession(page)
+  const data = { dragOperationsMask: 1, files: filePaths, items: [] }
+  let hasEntered = false
+
+  return {
+    cancel: async () => {
+      await cdp.send('Input.dispatchDragEvent', { type: 'dragCancel', data, x: 0, y: 0 })
+      await cdp.detach()
+    },
+    moveTo: async ({ x, y }: { x: number; y: number }) => {
+      if (!hasEntered) {
+        hasEntered = true
+        await cdp.send('Input.dispatchDragEvent', { type: 'dragEnter', data, x, y })
+      }
+
+      await cdp.send('Input.dispatchDragEvent', { type: 'dragOver', data, x, y })
+    },
+  }
+}

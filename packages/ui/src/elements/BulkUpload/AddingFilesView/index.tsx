@@ -13,6 +13,7 @@ import { Button } from '../../Button/index.js'
 import { DialogHeader } from '../../Dialog/DialogHeader/index.js'
 import { DialogModal } from '../../Dialog/DialogModal/index.js'
 import { DialogTitle } from '../../Dialog/DialogTitle/index.js'
+import { Dropzone } from '../../Dropzone/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { ActionsBar } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
@@ -70,71 +71,85 @@ export function AddingFilesView({ modalSlug }: Props) {
     ? (initialFiles?.length ?? initialForms?.length)
     : forms.length
   const canAddMoreFiles = typeof maxFiles === 'number' ? totalFileCount < maxFiles : true
+  const canAddFiles = canAddMoreFiles && !isInitializing
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <>
       <DialogModal className={baseClass} size="large" slug={modalSlug}>
-        <DialogHeader
-          onClose={() => openModal(discardBulkUploadModalSlug)}
-          showClose={true}
-          title={
-            <div className={`${baseClass}__header-title-section`}>
-              <DialogTitle title={t('upload:bulkUpload')} />
-              {totalErrorCount > 0 && <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />}
-            </div>
-          }
+        {/* Lets users drop more files anywhere on the modal, instead of opening "Add files" */}
+        <Dropzone
+          className={`${baseClass}__dropzone`}
+          disabled={!canAddFiles}
+          dropzoneStyle="outline"
+          isFocusable={false}
+          isPasteEnabled={false}
+          multipleFiles
+          onChange={handleAddFiles}
         >
-          {canAddMoreFiles && !isInitializing ? (
-            <Button
-              buttonStyle="secondary"
-              icon={<PlusIcon size={24} />}
-              iconPosition="left"
-              onClick={() => openModal(addMoreFilesModalSlug)}
-            >
-              {t('upload:addFiles')}
-            </Button>
-          ) : null}
-
-          <EditManyBulkUploads collection={collectionConfig} />
-        </DialogHeader>
-
-        <div className={`${baseClass}__body`}>
-          <FileSidebar />
-
-          <div className={`${baseClass}__editView`}>
-            {activeForm && !isInitializing ? (
-              <DocumentInfoProvider
-                collectionSlug={collectionSlug}
-                currentEditor={user}
-                docPermissions={docPermissions}
-                hasPublishedDoc={false}
-                hasPublishPermission={hasPublishPermission}
-                hasSavePermission={hasSavePermission}
-                id={null}
-                initialData={getDataFromFormState(activeForm.formState, true)}
-                initialState={activeForm.formState}
-                isLocked={false}
-                key={`${collectionSlug}-${activeIndex}-${forms.length}`}
-                lastUpdateTime={0}
-                mostRecentVersionIsAutosaved={false}
-                unpublishedVersionCount={0}
-                Upload={documentSlots.Upload}
-                versionCount={0}
+          <DialogHeader
+            onClose={() => openModal(discardBulkUploadModalSlug)}
+            showClose={true}
+            title={
+              <div className={`${baseClass}__header-title-section`}>
+                <DialogTitle title={t('upload:bulkUpload')} />
+                {totalErrorCount > 0 && (
+                  <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
+                )}
+              </div>
+            }
+          >
+            {canAddFiles ? (
+              <Button
+                buttonStyle="secondary"
+                icon={<PlusIcon size={24} />}
+                iconPosition="left"
+                onClick={() => openModal(addMoreFilesModalSlug)}
               >
-                <EditForm
-                  resetUploadEdits={resetUploadEdits}
-                  submitted={hasSubmitted}
-                  updateUploadEdits={updateUploadEdits}
-                  uploadEdits={activeForm?.uploadEdits}
-                />
-              </DocumentInfoProvider>
+                {t('upload:addFiles')}
+              </Button>
             ) : null}
-          </div>
-        </div>
 
-        <ActionsBar />
+            <EditManyBulkUploads collection={collectionConfig} />
+          </DialogHeader>
+
+          <div className={`${baseClass}__body`}>
+            <FileSidebar />
+
+            <div className={`${baseClass}__editView`}>
+              {activeForm && !isInitializing ? (
+                <DocumentInfoProvider
+                  collectionSlug={collectionSlug}
+                  currentEditor={user}
+                  docPermissions={docPermissions}
+                  hasPublishedDoc={false}
+                  hasPublishPermission={hasPublishPermission}
+                  hasSavePermission={hasSavePermission}
+                  id={null}
+                  initialData={getDataFromFormState(activeForm.formState, true)}
+                  initialState={activeForm.formState}
+                  isLocked={false}
+                  key={`${collectionSlug}-${activeIndex}-${forms.length}`}
+                  lastUpdateTime={0}
+                  mostRecentVersionIsAutosaved={false}
+                  unpublishedVersionCount={0}
+                  Upload={documentSlots.Upload}
+                  versionCount={0}
+                >
+                  <EditForm
+                    resetUploadEdits={resetUploadEdits}
+                    submitted={hasSubmitted}
+                    updateUploadEdits={updateUploadEdits}
+                    uploadEdits={activeForm?.uploadEdits}
+                  />
+                </DocumentInfoProvider>
+              ) : null}
+            </div>
+          </div>
+
+          <ActionsBar />
+        </Dropzone>
 
         {/* Nested Modals */}
         <AddFilesView

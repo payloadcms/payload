@@ -25,10 +25,11 @@
 
     &.dragging {
       background: var(--color-bg-brand-tertiary);
+    }
 
-      * {
-        pointer-events: none;
-      }
+    /* Outline dropzones can hold other dropzones, which must still get the drag */
+    &.dragging:not(.dropzone--style-outline) * {
+      pointer-events: none;
     }
 
     @media (min-width: 768px) {
@@ -40,8 +41,32 @@
       padding-block: var(--spacer-3);
     }
 
-    &.dropzone--style-none {
+    &.dropzone--style-none,
+    &.dropzone--style-outline {
       all: unset;
+    }
+
+    &.dropzone--style-outline {
+      position: relative;
+    }
+
+    /* `isolation` keeps the line's z-index inside the dropzone, so it cannot cover sticky headers or
+       footers outside it */
+    &.dropzone--style-outline.dragging {
+      isolation: isolate;
+    }
+
+    /* The dashed line is a layer above the content, not an `outline`: positioned content inside the
+       dropzone, such as a file preview, paints over an outline. It is absolutely positioned, so the
+       content does not move when a drag starts. */
+    &.dropzone--style-outline.dragging::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border: var(--stroke-width-small) dashed var(--color-border-selected);
+      border-radius: inherit;
+      pointer-events: none;
     }
   }
 }

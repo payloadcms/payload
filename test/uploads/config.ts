@@ -370,6 +370,15 @@ export default buildConfigWithDefaults({
   suite: 'uploads',
   config: {
     admin: {
+      dashboard: {
+        defaultLayout: [
+          { widgetSlug: 'welcome', width: 'full' },
+          { widgetSlug: 'upload-dropzone', width: 'full' },
+          { widgetSlug: 'activity', width: 'full' },
+          { widgetSlug: 'collections', width: 'full' },
+        ],
+        widgets: [],
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
