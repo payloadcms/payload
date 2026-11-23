@@ -22,7 +22,7 @@ export const markInheritedReadVersionsAccess = <TAccess extends Access>(
 export const isInheritedReadVersionsAccess = (access?: Access): boolean =>
   Boolean(
     access &&
-      (access as Partial<InheritedReadVersionsAccess>)[inheritedReadVersionsAccess] === true,
+    (access as Partial<InheritedReadVersionsAccess>)[inheritedReadVersionsAccess] === true,
   )
 
 export const resolveInheritedReadVersionsAccessArgs = (args: AccessArgs): AccessArgs => {

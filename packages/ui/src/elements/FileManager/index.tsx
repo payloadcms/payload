@@ -16,6 +16,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useFileFieldUploadSession } from '../../providers/UploadSessions/useFileFieldUploadSession.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -23,6 +24,8 @@ import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
+import { getFileDownloadSrc, getFilePreviewSrc } from '../Upload/getFilePreviewSrc.js'
+import { getInitialCrop } from '../Upload/getInitialCrop.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
@@ -41,6 +44,12 @@ export type FileManagerProps = {
   readonly collectionSlug: string
   readonly initialState?: import('payload').FormState
   /**
+   * Whether large files start a resumable upload as soon as they are picked. Bulk upload turns
+   * this off because it uploads its queue sequentially on save.
+   * @default true
+   */
+  readonly isUploadStartedOnSelect?: boolean
+  /**
    * When provided, upload edits are sourced from these props instead of the `useUploadEdits`
    * context. The bulk upload drawer uses this to drive per-file edits from its FormsManager.
    */
@@ -55,6 +64,7 @@ export type FileManagerProps = {
 export const FileManager: React.FC<FileManagerProps> = ({
   collectionSlug,
   initialState,
+  isUploadStartedOnSelect = true,
   resetUploadEdits: resetUploadEditsFromProps,
   updateUploadEdits: updateUploadEditsFromProps,
   uploadConfig,
@@ -118,15 +128,23 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const selectedSizeData = selectedSize
     ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
-  const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
-    | null
-    | string
+  const previewSrc = getFilePreviewSrc({ data, selectedSizeData })
+  const downloadSrc = getFileDownloadSrc({ data, selectedSizeData })
   const sidePanelMimeType = data?.mimeType as string | undefined
   const fileTypeIsAdjustable =
     !!sidePanelMimeType &&
     isImage(sidePanelMimeType) &&
     sidePanelMimeType !== 'image/svg+xml' &&
     sidePanelMimeType !== 'image/jxl'
+
+  const { hasUploadSession, onFileChange: onSessionFileChange } = useFileFieldUploadSession({
+    collectionSlug,
+    hasStoredFile: Boolean(data?.filename),
+    isEnabled: isUploadStartedOnSelect,
+    setFilename,
+    setRemovedFile,
+    setValue,
+  })
 
   const renameFile = (fileToChange: File, newName: string): File =>
     new File([fileToChange], newName, {
@@ -144,15 +162,20 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
-      if (isNewFile && file instanceof File) {
-        setFileSrc(URL.createObjectURL(file))
+      if (isNewFile) {
+        setFilename(file?.name ?? '')
+        if (file instanceof File) {
+          setFileSrc(URL.createObjectURL(file))
+        }
       }
+      onSessionFileChange({ file })
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
       setUploadControlFile(null)
     },
     [
+      onSessionFileChange,
       setValue,
       setUploadControlFile,
       setUploadControlFileName,
@@ -294,6 +317,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       <div className={`${baseClass}__selected-preview`}>
         <Thumbnail
           collectionSlug={collectionSlug}
+          doc={{ filename: filename || value?.name }}
           fileSrc={isImage(fileType) ? src : null}
           size="expand"
         />
@@ -309,11 +333,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
             fileName={value?.name || (data?.filename as string)}
             fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={uploadEdits?.crop ?? undefined}
+            initialCrop={getInitialCrop({ data, hasSelectedFile: Boolean(value), uploadEdits })}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || (data?.focalX as number) || 50,
               y: uploadEdits?.focalPoint?.y || (data?.focalY as number) || 50,
             }}
+            // The editor keeps its crop in state, so it starts again for each new file.
+            key={value ? `${value.name}-${value.lastModified}` : (data?.filename as string)}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
@@ -352,7 +378,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         {data?.filename && !removedFile && (
           <FileToolbar
             filename={data.filename as string}
-            fileSrc={sidePanelFileSrc}
+            fileSrc={downloadSrc}
             fileUrl={data?.url as string}
             hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
@@ -364,7 +390,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {data?.filename && !removedFile ? (
             <FilePreview
               collectionSlug={collectionSlug}
-              data={data as Record<string, unknown>}
+              data={data}
+              fileSrc={previewSrc}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}
@@ -397,7 +424,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                   />
                 </Dropzone>
               )}
-              {value && fileSrc && (
+              {value && (
                 <Fragment>
                   <Button
                     aria-label={t('general:cancel')}
@@ -408,7 +435,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
                     round
                     tooltip={t('general:cancel')}
                   />
-                  {renderSelectedFilePreview(fileSrc)}
+                  {/* An adopted upload's bytes are in storage, so it has nothing to preview. */}
+                  {fileSrc && renderSelectedFilePreview(fileSrc)}
                   <div className={`${baseClass}__file-adjustments`}>
                     {/* Custom id so this editor doesn't collide with the hidden auto `filename` field. */}
                     <TextInput
@@ -416,6 +444,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                       label={t('upload:fileName')}
                       onChange={handleFileNameChange}
                       path="filename"
+                      readOnly={hasUploadSession}
                       value={filename || value.name}
                     />
                     {(value.size || value.type) && (

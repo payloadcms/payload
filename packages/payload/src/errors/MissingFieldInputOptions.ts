@@ -4,7 +4,7 @@ import { APIError } from './APIError.js'
 
 export class MissingFieldInputOptions extends APIError {
   constructor(field: RadioField | SelectField) {
-    super(`Field ${field.label} is missing options.`)
+    super(`Field ${typeof field.label === 'string' ? field.label : field.name} is missing options.`)
     this.name = 'MissingFieldInputOptions'
   }
 }

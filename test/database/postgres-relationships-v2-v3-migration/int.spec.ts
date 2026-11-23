@@ -50,7 +50,7 @@ test.suite(
 
       expect(hasErr).toBeFalsy()
 
-      await payload.db.dropDatabase({ adapter: payload.db as any })
+      await payload.db.dropDatabase({ adapter: payload.db })
       await payload.destroy()
     })
   },

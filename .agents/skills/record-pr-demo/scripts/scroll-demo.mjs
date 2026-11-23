@@ -6,8 +6,8 @@ export function createScrollInteraction({ moveCursor, page }) {
       to = 'end',
       duration = 950,
       easing = 'easeInOutSine',
-      cursorPlacement = 'outside',
-      input = 'animation',
+      cursorPlacement = 'inside',
+      input = 'wheel',
       settle = 150,
     } = {},
   ) {
@@ -27,7 +27,7 @@ export function createScrollInteraction({ moveCursor, page }) {
       throw new Error('Wheel input requires cursorPlacement: inside for real hit testing')
     }
 
-    await locator.scrollIntoViewIfNeeded()
+    await locator.waitFor({ state: 'visible' })
     const range = await locator.evaluate((element, axis) => {
       const maximum =
         axis === 'x'
@@ -35,7 +35,11 @@ export function createScrollInteraction({ moveCursor, page }) {
           : element.scrollHeight - element.clientHeight
       const direction = axis === 'x' && getComputedStyle(element).direction === 'rtl' ? -1 : 1
 
-      return { direction, maximum, start: axis === 'x' ? element.scrollLeft : element.scrollTop }
+      return {
+        direction,
+        maximum,
+        start: axis === 'x' ? element.scrollLeft : element.scrollTop,
+      }
     }, axis)
 
     if (range.maximum <= 0) {
@@ -77,7 +81,9 @@ export function createScrollInteraction({ moveCursor, page }) {
           document.documentElement.append(element)
           return element
         }, point)
-        await moveCursor(page.locator('[data-pr-demo-scroll-anchor]'), { pauseAfter: 0 })
+        await moveCursor(page.locator('[data-pr-demo-scroll-anchor]'), {
+          pauseAfter: 0,
+        })
       } else {
         await moveCursor(locator, { pauseAfter: 0 })
       }
@@ -116,7 +122,9 @@ export function createScrollInteraction({ moveCursor, page }) {
 
         for (let step = 1; step <= steps; step += 1) {
           const eased = (1 - Math.cos((Math.PI * step) / steps)) / 2
-          const next = step === steps ? target : range.start + (target - range.start) * eased
+          // Chromium exposes whole-pixel scroll positions, so each checkpoint must be attainable.
+          const next =
+            step === steps ? target : Math.round(range.start + (target - range.start) * eased)
           const delta = next - previous
 
           await page.mouse.wheel(axis === 'x' ? delta : 0, axis === 'y' ? delta : 0)

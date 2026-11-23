@@ -9,5 +9,5 @@ import { nextServerAdapter } from '../adapters/server.js'
 export async function login<TSlug extends AuthCollectionSlug>(
   args: LoginArgsWithoutServerAdapter<TSlug>,
 ): Promise<LoginResult<TSlug>> {
-  return loginFn({ ...args, serverAdapter: nextServerAdapter } as LoginArgs<TSlug>)
+  return loginFn({ ...args, serverAdapter: nextServerAdapter })
 }

@@ -139,7 +139,7 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
     // BSON ObjectId instances expose extra enumerable properties (e.g. `buffer`) via `for...in`
     // that corrupt the copy. Detect BSON types early and convert them to their string representation.
     if ('_bsontype' in value && typeof (value as any).toHexString === 'function') {
-      return (value as any).toHexString() as unknown as T
+      return (value as any).toHexString()
     }
     const ret: { [key: string]: T } = {}
     const objectValue = value as Record<string, T>
@@ -203,13 +203,13 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
         return undefined!
       }
 
-      return value as unknown as T
+      return value
     }
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
     if ('_bsontype' in value && typeof (value as any).toHexString === 'function') {
-      return (value as any).toHexString() as unknown as T
+      return (value as any).toHexString()
     }
     const ret: { [key: string]: T } = {}
     const objectValue = value as Record<string, T>
@@ -243,7 +243,7 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
 
   // Handle File
   if (object instanceof File) {
-    return object as unknown as T
+    return object
   }
 
   // Handle Date

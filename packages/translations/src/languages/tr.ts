@@ -298,6 +298,7 @@ export const trTranslations: DefaultTranslationsObject = {
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
+    apiResponse: 'API yanıtı',
     applyChanges: 'Değişiklikleri Uygula',
     ascending: 'artan',
     auto: 'Otomatik',
@@ -370,6 +371,13 @@ export const trTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Bu belge yakın zamanda başka bir kullanıcı tarafından güncellendi. Görünümünüz güncel değil.',
     documents: 'Belgeler',
+    dragCancelled: '{{label}} sürüklemesi iptal edildi.',
+    dragDropped: '{{label}} bırakıldı. {{count}} içinde {{position}}. konum.',
+    dragInstructions:
+      'Bir satırı almak için Space veya Enter tuşuna basın. Taşımak için ok tuşlarını kullanın. VoiceOver ile Quick Nav özelliğini kapatın ve Command + ok tuşlarını kullanın. Bırakmak için Space veya Enter, iptal etmek için Escape tuşuna basın.',
+    dragMoved: '{{label}}: {{direction}}. {{count}} içinde {{position}}. konum.',
+    dragPickedUp: '{{label}} alındı. {{count}} içinde {{position}}. konum.',
+    dragToMove: 'Taşımak için sürükleyin',
     dragToReorder: 'Sürükleyerek yeniden sıralayın',
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
@@ -484,6 +492,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
     reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
+    removeFilter: 'Filtreyi kaldır',
     rename: 'Yeniden adlandır',
     replaceRow: 'Satırı Değiştir',
     requiredFields: '* ile işaretlenmiş alanlar zorunludur.',
@@ -578,6 +587,7 @@ export const trTranslations: DefaultTranslationsObject = {
     yes: 'Evet',
   },
   hierarchy: {
+    folderLocation: 'Klasör konumu',
     goTo: '"{{name}}" öğesine gidin',
     itemsMovedTo: "{{title}} {{destination}}'ye taşındı",
     itemsMovedToRoot: '{{title}} kök bölüme taşındı.',
@@ -638,6 +648,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    cancelUpload: 'Yüklemeyi iptal et',
     copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     copyURL: 'URL’yi kopyala',
     crop: 'Mahsulat',
@@ -659,6 +670,7 @@ export const trTranslations: DefaultTranslationsObject = {
     fileSize: 'Dosya boyutu',
     filesToUpload: 'Yüklemek için Dosyalar',
     fileToUpload: 'Yüklenecek Dosya',
+    finishSaving: 'Kaydetmeyi tamamla',
     focalPoint: 'Odak Noktası',
     focalPointDescription:
       'Önizlemeye odak noktasını doğrudan sürükleyin veya aşağıdaki değerleri ayarlayın.',
@@ -673,12 +685,26 @@ export const trTranslations: DefaultTranslationsObject = {
     previewSizes: 'Önizleme Boyutları',
     renameFile: 'Dosyayı yeniden adlandır',
     replaceFile: 'Dosyayı değiştir',
+    resumingFile: '{{filename}} sürdürülüyor',
+    savingInBackground: 'Yükleme arka planda tamamlanacak ve belge o zaman kaydedilecek.',
     selectCollectionToBrowse: 'Görüntülenecek bir koleksiyon seçin',
     selectFile: 'Dosya seç',
     setCropArea: 'Mahsul alanını ayarla',
     setFocalPoint: 'Odak noktasını ayarla',
     sizes: 'Boyutlar',
     sizesFor: '{{label}} için boyutlar',
+    uploadFileMismatch: 'Seçilen dosya kesintiye uğrayan yüklemeyle eşleşmiyor.',
+    uploadingFile: '{{filename}} yükleniyor',
+    uploadingFileProgress: '{{filename}} yükleniyor: %{{percent}}',
+    uploadInProgressLeaveWarning:
+      'Bir yükleme hâlâ devam ediyor. Şimdi ayrılırsanız kesintiye uğrayacak.',
+    uploadInterrupted: '{{filename}} yüklemesi kesintiye uğradı.',
+    uploadInterruptedWillSave:
+      '{{filename}} yüklemesi kesintiye uğradı. Yükleme bittiğinde belge kaydedilecek.',
+    uploadReadyToFinishSaving: '{{filename}} yüklendi. Kaydetmeyi tamamlamak için formu açın.',
+    uploadSavedInBackground: 'Yükleme tamamlandı ve belge kaydedildi.',
+    uploadStorageRejectedSegments:
+      'Depolama hiçbir yükleme parçasını kabul etmedi. Bucket CORS politikasını kontrol edin.',
     width: 'Genişlik',
   },
   validation: {
@@ -712,6 +738,10 @@ export const trTranslations: DefaultTranslationsObject = {
     type: 'Tür',
     aboutToPublishSelection: "Seçimdeki tüm {{label}}'i yayınlamak üzeresiniz. Emin misin?",
     aboutToRestore: 'Döküman {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} tarihindeki içeriği taslak olarak geri yükleyin. Yayımlanmış içerik, düzenleyiciden yayımlayana kadar değişmeden kalacaktır.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} tarihindeki içeriği tüm yerel ayarlarda taslak olarak geri yükleyin. Yayımlanmış içerik, düzenleyiciden yayımlayana kadar değişmeden kalacaktır.',
     aboutToRestoreGlobal:
       'Global {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.',
     aboutToRevertToPublished:

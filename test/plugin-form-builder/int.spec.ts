@@ -72,11 +72,11 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       title: 'Test Form',
     }
 
-    form = (await payload.create({
+    form = await payload.create({
       collection: formsSlug,
       data: formConfig,
       overrideAccess: true,
-    })) as unknown as Form
+    })
   })
 
   test.describe('plugin collections', () => {
@@ -86,11 +86,13 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
     })
 
     test('adds form submissions collection', async ({ payload }) => {
-      const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug, overrideAccess: true })
+      const { docs: formSubmissions } = await payload.find({
+        collection: formSubmissionsSlug,
+        overrideAccess: true,
+      })
       expect(formSubmissions).toHaveLength(1)
     })
 
-    /* eslint-disable vitest/no-standalone-expect -- test is a custom Vitest test registrar. */
     test('should restrict form data reads to admin collection users', async ({ payload }) => {
       const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
       const submissionsCollection = payload.config.collections.find(
@@ -113,7 +115,6 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
       expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
     })
-    /* eslint-enable vitest/no-standalone-expect */
   })
 
   test.describe('form building', () => {
@@ -2075,7 +2076,11 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
         createdFormIds.push(testForm.id)
 
         // Capture media count before the submission attempt
-        const mediaBefore = await payload.find({ collection: mediaSlug, limit: 0, overrideAccess: true })
+        const mediaBefore = await payload.find({
+          collection: mediaSlug,
+          limit: 0,
+          overrideAccess: true,
+        })
         const countBefore = mediaBefore.totalDocs
 
         const formData = new FormData()
@@ -2106,7 +2111,11 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
         expect(response.status).toBe(400)
 
         // The image doc created before the PDF validation failure should have been cleaned up
-        const mediaAfter = await payload.find({ collection: mediaSlug, limit: 0, overrideAccess: true })
+        const mediaAfter = await payload.find({
+          collection: mediaSlug,
+          limit: 0,
+          overrideAccess: true,
+        })
 
         expect(mediaAfter.totalDocs).toBe(countBefore)
       })

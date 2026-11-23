@@ -416,7 +416,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       })
 
       test('should allow querying within tabs-blocks-tabs', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' }, overrideAccess: true })
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { name: 'Pulp Fiction' },
+          overrideAccess: true,
+        })
 
         const { id } = await payload.create({
           collection: 'deep-nested',
@@ -450,7 +454,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       })
 
       test('should allow query hasMany select in relationship', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] }, overrideAccess: true })
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { select: ['a', 'b'] },
+          overrideAccess: true,
+        })
         const doc = await payload.create({
           collection: 'directors',
           data: { name: 'Mega Director', movie },
@@ -949,8 +957,16 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 
           expect(res_2.totalDocs).toBe(1)
 
-          const dir_1 = await payload.create({ collection: 'directors', data: { name: 'dir' }, overrideAccess: true })
-          const dir_2 = await payload.create({ collection: 'directors', data: { name: 'dir' }, overrideAccess: true })
+          const dir_1 = await payload.create({
+            collection: 'directors',
+            data: { name: 'dir' },
+            overrideAccess: true,
+          })
+          const dir_2 = await payload.create({
+            collection: 'directors',
+            data: { name: 'dir' },
+            overrideAccess: true,
+          })
 
           const dir_3 = await payload.create({
             collection: 'directors',
@@ -1030,7 +1046,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           'should treat an ObjectId as a relationship ID',
           { db: 'mongo' },
           async ({ payload }) => {
-            const movie = await payload.create({ collection: 'movies', data: {}, overrideAccess: true })
+            const movie = await payload.create({
+              collection: 'movies',
+              data: {},
+              overrideAccess: true,
+            })
 
             const director = await payload.create({
               collection: 'directors',
@@ -1269,7 +1289,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           await payload.delete({ collection: 'directors', where: {}, overrideAccess: true })
           await payload.delete({ collection: 'movies', where: {}, overrideAccess: true })
 
-          const director = await payload.create({ collection: 'directors', data: {}, overrideAccess: true })
+          const director = await payload.create({
+            collection: 'directors',
+            data: {},
+            overrideAccess: true,
+          })
 
           const movie = await payload.create({
             collection: 'movies',
@@ -1284,7 +1308,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             overrideAccess: true,
           })
 
-          const director_2 = await payload.create({ collection: 'directors', data: {}, overrideAccess: true })
+          const director_2 = await payload.create({
+            collection: 'directors',
+            data: {},
+            overrideAccess: true,
+          })
 
           const movie_2 = await payload.create({
             collection: 'movies',
@@ -1299,11 +1327,19 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             overrideAccess: true,
           })
 
-          const res = await payload.find({ collection: 'movies', sort: 'director.movie.name', overrideAccess: true })
+          const res = await payload.find({
+            collection: 'movies',
+            sort: 'director.movie.name',
+            overrideAccess: true,
+          })
           expect(res.docs[0].id).toBe(movie.id)
           expect(res.docs[1].id).toBe(movie_2.id)
 
-          const res_2 = await payload.find({ collection: 'movies', sort: '-director.movie.name', overrideAccess: true })
+          const res_2 = await payload.find({
+            collection: 'movies',
+            sort: '-director.movie.name',
+            overrideAccess: true,
+          })
           expect(res_2.docs[0].id).toBe(movie_2.id)
           expect(res_2.docs[1].id).toBe(movie.id)
         })
@@ -1525,7 +1561,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               where: {
                 id: { equals: post.id },
               },
-              req: { query: { depth: 5 } } as Partial<PayloadRequest> as PayloadRequest,
+              req: { query: { depth: 5 } },
               overrideAccess: true,
             })
 
@@ -1545,7 +1581,7 @@ test.suite('Relationships', { config: './config.ts' }, () => {
               where: {
                 id: { equals: post.id },
               },
-              req: { query: { depth: 0 } } as Partial<PayloadRequest> as PayloadRequest,
+              req: { query: { depth: 0 } },
               overrideAccess: true,
             })
 
@@ -1820,7 +1856,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        const rel = await payload.create({ collection: 'rels-to-pages', data: { page: page.id }, overrideAccess: true })
+        const rel = await payload.create({
+          collection: 'rels-to-pages',
+          data: { page: page.id },
+          overrideAccess: true,
+        })
 
         const resEquals = await payload.find({
           collection: 'rels-to-pages',
@@ -2191,7 +2231,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 
       test('should update with passing an object', async ({ payload }) => {
         const movie = await payload.create({ collection: 'movies', data: {}, overrideAccess: true })
-        const { id } = await payload.create({ collection: 'object-writes', data: {}, overrideAccess: true })
+        const { id } = await payload.create({
+          collection: 'object-writes',
+          data: {},
+          overrideAccess: true,
+        })
         const result = await payload.update({
           collection: 'object-writes',
           id,
@@ -2239,6 +2283,218 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 
         expect(result.blocks[0]?.directors[0].id).toBe(director1.id)
         expect(result.blocks[0]?.directors[1].id).toBe(director2.id)
+      })
+    })
+
+    test.describe('With array rows that hold hasMany fields', () => {
+      let directors: Director[]
+
+      test.beforeEach(async ({ payload }) => {
+        directors = await Promise.all(
+          ['a', 'b', 'c'].map((name) =>
+            payload.create({ collection: 'directors', data: { name }, overrideAccess: true }),
+          ),
+        )
+      })
+
+      test('should not let a row appended at a removed row index inherit its relationships', async ({
+        payload,
+      }) => {
+        const movie = await payload.create({
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: directors.map((director) => ({ director: [director.id] })),
+          },
+        })
+
+        // Remove the middle row, leaving index 2 unoccupied
+        await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: [{ director: [directors[0].id] }, { director: [directors[2].id] }],
+          },
+        })
+
+        const result = await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: [{ director: [directors[0].id] }, { director: [directors[2].id] }, {}],
+          },
+          depth: 0,
+        })
+
+        // Mongo omits the key entirely for a row that was never given a value, Postgres returns []
+        expect(result.array[2].director ?? []).toStrictEqual([])
+      })
+
+      test('should not let a row appended at a removed row index inherit its hasMany texts', async ({
+        payload,
+      }) => {
+        const movie = await payload.create({
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: [{ tags: ['a'] }, { tags: ['b'] }, { tags: ['c'] }],
+          },
+        })
+
+        await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: [{ tags: ['a'] }, { tags: ['c'] }],
+          },
+        })
+
+        const result = await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: [{ tags: ['a'] }, { tags: ['c'] }, {}],
+          },
+        })
+
+        expect(result.array[2].tags ?? []).toStrictEqual([])
+      })
+
+      test('should keep relationships of surviving rows when a row is removed', async ({
+        payload,
+      }) => {
+        const movie = await payload.create({
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: directors.map((director) => ({ director: [director.id] })),
+          },
+        })
+
+        const result = await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          overrideAccess: true,
+          data: {
+            array: [{ director: [directors[0].id] }, { director: [directors[2].id] }],
+          },
+          depth: 0,
+        })
+
+        expect(result.array).toHaveLength(2)
+        expect(result.array[0].director).toStrictEqual([directors[0].id])
+        expect(result.array[1].director).toStrictEqual([directors[2].id])
+      })
+    })
+
+    test.describe('With blocks that hold hasMany fields', () => {
+      let directors: Director[]
+
+      test.beforeEach(async ({ payload }) => {
+        directors = await Promise.all(
+          ['a', 'b'].map((name) =>
+            payload.create({ collection: 'directors', data: { name }, overrideAccess: true }),
+          ),
+        )
+      })
+
+      const twoBlocks = () =>
+        directors.map((director) => ({ blockType: 'some' as const, directors: [director.id] }))
+
+      test('should not let a block appended at a removed block index inherit its relationships', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'blocks',
+          data: { blocks: twoBlocks() },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [{ blockType: 'some', directors: [directors[0].id] }] },
+          overrideAccess: true,
+        })
+
+        const result = await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: {
+            blocks: [{ blockType: 'some', directors: [directors[0].id] }, { blockType: 'some' }],
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(result.blocks[0]?.directors).toStrictEqual([directors[0].id])
+        expect(result.blocks[1]?.directors ?? []).toStrictEqual([])
+      })
+
+      test('should not let blocks added after emptying the list inherit relationships', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'blocks',
+          data: { blocks: twoBlocks() },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [] },
+          overrideAccess: true,
+        })
+
+        const result = await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [{ blockType: 'some' }, { blockType: 'some' }] },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(result.blocks.map((block) => block.directors ?? [])).toStrictEqual([[], []])
+      })
+
+      test('should clear removed block relationships when writing through db.updateOne', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'blocks',
+          data: { blocks: twoBlocks() },
+          overrideAccess: true,
+        })
+
+        // The raw, locale-keyed document can be written straight back through the adapter, the
+        // same write `payload.update` reaches after hooks and validation.
+        const rawDoc = await payload.db.findOne({
+          collection: 'blocks',
+          where: { id: { equals: doc.id } },
+        })
+
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: 'blocks',
+          data: { blocks: [rawDoc.blocks[0]] },
+        })
+
+        const result = await payload.update({
+          id: doc.id,
+          collection: 'blocks',
+          data: {
+            blocks: [{ blockType: 'some', directors: [directors[0].id] }, { blockType: 'some' }],
+          },
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(result.blocks[1]?.directors ?? []).toStrictEqual([])
       })
     })
   })
@@ -2527,7 +2783,11 @@ test.suite('Relationships', { config: './config.ts' }, () => {
     test('should update document that polymorphicaly joined to another collection', async ({
       payload,
     }) => {
-      const item = await payload.create({ collection: 'items', data: { status: 'pending' }, overrideAccess: true })
+      const item = await payload.create({
+        collection: 'items',
+        data: { status: 'pending' },
+        overrideAccess: true,
+      })
 
       await payload.create({
         collection: 'relations',
@@ -2736,5 +2996,9 @@ test.suite('Relationships', { config: './config.ts' }, () => {
 })
 
 async function createPost({ payload }: { payload: Payload }, overrides?: Partial<Post>) {
-  return payload.create({ collection: slug, data: { title: 'title', ...overrides }, overrideAccess: true })
+  return payload.create({
+    collection: slug,
+    data: { title: 'title', ...overrides },
+    overrideAccess: true,
+  })
 }

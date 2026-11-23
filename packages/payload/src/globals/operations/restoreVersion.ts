@@ -1,5 +1,4 @@
-import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
-import type { TypeWithVersion } from '../../versions/types.js'
+import type { JsonObject, PayloadRequest, PopulateType, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -15,6 +14,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { saveVersion } from '../../versions/saveVersion.js'
 
 export type Arguments = {
   depth?: number
@@ -27,7 +27,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
+export const restoreVersionOperation = async <T extends JsonObject = any>(
   args: Arguments,
 ): Promise<T> => {
   assertNoValidationWrite(args.req)
@@ -160,31 +160,37 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
     let result = rawVersion.version
 
-    if (global) {
+    if (global || draft) {
       // Ensure updatedAt date is always updated
       result.updatedAt = new Date().toISOString()
-      result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
-        data: result,
-        req,
-      })
-
-      const now = new Date().toISOString()
-
-      result = await payload.db.createGlobalVersion({
-        autosave: false,
-        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
-        globalSlug: globalConfig.slug,
-        req,
-        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
-        versionData: result,
-      })
+      if (!draft) {
+        result = await payload.db.updateGlobal({
+          slug: globalConfig.slug,
+          data: result,
+          req,
+        })
+      }
     } else {
       result = await payload.db.createGlobal({
         slug: globalConfig.slug,
         data: result,
         req,
       })
+    }
+
+    result = await saveVersion({
+      autosave: false,
+      docWithLocales: result,
+      draft,
+      global: globalConfig,
+      operation: 'restoreVersion',
+      payload,
+      req,
+    })
+
+    result = {
+      ...result,
+      globalType: globalConfig.slug,
     }
 
     // /////////////////////////////////////

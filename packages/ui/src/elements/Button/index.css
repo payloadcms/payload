@@ -69,7 +69,7 @@
   .btn.btn--style-secondary {
     color: var(--color-text);
     background-color: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--special-border-translucent);
+    border: var(--stroke-width-small) solid var(--color-border-control);
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-secondary-hover);
@@ -235,6 +235,22 @@
     }
   }
 
+  .btn--dropdown {
+    .btn__content {
+      gap: var(--spacer-1);
+    }
+
+    .btn__icon {
+      width: var(--spacer-2-5);
+      padding-inline-end: var(--spacer-1);
+      flex-shrink: 0;
+    }
+
+    .icon--chevron {
+      flex-shrink: 0;
+    }
+  }
+
   .btn__label {
     white-space: nowrap;
   }
@@ -251,6 +267,11 @@
 
     &:not(.btn--icon-only).btn--icon-position-right {
       padding-inline-end: var(--spacer-1);
+    }
+
+    &.btn--dropdown {
+      padding-inline-start: calc(var(--spacer-2) - var(--stroke-width-small));
+      padding-inline-end: calc(var(--spacer-1) - var(--stroke-width-small));
     }
   }
 
@@ -393,12 +414,12 @@
   }
 
   .btn--withPopup.btn--style-secondary {
-    --separator-color: var(--special-border-translucent);
+    --separator-color: var(--color-border-control);
     .btn,
     .popup-button {
       color: var(--color-text);
       background-color: var(--color-bg);
-      border: var(--stroke-width-small) solid var(--special-border-translucent);
+      border: var(--stroke-width-small) solid var(--color-border-control);
 
       &:hover,
       &:active {

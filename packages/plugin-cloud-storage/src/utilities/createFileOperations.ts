@@ -1,4 +1,4 @@
-import type { CollectionConfig, ImageSize, JsonObject, UploadConfig } from 'payload'
+import type { CollectionConfig, FileToSave, ImageSize, JsonObject, UploadConfig } from 'payload'
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -151,26 +151,14 @@ export const createFileOperations = ({
       },
     }),
     stage: async ({ data, files, req, trackStagedObject }) => {
-      const uploadedNames = new Set<string>()
+      const uploadedKeys = new Set<string>()
       const metadata: Record<string, unknown> = {}
       const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
         | { filename: string }
         | undefined
       for (const file of files) {
         const filename = path.basename(file.path)
-        const representations: Record<string, unknown>[] = [data]
-        if (data.original && typeof data.original === 'object') {
-          representations.push(data.original as Record<string, unknown>)
-        }
-        if (data.variants && typeof data.variants === 'object') {
-          representations.push(
-            ...Object.values(data.variants).filter(
-              (value): value is Record<string, unknown> =>
-                Boolean(value) && typeof value === 'object',
-            ),
-          )
-        }
-        const destinations = representations.filter((value) => value.filename === filename)
+        const destinations = getStageDestinations({ data, file, filename })
         // Provider-direct uploads already placed the source object at its verified location.
         // A bounded content probe can still appear in files, but it is not a representation
         // Payload should upload again.
@@ -213,11 +201,11 @@ export const createFileOperations = ({
           useCompositePrefixes,
         }).storageFilePath
 
-        if (uploadedNames.has(filename)) {
-          throw new Error(`Duplicate managed cloud filename: ${filename}`)
+        if (uploadedKeys.has(storageFilePath)) {
+          throw new Error(`Duplicate managed cloud file: ${storageFilePath}`)
         }
 
-        uploadedNames.add(filename)
+        uploadedKeys.add(storageFilePath)
         const buffer =
           'buffer' in file
             ? file.buffer
@@ -228,7 +216,7 @@ export const createFileOperations = ({
           buffer,
           filename,
           filesize: 'buffer' in file ? file.buffer.length : (await fs.stat(file.sourcePath)).size,
-          mimeType: getMimeType({ data, filename }),
+          mimeType: getMimeType({ data, destination: destinations[0]!, filename }),
           ...('sourcePath' in file ? { tempFilePath: file.sourcePath } : {}),
         }
 
@@ -271,13 +259,78 @@ export const createFileOperations = ({
   }
 }
 
-const getMimeType = ({
+/**
+ * The document fields a staged file is stored for. The file's role names its field, because the
+ * main file and the original can share a filename in different folders. Fields with the same
+ * filename and `_objectKey` describe the same object, so they share its location.
+ */
+const getStageDestinations = ({
   data,
+  file,
   filename,
 }: {
   data: Record<string, unknown>
+  file: FileToSave
+  filename: string
+}): Record<string, unknown>[] => {
+  const representations: Record<string, unknown>[] = [data]
+  if (data.original && typeof data.original === 'object') {
+    representations.push(data.original as Record<string, unknown>)
+  }
+  if (data.variants && typeof data.variants === 'object') {
+    representations.push(
+      ...Object.values(data.variants).filter(
+        (value): value is Record<string, unknown> => Boolean(value) && typeof value === 'object',
+      ),
+    )
+  }
+  const namedDestinations = representations.filter((value) => value.filename === filename)
+  const roleDestination = file.role ? getRoleRepresentation({ data, role: file.role }) : undefined
+
+  if (roleDestination?.filename !== filename) {
+    return namedDestinations
+  }
+
+  return [
+    roleDestination,
+    ...namedDestinations.filter(
+      (value) => value !== roleDestination && value._objectKey === roleDestination._objectKey,
+    ),
+  ]
+}
+
+const getRoleRepresentation = ({
+  data,
+  role,
+}: {
+  data: Record<string, unknown>
+  role: NonNullable<FileToSave['role']>
+}): Record<string, unknown> | undefined => {
+  let representation: unknown = data
+
+  if (role.type === 'original') {
+    representation = data.original
+  } else if (role.type === 'size') {
+    representation = (data.variants as Record<string, unknown> | undefined)?.[role.sizeKey]
+  }
+
+  return representation && typeof representation === 'object'
+    ? (representation as Record<string, unknown>)
+    : undefined
+}
+
+const getMimeType = ({
+  data,
+  destination,
+  filename,
+}: {
+  data: Record<string, unknown>
+  destination: Record<string, unknown>
   filename: string
 }): string => {
+  if (typeof destination.mimeType === 'string') {
+    return destination.mimeType
+  }
   if (data.original && typeof data.original === 'object') {
     const original = data.original as { filename?: string; mimeType?: string }
     if (original.filename === filename && original.mimeType) {

@@ -292,6 +292,7 @@ export const koTranslations: DefaultTranslationsObject = {
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
+    apiResponse: 'API 응답',
     applyChanges: '변경 사항 적용',
     ascending: '오름차순',
     auto: '자동',
@@ -363,6 +364,13 @@ export const koTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       '이 문서는 최근에 다른 사용자에 의해 업데이트되었습니다. 귀하의 보기는 낡았습니다.',
     documents: '문서들',
+    dragCancelled: '{{label}} 드래그가 취소되었습니다.',
+    dragDropped: '{{label}}을 놓았습니다. {{count}}개 중 {{position}}번째 위치.',
+    dragInstructions:
+      'Space 또는 Enter를 눌러 행을 집으세요. 화살표 키로 이동하세요. VoiceOver에서는 Quick Nav를 끄고 Command + 화살표 키를 사용하세요. Space 또는 Enter를 눌러 놓거나 Escape를 눌러 취소하세요.',
+    dragMoved: '{{label}}: {{direction}}. {{count}}개 중 {{position}}번째 위치.',
+    dragPickedUp: '{{label}}을 집었습니다. {{count}}개 중 {{position}}번째 위치.',
+    dragToMove: '드래그하여 이동',
     dragToReorder: '드래그하여 순서 변경',
     duplicate: '복제',
     duplicateWithoutSaving: '변경 사항 저장 없이 복제',
@@ -477,6 +485,7 @@ export const koTranslations: DefaultTranslationsObject = {
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',
     reloadDocument: '문서 다시 불러오기',
     remove: '제거',
+    removeFilter: '필터 제거',
     rename: '이름 변경',
     replaceRow: '행 교체',
     requiredFields: '*로 표시된 필드는 필수입니다.',
@@ -568,6 +577,7 @@ export const koTranslations: DefaultTranslationsObject = {
     yes: '네',
   },
   hierarchy: {
+    folderLocation: '폴더 위치',
     goTo: '"{{name}}"로 이동하십시오.',
     itemsMovedTo: '{{title}}은 {{destination}}으로 이동되었습니다.',
     itemsMovedToRoot: '{{title}}가 루트로 이동되었습니다.',
@@ -627,6 +637,7 @@ export const koTranslations: DefaultTranslationsObject = {
     addFile: '파일 추가',
     addFiles: '파일 추가',
     bulkUpload: '일괄 업로드',
+    cancelUpload: '업로드 취소',
     copyLinkToFile: '파일에 대한 링크 복사',
     copyURL: 'URL 복사',
     crop: '자르기',
@@ -648,6 +659,7 @@ export const koTranslations: DefaultTranslationsObject = {
     fileSize: '파일 크기',
     filesToUpload: '업로드할 파일들',
     fileToUpload: '업로드할 파일',
+    finishSaving: '저장 완료하기',
     focalPoint: '초점',
     focalPointDescription: '미리보기에서 초점을 직접 드래그하거나 아래의 값을 조정하세요.',
     fromURL: 'URL에서 파일 업로드',
@@ -661,12 +673,26 @@ export const koTranslations: DefaultTranslationsObject = {
     previewSizes: '미리보기 크기',
     renameFile: '파일 이름 변경',
     replaceFile: '파일 교체',
+    resumingFile: '{{filename}} 재개 중',
+    savingInBackground: '업로드가 백그라운드에서 완료되며 그때 문서가 저장됩니다.',
     selectCollectionToBrowse: '찾을 컬렉션 선택',
     selectFile: '파일 선택',
     setCropArea: '자르기 영역 설정',
     setFocalPoint: '초점 설정',
     sizes: '크기',
     sizesFor: '{{label}} 크기',
+    uploadFileMismatch: '선택한 파일이 중단된 업로드와 일치하지 않습니다.',
+    uploadingFile: '{{filename}} 업로드 중',
+    uploadingFileProgress: '{{filename}} 업로드 중: {{percent}}%',
+    uploadInProgressLeaveWarning: '업로드가 아직 진행 중입니다. 지금 나가면 업로드가 중단됩니다.',
+    uploadInterrupted: '{{filename}} 업로드가 중단되었습니다.',
+    uploadInterruptedWillSave:
+      '{{filename}} 업로드가 중단되었습니다. 업로드가 완료되면 문서가 저장됩니다.',
+    uploadReadyToFinishSaving:
+      '{{filename}} 업로드가 완료되었습니다. 양식을 열어 저장을 완료하세요.',
+    uploadSavedInBackground: '업로드가 완료되었고 문서가 저장되었습니다.',
+    uploadStorageRejectedSegments:
+      '스토리지가 업로드 파트를 하나도 수락하지 않았습니다. 버킷의 CORS 정책을 확인하세요.',
     width: '너비',
   },
   validation: {
@@ -700,6 +726,10 @@ export const koTranslations: DefaultTranslationsObject = {
     type: '유형',
     aboutToPublishSelection: '선택한 {{label}}을(를) 게시하려고 합니다. 계속하시겠습니까?',
     aboutToRestore: '이 {{label}} 문서를 {{versionDate}}기준 버전으로 복원하려고 합니다.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}}의 콘텐츠를 초안으로 복원합니다. 편집기에서 게시할 때까지 게시된 콘텐츠는 변경되지 않습니다.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}}의 콘텐츠를 모든 로케일에서 초안으로 복원합니다. 편집기에서 게시할 때까지 게시된 콘텐츠는 변경되지 않습니다.',
     aboutToRestoreGlobal: '글로벌 {{label}}을(를) {{versionDate}}기준 버전으로 복원하려고 합니다.',
     aboutToRevertToPublished:
       '이 문서의 변경 사항을 게시된 상태로 되돌리려고 합니다. 계속하시겠습니까?',

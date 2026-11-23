@@ -300,6 +300,7 @@ export const roTranslations: DefaultTranslationsObject = {
     and: 'Şi',
     anotherUser: 'Un alt utilizator',
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
+    apiResponse: 'Răspuns API',
     applyChanges: 'Aplicați modificările',
     ascending: 'Ascendant',
     auto: 'Automat',
@@ -372,6 +373,13 @@ export const roTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Acest document a fost actualizat recent de un alt utilizator. Vizualizarea dvs. este depășită.',
     documents: 'Documente',
+    dragCancelled: 'Tragerea {{label}} a fost anulată.',
+    dragDropped: '{{label}} a fost plasat. Poziția {{position}} din {{count}}.',
+    dragInstructions:
+      'Apăsați Space sau Enter pentru a ridica un rând. Folosiți săgețile pentru a-l muta. Cu VoiceOver, dezactivați Quick Nav și folosiți Command + săgețile. Apăsați Space sau Enter pentru a plasa, sau Escape pentru a anula.',
+    dragMoved: '{{label}}: {{direction}}. Poziția {{position}} din {{count}}.',
+    dragPickedUp: '{{label}} a fost ridicat. Poziția {{position}} din {{count}}.',
+    dragToMove: 'Trageți pentru a muta',
     dragToReorder: 'Trage pentru a reordona',
     duplicate: 'Duplicați',
     duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',
@@ -486,6 +494,7 @@ export const roTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexarea tuturor {{collections}}.',
     reloadDocument: 'Reîncarcă documentul',
     remove: 'Eliminați',
+    removeFilter: 'Elimină filtrul',
     rename: 'Redenumire',
     replaceRow: 'Înlocuire rând',
     requiredFields: 'Câmpurile marcate cu * sunt obligatorii.',
@@ -578,6 +587,7 @@ export const roTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Locația folderului',
     goTo: 'Mergi la "{{name}}"',
     itemsMovedTo: '{{title}} s-a mutat la {{destination}}',
     itemsMovedToRoot: '{{title}} a fost mutat la rădăcină',
@@ -638,6 +648,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
+    cancelUpload: 'Anulează încărcarea',
     copyLinkToFile: 'Copiați linkul către fișier',
     copyURL: 'Copiați URL-ul',
     crop: 'Cultură',
@@ -659,6 +670,7 @@ export const roTranslations: DefaultTranslationsObject = {
     fileSize: 'Dimensiunea fișierului',
     filesToUpload: 'Fișiere de încărcat',
     fileToUpload: 'Fișier de încărcat',
+    finishSaving: 'Finalizează salvarea',
     focalPoint: 'Punct central',
     focalPointDescription:
       'Trageți punctul focal direct pe previzualizare sau ajustați valorile de mai jos.',
@@ -673,12 +685,27 @@ export const roTranslations: DefaultTranslationsObject = {
     previewSizes: 'Dimensiuni Previzualizare',
     renameFile: 'Redenumiți fișierul',
     replaceFile: 'Înlocuiți fișierul',
+    resumingFile: 'Se reia {{filename}}',
+    savingInBackground: 'Încărcarea se va finaliza în fundal, iar documentul va fi salvat atunci.',
     selectCollectionToBrowse: 'Selectați o colecție pentru navigare',
     selectFile: 'Selectați un fișier',
     setCropArea: 'Setați zona de decupare',
     setFocalPoint: 'Setează punctul focal',
     sizes: 'Dimensiuni',
     sizesFor: 'Mărimi pentru {{label}}',
+    uploadFileMismatch: 'Fișierul selectat nu corespunde încărcării întrerupte.',
+    uploadingFile: 'Se încarcă {{filename}}',
+    uploadingFileProgress: 'Se încarcă {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'O încărcare este încă în desfășurare. Dacă pleci acum, va fi întreruptă.',
+    uploadInterrupted: 'Încărcarea fișierului {{filename}} a fost întreruptă.',
+    uploadInterruptedWillSave:
+      'Încărcarea fișierului {{filename}} a fost întreruptă. Documentul va fi salvat când se termină.',
+    uploadReadyToFinishSaving:
+      '{{filename}} a fost încărcat. Deschide formularul pentru a finaliza salvarea.',
+    uploadSavedInBackground: 'Încărcarea s-a terminat și documentul a fost salvat.',
+    uploadStorageRejectedSegments:
+      'Spațiul de stocare nu a acceptat nicio parte a încărcării. Verifică politica CORS a bucket-ului.',
     width: 'Lățime',
   },
   validation: {
@@ -718,6 +745,10 @@ export const roTranslations: DefaultTranslationsObject = {
       'Sunteți pe cale să publicați toate {{label}} din selecție. Sunteți sigur?',
     aboutToRestore:
       'Sunteți pe cale să readuceți acest document {{label}} în starea în care se afla la data de {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaurați conținutul din {{versionDate}} ca ciornă. Conținutul publicat va rămâne neschimbat până când îl publicați din editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaurați conținutul din {{versionDate}} ca ciornă în toate limbile. Conținutul publicat va rămâne neschimbat până când îl publicați din editor.',
     aboutToRestoreGlobal:
       'Sunteți pe cale să readuceți {{label}} global în starea în care se afla la data de {{versionDate}}.',
     aboutToRevertToPublished:

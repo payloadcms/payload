@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import type { AdvisoryHit } from '../types'
 import type { ConsumerPackage } from './packages'
 
-import { mergeHits, parseAuditReport, toHits } from './auditReport'
+import { assertAuditCompleted, mergeHits, parseAuditReport, toHits } from './auditReport'
 import { runPnpm, type RunPnpm } from './runPnpm'
 
 const DEFAULT_CONCURRENCY = 4
@@ -69,19 +69,22 @@ const auditPackage = async ({
       cwd: dir,
     })
     if (install.code !== 0) {
-      // A failed resolve would otherwise yield an empty (falsely clean) audit.
-      console.warn(
-        `Warning: could not resolve dependencies for ${pkg.name}; its audit was skipped.` +
-          (install.stderr ? `\n${install.stderr.trim()}` : ''),
+      // A package without an audit makes the whole result incomplete, not clean.
+      throw new Error(
+        `could not resolve dependencies for ${pkg.name}` +
+          (install.stderr ? `:\n${install.stderr.trim()}` : ''),
       )
-      return []
     }
 
     const result = await run({
-      args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+      args: ['audit', '--prod', '--json'],
       cwd: dir,
     })
-    const report = parseAuditReport(result.stdout)
+    const report = assertAuditCompleted({
+      report: parseAuditReport(result.stdout),
+      result,
+      target: pkg.name,
+    })
     return toHits({ originPackage: pkg.shortName, report })
   } finally {
     await rm(dir, { force: true, recursive: true })

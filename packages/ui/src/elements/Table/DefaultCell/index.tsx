@@ -11,6 +11,7 @@ import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValu
 import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
 import { IDLabel } from '../../IDLabel/index.js'
 import { Link } from '../../Link/index.js'
+import { EmptyCell } from './EmptyCell/index.js'
 import { HierarchyCell } from './fields/Hierarchy/index.js'
 import { cellComponents } from './fields/index.js'
 import { StatusCell } from './fields/Status/index.js'
@@ -98,7 +99,12 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
-  const displayedValue = getDisplayedFieldValue(cellData, field, i18n)
+  const displayedValue = getDisplayedFieldValue({
+    cellData,
+    collectionConfig,
+    field,
+    i18n,
+  })
 
   // Check if this is a hierarchy relationship field by checking if the related collection has hierarchy config
   const isHierarchyField =
@@ -160,10 +166,11 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
         <WrapElement {...wrapElementProps}>
           {(displayedValue === '' ||
             typeof displayedValue === 'undefined' ||
-            displayedValue === null) &&
-            i18n.t('general:noLabel', {
-              label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
-            })}
+            displayedValue === null) && (
+            <EmptyCell
+              label={getTranslation(('label' in field ? field.label : null) || 'data', i18n)}
+            />
+          )}
           {typeof displayedValue === 'string' && displayedValue}
           {typeof displayedValue === 'number' && displayedValue}
           {typeof displayedValue === 'object' &&

@@ -100,7 +100,7 @@ export const parseParams = (params: RawParams): ParsedParams => {
   }
 
   if ('joins' in params) {
-    parsedParams.joins = sanitizeJoinParams(params.joins as JoinParams)
+    parsedParams.joins = sanitizeJoinParams(params.joins)
   }
 
   if ('sort' in params) {

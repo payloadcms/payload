@@ -19,6 +19,7 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { supportedPasswordHashIterations } from '../auth/strategies/local/generatePasswordSaltHash.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -39,6 +40,7 @@ import {
   stagedUploadEndpoints,
   uploadInstructionsEndpoint,
 } from '../uploads/endpoints/uploadInstructions.js'
+import { getUploadSessionsCollection } from '../uploads/sessions/collection.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -186,7 +188,7 @@ const addDefaultDashboardWidgets = ({
         components: {
           // Presents an inclusion filter (all collections checked by default) while persisting the
           // inverse as an exclusion list, so collections added later stay visible by default.
-          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+          Field: '@payloadcms/ui#CollectionFilter',
         },
         description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
@@ -240,7 +242,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/rsc#ActivityWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
@@ -302,10 +304,27 @@ const addDefaultDashboardWidgets = ({
 
 export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+
+  // RFC 6265 cookie names use HTTP token characters.
+  if (
+    typeof configWithDefaults.cookiePrefix !== 'string' ||
+    /[^\w!#$%&'*+.^`|~-]/.test(configWithDefaults.cookiePrefix)
+  ) {
+    throw new InvalidConfiguration(
+      '`cookiePrefix` must contain only valid cookie-name characters; whitespace is not allowed.',
+    )
+  }
+
   const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
     throw new InvalidConfiguration(
       '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
+
+  if (!supportedPasswordHashIterations.includes(configWithDefaults.auth!.passwordHashIterations!)) {
+    throw new InvalidConfiguration(
+      `\`auth.passwordHashIterations\` must be one of ${supportedPasswordHashIterations.join(', ')}.`,
     )
   }
 
@@ -560,12 +579,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
-      (Array.isArray(configWithDefaults.jobs?.workflows) &&
-        configWithDefaults.jobs?.workflows?.length),
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length),
   )
   config.jobs.hasConcurrency = Boolean(
     config.jobs.tasks?.some((task) => task.concurrency) ||
-      config.jobs.workflows?.some((workflow) => workflow.concurrency),
+    config.jobs.workflows?.some((workflow) => workflow.concurrency),
   )
 
   // Need to add default jobs collection before locked documents collections
@@ -614,6 +633,31 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeCollection(
         config as unknown as Config,
         lockedDocumentsCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
+  }
+
+  const segmentedUploadCollections = configWithDefaults.collections!.filter(
+    ({ upload }) => typeof upload === 'object' && upload.uploadInstructions?.segmented,
+  )
+
+  if (segmentedUploadCollections.length) {
+    // Resolve transfer preferences per collection so the Admin can read them from client config.
+    for (const collection of segmentedUploadCollections) {
+      if (typeof collection.upload === 'object') {
+        collection.upload.transfer = {
+          ...configWithDefaults.upload?.transfer,
+          ...collection.upload.transfer,
+        }
+      }
+    }
+
+    configWithDefaults.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        getUploadSessionsCollection(),
         richTextSanitizers,
         validRelationships,
       ),

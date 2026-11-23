@@ -53,7 +53,7 @@ export const ButtonContents = ({ children, icon, loading, showTooltip, tooltip }
         {icon && (
           <span className={`${baseClass}__icon`}>
             {isReactIcon && icon}
-            {BuiltInIcon && <BuiltInIcon size={24} />}
+            {BuiltInIcon && <BuiltInIcon size={icon === 'chevron' ? 16 : 24} />}
           </span>
         )}
       </span>
@@ -85,6 +85,7 @@ export const Button: React.FC<Props> = (props) => {
     onClick,
     onKeyDown,
     onMouseDown,
+    popupAriaLabel,
     popupIconSize,
     ref,
     round,
@@ -107,6 +108,7 @@ export const Button: React.FC<Props> = (props) => {
     baseClass,
     className && className,
     icon && `${baseClass}--icon`,
+    icon === 'chevron' && children && iconPosition === 'right' && `${baseClass}--dropdown`,
     icon && !children && `${baseClass}--icon-only`,
     size && `${baseClass}--size-${size}`,
     icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
@@ -222,7 +224,7 @@ export const Button: React.FC<Props> = (props) => {
         {buttonElement}
         <Popup
           button={<ChevronIcon size={popupIconSize} />}
-          buttonAriaLabel={t('general:moreOptions')}
+          buttonAriaLabel={popupAriaLabel || t('general:moreOptions')}
           buttonSize={size}
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}

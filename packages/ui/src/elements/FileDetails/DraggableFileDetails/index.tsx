@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import './index.css'
@@ -32,6 +33,7 @@ export type DraggableFileDetailsProps = {
 }
 
 export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props) => {
+  const { t } = useTranslation()
   const {
     collectionSlug,
     doc,
@@ -74,6 +76,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
                 className={`${baseClass}__drag`}
                 {...draggableSortableItemProps.attributes}
                 {...draggableSortableItemProps.listeners}
+                aria-label={`${t('general:dragToMove')}: ${filename}`}
               >
                 <AlignJustifiedIcon />
               </div>
@@ -96,6 +99,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
             </DocumentDrawerToggler>
             {!hideRemoveFile && removeItem && (
               <Button
+                aria-label={`${t('general:remove')}: ${filename}`}
                 buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"

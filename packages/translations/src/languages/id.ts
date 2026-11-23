@@ -296,6 +296,7 @@ export const idTranslations: DefaultTranslationsObject = {
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
+    apiResponse: 'Respons API',
     applyChanges: 'Terapkan Perubahan',
     ascending: 'Naik',
     auto: 'Otomatis',
@@ -368,6 +369,13 @@ export const idTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dokumen ini baru-baru ini diperbarui oleh pengguna lain. Tampilan Anda sudah usang.',
     documents: 'Dokumen',
+    dragCancelled: 'Penyeretan {{label}} dibatalkan.',
+    dragDropped: '{{label}} diletakkan. Posisi {{position}} dari {{count}}.',
+    dragInstructions:
+      'Tekan Space atau Enter untuk mengangkat baris. Gunakan tombol panah untuk memindahkannya. Dengan VoiceOver, nonaktifkan Quick Nav dan gunakan Command + tombol panah. Tekan Space atau Enter untuk meletakkan, atau Escape untuk membatalkan.',
+    dragMoved: '{{label}}: {{direction}}. Posisi {{position}} dari {{count}}.',
+    dragPickedUp: '{{label}} diangkat. Posisi {{position}} dari {{count}}.',
+    dragToMove: 'Seret untuk memindahkan',
     dragToReorder: 'Seret untuk mengurutkan ulang',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Duplikat tanpa menyimpan perubahan',
@@ -482,6 +490,7 @@ export const idTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',
     reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
+    removeFilter: 'Hapus filter',
     rename: 'Ganti Nama',
     replaceRow: 'Ganti Baris',
     requiredFields: 'Kolom yang ditandai dengan * wajib diisi.',
@@ -576,6 +585,7 @@ export const idTranslations: DefaultTranslationsObject = {
     yes: 'Ya',
   },
   hierarchy: {
+    folderLocation: 'Lokasi folder',
     goTo: 'Buka "{{name}}"',
     itemsMovedTo: '{{title}} dipindahkan ke {{destination}}',
     itemsMovedToRoot: '{{title}} dipindahkan ke akar',
@@ -636,6 +646,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addFile: 'Tambah file',
     addFiles: 'Tambah file',
     bulkUpload: 'Unggah Massal',
+    cancelUpload: 'Batalkan unggahan',
     copyLinkToFile: 'Salin tautan ke file',
     copyURL: 'Salin URL',
     crop: 'Pangkas',
@@ -657,6 +668,7 @@ export const idTranslations: DefaultTranslationsObject = {
     fileSize: 'Ukuran File',
     filesToUpload: 'File untuk Diunggah',
     fileToUpload: 'File untuk Diunggah',
+    finishSaving: 'Selesaikan penyimpanan',
     focalPoint: 'Titik Fokus',
     focalPointDescription:
       'Seret titik fokus langsung pada pratinjau atau sesuaikan nilai di bawah ini.',
@@ -671,12 +683,28 @@ export const idTranslations: DefaultTranslationsObject = {
     previewSizes: 'Ukuran Pratinjau',
     renameFile: 'Ganti nama file',
     replaceFile: 'Ganti berkas',
+    resumingFile: 'Melanjutkan {{filename}}',
+    savingInBackground:
+      'Unggahan akan selesai di latar belakang dan dokumen akan disimpan setelahnya.',
     selectCollectionToBrowse: 'Pilih Koleksi untuk Dijelajahi',
     selectFile: 'Pilih file',
     setCropArea: 'Atur area pangkas',
     setFocalPoint: 'Atur titik fokus',
     sizes: 'Ukuran',
     sizesFor: 'Ukuran untuk {{label}}',
+    uploadFileMismatch: 'File yang dipilih tidak cocok dengan unggahan yang terputus.',
+    uploadingFile: 'Mengunggah {{filename}}',
+    uploadingFileProgress: 'Mengunggah {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Unggahan masih berlangsung. Keluar sekarang akan menghentikannya.',
+    uploadInterrupted: 'Unggahan {{filename}} terputus.',
+    uploadInterruptedWillSave:
+      'Unggahan {{filename}} terputus. Dokumen akan disimpan setelah unggahan selesai.',
+    uploadReadyToFinishSaving:
+      '{{filename}} selesai diunggah. Buka formulir untuk menyelesaikan penyimpanan.',
+    uploadSavedInBackground: 'Unggahan selesai dan dokumen telah disimpan.',
+    uploadStorageRejectedSegments:
+      'Penyimpanan tidak menerima bagian unggahan apa pun. Periksa kebijakan CORS bucket.',
     width: 'Lebar',
   },
   validation: {
@@ -711,6 +739,10 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection:
       'Anda akan mempublikasikan semua {{label}} dalam pilihan. Apakah Anda yakin?',
     aboutToRestore: 'Anda akan memulihkan dokumen {{label}} ini ke keadaan pada {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Pulihkan konten dari {{versionDate}} sebagai draf. Konten yang dipublikasikan akan tetap tidak berubah sampai Anda memublikasikannya dari editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Pulihkan konten dari {{versionDate}} sebagai draf di semua lokal. Konten yang dipublikasikan akan tetap tidak berubah sampai Anda memublikasikannya dari editor.',
     aboutToRestoreGlobal: 'Anda akan memulihkan global {{label}} ke keadaan pada {{versionDate}}.',
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',

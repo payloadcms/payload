@@ -1,25 +1,34 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { getAccessResults, UnauthorizedError } from 'payload'
+import { executeAuthStrategies, Forbidden, getAccessResults, UnauthorizedError } from 'payload'
+import { extractBearerToken } from 'payload/shared'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
+import { authenticateLoginToken } from './oauthLoginToken.js'
 
 export type GetAuthorizedMCPArgs = {
+  /**
+   * Whether the request came through the HTTP endpoint, whose response can carry the OAuth
+   * challenge and headers from auth strategies. stdio has no response to carry them.
+   */
+  isHTTP?: boolean
   overrideAccess: boolean
   req: PayloadRequest
 }
 
 /**
- * Authenticates an MCP request and removes items the user cannot access.
- * `overrideAccess` skips Payload and MCP item access checks.
+ * Authenticates an MCP request, rejects users the plugin's `access` denies, and removes items the
+ * user cannot access. `overrideAccess` skips Payload and MCP access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
+  isHTTP = false,
   overrideAccess,
   req,
 }) => {
   const pluginConfig = getPluginConfig({ config: req.payload.config })
+  const isChallengedWhenSignedOut = isHTTP && Boolean(pluginConfig.oauth)
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({
@@ -34,30 +43,94 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     const hasAuthorization = headers.has('Authorization')
 
     headers.set('DisableAutologin', 'true')
-    req.user = (await req.payload.auth({ headers, req })).user
+    // Not `payload.auth()`, which also computes permissions that filterMCPItems computes anyway
+    const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders: isHTTP,
+      headers,
+      payload: req.payload,
+      req,
+    })
+    req.user = user
+    if (responseHeaders) {
+      req.responseHeaders = responseHeaders
+    }
 
-    if (hasAuthorization && !req.user) {
+    // Only bearer tokens that no auth strategy accepted get here, e.g. an OAuth access token.
+    // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
+    const bearerToken = extractBearerToken({ headers })
+    // Sealed Payload login tokens from the built-in OAuth server
+    if (
+      !req.user &&
+      bearerToken &&
+      pluginConfig.oauth?.type === 'builtin' &&
+      !pluginConfig.oauth.issueToken
+    ) {
+      req.user = await authenticateLoginToken({ req, token: bearerToken })
+    }
+    if (!req.user && bearerToken && pluginConfig.oauth?.authenticate) {
+      req.user = await pluginConfig.oauth.authenticate({ req, token: bearerToken })
+    }
+
+    // With OAuth, the endpoint answers with a challenge that starts the client's sign-in
+    if (hasAuthorization && !req.user && !isChallengedWhenSignedOut) {
       throw new UnauthorizedError(req.t)
     }
+  }
+
+  // Signed-out users only get the challenge, so they can't use any MCP items. Skipping the access
+  // checks saves work, and access callbacks only see signed-in users.
+  if (isChallengedWhenSignedOut && !req.user) {
+    return { items: [], overrideAccess }
+  }
+
+  // Computed once for the plugin's `access` and every item's
+  const permissions = overrideAccess ? undefined : await getAccessResults({ req })
+
+  if (!overrideAccess && !(await canUseMCP({ permissions, req }))) {
+    throw new Forbidden(req.t)
   }
 
   return {
     items: await filterMCPItems({
       items: pluginConfig.items,
       overrideAccess,
+      permissions,
       req,
     }),
     overrideAccess,
   }
 }
 
+/**
+ * Runs the plugin's top-level `access`, which decides whether the user can use MCP at all. Doesn't
+ * check `overrideAccess`, so callers skip it themselves.
+ */
+export const canUseMCP = async ({
+  permissions,
+  req,
+}: {
+  /** Computed when missing and `access` is set. */
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+}): Promise<boolean> => {
+  const { access } = getPluginConfig({ config: req.payload.config })
+
+  return (
+    !access ||
+    (await access({ permissions: permissions ?? (await getAccessResults({ req })), req }))
+  )
+}
+
 export const filterMCPItems = async ({
   items,
   overrideAccess,
+  permissions: providedPermissions,
   req,
 }: {
   items: MCPItem[]
   overrideAccess: boolean
+  /** Computed when missing. */
+  permissions?: SanitizedPermissions
   req: PayloadRequest
 }): Promise<MCPItem[]> => {
   // Match Payload core: overrideAccess bypasses access evaluation
@@ -67,7 +140,7 @@ export const filterMCPItems = async ({
 
   const authorizedItems: MCPItem[] = []
 
-  const permissions = await getAccessResults({ req })
+  const permissions = providedPermissions ?? (await getAccessResults({ req }))
 
   for (const item of items) {
     if (!(await checkItemAccess({ item, permissions, req }))) {

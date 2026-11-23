@@ -79,7 +79,7 @@ The following options are available:
 | `endpoints`     | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                                                                                                                     |
 | `fields` \*     | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview).                                                                                                                                           |
 | `graphQL`       | Manage GraphQL-related properties related to this global. [More details](#graphql)                                                                                                                                                                                                            |
-| `hooks`         | Entry point for Hooks. [More details](../hooks/overview#global-hooks).                                                                                                                                                                                                                        |
+| `hooks`         | Entry point for Hooks. [More details](../hooks/globals).                                                                                                                                                                                                                                      |
 | `label`         | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                                                                                                       |
 | `lockDocuments` | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                                                                                                |
 | `slug` \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                                                                                                   |
@@ -121,14 +121,14 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Option        | Description                                                                                                                                                                             |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group`       | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible. |
-| `hidden`      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing.                                                       |
-| `components`  | Swap in your own React components to be used within this Global. [More details](#custom-components).                                                                                    |
-| `preview`     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](../admin/preview).                                                 |
-| `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                           |
-| `meta`        | Page metadata overrides to apply to this Global within the Admin Panel. [More details](../admin/metadata).                                                                              |
+| Option        | Description                                                                                                                                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `group`       | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the Global from the sidebar, command palette, and Collection Cards while keeping its routes accessible. |
+| `hidden`      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing.                                                                                             |
+| `components`  | Swap in your own React components to be used within this Global. [More details](#custom-components).                                                                                                                          |
+| `preview`     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](../admin/preview).                                                                                       |
+| `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                 |
+| `meta`        | Page metadata overrides to apply to this Global within the Admin Panel. [More details](../admin/metadata).                                                                                                                    |
 
 ### Custom Components
 

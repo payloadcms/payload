@@ -3,7 +3,7 @@
 import type { FormState, PayloadRequest } from 'payload'
 
 import { email, formatAdminURL, text } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
 
@@ -112,7 +112,7 @@ export const ForgotPasswordForm: React.FC = () => {
   }, [resendDelay])
 
   const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
-    res
+    return res
       .json()
       .then(() => {
         const nextResendAvailableAt = Date.now() + minRequestInterval
@@ -143,21 +143,66 @@ export const ForgotPasswordForm: React.FC = () => {
       })
   }
 
-  const initialState: FormState = loginWithUsername
-    ? {
-        username: {
-          initialValue: storedRequest?.identifier ?? '',
-          valid: true,
-          value: storedRequest?.identifier,
-        },
-      }
-    : {
-        email: {
-          initialValue: storedRequest?.identifier ?? '',
-          valid: true,
-          value: storedRequest?.identifier,
-        },
-      }
+  const validateUsername = useCallback(
+    (value: null | string | undefined) =>
+      text(value, {
+        name: 'username',
+        type: 'text',
+        blockData: {},
+        data: {},
+        event: 'onChange',
+        path: ['username'],
+        preferences: { fields: {} },
+        req: {
+          payload: {
+            config,
+          },
+          t,
+        } as unknown as PayloadRequest,
+        required: true,
+        siblingData: {},
+      }),
+    [config, t],
+  )
+
+  const validateEmail = useCallback(
+    (value: null | string | undefined) =>
+      email(value, {
+        name: 'email',
+        type: 'email',
+        blockData: {},
+        data: {},
+        event: 'onChange',
+        path: ['email'],
+        preferences: { fields: {} },
+        req: { payload: { config }, t } as unknown as PayloadRequest,
+        required: true,
+        siblingData: {},
+      }),
+    [config, t],
+  )
+
+  const initialState = useMemo<FormState>(
+    () =>
+      loginWithUsername
+        ? {
+            username: {
+              initialValue: storedRequest?.identifier ?? '',
+              valid: true,
+              validate: validateUsername,
+              value: storedRequest?.identifier ?? '',
+            },
+          }
+        : {
+            email: {
+              initialValue: storedRequest?.identifier ?? '',
+              valid: true,
+              validate: validateEmail,
+              value: storedRequest?.identifier ?? '',
+            },
+          },
+    [loginWithUsername, storedRequest?.identifier, validateEmail, validateUsername],
+  )
 
   return (
     <Form
@@ -218,25 +263,7 @@ export const ForgotPasswordForm: React.FC = () => {
                   required: true,
                 }}
                 path="username"
-                validate={(value) =>
-                  text(value, {
-                    name: 'username',
-                    type: 'text',
-                    blockData: {},
-                    data: {},
-                    event: 'onChange',
-                    path: ['username'],
-                    preferences: { fields: {} },
-                    req: {
-                      payload: {
-                        config,
-                      },
-                      t,
-                    } as unknown as PayloadRequest,
-                    required: true,
-                    siblingData: {},
-                  })
-                }
+                validate={validateUsername}
               />
             ) : (
               <EmailField
@@ -249,20 +276,7 @@ export const ForgotPasswordForm: React.FC = () => {
                   required: true,
                 }}
                 path="email"
-                validate={(value) =>
-                  email(value, {
-                    name: 'email',
-                    type: 'email',
-                    blockData: {},
-                    data: {},
-                    event: 'onChange',
-                    path: ['email'],
-                    preferences: { fields: {} },
-                    req: { payload: { config }, t } as unknown as PayloadRequest,
-                    required: true,
-                    siblingData: {},
-                  })
-                }
+                validate={validateEmail}
               />
             )}
           </div>

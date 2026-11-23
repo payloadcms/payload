@@ -63,7 +63,7 @@
 
   .popup-button-list__button:focus-visible {
     outline: var(--accessibility-outline);
-    outline-offset: -1px;
+    outline-offset: var(--accessibility-outline-inset);
     border-radius: var(--popup-item-radius);
   }
   .popup-button-list__button:hover {
@@ -164,7 +164,7 @@
     padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
   }
 
-  .popup-button-list--large .popup-button-list__icon {
+  .popup-button-list--large > .popup-button-list__button > .popup-button-list__icon {
     width: auto;
     padding: 0 0 0 var(--spacer-1);
   }

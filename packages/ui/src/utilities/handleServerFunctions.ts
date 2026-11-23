@@ -1,5 +1,6 @@
 import type {
   AdminContext,
+  createPayloadRequest,
   DefaultServerFunctionArgs,
   ImportMap,
   SanitizedConfig,
@@ -12,6 +13,7 @@ import { sharedServerFunctions } from './serverFunctionRegistry.js'
 type InitAdminContextFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
+  overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
 }) => Promise<AdminContext>
 
 type CreateServerFunctionHandlerArgs = {
@@ -26,26 +28,17 @@ type CreateServerFunctionHandlerArgs = {
    * for adapter-specific functions; today both adapters run the shared set only.
    */
   serverFunctions?: Record<string, ServerFunction<any, any>>
-  /**
-   * Post-processes each handler's return value before it goes over the wire.
-   * The TanStack Start adapter passes `serializeForRsc` to convert React
-   * elements into RSC handles; Next.js ships them natively and omits this.
-   */
-  transformResult?: (result: unknown) => Promise<unknown> | unknown
 }
 
 /**
  * Factory for the framework-agnostic `handleServerFunctions` entry point.
  *
  * All adapters dispatch from the shared registry (`sharedServerFunctions`) and
- * differ only in the two injected hooks below — `initAdminContext` and `transformResult`
- * — so there is a single dispatch implementation and the handler sets cannot
- * drift between frameworks.
+ * inject their own admin context. Each framework owns its native response transport.
  */
 export const createServerFunctionHandler = ({
   initAdminContext,
   serverFunctions,
-  transformResult,
 }: CreateServerFunctionHandlerArgs): ServerFunctionHandler => {
   const baseServerFunctions: Record<string, ServerFunction<any, any>> = serverFunctions
     ? { ...sharedServerFunctions, ...serverFunctions }
@@ -57,12 +50,14 @@ export const createServerFunctionHandler = ({
       args: fnArgs,
       config: configPromise,
       importMap,
+      locale: requestLocale,
       serverFunctions: extraServerFunctions,
     } = args
 
     const { cookies, locale, permissions, req, user } = await initAdminContext({
       configPromise,
       importMap,
+      overrides: requestLocale !== undefined ? { locale: requestLocale } : undefined,
     })
 
     const augmentedArgs: DefaultServerFunctionArgs = {
@@ -81,8 +76,6 @@ export const createServerFunctionHandler = ({
       throw new Error(`Unknown Server Function: ${fnKey}`)
     }
 
-    const result = await fn(augmentedArgs)
-
-    return transformResult ? await transformResult(result) : result
+    return await fn(augmentedArgs)
   }
 }

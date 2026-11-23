@@ -293,6 +293,7 @@ export const isTranslations: DefaultTranslationsObject = {
     and: 'Og',
     anotherUser: 'Annar notandi',
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
+    apiResponse: 'API-svar',
     applyChanges: 'Virkja breytingar',
     ascending: 'Hækkandi',
     auto: 'Sjálfvirkt',
@@ -363,6 +364,13 @@ export const isTranslations: DefaultTranslationsObject = {
     documentModified: 'Skjal breytt',
     documentOutOfDate: 'Þetta skjal var nýlega uppfært af öðrum notanda. Yfirlitið þitt er úrelt.',
     documents: 'Færslur',
+    dragCancelled: 'Hætt við að draga {{label}}.',
+    dragDropped: '{{label}} sleppt. Staða {{position}} af {{count}}.',
+    dragInstructions:
+      'Ýttu á Space eða Enter til að taka upp röð. Notaðu örvatakkana til að færa hana. Með VoiceOver skaltu slökkva á Quick Nav og nota Command + örvatakkana. Ýttu á Space eða Enter til að sleppa, eða Escape til að hætta við.',
+    dragMoved: '{{label}}: {{direction}}. Staða {{position}} af {{count}}.',
+    dragPickedUp: '{{label}} tekið upp. Staða {{position}} af {{count}}.',
+    dragToMove: 'Dragðu til að færa',
     dragToReorder: 'Dragðu til að endurraða',
     duplicate: 'Tvöfalda',
     duplicateWithoutSaving: 'Tvöfalda án þess að vista breytingar',
@@ -476,6 +484,7 @@ export const isTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Endursetja leitargrunn fyrir allar {{collections}}.',
     reloadDocument: 'Endurhlaða skjal',
     remove: 'Fjarlægja',
+    removeFilter: 'Fjarlægja síu',
     rename: 'Endurnefna',
     replaceRow: 'Raðir skipt út',
     requiredFields: 'Reitir merktir með * eru skyldureitir.',
@@ -569,6 +578,7 @@ export const isTranslations: DefaultTranslationsObject = {
     yes: 'Já',
   },
   hierarchy: {
+    folderLocation: 'Staðsetning möppu',
     goTo: 'Farðu á "{{name}}"',
     itemsMovedTo: '{{title}} flutt til {{destination}}',
     itemsMovedToRoot: '{{title}} flutt til rót',
@@ -629,6 +639,7 @@ export const isTranslations: DefaultTranslationsObject = {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
+    cancelUpload: 'Hætta við upphleðslu',
     copyLinkToFile: 'Afrita hlekk á skrá',
     copyURL: 'Afrita URL',
     crop: 'Skera',
@@ -650,6 +661,7 @@ export const isTranslations: DefaultTranslationsObject = {
     fileSize: 'Skráarstærð',
     filesToUpload: 'Skrár til að hlaða upp',
     fileToUpload: 'Skrá til að hlaða upp',
+    finishSaving: 'Ljúka vistun',
     focalPoint: 'Brennipunktur',
     focalPointDescription:
       'Dragðu brennipunktinn beint á forskoðunina eða stilltu gildin hér að neðan.',
@@ -664,12 +676,26 @@ export const isTranslations: DefaultTranslationsObject = {
     previewSizes: 'Forskoðunarstærðir',
     renameFile: 'Endurnefna skrá',
     replaceFile: 'Skipta út skrá',
+    resumingFile: 'Held áfram með {{filename}}',
+    savingInBackground: 'Upphleðslan klárast í bakgrunni og skjalið verður þá vistað.',
     selectCollectionToBrowse: 'Veldu safn til að skoða',
     selectFile: 'Veldu skrá',
     setCropArea: 'Stilla klippingarsvæði',
     setFocalPoint: 'Stilla brennipunkt',
     sizes: 'Stærðir',
     sizesFor: 'Stærðir fyrir {{label}}',
+    uploadFileMismatch: 'Valin skrá passar ekki við rofna upphleðslu.',
+    uploadingFile: 'Hleð upp {{filename}}',
+    uploadingFileProgress: 'Hleð upp {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Upphleðsla er enn í gangi. Ef þú ferð núna verður hún rofin.',
+    uploadInterrupted: 'Upphleðsla {{filename}} var rofin.',
+    uploadInterruptedWillSave:
+      'Upphleðsla {{filename}} var rofin. Skjalið verður vistað þegar henni lýkur.',
+    uploadReadyToFinishSaving:
+      '{{filename}} hefur verið hlaðið upp. Opnaðu eyðublaðið til að ljúka vistun.',
+    uploadSavedInBackground: 'Upphleðslu lauk og skjalið var vistað.',
+    uploadStorageRejectedSegments:
+      'Geymslan tók ekki við neinum hlutum upphleðslunnar. Athugaðu CORS-stefnu bucket.',
     width: 'Breidd',
   },
   validation: {
@@ -705,6 +731,10 @@ export const isTranslations: DefaultTranslationsObject = {
     type: 'Tegund',
     aboutToPublishSelection: 'Þú ert að fara að gefa út allar valdar {{label}}. Ertu viss?',
     aboutToRestore: 'Þú munt endurheimta {{label}} í þá stöðu sem það var þann {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Endurheimtu efnið frá {{versionDate}} sem drög. Birt efni helst óbreytt þar til þú birtir það úr ritlinum.',
+    aboutToRestoreAsDraftAllLocales:
+      'Endurheimtu efnið frá {{versionDate}} sem drög á öllum tungumálum. Birt efni helst óbreytt þar til þú birtir það úr ritlinum.',
     aboutToRestoreGlobal:
       'Þú munt endurheimta {{label}} í þá stöðu sem það var í þann {{versionDate}}.',
     aboutToRevertToPublished:

@@ -14,8 +14,9 @@ import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'
 
-export interface FileCellProps
-  extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {
+export interface FileCellProps extends DefaultCellComponentProps<
+  TextFieldClient | UploadFieldClient
+> {
   readonly collectionConfig: ClientCollectionConfig
 }
 

@@ -295,6 +295,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     and: 'I',
     anotherUser: 'Drugi korisnik',
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
+    apiResponse: 'API odgovor',
     applyChanges: 'Primeni promene',
     ascending: 'Uzlazno',
     auto: 'Automatski',
@@ -365,6 +366,13 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     documentModified: 'Dokument izmenjen',
     documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pregled je zastareo.',
     documents: 'Dokumenti',
+    dragCancelled: 'Prevlačenje {{label}} je otkazano.',
+    dragDropped: '{{label}} je spušten. Položaj {{position}} od {{count}}.',
+    dragInstructions:
+      'Pritisnite Space ili Enter da podignete red. Koristite strelice da ga premestite. Uz VoiceOver isključite Quick Nav i koristite Command + strelice. Pritisnite Space ili Enter za spuštanje ili Escape za otkazivanje.',
+    dragMoved: '{{label}}: {{direction}}. Položaj {{position}} od {{count}}.',
+    dragPickedUp: '{{label}} je podignut. Položaj {{position}} od {{count}}.',
+    dragToMove: 'Prevucite za premeštanje',
     dragToReorder: 'Prevucite za promenu redosleda',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Ponovi bez čuvanja promena',
@@ -479,6 +487,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Ukloni',
+    removeFilter: 'Ukloni filter',
     rename: 'Preimenuj',
     replaceRow: 'Zameni red',
     requiredFields: 'Polja označena sa * su obavezna.',
@@ -571,6 +580,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     yes: 'Da',
   },
   hierarchy: {
+    folderLocation: 'Lokacija fascikle',
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premešteno u koren',
@@ -631,6 +641,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj Datoteke',
     bulkUpload: 'Masovno otpremanje',
+    cancelUpload: 'Otkaži otpremanje',
     copyLinkToFile: 'Kopiraj link ka fajlu',
     copyURL: 'Kopiraj URL',
     crop: 'Isecite sliku',
@@ -652,6 +663,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     fileSize: 'Veličina datoteke',
     filesToUpload: 'Fajlovi za Slanje',
     fileToUpload: 'Datoteka za otpremanje',
+    finishSaving: 'Završi čuvanje',
     focalPoint: 'Centralna tačka',
     focalPointDescription:
       'Prevucite središnju tačku direktno na pregled ili prilagodite vrednosti ispod.',
@@ -666,12 +678,27 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     previewSizes: 'Veličine pregleda',
     renameFile: 'Preimenujte fajl',
     replaceFile: 'Zamenite fajl',
+    resumingFile: 'Nastavlja se {{filename}}',
+    savingInBackground: 'Otpremanje će se završiti u pozadini i dokument će tada biti sačuvan.',
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
     selectFile: 'Odaberite datoteku',
     setCropArea: 'Postavite područje za isečenu sliku',
     setFocalPoint: 'Postavite centralnu tačku',
     sizes: 'Veličine',
     sizesFor: 'Veličine za {{label}}',
+    uploadFileMismatch: 'Izabrana datoteka ne odgovara prekinutom otpremanju.',
+    uploadingFile: 'Otpremanje datoteke {{filename}}',
+    uploadingFileProgress: 'Otpremanje datoteke {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Otpremanje je još u toku. Ako sada napustite stranicu, biće prekinuto.',
+    uploadInterrupted: 'Otpremanje datoteke {{filename}} je prekinuto.',
+    uploadInterruptedWillSave:
+      'Otpremanje datoteke {{filename}} je prekinuto. Dokument će biti sačuvan kada se završi.',
+    uploadReadyToFinishSaving:
+      'Datoteka {{filename}} je otpremljena. Otvorite obrazac da završite čuvanje.',
+    uploadSavedInBackground: 'Otpremanje je završeno i dokument je sačuvan.',
+    uploadStorageRejectedSegments:
+      'Skladište nije prihvatilo nijedan deo otpremanja. Proverite CORS smernice bucket-a.',
     width: 'Širina',
   },
   validation: {
@@ -705,6 +732,10 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     type: 'Tip',
     aboutToPublishSelection: 'Upravo ćete objaviti sve {{label}} u izboru. Da li ste sigurni?',
     aboutToRestore: 'Vratićete {{label}} dokument u stanje u kojem je bio {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'Vratite sadržaj od {{versionDate}} kao nacrt. Objavljeni sadržaj ostaće nepromenjen dok ga ne objavite iz uređivača.',
+    aboutToRestoreAsDraftAllLocales:
+      'Vratite sadržaj od {{versionDate}} kao nacrt na svim jezicima. Objavljeni sadržaj ostaće nepromenjen dok ga ne objavite iz uređivača.',
     aboutToRestoreGlobal: 'Vratićete globalni {{label}} u stanje u kojem je bio {{versionDate}}.',
     aboutToRevertToPublished:
       'Vratićete promene u dokumentu u objavljeno stanje. Da li ste sigurni?',

@@ -47,7 +47,10 @@ export type ServerOnlyUploadProperties = keyof Pick<
 >
 
 type ClientUploadConfig = {
-  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
+  uploadInstructions: {
+    /** Whether the adapter supports resumable, segmented upload sessions. @experimental */
+    supportsSegmentedUploads: boolean
+  } & Pick<UploadInstructionsCapability, 'useInAdmin'>
 } & Omit<SanitizedUploadConfig, 'fileOperations' | 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
@@ -141,7 +144,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.admin = {} as ClientCollectionConfig['admin']
+        clientCollection.admin = {}
 
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
@@ -265,7 +268,7 @@ export const createClientCollectionConfig = ({
 
         // Strip slugify function as it can't cross server-client boundary
         const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
-        clientCollection.hierarchy = clientHierarchy as ClientHierarchyConfig
+        clientCollection.hierarchy = clientHierarchy
 
         break
       }
@@ -291,6 +294,7 @@ export const createClientCollectionConfig = ({
 
         clientCollection.upload = {
           uploadInstructions: {
+            supportsSegmentedUploads: Boolean(collection.upload.uploadInstructions?.segmented),
             useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
           },
         } as ClientUploadConfig

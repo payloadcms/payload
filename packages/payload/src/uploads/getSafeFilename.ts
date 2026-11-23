@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { fileExists } from './fileExists.js'
+import { isFilenameReservedByUploadSession } from './sessions/isFilenameReserved.js'
 
 /**
  * Increments a filename by appending or incrementing a numeric suffix.
@@ -13,8 +14,9 @@ import { fileExists } from './fileExists.js'
  * incrementName('file-99.jpg') // 'file-100.jpg'
  */
 export const incrementName = (name: string): string => {
-  const extension = name.split('.').pop()
-  const baseFilename = sanitize(name.substring(0, name.lastIndexOf('.')) || name)
+  const extensionIndex = name.lastIndexOf('.')
+  const extension = extensionIndex === -1 ? '' : name.slice(extensionIndex)
+  const baseFilename = sanitize(name.substring(0, extensionIndex) || name)
   let incrementedName = baseFilename
   const regex = /(.*)-(\d+)$/
   const found = baseFilename.match(regex)
@@ -26,12 +28,14 @@ export const incrementName = (name: string): string => {
     const incremented = Number(matchedNumber) + 1
     incrementedName = `${matchedName}-${incremented}`
   }
-  return `${incrementedName}.${extension}`
+  return `${incrementedName}${extension}`
 }
 
 type Args = {
   collectionSlug: string
   desiredFilename: string
+  /** Ignores this document's own files, for writes that store a new version in its own folder. */
+  excludeDocumentID?: number | string
   prefix?: string
   req: PayloadRequest
   /**
@@ -43,8 +47,9 @@ type Args = {
 }
 
 /**
- * Generates a safe, unique filename by checking for conflicts in the database
- * and (when a `staticPath` is provided) the local filesystem. If a conflict
+ * Generates a safe, unique filename by checking for conflicts in the database,
+ * names reserved by unfinished upload sessions, and (when a `staticPath` is
+ * provided) the local filesystem. If a conflict
  * exists, it increments a numeric suffix until a unique name is found.
  *
  * @param args.collectionSlug - The slug of the upload collection
@@ -66,6 +71,7 @@ type Args = {
 export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
+  excludeDocumentID,
   prefix,
   req,
   staticPath,
@@ -75,15 +81,36 @@ export async function getSafeFileName({
   while (
     (await docWithFilenameExists({
       collectionSlug,
+      excludeDocumentID,
       filename: modifiedFilename,
       path: staticPath ?? '',
       prefix,
       req,
     })) ||
-    (staticPath ? await fileExists(`${staticPath}/${modifiedFilename}`) : false)
+    (staticPath ? await fileExists(`${staticPath}/${modifiedFilename}`) : false) ||
+    (await isFilenameReservedByUploadSession({ collectionSlug, filename: modifiedFilename, req }))
   ) {
     modifiedFilename = incrementName(modifiedFilename)
   }
 
   return modifiedFilename
+}
+
+/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
+export async function getUnplannedSafeFileName({
+  canUseName,
+  desiredFilename,
+  ...args
+}: {
+  canUseName: (filename: string) => boolean
+} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
+  let filename = desiredFilename
+
+  while (true) {
+    filename = await getSafeFileName({ ...args, desiredFilename: filename })
+    if (canUseName(filename)) {
+      return filename
+    }
+    filename = incrementName(filename)
+  }
 }

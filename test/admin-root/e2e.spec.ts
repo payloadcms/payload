@@ -156,7 +156,7 @@ test.describe('Admin Panel (Root)', () => {
     const textField = page.locator('#field-text')
     await textField.fill('updated')
     await openNav(page)
-    await page.click('button[aria-label="Account"]')
+    await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
     const profileLink = page.locator('a.user-menu__profile')
     await expect(profileLink).toBeVisible()
     await profileLink.click()

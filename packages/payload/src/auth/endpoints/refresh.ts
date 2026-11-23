@@ -17,10 +17,11 @@ export const refreshHandler: PayloadHandler = async (req) => {
 
   const result = await refreshOperation({
     collection,
+    refreshToken: typeof req.data?.refreshToken === 'string' ? req.data.refreshToken : undefined,
     req,
   })
 
-  const { refreshedToken, ...resultWithoutToken } = result
+  const { refreshedToken, refreshToken: _refreshToken, ...resultWithoutToken } = result
 
   if (result.setCookie) {
     const cookie = generatePayloadCookie({

@@ -57,7 +57,7 @@ export const stripePlugin = definePlugin<StripePluginConfig>({
 
           return res
         },
-        method: 'post' as Endpoint['method'],
+        method: 'post',
         path: '/stripe/rest',
       })
     }

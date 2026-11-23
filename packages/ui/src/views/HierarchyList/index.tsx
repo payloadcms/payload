@@ -124,7 +124,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       const newUrl = `${window.location.pathname}${queryString}`
 
       if (window.location.search !== queryString) {
-        startRouteTransition(() => router.replace(newUrl))
+        void startRouteTransition(() => router.replace(newUrl))
       }
     },
     [router, searchParams, startRouteTransition],
@@ -291,7 +291,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       const newUrl = `${window.location.pathname}${queryString}`
 
       if (window.location.search !== queryString) {
-        startRouteTransition(() => router.replace(newUrl))
+        void startRouteTransition(() => router.replace(newUrl))
       }
     },
     [router, searchParams, startRouteTransition, typeOptions.length],

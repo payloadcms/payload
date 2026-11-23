@@ -32,6 +32,11 @@ import SelectVersionsFields from './collections/SelectVersions/index.js'
 import SlugField from './collections/SlugField/index.js'
 import { SlugFieldAccess } from './collections/SlugFieldAccess/index.js'
 import { SlugFieldAutosave } from './collections/SlugFieldAutosave/index.js'
+import {
+  SlugFieldLocalizedRequired,
+  SlugFieldLocalizedRequiredNested,
+  SlugFieldLocalizedRequiredSiblings,
+} from './collections/SlugFieldLocalizedRequired/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
@@ -87,6 +92,9 @@ export const collections: CollectionConfig[] = [
   SlugField,
   SlugFieldAccess,
   SlugFieldAutosave,
+  SlugFieldLocalizedRequired,
+  ...SlugFieldLocalizedRequiredSiblings,
+  ...SlugFieldLocalizedRequiredNested,
   TabsFields2,
   TabsFields,
   TextFields,
@@ -130,6 +138,14 @@ export const baseConfig: Partial<Config> = {
         {
           name: 'deduplicatedText',
           type: 'text',
+          hooks: {
+            beforeValidate: [
+              ({ req, value }) => {
+                req.context.configBlockVisited = true
+                return value
+              },
+            ],
+          },
         },
       ],
     },
@@ -181,6 +197,41 @@ export const baseConfig: Partial<Config> = {
           name: 'text',
           type: 'text',
           localized: true,
+        },
+      ],
+    },
+    {
+      slug: 'sharedBlock',
+      fields: [
+        {
+          name: 'globalText',
+          type: 'text',
+          hooks: {
+            afterChange: [
+              ({ req, value }) => {
+                req.context.globalBlockAfterChange = true
+                return value
+              },
+            ],
+            afterRead: [
+              ({ req, value }) => {
+                req.context.globalBlockRead = true
+                return value
+              },
+            ],
+            beforeChange: [
+              ({ req, value }) => {
+                req.context.globalBlockBeforeChange = true
+                return value
+              },
+            ],
+            beforeValidate: [
+              ({ req, value }) => {
+                req.context.globalBlockVisited = true
+                return value
+              },
+            ],
+          },
         },
       ],
     },

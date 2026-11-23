@@ -77,6 +77,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   rowCount,
   rowIndex,
   schemaPath,
+  setActivatorNodeRef,
   setCollapse,
   setNodeRef,
   transform,
@@ -182,6 +183,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                 id: row.id,
                 attributes,
                 listeners,
+                setActivatorNodeRef,
               }
             : undefined
         }
@@ -216,7 +218,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             </div>
           )
         }
-        isCollapsed={row.collapsed}
+        isCollapsed={row.collapsed ?? Boolean(row.isLoading)}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >

@@ -15,7 +15,7 @@ export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
           const runnableOrActiveJobsForQueue = await countRunnableOrActiveJobsForQueue({
             queue: queueable.scheduleConfig.queue,
             req,
-            taskSlug: queueable.taskConfig?.slug as TaskSlug,
+            taskSlug: queueable.taskConfig?.slug,
             workflowSlug: queueable.workflowConfig?.slug as WorkflowSlug,
             onlyScheduled: false, // Set to false, used to test it
           })

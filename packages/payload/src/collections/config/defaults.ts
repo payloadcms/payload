@@ -139,6 +139,9 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   return collection
 }
 
+/** How many seconds a session with a refresh token lasts without a refresh, by default: 30 days. */
+export const defaultRefreshTokenExpiration = 30 * 24 * 60 * 60
+
 export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
   auth.cookies = {
     ...(auth.cookies || {}),
@@ -156,6 +159,13 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
       )
     : false
   auth.maxLoginAttempts = auth.maxLoginAttempts ?? 5
+  auth.refreshTokens = auth.refreshTokens
+    ? {
+        expiration:
+          (auth.refreshTokens === true ? undefined : auth.refreshTokens.expiration) ??
+          defaultRefreshTokenExpiration,
+      }
+    : false
   auth.tokenExpiration = auth.tokenExpiration ?? 7200
   auth.useSessions = auth.useSessions ?? true
   auth.verify = auth.verify ?? false

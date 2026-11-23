@@ -81,6 +81,9 @@ export default defineConfig({
         },
       },
       {
+        optimizeDeps: {
+          include: ['monaco-editor'],
+        },
         resolve: {
           dedupe: ['react', 'react-dom'],
         },

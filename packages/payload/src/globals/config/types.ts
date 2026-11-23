@@ -195,7 +195,8 @@ export type GlobalAdminOptions = {
    * Specify a navigational group for globals in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.
-   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   * - Set to `false` to exclude the global from the sidebar, command palette, and dashboard collection cards.
+   * This does not disable routes or change access control.
    */
   group?: false | Record<string, string> | string
   /**
@@ -289,7 +290,8 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 >
 
 export interface SanitizedGlobalConfig
-  extends Omit<
+  extends
+    Omit<
       GlobalConfig,
       | '_sanitized'
       | 'access'

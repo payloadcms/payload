@@ -140,7 +140,7 @@ const findTransaction = async ({
     throw new Error('Expected exactly one transaction for the provided PaymentIntent ID')
   }
 
-  return result.docs[0] as RecordValue
+  return result.docs[0]
 }
 
 const parseOptionalMetadata = ({

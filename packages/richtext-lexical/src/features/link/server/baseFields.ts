@@ -63,7 +63,7 @@ export const getBaseFields = (
         },
       ],
       required: true,
-    } as RadioField,
+    },
     {
       name: 'url',
       type: 'text',

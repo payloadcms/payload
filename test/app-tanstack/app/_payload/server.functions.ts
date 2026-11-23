@@ -35,16 +35,15 @@ const runPayloadServerFn = createServerFn({ method: 'POST' })
   .validator((args: ServerFunctionClientArgs): ServerFunctionClientArgs => args)
   .handler(async ({ data }) => {
     const { handleServerFunctions } = await import('@payloadcms/tanstack-start/server')
-    return (await handleServerFunctions({
+    return handleServerFunctions({
       args: data.args,
       config: await getConfig(),
       importMap: await getImportMap(),
+      locale: data.locale,
       name: data.name,
-    })) as any
+    })
   })
 
-// `createServerFunctionClient` sanitizes args for TanStack Start's seroval wire
-// format before dispatching through `runPayloadServerFn`.
 export const serverFunctionHandler = createServerFunctionClient({
   runServerFn: runPayloadServerFn,
 })

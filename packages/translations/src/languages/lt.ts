@@ -298,6 +298,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     and: 'Ir',
     anotherUser: 'Kitas vartotojas',
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
+    apiResponse: 'API atsakymas',
     applyChanges: 'Taikyti pakeitimus',
     ascending: 'Kylantis',
     auto: 'Automatinis',
@@ -370,6 +371,13 @@ export const ltTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Šis dokumentas neseniai buvo atnaujintas kitos naudotojo. Jūsų vaizdas yra pasenusi.',
     documents: 'Dokumentai',
+    dragCancelled: '{{label}} vilkimas atšauktas.',
+    dragDropped: '{{label}} padėta. Pozicija {{position}} iš {{count}}.',
+    dragInstructions:
+      'Paspauskite Space arba Enter, kad paimtumėte eilutę. Perkelkite ją rodyklių klavišais. Naudodami VoiceOver išjunkite Quick Nav ir naudokite Command + rodyklių klavišus. Paspauskite Space arba Enter, kad padėtumėte, arba Escape, kad atšauktumėte.',
+    dragMoved: '{{label}}: {{direction}}. Pozicija {{position}} iš {{count}}.',
+    dragPickedUp: '{{label}} paimta. Pozicija {{position}} iš {{count}}.',
+    dragToMove: 'Vilkite norėdami perkelti',
     dragToReorder: 'Vilkite, kad pakeistumėte eilės tvarką',
     duplicate: 'Dublikatas',
     duplicateWithoutSaving: 'Dubliuoti be įrašytų pakeitimų',
@@ -484,6 +492,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',
     reloadDocument: 'Perkrauti dokumentą',
     remove: 'Pašalinti',
+    removeFilter: 'Pašalinti filtrą',
     rename: 'Pervadinti',
     replaceRow: 'Pakeisti eilutę',
     requiredFields: '* pažymėti laukai yra privalomi.',
@@ -576,6 +585,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     yes: 'Taip',
   },
   hierarchy: {
+    folderLocation: 'Aplanko vieta',
     goTo: 'Eikite į "{{name}}"',
     itemsMovedTo: '{{title}} perkeltas į {{destination}}',
     itemsMovedToRoot: '{{title}} perkeltas į šaknį',
@@ -636,6 +646,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
+    cancelUpload: 'Atšaukti įkėlimą',
     copyLinkToFile: 'Kopijuoti nuorodą į failą',
     copyURL: 'Kopijuoti URL',
     crop: 'Pasėlis',
@@ -657,6 +668,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     fileSize: 'Failo dydis',
     filesToUpload: 'Įkelti failai',
     fileToUpload: 'Įkelti failą',
+    finishSaving: 'Užbaigti išsaugojimą',
     focalPoint: 'Fokuso Taškas',
     focalPointDescription:
       'Temkite fokusavimo tašką tiesiogiai peržiūroje arba reguliuokite žemiau esančias reikšmes.',
@@ -671,12 +683,26 @@ export const ltTranslations: DefaultTranslationsObject = {
     previewSizes: 'Peržiūros dydžiai',
     renameFile: 'Pervadinti failą',
     replaceFile: 'Pakeisti failą',
+    resumingFile: 'Tęsiamas {{filename}}',
+    savingInBackground: 'Įkėlimas bus užbaigtas fone, o tada dokumentas bus išsaugotas.',
     selectCollectionToBrowse: 'Pasirinkite kolekciją, kurią norėtumėte naršyti',
     selectFile: 'Pasirinkite failą',
     setCropArea: 'Nustatykite pjovimo plotą',
     setFocalPoint: 'Nustatyti fokuso tašką',
     sizes: 'Dydžiai',
     sizesFor: 'Dydžiai skirti {{label}}',
+    uploadFileMismatch: 'Pasirinktas failas neatitinka nutraukto įkėlimo.',
+    uploadingFile: 'Įkeliamas {{filename}}',
+    uploadingFileProgress: 'Įkeliamas {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Įkėlimas vis dar vyksta. Išėjus dabar jis bus nutrauktas.',
+    uploadInterrupted: '{{filename}} įkėlimas buvo nutrauktas.',
+    uploadInterruptedWillSave:
+      '{{filename}} įkėlimas buvo nutrauktas. Dokumentas bus išsaugotas, kai jis bus baigtas.',
+    uploadReadyToFinishSaving:
+      '{{filename}} įkeltas. Atidarykite formą, kad užbaigtumėte išsaugojimą.',
+    uploadSavedInBackground: 'Įkėlimas baigtas, dokumentas išsaugotas.',
+    uploadStorageRejectedSegments:
+      'Saugykla nepriėmė nė vienos įkėlimo dalies. Patikrinkite „bucket“ CORS politiką.',
     width: 'Plotis',
   },
   validation: {
@@ -714,6 +740,10 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Jūs ketinate išleisti visus {{label}} išrinktame. Ar esate tikri?',
     aboutToRestore:
       'Jūs ketinate atkurti šį {{label}} dokumentą į būklę, kurioje jis buvo {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Atkurkite {{versionDate}} turinį kaip juodraštį. Paskelbtas turinys liks nepakitęs, kol jo nepaskelbsite iš redaktoriaus.',
+    aboutToRestoreAsDraftAllLocales:
+      'Atkurkite {{versionDate}} turinį kaip juodraštį visomis kalbomis. Paskelbtas turinys liks nepakitęs, kol jo nepaskelbsite iš redaktoriaus.',
     aboutToRestoreGlobal:
       'Jūs ketinate atkurti visuotinę {{label}} būklę, kokia ji buvo {{versionDate}}.',
     aboutToRevertToPublished:

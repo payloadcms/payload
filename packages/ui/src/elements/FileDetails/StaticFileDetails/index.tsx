@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { UploadActions } from '../../Upload/index.js'
@@ -25,6 +26,7 @@ export type StaticFileDetailsProps = {
 }
 
 export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
+  const { t } = useTranslation()
   const {
     customUploadActions,
     doc,
@@ -74,6 +76,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
         </div>
         {!hideRemoveFile && handleRemove && (
           <Button
+            aria-label={`${t('general:remove')}: ${filename}`}
             buttonStyle="ghost"
             className={`${baseClass}__remove`}
             icon="x"

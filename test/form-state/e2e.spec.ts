@@ -2,8 +2,10 @@ import type { BrowserContext, Page, Request, Route } from '@playwright/test'
 import type { FormState } from 'payload'
 
 import { expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import * as path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
+import { fromJSON } from 'seroval'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -11,14 +13,13 @@ import type { Config, Post } from './payload-types.js'
 
 import { assertElementStaysVisible } from '../__helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
-import { assertRequestBody } from '../__helpers/e2e/assertRequestBody.js'
 import {
   addArrayRow,
   addArrayRowAsync,
   duplicateArrayRow,
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
-import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
+import { addBlock, reorderBlocks } from '../__helpers/e2e/fields/blocks/index.js'
 import { saveDocAndAssert, throttleTest, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
@@ -26,8 +27,10 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { autosavePostsSlug, draftPostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { autosaveReorderCorruptionSlug } from './slugs.js'
 
 const { afterEach, beforeEach, describe } = test
 
@@ -67,8 +70,25 @@ test.describe('Form State', () => {
   // already-initialized in the RSC payload, so there is no disabled phase — the
   // tanstack-start variant below asserts the form is immediately editable instead.
   test('should disable fields during initialization', { framework: 'next' }, async () => {
-    await page.goto(postsUrl.create, { waitUntil: 'commit' })
-    await expect(page.locator('#field-title')).toBeDisabled()
+    const hydration = Promise.withResolvers<void>()
+    const scriptURL = '**/_next/static/**/*.js*'
+    const holdHydration = async (route: Route) => {
+      await hydration.promise
+      await route.fallback()
+    }
+
+    // Keep hydration from finishing before the disabled state can be observed.
+    await page.route(scriptURL, holdHydration)
+
+    try {
+      await page.goto(postsUrl.create, { waitUntil: 'commit' })
+      await expect(page.locator('#field-title')).toBeDisabled()
+    } finally {
+      hydration.resolve()
+      await page.unroute(scriptURL, holdHydration)
+    }
+
+    await expect(page.locator('#field-title')).toBeEnabled()
   })
 
   test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
@@ -85,8 +105,23 @@ test.describe('Form State', () => {
     await page.goto(postsUrl.edit(doc.id))
     await waitForFormReady(page)
     await page.locator('#field-title').fill(title)
-    await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('#field-title')).toBeDisabled()
+
+    const save = await holdResponse({
+      method: 'PATCH',
+      page,
+      url: `${formatAdminURL({ apiRoute: '/api', path: `/${postsSlug}/${doc.id}`, serverURL })}**`,
+    })
+    const submission = page.click('#action-save', { delay: 100 })
+
+    try {
+      await save.captured
+      await expect(page.locator('#field-title')).toBeDisabled()
+    } finally {
+      await save.cleanup()
+      await submission
+    }
+
+    await waitForFormReady(page)
   })
 
   test('should re-enable fields after save', async () => {
@@ -183,74 +218,67 @@ test.describe('Form State', () => {
     )
   })
 
-  // Asserts the `lastRenderedPath` form-state optimization by inspecting the form
-  // state embedded in Next.js's RSC form-state request body. TanStack Start
-  // dispatches form state through the `createServerFn` RPC with a seroval-encoded
-  // body, so this Next-transport-specific assertion does not apply. The underlying
-  // optimization is framework-agnostic shared form logic exercised by the other
-  // form-state tests on both adapters.
-  test('should send `lastRenderedPath` only when necessary', { framework: 'next' }, async () => {
+  // Asserts the lastRenderedPath optimization by inspecting outgoing form-state requests on both frameworks.
+  // Previously rendered fields should retain their rendering paths as new array rows are added.
+  test('should send `lastRenderedPath` only when necessary', async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
+    await page.locator('#field-title').fill('Test')
 
-    const field = page.locator('#field-title')
-    await field.fill('Test')
+    // Both frameworks send the same form state, but TanStack wraps it in a Seroval-encoded RPC payload.
+    const readFormState = ({ request }: { request: Request }): FormState | undefined =>
+      readFormStateRequest({ request })?.formState
 
-    // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await addArrayRowAsync(page, 'array'),
-      expect: (body) =>
-        Boolean(
-          body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array',
-        ),
-      url: postsUrl.create,
-    })
+    // Add three rows to check that each request remembers fields rendered by earlier requests.
+    for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+      const requestPromise = page.waitForRequest((request) => {
+        const isFormStateURL =
+          currentFramework === 'tanstack-start'
+            ? request.url().startsWith(`${serverURL}/_serverFn/`)
+            : request.url() === postsUrl.create
 
-    await page.waitForResponse(
-      (response) =>
-        response.url() === postsUrl.create &&
-        response.status() === 200 &&
-        response.headers()['content-type'] === 'text/x-component',
-    )
+        return (
+          request.method() === 'POST' &&
+          isFormStateURL &&
+          Boolean(readFormState({ request })?.array)
+        )
+      })
 
-    // The `array` itself SHOULD still have a `lastRenderedPath`
-    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await addArrayRowAsync(page, 'array'),
-      expect: (body) =>
-        Boolean(
-          body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath === 'array' &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField',
-        ),
-      url: postsUrl.create,
-    })
+      await addArrayRowAsync(page, 'array')
 
-    await page.waitForResponse(
-      (response) =>
-        response.url() === postsUrl.create &&
-        response.status() === 200 &&
-        response.headers()['content-type'] === 'text/x-component',
-    )
+      const request = await requestPromise
+      const formState = readFormState({ request })
+      const response = await request.response()
 
-    // The `array` itself SHOULD still have a `lastRenderedPath`
-    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
-    // The custom text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: async () => await addArrayRowAsync(page, 'array'),
-      expect: (body) =>
-        Boolean(
-          body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-              'array.0.customTextField' &&
-            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
-              'array.1.customTextField',
-        ),
-      url: postsUrl.create,
-    })
+      // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load.
+      expect(formState?.array.lastRenderedPath).toBe('array')
+      expect(formState?.array.customComponents).toBeUndefined()
+      expect(formState?.array.rows).toHaveLength(rowIndex + 1)
+      expect(formState?.title.value).toBe('Test')
+
+      for (const [index, row] of (formState?.array.rows ?? []).entries()) {
+        expect(row.id).toBe(formState?.[`array.${index}.id`]?.value)
+        expect(row.customComponents).toBeUndefined()
+      }
+
+      // Each earlier row's custom text field SHOULD ALSO have a `lastRenderedPath` because it was rendered in a previous request.
+      // The second request checks the first row; the third request checks both earlier rows.
+      for (let renderedRowIndex = 0; renderedRowIndex < rowIndex; renderedRowIndex++) {
+        const fieldPath = `array.${renderedRowIndex}.customTextField`
+
+        expect(formState?.[fieldPath]?.lastRenderedPath).toBe(fieldPath)
+        expect(formState?.array.rows?.[renderedRowIndex]?.lastRenderedPath).toBe(
+          `array.${renderedRowIndex}`,
+        )
+        expect(formState?.[fieldPath]?.initialValue).toBe('This is a default value')
+        expect(formState?.[fieldPath]?.customComponents).toBeUndefined()
+      }
+
+      expect(response?.status()).toBe(200)
+      expect(response?.headers()['content-type']?.split(';')[0].trim()).toBe('text/x-component')
+      await expect(page.locator(`#field-array__${rowIndex}__customTextField`)).toBeVisible()
+      await expect(page.locator('#field-array .array-field__row')).toHaveCount(rowIndex + 1)
+    }
   })
 
   test('should not render stale values for server components while form state is in flight', async () => {
@@ -393,6 +421,322 @@ test.describe('Form State', () => {
     ).toHaveValue('This is a computed value.')
   })
 
+  test('should preserve content after sorting blocks with different field shapes', async () => {
+    const doc = await createPost({
+      sortedBlocks: [
+        { blockType: 'one', title: 'One', order: 2, content: { text: 'One nested content' } },
+        { blockType: 'two', title: 'Two', order: 1, content: 'Two scalar content' },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__1__order').fill('3')
+      await saveDocAndAssert(page)
+
+      await expect(
+        page.locator('#field-sortedBlocks .blocks-field__block-pill').first(),
+      ).toHaveText('Two')
+      await expect(page.locator('#field-sortedBlocks__0__content')).toHaveValue(
+        'Two scalar content',
+      )
+      await expect(
+        page
+          .locator('#field-sortedBlocks .blocks-field__row')
+          .first()
+          .locator('#field-sortedBlocks__0__title'),
+      ).toHaveValue('Two')
+
+      await page.locator('#field-title').fill('After sorting the blocks')
+      await saveDocAndAssert(page)
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.sortedBlocks?.map(({ blockType, content }) => ({ blockType, content }))
+        })
+        .toEqual([
+          { blockType: 'two', content: 'Two scalar content' },
+          { blockType: 'one', content: { text: 'One nested content' } },
+        ])
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should keep block fields and collapsed state with their IDs after a beforeChange reorder', async () => {
+    const doc = await createPost()
+
+    await page.goto(postsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
+    try {
+      for (const [index, blockType] of ['One', 'Two', 'Three'].entries()) {
+        await addBlock({ blockToSelect: blockType, fieldName: 'sortedBlocks', page })
+        await page.locator(`#field-sortedBlocks__${index}__title`).fill(blockType)
+        await page.locator(`#field-sortedBlocks__${index}__order`).fill(String(index + 1))
+        await saveDocAndAssert(page)
+
+        const expectedBlocks = ['One', 'Two', 'Three'].slice(0, index + 1).reverse()
+        const rows = page.locator('#field-sortedBlocks .blocks-field__row')
+
+        await expect(rows).toHaveCount(expectedBlocks.length)
+
+        for (const [rowIndex, title] of expectedBlocks.entries()) {
+          await expect(rows.nth(rowIndex).locator('.blocks-field__block-pill')).toHaveText(title)
+          await expect(rows.nth(rowIndex).locator('button.collapsible__toggle')).toHaveAttribute(
+            'aria-expanded',
+            rowIndex === 0 ? 'true' : 'false',
+          )
+          await expect(
+            rows.nth(rowIndex).locator(`#field-sortedBlocks__${rowIndex}__title`),
+          ).toHaveValue(title)
+          await expect(page.locator(`#field-sortedBlocks__${rowIndex}__order`)).toHaveValue(
+            String(index + 1 - rowIndex),
+          )
+        }
+
+        await rows.first().locator('button.collapsible__toggle').press('Enter')
+        await expect(rows.first().locator('button.collapsible__toggle')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        )
+        await page.locator('#field-title').fill(`Sorted blocks save ${index + 1}`)
+        await saveDocAndAssert(page)
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: postsSlug,
+              overrideAccess: true,
+              where: { id: { equals: doc.id } },
+            })
+
+            return docs[0]?.sortedBlocks?.map(({ blockType, order, title }) => ({
+              blockType,
+              order,
+              title,
+            }))
+          })
+          .toEqual(
+            expectedBlocks.map((title, rowIndex) => ({
+              blockType: title.toLowerCase(),
+              order: index + 1 - rowIndex,
+              title,
+            })),
+          )
+      }
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should preserve a hidden custom field when it becomes visible after a server reorder', async () => {
+    const doc = await createPost({
+      sortedBlocks: [
+        { blockType: 'two', title: 'First', order: 2 },
+        { blockType: 'two', title: 'Second', order: 1 },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__0__order').fill('-1')
+      await saveDocAndAssert(page)
+
+      const rows = page.locator('#field-sortedBlocks .blocks-field__row')
+
+      await expect(rows.nth(0).getByRole('textbox', { name: 'Title', exact: true })).toHaveValue(
+        'Second',
+      )
+      await expect(rows.nth(1).getByRole('textbox', { name: 'Title', exact: true })).toBeHidden()
+
+      await page.locator('#field-sortedBlocks__1__order').fill('0')
+
+      const restoredTitle = rows.nth(1).getByRole('textbox', { name: 'Title', exact: true })
+
+      await expect(restoredTitle).toHaveValue('First')
+      await restoredTitle.fill('First updated')
+      await expect(rows.nth(0).getByRole('textbox', { name: 'Title', exact: true })).toHaveValue(
+        'Second',
+      )
+      await saveDocAndAssert(page)
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.sortedBlocks?.map(({ title }) => title)
+        })
+        .toEqual(['Second', 'First updated'])
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should preserve cached paths for unchanged fields and rows after saving', async () => {
+    const doc = await createPost({
+      array: [{ customTextField: 'Unchanged array row' }],
+      sortedBlocks: [
+        { blockType: 'two', title: 'First', order: 3 },
+        { blockType: 'two', title: 'Second', order: 2 },
+        { blockType: 'two', title: 'Third', order: 1 },
+      ],
+    })
+
+    try {
+      await page.goto(postsUrl.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-sortedBlocks__1__order').fill('4')
+
+      const requestPromise = page.waitForRequest((request) => {
+        const isFormStateURL =
+          currentFramework === 'tanstack-start'
+            ? request.url().startsWith(`${serverURL}/_serverFn/`)
+            : request.url() === postsUrl.edit(doc.id)
+
+        if (request.method() !== 'POST' || !isFormStateURL) {
+          return false
+        }
+
+        return readFormStateRequest({ request })?.data?.sortedBlocks?.[0]?.title === 'Second'
+      })
+
+      await saveDocAndAssert(page)
+
+      const request = await requestPromise
+      const formState = readFormStateRequest({ request })?.formState as FormState
+
+      await expect
+        .poll(() => ({
+          title: formState.title.lastRenderedPath,
+          array: formState.array.lastRenderedPath,
+          arrayField: formState['array.0.customTextField'].lastRenderedPath,
+          arrayRow: formState.array.rows?.[0]?.lastRenderedPath,
+          sortedBlocks: formState.sortedBlocks.lastRenderedPath,
+          blockFields: [0, 1, 2].map(
+            (index) => formState[`sortedBlocks.${index}.title`].lastRenderedPath,
+          ),
+          blockRows: formState.sortedBlocks.rows?.map(({ lastRenderedPath }) => lastRenderedPath),
+        }))
+        .toEqual({
+          title: 'title',
+          array: 'array',
+          arrayField: 'array.0.customTextField',
+          arrayRow: 'array.0',
+          sortedBlocks: 'sortedBlocks',
+          blockFields: [undefined, undefined, 'sortedBlocks.2.title'],
+          blockRows: [undefined, undefined, 'sortedBlocks.2'],
+        })
+
+      await expect(
+        page
+          .locator('#field-sortedBlocks .blocks-field__row')
+          .first()
+          .locator('#field-sortedBlocks__0__title'),
+      ).toHaveValue('Second')
+    } finally {
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should finish post-save rebuilding before a pending edit refresh', async () => {
+    const doc = await createPost({ title: 'Before save' })
+    const { page: savePage } = await initPage({ context, serverURL })
+    const editURL = postsUrl.edit(doc.id)
+    const backgroundStarted = Promise.withResolvers<void>()
+    const releaseBackground = Promise.withResolvers<void>()
+    const backgroundReleased = Promise.withResolvers<void>()
+    const permissionsStarted = Promise.withResolvers<void>()
+    const releasePermissions = Promise.withResolvers<void>()
+    let hasHeldBackground = false
+    let hasHeldPermissions = false
+
+    try {
+      await savePage.clock.install()
+      await savePage.goto(editURL)
+      await waitForFormReady(savePage)
+      await savePage.clock.pauseAt(await savePage.evaluate(() => Date.now() + 1000))
+
+      await savePage.route(
+        (url) =>
+          url.href === editURL ||
+          (currentFramework === 'tanstack-start' && url.pathname.startsWith('/_serverFn/')),
+        async (route) => {
+          const request = route.request()
+
+          if (request.method() !== 'POST' || hasHeldBackground) {
+            return route.fallback()
+          }
+
+          const call = (
+            currentFramework === 'tanstack-start'
+              ? fromJSON(request.postDataJSON()).data
+              : request.postDataJSON()[0]
+          ) as { name?: string }
+
+          if (call?.name !== 'form-state') {
+            return route.fallback()
+          }
+
+          hasHeldBackground = true
+          const response = await route.fetch()
+
+          backgroundStarted.resolve()
+          await releaseBackground.promise
+          await route.fulfill({ response })
+          backgroundReleased.resolve()
+        },
+      )
+      await savePage.route(`**/api/posts/access/${doc.id}*`, async (route) => {
+        if (hasHeldPermissions || route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        hasHeldPermissions = true
+        const response = await route.fetch()
+
+        permissionsStarted.resolve()
+        await releasePermissions.promise
+        await route.fulfill({ response })
+      })
+
+      const titleField = savePage.locator('#field-title')
+
+      await titleField.fill('Intermediate title')
+      await savePage.clock.runFor(300)
+      await backgroundStarted.promise
+      await titleField.fill('After save')
+      await savePage.clock.runFor(300)
+      await savePage.locator('#action-save').click()
+      releaseBackground.resolve()
+      await backgroundReleased.promise
+      await permissionsStarted.promise
+      await savePage.clock.runFor(300)
+      releasePermissions.resolve()
+      await savePage.clock.resume()
+
+      await expect(savePage.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(savePage.locator('#field-computedTitle')).toHaveValue('After save')
+    } finally {
+      releaseBackground.resolve()
+      releasePermissions.resolve()
+      await savePage.unrouteAll({ behavior: 'wait' })
+      await savePage.close()
+    }
+  })
+
   test('should fetch new doc permissions after save', async () => {
     const doc = await createPost({ title: 'Initial Title' })
     await page.goto(postsUrl.edit(doc.id))
@@ -436,7 +780,7 @@ test.describe('Form State', () => {
     const doc = await payload.create({
       collection: autosavePostsSlug,
       data: {
-        title: 'Initial Title',
+        title: 'ok Initial Title',
       },
       overrideAccess: true,
     })
@@ -455,7 +799,7 @@ test.describe('Form State', () => {
         serverURL,
       }),
       async () => {
-        await titleField.fill('Updated Title')
+        await titleField.fill('ok Updated Title')
       },
       {
         allowedNumberOfRequests: 0,
@@ -471,7 +815,7 @@ test.describe('Form State', () => {
         serverURL,
       }),
       async () => {
-        await titleField.fill('Updated Title Again')
+        await titleField.fill('ok Updated Title Again')
       },
       {
         allowedNumberOfRequests: 0,
@@ -505,6 +849,8 @@ test.describe('Form State', () => {
     const titleField = page.locator('#field-title')
     const computedTitleField = page.locator('#field-computedTitle')
 
+    await expect(computedTitleField).toBeDisabled()
+
     await titleField.fill('Test Title')
 
     await waitForAutoSaveToRunAndComplete(page)
@@ -512,39 +858,353 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title')
   })
 
-  test('autosave - should not overwrite computed values that are being actively edited', async () => {
-    await page.goto(autosavePostsUrl.create)
-    await waitForFormReady(page)
+  describe('stale autosave responses', () => {
+    let releaseRoutes = () => {}
+    const createdDocs: { collection: typeof autosavePostsSlug | typeof postsSlug; id: string }[] =
+      []
 
-    const titleField = page.locator('#field-title')
-    const computedTitleField = page.locator('#field-computedTitle')
-
-    await titleField.fill('Test Title')
-
-    await expect(computedTitleField).toHaveValue('Test Title')
-
-    // Put cursor at end of text
-    await computedTitleField.evaluate((el: HTMLInputElement) => {
-      el.focus()
-      el.setSelectionRange(el.value.length, el.value.length)
+    afterEach(async () => {
+      releaseRoutes()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+      for (const { collection, id } of createdDocs) {
+        await payload.delete({ collection, id })
+      }
+      createdDocs.length = 0
     })
 
-    await computedTitleField.pressSequentially(' - Edited', { delay: 100 })
+    test('should preserve edits to two fields during autosave and persist the latest revision (#17676)', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial revision' },
+        draft: true,
+      })
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
 
-    await waitForAutoSaveToRunAndComplete(page)
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      const secondStarted = Promise.withResolvers<void>()
+      const releaseSecond = Promise.withResolvers<void>()
+      let requestCount = 0
 
-    await expect(computedTitleField).toHaveValue('Test Title - Edited')
+      releaseRoutes = () => {
+        releaseFirst.resolve()
+        releaseSecond.resolve()
+      }
 
-    // but then when editing another field, the computed field should update
-    const autosaveResponse = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'PATCH' &&
-        response.url().includes(`/api/${autosavePostsSlug}/`) &&
-        response.ok(),
-    )
-    await titleField.fill('Test Title 2')
-    await autosaveResponse
-    await expect(computedTitleField).toHaveValue('Test Title 2')
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+        requestCount += 1
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+        } else if (requestCount === 2) {
+          secondStarted.resolve()
+          await releaseSecond.promise
+        }
+        await route.continue()
+      })
+
+      const titleField = page.locator('#field-title')
+      const contentField = page.locator('#field-content')
+      const computedTitleField = page.locator('#field-computedTitle')
+      const documentInfoState = page.locator('#document-info-state')
+      const initialDocumentInfoState = await documentInfoState.evaluate(
+        (element) => element.outerHTML,
+      )
+
+      await expect(computedTitleField).toHaveValue('Initial revision')
+
+      await titleField.fill('First revision')
+      await firstStarted.promise
+
+      await titleField.fill('Latest revision')
+      await contentField.fill('Newer edit in another field')
+
+      releaseFirst.resolve()
+      await secondStarted.promise
+
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(contentField).toHaveValue('Newer edit in another field')
+      await expect(computedTitleField).toHaveValue('Initial revision')
+      expect(await documentInfoState.evaluate((element) => element.outerHTML)).toBe(
+        initialDocumentInfoState,
+      )
+
+      releaseSecond.resolve()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(contentField).toHaveValue('Newer edit in another field')
+      await expect(computedTitleField).toHaveValue('Latest revision')
+      expect(requestCount).toBe(2)
+
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: autosavePostsSlug,
+            draft: true,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return { title: docs[0]?.title, content: docs[0]?.content }
+        })
+        .toEqual({ title: 'Latest revision', content: 'Newer edit in another field' })
+
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(titleField).toHaveValue('Latest revision')
+      await expect(contentField).toHaveValue('Newer edit in another field')
+    })
+
+    test('should retain radio and select edits made during an autosave (#19368)', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Before editing', type: 'internal', size: 'small' },
+        draft: true,
+      })
+
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const save = await holdResponse({
+        method: 'PATCH',
+        page,
+        url: `**/api/${autosavePostsSlug}/${doc.id}?**`,
+      })
+
+      try {
+        await page.locator('#field-title').fill('Edited before changing two fields')
+        await save.captured
+        await page.locator('label[for="field-type-custom"]').click()
+        await page.locator('#field-size .rs__control').click()
+        await page.getByRole('option', { name: 'Large', exact: true }).click()
+        save.release()
+
+        await expect
+          .poll(async () => {
+            const { docs } = await payload.find({
+              collection: autosavePostsSlug,
+              draft: true,
+              overrideAccess: true,
+              where: { id: { equals: doc.id } },
+            })
+
+            return { type: docs[0]?.type, size: docs[0]?.size }
+          })
+          .toEqual({ type: 'custom', size: 'large' })
+
+        await expect(page.locator('#field-type-custom')).toBeChecked()
+        await expect(page.locator('#field-size')).toContainText('Large')
+        await page.reload()
+        await waitForFormReady(page)
+        await expect(page.locator('#field-type-custom')).toBeChecked()
+        await expect(page.locator('#field-size')).toContainText('Large')
+      } finally {
+        await save.cleanup()
+      }
+    })
+
+    test('should ignore errors from stale autosave responses', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial revision' },
+        draft: true,
+      })
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      const secondStarted = Promise.withResolvers<void>()
+      const releaseSecond = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => {
+        releaseFirst.resolve()
+        releaseSecond.resolve()
+      }
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        requestCount += 1
+
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+          return route.fulfill({
+            body: JSON.stringify({ message: 'Stale autosave failure' }),
+            contentType: 'application/json',
+            status: 400,
+          })
+        }
+
+        secondStarted.resolve()
+        await releaseSecond.promise
+        await route.continue()
+      })
+
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('First revision')
+      await firstStarted.promise
+      await titleField.fill('Latest revision')
+
+      releaseFirst.resolve()
+      await secondStarted.promise
+
+      await expect(page.getByText('Stale autosave failure', { exact: true })).toHaveCount(0)
+      await expect(titleField).toHaveValue('Latest revision')
+
+      releaseSecond.resolve()
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect(page.getByText('Stale autosave failure', { exact: true })).toHaveCount(0)
+      await expect.poll(() => requestCount).toBe(2)
+    })
+
+    test('should persist programmatic updates made during autosave', async () => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: {
+          programmaticValue: 'Initial programmatic value',
+          title: 'Initial revision',
+        },
+        draft: true,
+      })
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+      await page.goto(autosavePostsUrl.edit(doc.id))
+      await waitForFormReady(page)
+
+      const firstStarted = Promise.withResolvers<void>()
+      const releaseFirst = Promise.withResolvers<void>()
+      let requestCount = 0
+
+      releaseRoutes = () => releaseFirst.resolve()
+
+      await page.route(`**/api/${autosavePostsSlug}/**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        requestCount += 1
+
+        if (requestCount === 1) {
+          firstStarted.resolve()
+          await releaseFirst.promise
+        }
+
+        await route.continue()
+      })
+
+      await page.locator('#field-title').fill('First revision')
+      await firstStarted.promise
+      await page.locator('#set-programmatic-value').click()
+      releaseFirst.resolve()
+
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-programmaticValue')).toHaveValue('Updated programmatically')
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: autosavePostsSlug,
+            draft: true,
+            where: { id: { equals: doc.id } },
+          })
+          return docs[0]?.programmaticValue
+        })
+        .toBe('Updated programmatically')
+      expect(requestCount).toBe(2)
+    })
+  })
+
+  test('should persist programmatic updates made during the post-save refresh', async () => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { programmaticValue: 'Initial value', title: 'ok Initial revision' },
+      draft: true,
+    })
+    await page.goto(autosavePostsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
+    const responseCaptured = Promise.withResolvers<void>()
+    const releaseResponse = Promise.withResolvers<void>()
+    let hasCapturedResponse = false
+    let requestCount = 0
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() === 'PATCH') {
+        requestCount += 1
+      }
+      await route.continue()
+    })
+    const formStateURL =
+      currentFramework === 'tanstack-start' ? '**/_serverFn/**' : autosavePostsUrl.edit(doc.id)
+
+    await page.route(formStateURL, async (route) => {
+      const request = route.request()
+      const isFormStateRequest =
+        request.method() === 'POST' &&
+        (currentFramework === 'tanstack-start'
+          ? (request.postData() ?? '').includes('form-state')
+          : Boolean(request.headers()['next-action']))
+
+      if (
+        isFormStateRequest &&
+        readFormStateRequest({ request })?.data?.title === 'ok Latest revision' &&
+        !hasCapturedResponse
+      ) {
+        hasCapturedResponse = true
+        const response = await route.fetch()
+
+        responseCaptured.resolve()
+        await releaseResponse.promise
+        await route.fulfill({ response })
+      } else {
+        await route.continue()
+      }
+    })
+
+    try {
+      const titleField = page.locator('#field-title')
+
+      await titleField.fill('ok Latest revision')
+      await responseCaptured.promise
+      expect(requestCount).toBe(1)
+
+      await page.locator('#set-programmatic-value').click()
+
+      releaseResponse.resolve()
+
+      await expect(page.locator('#field-computedTitle')).toHaveValue('ok Latest revision')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-programmaticValue')).toHaveValue('Updated programmatically')
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: autosavePostsSlug,
+            draft: true,
+            where: { id: { equals: doc.id } },
+          })
+          return docs[0]?.programmaticValue
+        })
+        .toBe('Updated programmatically')
+      expect(requestCount).toBe(2)
+    } finally {
+      releaseResponse.resolve()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+      await payload.delete({ collection: autosavePostsSlug, id: doc.id })
+    }
   })
 
   test('array and block rows and maintain consistent row IDs across duplication', async () => {
@@ -685,7 +1345,6 @@ test.describe('Form State', () => {
       await expect(page.locator('#field-array #array-row-0')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
-      // eslint-disable-next-line playwright/no-wait-for-selector
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // Wait for the first request to be sent
@@ -696,7 +1355,6 @@ test.describe('Form State', () => {
       await expect(page.locator('#field-array #array-row-1')).toBeVisible()
 
       // use waitForSelector because the shimmer effect is not always visible
-      // eslint-disable-next-line playwright/no-wait-for-selector
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // At this point there should have been a single request sent for the first row
@@ -751,7 +1409,9 @@ test.describe('Form State', () => {
       )
     })
 
-    test('should not cause nested custom components to disappear when adding a row then editing a field', async () => {
+    test('should not cause nested custom components to disappear when adding a row then editing a field', async ({}, testInfo) => {
+      testInfo.setTimeout(TEST_TIMEOUT_LONG)
+
       await assertNetworkRequests(
         page,
         postsUrl.create,
@@ -762,7 +1422,6 @@ test.describe('Form State', () => {
           await page.locator('#field-title').fill('Test 2')
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
-          // eslint-disable-next-line playwright/no-wait-for-selector
           await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
             timeout: TEST_TIMEOUT,
           })
@@ -780,54 +1439,1165 @@ test.describe('Form State', () => {
       )
     })
 
-    test.fixme(
-      'should not cause nested custom components to disappear when adding rows back-to-back',
-      async () => {
-        // TODO: This test is too flaky
-        // Add two rows quickly
-        // Test that the custom text field within the rows do not disappear
-        await assertNetworkRequests(
-          page,
-          postsUrl.create,
-          async () => {
-            await addArrayRowAsync(page, 'array')
-            await addArrayRowAsync(page, 'array')
+    test.fixme('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
+      // TODO: This test is too flaky
+      // Add two rows quickly
+      // Test that the custom text field within the rows do not disappear
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await addArrayRowAsync(page, 'array')
+          await addArrayRowAsync(page, 'array')
 
-            // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
-            await page.waitForSelector(
-              '#field-array #array-row-0 #field-array__0__customTextField',
-              {
-                timeout: TEST_TIMEOUT,
-              },
-            )
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
 
-            // use `waitForSelector` to ensure the element doesn't appear and then disappear
-            // eslint-disable-next-line playwright/no-wait-for-selector
-            await page.waitForSelector(
-              '#field-array #array-row-1 #field-array__1__customTextField',
-              {
-                timeout: TEST_TIMEOUT,
-              },
-            )
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          await page.waitForSelector('#field-array #array-row-1 #field-array__1__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
 
-            await expect(
-              page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-            ).toBeVisible()
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
 
-            await expect(
-              page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
-            ).toBeVisible()
-          },
-          {
-            allowedNumberOfRequests: 2,
-            timeout: 10000,
-          },
-        )
-      },
-    )
+          await expect(
+            page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
+          ).toBeVisible()
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
+    })
   })
 })
+
+test.describe('Shared form request queue', () => {
+  let payload: PayloadTestSDK<Config>
+  let serverURL: string
+
+  const createdDocs: {
+    collection: 'autosave-posts' | 'conditions' | 'draft-posts' | 'posts'
+    id: Post['id']
+  }[] = []
+
+  const releases = new Set<() => void>()
+
+  test.beforeAll(async () => {
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+  })
+
+  test.beforeEach(async ({ page }) => {
+    await page.clock.install()
+    await initPage({ page, serverURL })
+  })
+
+  test.afterEach(async ({ page }) => {
+    releases.forEach((release) => release())
+    releases.clear()
+
+    await page.unrouteAll({ behavior: 'ignoreErrors' })
+
+    for (const { collection, id } of createdDocs) {
+      await payload.delete({ collection, id, overrideAccess: true })
+    }
+
+    createdDocs.length = 0
+  })
+
+  for (const failure of ['HTTP error', 'network error'] as const) {
+    test(`should refresh conditional fields after an explicit save ${failure}`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: conditionsSlug,
+        data: { showField: true, conditionalRowField: 'Initial value' },
+        overrideAccess: true,
+      })
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const failed = Promise.withResolvers<void>()
+      const editURL = new AdminUrlUtil(serverURL, conditionsSlug).edit(doc.id)
+      let didHoldRefresh = false
+
+      createdDocs.push({ collection: conditionsSlug, id: doc.id })
+      releases.add(released.resolve)
+
+      await page.goto(editURL)
+      await waitForFormReady(page)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      const checkbox = page.locator('#field-showField')
+      const conditionalField = page.locator('#field-conditionalRowField')
+      const save = page.locator('#action-save')
+      const prepared = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          response.url().includes(`/api/${conditionsSlug}/${doc.id}`) &&
+          response.ok(),
+      )
+
+      await conditionalField.fill('Prepared value')
+      await save.click()
+      await prepared
+      await waitForFormReady(page)
+
+      await page.route(
+        (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+        async (route) => {
+          if (
+            didHoldRefresh ||
+            route.request().method() !== 'POST' ||
+            !route.request().postData()?.includes('form-state')
+          ) {
+            return route.continue()
+          }
+
+          didHoldRefresh = true
+          const response = await route.fetch()
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        },
+      )
+      await page.route(`**/api/${conditionsSlug}/${doc.id}**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        if (failure === 'network error') {
+          await route.abort('failed')
+        } else {
+          await route.fulfill({ status: 500, json: { message: 'Save failed' } })
+        }
+
+        failed.resolve()
+      })
+
+      await checkbox.uncheck()
+      await page.clock.runFor(300)
+      await captured.promise
+      await checkbox.check()
+      await page.clock.runFor(300)
+      await save.click()
+
+      released.resolve()
+
+      await failed.promise
+      await expect(save).toBeEnabled()
+      await page.clock.runFor(1000)
+      await expect(checkbox).toBeChecked()
+      await expect(conditionalField).toBeVisible()
+    })
+  }
+
+  for (const submissionType of ['submit', 'autosave'] as const) {
+    test(`should retain client validation errors after a rejected ${submissionType}`, async ({
+      page,
+    }) => {
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const viewURL = formatAdminURL({
+        adminRoute: '/admin',
+        path: '/client-validation',
+        serverURL,
+      })
+      let didHoldRefresh = false
+      let saveCount = 0
+
+      releases.add(released.resolve)
+
+      await page.goto(viewURL)
+
+      const form = page.locator(`.client-validation-form--${submissionType}`)
+      const field = form.getByRole('textbox', { name: 'Client validated value', exact: true })
+      const error = form
+        .getByRole('alert')
+        .filter({ hasText: 'This value is rejected by client validation.' })
+      const submit = form.getByRole('button', { name: 'Submit', exact: true })
+
+      await expect(form).toHaveAttribute('data-form-ready', 'true')
+      await expect(field).toBeVisible()
+      await page.clock.runFor(200)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      await page.route(
+        (url) => url.href === viewURL || url.pathname.startsWith('/_serverFn/'),
+        async (route) => {
+          if (
+            didHoldRefresh ||
+            route.request().method() !== 'POST' ||
+            !route.request().postData()?.includes('form-state')
+          ) {
+            return route.continue()
+          }
+
+          didHoldRefresh = true
+          const response = await route.fetch()
+
+          expect(await response.text()).toContain('clientValidatedValue')
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        },
+      )
+      await page.route(
+        (url) => url.pathname === `/api/${conditionsSlug}`,
+        async (route) => {
+          if (route.request().method() !== 'POST') {
+            return route.continue()
+          }
+
+          saveCount += 1
+
+          const response = await route.fetch()
+          const json = await response.json()
+
+          if (response.ok() && json.doc?.id) {
+            createdDocs.push({ collection: conditionsSlug, id: json.doc.id })
+          }
+
+          await route.fulfill({ response })
+        },
+      )
+
+      await submit.click()
+      await captured.promise
+      await expect(submit).toBeDisabled()
+
+      // Exercise the onChange debounce before the submission refresh can finish.
+      await page.clock.runFor(300)
+      await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
+
+      released.resolve()
+
+      await expect(submit).toBeEnabled()
+      await expect.poll(() => saveCount).toBe(0)
+      await expect(field).toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toContainText('This value is rejected by client validation.')
+      await expect(error).toBeVisible()
+
+      const saved = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'POST' &&
+          new URL(response.url()).pathname === `/api/${conditionsSlug}` &&
+          response.status() === 201,
+      )
+
+      await field.fill('Allowed value')
+      await submit.click()
+
+      const response = await saved
+      const { doc } = await response.json()
+
+      await expect(submit).toBeEnabled()
+      await expect(field).not.toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toBeHidden()
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: conditionsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.clientValidatedValue
+        })
+        .toBe('Allowed value')
+    })
+  }
+
+  test('should preserve edits made during a queued autosave (#18348)', async ({ page }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const saves = Array.from({ length: 3 }, () => ({
+      captured: Promise.withResolvers<void>(),
+      released: Promise.withResolvers<void>(),
+    }))
+    const submittedValues: unknown[] = []
+    const readDraftValue = async () => {
+      const { docs } = await payload.find({
+        collection: autosavePostsSlug,
+        draft: true,
+        overrideAccess: true,
+        where: { id: { equals: doc.id } },
+      })
+
+      return docs[0]?.restrictedValue
+    }
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    saves.forEach(({ released }) => releases.add(released.resolve))
+
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (
+        route.request().method() !== 'PATCH' ||
+        new URL(route.request().url()).searchParams.get('autosave') !== 'true'
+      ) {
+        return route.continue()
+      }
+
+      const save = saves[submittedValues.length]
+
+      submittedValues.push(
+        readSubmittedData({ body: route.request().postData() ?? '' }).restrictedValue,
+      )
+
+      const response = await route.fetch()
+
+      if (save) {
+        save.captured.resolve()
+        await save.released.promise
+      }
+
+      await route.fulfill({ response })
+    })
+
+    const field = page.locator('#field-restrictedValue')
+    const savingIndicator = page.locator('.autosave')
+
+    await field.fill('a')
+    await page.clock.runFor(100)
+    await saves[0].captured.promise
+
+    await field.fill('ab')
+    await page.clock.runFor(100)
+    await expect.poll(() => submittedValues).toEqual(['a'])
+
+    saves[0].released.resolve()
+    await saves[1].captured.promise
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab'])
+    await expect(savingIndicator).toBeVisible()
+
+    await field.fill('abc')
+
+    const secondResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${autosavePostsSlug}/${doc.id}`) &&
+        readSubmittedData({ body: response.request().postData() ?? '' }).restrictedValue === 'ab',
+    )
+
+    saves[1].released.resolve()
+    await secondResponse
+    await page.clock.runFor(1000)
+    await expect.poll(readDraftValue).toBe('abc')
+    await saves[2].captured.promise
+    await expect(field).toHaveValue('abc')
+    await expect(savingIndicator).toBeVisible()
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab', 'abc'])
+    await expect.poll(readDraftValue).toBe('abc')
+
+    await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
+    saves[2].released.resolve()
+    await expect(savingIndicator).toBeHidden()
+    await page.clock.runFor(1000)
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab', 'abc'])
+
+    await page.reload()
+    await waitForFormReady(page)
+    await expect(field).toHaveValue('abc')
+  })
+
+  test('should refresh conditional fields when an autosave supersedes a refresh and fails', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const editURL = new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id)
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const failedAutosave = Promise.withResolvers<void>()
+    let autosaveCount = 0
+    let didHoldRefresh = false
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    releases.add(released.resolve)
+
+    await page.goto(editURL)
+    await waitForFormReady(page)
+
+    await page.route(
+      (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+      async (route) => {
+        if (
+          didHoldRefresh ||
+          route.request().method() !== 'POST' ||
+          !route.request().postData()?.includes('form-state')
+        ) {
+          return route.continue()
+        }
+
+        didHoldRefresh = true
+        const response = await route.fetch()
+
+        captured.resolve()
+        await released.promise
+        await route.fulfill({ response })
+      },
+    )
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (
+        route.request().method() !== 'PATCH' ||
+        new URL(route.request().url()).searchParams.get('autosave') !== 'true'
+      ) {
+        return route.continue()
+      }
+
+      autosaveCount += 1
+
+      if (autosaveCount === 1) {
+        return route.fulfill({ response: await route.fetch() })
+      }
+
+      await route.fulfill({
+        status: 500,
+        json: { message: 'Autosave failed' },
+      })
+      failedAutosave.resolve()
+    })
+
+    await expect(page.locator('#field-conditionalField')).toBeHidden()
+    await page.locator('#field-restrictedValue').fill('First autosave')
+    await page.clock.runFor(200)
+    await captured.promise
+
+    await page.locator('#field-showConditionalField').check()
+    await page.clock.runFor(500)
+
+    released.resolve()
+
+    await failedAutosave.promise
+    await page.clock.runFor(1000)
+    await expect(page.locator('#field-showConditionalField')).toBeChecked()
+    await expect(page.locator('#field-conditionalField')).toBeVisible()
+  })
+
+  for (const failure of ['HTTP error', 'network error'] as const) {
+    test(`should refresh form state after an autosave ${failure} without a pending refresh`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'Initial value' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+
+      await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+      await waitForFormReady(page)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        if (failure === 'network error') {
+          return route.abort('failed')
+        }
+
+        await route.fulfill({ status: 500, json: { message: 'Autosave failed' } })
+      })
+
+      await page.locator('#field-showConditionalField').check()
+      await page.clock.runFor(100)
+
+      await expect(page.locator('#field-conditionalField')).toBeVisible()
+    })
+  }
+
+  test('should restore field focus after a keyboard save', async ({ page }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial value' },
+      overrideAccess: true,
+    })
+
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+
+    createdDocs.push({ collection: postsSlug, id: doc.id })
+    releases.add(released.resolve)
+
+    await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      captured.resolve()
+
+      await released.promise
+      await route.fulfill({ response: await route.fetch() })
+    })
+
+    await page.goto(new AdminUrlUtil(serverURL, postsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    const title = page.locator('#field-title')
+
+    await title.fill('Keyboard save')
+
+    const modifier = await page.evaluate(() =>
+      navigator.userAgent.includes('Mac OS X') ? 'Meta' : 'Control',
+    )
+
+    await title.press(`${modifier}+s`)
+    await captured.promise
+    await expect(title).toBeDisabled()
+
+    released.resolve()
+
+    await expect(title).toBeEnabled()
+    await expect(title).toBeFocused()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should retain save errors when saving during an older form-state request (#18425)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial value' },
+      overrideAccess: true,
+    })
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let saveCount = 0
+
+    createdDocs.push({ collection: postsSlug, id: doc.id })
+    await page.goto(editURL)
+    await waitForFormReady(page)
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    const refresh = await holdResponse({
+      matches: (request) => (request.postData() ?? '').includes('form-state'),
+      method: 'POST',
+      page,
+      url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+    })
+
+    await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      saveCount += 1
+      await route.fulfill({
+        status: 400,
+        json: {
+          errors: [
+            {
+              data: { errors: [{ message: 'Title must be unique', path: 'title' }] },
+              message: 'The following field is invalid: title',
+            },
+          ],
+        },
+      })
+    })
+
+    try {
+      await page.locator('#field-title').fill('duplicate')
+      await page.clock.runFor(500)
+      await refresh.captured
+      await page.locator('#action-save').click()
+      await page.clock.runFor(500)
+      await expect.poll(() => saveCount).toBe(0)
+      refresh.release()
+
+      const error = page
+        .locator('.field-type.text', { has: page.locator('#field-title') })
+        .locator('.field-error')
+
+      await expect(error).toHaveText('Title must be unique')
+      await page.clock.runFor(1000)
+      await expect(error).toHaveText('Title must be unique')
+      await expect(page.locator('#action-save')).toBeEnabled()
+    } finally {
+      await refresh.cleanup()
+    }
+  })
+
+  test('should wait for a form-state refresh before starting an explicit save', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial value' },
+      overrideAccess: true,
+    })
+
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const saved = Promise.withResolvers<Record<string, unknown>>()
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let saveCount = 0
+
+    createdDocs.push({ collection: postsSlug, id: doc.id })
+    releases.add(released.resolve)
+    await page.goto(editURL)
+    await waitForFormReady(page)
+
+    await page.route(
+      (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+      async (route) => {
+        if (
+          route.request().method() !== 'POST' ||
+          !route.request().postData()?.includes('form-state')
+        ) {
+          return route.continue()
+        }
+        const response = await route.fetch()
+
+        captured.resolve()
+        await released.promise
+        await route.fulfill({ response })
+      },
+    )
+
+    await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      saveCount += 1
+      saved.resolve(readSubmittedData({ body: route.request().postData() ?? '' }))
+      await route.fulfill({ response: await route.fetch() })
+    })
+
+    await page.locator('#field-title').fill('Edited value')
+    await page.clock.runFor(500)
+    await captured.promise
+    await page.locator('#action-save').click()
+    await page.clock.runFor(500)
+    expect(saveCount).toBe(0)
+
+    await expect(page.locator('#action-save')).toBeDisabled()
+    await expect(page.locator('#field-title')).toBeDisabled()
+
+    released.resolve()
+
+    await expect(saved.promise).resolves.toMatchObject({ title: 'Edited value' })
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should submit values merged by the preceding queued autosave', async ({ page }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'ok Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const saved = Promise.withResolvers<Record<string, unknown>>()
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    releases.add(released.resolve)
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
+
+      if (isAutosave) {
+        const response = await route.fetch()
+
+        captured.resolve()
+        await released.promise
+        return route.fulfill({ response })
+      }
+
+      saved.resolve(readSubmittedData({ body: route.request().postData() ?? '' }))
+      await route.fulfill({ response: await route.fetch() })
+    })
+
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    await page.locator('#field-title').fill('ok Updated value')
+    await page.clock.runFor(200)
+    await captured.promise
+    await expect(page.locator('#field-computedTitle')).toHaveValue('ok Initial value')
+
+    await page
+      .locator('form.collection-edit__form')
+      .evaluate((form: HTMLFormElement) => form.requestSubmit())
+
+    released.resolve()
+
+    await expect(saved.promise).resolves.toMatchObject({ computedTitle: 'ok Updated value' })
+    await expect(page.locator('#field-computedTitle')).toHaveValue('ok Updated value')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should clear the saving indicator when an explicit save supersedes a pending autosave', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'ok Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const explicitSaved = Promise.withResolvers<void>()
+    let didHoldAutosave = false
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    releases.add(released.resolve)
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
+
+      if (isAutosave && !didHoldAutosave) {
+        didHoldAutosave = true
+        captured.resolve()
+        await released.promise
+      }
+
+      const response = await route.fetch()
+      await route.fulfill({ response })
+
+      if (!isAutosave) {
+        explicitSaved.resolve()
+      }
+    })
+
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    await page.locator('#field-title').fill('ok First autosave')
+    await page.clock.runFor(200)
+    await captured.promise
+    await page.locator('#field-title').fill('ok Pending autosave')
+    await page.clock.runFor(1000)
+    await expect(page.locator('.autosave')).toBeVisible()
+
+    await page.locator('form.collection-edit__form').evaluate((form: HTMLFormElement) => {
+      form.requestSubmit()
+    })
+
+    released.resolve()
+
+    await explicitSaved.promise
+    await expect(page.locator('.collection-edit__form')).toHaveAttribute('data-form-ready', 'true')
+    await page.clock.runFor(2000)
+    await expect(page.locator('.autosave')).toBeHidden()
+  })
+
+  test('should not allow saving a draft while a publish is queued', async ({ page }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'ok Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const editURL = new AdminUrlUtil(serverURL, draftPostsSlug).edit(doc.id)
+    const statuses: unknown[] = []
+
+    createdDocs.push({ collection: draftPostsSlug, id: doc.id })
+    releases.add(released.resolve)
+    await page.goto(editURL)
+    await waitForFormReady(page)
+
+    await page.route(
+      (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+      async (route) => {
+        if (
+          route.request().method() !== 'POST' ||
+          !route.request().postData()?.includes('form-state')
+        ) {
+          return route.continue()
+        }
+        const response = await route.fetch()
+
+        captured.resolve()
+        await released.promise
+        await route.fulfill({ response })
+      },
+    )
+
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      statuses.push(readSubmittedData({ body: route.request().postData() ?? '' })._status)
+      await route.fulfill({ response: await route.fetch() })
+    })
+
+    await page.locator('#field-title').fill('ok Published value')
+    await page.clock.runFor(500)
+    await captured.promise
+    await page.locator('#action-save').click()
+    await expect(page.locator('#action-save-draft')).toBeDisabled()
+
+    released.resolve()
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    expect(statuses).toEqual(['published'])
+  })
+
+  test('should keep the form disabled when an autosave settles while a save is queued', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'ok Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    const autosaveCaptured = Promise.withResolvers<void>()
+    const autosaveReleased = Promise.withResolvers<void>()
+    const saveCaptured = Promise.withResolvers<void>()
+    const saveReleased = Promise.withResolvers<void>()
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    releases.add(autosaveReleased.resolve)
+    releases.add(saveReleased.resolve)
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
+      const response = await route.fetch()
+
+      if (isAutosave) {
+        autosaveCaptured.resolve()
+        await autosaveReleased.promise
+      } else {
+        saveCaptured.resolve()
+        await saveReleased.promise
+      }
+
+      await route.fulfill({ response })
+    })
+
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    const title = page.locator('#field-title')
+
+    await title.fill('ok Autosaved value')
+    await page.clock.runFor(200)
+    await autosaveCaptured.promise
+
+    // The save button is inert during autosave, so submit the form directly.
+    await page
+      .locator('form.collection-edit__form')
+      .evaluate((form: HTMLFormElement) => form.requestSubmit())
+
+    await expect(title).toBeDisabled()
+
+    autosaveReleased.resolve()
+
+    await saveCaptured.promise
+    await expect(title).toBeDisabled()
+
+    saveReleased.resolve()
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(title).toBeEnabled()
+  })
+
+  test('should reject submissions until the saved document state is applied', async ({ page }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial value' },
+      overrideAccess: true,
+    })
+
+    const saved = Promise.withResolvers<void>()
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+
+    let didSave = false
+    let saveCount = 0
+
+    createdDocs.push({ collection: postsSlug, id: doc.id })
+    releases.add(released.resolve)
+
+    await page.goto(editURL)
+    await waitForFormReady(page)
+
+    await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      saveCount += 1
+      await route.fulfill({ response: await route.fetch() })
+      didSave = true
+      saved.resolve()
+    })
+
+    await page.route(
+      (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+      async (route) => {
+        if (
+          !didSave ||
+          route.request().method() !== 'POST' ||
+          !route.request().postData()?.includes('form-state')
+        ) {
+          return route.continue()
+        }
+
+        const response = await route.fetch()
+
+        captured.resolve()
+
+        await released.promise
+        await route.fulfill({ response })
+      },
+    )
+
+    const title = page.locator('#field-title')
+
+    await title.fill('Saved value')
+    await page.clock.runFor(500)
+    await page.locator('#action-save').click()
+    await saved.promise
+    await captured.promise
+
+    // Fields stay disabled while processing, so only a direct submit can reach the guard here.
+    await page
+      .locator('form.collection-edit__form')
+      .evaluate((form: HTMLFormElement) => form.requestSubmit())
+
+    released.resolve()
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(title).toBeEnabled()
+    await page.clock.runFor(500)
+    await expect(page.locator('.collection-edit__form')).toHaveAttribute('data-form-ready', 'true')
+    expect(saveCount).toBe(1)
+  })
+
+  test.describe('Superseded autosaves', () => {
+    test('should autosave a draft after the publish replacing it fails on the server', async ({
+      page,
+    }) => {
+      const doc = await createPost()
+      const state = await queueAutosaveBehindFormState({ id: doc.id, page })
+      const requests: string[] = []
+
+      await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+        const request = route.request()
+
+        if (request.method() !== 'PATCH') {
+          return route.fallback()
+        }
+
+        if (new URL(request.url()).searchParams.get('autosave') !== 'true') {
+          requests.push('rejected publish')
+          return route.fulfill({
+            contentType: 'application/json',
+            json: { message: 'Publish rejected for regression test' },
+            status: 400,
+          })
+        }
+
+        const data = readSubmittedData({ body: request.postData() ?? '' })
+
+        requests.push(`autosave: ${data.title}`)
+
+        const response = await route.fetch()
+
+        expect(response.ok()).toBe(true)
+        await route.fulfill({ response })
+      })
+
+      await page.locator('#field-title').fill('ok Draft survives a rejected publish')
+      await page.clock.runFor(1000)
+      await expect(page.locator('.autosave')).toBeVisible()
+      await page.locator('#action-save').click()
+
+      const rejected = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          new URL(response.url()).pathname.endsWith(`/${autosavePostsSlug}/${doc.id}`) &&
+          response.status() === 400,
+      )
+
+      state.release()
+      await state.finished
+      await rejected
+      await page.clock.runFor(1000)
+      await expect
+        .poll(async () => (await readPost({ id: doc.id })).title)
+        .toBe('ok Draft survives a rejected publish')
+      expect((await readPost({ id: doc.id }))._status).toBe('draft')
+      expect(requests).toEqual([
+        'rejected publish',
+        'autosave: ok Draft survives a rejected publish',
+      ])
+    })
+
+    test('should recover conditional fields after an autosave failure displaces their refresh', async ({
+      page,
+    }) => {
+      const doc = await createPost()
+      const state = await queueAutosaveBehindFormState({ id: doc.id, page })
+      const status = 400
+      let rejectedAutosaves = 0
+
+      await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+        const request = route.request()
+
+        if (
+          request.method() !== 'PATCH' ||
+          new URL(request.url()).searchParams.get('autosave') !== 'true'
+        ) {
+          return route.fallback()
+        }
+
+        rejectedAutosaves += 1
+        await route.fulfill({ json: { message: 'Autosave rejected' }, status })
+      })
+
+      await page.locator('label[for="field-type-custom"]').click()
+      await expect(page.locator('#field-type-custom')).toBeChecked()
+      await page.clock.runFor(1000)
+
+      const rejected = page.waitForResponse(
+        (response) =>
+          response.status() === status &&
+          response.request().method() === 'PATCH' &&
+          new URL(response.url()).pathname.endsWith(`/${autosavePostsSlug}/${doc.id}`),
+      )
+
+      state.release()
+      await state.finished
+      await rejected
+      await page.clock.runFor(1000)
+      await expect(page.locator('#field-url')).toBeEditable()
+      await expect(page.locator('#field-type-custom')).toBeChecked()
+      await page.clock.runFor(2000)
+      await expect(page.locator('.autosave')).toBeHidden()
+      expect(rejectedAutosaves).toBe(1)
+    })
+
+    async function createPost() {
+      const doc = await payload.create({
+        collection: autosavePostsSlug,
+        data: { title: 'ok Initial title' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+
+      return doc
+    }
+
+    async function queueAutosaveBehindFormState({ id, page }: { id: number | string; page: Page }) {
+      const editURL = new AdminUrlUtil(serverURL, autosavePostsSlug).edit(id)
+
+      await page.goto(editURL)
+      await waitForFormReady(page)
+      await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
+
+      const autosave = await holdResponse({
+        matches: (request) => new URL(request.url()).searchParams.get('autosave') === 'true',
+        method: 'PATCH',
+        page,
+        url: `**/api/${autosavePostsSlug}/${id}**`,
+      })
+
+      releases.add(autosave.release)
+
+      const state = await holdResponse({
+        matches: (request) =>
+          (request.postData() ?? '').includes('checkForStaleData') &&
+          (currentFramework === 'tanstack-start'
+            ? (request.postData() ?? '').includes('form-state')
+            : Boolean(request.headers()['next-action'])),
+        method: 'POST',
+        page,
+        url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+      })
+
+      releases.add(state.release)
+
+      await page.locator('#field-title').fill('ok Saved before the pending edit')
+      await page.clock.runFor(1000)
+      await autosave.captured
+      autosave.release()
+      await autosave.finished
+      await expect(page.locator('#field-computedTitle')).toHaveValue(
+        'ok Saved before the pending edit',
+      )
+      await page.clock.runFor(1000)
+      await expect(page.locator('.autosave')).toBeHidden()
+
+      // Reverting a sibling edit queues a refresh without changing the autosave snapshot.
+      await page.locator('label[for="field-type-custom"]').click()
+      await page.locator('label[for="field-type-internal"]').click()
+      await page.clock.runFor(1000)
+      await state.captured
+
+      return state
+    }
+
+    async function readPost({ id }: { id: number | string }) {
+      const { docs } = await payload.find({
+        collection: autosavePostsSlug,
+        depth: 0,
+        draft: true,
+        where: { id: { equals: id } },
+      })
+
+      return docs[0]!
+    }
+  })
+})
+
+function readFormStateRequest({
+  request,
+}: {
+  request: Request
+}): { data?: Partial<Post>; formState?: FormState } | undefined {
+  const body =
+    currentFramework === 'tanstack-start'
+      ? fromJSON(request.postDataJSON()).data
+      : request.postDataJSON()[0]
+
+  return body?.name === 'form-state' ? body.args : undefined
+}
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
@@ -837,5 +2607,678 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
+
+async function holdResponse({
+  matches,
+  method,
+  page,
+  url,
+}: {
+  matches?: (request: Request) => boolean
+  method: 'PATCH' | 'POST'
+  page: Page
+  url: string
+}) {
+  const captured = Promise.withResolvers<void>()
+  const finished = Promise.withResolvers<void>()
+  const release = Promise.withResolvers<void>()
+  let hasHeldRequest = false
+  const handler = async (route: Route) => {
+    if (
+      route.request().method() !== method ||
+      hasHeldRequest ||
+      (matches && !matches(route.request()))
+    ) {
+      return route.fallback()
+    }
+
+    hasHeldRequest = true
+
+    try {
+      const response = await route.fetch()
+
+      captured.resolve()
+      await release.promise
+      await route.fulfill({ response })
+    } catch (error) {
+      captured.reject(error)
+      await route.abort()
+    } finally {
+      finished.resolve()
+    }
+  }
+
+  await page.route(url, handler)
+
+  return {
+    captured: captured.promise,
+    finished: finished.promise,
+    release: release.resolve,
+    cleanup: async () => {
+      release.resolve()
+      if (hasHeldRequest) {
+        await finished.promise
+      }
+      await page.unroute(url, handler)
+    },
+  }
+}
+
+function readSubmittedData({ body }: { body: string }): Record<string, unknown> {
+  const data = body.match(/name="_payload"\r?\n\r?\n([^\r\n]+)/)?.[1]
+
+  if (!data) {
+    throw new Error('The form request did not contain a serialized payload')
+  }
+
+  return JSON.parse(data) as Record<string, unknown>
+}
+
+test.describe('Block form-state regressions', () => {
+  let payload: PayloadTestSDK<Config>
+  let serverURL: string
+
+  test.beforeAll(async () => {
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+  })
+
+  test('should preserve section edits when adding blocks during autosave (#15226)', async ({
+    page,
+  }) => {
+    const collection = autosaveReorderCorruptionSlug
+    const doc = await payload.create({
+      collection,
+      data: {
+        name: `Original schema ${randomUUID()}`,
+        layout: [
+          { blockType: 'section', title: 'First section' },
+          { blockType: 'section', title: 'Second section' },
+        ],
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    let save: Awaited<ReturnType<typeof holdResponse>> | undefined
+
+    try {
+      await initPage({ page, serverURL })
+      await page.goto(new AdminUrlUtil(serverURL, collection).edit(doc.id))
+      await waitForFormReady(page)
+      await expect(page.locator('#field-layout__0__title')).toHaveValue('First section')
+      await expect(page.locator('#field-layout__1__title')).toHaveValue('Second section')
+
+      save = await holdResponse({
+        method: 'PATCH',
+        page,
+        url: `**/api/${collection}/${doc.id}?**`,
+      })
+      await page.locator('#field-name').fill(`Edited ${randomUUID()}`)
+      await save.captured
+      await addBlock({ blockToSelect: 'Section', fieldName: 'layout', page })
+      await page.locator('#field-layout__0__title').fill('Edited first section')
+      await page.locator('#field-layout__1__title').fill('Edited second section')
+      save.release()
+
+      const added = page.locator('#field-layout__2__title')
+
+      await expect(added).toBeEditable()
+      await added.fill('Added third section')
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection,
+            draft: true,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          const rows = docs[0]?.layout ?? []
+
+          return {
+            hasAssignedIDs: rows.every(({ id }) => typeof id === 'string' && id.length > 0),
+            originalIDs: rows.slice(0, 2).map(({ id }) => id),
+            titles: rows.map(({ title }) => title),
+            uniqueIDs: new Set(rows.map(({ id }) => id)).size,
+          }
+        })
+        .toEqual({
+          hasAssignedIDs: true,
+          originalIDs: doc.layout!.map(({ id }) => id),
+          titles: ['Edited first section', 'Edited second section', 'Added third section'],
+          uniqueIDs: 3,
+        })
+
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(page.locator('#field-layout__0__title')).toHaveValue('Edited first section')
+      await expect(page.locator('#field-layout__1__title')).toHaveValue('Edited second section')
+      await expect(page.locator('#field-layout__2__title')).toHaveValue('Added third section')
+    } finally {
+      await save?.cleanup()
+      await payload.delete({ collection, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should preserve block identities and values when adding and reordering during autosave (#15226)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        blocks: [
+          { blockType: 'text', text: 'First block' },
+          { blockType: 'text', text: 'Second block' },
+        ],
+        title: 'Block collisions',
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+    let save: Awaited<ReturnType<typeof holdResponse>> | undefined
+
+    try {
+      await initPage({ page, serverURL })
+      await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+      await waitForFormReady(page)
+
+      save = await holdResponse({
+        method: 'PATCH',
+        page,
+        url: `**/api/${autosavePostsSlug}/${doc.id}?**`,
+      })
+
+      await page.locator('#field-blocks__0__text').fill('Edited first block')
+      await save.captured
+      await reorderBlocks({ fromBlockIndex: 1, page, toBlockIndex: 0 })
+      await expect(page.locator('#field-blocks__0__text')).toHaveValue('Second block')
+      await addBlock({ blockToSelect: 'Text', fieldName: 'blocks', page })
+      await page.locator('#field-blocks__0__text').fill('Edited second block')
+
+      save.release()
+
+      const addedField = page.locator('#field-blocks__2__text')
+
+      await expect(addedField).toBeVisible()
+      await addedField.fill('New third block')
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: autosavePostsSlug,
+            draft: true,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          const blocks = docs[0]?.blocks ?? []
+
+          return {
+            hasAssignedIDs: blocks.every(({ id }) => typeof id === 'string' && id.length > 0),
+            existingIDs: blocks.slice(0, 2).map(({ id }) => id),
+            texts: blocks.map(({ text }) => text),
+            uniqueIDs: new Set(blocks.map(({ id }) => id)).size,
+          }
+        })
+        .toEqual({
+          hasAssignedIDs: true,
+          existingIDs: [doc.blocks![1]!.id, doc.blocks![0]!.id],
+          texts: ['Edited second block', 'Edited first block', 'New third block'],
+          uniqueIDs: 3,
+        })
+
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(page.locator('#field-blocks .blocks-field__row')).toHaveCount(3)
+      await expect(page.locator('#field-blocks__0__text')).toHaveValue('Edited second block')
+      await expect(page.locator('#field-blocks__1__text')).toHaveValue('Edited first block')
+      await expect(page.locator('#field-blocks__2__text')).toHaveValue('New third block')
+    } finally {
+      await save?.cleanup()
+      await payload.delete({ collection: autosavePostsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should render editable block fields after an older form-state response returns (#18638)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Before adding' },
+      overrideAccess: true,
+    })
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let refresh: Awaited<ReturnType<typeof holdResponse>> | undefined
+
+    try {
+      await initPage({ page, serverURL })
+      await page.goto(editURL)
+      await waitForFormReady(page)
+
+      refresh = await holdResponse({
+        matches: (request) => (request.postData() ?? '').includes('checkForStaleData'),
+        method: 'POST',
+        page,
+        url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+      })
+
+      await page.locator('#field-title').fill('Typed before adding')
+      await refresh.captured
+      await addBlock({ blockToSelect: 'Text', fieldName: 'blocks', page })
+      refresh.release()
+
+      const text = page.locator('#field-blocks__0__text')
+
+      await expect(text).toBeVisible()
+      await expect(text).toBeEditable()
+      await text.fill('Editable without reloading')
+      await saveDocAndAssert(page)
+
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.blocks
+        })
+        .toMatchObject([{ blockType: 'text', text: 'Editable without reloading' }])
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(text).toHaveValue('Editable without reloading')
+    } finally {
+      await refresh?.cleanup()
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should render block fields when edits are reverted during their pending refresh', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Before editing' },
+      overrideAccess: true,
+    })
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let refresh: Awaited<ReturnType<typeof holdResponse>> | undefined
+    let refreshCount = 0
+
+    try {
+      await page.clock.install()
+      await initPage({ page, serverURL })
+      await page.goto(editURL)
+      await waitForFormReady(page)
+      await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 100)
+      refresh = await holdResponse({
+        matches: (request) => (request.postData() ?? '').includes('checkForStaleData'),
+        method: 'POST',
+        page,
+        url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+      })
+
+      page.on('request', (request) => {
+        if (request.method() === 'POST' && request.postData()?.includes('checkForStaleData')) {
+          refreshCount += 1
+        }
+      })
+
+      await page.locator('#field-title').fill('A')
+      await addBlock({ blockToSelect: 'Text', fieldName: 'blocks', page })
+      await page.clock.runFor(1000)
+      await refresh.captured
+      await page.locator('#field-title').fill('AB')
+      await page.locator('#field-title').fill('A')
+      await page.clock.runFor(1000)
+      refresh.release()
+      await refresh.finished
+      await page.clock.resume()
+
+      await expect(page.locator('#field-blocks__0__text')).toBeEditable()
+      await page.clock.runFor(1000)
+      expect(refreshCount).toBe(2)
+    } finally {
+      await refresh?.cleanup()
+      await page.unrouteAll({ behavior: 'ignoreErrors' })
+      await payload.delete({ collection: postsSlug, id: doc.id, overrideAccess: true })
+    }
+  })
+
+  test('should keep server-filtered rows removed on the next autosave', async ({ page }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: {
+        blocks: [
+          { blockType: 'text', text: 'First block' },
+          { blockType: 'text', text: 'Keep this block' },
+        ],
+        title: 'ok Server-filtered blocks',
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    try {
+      await initPage({ page, serverURL })
+      await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-blocks__0__text').fill('Remove on server')
+      await expect(page.locator('#field-blocks__0__text')).toHaveValue('Keep this block')
+      await expect(page.locator('#field-blocks__1__text')).toHaveCount(0)
+
+      const saved = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          response.url().includes(`/api/${autosavePostsSlug}/${doc.id}`) &&
+          Boolean(response.request().postData()?.includes('Trigger the next autosave')),
+      )
+
+      await page.locator('#field-content').fill('Trigger the next autosave')
+
+      const response = await saved
+      const data = readSubmittedData({ body: response.request().postData() ?? '' })
+
+      expect(response.ok()).toBe(true)
+      expect(data.blocks).toEqual([
+        expect.objectContaining({ id: doc.blocks![1]!.id, text: 'Keep this block' }),
+      ])
+      await expect
+        .poll(async () => {
+          const response = await page.request.get(
+            formatAdminURL({
+              apiRoute: '/api',
+              path: `/${autosavePostsSlug}/${doc.id}`,
+              serverURL,
+            }),
+            { params: { depth: 0, draft: true } },
+          )
+          const document = await response.json()
+
+          return document.blocks?.map(({ id, text }: { id: string; text: string }) => ({
+            id,
+            text,
+          }))
+        })
+        .toEqual([{ id: doc.blocks![1]!.id, text: 'Keep this block' }])
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(page.locator('#field-blocks__0__text')).toHaveValue('Keep this block')
+      await expect(page.locator('#field-blocks__1__text')).toHaveCount(0)
+    } finally {
+      await payload.delete({ id: doc.id, collection: autosavePostsSlug, overrideAccess: true })
+    }
+  })
+})
+
+test.describe('Document submission outcomes', () => {
+  let payload: PayloadTestSDK<Config>
+  let serverURL: string
+  let url: AdminUrlUtil
+  const releases = new Set<() => void>()
+  const createdIDs = new Set<Config['collections'][typeof draftPostsSlug]['id']>()
+
+  test.beforeAll(async () => {
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    url = new AdminUrlUtil(serverURL, draftPostsSlug)
+  })
+
+  test.beforeEach(async ({ page }) => {
+    await initPage({ page, serverURL })
+  })
+
+  test.afterEach(async ({ page }) => {
+    releases.forEach((release) => release())
+    releases.clear()
+    await page.unrouteAll({ behavior: 'ignoreErrors' })
+
+    for (const id of createdIDs) {
+      await payload.delete({ id, collection: draftPostsSlug, overrideAccess: true })
+    }
+
+    createdIDs.clear()
+  })
+
+  test('should save and reload a draft without another edit after a failed publish (#17517)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'Before the rejected publish' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    createdIDs.add(doc.id)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}?**`, async (route) => {
+      if (
+        route.request().method() !== 'PATCH' ||
+        readSubmittedData({ body: route.request().postData() ?? '' })._status !== 'published'
+      ) {
+        return route.continue()
+      }
+
+      await route.fulfill({
+        status: 400,
+        json: {
+          errors: [
+            {
+              data: { errors: [{ path: 'title', message: 'Title is required' }] },
+              message: 'The following field is invalid: title',
+            },
+          ],
+        },
+      })
+    })
+
+    await page.locator('#field-title').fill('')
+    await page.locator('#field-content').fill('Unsaved work after a failed publish')
+    await page.getByRole('button', { name: 'Publish changes', exact: true }).click()
+    await expect(page.locator('.field-error', { hasText: 'Title is required' })).toBeVisible()
+
+    const saveDraft = page.locator('#action-save-draft')
+
+    await expect(saveDraft).toBeEnabled()
+
+    const saved = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${draftPostsSlug}/${doc.id}`) &&
+        response.ok(),
+    )
+
+    await saveDraft.click()
+    await saved
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('#document-info-state')).toHaveAttribute('data-title-valid', 'true')
+
+    await expect
+      .poll(async () => {
+        const { docs } = await payload.find({
+          collection: draftPostsSlug,
+          draft: true,
+          overrideAccess: true,
+          where: { id: { equals: doc.id } },
+        })
+
+        return docs[0]
+      })
+      .toMatchObject({
+        _status: 'draft',
+        content: 'Unsaved work after a failed publish',
+        title: '',
+      })
+    await page.reload()
+    await waitForFormReady(page)
+    await expect(page.locator('#field-content')).toHaveValue('Unsaved work after a failed publish')
+    await expect(page.locator('#field-title')).toHaveValue('')
+  })
+
+  test('should show radio-dependent fields after an older form-state response returns (#18425)', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'Conditional fields', type: 'internal' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const editURL = url.edit(doc.id)
+    let refresh: Awaited<ReturnType<typeof holdResponse>> | undefined
+
+    createdIDs.add(doc.id)
+
+    try {
+      await page.goto(editURL)
+      await waitForFormReady(page)
+
+      refresh = await holdResponse({
+        matches: (request) => (request.postData() ?? '').includes('checkForStaleData'),
+        method: 'POST',
+        page,
+        url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : editURL,
+      })
+
+      await page.locator('#field-content').fill('Typed before choosing custom')
+      await refresh.captured
+      await page.locator('label[for="field-type-custom"]').click()
+      refresh.release()
+
+      await expect(page.locator('#field-type-custom')).toBeChecked()
+      await expect(page.locator('#field-url')).toBeVisible()
+      await expect(page.locator('#field-url')).toBeEditable()
+    } finally {
+      await refresh?.cleanup()
+    }
+  })
+
+  test('should count a saved draft when slug generation makes its response stale', async ({
+    page,
+  }) => {
+    const suffix = randomUUID()
+    const title = `ok Late ${suffix}`
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { slug: `original-${suffix}`, _status: 'published', title: `ok Published ${suffix}` },
+      overrideAccess: true,
+    })
+
+    createdIDs.add(doc.id)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    await expect(page.locator('.status__value')).toHaveText('Published')
+    await expect(page.locator('.pill-version-count')).toHaveText('1')
+    await page.locator('#field-title').fill(title)
+    await page.locator('#field-slug-lock').click()
+
+    const slug = await holdResponse({
+      matches: (request) => (request.postData() ?? '').includes('slugify'),
+      method: 'POST',
+      page,
+      url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : page.url(),
+    })
+
+    releases.add(slug.release)
+
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+
+    releases.add(released.resolve)
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}?**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+
+      const response = await route.fetch()
+
+      expect(response.ok()).toBe(true)
+      captured.resolve()
+      await released.promise
+      await route.fulfill({ response })
+    })
+    await page.locator('#field-slug-generate').click()
+    await slug.captured
+    await page.locator('#action-save-draft').click()
+    await captured.promise
+    slug.release()
+    await expect(page.locator('#field-slug')).toHaveValue(`ok-late-${suffix}`)
+    released.resolve()
+    await expect(page.locator('.status__value')).toHaveText('Changed')
+    await expect(page.locator('.pill-version-count')).toHaveText('2')
+    await expect(page.locator('#field-slug')).toHaveValue(`ok-late-${suffix}`)
+    await expect(page.locator('#action-save-draft')).toBeEnabled()
+
+    const { docs } = await payload.find({
+      collection: draftPostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(docs[0]).toMatchObject({ slug: doc.slug, _status: 'draft', title })
+  })
+
+  test('should ignore save callbacks after resetting during the post-save refresh', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: `ok Before save ${randomUUID()}` },
+      draft: true,
+      overrideAccess: true,
+    })
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    let hasCaptured = false
+
+    createdIDs.add(doc.id)
+    releases.add(released.resolve)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    const documentState = page.locator('#document-info-state')
+    const originalData = (await documentState.getAttribute('data-document-data')) ?? ''
+
+    await page.route(`**/api/${draftPostsSlug}/access/${doc.id}**`, async (route) => {
+      const response = await route.fetch()
+
+      if (!hasCaptured) {
+        hasCaptured = true
+        captured.resolve()
+        await released.promise
+        await route.fulfill({
+          response,
+          json: { ...(await response.json()), update: false },
+        })
+
+        return
+      }
+
+      await route.fulfill({ response })
+    })
+
+    await page.locator('#field-title').fill('ok Saved before reset')
+    await page.locator('#action-save-draft').click()
+    await captured.promise
+    await page.locator('#reset-form-state').click()
+    await page.locator('#field-title').fill('ok Edited after reset')
+
+    const refresh = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        (response.request().postData() ?? '').includes('form-state') &&
+        (response.request().postData() ?? '').includes('ok Edited after reset'),
+    )
+
+    released.resolve()
+    await refresh
+    await expect(documentState).toHaveAttribute('data-document-data', originalData)
+    await expect(page.locator('#field-title')).toHaveValue('ok Edited after reset')
+    await expect(page.locator('#action-save-draft')).toBeEnabled()
+  })
+})

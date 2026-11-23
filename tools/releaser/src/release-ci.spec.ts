@@ -5,6 +5,7 @@ import { runReleaseCi } from './release-ci.js'
 const defaultTriggerTag: string | undefined = 'v4.0.0-beta.10'
 
 const baseDeps = () => ({
+  addDistTag: vi.fn(async (_args: { name: string; tag: string; version: string }) => {}),
   createDraftGitHubRelease: vi.fn(async () => ({ releaseUrl: 'https://gh/release' })),
   findChangelogBaseTag: vi.fn(async () => 'v4.0.0-beta.9'),
   generateReleaseNotes: vi.fn(async () => ({
@@ -24,6 +25,8 @@ const baseDeps = () => ({
 const makeDeps = (
   over: Partial<ReturnType<typeof baseDeps>> = {},
 ): ReturnType<typeof baseDeps> => ({ ...baseDeps(), ...over })
+
+const betaVersion = '4.0.0-beta.10'
 
 describe('runReleaseCi', () => {
   it('should build, publish, generate notes, and create a draft in order', async () => {
@@ -51,15 +54,75 @@ describe('runReleaseCi', () => {
     expect(publishOrder).toBeGreaterThan(buildOrder)
   })
 
-  it('should derive the beta dist-tag from a beta version', async () => {
-    const deps = makeDeps({
-      triggerTag: 'v4.0.0-beta.3',
-      workspace: {
-        build: vi.fn(async () => {}),
-        publish: vi.fn(async () => {}),
-        version: vi.fn(async () => '4.0.0-beta.3'),
-      },
+  it('should point latest at each package without a stable release after publish', async () => {
+    const deps = makeDeps()
+
+    await runReleaseCi({ deps, dryRun: false })
+
+    expect(deps.addDistTag.mock.calls.map(([args]) => args)).toEqual([
+      { name: '@payloadcms/codemod', tag: 'latest', version: betaVersion },
+      { name: '@payloadcms/tanstack-start', tag: 'latest', version: betaVersion },
+      { name: '@payloadcms/transformer-sharp', tag: 'latest', version: betaVersion },
+    ])
+
+    const publishOrder = deps.workspace.publish.mock.invocationCallOrder[0]
+    const tagOrder = deps.addDistTag.mock.invocationCallOrder[0]
+    const draftOrder = deps.createDraftGitHubRelease.mock.invocationCallOrder[0]
+    expect(tagOrder).toBeGreaterThan(publishOrder)
+    expect(draftOrder).toBeGreaterThan(tagOrder)
+  })
+
+  it('should retry a failed dist-tag once', async () => {
+    const addDistTag = vi
+      .fn(async (_args: { name: string; tag: string; version: string }) => {})
+      .mockRejectedValueOnce(new Error('ECONNRESET'))
+    const deps = makeDeps({ addDistTag })
+
+    await runReleaseCi({ deps, dryRun: false })
+
+    expect(
+      addDistTag.mock.calls.filter(([args]) => args.name === '@payloadcms/codemod'),
+    ).toHaveLength(2)
+    expect(deps.log).toHaveBeenCalledWith(
+      `Pointed dist-tag 'latest' at @payloadcms/codemod@${betaVersion}`,
+    )
+  })
+
+  it('should warn per package and still create the draft when dist-tag keeps failing', async () => {
+    const addDistTag = vi.fn(async (_args: { name: string; tag: string; version: string }) => {
+      throw new Error('E401')
     })
+    const deps = makeDeps({ addDistTag })
+
+    await runReleaseCi({ deps, dryRun: false })
+
+    expect(addDistTag).toHaveBeenCalledTimes(6)
+    expect(deps.log).toHaveBeenCalledWith(
+      `::warning title=dist-tag latest failed::Could not point 'latest' at @payloadcms/codemod@${betaVersion} (E401). Run manually: npm dist-tag add @payloadcms/codemod@${betaVersion} latest`,
+    )
+    expect(deps.log).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `npm dist-tag add @payloadcms/transformer-sharp@${betaVersion} latest`,
+      ),
+    )
+    expect(deps.createDraftGitHubRelease).toHaveBeenCalledOnce()
+  })
+
+  it('should keep the dist-tag warning annotation on one line', async () => {
+    const addDistTag = vi.fn(async (_args: { name: string; tag: string; version: string }) => {
+      throw new Error('Command failed\nE403 100% forbidden')
+    })
+    const deps = makeDeps({ addDistTag })
+
+    await runReleaseCi({ deps, dryRun: false })
+
+    expect(deps.log).toHaveBeenCalledWith(
+      expect.stringContaining('(Command failed%0AE403 100%25 forbidden)'),
+    )
+  })
+
+  it('should derive the beta dist-tag from a beta version', async () => {
+    const deps = makeDeps()
 
     await runReleaseCi({ deps, dryRun: false })
 
@@ -175,7 +238,19 @@ describe('runReleaseCi', () => {
 
     expect(deps.workspace.build).not.toHaveBeenCalled()
     expect(deps.workspace.publish).not.toHaveBeenCalled()
+    expect(deps.addDistTag).not.toHaveBeenCalled()
     expect(deps.createDraftGitHubRelease).not.toHaveBeenCalled()
     expect(deps.generateReleaseNotes).toHaveBeenCalledOnce()
+  })
+
+  it('should log the planned latest moves without tagging in dry-run', async () => {
+    const deps = makeDeps()
+
+    await runReleaseCi({ deps, dryRun: true })
+
+    expect(deps.addDistTag).not.toHaveBeenCalled()
+    expect(deps.log).toHaveBeenCalledWith(
+      `[dry-run] would point dist-tag 'latest' at @payloadcms/tanstack-start@${betaVersion}`,
+    )
   })
 })

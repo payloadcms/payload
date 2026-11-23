@@ -2,7 +2,6 @@
   .document-fields {
     width: 100%;
     display: flex;
-    --doc-sidebar-width: 325px;
   }
 
   .document-fields--has-sidebar {
@@ -12,8 +11,8 @@
   }
 
   .document-fields--has-sidebar:has(
-      .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
-    ) {
+    .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
+  ) {
     --main-width: 100%;
     --main-border: none;
     --main-field-margin: initial;

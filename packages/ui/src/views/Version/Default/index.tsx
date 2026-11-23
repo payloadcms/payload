@@ -35,7 +35,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   versionToCreatedAtFormatted,
   VersionToCreatedAtLabel,
   versionToID,
-  versionToStatus,
 }) => {
   const { config, getEntityConfig } = useConfig()
   const locale = useLocale()
@@ -114,7 +113,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       const search = current.toString()
       const query = search ? `?${search}` : ''
 
-      startRouteTransition(() => router.push(`${pathname}${query}`))
+      void startRouteTransition(() => router.push(`${pathname}${query}`))
     },
     [pathname, router, searchParams, startRouteTransition],
   )
@@ -226,7 +225,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                   globalConfig={globalConfig}
                   label={collectionConfig?.labels.singular || globalConfig?.label}
                   originalDocID={originalDocID}
-                  status={versionToStatus}
                   versionDateFormatted={versionToCreatedAtFormatted}
                   versionID={versionToID}
                 />

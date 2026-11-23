@@ -296,6 +296,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
+    apiResponse: 'Resposta da API',
     applyChanges: 'Aplicar alterações',
     ascending: 'Ascendente',
     auto: 'Automático',
@@ -368,6 +369,13 @@ export const ptTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Este documento foi recentemente atualizado por outro usuário. Sua visualização está desatualizada.',
     documents: 'Documentos',
+    dragCancelled: 'Arrasto de {{label}} cancelado.',
+    dragDropped: '{{label}} largado. Posição {{position}} de {{count}}.',
+    dragInstructions:
+      'Prima Space ou Enter para selecionar uma linha para mover. Utilize as setas para a mover. Com VoiceOver, desative Quick Nav e utilize Command + as setas. Prima Space ou Enter para largar, ou Escape para cancelar.',
+    dragMoved: '{{label}}: {{direction}}. Posição {{position}} de {{count}}.',
+    dragPickedUp: '{{label}} selecionado para mover. Posição {{position}} de {{count}}.',
+    dragToMove: 'Arrastar para mover',
     dragToReorder: 'Arraste para reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sem salvar alterações',
@@ -483,6 +491,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexando todas as {{collections}}.',
     reloadDocument: 'Recarregar documento',
     remove: 'Remover',
+    removeFilter: 'Remover filtro',
     rename: 'Renomear',
     replaceRow: 'Substituir Linha',
     requiredFields: 'Os campos marcados com * são obrigatórios.',
@@ -576,6 +585,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     yes: 'Sim',
   },
   hierarchy: {
+    folderLocation: 'Localização da pasta',
     goTo: 'Ir para "{{name}}"',
     itemsMovedTo: '{{title}} foi movido para {{destination}}',
     itemsMovedToRoot: '{{title}} movido para a raiz',
@@ -636,6 +646,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addFile: 'Adicionar arquivo',
     addFiles: 'Adicionar Arquivos',
     bulkUpload: 'Upload em Massa',
+    cancelUpload: 'Cancelar envio',
     copyLinkToFile: 'Copiar link para o arquivo',
     copyURL: 'Copiar URL',
     crop: 'Cultura',
@@ -657,6 +668,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     fileSize: 'Tamanho do Arquivo',
     filesToUpload: 'Arquivos para Carregar',
     fileToUpload: 'Arquivo para upload',
+    finishSaving: 'Concluir salvamento',
     focalPoint: 'Ponto Focal',
     focalPointDescription:
       'Arraste o ponto focal diretamente na pré-visualização ou ajuste os valores abaixo.',
@@ -671,12 +683,27 @@ export const ptTranslations: DefaultTranslationsObject = {
     previewSizes: 'Tamanhos de Pré-visualização',
     renameFile: 'Renomear arquivo',
     replaceFile: 'Substituir arquivo',
+    resumingFile: 'Retomando {{filename}}',
+    savingInBackground:
+      'O envio será concluído em segundo plano e o documento será salvo nesse momento.',
     selectCollectionToBrowse: 'Selecione uma Coleção para Navegar',
     selectFile: 'Selecione um arquivo',
     setCropArea: 'Definir área de corte',
     setFocalPoint: 'Definir ponto focal',
     sizes: 'Tamanhos',
     sizesFor: 'Tamanhos para {{label}}',
+    uploadFileMismatch: 'O arquivo selecionado não corresponde ao envio interrompido.',
+    uploadingFile: 'Enviando {{filename}}',
+    uploadingFileProgress: 'Enviando {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Um envio ainda está em andamento. Sair agora irá interrompê-lo.',
+    uploadInterrupted: 'O envio de {{filename}} foi interrompido.',
+    uploadInterruptedWillSave:
+      'O envio de {{filename}} foi interrompido. O documento será salvo quando ele terminar.',
+    uploadReadyToFinishSaving:
+      '{{filename}} terminou de ser enviado. Abra o formulário para concluir o salvamento.',
+    uploadSavedInBackground: 'O envio foi concluído e o documento foi salvo.',
+    uploadStorageRejectedSegments:
+      'O armazenamento não aceitou nenhuma parte do envio. Verifique a política CORS do bucket.',
     width: 'Largura',
   },
   validation: {
@@ -712,6 +739,10 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Você está prestes a publicar todos os {{label}} da seleção. Tem certeza?',
     aboutToRestore:
       'Você está prestes a restaurar o documento {{label}} para o estado em que ele se encontrava em {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaure o conteúdo de {{versionDate}} como rascunho. O conteúdo publicado permanecerá inalterado até que o publique a partir do editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaure o conteúdo de {{versionDate}} como rascunho em todos os idiomas. O conteúdo publicado permanecerá inalterado até que o publique a partir do editor.',
     aboutToRestoreGlobal:
       'Você está prestes a restaurar o Global {{label}} para o estado em que ele se encontrava em {{versionDate}}.',
     aboutToRevertToPublished:

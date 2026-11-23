@@ -301,6 +301,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     and: 'En',
     anotherUser: 'Een andere gebruiker',
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
+    apiResponse: 'API-antwoord',
     applyChanges: 'Breng wijzigingen aan',
     ascending: 'Oplopend',
     auto: 'Automatisch',
@@ -373,6 +374,13 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dit document is onlangs bijgewerkt door een andere gebruiker. Uw weergave is verouderd.',
     documents: 'Documenten',
+    dragCancelled: 'Slepen van {{label}} geannuleerd.',
+    dragDropped: '{{label}} neergezet. Positie {{position}} van {{count}}.',
+    dragInstructions:
+      'Druk op Space of Enter om een rij op te pakken. Gebruik de pijltjestoetsen om deze te verplaatsen. Schakel met VoiceOver Quick Nav uit en gebruik Command + pijltjestoetsen. Druk op Space of Enter om neer te zetten, of Escape om te annuleren.',
+    dragMoved: '{{label}}: {{direction}}. Positie {{position}} van {{count}}.',
+    dragPickedUp: '{{label}} opgepakt. Positie {{position}} van {{count}}.',
+    dragToMove: 'Sleep om te verplaatsen',
     dragToReorder: 'Sleep om opnieuw te rangschikken',
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
@@ -487,6 +495,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
+    removeFilter: 'Filter verwijderen',
     rename: 'Hernoemen',
     replaceRow: 'Rij vervangen',
     requiredFields: 'Velden gemarkeerd met * zijn verplicht.',
@@ -580,6 +589,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Maplocatie',
     goTo: 'Ga naar "{{name}}"',
     itemsMovedTo: '{{title}} verplaatst naar {{destination}}',
     itemsMovedToRoot: '{{title}} verplaatst naar root',
@@ -640,6 +650,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
+    cancelUpload: 'Upload annuleren',
     copyLinkToFile: 'Kopieer link naar bestand',
     copyURL: 'Kopieer URL',
     crop: 'Bijsnijden',
@@ -661,6 +672,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     fileSize: 'Bestandsgrootte',
     filesToUpload: 'Bestanden om te uploaden',
     fileToUpload: 'Bestand om te uploaden',
+    finishSaving: 'Opslaan voltooien',
     focalPoint: 'Focuspunt',
     focalPointDescription:
       'Sleep het focuspunt rechtstreeks op de voorvertoning of pas de waarden hieronder aan.',
@@ -675,12 +687,28 @@ export const nlTranslations: DefaultTranslationsObject = {
     previewSizes: 'Voorbeeldgroottes',
     renameFile: 'Bestand hernoemen',
     replaceFile: 'Bestand vervangen',
+    resumingFile: '{{filename}} hervatten',
+    savingInBackground:
+      'De upload wordt op de achtergrond voltooid en het document wordt dan opgeslagen.',
     selectCollectionToBrowse: 'Selecteer een collectie om door te bladeren',
     selectFile: 'Selecteer een bestand',
     setCropArea: 'Stel bijsnijdgebied in',
     setFocalPoint: 'Stel het brandpunt in',
     sizes: 'Groottes',
     sizesFor: 'Maten voor {{label}}',
+    uploadFileMismatch: 'Het geselecteerde bestand komt niet overeen met de onderbroken upload.',
+    uploadingFile: '{{filename}} uploaden',
+    uploadingFileProgress: '{{filename}} uploaden: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Er is nog een upload bezig. Als je nu weggaat, wordt deze onderbroken.',
+    uploadInterrupted: 'De upload van {{filename}} is onderbroken.',
+    uploadInterruptedWillSave:
+      'De upload van {{filename}} is onderbroken. Het document wordt opgeslagen zodra deze klaar is.',
+    uploadReadyToFinishSaving:
+      '{{filename}} is geüpload. Open het formulier om het opslaan te voltooien.',
+    uploadSavedInBackground: 'De upload is voltooid en het document is opgeslagen.',
+    uploadStorageRejectedSegments:
+      'De opslag heeft geen enkel uploaddeel geaccepteerd. Controleer het CORS-beleid van de bucket.',
     width: 'Breedte',
   },
   validation: {
@@ -716,6 +744,10 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Je staat op het punt om alle {{label}} in de selectie te publiceren. Weet je het zeker?',
     aboutToRestore:
       'U staat op het punt dit {{label}} document te herstellen in de staat waarin het zich bevond op {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Herstel de inhoud van {{versionDate}} als concept. Gepubliceerde inhoud blijft ongewijzigd totdat u deze vanuit de editor publiceert.',
+    aboutToRestoreAsDraftAllLocales:
+      'Herstel de inhoud van {{versionDate}} als concept in alle talen. Gepubliceerde inhoud blijft ongewijzigd totdat u deze vanuit de editor publiceert.',
     aboutToRestoreGlobal:
       'U staat op het punt om de global {{label}} te herstellen in de staat waarin het zich bevond op {{versionDate}}.',
     aboutToRevertToPublished:

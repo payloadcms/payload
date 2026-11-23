@@ -12,11 +12,13 @@ import {
   useConfig,
   useEditDepth,
   useLocale,
+  useModal,
   useTranslation,
   WriteIcon,
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
 import {
+  $getNodeByKey,
   $getSelection,
   $isLineBreakNode,
   $isRangeSelection,
@@ -26,6 +28,7 @@ import {
   getDOMSelection,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -42,6 +45,7 @@ import { getSelectedNode } from '../../../../../../lexical/utils/getSelectedNode
 import { setFloatingElemPositionForLinkEditor } from '../../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
 import { FieldsDrawer } from '../../../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDrawer } from '../../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../../../utilities/mergeNodeFields.js'
 import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
@@ -57,6 +61,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   // TO-DO: There are several states that should not be state, because they
   // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
   const [linkNode, setLinkNode] = useState<LinkNode>()
+  const linkNodeKey = linkNode?.getKey()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const selectedNodeRectRef = useRef<DOMRect | null>(null)
@@ -90,6 +95,28 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   })
 
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { modalState } = useModal()
+  const isDrawerOpen = Boolean(modalState[drawerSlug]?.isOpen)
+
+  const handleDrawerInitialize = useCallback(
+    ({ formState }: { formState: FormState }) => {
+      const { text: _text, ...nodeFormState } = formState
+
+      editor.update(
+        () => {
+          const node = linkNodeKey ? $getNodeByKey(linkNodeKey) : null
+
+          if ($isLinkNode(node)) {
+            node.setFields(
+              mergeNodeFields({ currentFields: node.getFields(), formState: nodeFormState }),
+            )
+          }
+        },
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
+    },
+    [editor, linkNodeKey],
+  )
 
   const setNotLink = useCallback(() => {
     setIsLink(false)
@@ -105,6 +132,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
   const $updateLinkEditor = useCallback(() => {
+    // The drawer owns the in-progress edit until it closes, including its selected nodes.
+    if (isDrawerOpen) {
+      return
+    }
+
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined
 
@@ -173,7 +205,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }
 
         const loadingLabel = t('fields:linkedTo', {
-          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis', i18n)}`,
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis')}`,
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(loadingLabel)
 
@@ -208,7 +240,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           })
           .catch(() => {
             const label = t('fields:linkedTo', {
-              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)} - ID: ${id}`,
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled')} - ID: ${id}`,
             }).replace(/<[^>]*>?/g, '')
             setLinkLabel(label)
           })
@@ -262,6 +294,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     return true
   }, [
     editor,
+    isDrawerOpen,
     setNotLink,
     config.routes.admin,
     config.routes.api,
@@ -429,6 +462,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         drawerSlug={drawerSlug}
         drawerTitle={t('fields:editLink')}
         featureKey="link"
+        handleDrawerInitialize={handleDrawerInitialize}
         handleDrawerSubmit={(fields: FormState, data: Data) => {
           const newLinkPayload = data as { text: string } & LinkFields
 

@@ -49,13 +49,14 @@ import {
   createDatabase,
   createExtensions,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
+  findDocumentLocks,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -66,6 +67,8 @@ import type { Args, VercelPostgresAdapter } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({ from: import.meta.url })
 
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -125,6 +128,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         json: true,
       },
       fieldConstraints: {},
+      findDocumentLocks,
       forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
       foreignKeys: new Set(),
       generateSchema: createSchemaGenerator({

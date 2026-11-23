@@ -279,7 +279,7 @@ const resolveWherePath = ({
   if (schemaPath === 'relationTo') {
     return {
       type: 'scalar',
-      column: sql`${collection}`,
+      column: adapter.name === 'postgres' ? sql`cast(${collection} as text)` : sql`${collection}`,
       pathPlan,
       queryValueContext: {
         type: 'scalar',
@@ -325,7 +325,11 @@ const resolveWherePath = ({
 
   return {
     type: 'scalar',
-    column: fieldContext ? table[pathPlan.columnPath] : sql`null`,
+    column: fieldContext
+      ? fieldContext.isLocalized
+        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][pathPlan.columnPath]
+        : table[pathPlan.columnPath]
+      : sql`null`,
     fieldContext,
     pathPlan,
     queryValueContext,

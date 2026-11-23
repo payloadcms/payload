@@ -288,6 +288,7 @@ export const faTranslations: DefaultTranslationsObject = {
     and: 'و',
     anotherUser: 'کاربر دیگر',
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',
+    apiResponse: 'پاسخ API',
     applyChanges: 'اعمال تغییرات',
     ascending: 'صعودی',
     auto: 'خودکار',
@@ -359,6 +360,13 @@ export const faTranslations: DefaultTranslationsObject = {
     documentModified: 'سند تغییر یافته',
     documentOutOfDate: 'این سند اخیراً توسط کاربر دیگری به روز شده است. نمایش شما به روز نیست.',
     documents: 'اسناد',
+    dragCancelled: 'کشیدن {{label}} لغو شد.',
+    dragDropped: '{{label}} رها شد. موقعیت {{position}} از {{count}}.',
+    dragInstructions:
+      'برای برداشتن یک ردیف، Space یا Enter را فشار دهید. برای جابه‌جایی از کلیدهای جهت‌نما استفاده کنید. در VoiceOver، Quick Nav را خاموش کنید و از Command همراه کلیدهای جهت‌نما استفاده کنید. برای رها کردن Space یا Enter و برای لغو Escape را فشار دهید.',
+    dragMoved: '{{label}}: {{direction}}. موقعیت {{position}} از {{count}}.',
+    dragPickedUp: '{{label}} برداشته شد. موقعیت {{position}} از {{count}}.',
+    dragToMove: 'برای جابه‌جایی بکشید',
     dragToReorder: 'برای تغییر ترتیب، بکشید و رها کنید',
     duplicate: 'ایجاد کپی',
     duplicateWithoutSaving: 'ایجاد کپی بدون ذخیره تغییرات',
@@ -472,6 +480,7 @@ export const faTranslations: DefaultTranslationsObject = {
     reindexingAll: 'در حال ایندکس مجدد همه {{collections}}...',
     reloadDocument: 'بارگذاری مجدد سند',
     remove: 'حذف',
+    removeFilter: 'حذف فیلتر',
     rename: 'تغییر نام',
     replaceRow: 'جایگزینی سطر',
     requiredFields: 'تکمیل فیلدهای دارای علامت * الزامی است.',
@@ -564,6 +573,7 @@ export const faTranslations: DefaultTranslationsObject = {
     yes: 'بله',
   },
   hierarchy: {
+    folderLocation: 'محل پوشه',
     goTo: 'به "{{name}}" بروید.',
     itemsMovedTo: '{{title}} به {{destination}} منتقل شد.',
     itemsMovedToRoot: '{{title}} به ریشه منتقل شد',
@@ -624,6 +634,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addFile: 'افزودن فایل',
     addFiles: 'افزودن فایل‌ها',
     bulkUpload: 'آپلود گروهی',
+    cancelUpload: 'لغو بارگذاری',
     copyLinkToFile: 'کپی پیوند به فایل',
     copyURL: 'کپی URL',
     crop: 'برش',
@@ -645,6 +656,7 @@ export const faTranslations: DefaultTranslationsObject = {
     fileSize: 'حجم فایل',
     filesToUpload: 'فایل‌ها برای آپلود',
     fileToUpload: 'فایل برای آپلود',
+    finishSaving: 'پایان ذخیره‌سازی',
     focalPoint: 'نقطه کانونی',
     focalPointDescription: 'نقطه کانونی را مستقیماً روی تصویر بکشید یا مقادیر زیر را تنظیم کنید.',
     fromURL: 'بارگذاری فایل از طریق نشانی اینترنتی',
@@ -658,12 +670,26 @@ export const faTranslations: DefaultTranslationsObject = {
     previewSizes: 'اندازه‌های پیش‌نمایش',
     renameFile: 'تغییر نام فایل',
     replaceFile: 'جایگزینی فایل',
+    resumingFile: 'در حال ازسرگیری {{filename}}',
+    savingInBackground: 'بارگذاری در پس‌زمینه تمام می‌شود و سپس سند ذخیره خواهد شد.',
     selectCollectionToBrowse: 'یک مجموعه را برای مرور انتخاب کنید',
     selectFile: 'انتخاب فایل',
     setCropArea: 'تنظیم ناحیه برش',
     setFocalPoint: 'تنظیم نقطه کانونی',
     sizes: 'اندازه‌ها',
     sizesFor: 'اندازه‌ها برای {{label}}',
+    uploadFileMismatch: 'فایل انتخاب‌شده با بارگذاری قطع‌شده مطابقت ندارد.',
+    uploadingFile: 'در حال بارگذاری {{filename}}',
+    uploadingFileProgress: 'در حال بارگذاری {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'یک بارگذاری هنوز در حال انجام است. خروج در این لحظه آن را قطع می‌کند.',
+    uploadInterrupted: 'بارگذاری {{filename}} قطع شد.',
+    uploadInterruptedWillSave: 'بارگذاری {{filename}} قطع شد. سند پس از پایان آن ذخیره خواهد شد.',
+    uploadReadyToFinishSaving:
+      'بارگذاری {{filename}} تمام شد. برای پایان ذخیره‌سازی، فرم را باز کنید.',
+    uploadSavedInBackground: 'بارگذاری تمام شد و سند ذخیره شد.',
+    uploadStorageRejectedSegments:
+      'فضای ذخیره‌سازی هیچ بخشی از بارگذاری را نپذیرفت. سیاست CORS باکت را بررسی کنید.',
     width: 'عرض',
   },
   validation: {
@@ -698,6 +724,10 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'آیا از انتشار تمام {{label}} انتخاب شده مطمئن هستید؟',
     aboutToRestore:
       'شما در حال بازگردانی این {{label}} به نسخه‌ای هستید که در تاریخ {{versionDate}} ذخیره شده است. آیا ادامه می‌دهید؟',
+    aboutToRestoreAsDraft:
+      'محتوای {{versionDate}} را به‌صورت پیش‌نویس بازیابی کنید. محتوای منتشرشده تا زمانی که از ویرایشگر منتشر نکنید، بدون تغییر باقی می‌ماند.',
+    aboutToRestoreAsDraftAllLocales:
+      'محتوای {{versionDate}} را در همه زبان‌ها به‌صورت پیش‌نویس بازیابی کنید. محتوای منتشرشده تا زمانی که از ویرایشگر منتشر نکنید، بدون تغییر باقی می‌ماند.',
     aboutToRestoreGlobal:
       'شما در حال بازگردانی {{label}} به نسخه مربوط به تاریخ {{versionDate}} هستید. آیا ادامه می‌دهید؟',
     aboutToRevertToPublished:

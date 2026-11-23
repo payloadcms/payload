@@ -1,11 +1,11 @@
 @layer payload-default {
   .nav-group {
     width: 100%;
-    padding: var(--spacer-2) 0;
-    border-top: var(--stroke-width-small) solid var(--color-border);
+    padding-block: var(--spacer-2);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
 
     &:first-child {
-      border-top: none;
+      border-block-start: none;
     }
   }
 
@@ -79,5 +79,39 @@
 
   .nav-group--collapsed .nav-group__content {
     padding-bottom: 0;
+  }
+
+  /* Keep these rules flat so :host does not raise nested document selector specificity. */
+  html[data-enhanced-contrast] .nav-group,
+  :host([data-enhanced-contrast]) .nav-group {
+    padding-block: 0;
+    border-block-start: 0;
+  }
+
+  html[data-enhanced-contrast] .nav-group:first-child,
+  :host([data-enhanced-contrast]) .nav-group:first-child {
+    padding-block-start: var(--spacer-2-5);
+  }
+
+  html[data-enhanced-contrast]
+    .nav-group.nav-group--collapsed:has(~ .nav-group)
+    > .nav-group__toggle,
+  :host([data-enhanced-contrast])
+    .nav-group.nav-group--collapsed:has(~ .nav-group)
+    > .nav-group__toggle {
+    border-block-end: 0;
+  }
+
+  html[data-enhanced-contrast] .nav-group__toggle,
+  :host([data-enhanced-contrast]) .nav-group__toggle {
+    color: var(--color-text);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    border-block: var(--stroke-width-small) solid var(--color-border-control);
+  }
+
+  html[data-enhanced-contrast] .nav-group__toggle .nav-group__indicator,
+  :host([data-enhanced-contrast]) .nav-group__toggle .nav-group__indicator {
+    opacity: 1;
+    color: var(--color-icon-primary);
   }
 }

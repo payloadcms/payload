@@ -21,6 +21,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 export { useQueue } from '../../hooks/useQueue.js'
+export type { QueueResult, Task, TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
@@ -41,7 +42,7 @@ export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/Where
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
 export { CollectionCardsClient } from '../../widgets/CollectionCards/index.client.js'
 export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
-export { RecentlyViewedCollectionsField } from '../../widgets/RecentlyViewed/CollectionsField/index.js'
+export { CollectionFilter } from '../../widgets/shared/CollectionFilter/index.js'
 export { UploadDropzoneCollectionsField } from '../../widgets/UploadDropzone/CollectionsField/index.js'
 export { UploadDropzoneWidgetClient } from '../../widgets/UploadDropzone/index.client.js'
 export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'
@@ -404,7 +405,7 @@ export { FolderIcon } from '../../icons/Folder/index.js'
 export { GearIcon } from '../../icons/Gear/index.js'
 export { DocumentIcon } from '../../icons/Document/index.js'
 export { MoveFolderIcon } from '../../icons/MoveFolder/index.js'
-export { RecentsAndPinnedClient } from '../../widgets/RecentlyViewed/index.client.js'
+export { ActivityWidgetClient } from '../../widgets/Activity/index.client.js'
 export { GridViewIcon } from '../../icons/GridView/index.js'
 export { TableIcon } from '../../icons/Table/index.js'
 export { WriteIcon } from '../../icons/Write/index.js'
@@ -460,6 +461,7 @@ export {
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
+export { PageLocaleProvider } from '../../providers/PageLocale/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export {
   FormErrorHandlerContext,
@@ -516,14 +518,20 @@ export { UploadHandlersProvider, useUploadHandlers } from '../../providers/Uploa
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export {
   defaultTheme,
+  getHighContrastModeFromSystem,
+  getThemeFromSystem,
+  type RootThemeContext,
   type Theme,
   type ThemeContext,
   ThemeProvider,
+  useRootTheme,
   useTheme,
 } from '../../providers/Theme/index.js'
 export { EmbedProvider, useEmbed } from '../../providers/Embed/index.js'
 export type { EmbedContext } from '../../providers/Embed/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
+export type { TranslationProviderProps } from '../../providers/Translation/index.js'
+export { AdminTranslationProvider } from '../../providers/AdminTranslation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { useControllableState } from '../../hooks/useControllableState.js'
 

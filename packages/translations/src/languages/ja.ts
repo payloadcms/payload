@@ -297,6 +297,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     and: 'かつ',
     anotherUser: '別のユーザー',
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
+    apiResponse: 'API レスポンス',
     applyChanges: '変更を適用する',
     ascending: '昇順',
     auto: '自動',
@@ -368,6 +369,13 @@ export const jaTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'このドキュメントは最近別のユーザーによって更新されました。あなたのビューは古いものです。',
     documents: 'ドキュメント',
+    dragCancelled: '{{label}}のドラッグをキャンセルしました。',
+    dragDropped: '{{label}}をドロップしました。 {{count}}項目中{{position}}番目。',
+    dragInstructions:
+      'SpaceまたはEnterで行を持ち上げます。矢印キーで移動します。VoiceOverではQuick Navをオフにして、Command + 矢印キーを使用してください。SpaceまたはEnterでドロップ、Escapeでキャンセルします。',
+    dragMoved: '{{label}}: {{direction}}. {{count}}項目中{{position}}番目。',
+    dragPickedUp: '{{label}}を持ち上げました。 {{count}}項目中{{position}}番目。',
+    dragToMove: 'ドラッグして移動',
     dragToReorder: 'ドラッグして並べ替え',
     duplicate: '複製',
     duplicateWithoutSaving: '変更を保存せずに複製',
@@ -481,6 +489,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',
     reloadDocument: 'ドキュメントを再読み込みする',
     remove: '削除',
+    removeFilter: 'フィルターを削除',
     rename: '名前を変更する',
     replaceRow: '行を置換',
     requiredFields: '* が付いた項目は必須です。',
@@ -571,6 +580,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     yes: 'はい',
   },
   hierarchy: {
+    folderLocation: 'フォルダーの場所',
     goTo: '「{{name}}」へ移動してください。',
     itemsMovedTo: '{{title}}は{{destination}}に移動しました',
     itemsMovedToRoot: '{{title}}がルートに移動されました',
@@ -631,6 +641,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
     bulkUpload: '一括アップロード',
+    cancelUpload: 'アップロードをキャンセル',
     copyLinkToFile: 'ファイルへのリンクをコピー',
     copyURL: 'URLをコピー',
     crop: 'クロップ',
@@ -652,6 +663,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     fileSize: 'ファイル容量',
     filesToUpload: 'アップロードするファイル',
     fileToUpload: 'アップロードするファイル',
+    finishSaving: '保存を完了',
     focalPoint: '焦点',
     focalPointDescription: 'プレビュー上で焦点を直接ドラッグするか、下の値を調整してください。',
     fromURL: 'URLからファイルをアップロード',
@@ -665,12 +677,27 @@ export const jaTranslations: DefaultTranslationsObject = {
     previewSizes: 'プレビューサイズ',
     renameFile: 'ファイル名を変更',
     replaceFile: 'ファイルを差し替える',
+    resumingFile: '{{filename}} を再開しています',
+    savingInBackground:
+      'アップロードはバックグラウンドで完了し、その時点でドキュメントが保存されます。',
     selectCollectionToBrowse: '閲覧するコレクションを選択',
     selectFile: 'ファイルを選択',
     setCropArea: 'クロップエリアを設定する',
     setFocalPoint: '焦点を設定する',
     sizes: '容量',
     sizesFor: '{{label}}のサイズ',
+    uploadFileMismatch: '選択したファイルは中断されたアップロードと一致しません。',
+    uploadingFile: '{{filename}} をアップロード中',
+    uploadingFileProgress: '{{filename}} をアップロード中: {{percent}}%',
+    uploadInProgressLeaveWarning: 'アップロードはまだ進行中です。今ページを離れると中断されます。',
+    uploadInterrupted: '{{filename}} のアップロードが中断されました。',
+    uploadInterruptedWillSave:
+      '{{filename}} のアップロードが中断されました。完了するとドキュメントが保存されます。',
+    uploadReadyToFinishSaving:
+      '{{filename}} のアップロードが完了しました。フォームを開いて保存を完了してください。',
+    uploadSavedInBackground: 'アップロードが完了し、ドキュメントが保存されました。',
+    uploadStorageRejectedSegments:
+      'ストレージがアップロードのパートを受け付けませんでした。バケットの CORS ポリシーを確認してください。',
     width: '横幅',
   },
   validation: {
@@ -705,6 +732,10 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: '選択中のすべての{{label}}を公開しようとしています。よろしいですか？',
     aboutToRestore:
       'この {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} のコンテンツを下書きとして復元します。エディターから公開するまで、公開済みのコンテンツは変更されません。',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} のコンテンツをすべてのロケールで下書きとして復元します。エディターから公開するまで、公開済みのコンテンツは変更されません。',
     aboutToRestoreGlobal:
       'グローバルな {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。',
     aboutToRevertToPublished:

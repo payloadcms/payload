@@ -68,8 +68,7 @@ describe('runConsumerAudit', () => {
     expect(hits).toHaveLength(3)
   })
 
-  it('warns and skips a package whose install fails (no false clean)', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+  it('fails when the dependencies of a package do not resolve (no partial audit)', async () => {
     const run = vi.fn(({ args }: { args: string[]; cwd: string }): Promise<PnpmResult> => {
       if (args[0] === 'install') {
         return Promise.resolve({ code: 1, stderr: 'unresolved workspace:* spec', stdout: '' })
@@ -77,18 +76,40 @@ describe('runConsumerAudit', () => {
       return Promise.resolve({ code: 0, stderr: '', stdout: auditJson([]) })
     })
 
-    const hits = await runConsumerAudit({
-      packages: [pkg('a', { foo: '1' })],
-      run,
-    })
-
-    expect(hits).toEqual([])
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('@payloadcms/a'))
+    await expect(runConsumerAudit({ packages: [pkg('a', { foo: '1' })], run })).rejects.toThrow(
+      /@payloadcms\/a[\s\S]*unresolved workspace:\* spec/,
+    )
     expect(run).not.toHaveBeenCalledWith(
       expect.objectContaining({ args: expect.arrayContaining(['audit']) }),
     )
+  })
 
-    warn.mockRestore()
+  it('does not ignore registry errors, which would read as a clean audit', async () => {
+    const run = vi.fn(({ args }: { args: string[]; cwd: string }): Promise<PnpmResult> => {
+      if (args[0] === 'install') {
+        return Promise.resolve({ code: 0, stderr: '', stdout: '' })
+      }
+      return Promise.resolve({ code: 0, stderr: '', stdout: auditJson([]) })
+    })
+
+    await runConsumerAudit({ packages: [pkg('a', { lodash: '1' })], run })
+
+    const auditCall = run.mock.calls.find(([input]) => input.args[0] === 'audit')
+
+    expect(auditCall?.[0].args).not.toContain('--ignore-registry-errors')
+  })
+
+  it('fails when pnpm audit exits non-zero without advisories (no false clean)', async () => {
+    const run = vi.fn(({ args }: { args: string[]; cwd: string }): Promise<PnpmResult> => {
+      if (args[0] === 'install') {
+        return Promise.resolve({ code: 0, stderr: '', stdout: '' })
+      }
+      return Promise.resolve({ code: 1, stderr: 'ERR_PNPM_AUDIT_NO_LOCKFILE', stdout: '' })
+    })
+
+    await expect(runConsumerAudit({ packages: [pkg('a', { foo: '1' })], run })).rejects.toThrow(
+      /@payloadcms\/a.*exit code 1[\s\S]*ERR_PNPM_AUDIT_NO_LOCKFILE/,
+    )
   })
 
   it('does not suppress advisories at pnpm level (allowlist handled in reporting)', async () => {

@@ -82,6 +82,9 @@ export interface BaseDatabaseAdapter {
 
   findDistinct: FindDistinct
 
+  /** Read document locks using the adapter's transaction visibility rules. */
+  findDocumentLocks?: Find
+
   findGlobal: FindGlobal
 
   findGlobalVersions: FindGlobalVersions
@@ -847,6 +850,10 @@ export type MigrationTemplateArgs = {
 export type GenerateSchemaArgs = {
   log?: boolean
   outputFile?: string
+  /**
+   * Format the generated schema with the project's oxfmt, falling back to Prettier.
+   * @default true
+   */
   prettify?: boolean
 }
 

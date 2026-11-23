@@ -295,6 +295,7 @@ export const skTranslations: DefaultTranslationsObject = {
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
+    apiResponse: 'Odpoveď API',
     applyChanges: 'Použiť zmeny',
     ascending: 'Vzostupne',
     auto: 'Automaticky',
@@ -365,6 +366,13 @@ export const skTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tento dokument bol nedávno aktualizovaný iným používateľom. Váš pohľad je zastaraný.',
     documents: 'Dokumenty',
+    dragCancelled: 'Presúvanie {{label}} bolo zrušené.',
+    dragDropped: '{{label}} bol pustený. Pozícia {{position}} z {{count}}.',
+    dragInstructions:
+      'Stlačením Space alebo Enter uchopíte riadok. Pomocou šípok ho presuniete. S VoiceOver vypnite Quick Nav a použite Command + šípky. Stlačením Space alebo Enter ho pustíte, Escape akciu zruší.',
+    dragMoved: '{{label}}: {{direction}}. Pozícia {{position}} z {{count}}.',
+    dragPickedUp: '{{label}} bol uchopený. Pozícia {{position}} z {{count}}.',
+    dragToMove: 'Presunutím premiestniť',
     dragToReorder: 'Potiahnite pre zmenu poradia',
     duplicate: 'Duplikovať',
     duplicateWithoutSaving: 'Duplikovať bez uloženia zmien',
@@ -477,6 +485,7 @@ export const skTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Znova sa indexujú všetky {{collections}}.',
     reloadDocument: 'Obnoviť dokument',
     remove: 'Odstrániť',
+    removeFilter: 'Odstrániť filter',
     rename: 'Premenovať',
     replaceRow: 'Nahradiť riadok',
     requiredFields: 'Polia označené * sú povinné.',
@@ -568,6 +577,7 @@ export const skTranslations: DefaultTranslationsObject = {
     yes: 'Áno',
   },
   hierarchy: {
+    folderLocation: 'Umiestnenie priečinka',
     goTo: 'Prejdite na "{{name}}"',
     itemsMovedTo: '{{title}} presunuté do {{destination}}',
     itemsMovedToRoot: '{{title}} presunutý do koreňa',
@@ -628,6 +638,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addFile: 'Pridať súbor',
     addFiles: 'Pridať súbory',
     bulkUpload: 'Hromadné nahranie',
+    cancelUpload: 'Zrušiť nahrávanie',
     copyLinkToFile: 'Kopírovať odkaz na súbor',
     copyURL: 'Kopírovať URL',
     crop: 'Orezať',
@@ -649,6 +660,7 @@ export const skTranslations: DefaultTranslationsObject = {
     fileSize: 'Veľkosť súboru',
     filesToUpload: 'Súbory na nahranie',
     fileToUpload: 'Súbor na nahranie',
+    finishSaving: 'Dokončiť ukladanie',
     focalPoint: 'Stredobod',
     focalPointDescription:
       'Potiahnite bod stredobodu priamo na náhľad alebo upravte hodnoty nižšie.',
@@ -663,12 +675,25 @@ export const skTranslations: DefaultTranslationsObject = {
     previewSizes: 'Náhľady veľkostí',
     renameFile: 'Premenovať súbor',
     replaceFile: 'Nahradiť súbor',
+    resumingFile: 'Obnovuje sa {{filename}}',
+    savingInBackground: 'Nahrávanie sa dokončí na pozadí a dokument sa potom uloží.',
     selectCollectionToBrowse: 'Vyberte kolekciu na prezeranie',
     selectFile: 'Vyberte súbor',
     setCropArea: 'Nastaviť oblasť orezania',
     setFocalPoint: 'Nastaviť stredobod',
     sizes: 'Veľkosti',
     sizesFor: 'Veľkosti pre {{label}}',
+    uploadFileMismatch: 'Vybraný súbor nezodpovedá prerušenému nahrávaniu.',
+    uploadingFile: 'Nahráva sa {{filename}}',
+    uploadingFileProgress: 'Nahráva sa {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Nahrávanie stále prebieha. Ak teraz odídete, preruší sa.',
+    uploadInterrupted: 'Nahrávanie {{filename}} bolo prerušené.',
+    uploadInterruptedWillSave:
+      'Nahrávanie {{filename}} bolo prerušené. Dokument sa uloží, keď sa dokončí.',
+    uploadReadyToFinishSaving: '{{filename}} bol nahraný. Otvorte formulár a dokončite ukladanie.',
+    uploadSavedInBackground: 'Nahrávanie sa dokončilo a dokument bol uložený.',
+    uploadStorageRejectedSegments:
+      'Úložisko neprijalo žiadnu časť nahrávania. Skontrolujte pravidlá CORS bucketu.',
     width: 'Šírka',
   },
   validation: {
@@ -703,6 +728,10 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Chystáte sa publikovať všetky {{label}} vo výbere. Ste si istý?',
     aboutToRestore:
       'Chystáte sa obnoviť tento {{label}} dokument do stavu, v akom bol {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Obnovte obsah z {{versionDate}} ako koncept. Publikovaný obsah zostane nezmenený, kým ho nepublikujete z editora.',
+    aboutToRestoreAsDraftAllLocales:
+      'Obnovte obsah z {{versionDate}} ako koncept vo všetkých jazykových verziách. Publikovaný obsah zostane nezmenený, kým ho nepublikujete z editora.',
     aboutToRestoreGlobal:
       'Chystáte sa obnoviť globálne {{label}} do stavu, v akom bol {{versionDate}}.',
     aboutToRevertToPublished:

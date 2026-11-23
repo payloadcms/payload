@@ -5,12 +5,19 @@ import {
   lexicalEditor,
   LinkFeature,
   TreeViewFeature,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 
-import { lexicalLinkFeatureSlug } from '../../slugs.js'
+import { lexicalLinkFeatureAutosaveSlug, lexicalLinkFeatureSlug, uploadsSlug } from '../../slugs.js'
 
-export const LexicalLinkFeature: CollectionConfig = {
-  slug: lexicalLinkFeatureSlug,
+const createLexicalLinkFeature = ({
+  slug,
+  versions,
+}: {
+  slug: string
+  versions?: CollectionConfig['versions']
+}): CollectionConfig => ({
+  slug,
   labels: {
     singular: 'Lexical Link Feature',
     plural: 'Lexical Link Feature',
@@ -33,13 +40,72 @@ export const LexicalLinkFeature: CollectionConfig = {
                 return field
               })
 
-              return [...modifiedFields, { type: 'text', name: 'someText' }]
+              return [
+                ...modifiedFields,
+                {
+                  name: 'someText',
+                  type: 'text',
+                  access: {
+                    read: ({ req }) => req.headers.get('x-hide-lexical-fields') !== 'true',
+                  },
+                },
+                {
+                  name: 'hyperlink',
+                  type: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'assetLink',
+                      fields: [
+                        {
+                          name: 'label',
+                          type: 'text',
+                          access: {
+                            read: ({ req }) => req.headers.get('x-hide-lexical-fields') !== 'true',
+                          },
+                        },
+                        {
+                          name: 'asset',
+                          type: 'upload',
+                          relationTo: uploadsSlug,
+                        },
+                      ],
+                      labels: {
+                        plural: 'Asset Link Blocks',
+                        singular: 'Asset Link Block',
+                      },
+                    },
+                  ],
+                  maxRows: 1,
+                },
+              ]
             },
           }),
           FixedToolbarFeature(),
+          UploadFeature({
+            collections: {
+              [uploadsSlug]: {
+                fields: [{ name: 'caption', type: 'text', defaultValue: 'Server caption' }],
+              },
+            },
+          }),
         ],
       }),
     },
   ],
-  versions: false,
-}
+  versions: versions ?? false,
+})
+
+export const LexicalLinkFeature = createLexicalLinkFeature({
+  slug: lexicalLinkFeatureSlug,
+})
+
+export const LexicalLinkFeatureAutosave = createLexicalLinkFeature({
+  slug: lexicalLinkFeatureAutosaveSlug,
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 8000,
+      },
+    },
+  },
+})

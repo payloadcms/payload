@@ -1,27 +1,17 @@
 'use client'
 import type { ServerFunctionClient } from 'payload'
 
-import { RootProviders } from '@payloadcms/ui'
-import { Outlet, useLoaderData } from '@tanstack/react-router'
-import React from 'react'
+import { useLoaderData } from '@tanstack/react-router'
+import React, { useDeferredValue } from 'react'
 
-import { TanStackRouterAdapter } from '../router.js'
+import type { LoadLayoutDataResult } from './server.js'
 
-/**
- * The admin layout route's component. Maps the layout loader data onto `RootProviders` and
- * renders the admin chrome (progress bar, custom-provider tree or router `<Outlet />`, portal
- * mount). `payloadLayoutRoute` loads it lazily, so front-end routes never download the admin UI.
- */
+import { ServerFunctionContext } from './RootProviders/index.js'
+
+/** Renders the Flight layout with the app's client-local server-function dispatcher. */
 export function PayloadLayout({ serverFunction }: { serverFunction: ServerFunctionClient }) {
-  const data = useLoaderData({ strict: false })
+  const { layout }: LoadLayoutDataResult = useLoaderData({ strict: false })
+  const deferredLayout = useDeferredValue(layout)
 
-  return (
-    <RootProviders
-      data={data}
-      RouterAdapter={TanStackRouterAdapter}
-      serverFunction={serverFunction}
-    >
-      {data.providers ?? <Outlet />}
-    </RootProviders>
-  )
+  return <ServerFunctionContext value={serverFunction}>{deferredLayout}</ServerFunctionContext>
 }

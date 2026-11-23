@@ -33,6 +33,10 @@ export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolea
  */
 export type UploadReference = {
   _objectKey?: string
+  /** Data the adapter signed into the receipt with `resolveSignedURLKey`. Not stored on the document. */
+  adapterData?: Record<string, unknown>
+  /** Fields the client added to `uploadReference`. Not verified; check them before use. */
+  clientData?: Record<string, unknown>
   prefix: string
   signedReceipt: `${string}.${string}`
 }
@@ -102,6 +106,8 @@ export type StaticHandler = (
     params: {
       collection: string
       filename: string
+      /** True when the request asks for the original with `?original=true`. */
+      isOriginal?: boolean
       operation?: FileHandlerOperation
       prefix?: string
       uploadReference?: unknown

@@ -267,6 +267,19 @@ export type MCPPluginGlobalConfig = {
  * actually works with.
  */
 export type MCPPluginConfig = {
+  /**
+   * Decides who can use MCP at all. Runs on every MCP request once the user is authenticated,
+   * before the `access` callbacks of tools, prompts, and resources, and when a user allows an MCP
+   * client on the built-in OAuth server's sign-in page. Return `false` to answer MCP requests with
+   * `403` and to refuse to sign the client in. This is skipped when `overrideAccess` is enabled.
+   * `overrideGetAuthorizedMCP` replaces it on MCP requests.
+   *
+   * It only applies to MCP, not to Payload's REST or GraphQL APIs, so it doesn't replace access
+   * control on collections and globals.
+   *
+   * @default no check, so tools, prompts, and resources decide on their own
+   */
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   collections?: {
     [Slug in CollectionSlug]?: MCPPluginCollectionConfig<Slug>
   }
@@ -291,10 +304,19 @@ export type MCPPluginConfig = {
     verboseLogs?: boolean
   }
   /**
+   * How MCP clients sign in. MCP requests without an authenticated user get a `401` that points
+   * to the protected resource metadata (RFC 9728). Set to `false` to only accept API keys and
+   * anonymous requests.
+   *
+   * @default { type: 'builtin' }
+   */
+  oauth?: false | MCPOAuthConfig
+  /**
    * Replace the default MCP authorization resolver.
    *
-   * This hook replaces the default authentication flow. It must set `req.user` to the
-   * authenticated Payload user, or to `null` for an anonymous caller, before returning.
+   * This hook replaces the default authentication flow, including the plugin's `access`. It must
+   * set `req.user` to the authenticated Payload user, or to `null` for an anonymous caller, before
+   * returning.
    */
   overrideGetAuthorizedMCP?: (
     args: {
@@ -307,9 +329,99 @@ export type MCPPluginConfig = {
   tools?: MCPTopLevelToolsMap
 }
 
+export type MCPOAuthConfig = MCPBuiltinOAuthConfig | MCPExternalOAuthConfig
+
+/**
+ * This Payload app is the authorization server. Users sign in to the admin panel and allow the
+ * MCP client, which then gets an access token for them.
+ */
+export type MCPBuiltinOAuthConfig = {
+  /**
+   * Creates the tokens the MCP client gets when the user clicks Allow. `req` is the user's own
+   * browser request, so `req.user` is the user who allowed it. Pass `authenticate` too if
+   * Payload's auth strategies don't accept the access token.
+   *
+   * @default a Payload login token for that user that only works for MCP, with a refresh token when
+   * the collection uses sessions. Its session is labelled with the client's name.
+   */
+  issueToken?: (args: {
+    /** The MCP client the user allowed, with the address it returns to. */
+    client: { name: string; redirectURI: string }
+    req: PayloadRequest
+  }) => MaybePromise<MCPOAuthTokens>
+  /**
+   * Trades a refresh token from `issueToken`, or from an earlier refresh, for new tokens. Return
+   * `null` when it's no longer valid, and the client sends the user through sign-in again. `req`
+   * is the MCP client's request, without a user. Only used together with `issueToken`.
+   *
+   * OAuth requires noticing copied refresh tokens: return a new refresh token every time, and
+   * revoke the tokens when an already used refresh token comes back.
+   *
+   * It also runs when the client trades its authorization code, on the refresh token from
+   * `issueToken`, with `reuseInterval: 0`. OAuth requires a code to work only once, so refuse that
+   * refresh token if it was used before, even moments ago.
+   */
+  refreshToken?: (args: {
+    refreshToken: string
+    req: PayloadRequest
+    /**
+     * How long a refresh token that was just used may still be accepted, in milliseconds, e.g. for
+     * clients that refresh twice at once. `0` means not at all. When it's missing, use your usual
+     * leeway.
+     */
+    reuseInterval?: number
+  }) => MaybePromise<MCPOAuthTokens | null>
+  type: 'builtin'
+} & MCPOAuthSharedConfig
+
+export type MCPOAuthTokens = {
+  accessToken: string
+  /** Seconds until the access token expires. */
+  expiresIn?: number
+  /** Lets the client get new tokens without the user, through `refreshToken`. */
+  refreshToken?: string
+}
+
+/** Another service, e.g. your identity provider, is the authorization server. */
+export type MCPExternalOAuthConfig = {
+  /**
+   * The authorization servers that issue access tokens for MCP clients. Clients require each one
+   * to exactly match the `issuer` in that server's metadata, so pass a function when the exact
+   * value is only known at runtime, e.g. from the server's OpenID configuration or per host.
+   */
+  authorizationServers: ((args: { req: PayloadRequest }) => MaybePromise<string[]>) | string[]
+  /**
+   * Scopes MCP clients should request, e.g. `['openid', 'email', 'profile']`. Without them,
+   * clients request none, which some authorization servers reject or answer with a token that
+   * doesn't identify the user.
+   */
+  scopes?: string[]
+  type: 'external'
+} & MCPOAuthSharedConfig
+
+type MCPOAuthSharedConfig = {
+  /**
+   * Called on MCP requests with a bearer token that Payload's auth strategies didn't accept.
+   * Return the Payload user, including its `collection`, or `null` to answer with the OAuth challenge.
+   */
+  authenticate?: (args: {
+    req: PayloadRequest
+    token: string
+  }) => MaybePromise<PayloadRequest['user']>
+  /**
+   * The URL clients call to reach the MCP endpoint. The metadata link and the built-in
+   * authorization server's issuer are based on it.
+   *
+   * @default the absolute URL of `/api/mcp`, based on `serverURL` or the request URL
+   */
+  resource?: ((args: { req: PayloadRequest }) => string) | string
+}
+
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
+  /** `undefined` when OAuth is turned off. */
+  oauth?: MCPOAuthConfig
+} & Pick<MCPPluginConfig, 'access' | 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: McpServerOptions

@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as fse from 'fs-extra'
 import * as path from 'path'
 import * as os from 'os'
+import { Project, ts } from 'ts-morph'
 import { configurePayloadConfig } from './lib/configure-payload-config'
 import type { DbType, StorageAdapterType } from './types'
 import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './lib/ast/adapter-config'
@@ -46,16 +47,25 @@ const TEST_CASES: TestCase[] = [
     storageAdapter: 'localDisk',
   },
   {
-    name: 'ecommerce + postgres + r2Storage',
+    // r2Storage is not covered here: its config reads the `cloudflare` binding, which only
+    // the with-cloudflare-d1 template defines
+    name: 'ecommerce + postgres + gcsStorage',
     template: 'ecommerce',
     dbType: 'postgres',
-    storageAdapter: 'r2Storage',
+    storageAdapter: 'gcsStorage',
   },
 ]
 
+const repoRoot = path.resolve(__dirname, '../../..')
+
+const WORKSPACE_PACKAGE_PATHS = {
+  '@payloadcms/*': [path.join(repoRoot, 'packages/*/src/index.ts')],
+  payload: [path.join(repoRoot, 'packages/payload/src/index.ts')],
+}
+
 describe('AST Integration Tests', () => {
   let tempDir: string
-  const templatesRoot = path.resolve(__dirname, '../../..', 'templates')
+  const templatesRoot = path.join(repoRoot, 'templates')
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'payload-ast-integration-'))
@@ -121,9 +131,10 @@ describe('AST Integration Tests', () => {
         expect(configContent).not.toContain('mongooseAdapter')
       }
 
-      // Check that plugins array exists if storage adapter was added
+      // Check that storage adapter was added to the storage array
       if (storageAdapter !== 'localDisk') {
-        expect(configContent).toContain('plugins:')
+        const { adapterName } = STORAGE_ADAPTER_CONFIG[storageAdapter]
+        expect(configContent).toMatch(new RegExp(`storage:\\s*\\[[\\s\\S]*${adapterName}\\(`))
       }
 
       // Verify package.json transformations
@@ -152,5 +163,49 @@ describe('AST Integration Tests', () => {
       expect(configContent).not.toContain('database-adapter-config-start')
       expect(configContent).not.toContain('storage-adapter-placeholder')
     })
+
+    it('generates a payload.config.ts that type-checks against payload', async () => {
+      const testProjectDir = path.join(tempDir, template)
+      fse.copySync(path.join(templatesRoot, template), testProjectDir)
+
+      await configurePayloadConfig({
+        dbType,
+        storageAdapter,
+        projectDirOrConfigPath: { projectDir: testProjectDir },
+      })
+
+      const errors = getPayloadConfigTypeErrors({ projectDir: testProjectDir })
+
+      expect(errors).toEqual([])
+    }, 120_000)
   })
 })
+
+/**
+ * Type-checks the project's payload.config.ts with the project's tsconfig, resolving
+ * `payload` and `@payloadcms/*` to workspace sources so no build is needed.
+ * Only errors in payload.config.ts are returned. Imported template files are not checked.
+ */
+function getPayloadConfigTypeErrors({ projectDir }: { projectDir: string }): string[] {
+  const project = new Project({
+    skipAddingFilesFromTsConfig: true,
+    tsConfigFilePath: path.join(projectDir, 'tsconfig.json'),
+  })
+  project.compilerOptions.set({
+    paths: { ...project.compilerOptions.get().paths, ...WORKSPACE_PACKAGE_PATHS },
+    typeRoots: [path.join(repoRoot, 'node_modules/@types')],
+    types: ['node'],
+  })
+
+  const sourceFile = project.addSourceFileAtPath(path.join(projectDir, 'src', 'payload.config.ts'))
+  project.resolveSourceFileDependencies()
+
+  const program = project.getProgram()
+  return [
+    ...program.getSyntacticDiagnostics(sourceFile),
+    ...program.getSemanticDiagnostics(sourceFile),
+  ].map((diagnostic) => {
+    const message = ts.flattenDiagnosticMessageText(diagnostic.compilerObject.messageText, '\n')
+    return `line ${diagnostic.getLineNumber()}: TS${diagnostic.getCode()}: ${message}`
+  })
+}

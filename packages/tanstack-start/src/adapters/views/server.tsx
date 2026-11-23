@@ -1,8 +1,9 @@
-import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
+import type { RenderableServerComponentBuilder } from '@tanstack/react-start/rsc'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { getViewportContent } from '@payloadcms/ui/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
+import { getRequest } from '@tanstack/react-start/server'
 
 import type { AdminPageMetadata } from '../metadata.js'
 
@@ -18,7 +19,10 @@ export type LoadAdminPageArgs = {
   splat?: string
 }
 
-type RSCPayload = RenderableServerComponent<React.ReactElement>
+type RSCPayload = RenderableServerComponentBuilder<{
+  page: React.ReactElement
+  routeKey: string
+}>
 
 export type LoadAdminPageResult =
   | { _notFound: true; routeKey?: string; rscPayload?: RSCPayload }
@@ -129,7 +133,10 @@ export async function loadAdminPage({
       searchParams: Promise.resolve(searchParams),
     })
 
-    const rscPayload = await renderServerComponent(notFoundNode as React.ReactElement)
+    const rscPayload = await renderServerComponent({
+      page: notFoundNode as React.ReactElement,
+      routeKey: splat ?? '',
+    })
 
     return { _notFound: true, routeKey: splat ?? '', rscPayload }
   }
@@ -149,7 +156,10 @@ export async function loadAdminPage({
       searchParams: Promise.resolve(searchParams),
     })
 
-    const rscPayload = await renderServerComponent(node as React.ReactElement)
+    const rscPayload = await renderServerComponent({
+      page: node as React.ReactElement,
+      routeKey: splat ?? '',
+    })
 
     // The server-function (client-nav RPC) path returns the flight stream unread —
     // unlike the router/SSR path, which awaits a decode that drives the render to
@@ -165,7 +175,11 @@ export async function loadAdminPage({
         >
       )[Symbol.for('tanstack.rsc.stream')]
       if (typeof wrapper?.createReplayStream === 'function') {
-        const buffer = await new Response(wrapper.createReplayStream()).arrayBuffer()
+        const buffer = await new Response(
+          wrapper.createReplayStream().pipeThrough(new TransformStream(), {
+            signal: getRequest().signal,
+          }),
+        ).arrayBuffer()
         wrapper.createReplayStream = () => new Response(buffer).body as ReadableStream<Uint8Array>
       }
     }

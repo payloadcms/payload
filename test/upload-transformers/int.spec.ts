@@ -13,7 +13,9 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import {
+  convertedVariantMediaSlug,
   outsideFitMediaSlug,
+  requestVariantsMediaSlug,
   resizePreviewMediaSlug,
   transformerMediaSlug,
   usersSlug,
@@ -450,7 +452,7 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
         variants: { thumbnail: { filename: null | string; width: null | number } }
       }
 
-      expect(doc.variants.thumbnail.filename).toBe('image-original-100x100.png')
+      expect(doc.variants.thumbnail.filename).toBe('image-100x100.png')
       expect(doc.variants.thumbnail.width).toBe(100)
     })
 
@@ -458,6 +460,53 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
       await uploadFixture({ collection: variantMediaSlug, fixture: 'image.png' })
 
       expect(transformerCallCounts.dynamicOnlySharp).toBe(0)
+    })
+
+    test('should store only the original when another transformer registered the collection variants', async () => {
+      const crop = { height: 20, width: 30, x: 0, y: 0 }
+
+      const doc = (await payload.create({
+        collection: requestVariantsMediaSlug,
+        data: { _transforms: { crop } },
+        file: await getFileByPath(path.resolve(dirname, 'image.png')),
+        overrideAccess: true,
+      })) as unknown as {
+        filename: string
+        height: number
+        original?: { filename?: string }
+        width: number
+      }
+
+      expect(transformerCallCounts.dynamicOnlySharp).toBe(0)
+      expect(doc.filename).toBe(doc.original?.filename)
+      expect(doc).toMatchObject({ height: crop.height, width: crop.width })
+    })
+
+    test('should apply the crop with Sharp when the variants owner cannot build the file at request', async () => {
+      const crop = { height: 20, width: 30, x: 0, y: 0 }
+
+      const doc = (await payload.create({
+        collection: requestVariantsMediaSlug,
+        data: { _transforms: { crop } },
+        file: await getFileByPath(path.resolve(dirname, '../uploads/image.jpg')),
+        overrideAccess: true,
+      })) as unknown as { _stored?: boolean | null; height: number; width: number }
+
+      expect(transformerCallCounts.dynamicOnlySharp).toBeGreaterThan(0)
+      expect(doc._stored).not.toBe(false)
+      expect(doc).toMatchObject({ height: crop.height, width: crop.width })
+    })
+
+    test('should save a stored variant whose format is not in the upload MIME types', async () => {
+      const doc = (await uploadFixture({
+        collection: convertedVariantMediaSlug,
+        fixture: 'image.png',
+      })) as unknown as { variants: { webp: { filename: null | string; mimeType: null | string } } }
+
+      expect(doc.variants.webp).toMatchObject({
+        filename: 'image-50x50.webp',
+        mimeType: 'image/webp',
+      })
     })
   })
 })

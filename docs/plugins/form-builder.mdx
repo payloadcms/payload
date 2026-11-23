@@ -71,7 +71,7 @@ export default config
 
 ### `fields` (option)
 
-The `fields` property is an object of field types to allow your admin editors to build forms with. To override default settings, pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) _keyed to the block's slug_. See [Fields](#fields) for more details.
+The `fields` property is an object of field types to allow your admin editors to build forms with. To override default settings, pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-config-options) _keyed to the block's slug_. See [Fields](#fields) for more details.
 
 ```ts
 // payload.config.ts
@@ -628,7 +628,7 @@ Other adapters may return a named instruction for their own browser helper inste
 
 ### Field Overrides
 
-You can provide your own custom fields by passing a new [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) object into `fields`. You can override or extend any existing fields by first importing the `fields` from the plugin:
+You can provide your own custom fields by passing a new [Payload Block](https://payloadcms.com/docs/fields/blocks#block-config-options) object into `fields`. You can override or extend any existing fields by first importing the `fields` from the plugin:
 
 ```ts
 import { fields } from '@payloadcms/plugin-form-builder'

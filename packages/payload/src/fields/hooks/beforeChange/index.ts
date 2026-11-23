@@ -6,6 +6,7 @@ import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { recordNewDoc } from '../../baseFields/authorship/index.js'
 import { traverseFields } from './traverseFields.js'
 
 export type Args<T extends JsonObject> = {
@@ -59,6 +60,10 @@ export const beforeChange = async <T extends JsonObject>({
   const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions: (() => Promise<void> | void)[] = []
   const errors: ValidationFieldError[] = []
+
+  // Record the first-write flag before traversal mutates `docWithLocales`, so `createdBy` is
+  // stamped reliably.
+  recordNewDoc(context, !docWithLocales || Object.keys(docWithLocales).length === 0)
 
   await traverseFields({
     id,

@@ -153,14 +153,14 @@ function getRequiredDependencies({
     '@payloadcms/richtext-lexical': payloadVersion,
     '@payloadcms/tanstack-start': payloadVersion,
     '@payloadcms/ui': payloadVersion,
-    '@vitejs/plugin-rsc': '^0.5.21',
+    '@vitejs/plugin-rsc': '^0.5.38',
     [getDbPackageName(dbType)]: payloadVersion,
     graphql: '^16.8.1',
     payload: payloadVersion,
   }
 
   if (appDetails.kind === 'router-only') {
-    dependencies['@tanstack/react-start'] = '^1.168.60'
+    dependencies['@tanstack/react-start'] = '^1.169.1'
   }
 
   return dependencies

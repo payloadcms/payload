@@ -293,6 +293,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
+    apiResponse: 'API atbilde',
     applyChanges: 'Pielietot izmaiņas',
     ascending: 'Augošā secībā',
     auto: 'Automātiska',
@@ -365,6 +366,13 @@ export const lvTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Šis dokuments nesen tika atjaunināts ar citu lietotāju. Jūsu skatījums ir novecojis.',
     documents: 'Dokumenti',
+    dragCancelled: '{{label}} vilkšana atcelta.',
+    dragDropped: '{{label}} nolikts. Pozīcija {{position}} no {{count}}.',
+    dragInstructions:
+      'Nospiediet Space vai Enter, lai paņemtu rindu. Pārvietojiet to ar bulttaustiņiem. Izmantojot VoiceOver, izslēdziet Quick Nav un izmantojiet Command + bulttaustiņus. Nospiediet Space vai Enter, lai noliktu, vai Escape, lai atceltu.',
+    dragMoved: '{{label}}: {{direction}}. Pozīcija {{position}} no {{count}}.',
+    dragPickedUp: '{{label}} paņemts. Pozīcija {{position}} no {{count}}.',
+    dragToMove: 'Velciet, lai pārvietotu',
     dragToReorder: 'Velciet, lai pārkārtotu',
     duplicate: 'Dublēt',
     duplicateWithoutSaving: 'Dublēt bez izmaiņu saglabāšanas',
@@ -480,6 +488,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Pārindeksē visus {{collections}}.',
     reloadDocument: 'Pārlādēt dokumentu',
     remove: 'Noņemt',
+    removeFilter: 'Noņemt filtru',
     rename: 'Pārdēvēt',
     replaceRow: 'Aizstāt rindu',
     requiredFields: 'Lauki, kas atzīmēti ar *, ir obligāti.',
@@ -570,6 +579,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     yes: 'Jā',
   },
   hierarchy: {
+    folderLocation: 'Mapes atrašanās vieta',
     goTo: 'Dodieties uz "{{name}}"',
     itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
     itemsMovedToRoot: '{{title}} pārvietots uz sakni',
@@ -630,6 +640,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
+    cancelUpload: 'Atcelt augšupielādi',
     copyLinkToFile: 'Kopēt saiti uz failu',
     copyURL: 'Kopēt URL',
     crop: 'Apgriezt',
@@ -651,6 +662,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     fileSize: 'Faila izmērs',
     filesToUpload: 'Faili augšupielādei',
     fileToUpload: 'Fails augšupielādei',
+    finishSaving: 'Pabeigt saglabāšanu',
     focalPoint: 'Fokusa punkts',
     focalPointDescription:
       'Velciet fokusa punktu tieši priekšskatījumā vai pielāgojiet vērtības zemāk.',
@@ -665,12 +677,27 @@ export const lvTranslations: DefaultTranslationsObject = {
     previewSizes: 'Priekšskatījuma izmēri',
     renameFile: 'Pārsaukt failu',
     replaceFile: 'Aizstāt failu',
+    resumingFile: 'Atsāk {{filename}}',
+    savingInBackground: 'Augšupielāde tiks pabeigta fonā, un tad dokuments tiks saglabāts.',
     selectCollectionToBrowse: 'Izvēlieties kolekciju, ko pārlūkot',
     selectFile: 'Izvēlieties failu',
     setCropArea: 'Iestatīt apgriešanas apgabalu',
     setFocalPoint: 'Iestatīt fokusa punktu',
     sizes: 'Izmēri',
     sizesFor: 'Izmēri priekš {{label}}',
+    uploadFileMismatch: 'Atlasītais fails neatbilst pārtrauktajai augšupielādei.',
+    uploadingFile: 'Augšupielādē {{filename}}',
+    uploadingFileProgress: 'Augšupielādē {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Augšupielāde joprojām notiek. Ja aiziesiet tagad, tā tiks pārtraukta.',
+    uploadInterrupted: 'Faila {{filename}} augšupielāde tika pārtraukta.',
+    uploadInterruptedWillSave:
+      'Faila {{filename}} augšupielāde tika pārtraukta. Dokuments tiks saglabāts, kad tā būs pabeigta.',
+    uploadReadyToFinishSaving:
+      '{{filename}} ir augšupielādēts. Atveriet veidlapu, lai pabeigtu saglabāšanu.',
+    uploadSavedInBackground: 'Augšupielāde pabeigta, un dokuments tika saglabāts.',
+    uploadStorageRejectedSegments:
+      'Krātuve nepieņēma nevienu augšupielādes daļu. Pārbaudiet bucket CORS politiku.',
     width: 'Platums',
   },
   validation: {
@@ -706,6 +733,10 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūs grasāties publicēt visus {{label}} izvēlētajā sarakstā. Vai esat pārliecināts?',
     aboutToRestore:
       'Jūs grasāties atjaunot šo {{label}} dokumentu uz stāvokli, kādā tas bija {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Atjaunojiet {{versionDate}} saturu kā melnrakstu. Publicētais saturs paliks nemainīts, līdz to publicēsiet no redaktora.',
+    aboutToRestoreAsDraftAllLocales:
+      'Atjaunojiet {{versionDate}} saturu kā melnrakstu visās valodās. Publicētais saturs paliks nemainīts, līdz to publicēsiet no redaktora.',
     aboutToRestoreGlobal:
       'Jūs grasāties atjaunot globālo {{label}} uz stāvokli, kādā tas bija {{versionDate}}.',
     aboutToRevertToPublished:

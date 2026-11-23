@@ -13,9 +13,6 @@ export const normalizeStorageKey = ({ key }: { key: string }): string => {
   return key
 }
 
-export const getOriginalFilename = ({ filename }: { filename: string }): string =>
-  insertSuffix({ filename, suffix: 'original' })
-
 export const getArchivedFilename = ({
   filename,
   versionID,

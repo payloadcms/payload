@@ -42,7 +42,7 @@ the prompt instead of prompting.
 `npx @payloadcms/codemod upgrade run` performs the deterministic v3 -> v4 slice against the current
 directory (run it from your project root):
 
-1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (`beta` if run as `@payloadcms/codemod@beta`, else `canary`; override with `--tag <dist-tag>`).
+1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (its own prerelease id, else `beta`; override with `--tag <dist-tag>`).
 2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
    lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
    the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
@@ -57,7 +57,7 @@ prints the required Next target.
 
 Flags:
 
-- `--tag <dist-tag>`: dist-tag to resolve Payload versions from. Defaults to the dist-tag this CLI was installed under (`beta` when run as `@payloadcms/codemod@beta`, else `canary`).
+- `--tag <dist-tag>`: dist-tag to resolve Payload versions from. Defaults to the dist-tag this CLI was installed under (its own prerelease id, else `beta`).
 - `--dry`: preview the `package.json` changes and planned steps; write and install nothing.
 - `--force`: skip the dirty-git-tree warning.
 
@@ -84,6 +84,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 - `migrate-list-view-select-api`: Removes `admin.enableListViewSelectAPI` from Collection Configs. The List View's Select API is the default in v4.
 - `migrate-disabled-fields`: migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` and their equivalents on `imageSize.admin` into the consolidated `disabled` object form.
+- `migrate-displayed-field-value-args`: converts direct `getDisplayedFieldValue(cellData, field, i18n)` calls imported from `@payloadcms/ui/utilities/getDisplayedFieldValue` to the object argument form. Handles named, aliased, and namespace imports. Indirect references and unsupported argument shapes are reported for manual migration.
 - `globals-components-edit`: Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.
 - `migrate-force-select`: migrates `forceSelect: { ... }` on Collection/Global configs to a `select` function that augments the caller's `select` when present and returns `undefined` (preserving full-document reads) when not. Shallow values become a spread (`{ ...select, ... }`); nested values use `deepMergeSimple` from `payload/shared` (auto-imported) to preserve the previous deep-merge semantics. Non-literal values, sibling `select` already present, and unsupported member kinds are surfaced as notes for manual review.
 - `migrate-field-component-types`: replaces field component aliases—including concrete fields, canonical generics, labels, descriptions, errors, diffs, and block row labels—with the corresponding props types wrapped in `React.FC`. Generic arguments are preserved. Explicit class components, re-exports, namespace references, and inline imports are left unchanged with notes for manual migration.

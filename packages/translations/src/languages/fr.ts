@@ -305,6 +305,7 @@ export const frTranslations: DefaultTranslationsObject = {
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
+    apiResponse: 'Réponse de l’API',
     applyChanges: 'Appliquer les modifications',
     ascending: 'Ascendant',
     auto: 'Automatique',
@@ -377,6 +378,13 @@ export const frTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ce document a récemment été mis à jour par un autre utilisateur. Votre vue est obsolète.',
     documents: 'Documents',
+    dragCancelled: 'Déplacement de {{label}} annulé.',
+    dragDropped: '{{label}} déposé. Position {{position}} sur {{count}}.',
+    dragInstructions:
+      'Appuyez sur Space ou Enter pour saisir une ligne. Utilisez les flèches pour la déplacer. Avec VoiceOver, désactivez Quick Nav et utilisez Command + les flèches. Appuyez sur Space ou Enter pour déposer, ou sur Escape pour annuler.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} sur {{count}}.',
+    dragPickedUp: '{{label}} saisi. Position {{position}} sur {{count}}.',
+    dragToMove: 'Faire glisser pour déplacer',
     dragToReorder: 'Faites glisser pour réorganiser',
     duplicate: 'Dupliquer',
     duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
@@ -492,6 +500,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     reloadDocument: 'Recharger le document',
     remove: 'Retirer',
+    removeFilter: 'Supprimer le filtre',
     rename: 'Renommer',
     replaceRow: 'Remplacer la ligne',
     requiredFields: 'Les champs marqués d’un * sont obligatoires.',
@@ -586,6 +595,7 @@ export const frTranslations: DefaultTranslationsObject = {
     yes: 'Oui',
   },
   hierarchy: {
+    folderLocation: 'Emplacement du dossier',
     goTo: 'Aller à « {{name}} »',
     itemsMovedTo: '{{title}} déplacé vers {{destination}}',
     itemsMovedToRoot: '{{title}} déplacé à la racine',
@@ -646,6 +656,7 @@ export const frTranslations: DefaultTranslationsObject = {
     addFile: 'Ajouter un fichier',
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
+    cancelUpload: 'Annuler le téléversement',
     copyLinkToFile: 'Copier le lien vers le fichier',
     copyURL: 'Copier l’URL',
     crop: 'Recadrer',
@@ -667,6 +678,7 @@ export const frTranslations: DefaultTranslationsObject = {
     fileSize: 'Taille du fichier',
     filesToUpload: 'Fichiers à télécharger',
     fileToUpload: 'Fichier à télécharger',
+    finishSaving: "Terminer l'enregistrement",
     focalPoint: 'Point focal',
     focalPointDescription:
       'Faites glisser le point focal directement sur l’aperçu ou ajustez les valeurs ci-dessous.',
@@ -681,12 +693,28 @@ export const frTranslations: DefaultTranslationsObject = {
     previewSizes: 'Tailles d’aperçu',
     renameFile: 'Renommer le fichier',
     replaceFile: 'Remplacer le fichier',
+    resumingFile: 'Reprise de {{filename}}',
+    savingInBackground:
+      'Le téléversement se terminera en arrière-plan et le document sera alors enregistré.',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',
     selectFile: 'Sélectionnez un fichier',
     setCropArea: 'Définir la zone de recadrage',
     setFocalPoint: 'Définir le point focal',
     sizes: 'Tailles',
     sizesFor: 'Tailles pour {{label}}',
+    uploadFileMismatch: 'Le fichier sélectionné ne correspond pas au téléversement interrompu.',
+    uploadingFile: 'Téléversement de {{filename}}',
+    uploadingFileProgress: 'Téléversement de {{filename}} : {{percent}} %',
+    uploadInProgressLeaveWarning:
+      "Un téléversement est toujours en cours. Quitter maintenant l'interrompra.",
+    uploadInterrupted: 'Le téléversement de {{filename}} a été interrompu.',
+    uploadInterruptedWillSave:
+      'Le téléversement de {{filename}} a été interrompu. Le document sera enregistré une fois terminé.',
+    uploadReadyToFinishSaving:
+      "{{filename}} a été téléversé. Ouvrez le formulaire pour terminer l'enregistrement.",
+    uploadSavedInBackground: 'Le téléversement est terminé et le document a été enregistré.',
+    uploadStorageRejectedSegments:
+      "Le stockage n'a accepté aucun segment du téléversement. Vérifiez la politique CORS du bucket.",
     width: 'Largeur',
   },
   validation: {
@@ -724,6 +752,10 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de publier tous les {{label}} de la sélection. Êtes-vous sûr ?',
     aboutToRestore:
       'Vous êtes sur le point de restaurer le document {{label}} à l’état où il se trouvait le {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaurez le contenu du {{versionDate}} en tant que brouillon. Le contenu publié restera inchangé jusqu’à ce que vous le publiiez depuis l’éditeur.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaurez le contenu du {{versionDate}} en tant que brouillon dans toutes les langues. Le contenu publié restera inchangé jusqu’à ce que vous le publiiez depuis l’éditeur.',
     aboutToRestoreGlobal:
       'Vous êtes sur le point de restaurer le ou la {{label}} global(e) à l’état où il ou elle se trouvait le {{versionDate}}.',
     aboutToRevertToPublished:

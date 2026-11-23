@@ -3,11 +3,11 @@
 import React, { useCallback } from 'react'
 
 import { CheckboxInput } from '../../../fields/Checkbox/index.js'
-import { useTheme } from '../../../providers/Theme/index.js'
+import { useRootTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
 export const ToggleHighContrast: React.FC = () => {
-  const { highContrastMode, setHighContrastMode } = useTheme()
+  const { highContrastMode, setHighContrastMode } = useRootTheme()
   const { t } = useTranslation()
 
   const onToggle = useCallback(
