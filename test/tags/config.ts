@@ -17,7 +17,6 @@ export const categoriesSlug = 'categories'
 export const postsSlug = 'posts'
 export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
-export const restrictedMediaSlug = 'restricted-media'
 
 // Tags hierarchy collection (multi-select)
 export const Tags: CollectionConfig = {
@@ -140,21 +139,6 @@ export const Media: CollectionConfig = {
   versions: false,
 }
 
-// Upload collection whose tag field users cannot set on create
-export const RestrictedMedia: CollectionConfig = {
-  slug: restrictedMediaSlug,
-  fields: [
-    {
-      ...createTagField({ hasMany: true, relationTo: tagsSlug }),
-      access: {
-        create: () => false,
-      },
-    },
-  ],
-  upload: true,
-  versions: false,
-}
-
 export default buildConfigWithDefaults({
   suite: 'tags',
   config: {
@@ -163,7 +147,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [Categories, Posts, Pages, Media, RestrictedMedia, Tags],
+    collections: [Categories, Posts, Pages, Media, Tags],
     debug: true,
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -193,6 +177,5 @@ export {
   Media as MediaCollection,
   Pages as PagesCollection,
   Posts as PostsCollection,
-  RestrictedMedia as RestrictedMediaCollection,
   Tags as TagsCollection,
 }

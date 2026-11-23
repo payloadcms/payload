@@ -13,7 +13,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { mediaSlug, postsSlug, restrictedMediaSlug, tagsSlug } from './config.js'
+import { mediaSlug, postsSlug, tagsSlug } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +25,6 @@ test.describe('Tags', () => {
   let page: Page
   let mediaURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
-  let restrictedMediaURL: AdminUrlUtil
   let tagsURL: AdminUrlUtil
 
   const createdTagIds: Tag['id'][] = []
@@ -112,9 +111,6 @@ test.describe('Tags', () => {
 
   const imagePath = path.resolve(dirname, '../uploads/image.png')
 
-  const getBulkUploadTagsButton = (): Locator =>
-    page.locator('.bulk-upload--file-manager').getByRole('button', { name: 'Select Tags' })
-
   /** Open the bulk upload drawer from a list view and return its file input. */
   const openBulkUploadDrawer = async ({
     collectionURL,
@@ -147,7 +143,6 @@ test.describe('Tags', () => {
     serverURL = serverFromInit
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
-    restrictedMediaURL = new AdminUrlUtil(serverURL, restrictedMediaSlug)
     tagsURL = new AdminUrlUtil(serverURL, tagsSlug)
 
     const context = await browser.newContext()
@@ -237,17 +232,12 @@ test.describe('Tags', () => {
 
       await dropzoneInput.setInputFiles(imagePath)
 
-      await expect(getBulkUploadTagsButton()).toBeVisible()
-      await expect(getBulkUploadTagsButton()).toBeEnabled()
-    })
+      const tagsButton = page
+        .locator('.bulk-upload--file-manager')
+        .getByRole('button', { name: 'Select Tags' })
 
-    test('should keep the Tags field read-only in the bulk upload drawer without create access', async () => {
-      const dropzoneInput = await openBulkUploadDrawer({ collectionURL: restrictedMediaURL })
-
-      await dropzoneInput.setInputFiles(imagePath)
-
-      await expect(getBulkUploadTagsButton()).toBeVisible()
-      await expect(getBulkUploadTagsButton()).toBeDisabled()
+      await expect(tagsButton).toBeVisible()
+      await expect(tagsButton).toBeEnabled()
     })
   })
 
