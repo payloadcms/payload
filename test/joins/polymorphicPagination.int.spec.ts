@@ -7,6 +7,27 @@ import { test } from '../__helpers/int/vitest.js'
 import { accessJoinArticlesSlug, accessJoinNotesSlug, accessJoinParentsSlug } from './shared.js'
 
 test.suite('Polymorphic join pagination', { config: './config.ts', db: 'mongo' }, () => {
+  test('should return each document once when multiple pages share a sort value', async ({
+    payload,
+  }) => {
+    const { articles, notes, parentID } = await createJoinedDocuments({
+      payload,
+      articles: Array<string>(24).fill('Accessibility'),
+      notes: Array<string>(24).fill('Accessibility'),
+    })
+    const documents = []
+
+    for (let page = 1; page <= 5; page++) {
+      const children = await findJoinedPage({ count: true, limit: 10, page, parentID, payload })
+
+      documents.push(
+        ...(children?.docs ?? []).map(({ relationTo, value }) => ({ relationTo, value })),
+      )
+    }
+
+    expect(documents).toEqual([...articles, ...notes])
+  })
+
   for (const useJoinAggregations of [true, false]) {
     for (const count of [true, false]) {
       test.describe(`aggregations=${useJoinAggregations}, count=${count}`, () => {
