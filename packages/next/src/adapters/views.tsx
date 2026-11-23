@@ -32,7 +32,18 @@ type PageProps = {
 const isCacheComponentsEnabled = process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true'
 
 export const RootPage = async (props: PageProps) => {
-  const page = await renderRoot({ ...props, adminViews, initAdminContext, notFound, redirect })
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams])
+  const page = await renderRoot({
+    ...props,
+    adminViews,
+    initAdminContext,
+    key: JSON.stringify([params.segments, searchParams]),
+    notFound,
+    params: Promise.resolve(params),
+    persistDefaultTemplate: true,
+    redirect,
+    searchParams: Promise.resolve(searchParams),
+  })
 
   return isCacheComponentsEnabled ? <UnmountWhenHidden>{page}</UnmountWhenHidden> : page
 }

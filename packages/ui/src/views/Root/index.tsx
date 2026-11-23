@@ -21,6 +21,7 @@ import { RenderServerComponent } from '../../elements/RenderServerComponent/inde
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { PageConfigProvider, PageLocaleProvider } from '../../exports/client/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
+import { PersistentTemplateRegistration } from '../../templates/Default/PersistentTemplate/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
@@ -46,18 +47,16 @@ export type RenderRootArgs = {
   initAdminContext: InitAdminContextFn
   /**
    * Optional React `key` applied to the rendered view (not the surrounding admin
-   * template/nav). Adapters whose router reconciles a single RSC payload in place
-   * across navigations (e.g. TanStack Start) pass a per-route key here so the
-   * *view* remounts on route change — resetting view-scoped client providers like
+   * template/nav). It resets view-scoped client providers like
    * `DocumentInfoProvider` that hold uncontrolled `useState` from the prior
-   * document — while the persistent nav/template reconciles in place (no flash).
-   * Left `undefined` by Next.js, whose App Router already remounts the page
-   * segment while its layout (nav) persists.
+   * document, while the persistent template reconciles in place.
    */
   key?: string
   /** Framework notFound implementation (e.g. next/navigation notFound). Called before req is available. */
   notFound: () => never
   params: Promise<{ segments: string[] }>
+  /** Render the default template in the persistent root-layout provider. */
+  persistDefaultTemplate?: boolean
   /** Framework redirect implementation (e.g. next/navigation redirect). Called before req is available. */
   redirect: (url: string) => never
   searchParams: Promise<{ [key: string]: string | string[] }>
@@ -71,6 +70,7 @@ export const renderRoot = async ({
   key,
   notFound,
   params: paramsPromise,
+  persistDefaultTemplate,
   redirect,
   searchParams: searchParamsPromise,
 }: RenderRootArgs) => {
@@ -359,10 +359,46 @@ export const renderRoot = async ({
     } satisfies AdminViewServerPropsOnly,
   })
 
-  // Wrap the view in a keyed boundary so it remounts on route change while the
-  // surrounding template/nav reconciles in place. `key={undefined}` (Next.js) is
-  // a no-op, preserving prior behavior.
+  // Keep view-scoped state route-specific while the template/nav stays mounted.
   const KeyedView = <React.Fragment key={key}>{RenderedView}</React.Fragment>
+
+  const DefaultTemplateContent = (
+    <DefaultTemplate
+      collectionSlug={collectionConfig?.slug}
+      docID={routeParams.id}
+      documentSubViewType={documentSubViewType}
+      globalSlug={globalConfig?.slug}
+      i18n={req.i18n}
+      locale={locale}
+      params={params}
+      payload={req.payload}
+      permissions={permissions}
+      req={req}
+      searchParams={searchParams}
+      user={user}
+      viewActions={viewActions}
+      viewKey={key}
+      viewType={viewType}
+      visibleEntities={{
+        // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+        // which this caused as soon as initPageResult.visibleEntities is passed in
+        collections: visibleEntities?.collections,
+        globals: visibleEntities?.globals,
+      }}
+    >
+      {KeyedView}
+    </DefaultTemplate>
+  )
+
+  if (persistDefaultTemplate && templateType === 'default') {
+    return (
+      <PersistentTemplateRegistration>
+        <PageConfigProvider config={clientConfig}>
+          <PageLocaleProvider locale={locale?.code}>{DefaultTemplateContent}</PageLocaleProvider>
+        </PageConfigProvider>
+      </PersistentTemplateRegistration>
+    )
+  }
 
   return (
     <PageConfigProvider config={clientConfig}>
@@ -371,33 +407,7 @@ export const renderRoot = async ({
         {templateType === 'minimal' && (
           <MinimalTemplate className={templateClassName}>{KeyedView}</MinimalTemplate>
         )}
-        {templateType === 'default' && (
-          <DefaultTemplate
-            collectionSlug={collectionConfig?.slug}
-            docID={routeParams.id}
-            documentSubViewType={documentSubViewType}
-            globalSlug={globalConfig?.slug}
-            i18n={req.i18n}
-            locale={locale}
-            params={params}
-            payload={req.payload}
-            permissions={permissions}
-            req={req}
-            searchParams={searchParams}
-            user={user}
-            viewActions={viewActions}
-            viewKey={key}
-            viewType={viewType}
-            visibleEntities={{
-              // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-              // which this caused as soon as initPageResult.visibleEntities is passed in
-              collections: visibleEntities?.collections,
-              globals: visibleEntities?.globals,
-            }}
-          >
-            {KeyedView}
-          </DefaultTemplate>
-        )}
+        {templateType === 'default' && DefaultTemplateContent}
       </PageLocaleProvider>
     </PageConfigProvider>
   )
