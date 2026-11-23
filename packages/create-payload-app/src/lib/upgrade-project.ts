@@ -15,7 +15,11 @@ import {
   resolveTargets,
 } from '../upgrade-shared/index.js'
 import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
-import { formatMigrationPreview, resolveVersions } from '../upgrade-shared/toolchain.js'
+import {
+  assertMigrationNodeVersion,
+  formatMigrationPreview,
+  resolveVersions,
+} from '../upgrade-shared/toolchain.js'
 import { DEFAULT_PAYLOAD_VERSION_TAG } from '../utils/resolvePackageVersion.js'
 import { getPackageManager } from './get-package-manager.js'
 import {
@@ -109,6 +113,7 @@ export async function upgradeProject({
       ),
       tag: plan.targetVersion,
     })
+    assertMigrationNodeVersion({ resolved: plan.toolchain })
     migrationPreview = formatMigrationPreview({ plan, resolved: plan.toolchain })
   }
   p.note(

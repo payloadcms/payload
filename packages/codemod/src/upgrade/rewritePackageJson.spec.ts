@@ -28,13 +28,13 @@ describe('writeFloors', () => {
   it('keeps toolchain versions already at or above the floor', () => {
     const data: Record<string, unknown> = {
       devDependencies: { '@types/node': '^24.12.3', typescript: '^6.2.0' },
-      engines: { node: '>=26.12.1' },
+      engines: { node: '>=26.13.1' },
     }
 
     const written = writeFloors({ data, resolved })
 
     expect(data.devDependencies).toEqual({ '@types/node': '^24.12.3', typescript: '^6.2.0' })
-    expect(data.engines).toEqual({ node: '>=26.12.1' })
+    expect(data.engines).toEqual({ node: '>=26.13.1' })
     expect(written).toEqual([])
   })
 

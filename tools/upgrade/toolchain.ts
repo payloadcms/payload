@@ -71,6 +71,15 @@ export async function resolveVersions({
   }
 }
 
+export function assertMigrationNodeVersion({ resolved }: { resolved: ResolvedVersions }): void {
+  const running = process.versions.node
+  if (!semver.satisfies(running, resolved.enginesNode)) {
+    throw new Error(
+      `Node v${running} detected.\nPayload v${semver.major(resolved.payloadVersion)} requires Node ${resolved.enginesNode}.\n\nSwitch to a supported Node version, then rerun this command.\nNo files have been changed.`,
+    )
+  }
+}
+
 /** Only major migrations raise these floors; package selection belongs to the shared planner. */
 export function writeFloors({
   data,
@@ -79,19 +88,35 @@ export function writeFloors({
   data: Record<string, unknown>
   resolved: ResolvedVersions
 }): string[] {
+  const engines = isRecord(data.engines) ? data.engines : {}
+  const nodeSpec = engines.node
+  const nodeRange = typeof nodeSpec === 'string' ? semver.validRange(nodeSpec) : null
+  const isCompatible = nodeRange !== null && semver.subset(nodeRange, resolved.enginesNode)
+  if (
+    nodeSpec !== undefined &&
+    !isCompatible &&
+    (!nodeRange || !semver.subset(resolved.enginesNode, nodeRange))
+  ) {
+    throw new Error(
+      `package.json engines.node ${JSON.stringify(nodeSpec)} conflicts with Payload's requirement ${resolved.enginesNode}. Update this constraint manually, then rerun the upgrade. No files have been changed.`,
+    )
+  }
   const written: string[] = []
   if (writeDepFloor({ name: 'typescript', data, floor: resolved.typescript })) {
     written.push('typescript')
   }
-  if (writeDepFloor({ name: '@types/node', data, floor: resolved.typesNode })) {
+  if (
+    writeDepFloor({
+      name: '@types/node',
+      data,
+      floor: resolved.typesNode,
+      minimum: `${semver.major(resolved.typesNode)}.0.0`,
+    })
+  ) {
     written.push('@types/node')
   }
 
-  const engines = isRecord(data.engines) ? data.engines : {}
-  if (
-    engines.node === undefined ||
-    isBelowFloor({ floor: resolved.enginesNode, spec: engines.node })
-  ) {
+  if (!isCompatible) {
     engines.node = resolved.enginesNode
     data.engines = engines
     written.push('engines.node')
@@ -173,15 +198,17 @@ async function resolveNextTarget({
 /**
  * Raise a dep to `floor` wherever it already lives, else add it to devDependencies.
  * Placeholder specs, non-semver specs (e.g. `latest`), and ranges already at or
- * above the floor are left as-is. Returns whether the dep was written.
+ * above `minimum` (defaults to `floor`) are left as-is. Returns whether the dep was written.
  */
 function writeDepFloor({
   name,
   data,
   floor,
+  minimum = floor,
 }: {
   data: Record<string, unknown>
   floor: string
+  minimum?: string
   name: string
 }): boolean {
   for (const field of DEP_FIELDS) {
@@ -192,7 +219,7 @@ function writeDepFloor({
     const spec = deps[name]
     if (
       (typeof spec === 'string' && /^[a-z][a-z0-9+.-]*:/i.test(spec)) ||
-      !isBelowFloor({ floor, spec })
+      !isBelowFloor({ floor: minimum, spec })
     ) {
       return false
     }

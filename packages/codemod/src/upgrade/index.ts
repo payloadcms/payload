@@ -3,7 +3,6 @@ import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import semver from 'semver'
 
 import type { UpgradePlan } from '../upgrade-shared/index.js'
 import type { ReportModel, VersionReportRow } from './report.js'
@@ -16,6 +15,7 @@ import {
   createRegistryClient,
   readInstalledVersion,
 } from '../upgrade-shared/index.js'
+import { assertMigrationNodeVersion } from '../upgrade-shared/toolchain.js'
 import { loadPackageJsons, serializePackageJson } from '../utils/packageJson.js'
 import { loadProject } from '../utils/project.js'
 import { detectPackageManager } from './detectPackageManager.js'
@@ -124,7 +124,7 @@ async function performUpgrade({
         ),
         tag: plan.targetVersion,
       }))
-    warnStaleNode(resolved)
+    assertMigrationNodeVersion({ resolved })
     floorsWritten = writeFloors({ data, resolved })
   }
   if (plan.kind === 'update' && plan.changes.length === 0 && plan.overridesRemoved.length === 0) {
@@ -228,15 +228,6 @@ async function performUpgrade({
     )
   }
   return { failed }
-}
-
-function warnStaleNode(resolved: ResolvedVersions): void {
-  const running = process.versions.node
-  if (!semver.satisfies(running, resolved.enginesNode)) {
-    console.warn(
-      `Warning: running Node ${running} does not satisfy ${resolved.enginesNode}. Switch Node before continuing.`,
-    )
-  }
 }
 
 function verifyResolution({

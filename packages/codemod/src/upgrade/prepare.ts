@@ -11,7 +11,7 @@ import {
   resolveTargets,
 } from '../upgrade-shared/index.js'
 import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
-import { formatMigrationPreview } from '../upgrade-shared/toolchain.js'
+import { assertMigrationNodeVersion, formatMigrationPreview } from '../upgrade-shared/toolchain.js'
 import { resolveDefaultTag } from './defaultTag.js'
 import { resolveVersions } from './resolveVersions.js'
 
@@ -64,10 +64,11 @@ export async function prepareUpgrade({
     project,
     targetVersion,
   })
-  console.log(formatUpgradePlan({ plan }))
   if (plan.blockers.length > 0) {
+    console.log(formatUpgradePlan({ plan }))
     throw new Error('Resolve the package compatibility issues above before upgrading.')
   }
+  let migrationPreview = ''
   if (plan.kind === 'migrate') {
     plan.toolchain = await resolveVersions({
       fetchRegistry,
@@ -76,8 +77,11 @@ export async function prepareUpgrade({
       ),
       tag: plan.targetVersion,
     })
-    console.log(formatMigrationPreview({ plan, resolved: plan.toolchain }))
+    assertMigrationNodeVersion({ resolved: plan.toolchain })
+    migrationPreview = formatMigrationPreview({ plan, resolved: plan.toolchain })
   }
+
+  console.log([formatUpgradePlan({ plan }), migrationPreview].filter(Boolean).join('\n'))
 
   if (shouldConfirm && isInteractive) {
     const confirmed = await p.confirm({
