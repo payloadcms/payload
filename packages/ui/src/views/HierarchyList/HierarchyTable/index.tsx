@@ -648,9 +648,6 @@ export function HierarchyTable({
           <TableSection.Content>
             {hasChildren && (
               <div className={`${baseClass}__grid-section`}>
-                <h2 className={`${baseClass}__grid-heading ${baseClass}__group-label`}>
-                  {childrenLabel}
-                </h2>
                 <CardGrid
                   ariaLabel={childrenLabel}
                   getItemClassName={getGridItemClassName}
@@ -662,9 +659,6 @@ export function HierarchyTable({
             )}
             {hasRelated && (
               <div className={`${baseClass}__grid-section`}>
-                <h2 className={`${baseClass}__grid-heading ${baseClass}__group-label`}>
-                  {t('general:documents')}
-                </h2>
                 <CardGrid
                   ariaLabel={t('general:documents')}
                   getItemClassName={getGridItemClassName}

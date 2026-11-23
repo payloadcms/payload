@@ -199,13 +199,10 @@ test.describe('Tags', () => {
 
     const hierarchyGrid = page.getByRole('list', { name: 'Tags' })
     const documentGrid = page.getByRole('list', { name: 'Documents' })
+    const gridSections = page.locator('.hierarchy-tables__grid-section')
 
-    await expect(
-      page.locator('.hierarchy-tables').getByRole('heading', { name: 'Tags' }),
-    ).toBeVisible()
-    await expect(
-      page.locator('.hierarchy-tables').getByRole('heading', { name: 'Documents' }),
-    ).toBeVisible()
+    await expect(gridSections).toHaveCount(2)
+    await expect(gridSections.nth(1)).toHaveCSS('border-top-width', '1px')
     await expect(hierarchyGrid).toHaveCount(1)
     await expect(documentGrid).toHaveCount(1)
     await expect(
