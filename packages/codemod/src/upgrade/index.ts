@@ -219,7 +219,6 @@ async function performUpgrade({
     migrationGuidePath: deps.exists(migrationGuideAbsPath) ? migrationGuideAbsPath : undefined,
     nextTarget: resolved!.nextTarget,
     overridesRemoved: plan.overridesRemoved,
-    placeholdersSkipped: [],
     runbookPath: join(distDir, RUNBOOK_RELATIVE_PATH),
     transforms: results,
     versions,

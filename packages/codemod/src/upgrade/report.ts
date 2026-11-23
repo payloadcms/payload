@@ -16,7 +16,6 @@ export type ReportModel = {
   migrationGuidePath?: string
   nextTarget: null | string
   overridesRemoved: string[]
-  placeholdersSkipped: string[]
   runbookPath: string
   transforms: TransformRunResult[]
   versions: VersionReportRow[]
@@ -40,13 +39,6 @@ export function renderReport(model: ReportModel): string {
 
   if (model.overridesRemoved.length > 0) {
     lines.push(`Overrides removed: ${model.overridesRemoved.join(', ')}`, '')
-  }
-
-  if (model.placeholdersSkipped.length > 0) {
-    lines.push(
-      `Left as-is (workspace/catalog/link specs): ${model.placeholdersSkipped.join(', ')}`,
-      '',
-    )
   }
 
   if (model.floorsWritten.length > 0) {

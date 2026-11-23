@@ -299,17 +299,11 @@ export async function createUpgradePlan({
 }
 
 /** Apply only the reviewed plan; retain unrelated dependencies and intentional overrides. */
-export function applyUpgradePlan({
-  data,
-  plan,
-}: {
-  data?: Record<string, unknown>
-  plan: UpgradePlan
-}): Record<string, unknown> {
+export function applyUpgradePlan({ plan }: { plan: UpgradePlan }): Record<string, unknown> {
   if (plan.blockers.length > 0) {
     throw new Error(`Cannot apply upgrade:\n${plan.blockers.join('\n')}`)
   }
-  const next = structuredClone(data ?? plan.project.data)
+  const next = structuredClone(plan.project.data)
   for (const { group, name, to } of plan.changes) {
     const dependencies = asRecord(next[group])
     dependencies[name] = to
