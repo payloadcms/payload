@@ -4,12 +4,11 @@ export const ConditionalURL: CollectionConfig = {
   slug: 'conditional-url',
   admin: {
     livePreview: {
-      url: ({ data }) => (data?.enabled ? '/live-preview/static' : null),
+      url: ({ frontendPath }) => frontendPath,
     },
-    preview: (doc) => {
-      return doc?.enabled ? '/live-preview/static' : null
-    },
+    preview: (_doc, { frontendPath }) => frontendPath,
   },
+  generateFrontendPath: ({ doc }) => (doc?.enabled ? '/live-preview/static' : null),
   fields: [
     {
       name: 'title',

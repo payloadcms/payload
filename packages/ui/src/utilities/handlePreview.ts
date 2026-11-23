@@ -78,7 +78,17 @@ export const handlePreview = async ({
 
   if (typeof generatePreviewURL === 'function' && operation !== 'create') {
     try {
-      const result = await generatePreviewURL(data, { locale: req.locale, req, token })
+      const frontendPath = await req.payload.generateFrontendPath({
+        ...(collectionSlug ? { collection: collectionSlug } : { global: globalSlug! }),
+        doc: data,
+        req,
+      })
+      const result = await generatePreviewURL(data, {
+        frontendPath,
+        locale: req.locale,
+        req,
+        token,
+      })
 
       if (typeof result === 'string') {
         previewURL = result

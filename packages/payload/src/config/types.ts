@@ -328,9 +328,25 @@ export type LivePreviewConfig = {
    */
   url?:
     | ((args: {
+        /**
+         * @deprecated Use `frontendPath` to build the URL, or `req.payload.collections` if you need the config.
+         * Will be removed in v5.
+         */
         collectionConfig?: SanitizedCollectionConfig
         data: Record<string, any>
+        /**
+         * The path returned by the `generateFrontendPath` of the collection or global, or `null` if there is none.
+         * @see https://payloadcms.com/docs/configuration/collections#frontend-path
+         */
+        frontendPath: null | string
+        /**
+         * @deprecated Use `frontendPath` to build the URL, or `req.payload.config.globals` if you need the config.
+         * Will be removed in v5.
+         */
         globalConfig?: SanitizedGlobalConfig
+        /**
+         * @deprecated Use `req.locale` instead. Will be removed in v5.
+         */
         locale: Locale
         /**
          * @deprecated
@@ -373,6 +389,14 @@ export type MetaConfig = {
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
+  /**
+   * The path returned by the `generateFrontendPath` of the collection or global, or `null` if there is none.
+   * @see https://payloadcms.com/docs/configuration/collections#frontend-path
+   */
+  frontendPath: null | string
+  /**
+   * @deprecated Use `req.locale` instead. Will be removed in v5.
+   */
   locale: string
   req: PayloadRequest
   token: null | string

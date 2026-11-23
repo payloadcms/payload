@@ -49,16 +49,25 @@ The following arguments are provided to the `preview` function:
 
 The `options` object contains the following properties:
 
-| Path         | Description                                        |
-| ------------ | -------------------------------------------------- |
-| **`locale`** | The current locale of the Document being edited.   |
-| **`req`**    | The Payload Request object.                        |
-| **`token`**  | The JWT token of the currently authenticated user. |
+| Path               | Description                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`frontendPath`** | The path returned by the [`generateFrontendPath`](../configuration/collections#frontend-path) of the Collection or Global, or `null` if there is none. |
+| **`locale`**       | Deprecated, use `req.locale` instead. Will be removed in v5.                                                                                           |
+| **`req`**          | The Payload Request object.                                                                                                                            |
+| **`token`**        | The JWT token of the currently authenticated user.                                                                                                     |
+
+If the Collection or Global has `generateFrontendPath`, build the preview URL from `frontendPath`, so the path is defined in one place. Return `null` to hide the preview button:
+
+```ts
+preview: (doc, { frontendPath }) =>
+  frontendPath ? `http://localhost:3000${frontendPath}` : null // highlight-line
+```
 
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
 
 ```ts
-preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlight-line
+preview: (doc, { frontendPath, req }) =>
+  `${req.protocol}//${req.host}${frontendPath}` // highlight-line
 ```
 
 ## Draft Preview

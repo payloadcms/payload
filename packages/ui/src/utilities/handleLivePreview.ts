@@ -114,9 +114,15 @@ export const handleLivePreview = async ({
 
   if (typeof livePreviewConfig?.url === 'function' && operation !== 'create') {
     try {
+      const frontendPath = await req.payload.generateFrontendPath({
+        ...(collectionSlug ? { collection: collectionSlug } : { global: globalSlug! }),
+        doc: data,
+        req,
+      })
       const result = await livePreviewConfig.url({
         collectionConfig,
         data,
+        frontendPath,
         globalConfig,
         locale: { code: req.locale, label: '' },
         payload: req.payload,
