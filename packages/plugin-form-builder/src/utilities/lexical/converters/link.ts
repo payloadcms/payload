@@ -6,7 +6,7 @@ import type { HTMLConverter } from '../types.js'
 import { replaceDoubleCurlys } from '../../replaceDoubleCurlys.js'
 import { convertLexicalNodesToHTML } from '../serializeLexical.js'
 
-export const LinkHTMLConverter: HTMLConverter<any> = {
+export const createLinkHTMLConverter = ({ serverURL }: { serverURL: string }): HTMLConverter => ({
   async converter({ converters, node, parent, submissionData }) {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
@@ -18,10 +18,14 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
       submissionData,
     })
 
+    const frontendPath = node.fields.doc?.frontendPath
+
     let href: string =
       node.fields.linkType === 'custom'
         ? (node.fields.url ?? '')
-        : (node.fields.doc?.value?.id ?? '')
+        : typeof frontendPath === 'string'
+          ? `${serverURL}${frontendPath}`
+          : ''
 
     if (submissionData) {
       href = replaceDoubleCurlys(href, submissionData)
@@ -32,4 +36,6 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
     return `<a href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
   },
   nodeTypes: ['autolink', 'link'],
-}
+})
+
+export const LinkHTMLConverter: HTMLConverter = createLinkHTMLConverter({ serverURL: '' })

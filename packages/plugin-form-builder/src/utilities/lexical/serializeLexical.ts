@@ -1,9 +1,16 @@
 import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
+import { createLinkHTMLConverter } from './converters/link.js'
 import { defaultHTMLConverters } from './defaultConverters.js'
 
-export async function serializeLexical(data?: any, submissionData?: any): Promise<string> {
-  const converters: HTMLConverter[] = defaultHTMLConverters
+export async function serializeLexical(
+  data?: any,
+  submissionData?: any,
+  serverURL?: string,
+): Promise<string> {
+  const converters: HTMLConverter[] = serverURL
+    ? [createLinkHTMLConverter({ serverURL }), ...defaultHTMLConverters]
+    : defaultHTMLConverters
 
   if (data?.root?.children?.length) {
     return await convertLexicalNodesToHTML({
