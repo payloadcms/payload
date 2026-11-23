@@ -85,7 +85,7 @@ type MenuButtonProps = {
   children: React.ReactNode
   className?: string
   /**
-   * Keeps the item focusable, but suppresses event callbacks, activation and popup dismissal.
+   * Keeps the item focusable, but prevents activation and popup dismissal.
    * Native `aria-disabled={true}` or `aria-disabled="true"` has the same effect.
    * Disabled href items render as buttons without a destination.
    */
@@ -138,13 +138,8 @@ export const Button: React.FC<MenuButtonProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  // ARIA-disabled items remain focusable and emit native events, including capture events.
-  const nativeProps = isDisabled
-    ? Object.fromEntries(Object.entries(rest).filter(([name]) => !name.startsWith('on')))
-    : rest
-
   const itemProps = {
-    ...nativeProps,
+    ...rest,
     id,
     'aria-checked': ariaChecked ?? rest['aria-checked'],
     'aria-current': ariaCurrent ?? rest['aria-current'],
