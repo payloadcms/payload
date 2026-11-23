@@ -2489,6 +2489,60 @@ describe('Uploads', () => {
         await drag.cancel()
       }
     })
+
+    test('should let drags that are not files reach the page inside the bulk upload modal', async () => {
+      const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
+
+      const dropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
+
+      // Rich text block handles and text drops rely on these events reaching the document
+      const eventsAtDocument = await bulkUploadModal
+        .locator('.bulk-upload--file-manager__editView')
+        .evaluate((element) => {
+          const events: string[] = []
+          const recordEvent = (event: DragEvent) =>
+            events.push(`${event.type}, cancelled: ${event.defaultPrevented}`)
+
+          document.addEventListener('dragover', recordEvent)
+          document.addEventListener('drop', recordEvent)
+
+          for (const type of ['dragover', 'drop']) {
+            const transfer = new DataTransfer()
+            transfer.setData('text/plain', 'dragged text')
+            element.dispatchEvent(
+              new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: transfer }),
+            )
+          }
+
+          document.removeEventListener('dragover', recordEvent)
+          document.removeEventListener('drop', recordEvent)
+
+          return events
+        })
+
+      expect(eventsAtDocument).toEqual(['dragover, cancelled: false', 'drop, cancelled: false'])
+    })
+
+    test('should remove the modal outline when a field in the form stops the drop', async () => {
+      const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
+
+      const dropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
+      const field = bulkUploadModal.locator('input[name="prefix"]')
+
+      // Stands in for a field that handles file drops itself, so the drop never reaches the modal
+      await field.evaluate((element) => {
+        element.addEventListener('drop', (event) => event.stopPropagation())
+      })
+
+      const files = [{ name: 'dropped.png', type: 'image/png' }]
+      await dispatchDragEvent({ files, locator: field, type: 'dragenter' })
+      await expect(dropzone).toHaveClass(/dragging/)
+
+      await dispatchDragEvent({ files, locator: field, type: 'drop' })
+      await expect(dropzone).not.toHaveClass(/dragging/)
+    })
   })
 
   describe('remote url fetching', () => {
@@ -3617,16 +3671,14 @@ async function dispatchDragEvent({
  * nothing. This sends a file `dragenter` until the dropzone shows its drag state, then resets it.
  */
 async function waitForDropzoneToHandleDrags({ locator }: { locator: Locator }) {
+  const files = [{ name: 'probe.png', type: 'image/png' }]
+
   await expect(async () => {
-    await dispatchDragEvent({
-      files: [{ name: 'probe.png', type: 'image/png' }],
-      locator,
-      type: 'dragenter',
-    })
+    await dispatchDragEvent({ files, locator, type: 'dragenter' })
     await expect(locator).toHaveClass(/dragging/, { timeout: 500 })
   }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-  await dispatchDragEvent({ locator, type: 'dragleave' })
+  await dispatchDragEvent({ files, locator, type: 'dragleave' })
   await expect(locator).not.toHaveClass(/dragging/)
 }
 

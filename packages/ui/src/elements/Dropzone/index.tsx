@@ -3,14 +3,22 @@ import React from 'react'
 
 import './index.css'
 
+const baseClass = 'dropzone'
+
+/**
+ * Dropzones handle only drags that carry files. Other drags, such as moving a rich text block or
+ * dragging text into an input, must reach the page without being cancelled.
+ */
+const isFileDrag = (e: DragEvent) => Boolean(e.dataTransfer?.types.includes('Files'))
+
 const handleDragOver = (e: DragEvent) => {
+  if (!isFileDrag(e)) {
+    return
+  }
+
   e.preventDefault()
   e.stopPropagation()
 }
-
-const baseClass = 'dropzone'
-
-const isFileDrag = (e: DragEvent) => Boolean(e.dataTransfer?.types.includes('Files'))
 
 export type Props = {
   readonly children?: React.ReactNode
@@ -81,16 +89,21 @@ export function Dropzone({
   const enteredTargetsRef = React.useRef<EventTarget[]>([])
 
   const handleDragEnter = React.useCallback((e: DragEvent) => {
+    if (!isFileDrag(e)) {
+      return
+    }
+
     e.preventDefault()
     e.stopPropagation()
-
-    if (isFileDrag(e)) {
-      enteredTargetsRef.current = [...enteredTargetsRef.current, e.target]
-      setDragging(true)
-    }
+    enteredTargetsRef.current = [...enteredTargetsRef.current, e.target]
+    setDragging(true)
   }, [])
 
   const handleDragLeave = React.useCallback((e: DragEvent) => {
+    if (!isFileDrag(e)) {
+      return
+    }
+
     e.preventDefault()
     e.stopPropagation()
 
@@ -104,16 +117,27 @@ export function Dropzone({
     }
   }, [])
 
+  /**
+   * Added in the capture phase, so it runs before any element inside the dropzone can handle the
+   * drop and stop it. The browser sends no `dragleave` after a drop, so without this the drag
+   * state would stay on.
+   */
+  const resetDragState = React.useCallback(() => {
+    enteredTargetsRef.current = []
+    setDragging(false)
+  }, [])
+
   const handleDrop = React.useCallback(
     (e: DragEvent) => {
+      if (!isFileDrag(e)) {
+        return
+      }
+
       e.preventDefault()
       e.stopPropagation()
-      enteredTargetsRef.current = []
-      setDragging(false)
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         addFiles(e.dataTransfer.files)
-        setDragging(false)
 
         try {
           e.dataTransfer.clearData()
@@ -133,6 +157,7 @@ export function Dropzone({
       div.addEventListener('dragenter', handleDragEnter)
       div.addEventListener('dragleave', handleDragLeave)
       div.addEventListener('dragover', handleDragOver)
+      div.addEventListener('drop', resetDragState, { capture: true })
       div.addEventListener('drop', handleDrop)
       if (isPasteEnabled) {
         div.addEventListener('paste', handlePaste)
@@ -142,13 +167,22 @@ export function Dropzone({
         div.removeEventListener('dragenter', handleDragEnter)
         div.removeEventListener('dragleave', handleDragLeave)
         div.removeEventListener('dragover', handleDragOver)
+        div.removeEventListener('drop', resetDragState, { capture: true })
         div.removeEventListener('drop', handleDrop)
         div.removeEventListener('paste', handlePaste)
       }
     }
 
     return () => null
-  }, [disabled, handleDragEnter, handleDragLeave, handleDrop, handlePaste, isPasteEnabled])
+  }, [
+    disabled,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop,
+    handlePaste,
+    isPasteEnabled,
+    resetDragState,
+  ])
 
   const classes = [
     baseClass,
