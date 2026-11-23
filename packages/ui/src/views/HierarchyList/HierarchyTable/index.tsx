@@ -187,7 +187,7 @@ export function HierarchyTable({
           childrenWhere ?? combineWhereConstraints([parentCondition, searchCondition, baseFilter])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where: JSON.stringify(where) },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
