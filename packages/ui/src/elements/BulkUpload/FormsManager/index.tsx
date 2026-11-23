@@ -236,7 +236,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       method: 'POST',
     })
 
-    const json: SanitizedDocumentPermissions = await res.json()
+    const json: SanitizedDocumentPermissions = await readAccessResponse({ response: res })
     const publishedAccessJSON = await fetch(
       formatAdminURL({ apiRoute: api, path: docAccessPath }),
       {
@@ -250,7 +250,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         },
         method: 'POST',
       },
-    ).then((res) => res.json())
+    ).then((response) => readAccessResponse({ response }))
 
     if (currentCollectionSlugRef.current !== collectionSlug) {
       return null
@@ -330,6 +330,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
    * initialization do not start a second one.
    */
   const initializeCollection = React.useCallback((): Promise<FormState | null> => {
+    // Both must belong to this collection. Switching collections can replace the
+    // permissions while the previous collection's template is still stored.
+    if (
+      initializedStateCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsCollectionSlugRef.current === collectionSlug
+    ) {
+      return Promise.resolve(initialStateRef.current)
+    }
+
     if (initializingCollectionRef.current?.slug === collectionSlug) {
       return initializingCollectionRef.current.promise
     }
@@ -431,10 +440,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
-      let initialFormState = initialStateRef.current
-      if (initializedStateCollectionSlugRef.current !== collectionSlug) {
-        initialFormState = await initializeCollection()
-      }
+      const initialFormState = await initializeCollection()
       if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
         toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
         return false
@@ -466,10 +472,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const addInitialForms = useEffectEvent(async (initialForms: InitialForms) => {
     toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
 
-    let initialFormState = initialStateRef.current
-    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
-      initialFormState = await initializeCollection()
-    }
+    const initialFormState = await initializeCollection()
     if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
       return
@@ -775,9 +778,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     if (!collectionSlug) {
       return
     }
-    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
-      void initializeCollection()
-    }
+    void initializeCollection()
 
     if (initialFiles || initialForms) {
       if (
@@ -893,4 +894,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
 export function useFormsManager() {
   return React.use(Context)
+}
+
+/** Reads an access response, and throws on an HTTP error so the caller can try again. */
+async function readAccessResponse({ response }: { response: Response }) {
+  if (!response.ok) {
+    throw new Error(`Access request failed with status ${response.status}`)
+  }
+
+  return response.json()
 }
