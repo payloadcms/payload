@@ -49,8 +49,8 @@
   /* Semi-transparent, so the frame shows through and the badge stays readable on light and dark frames */
   .document-card__video-badge {
     position: absolute;
-    inset-block-end: var(--spacer-2);
-    inset-inline-start: var(--spacer-2);
+    inset-block-start: var(--spacer-2);
+    inset-inline-end: var(--spacer-2);
     display: flex;
     align-items: center;
     justify-content: center;
