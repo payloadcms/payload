@@ -72,6 +72,10 @@ import type {
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { MaybePromise, PayloadRequest, Where } from '../types/index.js'
+import type {
+  UploadSessionsConfig,
+  UploadSessionTransferConfig,
+} from '../uploads/sessions/types.js'
 import type { UploadTransformer } from '../uploads/transformers/types.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -873,6 +877,16 @@ export type FetchAPIFileUploadOptions = {
 
 export type GlobalUploadConfig = {
   /**
+   * Lifetime and quota policies for durable browser upload sessions.
+   * @experimental
+   */
+  sessions?: UploadSessionsConfig
+  /**
+   * Transfer preferences for segmented browser uploads. Storage provider limits always win.
+   * @experimental
+   */
+  transfer?: UploadSessionTransferConfig
+  /**
    * Ordered list of file transformers. Every eligible transformer joins the pipeline
    * for a given upload or dynamic request in declaration order. Slugs must be unique.
    *
@@ -1488,6 +1502,8 @@ export type Config = {
   collections?: CollectionConfig[]
   /**
    * Prefix a string to all cookies that Payload sets.
+   * Must contain only valid cookie-name characters; whitespace is not allowed.
+   * Empty strings use the default prefix.
    *
    * @default "payload"
    */

@@ -21,6 +21,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 export { useQueue } from '../../hooks/useQueue.js'
+export type { QueueResult, Task, TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
@@ -517,14 +518,20 @@ export { UploadHandlersProvider, useUploadHandlers } from '../../providers/Uploa
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export {
   defaultTheme,
+  getHighContrastModeFromSystem,
+  getThemeFromSystem,
+  type RootThemeContext,
   type Theme,
   type ThemeContext,
   ThemeProvider,
+  useRootTheme,
   useTheme,
 } from '../../providers/Theme/index.js'
 export { EmbedProvider, useEmbed } from '../../providers/Embed/index.js'
 export type { EmbedContext } from '../../providers/Embed/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
+export type { TranslationProviderProps } from '../../providers/Translation/index.js'
+export { AdminTranslationProvider } from '../../providers/AdminTranslation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { useControllableState } from '../../hooks/useControllableState.js'
 

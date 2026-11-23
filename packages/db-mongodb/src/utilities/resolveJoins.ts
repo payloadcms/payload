@@ -12,6 +12,7 @@ import type { MongooseAdapter } from '../index.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
+import { resolveWhereForCollection } from './resolveWhereForCollection.js'
 import { transform } from './transform.js'
 
 export type ResolveJoinsArgs = {
@@ -103,14 +104,6 @@ export async function resolveJoins({
         localizationConfig &&
         localizationConfig.defaultLocale)
 
-    // Extract relationTo filter from the where clause to determine which collections to query
-    const relationToFilter = extractRelationToFilter(joinQuery.where || {})
-
-    // Determine which collections to query based on relationTo filter
-    const collections = relationToFilter
-      ? allCollections.filter((col) => relationToFilter.includes(col))
-      : allCollections
-
     // Check if this is a polymorphic collection join (where field.collection is an array)
     const isPolymorphicJoin = Array.isArray(joinDef.field.collection)
 
@@ -120,7 +113,7 @@ export async function resolveJoins({
     const skip = (page - 1) * limit
 
     // Process collections concurrently
-    const collectionPromises = collections.map(async (joinCollectionSlug) => {
+    const collectionPromises = allCollections.map(async (joinCollectionSlug) => {
       const targetConfig = adapter.payload.collections[joinCollectionSlug]?.config
       if (!targetConfig) {
         return null
@@ -141,20 +134,29 @@ export async function resolveJoins({
       // Extract all parent document IDs to use in the join query
       const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
 
-      // Build the base query
-      let whereQuery: null | Record<string, unknown> = null
-      whereQuery = isPolymorphicJoin
-        ? filterWhereForCollection(
-            joinQuery.where || {},
-            targetConfig.flattenedFields,
-            true, // exclude relationTo for individual collections
-          )
-        : joinQuery.where || {}
+      let whereQuery: Record<string, unknown> = joinQuery.where || {}
 
-      // Skip this collection if the WHERE clause cannot be satisfied for polymorphic collection joins
-      if (whereQuery === null) {
-        return null
+      if (isPolymorphicJoin) {
+        const condition = resolveWhereForCollection({
+          collectionSlug: joinCollectionSlug,
+          fieldNames: new Set(targetConfig.flattenedFields.map(({ name }) => name)),
+          usesObjectIDs: !adapter.payload.collections[joinCollectionSlug]?.customIDType,
+          where: joinQuery.where || {},
+        })
+
+        // Skip targets whose collection-specific condition cannot be satisfied.
+        if (condition.matches === 'no-documents') {
+          return null
+        }
+
+        // Only unresolved document conditions need to reach the database.
+        if (condition.matches === 'documents-matching-where') {
+          whereQuery = condition.where
+        } else {
+          whereQuery = {}
+        }
       }
+
       whereQuery = useDrafts
         ? await JoinModel.buildQuery({
             locale,
@@ -207,13 +209,17 @@ export async function resolveJoins({
         ? Array.isArray(joinDef.targetField.relationTo)
         : false
 
-      if (isPolymorphic) {
-        // For polymorphic relationships, we need to match both relationTo and value
-        whereQuery[`${dbFieldName}.relationTo`] = collectionSlug
-        whereQuery[`${dbFieldName}.value`] = { $in: parentIDs }
+      const parentRestriction = isPolymorphic
+        ? {
+            [`${dbFieldName}.relationTo`]: collectionSlug,
+            [`${dbFieldName}.value`]: { $in: parentIDs },
+          }
+        : { [dbFieldName]: { $in: parentIDs } }
+
+      if (Object.keys(parentRestriction).some((path) => Object.hasOwn(whereQuery, path))) {
+        whereQuery = { $and: [whereQuery, parentRestriction] }
       } else {
-        // For regular relationships and polymorphic collection joins
-        whereQuery[dbFieldName] = { $in: parentIDs }
+        whereQuery = { ...whereQuery, ...parentRestriction }
       }
 
       // Build the sort parameters for the query
@@ -245,8 +251,6 @@ export async function resolveJoins({
         isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
       ])
 
-      const count = isPolymorphicJoin ? results.length : dbCount
-
       transform({
         adapter,
         data: results,
@@ -259,7 +263,7 @@ export async function resolveJoins({
       // Return results with collection info for grouping
       return {
         collectionSlug: joinCollectionSlug,
-        count,
+        count: dbCount,
         dbFieldName,
         results,
         sort,
@@ -278,7 +282,7 @@ export async function resolveJoins({
       }
     > = {}
 
-    let totalCount = 0
+    let countFromDatabase = 0
     for (const collectionResult of collectionResults) {
       if (!collectionResult) {
         continue
@@ -286,7 +290,7 @@ export async function resolveJoins({
 
       const { collectionSlug, count, dbFieldName, results, sort, useDrafts } = collectionResult
 
-      totalCount += count
+      countFromDatabase += count
 
       for (const result of results) {
         if (useDrafts) {
@@ -369,6 +373,7 @@ export async function resolveJoins({
     const localizedJoinPath = `${joinPath}${localeSuffix}`
 
     return {
+      countFromDatabase,
       grouped,
       isPolymorphicJoin,
       joinQuery,
@@ -376,7 +381,6 @@ export async function resolveJoins({
       localizedJoinPath,
       page,
       skip,
-      totalCount,
     }
   })
 
@@ -389,32 +393,40 @@ export async function resolveJoins({
       continue
     }
 
-    const { grouped, isPolymorphicJoin, joinQuery, limit, localizedJoinPath, skip, totalCount } =
-      joinResult
+    const {
+      countFromDatabase,
+      grouped,
+      isPolymorphicJoin,
+      joinQuery,
+      limit,
+      localizedJoinPath,
+      skip,
+    } = joinResult
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
       const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
-      const all = grouped[id]?.docs || []
+      const children = grouped[id]?.docs || []
+      const totalDocs = isPolymorphicJoin ? children.length : countFromDatabase
 
       // Calculate the slice for pagination
       // When limit is 0, it means unlimited - return all results
       const slice = isPolymorphicJoin
         ? limit === 0
-          ? all
-          : all.slice(skip, skip + limit)
+          ? children
+          : children.slice(skip, skip + limit)
         : // For non-polymorphic joins, we assume that page and limit were applied at the database level
-          all
+          children
 
       // Create the join result object with pagination metadata
       const value: Record<string, unknown> = {
         docs: slice,
-        hasNextPage: limit === 0 ? false : totalCount > skip + slice.length,
+        hasNextPage: limit === 0 ? false : totalDocs > skip + slice.length,
       }
 
       // Include total count if requested
       if (joinQuery.count) {
-        value.totalDocs = totalCount
+        value.totalDocs = totalDocs
       }
 
       // Navigate to the correct nested location in the document and set the join data
@@ -441,152 +453,6 @@ export async function resolveJoins({
       ref[segments[segments.length - 1]!] = value
     }
   }
-}
-
-/**
- * Extracts relationTo filter values from a WHERE clause
- *
- * @purpose When you have a polymorphic join field that can reference multiple collection types (e.g. the documentsAndFolders join field on
- * folders that points to all folder-enabled collections), Payload needs to decide which collections to actually query. Without filtering,
- * it would query ALL possible collections even when the WHERE clause clearly indicates it only needs specific ones.
- *
- * extractRelationToFilter analyzes the WHERE clause to extract relationTo conditions and returns only the collection slugs that
- * could possibly match, avoiding unnecessary database queries.
- *
- * @description The function recursively traverses a WHERE clause looking for relationTo conditions in these patterns:
- *
- * 1. Direct conditions: { relationTo: { equals: 'posts' } }
- * 2. IN conditions: { relationTo: { in: ['posts', 'media'] } }
- * 3. Nested in AND/OR: Recursively searches through logical operators
-
- * @param where - The WHERE clause to search
- * @returns Array of collection slugs if relationTo filter found, null otherwise
- */
-function extractRelationToFilter(where: Record<string, unknown>): null | string[] {
-  if (!where || typeof where !== 'object') {
-    return null
-  }
-
-  // Check for direct relationTo conditions
-  if (where.relationTo && typeof where.relationTo === 'object') {
-    const relationTo = where.relationTo as Record<string, unknown>
-    if (relationTo.in && Array.isArray(relationTo.in)) {
-      return relationTo.in as string[]
-    }
-    if (relationTo.equals) {
-      return [relationTo.equals as string]
-    }
-  }
-
-  // Check for relationTo in logical operators
-  if (where.and && Array.isArray(where.and)) {
-    const allResults: string[] = []
-    for (const condition of where.and) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        allResults.push(...result)
-      }
-    }
-    if (allResults.length > 0) {
-      return [...new Set(allResults)] // Remove duplicates
-    }
-  }
-
-  if (where.or && Array.isArray(where.or)) {
-    const allResults: string[] = []
-    for (const condition of where.or) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        allResults.push(...result)
-      }
-    }
-    if (allResults.length > 0) {
-      return [...new Set(allResults)] // Remove duplicates
-    }
-  }
-
-  return null
-}
-
-/**
- * Filters a WHERE clause to only include fields that exist in the target collection
- * This is needed for polymorphic joins where different collections have different fields
- * @param where - The original WHERE clause
- * @param availableFields - The fields available in the target collection
- * @param excludeRelationTo - Whether to exclude relationTo field (for individual collections)
- * @returns A filtered WHERE clause, or null if the query cannot match this collection
- */
-function filterWhereForCollection(
-  where: Record<string, unknown>,
-  availableFields: Array<{ name: string }>,
-  excludeRelationTo: boolean = false,
-): null | Record<string, unknown> {
-  if (!where || typeof where !== 'object') {
-    return where
-  }
-
-  const fieldNames = new Set(availableFields.map((f) => f.name))
-  // Add special fields that are available in polymorphic relationships
-  if (!excludeRelationTo) {
-    fieldNames.add('relationTo')
-  }
-
-  const filtered: Record<string, unknown> = {}
-
-  for (const [key, value] of Object.entries(where)) {
-    if (key === 'and') {
-      // Handle AND operator - all conditions must be satisfiable
-      if (Array.isArray(value)) {
-        const filteredConditions: Record<string, unknown>[] = []
-
-        for (const condition of value) {
-          const filteredCondition = filterWhereForCollection(
-            condition,
-            availableFields,
-            excludeRelationTo,
-          )
-
-          // If any condition in AND cannot be satisfied, the whole AND fails
-          if (filteredCondition === null) {
-            return null
-          }
-
-          if (Object.keys(filteredCondition).length > 0) {
-            filteredConditions.push(filteredCondition)
-          }
-        }
-
-        if (filteredConditions.length > 0) {
-          filtered[key] = filteredConditions
-        }
-      }
-    } else if (key === 'or') {
-      // Handle OR operator - at least one condition must be satisfiable
-      if (Array.isArray(value)) {
-        const filteredConditions = value
-          .map((condition) =>
-            filterWhereForCollection(condition, availableFields, excludeRelationTo),
-          )
-          .filter((condition) => condition !== null && Object.keys(condition).length > 0)
-
-        if (filteredConditions.length > 0) {
-          filtered[key] = filteredConditions
-        }
-        // If no OR conditions can be satisfied, we still continue (OR is more permissive)
-      }
-    } else if (key === 'relationTo' && excludeRelationTo) {
-      // Skip relationTo field for non-polymorphic collections
-      continue
-    } else if (fieldNames.has(key)) {
-      // Include the condition if the field exists in this collection
-      filtered[key] = value
-    } else {
-      // Field doesn't exist in this collection - this makes the query unsatisfiable
-      return null
-    }
-  }
-
-  return filtered
 }
 
 type SanitizedJoin = SanitizedJoins[string][number]

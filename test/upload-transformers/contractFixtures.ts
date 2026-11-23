@@ -3,6 +3,7 @@ import type {
   HandleTransformRequestArgs,
   TransformFileArgs,
   TransformFileResult,
+  TransformValidate,
   UploadTransformer,
 } from 'payload'
 
@@ -26,6 +27,8 @@ export const contractCalls = {
   handleRequest: [] as ({ slug: string } & HandleTransformRequestArgs)[],
   /** `docAtStart` is a copy of `doc` before the stage ran. */
   transformFile: [] as ({ docAtStart: Record<string, unknown> } & TransformFileArgs)[],
+  /** Each call of the `watermark` definition's `validate`, with `doc` copied when it was called. */
+  validate: [] as { context: Parameters<TransformValidate>[1]; value: unknown }[],
 }
 
 /** `_transforms` as each `ContractMedia` hook saw it, so a test can prove hooks run after the pipeline. */
@@ -35,6 +38,7 @@ export function resetContractCalls(): void {
   contractCalls.canTransform.length = 0
   contractCalls.handleRequest.length = 0
   contractCalls.transformFile.length = 0
+  contractCalls.validate.length = 0
   contractHookCalls.length = 0
 }
 
@@ -76,6 +80,31 @@ export const contractTransformers: UploadTransformer[] = [
         : { status: 'continue' }
     },
     mimeTypes: ['text/markdown', 'image/*'],
+    transformDefinitions: [
+      {
+        key: 'watermark',
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          description: 'Text drawn over the file.',
+          properties: {
+            opacity: { type: 'number', maximum: 1, minimum: 0 },
+            text: { type: 'string', minLength: 1 },
+          },
+          required: ['text'],
+        },
+        validate: (value, context) => {
+          contractCalls.validate.push({
+            context: { ...context, doc: structuredClone(context.doc) },
+            value,
+          })
+
+          return (value as { text: string }).text === 'forbidden'
+            ? 'watermark: this text is not allowed'
+            : true
+        },
+      },
+    ],
     transformFile: async (args) => {
       contractCalls.transformFile.push({ ...args, docAtStart: structuredClone(args.doc) })
 

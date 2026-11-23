@@ -320,19 +320,19 @@ export type LexicalNodes_8BCA914C =
   | SerializedHeadingNode<LexicalNodes_8BCA914C>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_57F47813".
+ * via the `definition` "LexicalNodes_70649ACC".
  */
-export type LexicalNodes_57F47813 =
+export type LexicalNodes_70649ACC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_57F47813>
-  | SerializedAutoLinkNode<LexicalNodes_57F47813, LexicalLinkFields_5D6A193C>
-  | SerializedLinkNode<LexicalNodes_57F47813, LexicalLinkFields_5D6A193C>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNode<'uploads'>
+  | SerializedParagraphNode<LexicalNodes_70649ACC>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_7C90EEAC>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_57F47813>
+  | SerializedAutoLinkNode<LexicalNodes_70649ACC, LexicalLinkFields_5D6A193C>
+  | SerializedLinkNode<LexicalNodes_70649ACC, LexicalLinkFields_5D6A193C>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_70649ACC>
   | SerializedRelationshipNode<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -370,9 +370,9 @@ export type LexicalNodes_57F47813 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_57F47813>
-  | SerializedListItemNode<LexicalNodes_57F47813>
-  | SerializedHeadingNode<LexicalNodes_57F47813>;
+  | SerializedListNode<LexicalNodes_70649ACC>
+  | SerializedListItemNode<LexicalNodes_70649ACC>
+  | SerializedHeadingNode<LexicalNodes_70649ACC>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_0D0FC62B".
@@ -1838,7 +1838,7 @@ export interface LexicalAutosave {
  */
 export interface LexicalLinkFeature {
   id: string;
-  richText?: LexicalRichText<LexicalNodes_57F47813> | null;
+  richText?: LexicalRichText<LexicalNodes_70649ACC> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1856,7 +1856,7 @@ export interface LexicalLinkFeature {
  */
 export interface LexicalLinkFeatureAutosave {
   id: string;
-  richText?: LexicalRichText<LexicalNodes_57F47813> | null;
+  richText?: LexicalRichText<LexicalNodes_70649ACC> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -4225,6 +4225,13 @@ export interface TextBlock {
   blockType: 'textBlock';
   blockTitle?: string | null;
   blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

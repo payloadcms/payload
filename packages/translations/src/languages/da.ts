@@ -641,6 +641,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addFile: 'Tilføj fil',
     addFiles: 'Tilføj Filer',
     bulkUpload: 'Masseupload',
+    cancelUpload: 'Annuller upload',
     copyLinkToFile: 'Kopier link til fil',
     copyURL: 'Kopier URL',
     crop: 'Beskær',
@@ -662,6 +663,7 @@ export const daTranslations: DefaultTranslationsObject = {
     fileSize: 'Filstørrelse',
     filesToUpload: 'Filer til upload',
     fileToUpload: 'Fil til upload',
+    finishSaving: 'Afslut gemning',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Træk fokuspunktet direkte på forhåndsvisningen eller juster værdierne nedenfor.',
@@ -676,12 +678,27 @@ export const daTranslations: DefaultTranslationsObject = {
     previewSizes: 'Forhåndsvisningsstørrelser',
     renameFile: 'Omdøb fil',
     replaceFile: 'Erstat fil',
+    resumingFile: 'Genoptager {{filename}}',
+    savingInBackground: 'Uploaden afsluttes i baggrunden, og dokumentet gemmes derefter.',
     selectCollectionToBrowse: 'Vælg en samling for at browse',
     selectFile: 'Vælg en fil',
     setCropArea: 'Indstil beskæringsområde',
     setFocalPoint: 'Indstil fokuspunkt',
     sizes: 'Størrelse',
     sizesFor: 'Størrelse for {{label}}',
+    uploadFileMismatch: 'Den valgte fil matcher ikke den afbrudte upload.',
+    uploadingFile: 'Uploader {{filename}}',
+    uploadingFileProgress: 'Uploader {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'En upload er stadig i gang. Hvis du forlader siden nu, afbrydes den.',
+    uploadInterrupted: 'Upload af {{filename}} blev afbrudt.',
+    uploadInterruptedWillSave:
+      'Upload af {{filename}} blev afbrudt. Dokumentet gemmes, når den er færdig.',
+    uploadReadyToFinishSaving:
+      '{{filename}} er uploadet. Åbn formularen for at afslutte gemningen.',
+    uploadSavedInBackground: 'Uploaden er færdig, og dokumentet blev gemt.',
+    uploadStorageRejectedSegments:
+      'Lageret accepterede ingen dele af uploaden. Tjek bucketens CORS-politik.',
     width: 'Bredde',
   },
   validation: {

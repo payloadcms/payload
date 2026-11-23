@@ -26,6 +26,40 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ## Breaking Changes
 
+### Theme context distinguishes local overrides from root preferences
+
+`useTheme` now reads and updates the nearest provider. Use `useRootTheme` for root preference controls and all `setTheme('auto')` calls:
+
+```diff
+-import { useTheme } from '@payloadcms/ui'
++import { useRootTheme } from '@payloadcms/ui'
+
+-const { autoMode, setTheme, theme } = useTheme()
++const { autoMode, setTheme, theme } = useRootTheme()
+```
+
+Theme setters no longer accept an options argument. Remove the second argument from both methods:
+
+```diff
+-setTheme('dark', { scoped: true })
++setTheme('dark')
+
+-setHighContrastMode(true, { scoped: true })
++setHighContrastMode(true)
+```
+
+`ThemeProvider` now manages only local overrides, including outside the Admin. The host supplies initial theme and contrast values and handles saved preferences. To use local setters, bind the provider to the themed element with `targetRef`:
+
+```tsx
+<ThemeProvider targetRef={targetRef} theme="dark">
+  <div data-theme="dark" ref={targetRef}>
+    {children}
+  </div>
+</ThemeProvider>
+```
+
+Without `targetRef`, control the theme through the provider's props. See [theme hooks](../admin/react-hooks#usetheme) for usage.
+
 ### Form-state data utilities are renamed
 
 The shared form-state utilities exported from `payload/shared` now explicitly name their source:
@@ -98,6 +132,20 @@ npx @payloadcms/codemod --transform migrate-payload-request-creation
 ```
 
 Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
+
+### Cookie prefixes are normalized and validated
+
+Projects configured with `cookiePrefix: ''` now use the default `payload` prefix, changing the auth cookie name from `-token` to `payload-token`. Omitting `cookiePrefix` or using a valid non-empty custom prefix keeps the same cookie names.
+
+Prefixes containing whitespace or other invalid [cookie-name characters](https://www.rfc-editor.org/rfc/rfc6265#section-4.1.1) now throw `InvalidConfiguration` during config sanitization. Update these prefixes to use valid characters before starting Payload. Changing a prefix changes its cookie names, so existing users must sign in again.
+
+When upgrading a project with an empty prefix:
+
+- Users with existing `-token` sessions must sign in again.
+- Custom integrations that read or write `-token` must use `payload-token`.
+- Existing `-token` cookies are no longer read or cleared by Payload. Remove them or allow them to expire.
+
+The empty `cookiePrefix` setting can be removed from the config to use the default.
 
 ### JWT authentication is versioned without moving token data
 
@@ -411,7 +459,7 @@ Collections and globals now track authorship by default: Payload injects `create
 
 - Every non-internal collection and global gains `createdBy` and `updatedBy` when your config has at least one auth collection. On SQL adapters this adds relationship rows in each entity's `_rels` table (see [Database migrations](#database-migrations)). Existing documents are backfilled with `null`.
 - `createdBy` is only derived on a document's first write, so editing a document whose `createdBy` is `null` (for example a migrated or anonymously created document) does not backfill the editor as the creator.
-- Payload's internal system collections and globals are excluded automatically: `payload-jobs`, `payload-jobs-stats`, `payload-preferences`, `payload-locked-documents`, `payload-migrations`, `payload-query-presets`, and the KV collection.
+- Payload's internal system collections and globals are excluded automatically: `payload-jobs`, `payload-jobs-stats`, `payload-preferences`, `payload-locked-documents`, `payload-migrations`, `payload-query-presets`, `payload-upload-sessions`, and the KV collection.
 
 **Plugins:** plugin-injected collections also receive authorship unless the plugin opts out. In this release:
 
@@ -947,6 +995,32 @@ BREAKING CHANGES:
 - Schema-backed forms with a local `onSubmit` validate on the server before committing. Remove `beforeSubmit` callbacks whose only purpose is fetching server form state. Invalid state or a validation request failure prevents the local commit.
 - After a successful save, `Form` refreshes permissions and state before calling `onSuccess`. Creates skip the state refresh because they replace the form. A failed refresh does not change the successful save outcome or suppress `onSuccess`.
 
+### `useQueue` tasks take an options object and report their outcome
+
+`useQueue().queueTask` now takes a `{ task, priority }` object and returns a promise that resolves to `{ status: 'completed', value }` or `{ status: 'superseded' }`. The queue keeps at most one pending task: lower `priority` values take precedence, and newer tasks win ties. The `beforeProcess` and `afterProcess` options have been removed, and a new `resetQueue` discards pending work and marks running tasks as stale through the `isCurrent()` check passed to each task.
+
+```diff
+'use client'
+import { useQueue } from '@payloadcms/ui'
+
+const { queueTask } = useQueue()
+
+-queueTask(async () => {
+-  await loadPosts()
+-})
++void queueTask({
++  task: async ({ isCurrent }) => {
++    const posts = await loadPosts()
++
++    if (isCurrent()) {
++      setPosts(posts)
++    }
++  },
++})
+```
+
+Task errors now reject the returned promise instead of being logged by the queue, so handle them at the call site.
+
 ### Locale hooks can now return null
 
 The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.
@@ -1077,6 +1151,43 @@ export const MyFeature = createServerFeature({
 ```
 
 If an affected adapter or feature performs asynchronous work, move that work to an asynchronous plugin before config sanitization or to a runtime hook. Projects that only use `buildConfig(...)` and `lexicalEditor(...)` normally are not affected; `buildConfig` remains asynchronous.
+
+### Lexical converters render the saved text direction
+
+The Lexical HTML converters and the `RichText` JSX component now render a `dir` attribute on elements with an explicit `direction` (`'ltr'` or `'rtl'`), matching the editor. Elements with `direction: null` render no `dir` and inherit the page direction, as before.
+
+```diff
+- <p>مرحبا</p>
++ <p dir="rtl">مرحبا</p>
+```
+
+Content saved with Lexical versions before 0.35, or created with `buildEditorState` before Payload 4.0, can contain a `direction: 'ltr'` that nobody chose. That content now renders as `dir="ltr"`. If text displays in the wrong direction, set `direction` to `null` on its element nodes, for example in a migration:
+
+```ts
+type ElementNode = {
+  children?: ElementNode[]
+  direction?: 'ltr' | 'rtl' | null
+}
+
+function clearDirection<T extends ElementNode>({ node }: { node: T }): T {
+  if (!node.children) {
+    return node
+  }
+
+  return {
+    ...node,
+    children: node.children.map((child) => clearDirection({ node: child })),
+    direction: null,
+  }
+}
+
+const content = {
+  ...doc.content,
+  root: clearDirection({ node: doc.content.root }),
+}
+```
+
+Custom HTML converters receive the attribute as `providedDirAttribute`. Add it to the opening tag, next to `providedStyleTag`, to render it too.
 
 ### Transaction requests now use a single identifier property
 
@@ -1256,11 +1367,11 @@ The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/d
 
 The minimum supported Node.js version is now **24.22.3** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
-### Minimum supported Next.js version is now 16.4.1 ([#16537](https://github.com/payloadcms/payload/pull/16537))
+### Minimum supported Next.js version is now 16.4.5 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
-Older versions of Next.js are no longer supported. Update Next.js to **16.4.1** or newer within the `16.x` release line.
+Older versions of Next.js are no longer supported. Update Next.js to **16.4.5** or newer within the `16.x` release line.
 
-React and React DOM must satisfy `^19.3.1`. TanStack Start applications also require `@vitejs/plugin-rsc` `^0.5.38`. These minimums include the fixes for [GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3) and its [Next.js advisory](https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr).
+React and React DOM must satisfy `^19.3.1`. TanStack Start applications also require `@vitejs/plugin-rsc` `^0.5.38`. These minimums include the fixes for [GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3) and its [Next.js advisory](https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr). The Next.js minimum also includes the fixes from the [November 2026 Next.js security release](https://nextjs.org/blog/november-2026-security-release).
 
 ### Minimum supported TypeScript version is now 6.0.3 ([#16692](https://github.com/payloadcms/payload/pull/16692))
 
@@ -2040,6 +2151,16 @@ uploadInstructions: {
 ```
 
 Both are optional. Custom handler props are now passed as `props`, and the supporting route is available as `endpointPath` instead of `serverHandlerPath`. The old Admin component `enabled` prop was removed.
+
+### S3 client uploads use resumable upload sessions for large files
+
+With `clientUploads` enabled, `@payloadcms/storage-s3` now sends files of 64 MiB or more through resumable upload sessions backed by S3 multipart uploads. Change the threshold with `upload.transfer.multipartThreshold` (in bytes) in your Payload config, or per collection on the collection's `upload` config. Smaller files, and SVG and XML files, keep using a single upload request.
+
+Payload tracks each session in a new hidden `payload-upload-sessions` collection. It is only added when at least one collection uses an adapter with segmented uploads, which today means S3 with `clientUploads` enabled. On SQL adapters this adds a `payload_upload_sessions` table, so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. MongoDB needs no migration.
+
+The multipart upload uses more S3 permissions than a single `PutObject`. Allow `s3:AbortMultipartUpload` and `s3:ListMultipartUploadParts` in addition to `s3:PutObject`. Payload also checks the finished object (`s3:GetObject`) and deletes abandoned ones (`s3:DeleteObject`); existing S3 setups usually grant both already. CORS needs no change: the browser still only sends `PUT` requests, and Payload reads uploaded parts from S3 instead of from `ETag` response headers.
+
+Payload cleans up abandoned sessions when sessions are created or listed. As a safety net, add a bucket lifecycle rule that aborts incomplete multipart uploads, for example after 7 days.
 
 ### The Uploadthing storage adapter has been removed
 
