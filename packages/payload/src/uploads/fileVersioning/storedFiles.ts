@@ -8,7 +8,7 @@ import type {
   StoredFileList,
   StoredFileRole,
   UploadFileEntry,
-  UploadFileValue,
+  UploadFileObject,
 } from './types.js'
 
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
@@ -31,11 +31,11 @@ export const getStoredFileIdentity = ({ key }: StoredFileIdentity): string =>
  * Lists the saved objects of the main file, the original and each size, in that order. Values
  * that are not objects are left out. Each value is the document's own object, not a copy.
  */
-export const getUploadFileValues = ({
+export const getUploadFileObjects = ({
   doc,
 }: {
   doc: Record<string, unknown>
-}): UploadFileValue[] => {
+}): UploadFileObject[] => {
   const variants = isEntryObject(doc.variants) ? Object.entries(doc.variants) : []
   const values: { role: StoredFileRole; value: unknown }[] = [
     { role: { type: 'default' }, value: doc },
@@ -46,18 +46,18 @@ export const getUploadFileValues = ({
     })),
   ]
 
-  return values.filter((entry): entry is UploadFileValue => isEntryObject(entry.value))
+  return values.filter((entry): entry is UploadFileObject => isEntryObject(entry.value))
 }
 
 /** The document's own object for one role, so a caller can change that entry. */
-export const getUploadFileValue = ({
+export const getUploadFileObject = ({
   doc,
   role,
 }: {
   doc: Record<string, unknown>
   role: StoredFileRole
 }): Record<string, unknown> | undefined =>
-  getUploadFileValues({ doc }).find((entry) => isSameFileRole({ first: entry.role, second: role }))
+  getUploadFileObjects({ doc }).find((entry) => isSameFileRole({ first: entry.role, second: role }))
     ?.value
 
 export const isSameFileRole = ({
@@ -71,7 +71,7 @@ export const isSameFileRole = ({
   (first.type !== 'size' || (second.type === 'size' && first.sizeKey === second.sizeKey))
 
 /** Older uploads without an original have not been identified as Payload-managed. */
-export const hasManagedOriginal = ({ doc }: { doc: Record<string, unknown> }): boolean =>
+export const isManagedUpload = ({ doc }: { doc: Record<string, unknown> }): boolean =>
   isEntryObject(doc.original) && typeof doc.original.filename === 'string'
 
 /**
@@ -85,9 +85,9 @@ export const getUploadFileEntries = ({
   req,
   trustGenerated = false,
 }: UploadFileEntriesArgs): UploadFileEntry[] => {
-  const isManagedUpload = hasManagedOriginal({ doc })
+  const isManaged = isManagedUpload({ doc })
 
-  return getUploadFileValues({ doc }).flatMap(({ role, value }): UploadFileEntry[] => {
+  return getUploadFileObjects({ doc }).flatMap(({ role, value }): UploadFileEntry[] => {
     if (typeof value.filename !== 'string') {
       return []
     }
@@ -97,23 +97,22 @@ export const getUploadFileEntries = ({
     // A `_stored: false` entry is built when it is requested, so it has no object to copy or delete.
     // An original is never built on request, so Payload does not manage one with that marker.
     if (isRequestTimeFile({ entry: value })) {
-      return [{ filename, role, status: role.type === 'original' ? 'unmanaged' : 'requestTime' }]
+      return [{ role, status: role.type === 'original' ? 'unmanaged' : 'requestTime' }]
     }
 
     if (
-      !isManagedUpload ||
+      !isManaged ||
       (!collection.upload.fileOperations &&
         !trustGenerated &&
         !hasPayloadFileURL({ collection, doc, entry: value, filename, req, role }))
     ) {
-      return [{ filename, role, status: 'unmanaged' }]
+      return [{ role, status: 'unmanaged' }]
     }
 
     validateRole({ role })
 
     return [
       {
-        filename,
         key: resolveStorageKey({ collection, entry: value, filename }),
         role,
         status: 'stored',
@@ -238,7 +237,7 @@ export const withLegacyCloudUploadFileData = async <T extends Record<string, unk
     typeof collection.upload === 'object' ? collection.upload.fileOperations : undefined
 
   if (
-    hasManagedOriginal({ doc: stored }) ||
+    isManagedUpload({ doc: stored }) ||
     !operations?.hasLegacyFile ||
     typeof stored.filename !== 'string' ||
     typeof stored.url !== 'string' ||

@@ -7,7 +7,7 @@ import { checkFileAccess } from '../checkFileAccess.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import {
   getUploadFileEntries,
-  getUploadFileValues,
+  getUploadFileObjects,
   hasStoredOriginal,
   isSameFileRole,
   withLegacyCloudUploadFileData,
@@ -100,13 +100,14 @@ const resolveVersionFile = async ({
     req,
   })
   // A shared filename means the main file unless the request asks for the original.
-  const values = getUploadFileValues({ doc: saved })
+  const values = getUploadFileObjects({ doc: saved })
   const match = isOriginalFileRequest({ doc: saved, filename, isOriginal })
     ? values.find(({ role }) => role.type === 'original')
     : values.find(({ role, value }) => role.type !== 'original' && value.filename === filename)
 
-  // Find the requested file before reading the version's entries. Reading them can throw for a
-  // damaged entry, and that must not happen before the access checks for another file.
+  // Find the requested file before reading the version's entries. Reading them throws for an
+  // unsafe storage key, so a request for a file that is not in this version must return
+  // "not found" first, not a server error from a damaged entry elsewhere in the version.
   if (!match || (prefix !== undefined && (match.value.prefix ?? '') !== prefix)) {
     return
   }

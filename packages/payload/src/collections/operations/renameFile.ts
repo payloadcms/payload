@@ -27,7 +27,7 @@ import {
   collectStoredFiles,
   getStoredFileIdentity,
   getUploadFileEntries,
-  getUploadFileValue,
+  getUploadFileObject,
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/storedFiles.js'
 import { getUnplannedSafeFileName } from '../../uploads/getSafeFilename.js'
@@ -201,10 +201,11 @@ export const renameFileOperation = async (
       ...Object.values(renamedVariants).map((variant) => variant?.filename),
     ])
     for (const { role } of requestTimeEntries) {
-      const variant =
-        role.type === 'size'
-          ? (getUploadFileValue({ doc: renamed, role }) as FileSize | undefined)
-          : undefined
+      if (role.type !== 'size') {
+        continue
+      }
+
+      const variant = getUploadFileObject({ doc: renamed, role }) as FileSize | undefined
 
       if (typeof variant?.filename !== 'string') {
         continue

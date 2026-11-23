@@ -7,9 +7,9 @@ import type { UploadFileEntry } from './types.js'
 import {
   collectStoredFiles,
   getUploadFileEntries,
-  getUploadFileValue,
-  getUploadFileValues,
-  hasManagedOriginal,
+  getUploadFileObject,
+  getUploadFileObjects,
+  isManagedUpload,
   hasStoredOriginal,
 } from './storedFiles.js'
 
@@ -79,17 +79,16 @@ it.for<{ entries: UploadFileEntry[]; expected: boolean; name: string }>([
   {
     name: 'find a stored original that shares its file with the main file',
     entries: [
-      { filename: 'photo.png', key: 'photo.png', role: { type: 'default' }, status: 'stored' },
-      { filename: 'photo.png', key: 'photo.png', role: { type: 'original' }, status: 'stored' },
+      { key: 'photo.png', role: { type: 'default' }, status: 'stored' },
+      { key: 'photo.png', role: { type: 'original' }, status: 'stored' },
     ],
     expected: true,
   },
   {
     name: 'find no stored original when only the main file and sizes are stored',
     entries: [
-      { filename: 'photo.png', key: 'photo.png', role: { type: 'default' }, status: 'stored' },
+      { key: 'photo.png', role: { type: 'default' }, status: 'stored' },
       {
-        filename: 'photo-card.png',
         key: 'photo-card.png',
         role: { sizeKey: 'card', type: 'size' },
         status: 'stored',
@@ -99,7 +98,7 @@ it.for<{ entries: UploadFileEntry[]; expected: boolean; name: string }>([
   },
   {
     name: 'find no stored original when the original is not managed',
-    entries: [{ filename: 'photo.png', role: { type: 'original' }, status: 'unmanaged' }],
+    entries: [{ role: { type: 'original' }, status: 'unmanaged' }],
     expected: false,
   },
 ])('should $name', ({ entries, expected }) => {
@@ -209,19 +208,16 @@ it('should list the main file, the original and each size as stored entries', ()
 
   expect(entries).toEqual([
     {
-      filename: 'photo.png',
       key: 'main-key/photo.png',
       role: { type: 'default' },
       status: 'stored',
     },
     {
-      filename: 'photo.png',
       key: 'original-key/photo.png',
       role: { type: 'original' },
       status: 'stored',
     },
     {
-      filename: 'photo-card.png',
       key: 'photo-card.png',
       role: { sizeKey: 'card', type: 'size' },
       status: 'stored',
@@ -242,14 +238,13 @@ it('should list a main file and a size that are built on request without a key',
   })
 
   expect(entries).toEqual([
-    { filename: 'photo.png', role: { type: 'default' }, status: 'requestTime' },
+    { role: { type: 'default' }, status: 'requestTime' },
     {
-      filename: 'photo.png',
       key: 'original-key/photo.png',
       role: { type: 'original' },
       status: 'stored',
     },
-    { filename: 'photo-card.png', role: { sizeKey: 'card', type: 'size' }, status: 'requestTime' },
+    { role: { sizeKey: 'card', type: 'size' }, status: 'requestTime' },
   ])
 })
 
@@ -261,8 +256,8 @@ it('should list one entry per role when a main file and an original share a key'
   })
 
   expect(entries).toEqual([
-    { filename: 'photo.png', key: 'photo.png', role: { type: 'default' }, status: 'stored' },
-    { filename: 'photo.png', key: 'photo.png', role: { type: 'original' }, status: 'stored' },
+    { key: 'photo.png', role: { type: 'default' }, status: 'stored' },
+    { key: 'photo.png', role: { type: 'original' }, status: 'stored' },
   ])
 })
 
@@ -274,8 +269,8 @@ it('should list the entries of a document with no original as unmanaged', () => 
   })
 
   expect(entries).toEqual([
-    { filename: 'photo.png', role: { type: 'default' }, status: 'unmanaged' },
-    { filename: 'photo-card.png', role: { sizeKey: 'card', type: 'size' }, status: 'unmanaged' },
+    { role: { type: 'default' }, status: 'unmanaged' },
+    { role: { sizeKey: 'card', type: 'size' }, status: 'unmanaged' },
   ])
 })
 
@@ -283,13 +278,12 @@ it.for([
   {
     name: 'list a local entry whose URL is not the Payload file route as unmanaged',
     trustGenerated: false,
-    expected: { filename: 'photo.png', role: { type: 'default' }, status: 'unmanaged' },
+    expected: { role: { type: 'default' }, status: 'unmanaged' },
   },
   {
     name: 'list a local entry whose URL is not the Payload file route as stored when generated files are trusted',
     trustGenerated: true,
     expected: {
-      filename: 'photo.png',
       key: 'photo.png',
       role: { type: 'default' },
       status: 'stored',
@@ -323,7 +317,6 @@ it('should not list entries that have no filename', () => {
 
   expect(entries).toEqual([
     {
-      filename: 'photo.png',
       key: 'original-key/photo.png',
       role: { type: 'original' },
       status: 'stored',
@@ -349,7 +342,7 @@ it('should list the main file, the original and each size object in that order',
     variants: { card, empty: null, list: ['not-an-entry'], thumb: 'not-an-entry' },
   }
 
-  const values = getUploadFileValues({ doc })
+  const values = getUploadFileObjects({ doc })
 
   expect(values).toEqual([
     { role: { type: 'default' }, value: doc },
@@ -362,7 +355,7 @@ it('should list the main file, the original and each size object in that order',
 it('should list no original or sizes when the document has none', () => {
   const doc = { filename: 'photo.png', original: null, variants: null }
 
-  expect(getUploadFileValues({ doc })).toEqual([{ role: { type: 'default' }, value: doc }])
+  expect(getUploadFileObjects({ doc })).toEqual([{ role: { type: 'default' }, value: doc }])
 })
 
 it.for([
@@ -379,7 +372,7 @@ it.for([
   const doc = { filename: 'photo.png', original, variants: { card } }
   const objects = { card, doc, original } as Record<string, unknown>
 
-  expect(getUploadFileValue({ doc, role })).toBe(expected ? objects[expected] : undefined)
+  expect(getUploadFileObject({ doc, role })).toBe(expected ? objects[expected] : undefined)
 })
 
 it('should list an original marked as not stored as unmanaged, because an original is never built on request', () => {
@@ -390,7 +383,6 @@ it('should list an original marked as not stored as unmanaged, because an origin
   })
 
   expect(entries).toContainEqual({
-    filename: 'photo.png',
     role: { type: 'original' },
     status: 'unmanaged',
   })
@@ -405,6 +397,6 @@ it.for([
   { name: 'an original with no filename', doc: { original: { filename: null } }, expected: false },
   { name: 'no original', doc: { original: null }, expected: false },
   { name: 'an original that is not an object', doc: { original: 'photo.png' }, expected: false },
-])('should find a managed original for $name: $expected', ({ doc, expected }) => {
-  expect(hasManagedOriginal({ doc })).toBe(expected)
+])('should treat an upload as managed for $name: $expected', ({ doc, expected }) => {
+  expect(isManagedUpload({ doc })).toBe(expected)
 })

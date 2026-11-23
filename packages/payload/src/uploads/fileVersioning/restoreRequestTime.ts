@@ -17,7 +17,7 @@ import {
   planRequestTimeBuild,
 } from '../transformState/planUpload.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
-import { getUploadFileEntries, getUploadFileValues, hasStoredOriginal } from './storedFiles.js'
+import { getUploadFileEntries, getUploadFileObjects, hasStoredOriginal } from './storedFiles.js'
 
 /**
  * Restores a version that has a file built at request time, from its retained original. A restore
@@ -178,7 +178,7 @@ function setFileEndpointURLs({
 }: { restored: JsonObject } & Pick<FileRestoreArgs<unknown>, 'collection' | 'req'>): JsonObject {
   const isOriginalRequested = shouldRequestOriginal({ doc: restored })
 
-  for (const { role, value } of getUploadFileValues({ doc: restored })) {
+  for (const { role, value } of getUploadFileObjects({ doc: restored })) {
     const filename = typeof value.filename === 'string' ? value.filename : undefined
 
     if (filename && (!collection.upload.fileOperations || isRequestTimeFile({ entry: value }))) {

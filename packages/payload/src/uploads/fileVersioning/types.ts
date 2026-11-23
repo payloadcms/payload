@@ -11,21 +11,19 @@ export type StoredFileList = StoredFile[]
 /** One file of a saved upload, for one role. Only a stored entry has an object in storage. */
 export type UploadFileEntry =
   | {
-      filename: string
       /** The object's resolved storage key. */
       key: string
       role: StoredFileRole
       status: 'stored'
     }
   | {
-      filename: string
       role: StoredFileRole
       /** `requestTime`: built when requested (`_stored: false`). `unmanaged`: Payload did not store it. */
       status: 'requestTime' | 'unmanaged'
     }
 
 /** The document's own object for one role of a saved upload. */
-export type UploadFileValue = {
+export type UploadFileObject = {
   role: StoredFileRole
   value: Record<string, unknown>
 }

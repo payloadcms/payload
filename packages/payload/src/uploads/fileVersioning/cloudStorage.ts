@@ -13,7 +13,7 @@ import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManage
 import {
   collectStoredFiles,
   getStoredFileIdentity,
-  hasManagedOriginal,
+  isManagedUpload,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
@@ -162,8 +162,8 @@ export const runCloudFileUpdate = async <T>({
     write: async () => {
       if (
         collection.versions &&
-        !hasManagedOriginal({ doc: current }) &&
-        hasManagedOriginal({ doc: storedCurrent })
+        !isManagedUpload({ doc: current }) &&
+        isManagedUpload({ doc: storedCurrent })
       ) {
         await persistLegacyCloudVersions({ id, collection, current: storedCurrent, req })
       }
@@ -250,7 +250,7 @@ const persistLegacyCloudVersions = async ({
 
     for (const row of versions.docs) {
       hasVersions = true
-      if (hasManagedOriginal({ doc: row.version })) {
+      if (isManagedUpload({ doc: row.version })) {
         continue
       }
 
@@ -259,7 +259,7 @@ const persistLegacyCloudVersions = async ({
         doc: row.version,
         req,
       })
-      if (!hasManagedOriginal({ doc: version })) {
+      if (!isManagedUpload({ doc: version })) {
         continue
       }
 
@@ -284,7 +284,7 @@ const persistLegacyCloudVersions = async ({
     page += 1
   }
 
-  if (!hasVersions && hasManagedOriginal({ doc: current })) {
+  if (!hasVersions && isManagedUpload({ doc: current })) {
     await saveVersion({
       id,
       collection,
