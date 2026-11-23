@@ -10,7 +10,7 @@ import path from 'path'
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, expect, vi } from 'vitest'
 
 import type { Post, User } from './payload-types.js'
 
@@ -87,6 +87,63 @@ describe('Locked documents', () => {
 
   afterEach(() => {
     postConfig.lockDocuments = { duration: 300 }
+  })
+
+  describe('global lock access', () => {
+    const createdLockIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      vi.restoreAllMocks()
+      for (const id of createdLockIDs) {
+        await payload.delete({ collection: lockedDocumentCollection, id, overrideAccess: true })
+      }
+      createdLockIDs.length = 0
+    })
+
+    it('should limit global lock operations to users with access to the global', async () => {
+      const global = payload.config.globals.find(({ slug }) => slug === menuSlug)!
+      vi.spyOn(global.access, 'read').mockImplementation(({ req }) => req.user?.id === user.id)
+      vi.spyOn(global.access, 'update').mockImplementation(({ req }) => req.user?.id === user.id)
+
+      const lock = await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          globalSlug: menuSlug,
+          user: { relationTo: usersSlug, value: user.id },
+        },
+        overrideAccess: false,
+        user,
+      })
+      createdLockIDs.push(lock.id)
+
+      const allowed = await payload.find({
+        collection: lockedDocumentCollection,
+        overrideAccess: false,
+        user,
+        where: { id: { equals: lock.id } },
+      })
+      const denied = await payload.find({
+        collection: lockedDocumentCollection,
+        overrideAccess: false,
+        user: user2,
+        where: { id: { equals: lock.id } },
+      })
+
+      expect(allowed.docs).toHaveLength(1)
+      expect(denied.docs).toHaveLength(0)
+
+      await expect(
+        payload.create({
+          collection: lockedDocumentCollection,
+          data: {
+            globalSlug: menuSlug,
+            user: { relationTo: usersSlug, value: user2.id },
+          },
+          overrideAccess: false,
+          user: user2,
+        }),
+      ).rejects.toThrow()
+    })
   })
 
   it('should update unlocked document - collection', async () => {
