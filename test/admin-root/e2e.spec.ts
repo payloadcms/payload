@@ -97,6 +97,30 @@ test.describe('Admin Panel (Root)', () => {
     await expect(firstRow).toBeVisible()
   })
 
+  test('collection — uses secondary text color for inactive document tabs without Lexical', async () => {
+    await page.goto(url.create)
+    const textField = page.locator('#field-text')
+    await textField.fill('test')
+    await saveDocAndAssert(page)
+
+    const inactiveTab = page.locator('a.doc-tab[href$="/versions"]')
+    await expect(inactiveTab).toBeVisible()
+
+    const colors = await inactiveTab.evaluate((element) => {
+      const rootStyles = getComputedStyle(document.documentElement)
+      const tabStyles = getComputedStyle(element)
+
+      return {
+        inactiveTab: tabStyles.color,
+        text: rootStyles.getPropertyValue('--color-text').trim(),
+        textSecondary: rootStyles.getPropertyValue('--color-text-secondary').trim(),
+      }
+    })
+
+    expect(colors.inactiveTab).toBe(colors.textSecondary)
+    expect(colors.inactiveTab).not.toBe(colors.text)
+  })
+
   test('collection - should hide Copy To Locale button when localization is false', async () => {
     await page.goto(url.create)
     const textField = page.locator('#field-text')

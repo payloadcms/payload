@@ -10,6 +10,7 @@ import {
   useSearchParams,
 } from '../../../../providers/RouterAdapter/index.js'
 import { Button } from '../../../Button/index.js'
+import './index.css'
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']
