@@ -2,7 +2,7 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/3.x/templates/with-cloudflare-d1)
 
-This template comes configured with the bare minimum to get started on anything you need. For production deployments, we recommend the Workers Paid plan. See [Worker limits](#worker-limits) for details.
+This template comes configured with the bare minimum to get started on anything you need. See [Worker limits](#worker-limits) for deployment limits.
 
 ## Quick start
 
@@ -112,7 +112,7 @@ We are currently waiting on some issues with GraphQL to be [fixed upstream in Wo
 
 Workers Free and Workers Paid both have a [Worker size limit](https://developers.cloudflare.com/workers/platform/limits/#worker-size) of **64 MiB uncompressed**, with no compressed size limit. This includes your application code and its dependencies.
 
-We recommend the Workers Paid plan for production deployments because the Free plan has a [CPU time limit of 10 ms per HTTP request](https://developers.cloudflare.com/workers/platform/limits/#cpu-time), which authentication and server-side rendering workloads can exceed.
+The Workers Free plan has a [CPU time limit of 10 ms per HTTP request](https://developers.cloudflare.com/workers/platform/limits/#cpu-time), which authentication and server-side rendering workloads can exceed.
 
 ## Questions
 
