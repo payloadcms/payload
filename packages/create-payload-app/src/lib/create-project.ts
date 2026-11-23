@@ -14,6 +14,7 @@ import type {
   ProjectTemplate,
 } from '../types.js'
 
+import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
@@ -269,7 +270,7 @@ export function updatePackageJSONDependencies(args: {
     (acc, [key, value]) => {
       if (typeof value === 'string' && value.startsWith('workspace:')) {
         acc[key] = `${latestVersion}`
-      } else if (key === 'payload' || key.startsWith('@payloadcms')) {
+      } else if ((payloadPackageNames as readonly string[]).includes(key)) {
         acc[key] = `${latestVersion}`
       } else {
         acc[key] = value

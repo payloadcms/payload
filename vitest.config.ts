@@ -3,6 +3,8 @@ import path from 'path'
 import fs from 'fs'
 import { defaultExclude, defineConfig } from 'vitest/config'
 
+import { prepareUpgradeSources } from './tools/upgrade/prepare.mjs'
+
 // Use process.cwd() to be safe in both CJS and ESM contexts within Vitest
 const ROOT_DIR = process.cwd()
 const figmaPath = path.resolve(ROOT_DIR, '../enterprise-plugins/packages/figma/src/index.ts')
@@ -21,6 +23,8 @@ if (hasFigma) {
 } else {
   console.log('[Dev Setup] Local Figma plugin NOT found, using node_modules')
 }
+
+prepareUpgradeSources()
 
 export default defineConfig({
   resolve: {

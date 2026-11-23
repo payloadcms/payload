@@ -21,6 +21,7 @@ export const defaultESLintIgnores = [
   '**/.yarn/',
   '**/build/',
   '**/node_modules/',
+  'packages/create-payload-app/src/upgrade-shared/**',
   '**/temp/',
   'packages/**/*.spec.ts',
   'next-env.d.ts',

@@ -48,6 +48,7 @@ export function helpMessage(): void {
       --use-pnpm                    Use pnpm to install dependencies
       --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
+      --payload-version <target>    Choose an exact Payload upgrade version or dist-tag
       -h                            Show help
 `)
 }

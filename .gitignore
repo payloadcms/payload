@@ -365,3 +365,6 @@ test/evals/eval-results/report.html
 test/evals/eval-results/runs/
 
 .pnpm-store
+
+# Generated upgrade planner and core release list
+/packages/create-payload-app/src/upgrade-shared/
