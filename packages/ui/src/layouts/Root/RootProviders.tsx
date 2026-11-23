@@ -14,6 +14,7 @@ import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
+import { AdminTranslationProvider } from '../../providers/AdminTranslation/index.js'
 import { AuthProvider } from '../../providers/Auth/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
 import { ClientFunctionProvider } from '../../providers/ClientFunction/index.js'
@@ -31,7 +32,6 @@ import { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.j
 import { ServerFunctionsProvider } from '../../providers/ServerFunctions/index.js'
 import { RootThemeProvider } from '../../providers/Theme/RootThemeProvider/index.js'
 import { ToastContainer } from '../../providers/ToastContainer/index.js'
-import { TranslationProvider } from '../../providers/Translation/index.js'
 import { UploadHandlersProvider } from '../../providers/UploadHandlers/index.js'
 import { UploadSessionsProvider } from '../../providers/UploadSessions/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
@@ -78,7 +78,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
               >
                 <ConfigProvider config={config}>
                   <ClientFunctionProvider>
-                    <TranslationProvider
+                    <AdminTranslationProvider
                       dateFNSKey={dateFNSKey}
                       fallbackLang={fallbackLang}
                       language={languageCode}
@@ -147,7 +147,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                           </ModalProvider>
                         </ScrollInfoProvider>
                       </WindowInfoProvider>
-                    </TranslationProvider>
+                    </AdminTranslationProvider>
                   </ClientFunctionProvider>
                 </ConfigProvider>
               </RouteCache>
