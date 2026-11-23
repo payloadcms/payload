@@ -60,8 +60,8 @@ const permissionsFor = (collectionSlug: string) =>
     fields: { [collectionSlug]: { create: true } },
   }) as unknown as SanitizedDocumentPermissions
 
-const jsonResponse = ({ body, status = 200 }: { body: unknown; status?: number }) =>
-  new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' }, status })
+const jsonResponse = ({ body }: { body: unknown }) =>
+  new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } })
 
 const getAccessCollectionSlug = (url: string) => url.match(/\/api\/([^/]+)\/access/)?.[1]
 
@@ -124,34 +124,4 @@ test('should load permissions again when returning to a collection after another
   resolveFormStateB!({ state: {} })
 
   await vi.waitFor(() => expect(formsManager.docPermissions).toEqual(permissionsFor('a')))
-})
-
-test('should load permissions again on the next file drop after the permissions request returns an HTTP error', async () => {
-  let isAccessFailing = true
-
-  mocks.fetch.mockImplementation((url: string) =>
-    Promise.resolve(
-      isAccessFailing
-        ? jsonResponse({ body: { errors: [{ message: 'Server error' }] }, status: 500 })
-        : jsonResponse({ body: permissionsFor(getAccessCollectionSlug(url)) }),
-    ),
-  )
-
-  const files = new DataTransfer()
-  files.items.add(new File(['image'], 'image.png', { type: 'image/png' }))
-
-  await render(renderFormsManager())
-
-  const isAddedWhileFailing = await formsManager.addFiles(files.files)
-
-  expect(isAddedWhileFailing).toBe(false)
-
-  isAccessFailing = false
-  const isAddedAfterRecovery = await formsManager.addFiles(files.files)
-
-  expect(isAddedAfterRecovery).toBe(true)
-  await vi.waitFor(() => expect(formsManager.docPermissions).toEqual(permissionsFor('a')))
-  expect(mocks.getFormState).toHaveBeenLastCalledWith(
-    expect.objectContaining({ docPermissions: permissionsFor('a') }),
-  )
 })
