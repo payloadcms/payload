@@ -2278,6 +2278,7 @@ describe('Uploads', () => {
       await page.goto(uploadsTwo.list)
 
       const dropzone = page.locator('.list-file-dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
 
       await dispatchDragEvent({
         files: [{ name: 'dropped.png', type: 'image/png' }],
@@ -2294,6 +2295,7 @@ describe('Uploads', () => {
       await page.goto(uploadsTwo.list)
 
       const dropzone = page.locator('.list-file-dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
       const imageBase64 = readFileSync(path.resolve(dirname, './image.png')).toString('base64')
 
       await dropzone.evaluate((element, base64) => {
@@ -2316,6 +2318,7 @@ describe('Uploads', () => {
       await page.goto(uploadsTwo.list)
 
       const dropzone = page.locator('.list-file-dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
 
       await dispatchDragEvent({
         files: [{ name: 'dropped.png', type: 'image/png' }],
@@ -2342,7 +2345,7 @@ describe('Uploads', () => {
       await page.goto(bulkUploadsURL.list)
 
       const dropzone = page.locator('.list-file-dropzone')
-      await expect(dropzone).toBeVisible()
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
       const box = await dropzone.boundingBox()
       const drag = await startRealFileDrag({
         filePaths: [path.resolve(dirname, './image.png')],
@@ -2371,6 +2374,7 @@ describe('Uploads', () => {
       await page.goto(uploadsTwo.list)
 
       const dropzone = page.locator('.list-file-dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
 
       await dispatchDragEvent({ locator: dropzone, text: 'some text', type: 'dragenter' })
 
@@ -2380,9 +2384,12 @@ describe('Uploads', () => {
     test('should show an error and keep bulk upload closed when no dropped file is accepted', async () => {
       await page.goto(pdfOnlyURL.list)
 
+      const dropzone = page.locator('.list-file-dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
+
       await dispatchDragEvent({
         files: [{ name: 'dropped.png', type: 'image/png' }],
-        locator: page.locator('.list-file-dropzone'),
+        locator: dropzone,
         type: 'drop',
       })
 
@@ -2403,6 +2410,9 @@ describe('Uploads', () => {
     test('should keep paste working in the list search input', async () => {
       await page.goto(uploadsTwo.list)
 
+      // Paste is only at risk once the dropzone has added its listeners
+      await waitForDropzoneToHandleDrags({ locator: page.locator('.list-file-dropzone') })
+
       await page.evaluate(async () => {
         await navigator.clipboard.writeText('pasted search')
       })
@@ -2419,9 +2429,12 @@ describe('Uploads', () => {
     test('should add files dropped on the bulk upload modal', async () => {
       const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
 
+      const dropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
+
       await dispatchDragEvent({
         files: [{ name: 'second.png', type: 'image/png' }],
-        locator: bulkUploadModal.locator('.bulk-upload--file-manager__dropzone'),
+        locator: dropzone,
         type: 'drop',
       })
 
@@ -2433,6 +2446,7 @@ describe('Uploads', () => {
       const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
 
       const dropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
+      await waitForDropzoneToHandleDrags({ locator: dropzone })
       const box = await dropzone.boundingBox()
       const drag = await startRealFileDrag({
         filePaths: [path.resolve(dirname, './image.png')],
@@ -2459,6 +2473,7 @@ describe('Uploads', () => {
       const modalDropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
       const fieldDropzone = bulkUploadModal.locator('#field-hasManyUpload .dropzone')
       await fieldDropzone.scrollIntoViewIfNeeded()
+      await waitForDropzoneToHandleDrags({ locator: fieldDropzone })
       const box = await fieldDropzone.boundingBox()
       const drag = await startRealFileDrag({
         filePaths: [path.resolve(dirname, './image.png')],
@@ -3594,6 +3609,25 @@ async function dispatchDragEvent({
     },
     { files, text, type },
   )
+}
+
+/**
+ * Waits until a dropzone handles drag events. With Next.js, `page.goto` can return before React
+ * hydrates the page and the dropzone adds its listeners, so a synthetic event sent too early does
+ * nothing. This sends a file `dragenter` until the dropzone shows its drag state, then resets it.
+ */
+async function waitForDropzoneToHandleDrags({ locator }: { locator: Locator }) {
+  await expect(async () => {
+    await dispatchDragEvent({
+      files: [{ name: 'probe.png', type: 'image/png' }],
+      locator,
+      type: 'dragenter',
+    })
+    await expect(locator).toHaveClass(/dragging/, { timeout: 500 })
+  }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+  await dispatchDragEvent({ locator, type: 'dragleave' })
+  await expect(locator).not.toHaveClass(/dragging/)
 }
 
 /**
