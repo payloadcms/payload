@@ -10,11 +10,22 @@ test.suite('Polymorphic join pagination', { config: './config.ts', db: 'mongo' }
   test('should return each document once when multiple pages share a sort value', async ({
     payload,
   }) => {
-    const { articles, notes, parentID } = await createJoinedDocuments({
+    const { parentID } = await createJoinedDocuments({ payload })
+
+    const notes = await createChildren({
+      collection: accessJoinNotesSlug,
+      parentID,
       payload,
-      articles: Array<string>(24).fill('Accessibility'),
-      notes: Array<string>(24).fill('Accessibility'),
+      titles: Array<string>(24).fill('Accessibility'),
     })
+
+    const articles = await createChildren({
+      collection: accessJoinArticlesSlug,
+      parentID,
+      payload,
+      titles: Array<string>(24).fill('Accessibility'),
+    })
+
     const documents = []
 
     for (let page = 1; page <= 5; page++) {
@@ -31,6 +42,7 @@ test.suite('Polymorphic join pagination', { config: './config.ts', db: 'mongo' }
     expect(documents.map(identity).sort()).toEqual([...articles, ...notes].map(identity).sort())
 
     if ((payload.db as unknown as MongooseAdapter).useJoinAggregations) {
+      expect(String(notes.at(-1)?.value) < String(articles[0]?.value)).toBe(true)
       expect(documents).toEqual([...articles, ...notes])
     }
   })
