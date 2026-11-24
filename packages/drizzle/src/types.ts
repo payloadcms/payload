@@ -196,6 +196,8 @@ export type RawTable = {
   name: string
 }
 
+export type RawTableKind = 'companion' | 'field' | 'root'
+
 /**
  * Abstract SQL foreign key that later gets converted by database specific implementation to Drizzle
  */
@@ -483,6 +485,13 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   primaryDrizzle?: PostgresDB
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
+  /**
+   * What each table in `rawTables` was built for while the schema is built: a collection or global
+   * (`root`), an array, block or `hasMany` select field (`field`), or a `_rels`, `_texts`,
+   * `_numbers` or `_locales` table of its parent (`companion`).
+   * @internal
+   */
+  rawTableKinds?: Map<string, RawTableKind>
   rawTables: Record<string, RawTable>
   /**
    * How long (ms) after a write to route reads to the primary instead of a
@@ -507,6 +516,13 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
       resolve: () => Promise<void>
     }
   }
+  /**
+   * Table names used by two tables when neither is a companion table, such as two arrays whose
+   * names convert to the same snake_case name. The later table replaces the earlier one, as it
+   * always has, and Payload warns about these names.
+   * @internal
+   */
+  sharedTableNames?: Set<string>
   /**
    * Array and `hasMany` select table names that turned out to equal a companion table of their
    * parent (`_rels`, `_texts`, `_numbers`, `_locales`) while the schema was built. The schema is
