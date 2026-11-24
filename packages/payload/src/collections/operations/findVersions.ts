@@ -86,14 +86,6 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
     const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
 
-    await validateQueryPaths({
-      collectionConfig,
-      overrideAccess: overrideAccess!,
-      req,
-      versionFields,
-      where: where!,
-    })
-
     await validateSortQuery({
       collectionConfig,
       overrideAccess: overrideAccess!,
@@ -113,6 +105,14 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     })
 
     sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
+    await validateQueryPaths({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      versionFields,
+      where: where!,
+    })
 
     const select = sanitizeSelect({
       fields: versionFields,

@@ -27,7 +27,6 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -157,6 +156,13 @@ export const findOperation = async <
       where: fullWhere,
     })
 
+    await validateQueryPaths({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      where: where ?? {},
+    })
+
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
       sort: incomingSort || collectionConfig.defaultSort,
@@ -179,14 +185,6 @@ export const findOperation = async <
     if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
       fullWhere = appendVersionToQueryKey(fullWhere)
 
-      await validateQueryPaths({
-        collectionConfig: collection.config,
-        overrideAccess: overrideAccess!,
-        req,
-        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
-        where: appendVersionToQueryKey(where),
-      })
-
       result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
@@ -203,13 +201,6 @@ export const findOperation = async <
         where: fullWhere,
       })
     } else {
-      await validateQueryPaths({
-        collectionConfig,
-        overrideAccess: overrideAccess!,
-        req,
-        where: where!,
-      })
-
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         draftsEnabled,

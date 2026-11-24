@@ -45,7 +45,6 @@ import {
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -225,13 +224,6 @@ export const updateOperation = async <
       )
     }
 
-    await validateQueryPaths({
-      collectionConfig,
-      overrideAccess: overrideAccess!,
-      req,
-      where,
-    })
-
     // /////////////////////////////////////
     // Retrieve documents
     // /////////////////////////////////////
@@ -269,6 +261,13 @@ export const updateOperation = async <
 
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
+    await validateQueryPaths({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      where,
+    })
+
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
       sort: incomingSort || collectionConfig.defaultSort,
@@ -285,14 +284,6 @@ export const updateOperation = async <
 
     if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
-
-      await validateQueryPaths({
-        collectionConfig: collection.config,
-        overrideAccess: overrideAccess!,
-        req,
-        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
-        where: appendVersionToQueryKey(where),
-      })
 
       const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
