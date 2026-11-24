@@ -9,6 +9,7 @@ import * as qs from 'qs-esm'
 import { waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { patchPageMethods } from '../__setup/e2e/patchPageMethods.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -41,6 +42,10 @@ let postsURL: AdminUrlUtil
 let serverURL: string
 
 test.describe('Standalone modals', () => {
+  test.beforeEach(({ page }) => {
+    patchPageMethods(page)
+  })
+
   test.beforeAll(async () => {
     ;({ serverURL } = await initPayloadE2ENoConfig({
       dirname: fileURLToPath(new URL('.', import.meta.url)),
