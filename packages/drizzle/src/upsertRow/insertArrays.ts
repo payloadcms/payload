@@ -49,10 +49,9 @@ export const insertArrays = async ({
 
       // Add any sub arrays that need to be created
       // We will call this recursively below
+      // Rows without sub arrays are pushed too, so each entry stays at the index of its parent row
       arrayRows.forEach((arrayRow) => {
-        if (Object.keys(arrayRow.arrays).length > 0) {
-          rowsByTable[tableName].arrays.push(arrayRow.arrays)
-        }
+        rowsByTable[tableName].arrays.push(arrayRow.arrays)
 
         // Set up parent IDs for both row and locale row
         arrayRow.row._parentID = parentID
