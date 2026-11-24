@@ -94,6 +94,14 @@ export class Main {
   async init(): Promise<void> {
     try {
       const debugFlag = this.args['--debug']
+      const hasCreationArgs = Boolean(
+        this.args['--name'] ||
+        this.args._[0] ||
+        this.args['--template'] ||
+        this.args['--example'] ||
+        this.args['--local-template'] ||
+        this.args['--local-example'],
+      )
 
       // Set DEBUG env var for logger utility
       if (debugFlag) {
@@ -112,7 +120,11 @@ export class Main {
 
       const tanStackDetection = await getTanStackAppDetails({ projectDir: process.cwd() })
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const appFramework = resolveAppFramework({ nextAppDetails, tanStackDetection })
+      const isCreatingProject =
+        hasCreationArgs && hasPayloadDependency({ projectDir: process.cwd() })
+      const appFramework = isCreatingProject
+        ? { kind: 'none' as const }
+        : resolveAppFramework({ nextAppDetails, tanStackDetection })
 
       if (appFramework.kind === 'ambiguous') {
         p.log.warn(
@@ -128,7 +140,7 @@ export class Main {
           : appFramework.kind === 'tanstack'
             ? appFramework.appDetails.projectDir
             : process.cwd()
-      if (hasPayloadDependency({ projectDir: existingProjectDir })) {
+      if (!isCreatingProject && hasPayloadDependency({ projectDir: existingProjectDir })) {
         await upgradeProject({
           cliArgs: this.args,
           nextAppDetails: appFramework.kind === 'next' ? appFramework.appDetails : undefined,

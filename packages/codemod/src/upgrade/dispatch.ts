@@ -26,6 +26,7 @@ export type DispatchDeps = {
   detectAgents: () => Agent[]
   isInteractive: boolean
   prepare: (args: {
+    packageManager?: UpgradeFlags['packageManager']
     path: string
     shouldConfirm: boolean
     tag?: string
@@ -56,6 +57,7 @@ export async function runDispatch(
   try {
     plan = await deps.prepare({
       path,
+      ...(upgradeFlags.packageManager ? { packageManager: upgradeFlags.packageManager } : {}),
       shouldConfirm: !upgradeFlags.dry && !upgradeFlags.yes,
       tag: upgradeFlags.tag,
     })

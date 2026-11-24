@@ -31,7 +31,11 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   if (flags.command === 'upgrade') {
     if (flags.upgrade === 'prompt') {
       try {
-        const plan = await prepareUpgrade({ path: flags.path, tag: flags.tag })
+        const plan = await prepareUpgrade({
+          path: flags.path,
+          tag: flags.tag,
+          ...(flags.packageManager ? { packageManager: flags.packageManager } : {}),
+        })
         if (plan) {
           console.log(
             renderUpgradePrompt({

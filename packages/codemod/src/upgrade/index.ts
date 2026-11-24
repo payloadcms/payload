@@ -13,10 +13,12 @@ import { transforms as registry } from '../registry.js'
 import { runTransforms as defaultRunTransforms } from '../runner.js'
 import {
   applyUpgradePlan,
+  assertInstalledVersionsUnchanged,
   createRegistryClient,
   readInstalledVersion,
 } from '../upgrade-shared/index.js'
 import {
+  assertApprovedUpgradePlan,
   assertMigrationNodeVersion,
   resolveVersions,
   writeFloors,
@@ -90,6 +92,7 @@ async function performUpgrade({
     (await prepareUpgrade({
       fetchRegistry: deps.fetchRegistry,
       path: projectPath,
+      ...(flags.packageManager ? { packageManager: flags.packageManager } : {}),
       shouldConfirm: !flags.dry && !flags.yes,
       tag: flags.tag,
     }))
@@ -109,6 +112,7 @@ async function performUpgrade({
       'package.json changed after planning. Run the upgrade again to review a fresh plan.',
     )
   }
+  assertInstalledVersionsUnchanged({ project: plan.project })
   const packageManager = flags.packageManager ?? detectPackageManager(projectPath, deps.exists)
   if (!flags.force && isGitTreeDirty(projectPath)) {
     console.warn('Warning: git tree is dirty. Commit or stash first, or pass --force.')
@@ -127,9 +131,10 @@ async function performUpgrade({
         ),
         tag: plan.targetVersion,
       }))
-    assertMigrationNodeVersion({ resolved })
     floorsWritten = writeFloors({ data, resolved })
+    assertMigrationNodeVersion({ data, resolved })
   }
+  assertApprovedUpgradePlan({ plan: { ...plan, toolchain: resolved } })
   if (plan.kind === 'update' && plan.changes.length === 0 && plan.overridesRemoved.length === 0) {
     console.log('Payload packages are already up to date.')
     return { failed: false }

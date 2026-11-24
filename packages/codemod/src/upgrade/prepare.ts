@@ -2,6 +2,7 @@
 import * as p from '@clack/prompts'
 
 import type { FetchRegistry, UpgradePlan } from '../upgrade-shared/index.js'
+import type { PackageManager } from './types.js'
 
 import {
   createRegistryClient,
@@ -12,22 +13,25 @@ import {
 } from '../upgrade-shared/index.js'
 import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
 import {
-  assertMigrationNodeVersion,
+  assertApprovedUpgradePlan,
   formatMigrationPreview,
   resolveVersions,
 } from '../upgrade-shared/toolchain.js'
 import { resolveDefaultTag } from './defaultTag.js'
+import { detectPackageManager } from './detectPackageManager.js'
 
 /** Resolve and preview the package plan before any install, transform, or agent starts. */
 export async function prepareUpgrade({
   path,
   fetchRegistry = createRegistryClient({ projectDir: path }),
   isInteractive = Boolean(process.stdin.isTTY && process.stdout.isTTY),
+  packageManager,
   shouldConfirm = false,
   tag,
 }: {
   fetchRegistry?: FetchRegistry
   isInteractive?: boolean
+  packageManager?: PackageManager
   path: string
   shouldConfirm?: boolean
   tag?: string
@@ -64,6 +68,7 @@ export async function prepareUpgrade({
   const plan = await createUpgradePlan({
     corePackageNames: payloadPackageNames,
     fetchRegistry,
+    packageManager: packageManager ?? detectPackageManager(path),
     project,
     targetVersion,
   })
@@ -80,9 +85,10 @@ export async function prepareUpgrade({
       ),
       tag: plan.targetVersion,
     })
-    assertMigrationNodeVersion({ resolved: plan.toolchain })
     migrationPreview = formatMigrationPreview({ plan, resolved: plan.toolchain })
   }
+
+  assertApprovedUpgradePlan({ plan })
 
   console.log([formatUpgradePlan({ plan }), migrationPreview].filter(Boolean).join('\n'))
 
