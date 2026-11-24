@@ -6,6 +6,7 @@ import type { Collection } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -68,8 +69,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       showHiddenFields,
       sort,
       trash = false,
-      where,
+      where: incomingWhere,
     } = args
+
+    const where = cloneWhere(incomingWhere)
 
     const req = args.req!
     const { fallbackLocale, locale, payload } = req

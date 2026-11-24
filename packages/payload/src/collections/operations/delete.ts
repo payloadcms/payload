@@ -11,6 +11,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -85,8 +86,10 @@ export const deleteOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      where,
+      where: incomingWhere,
     } = args
+
+    const where = cloneWhere(incomingWhere)
 
     if (!where) {
       throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)
