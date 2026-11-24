@@ -1,0 +1,24 @@
+.nested-doc-row__title {
+  align-items: center;
+  display: flex;
+  gap: var(--spacer-1);
+}
+
+.nested-doc-row__toggle {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  padding: var(--spacer-1);
+}
+
+.nested-doc-row__toggle:focus-visible {
+  outline: var(--stroke-width-medium) solid var(--color-text);
+}
+
+.nested-doc-row__child {
+  padding-inline-start: var(--spacer-4);
+}

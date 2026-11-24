@@ -1,13 +1,13 @@
 'use client'
 
-import type { Column, User } from 'payload'
+import type { Column, NestedDocRow, Sort } from 'payload'
 
 import React, { useRef } from 'react'
 
-import { useAuth } from '../../providers/Auth/index.js'
-import { useSelection } from '../../providers/Selection/index.js'
 import { useGridNavigation } from './GridNavigation/useGridNavigation.js'
+import { NestedDocRow } from './NestedDocRow/index.js'
 import { TableGridContext, useTableID, useTableNavigationLabel } from './TableIdentity.js'
+import { TableRow } from './TableRow/index.js'
 import './index.css'
 
 const baseClass = 'table'
@@ -20,6 +20,12 @@ export type Props = {
   readonly data: Record<string, unknown>[]
   readonly id?: string
   readonly navigationLabel?: string
+  readonly nestedDocs?: {
+    collectionSlug: string
+    rows: Record<string, NestedDocRow>
+    sort?: Sort
+  }
+  readonly useAsTitle?: string
 }
 
 export const Table: React.FC<Props> = ({
@@ -30,14 +36,14 @@ export const Table: React.FC<Props> = ({
   columns,
   data,
   navigationLabel: navigationLabelFromProps,
+  nestedDocs,
+  useAsTitle,
 }) => {
   const tableID = useTableID(id)
   const navigationLabelFromContext = useTableNavigationLabel()
   const navigationLabel = navigationLabelFromProps ?? navigationLabelFromContext
   const tableRef = useRef<HTMLTableElement>(null)
   const isGrid = Boolean(navigationLabel)
-  const { selected } = useSelection()
-  const { user } = useAuth()
 
   const activeColumns = columns?.filter((col) => col?.active)
   const hasRowSelection = isGrid && activeColumns?.some((column) => column.accessor === '_select')
@@ -81,54 +87,35 @@ export const Table: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {data &&
-              data?.map((row, rowIndex) => {
-                const userEditing = row._userEditing as undefined | User
-                const isLockedByAnotherUser =
-                  row._isLocked && userEditing && userEditing.id !== user?.id
+            {data?.map((row, rowIndex) => {
+              const key =
+                typeof row.id === 'string' || typeof row.id === 'number' ? String(row.id) : rowIndex
+              const metadata = nestedDocs?.rows[String(row.id)]
 
-                return (
-                  <tr
-                    aria-label={isGrid ? String(rowIndex + 1) : undefined}
-                    aria-selected={
-                      hasRowSelection && !isLockedByAnotherUser
-                        ? Boolean(
-                            (typeof row.id === 'string' || typeof row.id === 'number') &&
-                            selected.get(row.id),
-                          )
-                        : undefined
-                    }
-                    className={`row-${rowIndex + 1}`}
-                    data-id={row.id}
-                    key={
-                      typeof row.id === 'string' || typeof row.id === 'number'
-                        ? String(row.id)
-                        : rowIndex
-                    }
-                    role={isGrid ? 'row' : undefined}
-                  >
-                    {activeColumns.map((col) => {
-                      const { accessor } = col
-
-                      return (
-                        <td
-                          className={[
-                            `cell-${accessor.replace(/\./g, '__')}`,
-                            col.isLinkedColumn && 'cell--linked',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          data-column={accessor}
-                          key={accessor}
-                          role={isGrid ? 'gridcell' : undefined}
-                        >
-                          {col.renderedCells[rowIndex]}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
-              })}
+              return nestedDocs && metadata ? (
+                <NestedDocRow
+                  collectionSlug={nestedDocs.collectionSlug}
+                  columns={activeColumns}
+                  hasCellNavigation={isGrid}
+                  hasRowSelection={Boolean(hasRowSelection)}
+                  key={`${key}:${String(nestedDocs.sort)}`}
+                  row={row}
+                  rowIndex={rowIndex}
+                  rowMetadata={metadata}
+                  sort={nestedDocs.sort}
+                  useAsTitle={useAsTitle}
+                />
+              ) : (
+                <TableRow
+                  columns={activeColumns}
+                  hasCellNavigation={isGrid}
+                  hasRowSelection={Boolean(hasRowSelection)}
+                  key={key}
+                  row={row}
+                  rowIndex={rowIndex}
+                />
+              )
+            })}
           </tbody>
         </table>
       </TableGridContext>
