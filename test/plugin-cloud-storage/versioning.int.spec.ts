@@ -2019,22 +2019,50 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
   test('should remove sibling uploads only after they finish when one upload fails', async ({
     payload,
   }) => {
+    let releaseSiblingUploads!: () => void
+    const siblingUploadsReleased = new Promise<void>((resolve) => {
+      releaseSiblingUploads = resolve
+    })
+    let heldSiblingUploads = 0
+    let hasFailingUploadRun = false
+
     versionedCloudFailure.uploadNumber = 1
     versionedCloudFailure.beforeUpload = async ({ uploadNumber }) => {
-      if (uploadNumber !== versionedCloudFailure.uploadNumber) {
-        await new Promise((resolve) => setTimeout(resolve, 50))
+      if (uploadNumber === versionedCloudFailure.uploadNumber) {
+        hasFailingUploadRun = true
+        return
       }
+      heldSiblingUploads += 1
+      await siblingUploadsReleased
     }
 
-    await expect(
-      payload.create({
+    let isCreateSettled = false
+    const creation = payload
+      .create({
         collection: versionedPublicVariantCloudMediaSlug,
         data: {},
         filePath: firstFile,
-      }),
-    ).rejects.toThrow('Cloud test upload failed')
+      })
+      .finally(() => {
+        isCreateSettled = true
+      })
 
-    expect(versionedCloudCalls.uploads).toBeGreaterThan(1)
+    creation.catch(() => {})
+
+    await vi.waitFor(() => {
+      expect(hasFailingUploadRun).toBe(true)
+      expect(heldSiblingUploads).toBeGreaterThan(0)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 20))
+
+    expect(isCreateSettled).toBe(false)
+    expect(versionedCloudCalls.deletes).toEqual([])
+
+    releaseSiblingUploads()
+
+    await expect(creation).rejects.toThrow('Cloud test upload failed')
+
+    expect(heldSiblingUploads).toBe(versionedCloudCalls.uploads - 1)
     expect([...versionedCloudFiles.keys()]).toEqual([])
   })
 
