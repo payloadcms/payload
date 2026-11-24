@@ -1,4 +1,5 @@
-import type { Config, SanitizedConfig } from 'payload'
+import type { PipelineStage } from 'mongoose'
+import type { Config, FlattenedField, SanitizedConfig } from 'payload'
 import { describe, beforeAll, it, expect } from 'vitest'
 
 import { sanitizeConfig } from 'payload'
@@ -119,4 +120,68 @@ describe('builds sort params', () => {
 
     expect(result).toStrictEqual({ order: 'asc' })
   })
+
+  it('joins the related collection when sorting by a related field', () => {
+    const sortAggregation: PipelineStage[] = []
+
+    const result = buildSortParam({
+      adapter: createAdapterWithAuthors(),
+      config,
+      fields: postFields,
+      locale: 'en',
+      sort: 'author.name',
+      sortAggregation,
+      timestamps: true,
+    })
+
+    expect(result).toStrictEqual({ '__author.name': 'asc' })
+    expect(sortAggregation).toHaveLength(1)
+  })
+
+  it('does not join the related collection when sorting by an unknown related field', () => {
+    const sortAggregation: PipelineStage[] = []
+
+    buildSortParam({
+      adapter: createAdapterWithAuthors(),
+      config,
+      fields: postFields,
+      locale: 'en',
+      sort: 'author.unknownField',
+      sortAggregation,
+      timestamps: true,
+    })
+
+    expect(sortAggregation).toHaveLength(0)
+  })
 })
+
+const postFields: FlattenedField[] = [
+  {
+    name: 'author',
+    type: 'relationship',
+    relationTo: 'authors',
+  },
+]
+
+function createAdapterWithAuthors(): MongooseAdapter {
+  return {
+    collections: {
+      authors: { collection: { name: 'authors' } },
+    },
+    disableFallbackSort: true,
+    payload: {
+      collections: {
+        authors: {
+          config: {
+            flattenedFields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+            ],
+          },
+        },
+      },
+    },
+  } as unknown as MongooseAdapter
+}

@@ -643,6 +643,7 @@ export interface RelationRestricted {
   rank?: number | null;
   post?: (string | null) | Post;
   postLabel?: string | null;
+  unrestrictedDoc?: (string | null) | Unrestricted;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -2596,6 +2597,7 @@ export interface RelationRestrictedSelect<T extends boolean = true> {
   rank?: T;
   post?: T;
   postLabel?: T;
+  unrestrictedDoc?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

@@ -449,6 +449,11 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
           virtual: 'post.restrictedField',
         },
+        {
+          name: 'unrestrictedDoc',
+          type: 'relationship',
+          relationTo: unrestrictedSlug,
+        },
       ],
       versions: false,
     },

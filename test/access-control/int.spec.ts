@@ -1858,6 +1858,11 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             sort: 'postLabel',
           }),
           payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'unrestrictedDoc.hiddenName',
+          }),
+          payload.find({
             collection: 'sort-default-restricted',
             overrideAccess: false,
           }),
