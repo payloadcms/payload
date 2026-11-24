@@ -1994,6 +1994,50 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
   })
 
+  test('should upload every file of an upload in parallel', async ({ payload }) => {
+    let inFlightUploads = 0
+    let maxInFlightUploads = 0
+
+    versionedCloudFailure.beforeUpload = async () => {
+      inFlightUploads += 1
+      maxInFlightUploads = Math.max(maxInFlightUploads, inFlightUploads)
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      inFlightUploads -= 1
+    }
+
+    const created = await payload.create({
+      collection: versionedPublicVariantCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+
+    expect(created.variants?.small?.filename).toBeTruthy()
+    expect(versionedCloudCalls.uploads).toBeGreaterThan(1)
+    expect(maxInFlightUploads).toBe(versionedCloudCalls.uploads)
+  })
+
+  test('should remove sibling uploads only after they finish when one upload fails', async ({
+    payload,
+  }) => {
+    versionedCloudFailure.uploadNumber = 1
+    versionedCloudFailure.beforeUpload = async ({ uploadNumber }) => {
+      if (uploadNumber !== versionedCloudFailure.uploadNumber) {
+        await new Promise((resolve) => setTimeout(resolve, 50))
+      }
+    }
+
+    await expect(
+      payload.create({
+        collection: versionedPublicVariantCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+      }),
+    ).rejects.toThrow('Cloud test upload failed')
+
+    expect(versionedCloudCalls.uploads).toBeGreaterThan(1)
+    expect([...versionedCloudFiles.keys()]).toEqual([])
+  })
+
   test.options(
     'should remove staged cloud bytes when a later hook fails with a transaction',
     { db: isTransactionalMongoAdapter },

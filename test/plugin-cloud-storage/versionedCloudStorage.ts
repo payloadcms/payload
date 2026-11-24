@@ -49,7 +49,7 @@ export const versionedCloudFiles = new Map<string, Buffer>()
 export const versionedCloudFailure: {
   afterChange: boolean
   beforeCopy?: () => Promise<void>
-  beforeUpload?: () => Promise<void>
+  beforeUpload?: (args: { uploadNumber: number }) => Promise<void>
   deleteKey?: string
   uploadNumber: number
 } = { afterChange: false, uploadNumber: 0 }
@@ -84,8 +84,10 @@ export const versionedCloudAdapter: Adapter = () => ({
   },
   handleUpload: async ({ file, storageFilePath }) => {
     versionedCloudCalls.uploads += 1
-    await versionedCloudFailure.beforeUpload?.()
-    if (versionedCloudCalls.uploads === versionedCloudFailure.uploadNumber) {
+    // Uploads run in parallel, so each call keeps its own number across the await below.
+    const uploadNumber = versionedCloudCalls.uploads
+    await versionedCloudFailure.beforeUpload?.({ uploadNumber })
+    if (uploadNumber === versionedCloudFailure.uploadNumber) {
       throw new Error('Cloud test upload failed')
     }
     const bytes = file.tempFilePath
