@@ -540,6 +540,8 @@ export const skTranslations: DefaultTranslationsObject = {
       'Úspešne bolo preindexovaných {{count}} z {{total}} dokumentov z kolekcie {{collections}}, a {{skips}} konceptov bolo preskočených.',
     tableLayout: 'Tabuľka',
     treeLayout: 'Strom',
+    treeSearchResults:
+      'Zodpovedajúce dokumenty sa zobrazujú ako plochý zoznam. Pre návrat k stromu zrušte vyhľadávanie, filtre a zoskupenie.',
     takeOver: 'Prevziať',
     theme: 'Téma',
     thisLanguage: 'Slovenčina',

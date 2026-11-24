@@ -548,6 +548,8 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
     tableLayout: 'Lentelė',
     treeLayout: 'Medis',
+    treeSearchResults:
+      'Atitinkantys dokumentai rodomi plokščiame sąraše. Norėdami grįžti prie medžio, išvalykite paiešką, filtrus ir grupavimą.',
     takeOver: 'Perimti',
     theme: 'Tema',
     thisLanguage: 'Lietuvių',

@@ -8,6 +8,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 
+import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
@@ -36,6 +37,7 @@ import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/in
 import { getHierarchyListURL } from '../HierarchyList/getHierarchyListURL.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { DocumentGrid } from './DocumentGrid/index.js'
+import { getTreeURL } from './getTreeURL.js'
 import { GroupedDocumentGrid } from './GroupedDocumentGrid/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.css'
@@ -82,7 +84,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const wherePanelID = `list-controls-where-${instanceID}`
 
   const [Table] = useControllableState(InitialTable)
-  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
+  const [layout, setLayout] = useControllableState<DocumentLayout>(documentLayout ?? 'table')
 
   const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
@@ -115,7 +117,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const searchChangeResults = useRef<unknown>(null)
   const isDataGrouped = groupedData !== undefined
   const shouldRenderGrid = layout === 'grid' && !isInDrawer
-  const isNestedDocsTreeLayout = Boolean(hasTreeLayout && layout === 'tree' && nestedDocRows)
+  const isNestedDocsTreeLayout = Boolean(hasTreeLayout && layout === 'tree')
   const treeColumns = useMemo(
     () => columnState.filter((column) => column.accessor !== '_select'),
     [columnState],
@@ -139,12 +141,23 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
     const preferencesKey = `collection-${collectionSlug}`
+    const hasTreeQuery = Boolean(
+      query?.groupBy ||
+      query?.preset ||
+      query?.search ||
+      (query?.where && Object.keys(query.where).length > 0) ||
+      (query?.page && Number(query.page) > 1),
+    )
 
     setLayout(nextLayout)
     await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
       ...(preferences ?? {}),
       documentLayout: nextLayout,
     }))
+    if (nextLayout === 'tree' && hasTreeQuery) {
+      window.location.replace(getTreeURL({ currentURL: window.location.href }))
+      return
+    }
     router.refresh()
   }
 
@@ -310,7 +323,13 @@ export function DefaultListView(props: ListViewClientProps) {
             collectionSlug={collectionSlug}
             columns={treeColumns}
             data={data}
-            enabled={isNestedDocsTreeLayout}
+            enabled={Boolean(
+              isNestedDocsTreeLayout &&
+              nestedDocRows &&
+              !resolvedSearch &&
+              !hasActiveFilters &&
+              !isGroupingBy,
+            )}
             initialExpanded={nestedDocExpanded}
             rows={nestedDocRows}
             sort={query?.sort}
@@ -393,6 +412,21 @@ export function DefaultListView(props: ListViewClientProps) {
                 <span key={resolvedSearch || ''}>{resultsAnnouncement}</span>
               )}
             </div>
+            {isNestedDocsTreeLayout && (resolvedSearch || hasActiveFilters || isGroupingBy) && (
+              <div className={`${baseClass}__tree-search-banner`} role="status">
+                <Banner>
+                  <span>{i18n.t('general:treeSearchResults')}</span>
+                  <Button
+                    buttonStyle="secondary"
+                    onClick={() =>
+                      window.location.replace(getTreeURL({ currentURL: window.location.href }))
+                    }
+                  >
+                    {i18n.t('general:clearAll')}
+                  </Button>
+                </Banner>
+              </div>
+            )}
             {BeforeListTable}
             {hierarchyData ? (
               <DocumentSelectionProvider
@@ -494,7 +528,7 @@ export function DefaultListView(props: ListViewClientProps) {
               ))}
             {AfterListTable}
             {AfterList}
-            {docs?.length > 0 && !isGroupingBy && !isNestedDocsTreeLayout && (
+            {docs?.length > 0 && !isGroupingBy && (!isNestedDocsTreeLayout || resolvedSearch || hasActiveFilters) && (
               <PageControls
                 AfterPageControls={
                   smallBreak ? (
@@ -504,7 +538,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         disableBulkDelete={disableBulkDelete}
                         disableBulkEdit={disableBulkEdit}
                         label={collectionLabel}
-                        showSelectAllAcrossPages={!isGroupingBy}
+                        showSelectAllAcrossPages={!isGroupingBy && !isNestedDocsTreeLayout}
                         viewType={viewType}
                       />
                       <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>

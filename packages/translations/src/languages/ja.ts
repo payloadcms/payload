@@ -543,6 +543,8 @@ export const jaTranslations: DefaultTranslationsObject = {
       '{{collections}} から {{total}} 件のうち {{count}} 件を正常に再インデックスし、{{skips}} 件の下書きをスキップしました。',
     tableLayout: 'テーブル',
     treeLayout: 'ツリー',
+    treeSearchResults:
+      '一致するドキュメントをフラットなリストで表示しています。ツリーに戻るには検索、フィルター、グループ化を解除してください。',
     takeOver: '引き継ぐ',
     theme: 'テーマ',
     thisLanguage: 'Japanese',

@@ -527,6 +527,8 @@ export const heTranslations: DefaultTranslationsObject = {
       'ביצוע מחדש של אינדקס בוצע בהצלחה על {{count}} מתוך {{total}} מסמכים מתוך {{collections}}, ו-{{skips}} טיוטות הושמטו.',
     tableLayout: 'טבלה',
     treeLayout: 'עץ',
+    treeSearchResults:
+      'המסמכים התואמים מוצגים ברשימה שטוחה. יש לנקות את החיפוש, המסננים והקיבוץ כדי לחזור לעץ.',
     takeOver: 'קח פיקוד',
     theme: 'ערכת עיצוב',
     thisLanguage: 'עברית',

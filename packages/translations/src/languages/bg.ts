@@ -544,6 +544,8 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Успешно преиндексирани {{count}} от общо {{total}} документа от {{collections}} и пропуснати {{skips}} чернови.',
     tableLayout: 'Таблица',
     treeLayout: 'Дърво',
+    treeSearchResults:
+      'Съвпадащите документи са показани като плосък списък. Изчистете търсенето, филтрите и групирането, за да се върнете към дървото.',
     takeOver: 'Поемане',
     theme: 'Тема',
     thisLanguage: 'Български',

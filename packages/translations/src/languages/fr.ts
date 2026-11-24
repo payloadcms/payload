@@ -556,6 +556,8 @@ export const frTranslations: DefaultTranslationsObject = {
       '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
     tableLayout: 'Tableau',
     treeLayout: 'Arbre',
+    treeSearchResults:
+      'Les documents correspondants sont affichés dans une liste à plat. Effacez la recherche, les filtres et le regroupement pour revenir à l’arbre.',
     takeOver: 'Prendre en charge',
     theme: 'Thème',
     thisLanguage: 'Français',

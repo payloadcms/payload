@@ -217,7 +217,7 @@ export const renderListView = async (
   query.sort =
     (isSavedTreeLayout ? query.sort : undefined) ||
     collectionPreferences?.sort ||
-    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+    collectionConfig.defaultSort
 
   const baseFilterConstraint = await (
     collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter

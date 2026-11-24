@@ -557,6 +557,8 @@ export const deTranslations: DefaultTranslationsObject = {
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
     tableLayout: 'Tabelle',
     treeLayout: 'Baum',
+    treeSearchResults:
+      'Passende Dokumente werden als flache Liste angezeigt. Entferne Suche, Filter und Gruppierung, um zum Baum zurückzukehren.',
     takeOver: 'Übernehmen',
     theme: 'Thema',
     thisLanguage: 'Deutsch',

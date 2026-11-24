@@ -549,6 +549,8 @@ export const trTranslations: DefaultTranslationsObject = {
       '{{collections}}’den toplam {{total}} belge arasından {{count}} belge başarıyla yeniden indekslendi ve {{skips}} taslak atlandı.',
     tableLayout: 'Tablo',
     treeLayout: 'Ağaç',
+    treeSearchResults:
+      'Eşleşen belgeler düz liste olarak gösteriliyor. Ağaca dönmek için aramayı, filtreleri ve gruplandırmayı temizleyin.',
     takeOver: 'Devralmak',
     theme: 'Tema',
     thisLanguage: 'Türkçe',

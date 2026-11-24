@@ -546,6 +546,8 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Vellykket reindeksering av {{count}} av totalt {{total}} dokumenter fra {{collections}}, og {{skips}} utkast ble hoppet over.',
     tableLayout: 'Tabell',
     treeLayout: 'Tre',
+    treeSearchResults:
+      'Samsvarende dokumenter vises som en flat liste. Fjern søk, filtre og gruppering for å gå tilbake til treet.',
     takeOver: 'Ta over',
     theme: 'Tema',
     thisLanguage: 'Norsk',

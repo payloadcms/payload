@@ -542,6 +542,8 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}, izlaisti {{skips}} melnraksti.',
     tableLayout: 'Tabula',
     treeLayout: 'Koks',
+    treeSearchResults:
+      'Atbilstošie dokumenti tiek rādīti plakanā sarakstā. Lai atgrieztos kokā, notīriet meklēšanu, filtrus un grupēšanu.',
     takeOver: 'Pārņemt',
     theme: 'Tēma',
     thisLanguage: 'Latviešu',
