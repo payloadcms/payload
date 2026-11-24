@@ -98,6 +98,14 @@ const relationshipSort = ({
         return `${previousField}${localizedRelationshipPath}`
       }
 
+      const hasRelatedField = collectionConfig.flattenedFields.some(
+        (each) => each.name === nextPath[0],
+      )
+
+      if (!hasRelatedField) {
+        return null
+      }
+
       const as = `__${previousField}${localizedRelationshipPath}`
 
       sortAggregation.push({

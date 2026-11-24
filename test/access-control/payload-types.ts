@@ -700,72 +700,7 @@ export interface RelationRestricted {
   rank?: number | null;
   post?: (string | null) | Post;
   postLabel?: string | null;
-  createdBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string | PublicUser;
-      } | null)
-    | ({
-        relationTo: 'auth-collection';
-        value: string | AuthCollection;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string | PublicUser;
-      } | null)
-    | ({
-        relationTo: 'auth-collection';
-        value: string | AuthCollection;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "post-references".
- */
-export interface PostReference {
-  id: string;
-  post?: (string | Post)[] | null;
-  singlePost?: (string | null) | Post;
-  joinedPosts?: {
-    docs?: (string | Post)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  joinedPostsMany?: {
-    docs?: (string | Post)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  polymorphicJoinedPosts?: {
-    docs?: (
-      | {
-          relationTo?: 'posts';
-          value: string | Post;
-        }
-      | {
-          relationTo?: 'unrestricted';
-          value: string | Unrestricted;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  joinedPostsPolymorphicOn?: {
-    docs?: (string | Post)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
+  unrestrictedDoc?: (string | null) | Unrestricted;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -847,6 +782,74 @@ export interface Unrestricted {
       } | null);
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-references".
+ */
+export interface PostReference {
+  id: string;
+  post?: (string | Post)[] | null;
+  singlePost?: (string | null) | Post;
+  singlePostTitle?: string | null;
+  joinedPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  joinedPostsMany?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoinedPosts?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'unrestricted';
+          value: string | Unrestricted;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  joinedPostsPolymorphicOn?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2697,6 +2700,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostReferencesSelect<T extends boolean = true> {
   post?: T;
   singlePost?: T;
+  singlePostTitle?: T;
   joinedPosts?: T;
   joinedPostsMany?: T;
   polymorphicJoinedPosts?: T;
@@ -2705,6 +2709,7 @@ export interface PostReferencesSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2741,6 +2746,7 @@ export interface RelationRestrictedSelect<T extends boolean = true> {
   rank?: T;
   post?: T;
   postLabel?: T;
+  unrestrictedDoc?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -3593,6 +3599,8 @@ export interface InheritedReadVersionsVirtualGlobal {
  */
 export interface Setting {
   id: string;
+  post?: (string | null) | Post;
+  postTitle?: string | null;
   test?: boolean | null;
   secret?: string | null;
   createdBy?:
@@ -3797,6 +3805,8 @@ export interface InheritedReadVersionsVirtualGlobalSelect<T extends boolean = tr
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
+  post?: T;
+  postTitle?: T;
   test?: T;
   secret?: T;
   createdBy?: T;

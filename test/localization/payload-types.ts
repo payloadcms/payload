@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_14F501F5".
+ * via the `definition` "LexicalNodes_1F3E020A".
  */
-export type LexicalNodes_14F501F5 =
+export type LexicalNodes_1F3E020A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_14F501F5>
+  | SerializedParagraphNode<LexicalNodes_1F3E020A>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -79,13 +79,15 @@ export type LexicalNodes_14F501F5 =
       version?: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_14F501F5>
+  | SerializedQuoteNode<LexicalNodes_1F3E020A>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
       | 'nested-arrays'
       | 'nested-field-tables'
       | 'localized-drafts'
+      | 'localized-query-targets'
+      | 'localized-query-references'
       | 'localized-date-fields'
       | 'all-fields-localized'
       | 'locale-validation'
@@ -115,11 +117,11 @@ export type LexicalNodes_14F501F5 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_14F501F5, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_14F501F5, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_14F501F5>
-  | SerializedListItemNode<LexicalNodes_14F501F5>
-  | SerializedHeadingNode<LexicalNodes_14F501F5>;
+  | SerializedAutoLinkNode<LexicalNodes_1F3E020A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_1F3E020A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_1F3E020A>
+  | SerializedListItemNode<LexicalNodes_1F3E020A>
+  | SerializedHeadingNode<LexicalNodes_1F3E020A>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -146,6 +148,8 @@ export interface Config {
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
     'localized-drafts': LocalizedDraft;
+    'localized-query-targets': LocalizedQueryTarget;
+    'localized-query-references': LocalizedQueryReference;
     'localized-date-fields': LocalizedDateField;
     'all-fields-localized': AllFieldsLocalized;
     'locale-validation': LocaleValidation;
@@ -183,6 +187,8 @@ export interface Config {
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
+    'localized-query-targets': LocalizedQueryTargetsSelect<false> | LocalizedQueryTargetsSelect<true>;
+    'localized-query-references': LocalizedQueryReferencesSelect<false> | LocalizedQueryReferencesSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
     'locale-validation': LocaleValidationSelect<false> | LocaleValidationSelect<true>;
@@ -297,7 +303,7 @@ export interface LocaleValidationBlock {
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_14F501F5> | null;
+  lexical?: LexicalRichText<LexicalNodes_1F3E020A> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -563,6 +569,44 @@ export interface Content {
 export interface LocalizedDraft {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-targets".
+ */
+export interface LocalizedQueryTarget {
+  id: string;
+  title?: string | null;
+  category?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-references".
+ */
+export interface LocalizedQueryReference {
+  id: string;
+  target?: (string | null) | LocalizedQueryTarget;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1400,6 +1444,14 @@ export interface PayloadLockedDocument {
         value: string | LocalizedDraft;
       } | null)
     | ({
+        relationTo: 'localized-query-targets';
+        value: string | LocalizedQueryTarget;
+      } | null)
+    | ({
+        relationTo: 'localized-query-references';
+        value: string | LocalizedQueryReference;
+      } | null)
+    | ({
         relationTo: 'localized-date-fields';
         value: string | LocalizedDateField;
       } | null)
@@ -1717,6 +1769,30 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
  */
 export interface LocalizedDraftsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-targets_select".
+ */
+export interface LocalizedQueryTargetsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-references_select".
+ */
+export interface LocalizedQueryReferencesSelect<T extends boolean = true> {
+  target?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2894,6 +2970,8 @@ export interface CollectionQueryWidget {
       | 'nested-arrays'
       | 'nested-field-tables'
       | 'localized-drafts'
+      | 'localized-query-targets'
+      | 'localized-query-references'
       | 'localized-date-fields'
       | 'all-fields-localized'
       | 'locale-validation'
@@ -2946,6 +3024,8 @@ export interface ActivityWidget {
           | 'nested-arrays'
           | 'nested-field-tables'
           | 'localized-drafts'
+          | 'localized-query-targets'
+          | 'localized-query-references'
           | 'localized-date-fields'
           | 'all-fields-localized'
           | 'locale-validation'

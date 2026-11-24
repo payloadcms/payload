@@ -146,6 +146,20 @@ export interface UserAuthOperations {
  */
 export interface FieldAccessContextParent {
   id: string;
+  count?: number | null;
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  saveInstruction?: string | null;
+  nested?: {
+    note?: string | null;
+  };
   title?: string | null;
   accessCreateProbe?: string | null;
   accessReadProbe?: string | null;
@@ -335,6 +349,14 @@ export interface PayloadLlmInstruction {
  * via the `definition` "field-access-context-parents_select".
  */
 export interface FieldAccessContextParentsSelect<T extends boolean = true> {
+  count?: T;
+  metadata?: T;
+  saveInstruction?: T;
+  nested?:
+    | T
+    | {
+        note?: T;
+      };
   title?: T;
   accessCreateProbe?: T;
   accessReadProbe?: T;
@@ -451,6 +473,7 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
  */
 export interface FieldAccessContextGlobal {
   id: string;
+  count?: number | null;
   globalReadProbe?: string | null;
   globalChild?: (string | null) | FieldAccessContextChild;
   createdBy?: {
@@ -469,6 +492,7 @@ export interface FieldAccessContextGlobal {
  * via the `definition` "field-access-context-global_select".
  */
 export interface FieldAccessContextGlobalSelect<T extends boolean = true> {
+  count?: T;
   globalReadProbe?: T;
   globalChild?: T;
   createdBy?: T;

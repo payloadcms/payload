@@ -8,7 +8,7 @@ it.each(['in', 'not_in'] as const)(
   (operator) => {
     const objectID = new Types.ObjectId().toHexString()
     const idFilter = { id: { [operator]: ['article-a', objectID] } }
-    const args = { collectionSlug: 'articles', fieldNames: new Set<string>() }
+    const args = { collectionSlug: 'articles', flattenedFields: [] }
 
     expect(
       resolveWhereForCollection({ ...args, usesObjectIDs: false, where: idFilter }),
