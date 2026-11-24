@@ -13,6 +13,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -184,8 +185,10 @@ export const updateOperation = async <
       sort: incomingSort,
       trash = false,
       unpublishAllLocales: unpublishAllLocalesArg,
-      where,
+      where: incomingWhere,
     } = args
+
+    const where = cloneWhere(incomingWhere)
 
     if (!where) {
       throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)

@@ -1210,6 +1210,343 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(visibleResult.docs[0].id).toBe(publicReference.id)
       })
 
+      test.describe('nested hasMany relationship queries', () => {
+        const createdFullyRestrictedIDs: (number | string)[] = []
+        const createdUnrestrictedIDs: (number | string)[] = []
+
+        test.afterEach(async ({ payload }) => {
+          for (const id of createdUnrestrictedIDs) {
+            await payload.delete({ id, collection: unrestrictedSlug, overrideAccess: true })
+          }
+          createdUnrestrictedIDs.length = 0
+
+          for (const id of createdFullyRestrictedIDs) {
+            await payload.delete({ id, collection: fullyRestrictedSlug, overrideAccess: true })
+          }
+          createdFullyRestrictedIDs.length = 0
+        })
+
+        const createReferences = async ({ payload }: { payload: Payload }) => {
+          const archivedPost = await payload.create({
+            collection: slug,
+            data: { title: 'archived' },
+            overrideAccess: true,
+          })
+          const publicPost = await payload.create({
+            collection: slug,
+            data: { title: 'public' },
+            overrideAccess: true,
+          })
+
+          createdPostIDs.push(archivedPost.id, publicPost.id)
+
+          const mixedReference = await payload.create({
+            collection: postReferencesSlug,
+            data: { post: [archivedPost.id, publicPost.id] },
+            overrideAccess: true,
+          })
+          const publicReference = await payload.create({
+            collection: postReferencesSlug,
+            data: { post: [publicPost.id] },
+            overrideAccess: true,
+          })
+          const archivedReference = await payload.create({
+            collection: postReferencesSlug,
+            data: { post: [archivedPost.id] },
+            overrideAccess: true,
+          })
+
+          createdPostReferenceIDs.push(mixedReference.id, publicReference.id, archivedReference.id)
+
+          return { archivedReference, mixedReference, publicReference }
+        }
+
+        test('should apply related collection access constraints to nested contains queries', async ({
+          payload,
+          restClient,
+        }) => {
+          await createReferences({ payload })
+
+          const response = await restClient.GET(`/${postReferencesSlug}`, {
+            auth: false,
+            query: {
+              where: {
+                post: {
+                  contains: {
+                    title: {
+                      equals: 'archived',
+                    },
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toBe(200)
+          expect(result.docs).toHaveLength(0)
+        })
+
+        test('should apply related collection access constraints to nested contains like queries', async ({
+          payload,
+          restClient,
+        }) => {
+          await createReferences({ payload })
+
+          const response = await restClient.GET(`/${postReferencesSlug}`, {
+            auth: false,
+            query: {
+              where: {
+                post: {
+                  contains: {
+                    title: {
+                      like: 'arch',
+                    },
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toBe(200)
+          expect(result.docs).toHaveLength(0)
+        })
+
+        test('should ignore unreadable related documents in nested equals queries', async ({
+          payload,
+        }) => {
+          const { archivedReference, mixedReference, publicReference } = await createReferences({
+            payload,
+          })
+
+          const result = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: false,
+            where: {
+              post: {
+                equals: {
+                  title: {
+                    not_equals: 'other',
+                  },
+                },
+              },
+            },
+          })
+
+          expect(result.docs.map(({ id }) => id).sort()).toStrictEqual(
+            [archivedReference.id, mixedReference.id, publicReference.id].sort(),
+          )
+        })
+
+        test('should match nested equals queries the same way regardless of unreadable related values', async ({
+          payload,
+        }) => {
+          const { archivedReference } = await createReferences({ payload })
+
+          const findByRelatedTitle = (title: string) =>
+            payload.find({
+              collection: postReferencesSlug,
+              overrideAccess: false,
+              where: {
+                post: {
+                  equals: {
+                    title: {
+                      equals: title,
+                    },
+                  },
+                },
+              },
+            })
+
+          const archivedTitleResult = await findByRelatedTitle('archived')
+          const missingTitleResult = await findByRelatedTitle('missing')
+
+          expect(archivedTitleResult.docs.map(({ id }) => id)).toStrictEqual([archivedReference.id])
+          expect(missingTitleResult.docs.map(({ id }) => id)).toStrictEqual([archivedReference.id])
+        })
+
+        test('should apply related collection access constraints to nested not_equals queries', async ({
+          payload,
+        }) => {
+          const { archivedReference, mixedReference, publicReference } = await createReferences({
+            payload,
+          })
+
+          const result = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: false,
+            where: {
+              post: {
+                not_equals: {
+                  title: {
+                    equals: 'archived',
+                  },
+                },
+              },
+            },
+          })
+
+          expect(result.docs.map(({ id }) => id).sort()).toStrictEqual(
+            [archivedReference.id, mixedReference.id, publicReference.id].sort(),
+          )
+        })
+
+        test('should keep nested contains queries working when the related document is readable', async ({
+          payload,
+          restClient,
+        }) => {
+          const { mixedReference, publicReference } = await createReferences({ payload })
+
+          const response = await restClient.GET(`/${postReferencesSlug}`, {
+            auth: false,
+            query: {
+              where: {
+                post: {
+                  contains: {
+                    title: {
+                      equals: 'public',
+                    },
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toBe(200)
+          expect(result.docs.map(({ id }: { id: number | string }) => id).sort()).toStrictEqual(
+            [mixedReference.id, publicReference.id].sort(),
+          )
+        })
+
+        test('should not apply related collection access constraints when overriding access', async ({
+          payload,
+        }) => {
+          const { archivedReference, mixedReference } = await createReferences({ payload })
+
+          const result = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: true,
+            where: {
+              post: {
+                contains: {
+                  title: {
+                    equals: 'archived',
+                  },
+                },
+              },
+            },
+          })
+
+          expect(result.docs.map(({ id }) => id).sort()).toStrictEqual(
+            [archivedReference.id, mixedReference.id].sort(),
+          )
+        })
+
+        test('should leave a reused nested query unchanged by access constraints', async ({
+          payload,
+        }) => {
+          const { archivedReference, mixedReference } = await createReferences({ payload })
+
+          const where = {
+            post: {
+              contains: {
+                title: {
+                  equals: 'archived',
+                },
+              },
+            },
+          }
+
+          const restrictedResult = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: false,
+            where,
+          })
+
+          const overriddenResult = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: true,
+            where,
+          })
+
+          expect(restrictedResult.docs).toHaveLength(0)
+          expect(where).toStrictEqual({ post: { contains: { title: { equals: 'archived' } } } })
+          expect(overriddenResult.docs.map(({ id }) => id).sort()).toStrictEqual(
+            [archivedReference.id, mixedReference.id].sort(),
+          )
+        })
+
+        test('should leave a reused relationship path query unchanged by access constraints', async ({
+          payload,
+        }) => {
+          const { archivedReference, mixedReference } = await createReferences({ payload })
+
+          const where = {
+            'post.title': {
+              equals: 'archived',
+            },
+          }
+
+          const restrictedResult = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: false,
+            where,
+          })
+
+          const overriddenResult = await payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: true,
+            where,
+          })
+
+          expect(restrictedResult.docs).toHaveLength(0)
+          expect(where).toStrictEqual({ 'post.title': { equals: 'archived' } })
+          expect(overriddenResult.docs.map(({ id }) => id).sort()).toStrictEqual(
+            [archivedReference.id, mixedReference.id].sort(),
+          )
+        })
+
+        test('should reject nested relationship queries when the related collection cannot be read', async ({
+          payload,
+          restClient,
+        }) => {
+          const restrictedDoc = await payload.create({
+            collection: fullyRestrictedSlug,
+            data: { name: 'restricted' },
+            overrideAccess: true,
+          })
+
+          createdFullyRestrictedIDs.push(restrictedDoc.id)
+
+          const unrestrictedDoc = await payload.create({
+            collection: unrestrictedSlug,
+            data: { fullyRestrictedDocs: [restrictedDoc.id] },
+            overrideAccess: true,
+          })
+
+          createdUnrestrictedIDs.push(unrestrictedDoc.id)
+
+          const response = await restClient.GET(`/${unrestrictedSlug}`, {
+            auth: false,
+            query: {
+              where: {
+                fullyRestrictedDocs: {
+                  contains: {
+                    id: {
+                      equals: restrictedDoc.id,
+                    },
+                  },
+                },
+              },
+            },
+          })
+
+          expect(response.status).toBe(400)
+        })
+      })
+
       test('should apply related collection access constraints to join field queries', async ({
         payload,
         restClient,
