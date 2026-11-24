@@ -8,7 +8,7 @@ import { isCrossSiteNavigation } from './isCrossSiteNavigation.js'
  * Treat the navigation as unauthenticated. Access functions that check something else,
  * such as a cron secret, keep working.
  */
-export const ignoreCrossSiteNavigationUser = (req: PayloadRequest): void => {
+export const stripUserFromCrossSiteNavigation = (req: PayloadRequest): void => {
   if (req.user && isCrossSiteNavigation(req.headers)) {
     req.user = null
   }

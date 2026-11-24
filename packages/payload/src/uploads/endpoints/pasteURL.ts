@@ -1,7 +1,7 @@
 import type { PayloadHandler } from '../../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { ignoreCrossSiteNavigationUser } from '../../auth/ignoreCrossSiteNavigationUser.js'
+import { stripUserFromCrossSiteNavigation } from '../../auth/stripUserFromCrossSiteNavigation.js'
 import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
@@ -18,7 +18,7 @@ import { validateUploadURL } from '../validateUploadURL.js'
 export const pasteURLHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req, { optionalID: true })
 
-  ignoreCrossSiteNavigationUser(req)
+  stripUserFromCrossSiteNavigation(req)
 
   if (!req.user) {
     throw new Forbidden(req.t)
