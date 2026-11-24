@@ -160,6 +160,7 @@ export const findDistinctOperation = async (
       incomingPath: args.field,
       locale: req.locale!,
       overrideAccess: true,
+      parentIsLocalized: false,
       payload,
     })
 
