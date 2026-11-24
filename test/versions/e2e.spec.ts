@@ -65,6 +65,7 @@ import {
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
   autosaveWithDraftValidateSlug,
+  autosaveWithoutLocalizationGlobalSlug,
   autosaveWithVirtualSlug,
   customIDSlug,
   diffCollectionSlug,
@@ -1934,6 +1935,42 @@ describe('Versions', () => {
       await expect(titleField).toHaveValue('global title')
       await page.goto(url.global(autoSaveGlobalSlug))
       await expect(page.locator('#field-title')).toHaveValue('global title')
+    })
+
+    test('should show changed status and published actions after autosaving and reloading a global', async () => {
+      await payload.updateGlobal({
+        slug: autosaveWithoutLocalizationGlobalSlug,
+        data: { _status: 'published', title: 'published global' },
+      })
+
+      const url = new AdminUrlUtil(serverURL, autosaveWithoutLocalizationGlobalSlug)
+
+      await page.goto(url.global(autosaveWithoutLocalizationGlobalSlug))
+      await waitForFormReady(page)
+      await expect(page.locator('.doc-controls__status .status__value')).toHaveText('Published')
+
+      const autosaved = page.waitForResponse((response) => {
+        const responseURL = new URL(response.url())
+
+        return (
+          response.request().method() === 'POST' &&
+          responseURL.pathname.endsWith(`/globals/${autosaveWithoutLocalizationGlobalSlug}`) &&
+          responseURL.searchParams.get('autosave') === 'true' &&
+          response.ok()
+        )
+      })
+
+      await page.locator('#field-title').fill('autosaved draft')
+      await autosaved
+      await page.reload()
+
+      await expect(page.locator('#field-title')).toHaveValue('autosaved draft')
+      await expect(page.locator('.doc-controls__status .status__value')).toHaveText('Changed')
+      await expect(
+        page.getByRole('button', { name: 'Revert to published', exact: true }),
+      ).toBeVisible()
+      await openDocControls(page)
+      await expect(page.getByRole('menuitem', { name: 'Unpublish', exact: true })).toBeVisible()
     })
 
     test('globals — should hide publish button when access control prevents update', async () => {
