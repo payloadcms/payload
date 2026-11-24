@@ -134,6 +134,12 @@ export class Main {
         return
       }
 
+      if (appFramework.kind === 'unsupported-tanstack') {
+        p.log.warn(appFramework.reason)
+        p.outro(feedbackOutro())
+        return
+      }
+
       const existingProjectDir =
         appFramework.kind === 'next'
           ? path.dirname(appFramework.appDetails.nextConfigPath!)
@@ -148,12 +154,6 @@ export class Main {
           tanStackAppDetails:
             appFramework.kind === 'tanstack' ? appFramework.appDetails : undefined,
         })
-        p.outro(feedbackOutro())
-        return
-      }
-
-      if (appFramework.kind === 'unsupported-tanstack') {
-        p.log.warn(appFramework.reason)
         p.outro(feedbackOutro())
         return
       }
