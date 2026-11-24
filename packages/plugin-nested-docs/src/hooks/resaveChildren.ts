@@ -74,6 +74,7 @@ export const resaveChildren =
             id: child.id,
             collection: collection.slug,
             data: await populateBreadcrumbs({
+              breadcrumbsFieldName: pluginConfig.breadcrumbsFieldSlug,
               collection,
               data: child,
               generateLabel: pluginConfig.generateLabel,
