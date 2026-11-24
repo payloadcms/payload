@@ -7,7 +7,7 @@ import React, { useRef } from 'react'
 import { useNestedDocsTree } from '../../providers/NestedDocs/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useGridNavigation } from './GridNavigation/useGridNavigation.js'
-import { NestedDocsBranchRow } from './NestedDocsBranchRow/index.js'
+import { NestedDocRow } from './NestedDocRow/index.js'
 import { NestedDocsContinuationRow } from './NestedDocsContinuationRow/index.js'
 import { TableGridContext, useTableID, useTableNavigationLabel } from './TableIdentity.js'
 import { TableRow } from './TableRow/index.js'
@@ -128,7 +128,7 @@ export const Table: React.FC<Props> = ({
 
               return nestedDocs && metadata ? (
                 <React.Fragment key={key}>
-                  <NestedDocsBranchRow
+                  <NestedDocRow
                     columns={activeColumns}
                     hasCellNavigation={isGrid}
                     hasRowSelection={Boolean(hasRowSelection)}

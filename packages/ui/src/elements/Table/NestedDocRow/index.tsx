@@ -8,7 +8,7 @@ import { useNestedDocsTree } from '../../../providers/NestedDocs/index.js'
 import { NestedDocCell } from '../NestedDocCell/index.js'
 import { TableRow } from '../TableRow/index.js'
 
-export function NestedDocsBranchRow({
+export function NestedDocRow({
   columns,
   hasCellNavigation,
   hasRowSelection,
