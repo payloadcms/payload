@@ -62,6 +62,62 @@ describe('uploadWithSession', () => {
     expect(await result).toMatchObject({ code: 'storageRejectedSegments' })
   })
 
+  it('should stop reporting progress once a segment fails', async () => {
+    const twoSegmentSession = {
+      ...session,
+      transfer: {
+        concurrency: 2,
+        segments: [
+          { end: 2, number: 1, start: 0 },
+          { end: 4, number: 2, start: 2 },
+        ],
+      },
+    } as unknown as ClientUploadSession
+    const onProgress = vi.fn()
+    let finishSegment2: (response: Response) => void = () => {}
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        if (url.endsWith('/instructions')) {
+          return Promise.resolve(
+            json({
+              body: {
+                requests: [
+                  { method: 'PUT', number: 1, url: 'https://storage/1' },
+                  { method: 'PUT', number: 2, url: 'https://storage/2' },
+                ],
+                session: twoSegmentSession,
+              },
+            }),
+          )
+        }
+
+        // Segment 1 is rejected for good while segment 2 is still sending.
+        if (url.endsWith('/1')) {
+          return Promise.resolve(new Response(null, { status: 400 }))
+        }
+
+        return new Promise<Response>((resolve) => {
+          finishSegment2 = resolve
+        })
+      }),
+    )
+
+    const result = await resumeUploadSession({
+      ...requestArgs,
+      file,
+      onProgress,
+      session: twoSegmentSession,
+    }).catch((err: unknown) => err)
+
+    finishSegment2(new Response(null, { status: 200 }))
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(result).toBeInstanceOf(Error)
+    expect(onProgress).not.toHaveBeenCalled()
+  })
+
   it('should retry a cancel while another request holds the session', async () => {
     const fetch = vi
       .fn()

@@ -284,6 +284,14 @@ export const resumeUploadSession = async ({
   const segments = new Map(session.transfer.segments.map((segment) => [segment.number, segment]))
   let concurrency = session.transfer.concurrency
   let stalledWindows = 0
+  // Set once this attempt fails. Parts still in flight must not report after that, or a late
+  // update would replace the retry offer the caller shows for the failure.
+  let hasFailed = false
+  const reportProgress = (progress: UploadSessionProgress) => {
+    if (!hasFailed) {
+      onProgress?.(progress)
+    }
+  }
 
   while (true) {
     const { requests, session: currentSession } = await requestSession<{
@@ -328,7 +336,7 @@ export const resumeUploadSession = async ({
 
       if (result === 'sent') {
         windowBytes += segment.end - segment.start
-        onProgress?.({ loaded: confirmedBytes + windowBytes, total: file.size })
+        reportProgress({ loaded: confirmedBytes + windowBytes, total: file.size })
       }
 
       // Expired or throttled segments are picked up again by the next instructions request.
@@ -337,7 +345,12 @@ export const resumeUploadSession = async ({
       }
     }
 
-    await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, sendNext))
+    await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, sendNext)).catch(
+      (err: unknown) => {
+        hasFailed = true
+        throw err
+      },
+    )
 
     // A window where nothing was accepted (e.g. a CORS or permission problem) must not loop forever.
     stalledWindows = windowBytes ? 0 : stalledWindows + 1
