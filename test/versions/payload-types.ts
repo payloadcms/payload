@@ -1135,6 +1135,7 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
+  constrainedRelationship?: (string | null) | Text;
   richtext?: LexicalRichText<LexicalNodes_47553BF6> | null;
   richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_84E9EB04> | null;
   richtextWithCustomDiff?: LexicalRichText<LexicalNodes_47553BF6> | null;
@@ -2302,6 +2303,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasManyPolymorphic?: T;
   relationshipHasManyPolymorphic2?: T;
   zeroDepthRelationship?: T;
+  constrainedRelationship?: T;
   richtext?: T;
   richtextWithConstrainedRelationship?: T;
   richtextWithCustomDiff?: T;
