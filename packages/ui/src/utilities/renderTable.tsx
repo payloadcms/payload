@@ -321,7 +321,7 @@ export const renderTable = ({
     }
   }
 
-  if (!orderableFieldName) {
+  if (!orderableFieldName || nestedDocRows) {
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
@@ -338,15 +338,7 @@ export const renderTable = ({
               columns={columnsToUse}
               data={data?.docs || []}
               id={tableId}
-              nestedDocs={
-                nestedDocRows && collectionConfig
-                  ? {
-                      collectionSlug: collectionConfig.slug,
-                      rows: nestedDocRows,
-                      sort: query?.sort,
-                    }
-                  : undefined
-              }
+              nestedDocRows={nestedDocRows}
               useAsTitle={useAsTitle}
             />
           </TableSectionContent>

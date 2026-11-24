@@ -1,71 +1,124 @@
 'use client'
 
-import type { Column, NestedDocRow } from 'payload'
+import type { NestedDocRow as NestedDocRowData } from 'payload'
 
 import React from 'react'
 
+import type { TableRowProps } from '../TableRow/index.js'
+
 import { useNestedDocsTree } from '../../../providers/NestedDocs/index.js'
+import { branchKey } from '../../../providers/NestedDocs/state.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { SelectRow } from '../../SelectRow/index.js'
 import { NestedDocCell } from '../NestedDocCell/index.js'
+import { NestedDocsContinuationRow } from '../NestedDocsContinuationRow/index.js'
 import { TableRow } from '../TableRow/index.js'
 
 export function NestedDocRow({
   columns,
+  documentsByID,
   hasCellNavigation,
   hasRowSelection,
-  isLastRendered,
+  isLastDocument,
+  label,
   row,
   rowIndex,
-  rowMetadata,
+  rows,
   useAsTitle,
 }: {
-  columns: Column[]
-  hasCellNavigation: boolean
-  hasRowSelection: boolean
-  isLastRendered: boolean
-  row: Record<string, unknown>
-  rowIndex: number
-  rowMetadata: NestedDocRow
+  documentsByID?: Map<unknown, Record<string, unknown>>
+  isLastDocument: boolean
+  label?: string
+  rows: Record<string, NestedDocRowData>
   useAsTitle?: string
-}) {
+} & Omit<TableRowProps, 'renderCell'>) {
   const tree = useNestedDocsTree()
+  const { t } = useTranslation()
+  const rowID = typeof row.id === 'string' || typeof row.id === 'number' ? row.id : rowIndex
+  const title = getRowTitle({ fallback: String(rowID), row, useAsTitle })
+  const parentID = rows[String(rowID)]?.parentID
+  const parent =
+    parentID === null || parentID === undefined ? undefined : documentsByID?.get(parentID)
+  const parentTitle = parent
+    ? getRowTitle({ fallback: String(parentID), row: parent, useAsTitle })
+    : undefined
   const titleColumn =
     columns.find((column) => column.isLinkedColumn) ??
     columns.find((column) => column.accessor !== '_select')
-  const rowID = row.id as number | string
-  const titleValue = useAsTitle ? row[useAsTitle] : rowID
-  const title =
-    typeof titleValue === 'string' || typeof titleValue === 'number'
-      ? String(titleValue)
-      : String(rowID)
-  const parent = tree?.docs.find((doc) => String(doc.id) === String(rowMetadata.parentID))
-  const parentTitleValue = parent && useAsTitle ? parent[useAsTitle] : undefined
-  const parentTitle =
-    typeof parentTitleValue === 'string' || typeof parentTitleValue === 'number'
-      ? String(parentTitleValue)
-      : undefined
 
   return (
-    <TableRow
-      columns={columns}
-      hasCellNavigation={hasCellNavigation}
-      hasRowSelection={hasRowSelection}
-      renderCell={({ column }) =>
-        column === titleColumn ? (
-          <NestedDocCell
-            id={String(rowID)}
-            isLastRendered={isLastRendered}
-            parentTitle={parentTitle}
-            row={rowMetadata}
-            title={title}
-          >
-            {column.renderedCells[rowIndex]}
-          </NestedDocCell>
-        ) : (
-          column.renderedCells[rowIndex]
+    <>
+      <TableRow
+        columns={columns}
+        hasCellNavigation={hasCellNavigation}
+        hasRowSelection={hasRowSelection}
+        renderCell={({ column }) => {
+          if (tree && column.accessor === '_select') {
+            return (
+              <SelectRow
+                rowData={{ ...row, id: rowID }}
+                rowIndex={rowIndex}
+                selectRowLabel={t('general:selectLabel', { label: title })}
+              />
+            )
+          }
+
+          if (rows[String(rowID)] && column === titleColumn) {
+            return (
+              <NestedDocCell
+                id={String(rowID)}
+                isLastRendered={isLastDocument && !tree?.continuationsByRowID.has(String(rowID))}
+                parentTitle={parentTitle}
+                row={rows[String(rowID)]}
+                title={title}
+              >
+                {column.renderedCells[rowIndex]}
+              </NestedDocCell>
+            )
+          }
+
+          return column.renderedCells[rowIndex]
+        }}
+        row={row}
+        rowIndex={rowIndex}
+      />
+      {(tree?.continuationsByRowID.get(String(rowID)) ?? []).map((parentID) => {
+        const parent =
+          parentID === null
+            ? undefined
+            : tree?.docs.find((doc) => String(doc.id) === String(parentID))
+        const fallback = parentID === null ? (label ?? t('general:treeLayout')) : String(parentID)
+        const parentLabel = getRowTitle({ fallback, row: parent, useAsTitle })
+
+        return (
+          <NestedDocsContinuationRow
+            columns={columns}
+            hasCellNavigation={hasCellNavigation}
+            key={`load-${branchKey({ parentID })}`}
+            label={parentLabel}
+            parentID={parentID}
+            titleColumn={titleColumn?.accessor}
+          />
         )
-      }
-      row={row}
-      rowIndex={rowIndex}
-    />
+      })}
+    </>
   )
+}
+
+function getRowTitle({
+  fallback,
+  row,
+  useAsTitle,
+}: {
+  fallback: string
+  row?: Record<string, unknown>
+  useAsTitle?: string
+}): string {
+  const value = useAsTitle ? row?.[useAsTitle] : undefined
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return String(value)
+  }
+
+  return fallback
 }

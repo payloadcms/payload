@@ -84,4 +84,17 @@ test.describe('Nested document tree', () => {
 
     await expect.poll(() => connectorX(child)).toBeGreaterThan(parentX)
   })
+
+  test('should select a loaded child and clear it when the branch closes', async ({ page }) => {
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+
+    await page.getByRole('checkbox', { name: /^Select Department 12/ }).check()
+    await expect(page.locator('.list-selection__count')).toContainText('1 selected')
+
+    await page.getByRole('button', { name: 'Collapse: About us', exact: true }).click()
+
+    await expect(page.locator('.list-selection__count')).toHaveCount(0)
+    await expect(page.getByRole('checkbox', { name: /^Select Department 12/ })).toHaveCount(0)
+  })
 })
