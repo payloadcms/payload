@@ -87,6 +87,14 @@ export class Main {
   async init(): Promise<void> {
     try {
       const debugFlag = this.args['--debug']
+      const hasCreationArgs = Boolean(
+        this.args['--name'] ||
+          this.args._[0] ||
+          this.args['--template'] ||
+          this.args['--example'] ||
+          this.args['--local-template'] ||
+          this.args['--local-example'],
+      )
 
       // Set DEBUG env var for logger utility
       if (debugFlag) {
@@ -105,11 +113,13 @@ export class Main {
 
       // Detect if inside Next.js project
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const { hasTopLevelLayout, isSupportedNextVersion, nextAppDir, nextConfigPath, nextVersion } =
-        nextAppDetails
+      const isCreatingProject =
+        hasCreationArgs && hasPayloadDependency({ projectDir: process.cwd() })
+      const { hasTopLevelLayout, isSupportedNextVersion, nextAppDir, nextVersion } = nextAppDetails
+      const nextConfigPath = isCreatingProject ? undefined : nextAppDetails.nextConfigPath
 
       const projectDirForUpgrade = nextConfigPath ? path.dirname(nextConfigPath) : process.cwd()
-      if (hasPayloadDependency({ projectDir: projectDirForUpgrade })) {
+      if (!isCreatingProject && hasPayloadDependency({ projectDir: projectDirForUpgrade })) {
         await upgradeProject({
           cliArgs: this.args,
           nextAppDetails: nextConfigPath ? nextAppDetails : undefined,

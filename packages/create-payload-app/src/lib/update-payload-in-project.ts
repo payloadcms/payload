@@ -10,6 +10,7 @@ import type { UpgradePlan } from '../upgrade-shared/index.js'
 
 import {
   applyUpgradePlan,
+  assertInstalledVersionsUnchanged,
   createRegistryClient,
   createUpgradePlan,
   readInstalledVersion,
@@ -68,6 +69,11 @@ export async function updatePayloadInNextProject({
   let adminRoute = '/admin'
   const packageUpdate = await performPayloadPackageUpdate({
     beforeInstall: () => {
+      if (appDetails.isSupportedNextVersion === false) {
+        throw new Error(
+          `Next.js ${appDetails.nextVersion} is unsupported. Update Next.js before applying a same-major Payload update.`,
+        )
+      }
       adminRoute = getAdminRoute({ projectDir })
     },
     cliArgs,
@@ -143,6 +149,7 @@ async function performPayloadPackageUpdate({
     throw new Error('The upgrade plan belongs to a different project.')
   }
   const fetchRegistry = createRegistryClient({ projectDir })
+  const packageManager = await getPackageManager({ cliArgs, projectDir })
   const target =
     preparedPlan?.targetVersion ??
     (
@@ -161,6 +168,7 @@ async function performPayloadPackageUpdate({
     (await createUpgradePlan({
       corePackageNames: payloadPackageNames,
       fetchRegistry,
+      packageManager,
       project,
       targetVersion: target,
     }))
@@ -196,19 +204,19 @@ async function performPayloadPackageUpdate({
   if (fse.readFileSync(project.packageJsonPath, 'utf8') !== project.originalText) {
     throw new Error('package.json changed after planning. Run the upgrade again.')
   }
+  assertInstalledVersionsUnchanged({ project })
   const data = applyUpgradePlan({ plan })
   const indent = project.originalText.match(/\n([\t ]+)"/)?.[1] ?? '  '
   const nextText = JSON.stringify(data, null, indent) + '\n'
   fse.writeFileSync(project.packageJsonPath, nextText)
   if (cliArgs?.['--no-deps']) {
     return {
-      isUpdated: false,
-      message: 'Updated package.json. Install dependencies before continuing.',
+      isUpdated: true,
+      message: 'Updated project files. Install dependencies before continuing.',
       success: true,
       targetVersion: target,
     }
   }
-  const packageManager = await getPackageManager({ cliArgs, projectDir })
   info(`Installing Payload v${target} with ${packageManager}...`)
   try {
     const { exitCode } = await execa(packageManager, ['install'], {
@@ -229,11 +237,15 @@ async function performPayloadPackageUpdate({
       }
     }
   } catch (error) {
-    if (fse.readFileSync(project.packageJsonPath, 'utf8') === nextText) {
+    const canRestore = fse.readFileSync(project.packageJsonPath, 'utf8') === nextText
+    if (canRestore) {
       fse.writeFileSync(project.packageJsonPath, project.originalText)
     }
+    const recovery = canRestore
+      ? 'Reinstall the original dependencies before retrying.'
+      : 'Restore the original dependency entries while preserving your other edits, then reinstall before retrying.'
     throw new Error(
-      `${error instanceof Error ? error.message : String(error)} Dependencies or the lockfile may be partially changed. Reinstall the original dependencies before retrying.`,
+      `${error instanceof Error ? error.message : String(error)} Dependencies or the lockfile may be partially changed. ${recovery}`,
     )
   }
   return {

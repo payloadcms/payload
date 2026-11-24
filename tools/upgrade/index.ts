@@ -42,6 +42,7 @@ export type UpgradePlan = {
   kind: 'migrate' | 'update'
   notices: string[]
   overridesRemoved: string[]
+  overridePathsRemoved?: string[][]
   project: ProjectInfo
   targetVersion: string
   toolchain?: ResolvedVersions
@@ -84,7 +85,7 @@ export function readProject({ projectDir }: { projectDir: string }): ProjectInfo
     )
   ) {
     throw new Error(
-      'Could not resolve Payload through Yarn Plug’n’Play. Run yarn install first, or use the node-modules linker before upgrading.',
+      'Yarn Plug’n’Play resolution is not supported by this upgrade command. Use the node-modules linker, or update dependencies manually.',
     )
   }
   const currentVersion = payload.currentVersion ?? versionFromRange({ spec: payload.spec })
@@ -168,7 +169,9 @@ export async function createUpgradePlan({
   fetchRegistry,
   project,
   targetVersion,
+  packageManager = 'npm',
 }: {
+  packageManager?: string
   corePackageNames: readonly string[]
   fetchRegistry: FetchRegistry
   project: ProjectInfo
@@ -185,6 +188,7 @@ export async function createUpgradePlan({
     kind: currentMajor === targetMajor ? 'update' : 'migrate',
     notices: [],
     overridesRemoved: [],
+    overridePathsRemoved: [],
     project,
     targetVersion,
   }
@@ -294,8 +298,19 @@ export async function createUpgradePlan({
     }
   }
   checkSelectedRelationships({ core, plan, selected })
-  inspectOverrides({ core, plan })
+  inspectOverrides({ core, packageManager, plan })
   return plan
+}
+
+/** Refuse to apply a preview after another process changes installed dependencies. */
+export function assertInstalledVersionsUnchanged({ project }: { project: ProjectInfo }): void {
+  for (const { currentVersion, name } of project.dependencies) {
+    if (readInstalledVersion({ name, projectDir: project.projectDir }) !== currentVersion) {
+      throw new Error(
+        `${name} changed after planning. Run the upgrade again to review a fresh plan.`,
+      )
+    }
+  }
 }
 
 /** Apply only the reviewed plan; retain unrelated dependencies and intentional overrides. */
@@ -309,10 +324,10 @@ export function applyUpgradePlan({ plan }: { plan: UpgradePlan }): Record<string
     dependencies[name] = to
     next[group] = dependencies
   }
-  const core = new Set(plan.overridesRemoved)
-  for (const { block, label, owner, property } of overrideBlocks({ data: next }).reverse()) {
+  const removed = new Set(plan.overridePathsRemoved?.map((path) => JSON.stringify(path)))
+  for (const { block, path, owner, property } of overrideBlocks({ data: next }).reverse()) {
     for (const key of Object.keys(block)) {
-      if (core.has(`${label}.${key}`)) {
+      if (removed.has(JSON.stringify([...path, key]))) {
         delete block[key]
       }
     }
@@ -363,11 +378,7 @@ export function createRegistryClient({ projectDir }: { projectDir: string }): Fe
             projectDir,
             version: taggedVersion,
           })
-          const versions = Array.isArray(published)
-            ? published
-            : typeof published === 'string'
-              ? [published]
-              : []
+          const versions = Array.isArray(published) ? published.flat() : [published]
           const manifests = new Map<string, Promise<RegistryVersion | undefined>>()
           let stableManifests: Promise<Map<string, RegistryVersion>> | undefined
           const doc: RegistryPackage = {
@@ -390,7 +401,10 @@ export function createRegistryClient({ projectDir }: { projectDir: string }): Fe
                       name,
                       projectDir,
                       version,
-                    }).then((value) => asRecord(value) as RegistryVersion),
+                    }).then(
+                      (value) =>
+                        asRecord(Array.isArray(value) ? value[0] : value) as RegistryVersion,
+                    ),
                   )
                 } else {
                   // npm fetches a complete packument for each view. Read all stable manifests
@@ -453,35 +467,6 @@ export function readInstalledVersion({
     } catch {
       // npm and Yarn may hoist a workspace's dependencies to an ancestor.
     }
-    const loader = join(path, '.pnp.cjs')
-    if (existsSync(loader)) {
-      const script = `
-        const fs = require('node:fs');
-        const path = require('node:path');
-        const requireProject = require('node:module').createRequire(path.join(process.argv[1], 'package.json'));
-        const name = process.argv[2];
-        let entry;
-        try { entry = requireProject.resolve(name + '/package.json'); }
-        catch { entry = requireProject.resolve(name); }
-        let directory = path.dirname(entry);
-        while (true) {
-          try {
-            const pkg = JSON.parse(fs.readFileSync(path.join(directory, 'package.json'), 'utf8'));
-            if (pkg.name === name) { process.stdout.write(pkg.version); break; }
-          } catch {}
-          const parent = path.dirname(directory);
-          if (parent === directory) break;
-          directory = parent;
-        }
-      `
-      const result = spawnSync(
-        process.execPath,
-        ['--require', loader, '-e', script, resolve(projectDir), name],
-        { encoding: 'utf8' },
-      )
-      const version = result.stdout?.trim()
-      return result.status === 0 && semver.valid(version) ? version : undefined
-    }
   }
   return undefined
 }
@@ -532,10 +517,7 @@ function addChange({
   plan: UpgradePlan
   version: string
 }): void {
-  if (
-    dependency.spec !== version ||
-    (dependency.currentVersion && dependency.currentVersion !== version)
-  ) {
+  if (dependency.spec !== version || dependency.currentVersion !== version) {
     plan.changes.push({
       from: dependency.spec,
       group: dependency.group,
@@ -732,16 +714,18 @@ function checkSelectedRelationships({
   selected: Map<string, { manifest: RegistryVersion; version: string }>
 }): void {
   for (const [name, { manifest }] of selected) {
-    if (core.has(name)) {
+    if (core.has(name) && plan.kind === 'migrate') {
       continue
     }
     for (const [peer, range] of Object.entries({
       ...manifest.dependencies,
       ...manifest.peerDependencies,
     })) {
-      const directDependency = peer.startsWith('@payloadcms/')
-        ? plan.project.dependencies.find((dependency) => dependency.name === peer)
-        : undefined
+      const directDependency =
+        peer.startsWith('@payloadcms/') ||
+        (core.has(name) && ['next', 'react', 'react-dom'].includes(peer))
+          ? plan.project.dependencies.find((dependency) => dependency.name === peer)
+          : undefined
       const peerVersion =
         selected.get(peer)?.version ??
         directDependency?.currentVersion ??
@@ -764,7 +748,15 @@ function checkSelectedRelationships({
   }
 }
 
-function inspectOverrides({ core, plan }: { core: Set<string>; plan: UpgradePlan }): void {
+function inspectOverrides({
+  core,
+  packageManager,
+  plan,
+}: {
+  core: Set<string>
+  packageManager: string
+  plan: UpgradePlan
+}): void {
   const workspace = ancestorDirectories({ projectDir: plan.project.projectDir }).find((directory) =>
     existsSync(join(directory, 'pnpm-workspace.yaml')),
   )
@@ -796,7 +788,7 @@ function inspectOverrides({ core, plan }: { core: Set<string>; plan: UpgradePlan
       )
     }
   }
-  for (const { block, label } of overrideBlocks({ data: plan.project.data })) {
+  for (const { block, label, path } of overrideBlocks({ data: plan.project.data })) {
     for (const [selector, value] of Object.entries(block)) {
       const name = selectorPackageName({ selector })
       if (core.has(name)) {
@@ -810,9 +802,11 @@ function inspectOverrides({ core, plan }: { core: Set<string>; plan: UpgradePlan
         if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
           if ('.' in value) {
             plan.overridesRemoved.push(`${label}.${selector}..`)
+            plan.overridePathsRemoved?.push([...path, selector, '.'])
           }
         } else {
           plan.overridesRemoved.push(`${label}.${selector}`)
+          plan.overridePathsRemoved?.push([...path, selector])
         }
       } else {
         const dependency = plan.project.dependencies.find((entry) => entry.name === name)
@@ -836,10 +830,12 @@ function inspectOverrides({ core, plan }: { core: Set<string>; plan: UpgradePlan
           change &&
           pin !== undefined &&
           pin !== `$${name}` &&
-          (!semver.validRange(pin) || !semver.satisfies(change.to, pin))
+          (!semver.validRange(pin) ||
+            !semver.satisfies(change.to, pin) ||
+            (packageManager === 'npm' && label === 'overrides' && pin !== change.to))
         ) {
           plan.blockers.push(
-            `${label}.${selector} pins an independent package. Resolve the override before upgrading ${name} to ${change.to}.`,
+            `${label}.${selector} conflicts with the planned dependency spec ${change.to}. Update the override manually${packageManager === 'npm' && label === 'overrides' ? `, or use $${name} to follow the direct dependency` : ''}.`,
           )
         }
       }
@@ -917,21 +913,30 @@ function overrideTargetSelector({ selector }: { selector: string }): string {
 function overrideBlocks({ data }: { data: Record<string, unknown> }): {
   block: Record<string, unknown>
   label: string
+  path: string[]
   owner: Record<string, unknown>
   property: string
 }[] {
   const pnpm = asRecord(data.pnpm)
   const roots = [
-    { block: asRecord(data.overrides), label: 'overrides', owner: data, property: 'overrides' },
+    {
+      block: asRecord(data.overrides),
+      label: 'overrides',
+      path: ['overrides'],
+      owner: data,
+      property: 'overrides',
+    },
     {
       block: asRecord(data.resolutions),
       label: 'resolutions',
+      path: ['resolutions'],
       owner: data,
       property: 'resolutions',
     },
     {
       block: asRecord(pnpm.overrides),
       label: 'pnpm.overrides',
+      path: ['pnpm', 'overrides'],
       owner: pnpm,
       property: 'overrides',
     },
@@ -946,6 +951,7 @@ function overrideBlocks({ data }: { data: Record<string, unknown> }): {
           entry: {
             block: asRecord(value),
             label: `${entry.label}.${property}`,
+            path: [...entry.path, property],
             owner: entry.block,
             property,
           },

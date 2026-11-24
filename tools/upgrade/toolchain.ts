@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import semver from 'semver'
 
 import type { FetchRegistry, UpgradePlan } from './index.js'
@@ -71,11 +72,19 @@ export async function resolveVersions({
   }
 }
 
-export function assertMigrationNodeVersion({ resolved }: { resolved: ResolvedVersions }): void {
+export function assertMigrationNodeVersion({
+  data,
+  resolved,
+}: {
+  data: Record<string, unknown>
+  resolved: ResolvedVersions
+}): void {
   const running = process.versions.node
-  if (!semver.satisfies(running, resolved.enginesNode)) {
+  const projectNode = asRecord(data.engines).node
+  const requirement = typeof projectNode === 'string' ? projectNode : resolved.enginesNode
+  if (!semver.satisfies(running, resolved.enginesNode) || !semver.satisfies(running, requirement)) {
     throw new Error(
-      `Node v${running} detected.\nPayload v${semver.major(resolved.payloadVersion)} requires Node ${resolved.enginesNode}.\n\nSwitch to a supported Node version, then rerun this command.\nNo files have been changed.`,
+      `Node v${running} detected.\nPayload v${semver.major(resolved.payloadVersion)} requires Node ${resolved.enginesNode}.${requirement !== resolved.enginesNode ? `\nThis project requires Node ${requirement}.` : ''}\n\nSwitch to a supported Node version, then rerun this command.\nNo files have been changed.`,
     )
   }
 }
@@ -125,6 +134,34 @@ export function writeFloors({
   return written
 }
 
+/** Bind the codemod handoff to the manifest and installed versions approved in CPA. */
+export function getUpgradePlanHash({ plan }: { plan: UpgradePlan }): string {
+  const data = applyUpgradePlan({ plan })
+  if (plan.toolchain) {
+    writeFloors({ data, resolved: plan.toolchain })
+  }
+  return createHash('sha256')
+    .update(
+      JSON.stringify(
+        { data, installed: plan.project.dependencies, target: plan.targetVersion },
+        (_key, value: unknown) =>
+          value && typeof value === 'object' && !Array.isArray(value)
+            ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)))
+            : value,
+      ),
+    )
+    .digest('hex')
+}
+
+export function assertApprovedUpgradePlan({ plan }: { plan: UpgradePlan }): void {
+  const expected = process.env.PAYLOAD_UPGRADE_PLAN_HASH
+  if (expected && getUpgradePlanHash({ plan }) !== expected) {
+    throw new Error(
+      'The upgrade plan changed after approval. Rerun create-payload-app to review a fresh preview.',
+    )
+  }
+}
+
 /** Preview the same migration floors both CLIs apply after confirmation. */
 export function formatMigrationPreview({
   plan,
@@ -135,6 +172,7 @@ export function formatMigrationPreview({
 }): string {
   const data = applyUpgradePlan({ plan })
   const floors = writeFloors({ data, resolved })
+  assertMigrationNodeVersion({ data, resolved })
   const changes = floors.map((name) => {
     const group =
       name === 'engines.node'

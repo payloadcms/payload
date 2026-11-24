@@ -15,8 +15,8 @@ import {
 } from '../upgrade-shared/index.js'
 import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
 import {
-  assertMigrationNodeVersion,
   formatMigrationPreview,
+  getUpgradePlanHash,
   resolveVersions,
 } from '../upgrade-shared/toolchain.js'
 import { getPackageManager } from './get-package-manager.js'
@@ -99,9 +99,11 @@ export async function upgradeProject({
   if (p.isCancel(target) || typeof target !== 'string' || target === 'cancel') {
     return
   }
+  const packageManager = await getPackageManager({ cliArgs, projectDir })
   const plan = await createUpgradePlan({
     corePackageNames: payloadPackageNames,
     fetchRegistry,
+    packageManager,
     project,
     targetVersion: target,
   })
@@ -114,7 +116,6 @@ export async function upgradeProject({
       ),
       tag: plan.targetVersion,
     })
-    assertMigrationNodeVersion({ resolved: plan.toolchain })
     migrationPreview = formatMigrationPreview({ plan, resolved: plan.toolchain })
   }
   p.note(
@@ -170,7 +171,6 @@ export async function upgradeProject({
         `No published migration tooling is available for Payload v${semver.major(target)}.`,
       )
     }
-    const packageManager = await getPackageManager({ cliArgs, projectDir })
     const { exitCode } = await execa(
       'npx',
       [
@@ -184,7 +184,12 @@ export async function upgradeProject({
         '--package-manager',
         packageManager,
       ],
-      { cwd: projectDir, reject: false, stdio: 'inherit' },
+      {
+        cwd: projectDir,
+        env: { ...process.env, PAYLOAD_UPGRADE_PLAN_HASH: getUpgradePlanHash({ plan }) },
+        reject: false,
+        stdio: 'inherit',
+      },
     )
     if (exitCode !== 0) {
       throw new Error(

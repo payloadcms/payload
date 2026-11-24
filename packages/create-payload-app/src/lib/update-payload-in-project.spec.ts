@@ -63,6 +63,11 @@ describe('Payload project updates', () => {
     fse.writeJsonSync(path.join(projectDir, 'package.json'), {
       dependencies: { payload: '3.99.0', '@payloadcms/ui': '3.99.0' },
     })
+    for (const name of ['payload', '@payloadcms/ui']) {
+      fse.outputJsonSync(path.join(projectDir, 'node_modules', name, 'package.json'), {
+        version: '3.99.0',
+      })
+    }
     fse.outputFileSync(
       path.join(projectDir, 'payload.config.ts'),
       "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: process.env.ADMIN_ROUTE } })",
