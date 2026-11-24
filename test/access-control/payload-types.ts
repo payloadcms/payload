@@ -680,6 +680,7 @@ export interface PostReference {
   id: string;
   post?: (string | Post)[] | null;
   singlePost?: (string | null) | Post;
+  singlePostTitle?: string | null;
   joinedPosts?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
@@ -2550,6 +2551,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostReferencesSelect<T extends boolean = true> {
   post?: T;
   singlePost?: T;
+  singlePostTitle?: T;
   joinedPosts?: T;
   joinedPostsMany?: T;
   polymorphicJoinedPosts?: T;
@@ -3387,6 +3389,8 @@ export interface InheritedReadVersionsVirtualGlobal {
  */
 export interface Setting {
   id: string;
+  post?: (string | null) | Post;
+  postTitle?: string | null;
   test?: boolean | null;
   secret?: string | null;
   createdBy?:
@@ -3591,6 +3595,8 @@ export interface InheritedReadVersionsVirtualGlobalSelect<T extends boolean = tr
  * via the `definition` "settings_select".
  */
 export interface SettingsSelect<T extends boolean = true> {
+  post?: T;
+  postTitle?: T;
   test?: T;
   secret?: T;
   createdBy?: T;

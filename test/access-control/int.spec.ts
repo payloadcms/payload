@@ -11,9 +11,11 @@ import { AuthenticationError, createPayloadRequest, docAccessOperation, Forbidde
 import { getEntityPermissions, sanitizePermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
+import type { DatabaseAdapterType } from '../dbAdapters.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import {
   requestHeaders,
   setInheritedReadVersionsAllowedID,
@@ -51,6 +53,12 @@ import {
   userRestrictedCollectionSlug,
   usersSlug,
 } from './shared.js'
+
+const shouldTestDraftJoinQueries = (adapterType: DatabaseAdapterType): boolean =>
+  !mongooseList.includes(adapterType) &&
+  adapterType !== 'content-api' &&
+  !adapterType.includes('uuid')
+
 test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }, () => {
   let post1: Post
   let restricted: FullyRestricted
@@ -883,6 +891,203 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         expect(result.docs).toHaveLength(0)
       })
 
+      test('should constrain draft queries through many relationships', async ({ payload }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+        const publicPost = await payload.create({
+          collection: slug,
+          data: { title: 'public' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const reference = await payload.create({
+          collection: postReferencesSlug,
+          data: { post: [archivedPost.id, publicPost.id] },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        createdPostReferenceIDs.push(reference.id)
+
+        for (const title of ['archived', 'missing']) {
+          const result = await payload.find({
+            collection: postReferencesSlug,
+            draft: true,
+            overrideAccess: false,
+            where: { 'post.title': { equals: title } },
+          })
+
+          expect(result.docs).toHaveLength(0)
+        }
+
+        const readableResult = await payload.find({
+          collection: postReferencesSlug,
+          draft: true,
+          overrideAccess: false,
+          where: { 'post.title': { equals: 'public' } },
+        })
+
+        expect(readableResult.docs.map(({ id }) => id)).toEqual([reference.id])
+      })
+
+      test('should constrain draft queries through single relationships', async ({ payload }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+        const publicPost = await payload.create({
+          collection: slug,
+          data: { title: 'public' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const archivedReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: archivedPost.id },
+          draft: true,
+          overrideAccess: true,
+        })
+        const publicReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: publicPost.id },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        createdPostReferenceIDs.push(archivedReference.id, publicReference.id)
+
+        for (const title of ['archived', 'missing']) {
+          const result = await payload.find({
+            collection: postReferencesSlug,
+            draft: true,
+            overrideAccess: false,
+            where: { 'singlePost.title': { equals: title } },
+          })
+
+          expect(result.docs).toHaveLength(0)
+        }
+
+        const readableResult = await payload.find({
+          collection: postReferencesSlug,
+          draft: true,
+          overrideAccess: false,
+          where: { 'singlePost.title': { equals: 'public' } },
+        })
+
+        expect(readableResult.docs.map(({ id }) => id)).toEqual([publicReference.id])
+      })
+
+      // Draft joins currently resolve parent IDs only on numeric ID Drizzle adapters.
+      test.options(
+        'should constrain draft queries through joined relationships with nested conditions',
+        { db: shouldTestDraftJoinQueries },
+        async ({ payload }) => {
+          const reference = await payload.create({
+            collection: postReferencesSlug,
+            data: {},
+            draft: true,
+            overrideAccess: true,
+          })
+
+          createdPostReferenceIDs.push(reference.id)
+
+          const archivedPost = await payload.create({
+            collection: slug,
+            data: { reference: reference.id, title: 'archived' },
+            overrideAccess: true,
+          })
+          const publicPost = await payload.create({
+            collection: slug,
+            data: { reference: reference.id, title: 'public' },
+            overrideAccess: true,
+          })
+
+          createdPostIDs.push(archivedPost.id, publicPost.id)
+
+          for (const title of ['archived', 'missing']) {
+            const result = await payload.find({
+              collection: postReferencesSlug,
+              draft: true,
+              overrideAccess: false,
+              where: {
+                and: [
+                  { id: { equals: reference.id } },
+                  {
+                    or: [
+                      { 'joinedPosts.title': { equals: title } },
+                      { 'joinedPosts.title': { equals: 'other' } },
+                    ],
+                  },
+                ],
+              },
+            })
+
+            expect(result.docs).toHaveLength(0)
+          }
+
+          const readableResult = await payload.find({
+            collection: postReferencesSlug,
+            draft: true,
+            overrideAccess: false,
+            where: {
+              and: [
+                { id: { equals: reference.id } },
+                {
+                  or: [
+                    { 'joinedPosts.title': { equals: 'public' } },
+                    { 'joinedPosts.title': { equals: 'other' } },
+                  ],
+                },
+              ],
+            },
+          })
+
+          expect(readableResult.docs.map(({ id }) => id)).toEqual([reference.id])
+        },
+      )
+
+      test('should constrain draft relationship queries through REST', async ({
+        payload,
+        restClient,
+      }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id)
+
+        const reference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: archivedPost.id },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        createdPostReferenceIDs.push(reference.id)
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            draft: true,
+            where: { 'singlePost.title': { equals: 'archived' } },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.docs).toHaveLength(0)
+      })
+
       test('should apply related collection access constraints when querying another related field', async ({
         payload,
         restClient,
@@ -1310,6 +1515,263 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
 
         expect(result.docs).toHaveLength(1)
         expect(result.docs[0]!.id).toBe(childB.id)
+      })
+
+      test('should constrain bulk relationship updates through a virtual field', async ({
+        payload,
+      }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+        const publicPost = await payload.create({
+          collection: slug,
+          data: { title: 'public' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const archivedReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: archivedPost.id },
+          overrideAccess: true,
+        })
+        const publicReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: publicPost.id },
+          overrideAccess: true,
+        })
+
+        createdPostReferenceIDs.push(archivedReference.id, publicReference.id)
+
+        for (const isDraft of [false, true]) {
+          const restrictedResult = await payload.update({
+            collection: postReferencesSlug,
+            data: { singlePost: publicPost.id },
+            draft: isDraft,
+            overrideAccess: false,
+            where: { singlePostTitle: { equals: 'archived' } },
+          })
+
+          expect(restrictedResult.docs).toHaveLength(0)
+
+          const readableResult = await payload.update({
+            collection: postReferencesSlug,
+            data: { singlePost: publicPost.id },
+            draft: isDraft,
+            overrideAccess: false,
+            where: { singlePostTitle: { equals: 'public' } },
+          })
+
+          expect(readableResult.docs.map(({ id }) => id)).toEqual([publicReference.id])
+        }
+
+        const storedReference = await payload.findByID({
+          collection: postReferencesSlug,
+          id: archivedReference.id,
+          overrideAccess: true,
+        })
+
+        expect(storedReference.singlePost).toMatchObject({ id: archivedPost.id })
+      })
+
+      test('should constrain bulk relationship deletes through a virtual field', async ({
+        payload,
+      }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+        const publicPost = await payload.create({
+          collection: slug,
+          data: { title: 'public' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const archivedReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: archivedPost.id },
+          overrideAccess: true,
+        })
+        const publicReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: publicPost.id },
+          overrideAccess: true,
+        })
+
+        createdPostReferenceIDs.push(archivedReference.id)
+
+        const restrictedResult = await payload.delete({
+          collection: postReferencesSlug,
+          overrideAccess: false,
+          where: { singlePostTitle: { equals: 'archived' } },
+        })
+
+        expect(restrictedResult.docs).toHaveLength(0)
+
+        const storedReference = await payload.findByID({
+          collection: postReferencesSlug,
+          id: archivedReference.id,
+          overrideAccess: true,
+        })
+
+        expect(storedReference.id).toBe(archivedReference.id)
+
+        const readableResult = await payload.delete({
+          collection: postReferencesSlug,
+          overrideAccess: false,
+          where: { singlePostTitle: { equals: 'public' } },
+        })
+
+        expect(readableResult.docs.map(({ id }) => id)).toEqual([publicReference.id])
+      })
+
+      test('should constrain version queries through a virtual relationship field', async ({
+        payload,
+      }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+        const publicPost = await payload.create({
+          collection: slug,
+          data: { title: 'public' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const archivedReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: archivedPost.id },
+          overrideAccess: true,
+        })
+        const publicReference = await payload.create({
+          collection: postReferencesSlug,
+          data: { singlePost: publicPost.id },
+          overrideAccess: true,
+        })
+
+        createdPostReferenceIDs.push(archivedReference.id, publicReference.id)
+
+        const restrictedResult = await payload.findVersions({
+          collection: postReferencesSlug,
+          overrideAccess: false,
+          where: { 'version.singlePostTitle': { equals: 'archived' } },
+        })
+
+        expect(restrictedResult.docs).toHaveLength(0)
+
+        const readableResult = await payload.findVersions({
+          collection: postReferencesSlug,
+          overrideAccess: false,
+          where: { 'version.singlePostTitle': { equals: 'public' } },
+        })
+
+        expect(readableResult.docs.map(({ parent }) => parent)).toContain(publicReference.id)
+      })
+
+      test('should constrain global version queries through a virtual relationship field', async ({
+        payload,
+      }) => {
+        const previousSettings = await payload.findGlobal({
+          slug: 'settings',
+          depth: 0,
+          overrideAccess: true,
+        })
+        const previousVersions = await payload.findGlobalVersions({
+          slug: 'settings',
+          overrideAccess: true,
+          pagination: false,
+        })
+        const previousVersionIDs = new Set(previousVersions.docs.map(({ id }) => id))
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: { title: 'archived' },
+          overrideAccess: true,
+        })
+        const publicPost = await payload.create({
+          collection: slug,
+          data: { title: 'public' },
+          overrideAccess: true,
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        try {
+          await payload.updateGlobal({
+            slug: 'settings',
+            data: { post: archivedPost.id },
+            overrideAccess: true,
+          })
+
+          const restrictedResult = await payload.findGlobalVersions({
+            slug: 'settings',
+            overrideAccess: false,
+            where: { 'version.postTitle': { equals: 'archived' } },
+          })
+
+          expect(restrictedResult.docs).toHaveLength(0)
+
+          await payload.updateGlobal({
+            slug: 'settings',
+            data: { post: publicPost.id },
+            overrideAccess: true,
+          })
+
+          const readableResult = await payload.findGlobalVersions({
+            slug: 'settings',
+            overrideAccess: false,
+            where: { 'version.postTitle': { equals: 'public' } },
+          })
+
+          expect(readableResult.docs).toHaveLength(1)
+        } finally {
+          await payload.updateGlobal({
+            slug: 'settings',
+            data: { post: previousSettings.post ?? null },
+            overrideAccess: true,
+          })
+
+          const currentVersions = await payload.findGlobalVersions({
+            slug: 'settings',
+            overrideAccess: true,
+            pagination: false,
+          })
+          const createdVersionIDs = currentVersions.docs
+            .map(({ id }) => id)
+            .filter((id) => !previousVersionIDs.has(id))
+
+          if (createdVersionIDs.length > 0) {
+            await payload.db.deleteVersions({
+              globalSlug: 'settings',
+              where: { id: { in: createdVersionIDs } },
+            })
+          }
+        }
+
+        const restoredSettings = await payload.findGlobal({
+          slug: 'settings',
+          depth: 0,
+          overrideAccess: true,
+        })
+        const restoredVersions = await payload.findGlobalVersions({
+          slug: 'settings',
+          overrideAccess: true,
+          pagination: false,
+        })
+
+        expect(restoredSettings.post ?? null).toBe(previousSettings.post ?? null)
+        expect(restoredVersions.docs.map(({ id }) => id)).toEqual(
+          previousVersions.docs.map(({ id }) => id),
+        )
       })
     })
 

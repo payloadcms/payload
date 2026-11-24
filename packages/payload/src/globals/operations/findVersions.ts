@@ -64,14 +64,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     ? await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
     : true
 
-  await validateQueryPaths({
-    globalConfig,
-    overrideAccess: overrideAccess!,
-    req,
-    versionFields,
-    where: where!,
-  })
-
   await validateSortQuery({
     globalConfig,
     overrideAccess: overrideAccess!,
@@ -83,6 +75,14 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   const fullWhere = combineQueries(where!, accessResults)
 
   sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
+  await validateQueryPaths({
+    globalConfig,
+    overrideAccess: overrideAccess!,
+    req,
+    versionFields,
+    where: where!,
+  })
 
   const select = sanitizeSelect({
     fields: buildVersionGlobalFields(payload.config, globalConfig, true),

@@ -134,13 +134,6 @@ export const deleteOperation = async <
       )
     }
 
-    await validateQueryPaths({
-      collectionConfig,
-      overrideAccess: overrideAccess!,
-      req,
-      where,
-    })
-
     let fullWhere = combineQueries(where, accessResult!)
 
     // Exclude trashed documents when trash: false
@@ -151,6 +144,13 @@ export const deleteOperation = async <
     })
 
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    await validateQueryPaths({
+      collectionConfig,
+      overrideAccess: overrideAccess!,
+      req,
+      where,
+    })
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
