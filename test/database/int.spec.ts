@@ -3495,6 +3495,78 @@ describe('database', () => {
       })
     })
 
+    it('should save drafts and publish an array renamed for the numbers table', async () => {
+      // The main `numbers` array table is renamed, but its versions table keeps its name.
+      const created = await payload.create({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        data: {
+          _status: 'published',
+          numbers: [{ drawPosition: 1 }],
+          scores: [10],
+        },
+      })
+
+      await payload.update({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        draft: true,
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 2 }],
+          scores: [20],
+        },
+      })
+
+      const published = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      const draft = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      expect(published.numbers?.map((row) => row.drawPosition)).toStrictEqual([1])
+      expect(published.scores).toStrictEqual([10])
+      expect(draft.numbers?.map((row) => row.drawPosition)).toStrictEqual([2])
+      expect(draft.scores).toStrictEqual([20])
+
+      await payload.update({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+        data: {
+          _status: 'published',
+          numbers: [{ drawPosition: 2 }],
+          scores: [20],
+        },
+      })
+
+      const republished = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      const { docs: versions } = await payload.findVersions({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        sort: 'createdAt',
+        where: { parent: { equals: created.id } },
+      })
+
+      expect(republished.numbers?.map((row) => row.drawPosition)).toStrictEqual([2])
+      expect(republished.scores).toStrictEqual([20])
+      expect(
+        versions.map((version) => version.version.numbers?.map((row) => row.drawPosition)),
+      ).toStrictEqual([[1], [2], [2]])
+    })
+
     it('should read an array whose only localized field is a hasMany number', async () => {
       const created = await payload.create({
         collection: 'reserved-field-name-clashes',

@@ -31,6 +31,8 @@ export const buildRawSchema = ({ adapter, setColumnID }: Args) => {
   // Renaming a table also renames its nested tables, which can clash in turn, so repeat until a
   // build finds no new clashes.
   for (let pass = 1; ; pass++) {
+    adapter.rawTableKinds = new Map()
+    adapter.sharedTableNames = new Set()
     adapter.subTableNameClashes = new Set()
 
     buildTables({ adapter, setColumnID })

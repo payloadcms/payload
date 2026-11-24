@@ -1167,7 +1167,9 @@ export const getConfig: () => Partial<Config> = () => ({
           hasMany: true,
         },
       ],
-      versions: false,
+      versions: {
+        drafts: true,
+      },
     },
     {
       slug: 'virtual-linked-tenants',

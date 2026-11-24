@@ -7,6 +7,7 @@ import type { DrizzleAdapter } from '../types.js'
 import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
 import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
 import { warnRenamedSubTables } from '../utilities/warnRenamedSubTables.js'
+import { warnSharedTableNames } from '../utilities/warnSharedTableNames.js'
 import { buildRawSchema } from './buildRawSchema.js'
 
 const headlineBlock: Block = {
@@ -586,7 +587,7 @@ describe('buildRawSchema', () => {
       expect(adapter.rawTables.p_items_locales_field.columns.label).toBeDefined()
     })
 
-    it('should rename an array table that takes the dbName of a collection built after it', async () => {
+    it('should not rename an array table that takes the dbName of a collection built after it', async () => {
       const config = await sanitizeConfig({
         collections: [
           {
@@ -608,9 +609,10 @@ describe('buildRawSchema', () => {
 
       buildRawSchema({ adapter, setColumnID })
 
-      expect(adapter.tableNameMap.get('p_items')).toBe('p_items_field')
+      expect(adapter.tableNameMap.get('p_items')).toBe('p_items')
       expect(adapter.rawTables.p_items.columns.title).toBeDefined()
-      expect(adapter.rawTables.p_items_field.columns.label).toBeDefined()
+      expect(adapter.subTableNameReplacements?.size).toBe(0)
+      expect(adapter.sharedTableNames).toEqual(new Set(['p_items']))
     })
 
     it('should keep the replacement name within the identifier length limit', async () => {
@@ -781,6 +783,160 @@ describe('buildRawSchema', () => {
       const warn = vi.fn()
 
       warnRenamedSubTables({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('tables that share a name without a companion table', () => {
+    const arrayField = (name: string, fieldName = 'value') => ({
+      name,
+      type: 'array' as const,
+      fields: [{ name: fieldName, type: 'text' as const }],
+    })
+
+    // Each config builds the same schema as before: the later table replaces the earlier one.
+    // Renaming either table would change the schema of projects that run today.
+    it.each([
+      {
+        name: 'an array and a named tab array that convert to the same name',
+        config: {
+          globals: [
+            {
+              slug: 'site-settings',
+              fields: [
+                arrayField('socialLinks', 'url'),
+                {
+                  type: 'tabs',
+                  tabs: [{ name: 'social', fields: [arrayField('links', 'url')] }],
+                },
+              ],
+              versions: false,
+            },
+          ],
+        },
+        tableName: 'site_settings_social_links',
+      },
+      {
+        name: 'two arrays that convert to the same name',
+        config: {
+          collections: [
+            {
+              slug: 'p',
+              fields: [arrayField('fooBar', 'a'), arrayField('foo_bar', 'b')],
+              versions: false,
+            },
+          ],
+        },
+        tableName: 'p_foo_bar',
+      },
+      {
+        name: 'an array and a hasMany select that convert to the same name',
+        config: {
+          collections: [
+            {
+              slug: 'p',
+              fields: [
+                { name: 'fooBar', type: 'select', hasMany: true, options: ['a'] },
+                arrayField('foo_bar'),
+              ],
+              versions: false,
+            },
+          ],
+        },
+        tableName: 'p_foo_bar',
+      },
+      {
+        name: 'an array and a collection with the same table name',
+        config: {
+          collections: [
+            { slug: 'p', fields: [arrayField('items')], versions: false },
+            { slug: 'p-items', fields: [{ name: 'title', type: 'text' }], versions: false },
+          ],
+        },
+        tableName: 'p_items',
+      },
+      {
+        name: 'a relationships table and a collection with the same table name',
+        config: {
+          collections: [
+            {
+              slug: 'posts',
+              fields: [
+                { name: 'related', type: 'relationship', hasMany: true, relationTo: 'posts' },
+              ],
+              versions: false,
+            },
+            { slug: 'posts-rels', fields: [{ name: 'title', type: 'text' }], versions: false },
+          ],
+        },
+        tableName: 'posts_rels',
+      },
+      {
+        name: 'two collections with the same dbName',
+        config: {
+          collections: [
+            { slug: 'a', dbName: 'shared', fields: [{ name: 'x', type: 'text' }], versions: false },
+            { slug: 'b', dbName: 'shared', fields: [{ name: 'y', type: 'text' }], versions: false },
+          ],
+        },
+        tableName: 'shared',
+      },
+    ])('should keep the schema of $name', async ({ config, tableName }) => {
+      const adapter = createAdapter(await sanitizeConfig(config as Config))
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(adapter.rawTables[tableName]).toBeDefined()
+      expect(adapter.subTableNameReplacements?.size).toBe(0)
+      expect(adapter.sharedTableNames?.has(tableName)).toBe(true)
+    })
+
+    it('should keep the tables of an array and a collection with the same table name', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          { slug: 'p', fields: [arrayField('items')], versions: false },
+          { slug: 'p-items', fields: [{ name: 'title', type: 'text' }], versions: false },
+        ],
+      } as Config)
+      const adapter = createAdapter(config)
+
+      buildRawSchema({ adapter, setColumnID })
+
+      expect(adapter.tableNameMap.get('p')).toBe('p')
+      expect(adapter.tableNameMap.get('p_items')).toBe('p_items')
+      expect(adapter.rawTables.p_items.columns.title).toBeDefined()
+    })
+
+    it('should warn about shared table names', async () => {
+      const config = await sanitizeConfig({
+        collections: [
+          {
+            slug: 'p',
+            fields: [arrayField('fooBar', 'a'), arrayField('foo_bar', 'b')],
+            versions: false,
+          },
+        ],
+      } as Config)
+      const adapter = createAdapter(config)
+      const warn = vi.fn()
+
+      buildRawSchema({ adapter, setColumnID })
+      warnSharedTableNames({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
+
+      expect(warn).toHaveBeenCalledTimes(1)
+      expect(warn.mock.calls[0][0]).toContain('p_foo_bar')
+    })
+
+    it('should not warn when no table name is shared', async () => {
+      const config = await sanitizeConfig({
+        collections: [{ slug: 'p', fields: [arrayField('items')], versions: false }],
+      } as Config)
+      const adapter = createAdapter(config)
+      const warn = vi.fn()
+
+      buildRawSchema({ adapter, setColumnID })
+      warnSharedTableNames({ adapter: { ...adapter, payload: { logger: { warn } } } as any })
 
       expect(warn).not.toHaveBeenCalled()
     })
