@@ -139,31 +139,61 @@ test.describe('Standalone modals', () => {
   test('should isolate and observe the host page around a slotted shadow widget', async ({
     page,
   }) => {
-    await page.goto(`${serverURL}/modals?shadow=true`)
-    await page.getByRole('button', { name: 'Open confirmation', exact: true }).waitFor()
-    await page.getByTestId('shadow-host').evaluate((host) => {
-      const wrapper = document.createElement('div')
+    for (const slotAssignment of ['named', 'manual'] as const) {
+      await page.goto(`${serverURL}/modals?shadow=true`)
+      await page.getByRole('button', { name: 'Open confirmation', exact: true }).waitFor()
+      await page.getByTestId('shadow-host').evaluate((host, slotAssignment) => {
+        const wrapper = document.createElement('div')
+        const background = document.createElement('button')
 
-      wrapper.dataset.testid = 'slot-host'
-      wrapper.attachShadow({ mode: 'open' }).innerHTML =
-        '<slot></slot><button data-testid="slot-background">Beside the slot</button>'
-      host.before(wrapper)
-      wrapper.append(host)
-    })
-    await page.getByRole('button', { name: 'Open confirmation', exact: true }).click()
-    await expect(page.getByTestId('slot-background')).toHaveAttribute('inert', '')
-    await page.getByTestId('slot-host').evaluate((host) => {
-      const sibling = document.createElement('button')
+        wrapper.dataset.testid = 'slot-host'
+        background.dataset.testid = 'slotted-background'
+        background.textContent = 'Slotted background'
+        background.slot = 'background'
+        host.slot = 'widget'
 
-      sibling.dataset.testid = 'slot-new-background'
-      sibling.textContent = 'Added beside the slot'
-      host.shadowRoot!.append(sibling)
-    })
-    await expect(page.getByTestId('slot-new-background')).toHaveAttribute('inert', '')
-    await page.keyboard.press('Escape')
-    await expect(page.getByTestId('slot-background')).not.toHaveAttribute('inert')
-    await expect(page.getByTestId('slot-background')).not.toHaveAttribute('aria-hidden')
-    await expect(page.getByTestId('slot-new-background')).not.toHaveAttribute('inert')
+        const shadow = wrapper.attachShadow({ mode: 'open', slotAssignment })
+
+        shadow.innerHTML =
+          '<slot name="widget"></slot><slot name="background"></slot><button data-testid="slot-background">Beside the slot</button>'
+        host.before(wrapper)
+        wrapper.append(host, background)
+
+        if (slotAssignment === 'manual') {
+          shadow.querySelector<HTMLSlotElement>('slot[name="widget"]')!.assign(host)
+          shadow.querySelector<HTMLSlotElement>('slot[name="background"]')!.assign(background)
+        }
+      }, slotAssignment)
+      await page.getByRole('button', { name: 'Open confirmation', exact: true }).click()
+      await expect(page.getByTestId('slot-background')).toHaveAttribute('inert', '')
+      await page.getByTestId('slot-host').evaluate((host, slotAssignment) => {
+        const widget = host.querySelector<HTMLElement>('[data-testid="shadow-host"]')!
+        const background = host.querySelector<HTMLElement>('[data-testid="slotted-background"]')!
+
+        if (slotAssignment === 'manual') {
+          host
+            .shadowRoot!.querySelector<HTMLSlotElement>('slot[name="widget"]')!
+            .assign(widget, background)
+        } else {
+          background.slot = 'widget'
+        }
+      }, slotAssignment)
+      await expect(page.getByTestId('slotted-background')).toHaveAttribute('inert', '')
+      await page.getByTestId('slot-host').evaluate((host) => {
+        const sibling = document.createElement('button')
+
+        sibling.dataset.testid = 'slot-new-background'
+        sibling.textContent = 'Added beside the slot'
+        host.shadowRoot!.append(sibling)
+      })
+      await expect(page.getByTestId('slot-new-background')).toHaveAttribute('inert', '')
+      await page.keyboard.press('Escape')
+      await expect(page.getByTestId('slot-background')).not.toHaveAttribute('inert')
+      await expect(page.getByTestId('slot-background')).not.toHaveAttribute('aria-hidden')
+      await expect(page.getByTestId('slot-new-background')).not.toHaveAttribute('inert')
+      await expect(page.getByTestId('slotted-background')).not.toHaveAttribute('inert')
+      await expect(page.getByTestId('slotted-background')).not.toHaveAttribute('aria-hidden')
+    }
   })
 
   test('should isolate shadow and host backgrounds and restore their prior attributes', async ({

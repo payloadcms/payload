@@ -24,8 +24,9 @@ export function ModalAccessibility() {
       }
 
       observedRoots.add(root)
+      root.addEventListener('slotchange', update)
       observer.observe(root instanceof Document ? root.body : root, {
-        attributeFilter: ['open'],
+        attributeFilter: ['open', 'slot'],
         attributes: true,
         childList: true,
         subtree: true,
@@ -86,6 +87,9 @@ export function ModalAccessibility() {
 
     return () => {
       observer.disconnect()
+      for (const root of observedRoots) {
+        root.removeEventListener('slotchange', update)
+      }
       restore()
     }
   }, [containerRef, modalState])

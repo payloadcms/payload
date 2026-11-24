@@ -14,7 +14,9 @@ export function getDeepestActiveElement({
 export function getRootNode({ element }: { element?: Element | null }): Document | ShadowRoot {
   const root = element?.getRootNode()
 
-  return root instanceof ShadowRoot ? root : (element?.ownerDocument ?? document)
+  return root?.nodeType === Node.DOCUMENT_FRAGMENT_NODE && 'host' in root
+    ? (root as ShadowRoot)
+    : (element?.ownerDocument ?? document)
 }
 
 /** Continue from the top of a shadow tree through its host. */
@@ -29,7 +31,9 @@ export function getComposedParent({ element }: { element: Element }): Element | 
 
   const root = element.getRootNode()
 
-  return root instanceof ShadowRoot ? root.host : null
+  return root.nodeType === Node.DOCUMENT_FRAGMENT_NODE && 'host' in root
+    ? (root as ShadowRoot).host
+    : null
 }
 
 export function isComposedDescendant({

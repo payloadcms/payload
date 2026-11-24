@@ -11,11 +11,42 @@ import {
 } from '../../../../../test/__helpers/components/PopupTestRoot/index.js'
 import { Modal } from '../../elements/Modal/index.js'
 import { Popup, PopupList } from '../../elements/Popup/index.js'
+import {
+  getComposedParent,
+  getRootNode,
+  isComposedDescendant,
+  isWithinInertTree,
+} from '../../utilities/shadowDom.js'
 import { ModalProvider as PayloadModalProvider } from '../Modal/index.js'
 import { ModalFocusProvider, useModalFocus } from './index.js'
 
 describe('document', () => runPopupFocusTests({ isShadowRoot: false }))
 describe('shadow root', () => runPopupFocusTests({ isShadowRoot: true }))
+
+test('should traverse shadow roots from another document', async () => {
+  const frame = document.createElement('iframe')
+
+  document.body.append(frame)
+
+  try {
+    const frameDocument = frame.contentDocument!
+    const host = frameDocument.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    const button = frameDocument.createElement('button')
+
+    frameDocument.body.append(host)
+    shadow.append(button)
+    host.inert = true
+
+    expect(getRootNode({ element: button })).toBe(shadow)
+    expect(getRootNode({ element: host })).toBe(frameDocument)
+    expect(getComposedParent({ element: button })).toBe(host)
+    expect(isComposedDescendant({ ancestor: host, element: button })).toBe(true)
+    expect(isWithinInertTree({ element: button })).toBe(true)
+  } finally {
+    frame.remove()
+  }
+})
 
 test('should restore shadow background attributes when the modal provider unmounts', async () => {
   const host = document.createElement('div')
