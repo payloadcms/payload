@@ -3043,6 +3043,383 @@ test.describe('Document submission outcomes', () => {
     createdIDs.clear()
   })
 
+  test('should retire a prior field error when a successful retry has newer unrelated edits', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'ok Retry title' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    let attempts = 0
+
+    createdIDs.add(doc.id)
+    releases.add(released.resolve)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    await page.locator('#field-content').fill('Submitted content')
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}?**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.fallback()
+      }
+
+      attempts += 1
+      if (attempts === 1) {
+        await route.fulfill({
+          status: 400,
+          json: {
+            errors: [
+              {
+                message: 'Invalid title',
+                data: { errors: [{ path: 'title', message: 'Title already exists' }] },
+              },
+            ],
+          },
+        })
+        return
+      }
+
+      const response = await route.fetch()
+
+      expect(response.ok()).toBe(true)
+      captured.resolve()
+      await released.promise
+      await route.fulfill({ response })
+    })
+
+    const publish = page.getByRole('button', { name: 'Publish changes', exact: true })
+
+    await publish.click()
+    await expect(page.locator('#field-title')).toHaveAttribute('aria-invalid', 'true')
+    await waitForFormReady(page)
+    await publish.click()
+    await captured.promise
+
+    const refreshed = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        (response.request().postData() ?? '').includes('form-state') &&
+        (response.request().postData() ?? '').includes('Updated content'),
+    )
+
+    await page.locator('#set-programmatic-content').click()
+    released.resolve()
+    await expect(page.locator('[data-sonner-toast][data-type="success"]')).toContainText(
+      'successfully',
+    )
+    await refreshed
+    await assertElementStaysVisible(page, '#field-title:not([aria-invalid="true"])')
+    await expect(page.locator('#field-content')).toHaveValue('Updated content')
+  })
+
+  test('should report a successful save when its permissions refresh fails', async ({ page }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'ok Before save' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    createdIDs.add(doc.id)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    await page.locator('#field-title').fill('ok Saved despite refresh failure')
+    await page.route(`**/api/${draftPostsSlug}/access/${doc.id}**`, (route) =>
+      route.abort('failed'),
+    )
+    await page.locator('#action-save-draft').click()
+    await expect(page.locator('[data-sonner-toast][data-type="success"]')).toContainText(
+      'successfully',
+    )
+    await waitForFormReady(page)
+  })
+
+  test('should discard a retained field error when a different block moves into its path', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: {
+        title: 'ok Block errors',
+        blocks: [
+          { blockType: 'text', text: 'Same value' },
+          { blockType: 'text', text: 'Same value' },
+        ],
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    createdIDs.add(doc.id)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    await page.locator('#field-content').fill('An edit')
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}?**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.fallback()
+      }
+      await route.fulfill({
+        status: 400,
+        json: {
+          errors: [
+            {
+              message: 'Invalid block',
+              data: { errors: [{ path: 'blocks.0.text', message: 'First block rejected' }] },
+            },
+          ],
+        },
+      })
+    })
+    await page.getByRole('button', { name: 'Publish changes', exact: true }).click()
+    await expect(page.locator('#field-blocks__0__text')).toHaveAttribute('aria-invalid', 'true')
+
+    const refreshed = page.waitForResponse((response) => {
+      const request = response.request()
+
+      return (
+        request.method() === 'POST' &&
+        (request.postData() ?? '').includes('form-state') &&
+        readFormStateRequest({ request })?.formState?.blocks?.rows?.length === 1
+      )
+    })
+
+    await page.locator('#field-blocks #blocks-row-0 .array-actions__button').click()
+    await page.locator('.popup__content .array-actions__remove').click()
+    await refreshed
+    await expect(page.locator('#field-blocks__0__text')).toHaveValue('Same value')
+    await expect(page.locator('#field-blocks__1__text')).toHaveCount(0)
+    await assertElementStaysVisible(page, '#field-blocks__0__text:not([aria-invalid="true"])')
+  })
+
+  test('should preserve a custom success notification when its handler closes the form', async ({
+    page,
+  }) => {
+    await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/client-validation', serverURL }))
+    await page.getByRole('checkbox', { name: 'Close after custom response' }).check()
+
+    const form = page.locator('.custom-response-form')
+
+    await expect(form).toHaveAttribute('data-form-ready', 'true')
+    await form.getByRole('textbox').fill('Allowed value')
+    await page.route(`**/api/${conditionsSlug}`, (route) =>
+      route.fulfill({ status: 200, json: { message: 'Server outcome' } }),
+    )
+    await form.getByRole('button', { name: 'Submit', exact: true }).click()
+    await expect(form).toHaveCount(0)
+    await expect(page.locator('[data-sonner-toast][data-type="success"]')).toContainText(
+      'Custom handler: Server outcome',
+    )
+  })
+
+  for (const status of [200, 400]) {
+    for (const shouldEdit of [false, true]) {
+      test(`should report a custom response (${status}) with newer edits: ${shouldEdit}`, async ({
+        page,
+      }) => {
+        const captured = Promise.withResolvers<void>()
+        const released = Promise.withResolvers<void>()
+
+        releases.add(released.resolve)
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/client-validation', serverURL }),
+        )
+
+        const form = page.locator('.custom-response-form')
+        const field = form.getByRole('textbox')
+        const submit = form.getByRole('button', { name: 'Submit', exact: true })
+
+        await expect(form).toHaveAttribute('data-form-ready', 'true')
+        await field.fill('Allowed value')
+        await page.route(`**/api/${conditionsSlug}`, async (route) => {
+          if (route.request().method() !== 'POST') {
+            return route.fallback()
+          }
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ status, json: { message: 'Server outcome' } })
+        })
+        await submit.click()
+        await captured.promise
+
+        if (shouldEdit) {
+          await form.getByRole('button', { name: 'Update value', exact: true }).click()
+        }
+
+        released.resolve()
+        await expect(submit).toBeEnabled()
+        await expect(
+          page.locator(`[data-sonner-toast][data-type="${status === 200 ? 'success' : 'error'}"]`),
+        ).toContainText(shouldEdit ? 'Server outcome' : 'Custom handler: Server outcome')
+        await expect(form.getByTestId('handled-responses')).toHaveText(shouldEdit ? '0' : '1')
+        await expect(field).toHaveValue(shouldEdit ? 'Changed during submission' : 'Allowed value')
+      })
+    }
+  }
+
+  for (const scenario of [
+    'field errors',
+    'non-field error',
+    'request failure',
+    'reset',
+    'slug',
+  ] as const) {
+    test(`should handle a rejected explicit save after a field update: ${scenario}`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: draftPostsSlug,
+        data: { title: 'ok Before rejected save', programmaticValue: 'Original value' },
+        draft: true,
+        overrideAccess: true,
+      })
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const finished = Promise.withResolvers<void>()
+
+      createdIDs.add(doc.id)
+      releases.add(released.resolve)
+      await page.goto(url.edit(doc.id))
+      await waitForFormReady(page)
+      await page.locator('#field-title').fill('ok Rejected save')
+
+      let slug: Awaited<ReturnType<typeof holdResponse>> | undefined
+
+      if (scenario === 'slug') {
+        await page.locator('#field-slug-lock').click()
+        slug = await holdResponse({
+          matches: (request) => (request.postData() ?? '').includes('slugify'),
+          method: 'POST',
+          page,
+          url: currentFramework === 'tanstack-start' ? '**/_serverFn/**' : page.url(),
+        })
+        releases.add(slug.release)
+        await page.locator('#field-slug-generate').click()
+        await slug.captured
+      }
+
+      await page.route(`**/api/${draftPostsSlug}/${doc.id}?**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.fallback()
+        }
+
+        captured.resolve()
+        await released.promise
+
+        if (scenario === 'request failure') {
+          await route.abort('failed')
+          finished.resolve()
+          return
+        }
+
+        await route.fulfill({
+          status: 400,
+          json:
+            scenario === 'non-field error'
+              ? { message: 'Save rejected by the server' }
+              : {
+                  errors: [
+                    {
+                      data: {
+                        errors: [
+                          { path: 'title', message: 'Title already exists' },
+                          { path: 'programmaticValue', message: 'Original value is invalid' },
+                        ],
+                      },
+                      message: 'The following fields are invalid: Title, Programmatic Value',
+                    },
+                  ],
+                },
+        })
+        finished.resolve()
+      })
+
+      await page.getByRole('button', { name: 'Publish changes', exact: true }).click()
+      await captured.promise
+
+      if (slug) {
+        slug.release()
+        await expect(page.locator('#field-slug')).toHaveValue('ok-rejected-save')
+      } else {
+        await page.locator('#set-programmatic-value').click()
+        await expect(page.locator('#field-programmaticValue')).toHaveValue(
+          'Updated programmatically',
+        )
+      }
+
+      if (scenario === 'reset') {
+        await page.locator('#reset-form-state').click()
+      }
+
+      const refreshedAfterEdit =
+        scenario === 'non-field error' || scenario === 'request failure'
+          ? page.waitForResponse(
+              (response) =>
+                response.request().method() === 'POST' &&
+                (response.request().postData() ?? '').includes('form-state') &&
+                (response.request().postData() ?? '').includes('Updated programmatically'),
+            )
+          : undefined
+
+      released.resolve()
+      await finished.promise
+      await expect(page.getByRole('button', { name: 'Publish changes', exact: true })).toBeEnabled()
+
+      if (scenario === 'reset') {
+        await expect(page.locator('[data-sonner-toast][data-type="error"]')).toHaveCount(0)
+        await expect(page.locator('.field-error', { hasText: 'Title already exists' })).toHaveCount(
+          0,
+        )
+        return
+      }
+
+      await expect(page.locator('[data-sonner-toast][data-type="error"]')).toContainText(
+        scenario === 'request failure'
+          ? /fetch|network|load/i
+          : scenario === 'non-field error'
+            ? 'Save rejected by the server'
+            : 'The following fields are invalid',
+      )
+
+      await refreshedAfterEdit
+
+      if (scenario === 'field errors' || scenario === 'slug') {
+        const titleError = page.locator('.field-error', { hasText: 'Title already exists' })
+
+        await expect(titleError).toBeVisible()
+        await expect(titleError).toHaveAttribute('role', 'alert')
+        await expect(page.locator('#field-title')).toHaveAttribute('aria-invalid', 'true')
+        await expect(page.locator('#field-title')).toHaveAttribute(
+          'aria-describedby',
+          (await titleError.getAttribute('id'))!,
+        )
+
+        if (scenario === 'field errors') {
+          await expect(
+            page.locator('.field-error', { hasText: 'Original value is invalid' }),
+          ).toHaveCount(0)
+        }
+
+        await page.locator('#set-programmatic-content').click()
+        await expect(page.locator('#field-content')).toHaveValue('Updated content')
+        await assertElementStaysVisible(page, '.field-error:has-text("Title already exists")')
+        const refreshed = page.waitForResponse(
+          (response) =>
+            response.request().method() === 'POST' &&
+            (response.request().postData() ?? '').includes('form-state') &&
+            (response.request().postData() ?? '').includes('ok A different title'),
+        )
+
+        await page.locator('#field-title').fill('ok A different title')
+        await refreshed
+        await expect(titleError).toBeHidden()
+      }
+    })
+  }
+
   test('should save and reload a draft without another edit after a failed publish (#17517)', async ({
     page,
   }) => {
@@ -3211,6 +3588,9 @@ test.describe('Document submission outcomes', () => {
     released.resolve()
     await expect(page.locator('.status__value')).toHaveText('Changed')
     await expect(page.locator('.pill-version-count')).toHaveText('2')
+    await expect(page.locator('[data-sonner-toast][data-type="success"]')).toContainText(
+      'successfully',
+    )
     await expect(page.locator('#field-slug')).toHaveValue(`ok-late-${suffix}`)
     await expect(page.locator('#action-save-draft')).toBeEnabled()
 
