@@ -33,6 +33,11 @@ export type Props = {
    */
   readonly dropzoneStyle?: 'default' | 'none' | 'outline'
   readonly hasError?: boolean
+  /**
+   * Only a `default` style dropzone can take focus. The other styles wrap content that has its own
+   * focusable elements.
+   * @default true
+   */
   readonly isFocusable?: boolean
   /**
    * When false, the dropzone does not take files pasted into it, so paste works as normal in inputs inside it.
@@ -199,7 +204,7 @@ export function Dropzone({
     <div
       className={classes}
       ref={dropRef}
-      tabIndex={isFocusable && dropzoneStyle !== 'none' ? 0 : undefined}
+      tabIndex={isFocusable && dropzoneStyle === 'default' ? 0 : undefined}
     >
       {children}
     </div>

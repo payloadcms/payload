@@ -17,6 +17,13 @@ import './index.css'
 const baseClass = 'page-controls'
 
 /**
+ * The page controls stick to the bottom of the list, and their height changes, for example when
+ * they show the list selection. Other content that sticks to the bottom, such as the list drop
+ * message, reads this variable from the shared parent element to stay above them.
+ */
+const heightVariable = '--page-controls-height'
+
+/**
  * @internal
  */
 export const PageControlsComponent: React.FC<{
@@ -42,9 +49,32 @@ export const PageControlsComponent: React.FC<{
   const { i18n } = useTranslation()
   const resolvedTableID = useTableID(tableId)
   const label = countLabel ?? i18n.t(data.totalDocs === 1 ? 'general:item' : 'general:items')
+  const pageControlsRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const pageControls = pageControlsRef.current
+    const parent = pageControls?.parentElement
+
+    if (!pageControls || !parent || typeof ResizeObserver === 'undefined') {
+      return
+    }
+
+    const observer = new ResizeObserver(() => {
+      parent.style.setProperty(heightVariable, `${pageControls.offsetHeight}px`)
+    })
+    observer.observe(pageControls)
+
+    return () => {
+      observer.disconnect()
+      parent.style.removeProperty(heightVariable)
+    }
+  }, [])
 
   return (
-    <div className={[baseClass, isEmbedded && `${baseClass}--embedded`].filter(Boolean).join(' ')}>
+    <div
+      className={[baseClass, isEmbedded && `${baseClass}--embedded`].filter(Boolean).join(' ')}
+      ref={pageControlsRef}
+    >
       {AfterPageControls}
       <div className={`${baseClass}__inner`}>
         <Pagination

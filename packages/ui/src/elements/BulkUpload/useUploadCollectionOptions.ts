@@ -1,11 +1,11 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
-import { validateMimeType } from 'payload/shared'
 import { useMemo } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isFileTypeAccepted } from '../../utilities/isFileTypeAccepted.js'
 import { useFormsManager } from './FormsManager/index.js'
 import { useBulkUpload } from './index.js'
 
@@ -29,9 +29,7 @@ export function useUploadCollectionOptions() {
     return (selectableCollections ?? []).map((slug) => {
       const config = getEntityConfig({ collectionSlug: slug })
       const mimeTypes = config.upload?.mimeTypes
-      const isCompatible = files.every(
-        (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
-      )
+      const isCompatible = files.every((file) => isFileTypeAccepted({ file, mimeTypes }))
       const label = getTranslation(config.labels.singular, i18n)
 
       return {

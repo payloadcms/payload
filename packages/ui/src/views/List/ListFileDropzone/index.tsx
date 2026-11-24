@@ -1,13 +1,13 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload'
 
-import { validateMimeType } from 'payload/shared'
 import React from 'react'
 import { toast } from 'sonner'
 
+import { useOpenListBulkUpload } from '../../../elements/BulkUpload/useOpenListBulkUpload.js'
 import { Dropzone } from '../../../elements/Dropzone/index.js'
-import { useOpenListBulkUpload } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { isFileTypeAccepted } from '../../../utilities/isFileTypeAccepted.js'
 import './index.css'
 
 const baseClass = 'list-file-dropzone'
@@ -34,8 +34,8 @@ export function ListFileDropzone({
 
   const onDrop = React.useCallback(
     (files: FileList) => {
-      const hasAcceptedFile = Array.from(files).some(
-        (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
+      const hasAcceptedFile = Array.from(files).some((file) =>
+        isFileTypeAccepted({ file, mimeTypes }),
       )
 
       if (!hasAcceptedFile) {
@@ -56,7 +56,6 @@ export function ListFileDropzone({
     <Dropzone
       className={baseClass}
       dropzoneStyle="outline"
-      isFocusable={false}
       isPasteEnabled={false}
       multipleFiles
       onChange={onDrop}

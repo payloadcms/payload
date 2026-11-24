@@ -11,7 +11,7 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, parseErrorResponse, validateMimeType } from 'payload/shared'
+import { formatAdminURL, parseErrorResponse } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -26,6 +26,7 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { isFileTypeAccepted } from '../../../utilities/isFileTypeAccepted.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
@@ -174,10 +175,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       const mimeTypes = getEntityConfig({ collectionSlug: slug })?.upload?.mimeTypes
       if (
-        mimeTypes?.length &&
         forms.some(({ formState }) => {
           const file = formState?.file?.value
-          return file instanceof File && !validateMimeType(file.type, mimeTypes)
+          return file instanceof File && !isFileTypeAccepted({ file, mimeTypes })
         })
       ) {
         toast.error(t('error:invalidFileType'))
@@ -363,8 +363,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const addFiles = React.useCallback(
     async (files: FileList) => {
       const mimeTypes = getEntityConfig({ collectionSlug })?.upload?.mimeTypes
-      const acceptedFiles = Array.from(files).filter(
-        (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
+      const acceptedFiles = Array.from(files).filter((file) =>
+        isFileTypeAccepted({ file, mimeTypes }),
       )
       if (acceptedFiles.length !== files.length) {
         toast.error(t('error:invalidFileType'))

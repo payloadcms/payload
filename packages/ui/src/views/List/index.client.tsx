@@ -147,7 +147,9 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  const canDropFilesToUpload =
+  // One rule for the Bulk Upload button and the drop area, so the keyboard path and the drop path
+  // stay in step
+  const canBulkUpload =
     hasCreatePermission &&
     isBulkUploadEnabled &&
     !upload.hideFileInputOnCreate &&
@@ -332,7 +334,7 @@ export function DefaultListView(props: ListViewClientProps) {
               hasDeletePermission={hasDeletePermission}
               hasTrashPermission={hasTrashPermission}
               i18n={i18n}
-              isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+              isBulkUploadEnabled={canBulkUpload}
               newDocumentURL={newDocumentURL}
               smallBreak={smallBreak}
               viewType={viewType}
@@ -380,7 +382,7 @@ export function DefaultListView(props: ListViewClientProps) {
               )}
             </div>
             {BeforeListTable}
-            <ListFileDropzone collectionConfig={collectionConfig} isEnabled={canDropFilesToUpload}>
+            <ListFileDropzone collectionConfig={collectionConfig} isEnabled={canBulkUpload}>
               {hierarchyData ? (
                 <DocumentSelectionProvider
                   collectionData={{

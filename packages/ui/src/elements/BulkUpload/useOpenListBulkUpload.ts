@@ -4,9 +4,9 @@ import type { CollectionSlug } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import { useHierarchy } from '../../../providers/Hierarchy/index.js'
-import { useRouter } from '../../../providers/RouterAdapter/index.js'
-import { useBulkUpload } from '../../BulkUpload/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
+import { useBulkUpload } from './index.js'
 
 /**
  * Returns a function that opens the bulk upload modal for a list view.

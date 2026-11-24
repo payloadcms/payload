@@ -70,8 +70,8 @@ export function AddingFilesView({ modalSlug }: Props) {
   const totalFileCount = isInitializing
     ? (initialFiles?.length ?? initialForms?.length)
     : forms.length
-  const canAddMoreFiles = typeof maxFiles === 'number' ? totalFileCount < maxFiles : true
-  const canAddFiles = canAddMoreFiles && !isInitializing
+  const isBelowMaxFiles = typeof maxFiles === 'number' ? totalFileCount < maxFiles : true
+  const canAddFiles = isBelowMaxFiles && !isInitializing
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -83,7 +83,6 @@ export function AddingFilesView({ modalSlug }: Props) {
           className={`${baseClass}__dropzone`}
           disabled={!canAddFiles}
           dropzoneStyle="outline"
-          isFocusable={false}
           isPasteEnabled={false}
           multipleFiles
           onChange={handleAddFiles}

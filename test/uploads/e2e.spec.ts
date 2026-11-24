@@ -2407,21 +2407,39 @@ describe('Uploads', () => {
       await expect(page.locator('.list-file-dropzone')).toHaveCount(0)
     })
 
-    test('should keep paste working in the list search input', async () => {
-      await page.goto(uploadsTwo.list)
+    test('should keep the drop message above the page controls on a narrow screen', async () => {
+      const originalViewport = page.viewportSize()
 
-      // Paste is only at risk once the dropzone has added its listeners
-      await waitForDropzoneToHandleDrags({ locator: page.locator('.list-file-dropzone') })
+      // On narrow screens the page controls also hold the list selection
+      await page.setViewportSize({ width: 390, height: 420 })
 
-      await page.evaluate(async () => {
-        await navigator.clipboard.writeText('pasted search')
-      })
+      try {
+        await page.goto(mediaURL.list)
 
-      const searchInput = page.locator('#search-filter-input')
-      await searchInput.click()
-      await page.keyboard.press('ControlOrMeta+V')
+        // With a row selected, the page controls show the selection actions and grow taller
+        await page.locator('tbody .select-row__checkbox').first().click()
+        await expect(page.locator('.page-controls .list-selection')).toBeVisible()
 
-      await expect(searchInput).toHaveValue('pasted search')
+        const dropzone = page.locator('.list-file-dropzone')
+        await waitForDropzoneToHandleDrags({ locator: dropzone })
+        await dispatchDragEvent({
+          files: [{ name: 'dropped.png', type: 'image/png' }],
+          locator: dropzone,
+          type: 'dragenter',
+        })
+
+        const message = dropzone.getByText('Drag and drop a file')
+        await expect(message).toBeVisible()
+        const messageBox = await message.boundingBox()
+        const dropzoneBox = await dropzone.boundingBox()
+        const pageControlsBox = await page.locator('.page-controls').boundingBox()
+
+        // The list must reach under the page controls, so the message sticks above them
+        expect(dropzoneBox.y + dropzoneBox.height).toBeGreaterThan(pageControlsBox.y)
+        expect(messageBox.y + messageBox.height).toBeLessThanOrEqual(pageControlsBox.y)
+      } finally {
+        await page.setViewportSize(originalViewport)
+      }
     })
   })
 
@@ -2542,6 +2560,25 @@ describe('Uploads', () => {
 
       await dispatchDragEvent({ files, locator: field, type: 'drop' })
       await expect(dropzone).not.toHaveClass(/dragging/)
+    })
+
+    test('should keep paste working in the bulk upload form fields', async () => {
+      const bulkUploadModal = await openBulkUploadFromList({ listURL: uploadsTwo.list, page })
+
+      // Paste is only at risk once the dropzone around the form has added its listeners
+      await waitForDropzoneToHandleDrags({
+        locator: bulkUploadModal.locator('.bulk-upload--file-manager__dropzone'),
+      })
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('pasted prefix')
+      })
+
+      const prefixInput = bulkUploadModal.locator('input[name="prefix"]')
+      await prefixInput.click()
+      await page.keyboard.press('ControlOrMeta+V')
+
+      await expect(prefixInput).toHaveValue('pasted prefix')
     })
   })
 

@@ -3,7 +3,6 @@
 import type { CollectionSlug, JsonObject } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { validateMimeType } from 'payload/shared'
 import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 
@@ -12,6 +11,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
+import { isFileTypeAccepted } from '../../utilities/isFileTypeAccepted.js'
 import { useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
@@ -35,11 +35,7 @@ function DrawerContent() {
     (acceptedFiles: FileList) => {
       const fileTransfer = new DataTransfer()
       for (const candidateFile of acceptedFiles) {
-        if (
-          uploadMimeTypes === undefined ||
-          uploadMimeTypes.length === 0 ||
-          validateMimeType(candidateFile.type, uploadMimeTypes)
-        ) {
+        if (isFileTypeAccepted({ file: candidateFile, mimeTypes: uploadMimeTypes })) {
           fileTransfer.items.add(candidateFile)
         }
       }

@@ -4,8 +4,8 @@ import type { CollectionSlug } from 'payload'
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { useOpenListBulkUpload } from '../../BulkUpload/useOpenListBulkUpload.js'
 import { Button } from '../../Button/index.js'
-import { useOpenListBulkUpload } from './useOpenListBulkUpload.js'
 
 export function ListBulkUploadButton({
   collectionSlug,

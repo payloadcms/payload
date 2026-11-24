@@ -17,12 +17,13 @@
   }
 
   /*
-   * A zero-height element at the end of the list. It sticks above the sticky page controls
-   * (49px tall) so the message stays in view while a long list scrolls.
+   * A zero-height element at the end of the list. It sticks above the sticky page controls, whose
+   * height they set in `--page-controls-height`, so the message stays in view while a long list
+   * scrolls.
    */
   .list-file-dropzone.dragging .list-file-dropzone__message-anchor {
     position: sticky;
-    inset-block-end: calc(var(--spacer-6) + var(--spacer-2) + var(--stroke-width-small));
+    inset-block-end: var(--page-controls-height, var(--spacer-0));
     display: block;
     height: 0;
     margin-block-start: auto;
