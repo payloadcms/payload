@@ -13,12 +13,14 @@ import {
   errorOnUnnamedFieldsSlug,
   fakeCustomIDsSlug,
   fieldsPersistanceSlug,
+  global2Slug,
   pgMigrationSlug,
   placesSlug,
   postsSlug,
   relationASlug,
   relationBSlug,
   relationshipsMigrationSlug,
+  simpleSlug,
 } from './shared.js'
 
 const defaultValueField: TextField = {
@@ -97,7 +99,7 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
-      slug: 'simple',
+      slug: simpleSlug,
       fields: [
         {
           type: 'text',
@@ -1200,7 +1202,7 @@ export const getConfig: () => Partial<Config> = () => ({
       versions: true,
     },
     {
-      slug: 'global-2',
+      slug: global2Slug,
       fields: [
         {
           name: 'text',
