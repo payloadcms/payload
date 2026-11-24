@@ -470,6 +470,7 @@ export const thTranslations: DefaultTranslationsObject = {
     remove: 'ลบ',
     removeFilter: 'นำตัวกรองออก',
     rename: 'เปลี่ยนชื่อ',
+    replace: 'แทนที่',
     replaceRow: 'แทนที่แถว',
     requiredFields: 'จำเป็นต้องกรอกช่องที่มีเครื่องหมาย *',
     reset: 'รีเซ็ต',

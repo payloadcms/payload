@@ -1,6 +1,12 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { ClientWidget, Field, WidgetServerProps } from 'payload'
+import type { ClientWidget, WidgetServerProps } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
+import {
+  createClientWidgetControls,
+  getWidgetControlData,
+  getWidgetControlFields,
+} from 'payload/shared'
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'
@@ -30,9 +36,16 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
   const serverLayout: ServerLayout = layout.map((layoutItem) => {
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
     const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
+    const data = getWidgetControlData({ controls: widgetConfig?.controls, data: layoutItem.data })
+    const controlData = Object.fromEntries(
+      getWidgetControlFields({ controls: widgetConfig?.controls }).map(({ name }) => [
+        name,
+        data[name],
+      ]),
+    )
     const widgetData = widgetConfig?.fields?.length
-      ? extractLocaleData(layoutItem.data || {}, req.locale || 'en', widgetConfig.fields)
-      : layoutItem.data || {}
+      ? { ...controlData, ...extractLocaleData(data, req.locale || 'en', widgetConfig.fields) }
+      : data
 
     return {
       component: RenderServerComponent({
@@ -45,19 +58,23 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           req,
           user,
           widgetData,
+          widgetId: layoutItem.id,
           widgetSlug,
         } satisfies WidgetServerProps,
       }),
-      item: layoutItem,
+      item: { ...layoutItem, data },
     }
   })
 
   // Resolve function labels to static labels for client components
   const clientWidgets: ClientWidget[] = widgets.map((widget) => {
-    const { Component: _, fields: __, label, ...rest } = widget
+    const { Component: _, controls, description, fields: __, label, preview, ...rest } = widget
     return {
       ...rest,
+      controls: createClientWidgetControls({ controls, i18n, importMap }),
+      description: description ? getTranslation(description, i18n) : undefined,
       label: typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
+      preview: preview !== false,
     }
   })
 

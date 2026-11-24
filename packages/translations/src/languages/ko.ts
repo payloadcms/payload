@@ -487,6 +487,7 @@ export const koTranslations: DefaultTranslationsObject = {
     remove: '제거',
     removeFilter: '필터 제거',
     rename: '이름 변경',
+    replace: '교체',
     replaceRow: '행 교체',
     requiredFields: '*로 표시된 필드는 필수입니다.',
     reset: '초기화',

@@ -486,6 +486,7 @@ export const csTranslations: DefaultTranslationsObject = {
     remove: 'Odstranit',
     removeFilter: 'Odstranit filtr',
     rename: 'Přejmenovat',
+    replace: 'Nahradit',
     replaceRow: 'Nahradit řádek',
     requiredFields: 'Pole označená * jsou povinná.',
     reset: 'Resetovat',

@@ -490,6 +490,7 @@ export const plTranslations: DefaultTranslationsObject = {
     remove: 'Usuń',
     removeFilter: 'Usuń filtr',
     rename: 'Zmień nazwę',
+    replace: 'Zastąp',
     replaceRow: 'Zastąp wiersz',
     requiredFields: 'Pola oznaczone * są wymagane.',
     reset: 'Zresetuj',

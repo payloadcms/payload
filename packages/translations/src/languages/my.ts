@@ -480,6 +480,7 @@ export const myTranslations: DefaultTranslationsObject = {
     remove: 'ဖယ်ရှားမည်။',
     removeFilter: 'စစ်ထုတ်မှုကို ဖယ်ရှားရန်',
     rename: 'အမည်ပြောင်း',
+    replace: 'အစားထိုးရန်',
     replaceRow: 'တန်းစီအစားထိုးရန်',
     requiredFields: '* ဖြင့် အမှတ်အသားပြုထားသော အကွက်များကို မဖြစ်မနေ ဖြည့်ရပါမည်။',
     reset: 'ပြန်လည်သတ်မှတ်ပါ',

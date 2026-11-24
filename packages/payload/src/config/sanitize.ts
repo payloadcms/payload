@@ -214,20 +214,21 @@ const addDefaultDashboardWidgets = ({
 
   const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
+  const defaultWidgets: Widget[] = []
 
-  dashboard.widgets.push({
+  defaultWidgets.push({
     slug: 'welcome',
     Component: '@payloadcms/ui/rsc#WelcomeWidget',
     label: ({ t }) => t('general:welcome'),
     maxWidth: 'full',
     minWidth: 'full',
   })
-  dashboard.widgets.push({
+  defaultWidgets.push({
     slug: 'collections',
     Component: '@payloadcms/ui/rsc#CollectionCards',
     minWidth: 'full',
   })
-  dashboard.widgets.push({
+  defaultWidgets.push({
     slug: 'collection-query',
     Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
     fields: sanitizeFields({
@@ -240,7 +241,7 @@ const addDefaultDashboardWidgets = ({
     }),
     minWidth: 'x-small',
   })
-  dashboard.widgets.push({
+  defaultWidgets.push({
     slug: 'activity',
     Component: '@payloadcms/ui/rsc#ActivityWidget',
     fields: sanitizeFields({
@@ -255,7 +256,7 @@ const addDefaultDashboardWidgets = ({
     minWidth: 'small',
   })
   if (uploadCollections.length > 0) {
-    dashboard.widgets.push({
+    defaultWidgets.push({
       slug: 'upload-dropzone',
       Component: '@payloadcms/ui/rsc#UploadDropzoneWidget',
       fields: sanitizeFields({
@@ -286,6 +287,16 @@ const addDefaultDashboardWidgets = ({
       minWidth: 'x-small',
     })
   }
+  const widgetSlugs = new Set<string>()
+
+  dashboard.widgets = [...dashboard.widgets, ...defaultWidgets].filter(({ slug }) => {
+    if (widgetSlugs.has(slug)) {
+      return false
+    }
+    widgetSlugs.add(slug)
+    return true
+  })
+
   dashboard.defaultLayout ??= [
     {
       widgetSlug: 'welcome',

@@ -943,8 +943,112 @@ export type AfterErrorHook = (
 
 export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
 
+type WidgetControlBase = {
+  label?: LabelFunction | StaticLabel
+  /** The key in widgetData that this control reads and updates. */
+  name: string
+}
+
+export type WidgetControlOption =
+  | { Icon?: PayloadComponent; label: LabelFunction | StaticLabel; value: string }
+  | string
+
+export type WidgetSelectControl = {
+  defaultValue?: string
+  /** Optional decorative icon rendered before the selected value. */
+  Icon?: PayloadComponent
+  options: WidgetControlOption[]
+  type: 'select'
+} & WidgetControlBase
+
+export type WidgetTextControl = {
+  defaultValue?: string
+  placeholder?: LabelFunction | StaticLabel
+  type: 'text'
+} & WidgetControlBase
+
+export type WidgetNumberControl = {
+  defaultValue?: number
+  placeholder?: LabelFunction | StaticLabel
+  step?: number
+  type: 'number'
+} & (
+  | {
+      max: number
+      min: number
+      /** Add a range slider, or hint markers for a stepped slider. Uses the same step as the number input. */
+      slider: { hints: number[] } | true
+    }
+  | { max?: number; min?: number; slider?: false }
+) &
+  WidgetControlBase
+
+export type WidgetSwitchControl = {
+  defaultValue?: boolean
+  type: 'switch'
+} & WidgetControlBase
+
+export type WidgetChoiceControl = {
+  defaultValue?: string
+  options: WidgetControlOption[]
+} & ({ type: 'menu' } | { type: 'segment' }) &
+  WidgetControlBase
+
+export type WidgetLeafControl =
+  | WidgetChoiceControl
+  | WidgetNumberControl
+  | WidgetSelectControl
+  | WidgetSwitchControl
+  | WidgetTextControl
+
+/** A visual section; it does not introduce a nesting level in widgetData. */
+export type WidgetGroupControl = {
+  controls: WidgetLeafControl[]
+  label?: LabelFunction | StaticLabel
+  type: 'group'
+}
+
+export type WidgetPopoutControl = {
+  controls: (WidgetGroupControl | WidgetLeafControl)[]
+  Icon?: PayloadComponent
+  label: LabelFunction | StaticLabel
+  type: 'popout'
+}
+
+export type WidgetControl = WidgetPopoutControl | WidgetSelectControl
+export type WidgetControlNode = WidgetControl | WidgetGroupControl | WidgetLeafControl
+
+export type ClientWidgetControlOption =
+  | { Icon?: React.ReactNode; label: StaticLabel; value: string }
+  | string
+
+type ClientWidgetControlType<T> = T extends WidgetControlNode
+  ? {
+      [K in keyof T]: K extends 'Icon'
+        ? React.ReactNode
+        : K extends 'label' | 'placeholder'
+          ? StaticLabel
+          : K extends 'controls'
+            ? T[K] extends (infer Child)[]
+              ? ClientWidgetControlType<Child>[]
+              : never
+            : K extends 'options'
+              ? ClientWidgetControlOption[]
+              : T[K]
+    }
+  : never
+
+export type ClientWidgetControl = ClientWidgetControlType<WidgetControl>
+export type ClientWidgetControlNode = ClientWidgetControlType<WidgetControlNode>
+export type ClientWidgetLeafControl = ClientWidgetControlType<WidgetLeafControl>
+export type ClientWidgetPopoutControl = ClientWidgetControlType<WidgetPopoutControl>
+
 export type Widget = {
   Component: PayloadComponent
+  /** Simple widget settings displayed in the dashboard edit toolbar. */
+  controls?: WidgetControl[]
+  /** Optional description displayed below the widget label in the Add Widget drawer. Supports translations and label functions. */
+  description?: LabelFunction | StaticLabel
   fields?: Field[]
   /**
    * Human-friendly label for the widget.
@@ -954,6 +1058,15 @@ export type Widget = {
   label?: LabelFunction | StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
+  /** Customize automatic picker previews, or disable rendering for this widget. */
+  preview?:
+    | {
+        /** Optional lightweight component used instead of Component in picker previews. */
+        Component?: PayloadComponent
+        /** Sample data used only for previews; never saved to the dashboard layout. */
+        data?: Record<string, unknown>
+      }
+    | false
   slug: string
   // Maybe:
   // ImageURL?: string // similar to Block
@@ -963,10 +1076,13 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  controls?: ClientWidgetControl[]
+  description?: StaticLabel
   fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
+  preview?: boolean
   slug: string
 }
 
@@ -975,6 +1091,8 @@ export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extend
       data?: DataFromWidgetSlug<TSlug> extends Record<string, unknown>
         ? DataFromWidgetSlug<TSlug>
         : Record<string, unknown>
+      /** Start this widget on a separate row, even when the previous row has free space. */
+      startsNewRow?: boolean
       widgetSlug: TSlug
       width: [
         Extract<

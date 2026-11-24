@@ -13,6 +13,22 @@
     cursor: pointer;
   }
 
+  .thumbnail-card__wrapper {
+    position: relative;
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
+
+  .thumbnail-card__preview {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: var(--radius-medium);
+    pointer-events: none;
+  }
+
   .thumbnail-card--has-on-click {
     cursor: pointer;
 
@@ -66,6 +82,21 @@
 
   .thumbnail-card--selected.thumbnail-card--has-on-click:active .thumbnail-card__thumbnail {
     outline-color: var(--accessibility-focus-color);
+  }
+
+  .thumbnail-card__details {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .thumbnail-card__description {
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    text-align: start;
+    overflow-wrap: anywhere;
   }
 
   .thumbnail-card__label {

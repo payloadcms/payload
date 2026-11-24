@@ -493,6 +493,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     remove: 'Remover',
     removeFilter: 'Remover filtro',
     rename: 'Renomear',
+    replace: 'Substituir',
     replaceRow: 'Substituir Linha',
     requiredFields: 'Os campos marcados com * são obrigatórios.',
     reset: 'Redefinir',

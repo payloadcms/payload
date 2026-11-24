@@ -496,6 +496,7 @@ export const roTranslations: DefaultTranslationsObject = {
     remove: 'Eliminați',
     removeFilter: 'Elimină filtrul',
     rename: 'Redenumire',
+    replace: 'Înlocuiește',
     replaceRow: 'Înlocuire rând',
     requiredFields: 'Câmpurile marcate cu * sunt obligatorii.',
     reset: 'Resetare',

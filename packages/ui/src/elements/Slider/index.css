@@ -1,0 +1,157 @@
+@layer payload-default {
+  .slider {
+    position: relative;
+    inline-size: 100%;
+    block-size: var(--spacer-4);
+    min-inline-size: var(--spacer-4);
+  }
+
+  .slider__input {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    appearance: none;
+    opacity: 0;
+    cursor: ew-resize;
+    touch-action: pan-y;
+    z-index: 1;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      inline-size: var(--spacer-3);
+      block-size: var(--spacer-3);
+    }
+
+    &::-moz-range-thumb {
+      inline-size: var(--spacer-3);
+      block-size: var(--spacer-3);
+      border: 0;
+    }
+  }
+
+  .slider__visual {
+    position: absolute;
+    inset-block-start: var(--spacer-1);
+    inset-inline: var(--spacer-2);
+    block-size: var(--spacer-3);
+    pointer-events: none;
+  }
+
+  .slider__track,
+  .slider__range::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: calc(var(--spacer-2) * -1);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    outline: var(--stroke-width-small) solid var(--color-border-control-strong);
+    outline-offset: calc(var(--stroke-width-small) * -1);
+  }
+
+  .slider__range {
+    position: absolute;
+    inset-block: 0;
+
+    &::before {
+      content: '';
+      background: var(--color-bg-brand);
+      outline-color: var(--color-border-control);
+    }
+  }
+
+  .slider__hint {
+    position: absolute;
+    inset-block-start: 50%;
+    inline-size: var(--spacer-1);
+    block-size: var(--spacer-1);
+    margin-inline-start: calc(var(--spacer-1) / -2);
+    translate: 0 -50%;
+    border-radius: var(--radius-full);
+    background: var(--color-icon-tertiary);
+  }
+
+  .slider__hint--default {
+    background: var(--color-icon);
+  }
+
+  .slider__thumb {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: var(--slider-position);
+    margin-inline-start: calc(var(--spacer-2) * -1);
+    inline-size: var(--spacer-3);
+    block-size: var(--spacer-3);
+  }
+
+  .slider__thumb-shadow {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    margin-inline: auto;
+    inline-size: var(--spacer-2-5);
+    block-size: var(--spacer-2-5);
+    border-radius: var(--radius-full);
+    box-shadow: var(--elevation-300-tooltip);
+  }
+
+  .slider__thumb-knob {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-radius: var(--radius-full);
+    background: var(--color-icon-onbrand);
+    outline: var(--stroke-width-small) solid var(--color-border-control);
+  }
+
+  .slider[data-modified] .slider__thumb-knob {
+    border: var(--spacer-1) solid var(--color-icon-onbrand);
+    background: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: calc(var(--stroke-width-small) * -1);
+      border: var(--stroke-width-small) solid var(--color-border-control);
+      border-radius: var(--radius-full);
+    }
+  }
+
+  .slider__input:focus-visible ~ .slider__visual .slider__thumb-knob {
+    inset: calc(var(--stroke-width-medium) * -1);
+    outline-color: var(--color-border-selected);
+    outline-offset: calc(var(--stroke-width-medium) * -1);
+  }
+
+  .slider[data-modified] .slider__input:focus-visible ~ .slider__visual .slider__thumb-knob {
+    border-width: calc(var(--spacer-1) + var(--stroke-width-medium));
+  }
+
+  .slider[data-disabled] .slider__input {
+    cursor: not-allowed;
+  }
+
+  .slider[data-disabled] .slider__track {
+    background: var(--color-bg);
+    outline-color: var(--color-border-disabled);
+  }
+
+  .slider[data-disabled] .slider__range::before {
+    background: var(--color-bg-disabled);
+    outline: none;
+  }
+
+  .slider[data-disabled] .slider__thumb-knob {
+    background: var(--color-icon-ondisabled);
+    outline-color: var(--color-border-disabled);
+    border: 0;
+  }
+
+  .slider[data-disabled] :is(.slider__hint, .slider__thumb-shadow),
+  .slider[data-disabled] .slider__thumb-knob::after {
+    display: none;
+  }
+}

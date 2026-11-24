@@ -494,6 +494,7 @@ export const trTranslations: DefaultTranslationsObject = {
     remove: 'Kaldır',
     removeFilter: 'Filtreyi kaldır',
     rename: 'Yeniden adlandır',
+    replace: 'Değiştir',
     replaceRow: 'Satırı Değiştir',
     requiredFields: '* ile işaretlenmiş alanlar zorunludur.',
     reset: 'Sıfırla',

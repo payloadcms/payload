@@ -4,6 +4,15 @@ import type { WidgetWidth } from 'payload'
 
 import { expect, type Locator, type Page } from '@playwright/test'
 
+const widthLabels: Record<WidgetWidth, string> = {
+  'x-small': 'Extra Small',
+  small: 'Small',
+  medium: 'Medium',
+  large: 'Large',
+  'x-large': 'Extra Large',
+  full: 'Full',
+}
+
 export class DashboardHelper {
   private page: Page
 
@@ -105,6 +114,7 @@ export class DashboardHelper {
         throw new Error(`Widget has no width`)
       }
       const cols = WIDTH_TO_COLS[width as WidgetWidth]
+      const startsNewRow = (await widget.getAttribute('data-starts-new-row')) === 'true'
       const dashboardBox = await this.dashboard.boundingBox()
       const widgetBox = await widget.boundingBox()
       if (!widgetBox || !dashboardBox) {
@@ -113,7 +123,8 @@ export class DashboardHelper {
 
       // Determine expected position
       let expectedX: number
-      if (currentPos === 0 || currentPos + cols > 12) {
+      if (currentPos === 0 || startsNewRow || currentPos + cols > 12) {
+        currentPos = 0
         // Widget is at the start of a new row
         expectedX = dashboardBox.x
       } else {
@@ -136,14 +147,14 @@ export class DashboardHelper {
 
   resizeWidget = async (position: number, width: WidgetWidth) => {
     const widget = this.widgetByPos(position)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     const widthButton = widget.locator('.widget-wrapper__size-btn')
     await expect(widthButton).toBeVisible()
     await widthButton.click()
     const activePopup = this.page.locator('.popup__content:visible')
     await expect(activePopup).toBeVisible()
     const widthOptions = activePopup.locator('.popup-button-list__button')
-    await widthOptions.getByText(width).click()
+    await widthOptions.getByText(widthLabels[width], { exact: true }).click()
     const slug = await widget.getAttribute('data-slug')
     if (!slug) {
       throw new Error(`Widget at position ${position} has no slug`)
@@ -153,7 +164,7 @@ export class DashboardHelper {
 
   assertWidthRange = async (arg: { max: WidgetWidth; min: WidgetWidth; position: number }) => {
     const widget = this.widgetByPos(arg.position)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     const widthButton = widget.locator('.widget-wrapper__size-btn')
     if ((await widthButton.count()) === 0) {
       await expect(widget).toHaveAttribute('data-width', arg.min)
@@ -166,9 +177,11 @@ export class DashboardHelper {
     await expect(activePopup).toBeVisible()
     const widthOptions = activePopup.locator('.popup-button-list__button')
     await expect(widthOptions.first().locator('.widget-wrapper__size-btn-label')).toHaveText(
-      arg.min,
+      widthLabels[arg.min],
     )
-    await expect(widthOptions.last().locator('.widget-wrapper__size-btn-label')).toHaveText(arg.max)
+    await expect(widthOptions.last().locator('.widget-wrapper__size-btn-label')).toHaveText(
+      widthLabels[arg.max],
+    )
   }
 
   assertWidget = async (pos: number, slug: string, width: WidgetWidth) => {
@@ -192,9 +205,9 @@ export class DashboardHelper {
     if (shouldBe) {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
       await expect(this.stepNavButtons).toHaveCount(3)
-      await expect(this.stepNavButtons.nth(0)).toHaveText('Add +')
-      await expect(this.stepNavButtons.nth(1)).toHaveText('Save changes')
-      await expect(this.stepNavButtons.nth(2)).toHaveText('Cancel')
+      await expect(this.stepNavButtons.nth(0)).toHaveAccessibleName('Add Widget')
+      await expect(this.stepNavButtons.nth(1)).toHaveAccessibleName('Save changes')
+      await expect(this.stepNavButtons.nth(2)).toHaveAccessibleName('Cancel')
     } else {
       await expect(this.stepNavButtons).toHaveCount(1)
       await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()
@@ -204,7 +217,7 @@ export class DashboardHelper {
   addWidget = async (slug: string) => {
     const widgetsCount = await this.widgets.count()
     await this.stepNavButtons.nth(0).click()
-    await this.page.locator('.drawer__content').getByText(slug).click()
+    await this.page.locator('.drawer__content').getByRole('button', { name: slug }).click()
     await expect(this.widgets).toHaveCount(widgetsCount + 1)
     // Wait for highlight animation to complete (1.5s animation + buffer)
     await this.page.waitForTimeout(1600)
@@ -232,7 +245,7 @@ export class DashboardHelper {
     const widgetsCount = await this.widgets.count()
     const widget = this.widgetByPos(position)
     const widgetDomElem = await widget.elementHandle()
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await this.getDeleteWidgetButton(widget).click()
     expect(await widgetDomElem?.isHidden()).toBe(true)
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
@@ -240,7 +253,7 @@ export class DashboardHelper {
 
   editWidget = async (position: number, title: string) => {
     const widget = this.widgetByPos(position)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = this.page.locator('.drawer__content:visible')
@@ -257,7 +270,16 @@ export class DashboardHelper {
     const confirmButton = this.page.locator(
       '#cancel-dashboard-changes [data-dialog-action="confirm"]',
     )
-    await confirmButton.click()
+    await expect
+      .poll(
+        async () =>
+          (await confirmButton.isVisible()) ||
+          !(await this.stepNavLast.getByText('Editing Dashboard').isVisible()),
+      )
+      .toBe(true)
+    if (await confirmButton.isVisible()) {
+      await confirmButton.click()
+    }
     await this.assertIsEditing(false)
     // Wait for any layout changes/transitions to settle
     await this.page.waitForTimeout(200)
@@ -282,7 +304,7 @@ export class DashboardHelper {
 
   moveWidget = async (from: number, to: number, place: 'after' | 'before' = 'before') => {
     const srcWidget = this.widgetByPos(from)
-    await srcWidget.hover()
+    await srcWidget.locator('.widget-wrapper__drag-btn').click()
     const srcWidgetBox = (await srcWidget.locator('.widget-wrapper__drag-btn').boundingBox())!
     const targetWidget = this.widgetByPos(to)
     const snapshot = await this.getSnapshot()
@@ -302,15 +324,26 @@ export class DashboardHelper {
       srcWidgetBox.y + srcWidgetBox.height / 2,
     )
     await this.page.mouse.down()
-    await targetWidget.scrollIntoViewIfNeeded()
-    const targetWidgetBox = (await targetWidget.boundingBox())!
     await this.page.mouse.move(
-      targetWidgetBox.x + targetWidgetBox.width / 2 + (place === 'after' ? 5 : -5),
-      targetWidgetBox.y + targetWidgetBox.height / 2,
-      {
-        // steps is important: move slightly to trigger the drag sensor of DnD-kit
-        steps: 10,
-      },
+      srcWidgetBox.x + srcWidgetBox.width / 2 + 10,
+      srcWidgetBox.y + srcWidgetBox.height / 2,
+    )
+    await expect(this.dashboard.locator('.dashboard-row-drop-targets')).toBeVisible()
+    const targetID = await targetWidget.getAttribute('data-slug')
+    let dropTarget = this.page.getByTestId(`${targetID}-${place}`)
+
+    if (!(await dropTarget.isVisible())) {
+      const dropIndex = place === 'after' ? to : to - 1
+
+      dropTarget = this.page.locator(`.dashboard-row-drop-target[data-drop-index="${dropIndex}"]`)
+    }
+    await expect(dropTarget).toBeVisible()
+    await dropTarget.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+    const targetBounds = (await dropTarget.boundingBox())!
+
+    await this.page.mouse.move(
+      targetBounds.x + targetBounds.width / 2,
+      targetBounds.y + targetBounds.height / 2,
     )
     await this.page.mouse.up()
     await this.page.waitForTimeout(400) // dndkit animation
@@ -318,7 +351,12 @@ export class DashboardHelper {
     // validate that the move was successful with the new order
     const snapshotAfter = await this.getSnapshot()
     const expectedSnapshot = moveArrayItem(snapshot, from, to, place)
-    expect(snapshotAfter).toEqual(expectedSnapshot)
+    expect(snapshotAfter.map(([id]) => id)).toEqual(expectedSnapshot.map(([id]) => id))
+    // The source and destination may resize to share a row; other widths must be preserved.
+    const resizedIDs = new Set([snapshot[from - 1][0], snapshot[to - 1][0]])
+    expect(snapshotAfter.filter(([id]) => !resizedIDs.has(id))).toEqual(
+      expectedSnapshot.filter(([id]) => !resizedIDs.has(id)),
+    )
   }
 }
 

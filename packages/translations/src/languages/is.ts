@@ -486,6 +486,7 @@ export const isTranslations: DefaultTranslationsObject = {
     remove: 'Fjarlægja',
     removeFilter: 'Fjarlægja síu',
     rename: 'Endurnefna',
+    replace: 'Skipta út',
     replaceRow: 'Raðir skipt út',
     requiredFields: 'Reitir merktir með * eru skyldureitir.',
     reset: 'Endurstilla',

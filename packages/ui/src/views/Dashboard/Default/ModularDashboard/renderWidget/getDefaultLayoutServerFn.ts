@@ -1,14 +1,9 @@
-import type {
-  DashboardConfig,
-  PayloadRequest,
-  ServerFunction,
-  Widget,
-  WidgetServerProps,
-} from 'payload'
+import type { ServerFunction, WidgetServerProps } from 'payload'
 
-import type { WidgetInstanceClient, WidgetItem } from '../index.client.js'
+import type { WidgetInstanceClient } from '../index.client.js'
 
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
+import { getItemsFromConfig } from '../utils/getItemsFromConfig.js'
 
 export type GetDefaultLayoutServerFnArgs = Record<string, never>
 
@@ -46,6 +41,7 @@ export const getDefaultLayoutHandler: ServerFunction<
           req,
           user,
           widgetData: layoutItem.data || {},
+          widgetId: layoutItem.id,
           widgetSlug,
         } satisfies WidgetServerProps,
       }),
@@ -54,28 +50,4 @@ export const getDefaultLayoutHandler: ServerFunction<
   })
 
   return { layout }
-}
-
-async function getItemsFromConfig(
-  defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
-  req: PayloadRequest,
-  widgets: Pick<Widget, 'maxWidth' | 'minWidth' | 'slug'>[],
-): Promise<WidgetItem[]> {
-  let widgetInstances
-  if (typeof defaultLayout === 'function') {
-    widgetInstances = await defaultLayout({ req })
-  } else {
-    widgetInstances = defaultLayout
-  }
-
-  return widgetInstances.map((widgetInstance, index) => {
-    const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
-    return {
-      id: `${widgetInstance.widgetSlug}-${index}`,
-      data: widgetInstance.data,
-      maxWidth: widget?.maxWidth ?? 'full',
-      minWidth: widget?.minWidth ?? 'x-small',
-      width: widgetInstance.width || 'x-small',
-    }
-  })
 }

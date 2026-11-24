@@ -492,6 +492,7 @@ export const idTranslations: DefaultTranslationsObject = {
     remove: 'Hapus',
     removeFilter: 'Hapus filter',
     rename: 'Ganti Nama',
+    replace: 'Ganti',
     replaceRow: 'Ganti Baris',
     requiredFields: 'Kolom yang ditandai dengan * wajib diisi.',
     reset: 'Atur Ulang',

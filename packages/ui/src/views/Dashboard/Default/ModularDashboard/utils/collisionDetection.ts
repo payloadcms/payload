@@ -1,40 +1,74 @@
 import type { CollisionDetection } from '@dnd-kit/core'
 
-/**
- * Collision detection that considers the X
- * axis only with respect to the position of the pointer (or collisionRect for keyboard)
- */
+/** Prefer nearby row boundaries for pointers, and exact target centers for keyboard dragging. */
 export const closestInXAxis: CollisionDetection = (args) => {
   const collisions: Array<{ data: { value: number }; id: string }> = []
+  const rowCollisions: Array<{ data: { value: number }; id: string }> = []
+  const coordinates =
+    args.pointerCoordinates ??
+    (args.collisionRect
+      ? {
+          x: args.collisionRect.left + args.collisionRect.width / 2,
+          y: args.collisionRect.top + args.collisionRect.height / 2,
+        }
+      : null)
 
-  // Use pointer coordinates if available (mouse/touch), otherwise use collisionRect center (keyboard)
-  let x: number
-  let y: number
+  if (!coordinates) {
+    return []
+  }
 
-  if (args.pointerCoordinates) {
-    x = args.pointerCoordinates.x
-    y = args.pointerCoordinates.y
-  } else if (args.collisionRect) {
-    // For keyboard navigation, use the center of the collisionRect
-    x = args.collisionRect.left + args.collisionRect.width / 2
-    y = args.collisionRect.top + args.collisionRect.height / 2
-  } else {
+  const { x, y } = coordinates
+  const initialRect = args.active?.rect.current.initial
+
+  if (
+    !args.pointerCoordinates &&
+    initialRect &&
+    Math.abs(x - initialRect.left - initialRect.width / 2) < 0.5 &&
+    Math.abs(y - initialRect.top - initialRect.height / 2) < 0.5
+  ) {
     return []
   }
 
   for (const container of args.droppableContainers) {
     const rect = args.droppableRects.get(container.id)
-    if (!rect) {
+
+    if (!rect || rect.width <= 0 || rect.height <= 0) {
       continue
     }
 
-    // Only consider widgets in the same row (same Y axis)
-    if (y >= rect.top && y <= rect.bottom) {
-      const centerX = rect.left + rect.width / 2
-      const distance = Math.abs(x - centerX)
-      collisions.push({ id: String(container.id), data: { value: distance } })
+    if (!args.pointerCoordinates) {
+      collisions.push({
+        id: String(container.id),
+        data: { value: Math.hypot(x - rect.left - rect.width / 2, y - rect.top - rect.height / 2) },
+      })
+      continue
+    }
+
+    const position = container.data.current?.position
+    const isRowTarget = position === 'row-after' || position === 'row-before'
+
+    if (isRowTarget) {
+      if (
+        args.pointerCoordinates &&
+        x >= rect.left &&
+        x <= rect.right &&
+        y >= rect.top &&
+        y <= rect.bottom
+      ) {
+        rowCollisions.push({
+          id: String(container.id),
+          data: { value: Math.abs(y - (rect.top + rect.height / 2)) },
+        })
+      }
+    } else if (y >= rect.top && y <= rect.bottom) {
+      collisions.push({
+        id: String(container.id),
+        data: { value: Math.abs(x - (rect.left + rect.width / 2)) },
+      })
     }
   }
 
-  return collisions.sort((a, b) => a.data.value - b.data.value)
+  return (rowCollisions.length ? rowCollisions : collisions).sort(
+    (a, b) => a.data.value - b.data.value,
+  )
 }

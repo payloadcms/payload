@@ -13,18 +13,23 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { ThumbnailCard } from '../ThumbnailCard/index.js'
 import './index.css'
+import { DraggableWidgetCard } from './DraggableWidgetCard/index.js'
 import { ItemSearch } from './ItemSearch/index.js'
+import { WidgetPreview } from './WidgetPreview/index.js'
+import { WidgetPreviewProvider } from './WidgetPreviewProvider/index.js'
 
 export type DrawerItem = ClientBlock | ClientWidget
 
 export type ItemsDrawerProps = {
   readonly addRowIndex?: number
   readonly drawerSlug: string
+  readonly isDraggable?: boolean
   readonly items: (DrawerItem | string)[]
   readonly labels?: Labels
   readonly onItemClick: (item: DrawerItem, index?: number) => Promise<void> | void
   readonly searchPlaceholder?: string
   readonly title?: string
+  readonly variant?: 'default' | 'widgets'
 }
 
 const baseClass = 'items-drawer'
@@ -100,15 +105,56 @@ const getItemDisplayLabel = (item: DrawerItem, i18n: I18nClient): string => {
 }
 
 export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
-  const { addRowIndex, drawerSlug, items, labels, onItemClick, searchPlaceholder, title } = props
+  const {
+    addRowIndex,
+    drawerSlug,
+    isDraggable = false,
+    items,
+    labels,
+    onItemClick,
+    searchPlaceholder,
+    title,
+    variant = 'default',
+  } = props
+  const isWidgetPicker = variant === 'widgets'
+  const PreviewProvider = isWidgetPicker ? WidgetPreviewProvider : React.Fragment
 
   const [searchTerm, setSearchTerm] = useState('')
   const [resultsAnnouncement, setResultsAnnouncement] = useState('')
-  const [filteredItems, setFilteredItems] = useState(items)
   const { closeModal, isModalOpen } = useModal()
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
   const isOpen = isModalOpen(drawerSlug)
+
+  const filteredItems = useMemo(() => {
+    const searchTermToUse = searchTerm.toLowerCase()
+
+    const widgetSlugs = new Set<string>()
+    const matchingItems = items?.reduce((matchedItems, _item) => {
+      let item: DrawerItem
+
+      if (typeof _item === 'string') {
+        // Handle string references (for blocks)
+        item = config.blocksMap?.[_item]
+      } else {
+        item = _item
+      }
+
+      if (item) {
+        if (isWidgetPicker && widgetSlugs.has(item.slug)) {
+          return matchedItems
+        }
+        widgetSlugs.add(item.slug)
+        const itemLabel = getItemLabel(item, i18n)
+        if (itemLabel.includes(searchTermToUse)) {
+          matchedItems.push(item)
+        }
+      }
+      return matchedItems
+    }, [] as DrawerItem[])
+
+    return matchingItems || []
+  }, [searchTerm, items, i18n, config.blocksMap, isWidgetPicker])
 
   useEffect(() => {
     if (!isOpen) {
@@ -154,31 +200,6 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
     }
   }, [isModalOpen, drawerSlug])
 
-  useEffect(() => {
-    const searchTermToUse = searchTerm.toLowerCase()
-
-    const matchingItems = items?.reduce((matchedItems, _item) => {
-      let item: DrawerItem
-
-      if (typeof _item === 'string') {
-        // Handle string references (for blocks)
-        item = config.blocksMap?.[_item]
-      } else {
-        item = _item
-      }
-
-      if (item) {
-        const itemLabel = getItemLabel(item, i18n)
-        if (itemLabel.includes(searchTermToUse)) {
-          matchedItems.push(item)
-        }
-      }
-      return matchedItems
-    }, [] as DrawerItem[])
-
-    setFilteredItems(matchingItems || [])
-  }, [searchTerm, items, i18n, config.blocksMap])
-
   const finalTitle =
     title ||
     (labels
@@ -186,70 +207,92 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
       : t('fields:addNew'))
 
   return (
-    <Drawer slug={drawerSlug} title={finalTitle}>
-      <span aria-atomic="true" className="sr-only" role="status">
-        {resultsAnnouncement}
-      </span>
-      <ItemSearch
-        placeholder={searchPlaceholder || t('fields:searchForBlock')}
-        setSearchTerm={setSearchTerm}
-      />
-      <div className={`${baseClass}__items-wrapper`}>
-        <ul className={`${baseClass}__item-groups`}>
-          {Object.entries(itemGroups).map(([groupLabel, groupItems]) =>
-            !groupItems.length ? null : (
-              <li
-                className={[
-                  `${baseClass}__item-group`,
-                  groupLabel === '_none' && `${baseClass}__item-group-none`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                key={groupLabel}
-              >
-                {groupLabel !== '_none' && (
-                  <h3 className={`${baseClass}__item-group-label`}>{groupLabel}</h3>
-                )}
-                <ul className={`${baseClass}__items`}>
-                  {groupItems.map((_item, index) => {
-                    const item =
-                      typeof _item === 'string' ? (config.blocksMap?.[_item] as DrawerItem) : _item
+    <Drawer
+      className={isWidgetPicker ? `${baseClass}--widgets` : undefined}
+      slug={drawerSlug}
+      title={finalTitle}
+    >
+      <PreviewProvider>
+        <span aria-atomic="true" className="sr-only" role="status">
+          {resultsAnnouncement}
+        </span>
+        <ItemSearch
+          placeholder={searchPlaceholder || t('fields:searchForBlock')}
+          setSearchTerm={setSearchTerm}
+        />
+        <div className={`${baseClass}__items-wrapper`}>
+          <ul className={`${baseClass}__item-groups`}>
+            {Object.entries(itemGroups).map(([groupLabel, groupItems]) =>
+              !groupItems.length ? null : (
+                <li
+                  className={[
+                    `${baseClass}__item-group`,
+                    groupLabel === '_none' && `${baseClass}__item-group-none`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  key={groupLabel}
+                >
+                  {groupLabel !== '_none' && (
+                    <h3 className={`${baseClass}__item-group-label`}>{groupLabel}</h3>
+                  )}
+                  <ul className={`${baseClass}__items`}>
+                    {groupItems.map((_item) => {
+                      const item =
+                        typeof _item === 'string'
+                          ? (config.blocksMap?.[_item] as DrawerItem)
+                          : _item
 
-                    if (!item) {
-                      return null
-                    }
+                      if (!item) {
+                        return null
+                      }
 
-                    const { imageAltText, imageURL } = getItemImageInfo(item)
-                    const displayLabel = getItemDisplayLabel(item, i18n)
+                      const { imageAltText, imageURL } = getItemImageInfo(item)
+                      const displayLabel = getItemDisplayLabel(item, i18n)
+                      const description =
+                        isWidgetPicker && 'description' in item && item.description
+                          ? getTranslation(item.description, i18n)
+                          : undefined
 
-                    return (
-                      <li className={`${baseClass}__item`} key={index}>
-                        <ThumbnailCard
-                          alignLabel="center"
-                          label={displayLabel}
-                          onClick={() => {
-                            void onItemClick(item, addRowIndex)
-                            closeModal(drawerSlug)
-                          }}
-                          thumbnail={
-                            <div className={`${baseClass}__default-image`}>
-                              {imageURL ? (
-                                <img alt={imageAltText} src={imageURL} />
+                      const Card =
+                        isWidgetPicker && isDraggable ? DraggableWidgetCard : ThumbnailCard
+                      const dragProps = { drawerSlug, widget: item as ClientWidget }
+                      return (
+                        <li className={`${baseClass}__item`} key={item.slug}>
+                          <Card
+                            {...dragProps}
+                            alignLabel={isWidgetPicker ? 'left' : 'center'}
+                            description={description}
+                            label={displayLabel}
+                            onClick={() => {
+                              void onItemClick(item, addRowIndex)
+                              closeModal(drawerSlug)
+                            }}
+                            shouldRenderThumbnailOutsideButton={isWidgetPicker}
+                            thumbnail={
+                              isWidgetPicker ? (
+                                <WidgetPreview widget={item as ClientWidget} />
                               ) : (
-                                <DefaultBlockImage />
-                              )}
-                            </div>
-                          }
-                        />
-                      </li>
-                    )
-                  })}
-                </ul>
-              </li>
-            ),
-          )}
-        </ul>
-      </div>
+                                <div className={`${baseClass}__default-image`}>
+                                  {imageURL ? (
+                                    <img alt={imageAltText} src={imageURL} />
+                                  ) : (
+                                    <DefaultBlockImage />
+                                  )}
+                                </div>
+                              )
+                            }
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+      </PreviewProvider>
     </Drawer>
   )
 }
