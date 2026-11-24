@@ -31,11 +31,18 @@ import {
 
 import type { DatabaseAdapterType } from '../generateDatabaseAdapter.js'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import type { FullyRestricted, Post } from './payload-types.js'
+import type {
+  FullyRestricted,
+  PayloadLockedDocument,
+  Post,
+  PublicUser,
+  User,
+} from './payload-types.js'
 
 import { it } from '../__helpers/int/vitest.js'
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { requestHeaders } from './getConfig.js'
 import {
   accessRelationChildSlug,
@@ -2623,6 +2630,89 @@ describe('Access Control', () => {
         read: { permission: true },
         update: { permission: true },
       } satisfies CollectionPermission)
+    })
+  })
+
+  describe('Framework-managed collections', () => {
+    const lockedDocumentsSlug = 'payload-locked-documents'
+
+    let adminUser: User
+    let publicUser: PublicUser
+    let lockedDocument: PayloadLockedDocument
+
+    beforeAll(async () => {
+      const adminLogin = await payload.login({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const publicLogin = await payload.login({
+        collection: publicUsersSlug,
+        data: {
+          email: publicUserEmail,
+          password: devUser.password,
+        },
+      })
+
+      adminUser = adminLogin.user!
+      publicUser = publicLogin.user!
+    })
+
+    beforeEach(async () => {
+      lockedDocument = await payload.create({
+        collection: lockedDocumentsSlug,
+        data: {
+          document: {
+            relationTo: slug,
+            value: post1.id,
+          },
+          user: {
+            relationTo: 'users',
+            value: adminUser.id,
+          },
+        },
+      })
+    })
+
+    afterEach(async () => {
+      await payload.delete({
+        id: lockedDocument.id,
+        collection: lockedDocumentsSlug,
+      })
+    })
+
+    it('should return locked documents to users of the admin user collection', async () => {
+      const { docs } = await payload.find({
+        collection: lockedDocumentsSlug,
+        overrideAccess: false,
+        user: adminUser,
+      })
+
+      expect(docs.map(({ id }) => id)).toContain(lockedDocument.id)
+    })
+
+    it('should not return locked documents to users of other auth collections', async () => {
+      await expect(
+        payload.find({
+          collection: lockedDocumentsSlug,
+          overrideAccess: false,
+          user: publicUser,
+        }),
+      ).rejects.toThrow(Forbidden)
+    })
+
+    it('should not allow users of other auth collections to delete locked documents', async () => {
+      await expect(
+        payload.delete({
+          id: lockedDocument.id,
+          collection: lockedDocumentsSlug,
+          overrideAccess: false,
+          user: publicUser,
+        }),
+      ).rejects.toThrow(Forbidden)
     })
   })
 })

@@ -104,15 +104,15 @@ export type JobsConfig = {
    */
   access?: {
     /**
-     * By default, all logged-in users can cancel jobs.
+     * By default, only users from the configured admin auth collection can cancel jobs.
      */
     cancel?: CancelJobAccess
     /**
-     * By default, all logged-in users can queue jobs.
+     * By default, only users from the configured admin auth collection can queue jobs.
      */
     queue?: QueueJobAccess
     /**
-     * By default, all logged-in users can run jobs.
+     * By default, only users from the configured admin auth collection can run jobs.
      */
     run?: RunJobAccess
   }
