@@ -176,6 +176,7 @@ export const esTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Tipo de archivo inválido: {{value}}',
     invalidRequestArgs: 'Argumentos inválidos en la solicitud: {{args}}',
     loadingDocument: 'Ocurrió un problema al cargar el documento con ID {{id}}.',
+    loadingItems: 'No se pudieron cargar los elementos.',
     localesNotSaved_one: 'No se pudo guardar el siguiente idioma:',
     localesNotSaved_other: 'No se pudieron guardar los siguientes idiomas:',
     logoutFailed: 'El cierre de sesión falló.',

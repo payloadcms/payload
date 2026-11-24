@@ -177,6 +177,7 @@ export const itTranslations: DefaultTranslationsObject = {
     invalidRequestArgs: 'Argomenti non validi nella richiesta: {{args}}',
     loadingDocument:
       'Si è verificato un problema durante il caricamento del documento con ID {{id}}.',
+    loadingItems: 'Impossibile caricare gli elementi.',
     localesNotSaved_one: 'Non è stato possibile salvare la seguente impostazione locale:',
     localesNotSaved_other: 'Non è stato possibile salvare le seguenti impostazioni locali:',
     logoutFailed: 'Disconnessione non riuscita.',

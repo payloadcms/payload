@@ -176,6 +176,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Neteisingas failo tipas: {{value}}',
     invalidRequestArgs: 'Netinkami argumentai perduoti užklausoje: {{args}}',
     loadingDocument: 'Įvyko klaida įkeliant dokumentą, kurio ID yra {{id}}.',
+    loadingItems: 'Nepavyko įkelti elementų.',
     localesNotSaved_one: 'Negalima išsaugoti šios lokalės:',
     localesNotSaved_other: 'Šios lokalės negalėjo būti išsaugotos:',
     logoutFailed: 'Atsijungimas nepavyko.',

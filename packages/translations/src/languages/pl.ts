@@ -174,6 +174,7 @@ export const plTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Nieprawidłowy typ pliku: {{value}}',
     invalidRequestArgs: 'Nieprawidłowe argumenty w żądaniu: {{args}}',
     loadingDocument: 'Wystapił problem podczas ładowania dokumentu o ID {{id}}.',
+    loadingItems: 'Nie udało się wczytać elementów.',
     localesNotSaved_one: 'Następującej lokalizacji nie można było zapisać:',
     localesNotSaved_other: 'Następujących lokalizacji nie można było zapisać:',
     logoutFailed: 'Wylogowanie nie powiodło się.',

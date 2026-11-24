@@ -164,6 +164,7 @@ export const thTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'ประเภทของไฟล์ไม่ถูกต้อง: {{value}}',
     invalidRequestArgs: 'มีการส่งอาร์กิวเมนต์ที่ไม่ถูกต้องในคำขอ: {{args}}',
     loadingDocument: 'เกิดปัญหาระหว่างการโหลดเอกสารที่มี ID {{id}}',
+    loadingItems: 'ไม่สามารถโหลดรายการได้',
     localesNotSaved_one: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
     localesNotSaved_other: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
     logoutFailed: 'การออกจากระบบล้มเหลว.',

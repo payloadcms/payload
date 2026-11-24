@@ -175,6 +175,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: '無効なファイル形式: {{value}}',
     invalidRequestArgs: 'リクエストに無効な引数が渡されました: {{args}}',
     loadingDocument: 'IDが {{id}} のデータを読み込む際に問題が発生しました。',
+    loadingItems: '項目を読み込めませんでした。',
     localesNotSaved_one: '次のロケールを保存できませんでした：',
     localesNotSaved_other: '次のロケールを保存できませんでした：',
     logoutFailed: 'ログアウトに失敗しました。',

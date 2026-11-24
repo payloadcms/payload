@@ -175,6 +175,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Neispravan tip datoteke: {{value}}',
     invalidRequestArgs: 'Nevažeći argumenti u zahtjevu: {{args}}',
     loadingDocument: 'Došlo je do problema pri učitavanju dokumenta čiji je ID {{id}}.',
+    loadingItems: 'Stavke nije bilo moguće učitati.',
     localesNotSaved_one: 'Sljedeću lokalnu postavku nije bilo moguće spremiti:',
     localesNotSaved_other: 'Sljedeće lokalne postavke nije bilo moguće spremiti:',
     logoutFailed: 'Odjava nije uspjela.',

@@ -173,6 +173,7 @@ export const slTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Neveljaven tip datoteke: {{value}}',
     invalidRequestArgs: 'V zahtevi so bili poslani neveljavni argumenti: {{args}}',
     loadingDocument: 'Pri nalaganju dokumenta z ID-jem {{id}} je prišlo do težave.',
+    loadingItems: 'Elementov ni bilo mogoče naložiti.',
     localesNotSaved_one: 'Naslednjega jezika ni bilo mogoče shraniti:',
     localesNotSaved_other: 'Naslednjih jezikov ni bilo mogoče shraniti:',
     logoutFailed: 'Odjava ni uspela.',

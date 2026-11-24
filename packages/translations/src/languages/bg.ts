@@ -175,6 +175,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Невалиден тип на файл: {{value}}',
     invalidRequestArgs: 'Невалидни аргументи в заявката: {{args}}',
     loadingDocument: 'Имаше проблем при зареждането на документа с идентификатор {{id}}.',
+    loadingItems: 'Елементите не можаха да се заредят.',
     localesNotSaved_one: 'Следната локализация не може да бъде запазена:',
     localesNotSaved_other: 'Следните локализации не могат да бъдат запазени:',
     logoutFailed: 'Излизането не бе успешно.',

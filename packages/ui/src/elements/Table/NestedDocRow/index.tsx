@@ -4,18 +4,15 @@ import type { Column, NestedDocRow } from 'payload'
 
 import React from 'react'
 
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { SpinnerIcon } from '../../../icons/Spinner/index.js'
 import { useNestedDocsTree } from '../../../providers/NestedDocs/index.js'
-import { branchKey } from '../../../providers/NestedDocs/state.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
+import { NestedDocCell } from '../NestedDocCell/index.js'
 import { TableRow } from '../TableRow/index.js'
-import './index.css'
 
 export function NestedDocRow({
   columns,
   hasCellNavigation,
   hasRowSelection,
+  isLastRendered,
   row,
   rowIndex,
   rowMetadata,
@@ -24,13 +21,13 @@ export function NestedDocRow({
   columns: Column[]
   hasCellNavigation: boolean
   hasRowSelection: boolean
+  isLastRendered: boolean
   row: Record<string, unknown>
   rowIndex: number
   rowMetadata: NestedDocRow
   useAsTitle?: string
 }) {
   const tree = useNestedDocsTree()
-  const { t } = useTranslation()
   const titleColumn =
     columns.find((column) => column.isLinkedColumn) ??
     columns.find((column) => column.accessor !== '_select')
@@ -40,7 +37,12 @@ export function NestedDocRow({
     typeof titleValue === 'string' || typeof titleValue === 'number'
       ? String(titleValue)
       : String(rowID)
-  const isPending = tree?.pending.has(branchKey({ parentID: rowID })) ?? false
+  const parent = tree?.docs.find((doc) => String(doc.id) === String(rowMetadata.parentID))
+  const parentTitleValue = parent && useAsTitle ? parent[useAsTitle] : undefined
+  const parentTitle =
+    typeof parentTitleValue === 'string' || typeof parentTitleValue === 'number'
+      ? String(parentTitleValue)
+      : undefined
 
   return (
     <TableRow
@@ -49,30 +51,15 @@ export function NestedDocRow({
       hasRowSelection={hasRowSelection}
       renderCell={({ column }) =>
         column === titleColumn ? (
-          <div
-            className="nested-doc-row__title"
-            style={{ paddingInlineStart: `calc(var(--spacer-4) * ${rowMetadata.depth})` }}
+          <NestedDocCell
+            id={String(rowID)}
+            isLastRendered={isLastRendered}
+            parentTitle={parentTitle}
+            row={rowMetadata}
+            title={title}
           >
-            {rowMetadata.hasChildren && (
-              <button
-                aria-busy={isPending}
-                aria-expanded={rowMetadata.isExpanded}
-                aria-label={`${t(rowMetadata.isExpanded ? 'general:collapse' : 'general:expand')}: ${title}`}
-                className="nested-doc-row__toggle"
-                onClick={() => tree?.toggle({ id: String(rowID) })}
-                type="button"
-              >
-                <span aria-hidden="true">
-                  {isPending ? (
-                    <SpinnerIcon size="sm" />
-                  ) : (
-                    <ChevronIcon direction={rowMetadata.isExpanded ? 'down' : 'right'} size={16} />
-                  )}
-                </span>
-              </button>
-            )}
             {column.renderedCells[rowIndex]}
-          </div>
+          </NestedDocCell>
         ) : (
           column.renderedCells[rowIndex]
         )
