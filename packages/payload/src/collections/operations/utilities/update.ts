@@ -176,18 +176,11 @@ export const updateDocument = async <
   })
   const isTrashing = Boolean(collectionConfig.trash && data?.deletedAt)
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
-  const isUnpublishingSingleLocale =
-    hasLocalizeStatusEnabled(collectionConfig) &&
-    !isSavingDraft &&
-    data?._status === 'draft' &&
-    Boolean(locale && locale !== 'all')
+  const preHookTopLevelFieldNames = getTopLevelFieldNames(data)
   const shouldLimitValidationToSubmittedFields =
-    isTrashing ||
-    (collectionConfig.trash && isRestoringDraftFromTrash) ||
-    unpublishAllLocales ||
-    isUnpublishingSingleLocale
+    isTrashing || (collectionConfig.trash && isRestoringDraftFromTrash) || unpublishAllLocales
   const submittedTopLevelFieldNames = shouldLimitValidationToSubmittedFields
-    ? getTopLevelFieldNames(data)
+    ? preHookTopLevelFieldNames
     : undefined
 
   if (collectionConfig.auth) {
@@ -261,6 +254,11 @@ export const updateDocument = async <
         : undefined,
   })
 
+  const dataAfterFieldBeforeValidate =
+    collectionConfig.hooks?.beforeValidate?.length || collectionConfig.hooks?.beforeChange?.length
+      ? { ...data }
+      : undefined
+
   // /////////////////////////////////////
   // beforeValidate - Collection
   // /////////////////////////////////////
@@ -299,6 +297,23 @@ export const updateDocument = async <
 
   const publicationData = { ...data }
 
+  const isUnpublishingSingleLocale =
+    statusFieldAccess &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    !isSavingDraft &&
+    data?._status === 'draft' &&
+    Boolean(locale && locale !== 'all')
+  const hookChangedFieldNames = dataAfterFieldBeforeValidate
+    ? Object.keys(data).filter((key) => data[key] !== dataAfterFieldBeforeValidate[key])
+    : []
+  const fieldsToValidate =
+    !isTrashing && data._status === 'published'
+      ? undefined
+      : (submittedTopLevelFieldNames ??
+        (isUnpublishingSingleLocale
+          ? new Set([...preHookTopLevelFieldNames, ...hookChangedFieldNames])
+          : undefined))
+
   // /////////////////////////////////////
   // beforeChange - Fields
   // /////////////////////////////////////
@@ -310,8 +325,7 @@ export const updateDocument = async <
     data: { ...data, id },
     doc: publicationHookDoc,
     docWithLocales,
-    fieldsToValidate:
-      !isTrashing && data._status === 'published' ? undefined : submittedTopLevelFieldNames,
+    fieldsToValidate,
     global: null,
     operation: 'update',
     overrideAccess,

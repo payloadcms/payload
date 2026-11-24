@@ -185,14 +185,8 @@ export const updateOperation = async <
       data._status = 'draft'
     }
 
-    const isUnpublishingSingleLocale =
-      hasLocalizeStatusEnabled(globalConfig) &&
-      !isSavingDraft &&
-      data?._status === 'draft' &&
-      Boolean(locale && locale !== 'all')
-
-    const submittedTopLevelFieldNames =
-      unpublishAllLocales || isUnpublishingSingleLocale ? getTopLevelFieldNames(data) : undefined
+    const preHookTopLevelFieldNames = getTopLevelFieldNames(data)
+    const submittedTopLevelFieldNames = unpublishAllLocales ? preHookTopLevelFieldNames : undefined
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -309,6 +303,11 @@ export const updateOperation = async <
           : undefined,
     })
 
+    const dataAfterFieldBeforeValidate =
+      globalConfig.hooks?.beforeValidate?.length || globalConfig.hooks?.beforeChange?.length
+        ? { ...data }
+        : undefined
+
     // /////////////////////////////////////
     // beforeValidate - Global
     // /////////////////////////////////////
@@ -349,6 +348,23 @@ export const updateOperation = async <
 
     const publicationData = { ...data }
 
+    const isUnpublishingSingleLocale =
+      statusFieldAccess &&
+      hasLocalizeStatusEnabled(globalConfig) &&
+      !isSavingDraft &&
+      data?._status === 'draft' &&
+      Boolean(locale && locale !== 'all')
+    const hookChangedFieldNames = dataAfterFieldBeforeValidate
+      ? Object.keys(data).filter((key) => data[key] !== dataAfterFieldBeforeValidate[key])
+      : []
+    const fieldsToValidate =
+      data._status === 'published'
+        ? undefined
+        : (submittedTopLevelFieldNames ??
+          (isUnpublishingSingleLocale
+            ? new Set([...preHookTopLevelFieldNames, ...hookChangedFieldNames])
+            : undefined))
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
@@ -359,7 +375,7 @@ export const updateOperation = async <
       data,
       doc: publicationHookDoc,
       docWithLocales: globalJSON,
-      fieldsToValidate: data._status === 'published' ? undefined : submittedTopLevelFieldNames,
+      fieldsToValidate,
       global: globalConfig,
       operation: 'update',
       req,
