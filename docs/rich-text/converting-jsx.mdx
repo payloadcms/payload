@@ -53,8 +53,9 @@ Without a frontend path, the converters log an error and fall back to `#` (or an
 <Banner type="warning">
   The `internalDocToHref` prop of `LinkJSXConverter`, `LinkHTMLConverter`,
   `LinkHTMLConverterAsync` and `LinkFeature` is deprecated and will be removed
-  in v5. If you pass it, it still takes precedence over
-  `fields.doc.frontendPath`.
+  in v5. If you pass it, it's only used for links without
+  `fields.doc.frontendPath`, and the converters log a warning when they ignore
+  it.
 </Banner>
 
 ### Lexical Blocks

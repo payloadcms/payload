@@ -79,7 +79,7 @@ export type LinkFeatureServerProps = {
    * output will have an empty href: `[link text]()`.
    *
    * @deprecated Add `generateFrontendPath` to the linked collections instead. Internal links then
-   * use `fields.doc.frontendPath`. Will be removed in v5.
+   * use `fields.doc.frontendPath`, and this is only used for links without one. Will be removed in v5.
    */
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
   /**

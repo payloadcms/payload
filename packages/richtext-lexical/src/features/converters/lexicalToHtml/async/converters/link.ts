@@ -4,10 +4,12 @@ import { sanitizeUrl } from 'payload/shared'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync, HTMLPopulateFn } from '../types.js'
 
+let hasWarnedAboutInternalDocToHref = false
+
 export const LinkHTMLConverterAsync: (args: {
   /**
    * @deprecated Add `generateFrontendPath` to the linked collections instead. Internal links then
-   * use `fields.doc.frontendPath`. Will be removed in v5.
+   * use `fields.doc.frontendPath`, and this is only used for links without one. Will be removed in v5.
    */
   internalDocToHref?: (args: {
     linkNode: SerializedLinkNode
@@ -36,17 +38,24 @@ export const LinkHTMLConverterAsync: (args: {
 
     let href: string = node.fields.url ?? ''
     if (node.fields.linkType === 'internal') {
-      if (internalDocToHref) {
-        href = await internalDocToHref({ linkNode: node, populate })
-      } else if (typeof node.fields.doc?.frontendPath === 'string') {
-        href = node.fields.doc.frontendPath
-      } else {
-        if (node.fields.doc?.frontendPath === undefined) {
+      const frontendPath = node.fields.doc?.frontendPath
+
+      if (frontendPath !== undefined) {
+        if (internalDocToHref && !hasWarnedAboutInternalDocToHref) {
+          hasWarnedAboutInternalDocToHref = true
           // eslint-disable-next-line no-console
-          console.error(
-            'Lexical => HTML converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
+          console.warn(
+            'Lexical => HTML converter: Link converter: internalDocToHref is ignored for links that have a frontend path from generateFrontendPath, and only used for the rest. internalDocToHref is deprecated and will be removed in v5',
           )
         }
+        href = frontendPath ?? '#'
+      } else if (internalDocToHref) {
+        href = await internalDocToHref({ linkNode: node, populate })
+      } else {
+        // eslint-disable-next-line no-console
+        console.error(
+          'Lexical => HTML converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
+        )
         href = '#' // fallback
       }
     }
