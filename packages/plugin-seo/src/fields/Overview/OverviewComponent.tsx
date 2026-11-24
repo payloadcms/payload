@@ -56,10 +56,12 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
     typeof metaTitle === 'string'
       ? metaTitle.length >= minTitle && metaTitle.length <= maxTitle
       : undefined
+
   const descIsValid =
     typeof metaDesc === 'string'
       ? metaDesc.length >= minDesc && metaDesc.length <= maxDesc
       : undefined
+
   const imageIsValid = Boolean(metaImage)
 
   const testResults = [titleIsValid, descIsValid, imageIsValid]
