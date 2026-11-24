@@ -2874,6 +2874,27 @@ describe('Versions', () => {
       ).toHaveText('dev@payloadcms.com')
     })
 
+    test('should respect read access for relationship labels', async () => {
+      await navigateToDiffVersionView()
+
+      const {
+        docs: [otherUserDoc],
+      } = await payload.find({
+        collection: 'text',
+        depth: 0,
+        where: { text: { equals: 'Document 3' } },
+      })
+
+      const constrainedRelationship = page.locator('[data-field-path="constrainedRelationship"]')
+
+      await expect(
+        constrainedRelationship.locator('.html-diff__diff-old .relationship-diff__info'),
+      ).toHaveText(`Untitled - ID: ${otherUserDoc?.id}`)
+      await expect(
+        constrainedRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
+      ).toHaveText('Document 2')
+    })
+
     test('correctly renders diff for richtext fields', async () => {
       await navigateToDiffVersionView()
 
