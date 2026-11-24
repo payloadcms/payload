@@ -35,6 +35,7 @@ import { ToastContainer } from '../../providers/ToastContainer/index.js'
 import { UploadHandlersProvider } from '../../providers/UploadHandlers/index.js'
 import { UploadSessionsProvider } from '../../providers/UploadSessions/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
+import { PersistentTemplateProvider } from '../../templates/Default/PersistentTemplate/index.js'
 
 export type RootProviderProps = {
   readonly children: React.ReactNode
@@ -124,7 +125,9 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                                           id={dndContextID}
                                                         >
                                                           <ProgressBar />
-                                                          {children}
+                                                          <PersistentTemplateProvider>
+                                                            {children}
+                                                          </PersistentTemplateProvider>
                                                         </DndContext>
                                                       </UploadHandlersProvider>
                                                     </UploadSessionsProvider>

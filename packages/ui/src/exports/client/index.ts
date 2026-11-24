@@ -488,6 +488,7 @@ export { OperationProvider, useOperation } from '../../providers/Operation/index
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProviders } from '../../layouts/Root/RootProviders.js'
 export type { RootProviderProps } from '../../layouts/Root/RootProviders.js'
+export { PersistentTemplateRegistration } from '../../templates/Default/PersistentTemplate/index.js'
 export {
   PayloadLink,
   RouterAdapterContext,
