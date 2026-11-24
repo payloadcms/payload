@@ -4,7 +4,7 @@ import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
 import { transpose } from 'date-fns'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useId, useMemo } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -46,6 +46,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const { config } = useConfig()
   const { i18n } = useTranslation()
   const { dispatchFields, setModified } = useForm()
+  const fallbackID = useId()
+  const inputID = datePickerProps?.overrides?.id || fallbackID
 
   const memoizedValidate: DateFieldValidation = useCallback(
     (value, options) => {
@@ -68,6 +70,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const wrapperID = `field-${path.replace(/\./g, '__')}`
   const timezonePath = path + '_tz'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
 
@@ -178,10 +181,16 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={inputID}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
-      <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
+      <div className={`${fieldBaseClass}__wrap`} id={wrapperID === inputID ? undefined : wrapperID}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
@@ -192,6 +201,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           onChange={onChange}
           overrides={{
             ...datePickerProps?.overrides,
+            id: inputID,
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={readOnly || disabled}

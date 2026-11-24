@@ -871,6 +871,30 @@ describe('Date', () => {
   })
 
   describe('A11y', () => {
+    test('should name the date input and its clear button', async () => {
+      await page.goto(url.create)
+
+      const dateInput = page.getByRole('textbox', { name: 'Day Only', exact: true })
+      const field = page.locator('#field-dayOnly')
+
+      await expect(dateInput).toHaveValue('')
+      await dateInput.click()
+      await field
+        .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+        .click()
+      await expect(dateInput).not.toHaveValue('')
+
+      const clearButton = field.getByRole('button', { name: 'Clear', exact: true })
+      await expect(clearButton).toBeVisible()
+      const results = await runAxeScan({ include: ['#field-dayOnly'], page, testInfo: test.info() })
+      expect(results.violations.filter(({ id }) => ['button-name', 'label'].includes(id))).toEqual(
+        [],
+      )
+
+      await clearButton.press('Enter')
+      await expect(dateInput).toHaveValue('')
+    })
+
     test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-default').waitFor()
