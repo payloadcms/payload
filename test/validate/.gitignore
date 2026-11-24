@@ -1,4 +1,5 @@
-# TODO: commit the generated file and remove this ignore once int.spec.ts type-checks against it.
+# TODO: commit the generated file, and remove this ignore and the matching exclude in tsconfig.json,
+# once int.spec.ts type-checks against it.
 # Generating it adds 17 type errors there, e.g. creates that omit the required `status`, a fake
 # user from a non-auth collection, and a Lexical fixture whose node types are inferred as string.
 payload-types.ts
