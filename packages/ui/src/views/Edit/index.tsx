@@ -276,7 +276,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     (json, ctx) => {
-      const { context, isCurrent = () => true } = ctx || {}
+      const { context, isCurrent = () => true, isQueueReset = () => false } = ctx || {}
 
       const document = json?.doc || json?.result
 
@@ -288,7 +288,7 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      if (isCurrent()) {
+      if (!isQueueReset()) {
         setLastUpdateTime(new Date(updatedAt).getTime())
 
         if (context?.incrementVersionCount !== false) {
@@ -315,7 +315,7 @@ export function DefaultEditView({
         })
       }
 
-      if (isCurrent()) {
+      if (isCurrent() || !isEditing) {
         if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
           // Store success message to show after redirect
           if (json.message && typeof window !== 'undefined') {
