@@ -7,6 +7,83 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadTransforms".
+ */
+export type UploadTransforms = {
+  /**
+   * Time range on the original, in milliseconds. Start inclusive, end exclusive.
+   */
+  clip?: {
+    endMs: number;
+    startMs: number;
+  };
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Encoding settings for the output format. Does not select the format.
+   */
+  encoding?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Mirror the image on one or both axes.
+   */
+  flip?: {
+    horizontal?: boolean;
+    vertical?: boolean;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  /**
+   * Keep or remove metadata embedded in the output file.
+   */
+  metadataPolicy?: {
+    mode: 'preserve' | 'strip';
+  };
+  /**
+   * One-based, inclusive page range on the original document.
+   */
+  pageRange?: {
+    endPage: number;
+    startPage: number;
+  };
+  /**
+   * Video frame to use as the poster, in milliseconds on the original.
+   */
+  posterFrame?: {
+    timestampMs: number;
+  };
+  /**
+   * Target size for visual media.
+   */
+  resize?: {
+    fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+    height?: number;
+    width?: number;
+    withoutEnlargement?: boolean;
+  };
+  /**
+   * Clockwise rotation in degrees.
+   */
+  rotate?: {
+    angle: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -62,24 +139,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_47553BF6".
+ * via the `definition` "LexicalNodes_FE65E5AC".
  */
-export type LexicalNodes_47553BF6 =
+export type LexicalNodes_FE65E5AC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_47553BF6>
+  | SerializedParagraphNode<LexicalNodes_FE65E5AC>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_47553BF6>
+  | SerializedHeadingNode<LexicalNodes_FE65E5AC>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_47553BF6>
-  | SerializedListNode<LexicalNodes_47553BF6>
-  | SerializedListItemNode<LexicalNodes_47553BF6>
-  | SerializedAutoLinkNode<LexicalNodes_47553BF6, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_47553BF6, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_FE65E5AC>
+  | SerializedListNode<LexicalNodes_FE65E5AC>
+  | SerializedListItemNode<LexicalNodes_FE65E5AC>
+  | SerializedAutoLinkNode<LexicalNodes_FE65E5AC, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_FE65E5AC, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -115,13 +192,13 @@ export type LexicalNodes_47553BF6 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_84E9EB04".
+ * via the `definition` "LexicalNodes_1FAC9198".
  */
-export type LexicalNodes_84E9EB04 =
+export type LexicalNodes_1FAC9198 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_84E9EB04>
+  | SerializedParagraphNode<LexicalNodes_1FAC9198>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -413,6 +490,17 @@ export interface User {
         expiresAt: string;
         refreshCount?: number | null;
         refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
       }[]
     | null;
   password?: string | null;
@@ -459,6 +547,17 @@ export interface SecondaryAdminUser {
         expiresAt: string;
         refreshCount?: number | null;
         refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
       }[]
     | null;
   password?: string | null;
@@ -503,7 +602,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_47553BF6> | null;
+  richText?: LexicalRichText<LexicalNodes_FE65E5AC> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -1136,9 +1235,9 @@ export interface Diff {
     | null;
   zeroDepthRelationship?: (string | null) | User;
   constrainedRelationship?: (string | null) | Text;
-  richtext?: LexicalRichText<LexicalNodes_47553BF6> | null;
-  richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_84E9EB04> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_47553BF6> | null;
+  richtext?: LexicalRichText<LexicalNodes_FE65E5AC> | null;
+  richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_1FAC9198> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_FE65E5AC> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -1304,6 +1403,8 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -1313,6 +1414,7 @@ export interface Media {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -1368,6 +1470,8 @@ export interface DraftWithUpload {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -1377,6 +1481,7 @@ export interface DraftWithUpload {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -1418,6 +1523,8 @@ export interface DraftWithUploadCloudStorage {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -1427,6 +1534,7 @@ export interface DraftWithUploadCloudStorage {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -1464,6 +1572,8 @@ export interface Media2 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -1473,6 +1583,7 @@ export interface Media2 {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -2371,6 +2482,8 @@ export interface DraftWithUploadSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -2382,6 +2495,7 @@ export interface DraftWithUploadSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -2406,6 +2520,8 @@ export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -2417,6 +2533,7 @@ export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -2437,6 +2554,8 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -2448,6 +2567,7 @@ export interface MediaSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -2468,6 +2588,8 @@ export interface Media2Select<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -2479,6 +2601,7 @@ export interface Media2Select<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -2532,6 +2655,9 @@ export interface UsersSelect<T extends boolean = true> {
         expiresAt?: T;
         refreshCount?: T;
         refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -2559,6 +2685,9 @@ export interface SecondaryAdminUsersSelect<T extends boolean = true> {
         expiresAt?: T;
         refreshCount?: T;
         refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
