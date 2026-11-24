@@ -206,8 +206,8 @@ export type AfterReadNodeHook<T extends SerializedLexicalNode> = (
 ) => Promise<T> | T
 
 /**
- * Runs in the REST and Local API each time a population of the node's sub-fields finishes, so the
- * node can read its populated data. It mutates the node in place.
+ * @internal Runs in the REST and Local API each time a population of the node's sub-fields
+ * finishes, so the node can read its populated data. It mutates the node in place.
  */
 export type AfterPopulateNodeHook<T extends SerializedLexicalNode> = (
   args: BaseNodeHookArgs<T>,
@@ -286,6 +286,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    */
   hooks?: {
     afterChange?: Array<AfterChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    /** @internal */
     afterPopulate?: Array<AfterPopulateNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
     afterRead?: Array<AfterReadNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
     beforeChange?: Array<BeforeChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>

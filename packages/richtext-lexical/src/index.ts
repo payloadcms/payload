@@ -283,7 +283,6 @@ export type {
 export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
-  AfterPopulateNodeHook,
   AfterReadNodeHook,
   AfterReadNodeHookArgs,
   BaseNodeHookArgs,
