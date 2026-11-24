@@ -1,10 +1,10 @@
-.nested-docs-branch-row__title {
+.nested-doc-row__title {
   align-items: center;
   display: flex;
   gap: var(--spacer-1);
 }
 
-.nested-docs-branch-row__toggle {
+.nested-doc-row__toggle {
   align-items: center;
   background: none;
   border: 0;
@@ -15,10 +15,10 @@
   padding: var(--spacer-1);
 }
 
-.nested-docs-branch-row__toggle:focus-visible {
+.nested-doc-row__toggle:focus-visible {
   outline: var(--stroke-width-medium) solid var(--color-text);
 }
 
-.nested-docs-branch-row__child {
+.nested-doc-row__child {
   padding-inline-start: var(--spacer-4);
 }

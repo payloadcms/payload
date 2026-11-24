@@ -11,7 +11,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { TableRow } from '../TableRow/index.js'
 import './index.css'
 
-export function NestedDocsBranchRow({
+export function NestedDocRow({
   collectionSlug,
   columns,
   hasCellNavigation,
@@ -91,12 +91,12 @@ export function NestedDocsBranchRow({
         hasRowSelection={hasRowSelection}
         renderCell={({ column }) =>
           column === titleColumn ? (
-            <div className="nested-docs-branch-row__title">
+            <div className="nested-doc-row__title">
               {rowMetadata.hasChildren && (
                 <button
                   aria-expanded={isExpanded}
                   aria-label={`${t(hasError ? 'general:retry' : isExpanded ? 'general:collapse' : 'general:expand')}: ${title}`}
-                  className="nested-docs-branch-row__toggle"
+                  className="nested-doc-row__toggle"
                   disabled={isPending}
                   onClick={toggle}
                   type="button"
@@ -128,7 +128,7 @@ export function NestedDocsBranchRow({
               const cell = branchColumn?.renderedCells[childIndex]
 
               return column === titleColumn ? (
-                <div className="nested-docs-branch-row__child">{cell}</div>
+                <div className="nested-doc-row__child">{cell}</div>
               ) : (
                 cell
               )

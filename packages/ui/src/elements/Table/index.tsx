@@ -5,7 +5,7 @@ import type { Column, NestedDocRow, Sort } from 'payload'
 import React, { useRef } from 'react'
 
 import { useGridNavigation } from './GridNavigation/useGridNavigation.js'
-import { NestedDocsBranchRow } from './NestedDocsBranchRow/index.js'
+import { NestedDocRow } from './NestedDocRow/index.js'
 import { TableGridContext, useTableID, useTableNavigationLabel } from './TableIdentity.js'
 import { TableRow } from './TableRow/index.js'
 import './index.css'
@@ -93,7 +93,7 @@ export const Table: React.FC<Props> = ({
               const metadata = nestedDocs?.rows[String(row.id)]
 
               return nestedDocs && metadata ? (
-                <NestedDocsBranchRow
+                <NestedDocRow
                   collectionSlug={nestedDocs.collectionSlug}
                   columns={activeColumns}
                   hasCellNavigation={isGrid}
