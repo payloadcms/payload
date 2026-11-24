@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslation } from '@payloadcms/ui'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'
 
@@ -15,69 +15,58 @@ export const LengthIndicator: React.FC<{
 }> = (props) => {
   const { maxLength = 0, minLength = 0, text } = props
 
-  const [labelStyle, setLabelStyle] = useState({
-    backgroundColor: '',
-    color: '',
-  })
-
-  const [label, setLabel] = useState('')
-  const [barWidth, setBarWidth] = useState<number>(0)
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
-  useEffect(() => {
-    const textLength = text?.length || 0
+  const textLength = text?.length || 0
 
-    if (textLength === 0) {
-      setLabel(t('plugin-seo:missing'))
-      setLabelStyle({
+  let label: string
+  let labelStyle: { backgroundColor: string; color: string }
+  let barWidth: number
+
+  if (textLength === 0) {
+    label = t('plugin-seo:missing')
+    labelStyle = {
+      backgroundColor: 'var(--seo-danger-bg)',
+      color: 'var(--seo-danger-text)',
+    }
+    barWidth = 0
+  } else {
+    const progress = (textLength - minLength) / (maxLength - minLength)
+
+    if (progress < 0) {
+      const ratioUntilMin = textLength / minLength
+
+      if (ratioUntilMin > 0.9) {
+        label = t('plugin-seo:almostThere')
+        labelStyle = {
+          backgroundColor: 'var(--seo-warning-bg)',
+          color: 'var(--seo-warning-text)',
+        }
+      } else {
+        label = t('plugin-seo:tooShort')
+        labelStyle = {
+          backgroundColor: 'var(--seo-short-bg)',
+          color: 'var(--seo-danger-text)',
+        }
+      }
+
+      barWidth = ratioUntilMin
+    } else if (progress <= 1) {
+      label = t('plugin-seo:good')
+      labelStyle = {
+        backgroundColor: 'var(--seo-success-bg)',
+        color: 'var(--seo-success-text)',
+      }
+      barWidth = progress
+    } else {
+      label = t('plugin-seo:tooLong')
+      labelStyle = {
         backgroundColor: 'var(--seo-danger-bg)',
         color: 'var(--seo-danger-text)',
-      })
-      setBarWidth(0)
-    } else {
-      const progress = (textLength - minLength) / (maxLength - minLength)
-
-      if (progress < 0) {
-        const ratioUntilMin = textLength / minLength
-
-        if (ratioUntilMin > 0.9) {
-          setLabel(t('plugin-seo:almostThere'))
-          setLabelStyle({
-            backgroundColor: 'var(--seo-warning-bg)',
-            color: 'var(--seo-warning-text)',
-          })
-        } else {
-          setLabel(t('plugin-seo:tooShort'))
-          setLabelStyle({
-            backgroundColor: 'var(--seo-short-bg)',
-            color: 'var(--seo-danger-text)',
-          })
-        }
-
-        setBarWidth(ratioUntilMin)
       }
-
-      if (progress >= 0 && progress <= 1) {
-        setLabel(t('plugin-seo:good'))
-        setLabelStyle({
-          backgroundColor: 'var(--seo-success-bg)',
-          color: 'var(--seo-success-text)',
-        })
-        setBarWidth(progress)
-      }
-
-      if (progress > 1) {
-        setLabel(t('plugin-seo:tooLong'))
-        setLabelStyle({
-          backgroundColor: 'var(--seo-danger-bg)',
-          color: 'var(--seo-danger-text)',
-        })
-        setBarWidth(1)
-      }
+      barWidth = 1
     }
-  }, [minLength, maxLength, text, t])
-
-  const textLength = text?.length || 0
+  }
 
   const charsUntilMax = maxLength - textLength
   const charsUntilMin = minLength - textLength
