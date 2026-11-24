@@ -1,8 +1,8 @@
 import type { Endpoint } from '../../config/types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { ignoreCrossSiteNavigationUser } from '../../auth/ignoreCrossSiteNavigationUser.js'
 import { handleSchedules } from '../operations/handleSchedules/index.js'
-import { ignoreCrossSiteNavigationUser } from './ignoreCrossSiteNavigationUser.js'
 import { configHasJobs } from './run.js'
 
 /**
