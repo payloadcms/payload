@@ -37,9 +37,11 @@ export const LinkJSXConverter: (args: {
       } else if (typeof node.fields.doc?.frontendPath === 'string') {
         href = node.fields.doc.frontendPath
       } else {
-        console.error(
-          'Lexical => JSX converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
-        )
+        if (node.fields.doc?.frontendPath === undefined) {
+          console.error(
+            'Lexical => JSX converter: Link converter: found internal link without a frontend path. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
+          )
+        }
         href = '#' // fallback
       }
     }
