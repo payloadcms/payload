@@ -435,10 +435,14 @@ export const renderListView = async (
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
-        limit: query?.limit ? Number(query.limit) : undefined,
+        limit: shouldLoadNestedDocsTree
+          ? Math.min(100, Math.max(1, Number(query.limit) || 10))
+          : query?.limit
+            ? Number(query.limit)
+            : undefined,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.page ? Number(query.page) : undefined,
+        page: shouldLoadNestedDocsTree ? 1 : query?.page ? Number(query.page) : undefined,
         populate: thumbnailPopulate,
         req,
         select,
@@ -652,6 +656,12 @@ export const renderListView = async (
       hierarchyData,
       HierarchyIcon,
       listPreferences: collectionPreferences,
+      nestedDocExpanded: shouldLoadNestedDocsTree
+        ? (Array.isArray(query?.treeExpanded) ? query.treeExpanded : [query?.treeExpanded]).filter(
+            (value): value is string => typeof value === 'string',
+          )
+        : undefined,
+      nestedDocRows,
       newDocumentURL,
       queryPreset,
       queryPresetPermissions,

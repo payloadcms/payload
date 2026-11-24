@@ -38,11 +38,27 @@ test.describe('Nested document tree', () => {
 
   test('should expand one authorized branch in Tree', async ({ page }) => {
     await page.getByRole('radio', { name: 'Tree', exact: true }).check()
-    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+    const expand = page.getByRole('button', { name: 'Expand: About us', exact: true })
+
+    await expand.focus()
+    await page.keyboard.press('Enter')
 
     await expect(page.getByRole('link', { name: 'Department 12', exact: true })).toBeVisible()
     await expect(
       page.getByRole('button', { name: 'Collapse: About us', exact: true }),
-    ).toBeVisible()
+    ).toBeFocused()
+  })
+
+  test('should page through children and restore an expanded branch', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 480 })
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+
+    await expect(page.getByRole('link', { name: 'Department 04', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: /^Load more:/ }).scrollIntoViewIfNeeded()
+
+    await expect(page.getByRole('link', { name: 'Department 01', exact: true })).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('link', { name: 'Department 12', exact: true })).toBeVisible()
   })
 })
