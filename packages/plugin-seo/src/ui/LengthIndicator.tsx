@@ -33,8 +33,17 @@ export const LengthIndicator: React.FC<{
   } else {
     const range = maxLength - minLength
     // When minLength === maxLength, only that exact length is good
-    const progress =
-      range > 0 ? (textLength - minLength) / range : textLength === minLength ? 1 : textLength < minLength ? -1 : 2
+    let progress: number
+
+    if (range > 0) {
+      progress = (textLength - minLength) / range
+    } else if (textLength === minLength) {
+      progress = 1
+    } else if (textLength < minLength) {
+      progress = -1
+    } else {
+      progress = 2
+    }
 
     if (progress < 0) {
       const ratioUntilMin = textLength / minLength
