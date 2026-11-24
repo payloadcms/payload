@@ -2,9 +2,11 @@
  * Normalizes a storage prefix for use in object keys and URLs.
  *
  * Decodes URI components once (so query-style `%2F` becomes `/`), rejects
- * values that still contain percent-encodings after decoding (e.g. `%252f`),
+ * values that still contain a `%` after decoding (e.g. `%252f` or `%25`),
  * then removes control characters, normalizes slashes, drops `.` / `..` segments,
  * and strips leading slashes.
+ *
+ * Sanitizing an already sanitized prefix returns it unchanged.
  */
 export function sanitizePrefix(prefix: string): string {
   let decodedPrefix: string
@@ -15,8 +17,8 @@ export function sanitizePrefix(prefix: string): string {
     return ''
   }
 
-  // Reject multi-encoded values (e.g. `%252f`) by allowing only a single decode pass.
-  if (/%[0-9a-f]{2}/i.test(decodedPrefix)) {
+  // Allow a single decode pass only. A `%` left over could be decoded again later.
+  if (decodedPrefix.includes('%')) {
     return ''
   }
 

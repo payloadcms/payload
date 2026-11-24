@@ -5,7 +5,10 @@ import type { AllowList, PluginOptions } from './types.js'
 import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
-import { getNormalizeUploadPrefixHook } from './hooks/normalizeUploadPrefix.js'
+import {
+  getNormalizeUploadPrefixHook,
+  getResolveUploadPrefixHook,
+} from './hooks/normalizeUploadPrefix.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
@@ -183,6 +186,13 @@ export const cloudStoragePlugin =
                   useCompositePrefixes,
                 }),
                 getPreserveFileDataHook(),
+              ],
+              beforeOperation: [
+                ...(existingCollection.hooks?.beforeOperation || []),
+                getResolveUploadPrefixHook({
+                  collectionPrefix: options.prefix,
+                  useCompositePrefixes,
+                }),
               ],
             },
             upload: {

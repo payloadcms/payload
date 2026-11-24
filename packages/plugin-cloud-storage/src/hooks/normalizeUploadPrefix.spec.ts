@@ -6,6 +6,8 @@ import { getFields } from '../fields/getFields.js'
 import {
   getNormalizeUploadPrefixFieldHook,
   getNormalizeUploadPrefixHook,
+  getResolveUploadPrefixHook,
+  getRestoreStoredPrefixFieldHook,
 } from './normalizeUploadPrefix.js'
 
 const runHook = ({
@@ -131,5 +133,91 @@ describe('new upload prefixes', () => {
         await runFieldHook({ previousValue: 'legacy-invoices', value: 'legacy-invoices' }),
       ).toBe('legacy-invoices')
     })
+  })
+})
+
+describe('upload prefix before filename selection', () => {
+  const runOperationHook = async ({
+    data,
+    operation = 'create',
+    req = { context: {}, file: {}, payload: { db: { findOne: () => Promise.resolve(null) } } },
+    useCompositePrefixes,
+  }: {
+    data: Record<string, unknown>
+    operation?: string
+    req?: Record<string, unknown>
+    useCompositePrefixes?: boolean
+  }) =>
+    (await getResolveUploadPrefixHook({ collectionPrefix: 'media', useCompositePrefixes })({
+      args: { data },
+      collection: { slug: 'media' },
+      operation,
+      req,
+    } as never)) as { data: Record<string, unknown> }
+
+  it('should resolve the prefix of an update with a file', async () => {
+    const result = await runOperationHook({ data: { prefix: './nested/' }, operation: 'update' })
+
+    expect(result.data.prefix).toBe('media/nested')
+  })
+
+  it('should leave the prefix of an update without a file alone', async () => {
+    const result = await runOperationHook({
+      data: { prefix: './nested/' },
+      operation: 'update',
+      req: { context: {} },
+    })
+
+    expect(result.data.prefix).toBe('./nested/')
+  })
+
+  it('should reject a prefix inside the object folder of a stored version', async () => {
+    const result = getResolveUploadPrefixHook({ collectionPrefix: 'media' })({
+      args: { data: { prefix: 'draft-key' } },
+      collection: { slug: 'media', versions: { drafts: true } },
+      operation: 'create',
+      req: {
+        context: {},
+        file: {},
+        payload: {
+          db: {
+            findOne: () => Promise.resolve(null),
+            findVersions: () => Promise.resolve({ docs: [{ id: 'version' }] }),
+          },
+        },
+      },
+    } as never)
+
+    await expect(result).rejects.toThrow('The provided prefix is not allowed.')
+  })
+
+  it('should give prefix hooks the stored prefix after a file update', () => {
+    const value = getRestoreStoredPrefixFieldHook()({
+      previousValue: 'media/nested',
+      req: { file: {} },
+      value: null,
+    } as never)
+
+    expect(value).toBe('media/nested')
+  })
+
+  it('should check the filename of a duplicate across the collection', async () => {
+    const result = await getResolveUploadPrefixHook({ collectionPrefix: 'media' })({
+      args: { data: { prefix: 'nested' }, duplicateFromID: 'source' },
+      collection: { slug: 'media' },
+      operation: 'create',
+      req: { context: {} },
+    } as never)
+
+    expect(result.data).toStrictEqual({})
+  })
+
+  it('should resolve composite prefixes relative to the collection prefix', async () => {
+    const result = await runOperationHook({
+      data: { prefix: './nested/' },
+      useCompositePrefixes: true,
+    })
+
+    expect(result.data.prefix).toBe('nested')
   })
 })
