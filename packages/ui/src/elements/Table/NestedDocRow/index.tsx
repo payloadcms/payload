@@ -12,7 +12,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { TableRow } from '../TableRow/index.js'
 import './index.css'
 
-export function NestedDocsBranchRow({
+export function NestedDocRow({
   columns,
   hasCellNavigation,
   hasRowSelection,
@@ -50,7 +50,7 @@ export function NestedDocsBranchRow({
       renderCell={({ column }) =>
         column === titleColumn ? (
           <div
-            className="nested-docs-branch-row__title"
+            className="nested-doc-row__title"
             style={{ paddingInlineStart: `calc(var(--spacer-4) * ${rowMetadata.depth})` }}
           >
             {rowMetadata.hasChildren && (
@@ -58,7 +58,7 @@ export function NestedDocsBranchRow({
                 aria-busy={isPending}
                 aria-expanded={rowMetadata.isExpanded}
                 aria-label={`${t(rowMetadata.isExpanded ? 'general:collapse' : 'general:expand')}: ${title}`}
-                className="nested-docs-branch-row__toggle"
+                className="nested-doc-row__toggle"
                 onClick={() => tree?.toggle({ id: String(rowID) })}
                 type="button"
               >
