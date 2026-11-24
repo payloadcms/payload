@@ -20,6 +20,8 @@ type UploadFileEntriesArgs = {
   collection: SanitizedCollectionConfig
   doc: Record<string, unknown>
   req: PayloadRequest
+  /** Read only these roles, so a damaged entry for another role does not throw. */
+  roles?: StoredFileRole[]
   /** Treat local entries as Payload-managed without checking their URL, for a next state Payload built. */
   trustGenerated?: boolean
 }
@@ -83,11 +85,15 @@ export const getUploadFileEntries = ({
   collection,
   doc,
   req,
+  roles,
   trustGenerated = false,
 }: UploadFileEntriesArgs): UploadFileEntry[] => {
   const isManaged = isManagedUpload({ doc })
+  const objects = getUploadFileObjects({ doc }).filter(
+    ({ role }) => !roles || roles.some((wanted) => isSameFileRole({ first: wanted, second: role })),
+  )
 
-  return getUploadFileObjects({ doc }).flatMap(({ role, value }): UploadFileEntry[] => {
+  return objects.flatMap(({ role, value }): UploadFileEntry[] => {
     if (typeof value.filename !== 'string') {
       return []
     }

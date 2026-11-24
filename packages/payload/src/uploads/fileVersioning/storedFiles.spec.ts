@@ -334,6 +334,24 @@ it('should throw for a stored entry whose storage key is not safe', () => {
   ).toThrow('Unsafe managed storage key')
 })
 
+it('should read only the given roles without checking the other entries', () => {
+  const entries = getUploadFileEntries({
+    collection,
+    doc: {
+      _objectKey: 'main-key',
+      filename: 'photo.png',
+      original: { ...original, filename: '../photo.png' },
+      variants: { 'a/b': { filename: 'photo-ab.png' } },
+    },
+    req: {} as PayloadRequest,
+    roles: [{ type: 'default' }],
+  })
+
+  expect(entries).toEqual([
+    { key: 'main-key/photo.png', role: { type: 'default' }, status: 'stored' },
+  ])
+})
+
 it('should list the main file, the original and each size object in that order', () => {
   const card = { filename: 'photo-card.png' }
   const doc = {
