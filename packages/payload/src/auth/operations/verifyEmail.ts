@@ -46,16 +46,13 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
       throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
     }
 
-    // Ensure updatedAt date is always updated
-    user.updatedAt = new Date().toISOString()
-
     await req.payload.db.updateOne({
       id: user.id,
       collection: collection.config.slug,
       data: {
-        ...user,
         _verificationToken: null,
         _verified: true,
+        updatedAt: new Date().toISOString(),
       },
       req,
       returning: false,

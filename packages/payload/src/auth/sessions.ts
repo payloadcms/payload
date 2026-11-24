@@ -55,7 +55,7 @@ export const addSessionToUser = async ({
     await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
-      data: user,
+      data: { sessions: user.sessions, updatedAt: null },
       req,
       returning: false,
     })
@@ -87,7 +87,7 @@ export const revokeSession = async ({
     await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
-      data: user,
+      data: { sessions: user.sessions, updatedAt: null },
       req,
       returning: false,
     })

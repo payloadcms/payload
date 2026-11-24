@@ -1,4 +1,5 @@
 import { status as httpStatus } from 'http-status'
+import { isDeepStrictEqual } from 'util'
 
 import type {
   Collection,
@@ -14,6 +15,7 @@ import { buildBeforeOperation } from '../../collections/operations/utilities/bui
 import { APIError, Forbidden, ValidationError } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
@@ -101,6 +103,8 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
     }
 
+    const originalUser = deepCopyObject(user)
+
     await validatePasswordField({
       collectionConfig,
       overrideAccess,
@@ -157,10 +161,24 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       user.sessions = []
     }
 
+    const { sessions, ...changedData } = Object.fromEntries(
+      Object.entries(user).filter(([key, value]) => !isDeepStrictEqual(value, originalUser[key])),
+    )
+
+    if (sessions) {
+      await payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: { sessions, updatedAt: user.updatedAt },
+        req,
+        returning: false,
+      })
+    }
+
     const doc = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
-      data: user,
+      data: changedData,
       req,
     })
 

@@ -143,6 +143,10 @@ export const traverseFields = ({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      if (fieldData === undefined) {
+        return
+      }
+
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       const arrayPathPrefix = `${path || ''}${field.name}.`
 
@@ -255,6 +259,10 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
+      if (fieldData === undefined) {
+        return
+      }
+
       ;(field.blockReferences ?? field.blocks).forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
