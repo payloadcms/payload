@@ -7,6 +7,7 @@ import { Readable } from 'stream'
 
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
+import { escapeCSVFormulaString } from '../utilities/escapeCSVFormulaString.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFilename } from '../utilities/getFilename.js'
@@ -399,6 +400,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
           const csvString = stringify(paddedRows, {
             bom: isFirstBatch,
+            cast: { string: escapeCSVFormulaString },
             header: isFirstBatch,
             columns: allColumns,
           })
@@ -585,6 +587,7 @@ export const createExport = async (args: CreateExportArgs) => {
     outputData.push(
       stringify(paddedRows, {
         bom: true,
+        cast: { string: escapeCSVFormulaString },
         header: true,
         columns: finalColumns,
       }),
