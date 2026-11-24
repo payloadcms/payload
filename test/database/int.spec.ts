@@ -958,6 +958,51 @@ describe('database', () => {
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
     })
+
+    it(
+      'should not return related documents used for sorting even with allowAdditionalKeys true',
+      { db: 'mongo' },
+      async () => {
+        const simple = await payload.create({
+          collection: 'simple',
+          data: { text: 'sorted simple' },
+        })
+
+        const category = await payload.create({
+          collection: 'categories',
+          data: { simple: simple.id, title: 'sorted category' },
+        })
+
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { category: category.id, title: 'sorted post' },
+        })
+
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+
+        payload.db.allowAdditionalKeys = true
+
+        try {
+          for (const sort of ['category.title', 'category.simple.text']) {
+            const result = await payload.find({
+              collection: postsSlug,
+              depth: 0,
+              sort,
+              where: { id: { equals: post.id } },
+            })
+
+            expect(result.docs).toHaveLength(1)
+            expect(result.docs[0]).not.toHaveProperty('__category')
+            expect(result.docs[0]).not.toHaveProperty('____category')
+          }
+        } finally {
+          payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+          await payload.delete({ id: post.id, collection: postsSlug })
+          await payload.delete({ id: category.id, collection: 'categories' })
+          await payload.delete({ id: simple.id, collection: 'simple' })
+        }
+      },
+    )
   })
 
   it('should query hasMany select field with contains operator', async () => {

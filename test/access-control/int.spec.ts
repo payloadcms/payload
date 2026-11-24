@@ -1784,6 +1784,11 @@ describe('Access Control', () => {
             sort: 'postLabel',
           }),
           payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'unrestrictedDoc.hiddenName',
+          }),
+          payload.find({
             collection: slug,
             overrideAccess: false,
             sort: 'restrictedField.en',
