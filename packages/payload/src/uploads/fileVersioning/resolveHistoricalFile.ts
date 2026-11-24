@@ -9,7 +9,6 @@ import {
   getUploadFileEntries,
   getUploadFileObjects,
   hasStoredOriginal,
-  isSameFileRole,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
@@ -55,11 +54,18 @@ export const resolveHistoricalFile = async ({
     where: { id: { equals: versionID } },
   })
   const matched = docs[0]
-  const historical = matched
-    ? await resolveVersionFile({ collection, filename, isOriginal, prefix, req, row: matched })
-    : undefined
+  let historical: HistoricalFile | undefined
+  let resolveFailure: { err: unknown } | undefined
 
-  // Check both policies before exposing a missing version or a filename mismatch.
+  try {
+    historical = matched
+      ? await resolveVersionFile({ collection, filename, isOriginal, prefix, req, row: matched })
+      : undefined
+  } catch (err) {
+    resolveFailure = { err }
+  }
+
+  // Check both policies before exposing a missing version, a filename mismatch or a damaged entry.
   if (!historical?.isBuiltAtRequest) {
     await checkFileAccess({ collection, documentID: matched?.parent, filename, req })
   }
@@ -71,6 +77,10 @@ export const resolveHistoricalFile = async ({
     req,
     showHiddenFields: true,
   })
+
+  if (resolveFailure) {
+    throw resolveFailure.err
+  }
 
   if (!historical) {
     throw new NotFound(req.t)
@@ -105,17 +115,30 @@ const resolveVersionFile = async ({
     ? values.find(({ role }) => role.type === 'original')
     : values.find(({ role, value }) => role.type !== 'original' && value.filename === filename)
 
-  // Find the requested file before reading the version's entries. Reading them throws for an
-  // unsafe storage key, so a request for a file that is not in this version must return
-  // "not found" first, not a server error from a damaged entry elsewhere in the version.
+  // Find the requested file, then read only the entries it needs. Reading an entry throws for an
+  // unsafe storage key, so a damaged entry elsewhere in the version must not fail this request.
   if (!match || (prefix !== undefined && (match.value.prefix ?? '') !== prefix)) {
     return
   }
 
-  const entries = getUploadFileEntries({ collection: collection.config, doc: saved, req })
-  const entry = entries.find(({ role }) => isSameFileRole({ first: role, second: match.role }))
+  const [entry] = getUploadFileEntries({
+    collection: collection.config,
+    doc: saved,
+    req,
+    roles: [match.role],
+  })
   const isBuiltAtRequest = entry?.status === 'requestTime'
-  const hasFile = isBuiltAtRequest ? hasStoredOriginal({ entries }) : entry?.status === 'stored'
+  // A file built on request is built from the original, so only then is the original read too.
+  const hasFile = isBuiltAtRequest
+    ? hasStoredOriginal({
+        entries: getUploadFileEntries({
+          collection: collection.config,
+          doc: saved,
+          req,
+          roles: [{ type: 'original' }],
+        }),
+      })
+    : entry?.status === 'stored'
 
   if (!hasFile) {
     return
