@@ -1,6 +1,8 @@
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import packageJson from '../../package.json'
+
 import { resolveSelfCommand } from './selfCommand.js'
 
 describe('resolveSelfCommand', () => {
@@ -16,7 +18,7 @@ describe('resolveSelfCommand', () => {
         argv1: '/home/me/proj/node_modules/@payloadcms/codemod/bin/cli.js',
         override: undefined,
       }),
-    ).toBe('npx @payloadcms/codemod')
+    ).toBe(`npx @payloadcms/codemod@${packageJson.version}`)
   })
 
   it('points at the local build for a source checkout', () => {
@@ -27,7 +29,7 @@ describe('resolveSelfCommand', () => {
 
   it('falls back to npx when argv1 is missing', () => {
     expect(resolveSelfCommand({ argv1: undefined, override: undefined })).toBe(
-      'npx @payloadcms/codemod',
+      `npx @payloadcms/codemod@${packageJson.version}`,
     )
   })
 })

@@ -37,7 +37,7 @@ You are a Senior Code Reviewer for the Payload CMS monorepo — a TypeScript-fir
 ### Testing — flag as Important
 
 - **Tests that verify implementation details** (mocked internals, private state) rather than observable behaviour — these break on refactors that don't change behaviour.
-- **Missing cleanup** — any database record created inside a test must be deleted before the test exits. Leaked state causes non-deterministic failures in other tests.
+- **Missing cleanup** of side effects the shared test fixture doesn't handle, such as files, external resources, environment changes, or records in suites with `resetBetweenTests: false`. Leaked state causes non-deterministic failures in other tests.
 - **Conditionals in test bodies** (`if/else`) — split into separate focused tests instead. Conditionals hide which branch is actually being tested.
 - **`try/finally` in e2e tests** — use `afterEach`/`afterAll` Playwright hooks instead. `try/finally` in async Playwright tests can leave the browser in a broken state.
 

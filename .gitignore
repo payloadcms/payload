@@ -378,3 +378,7 @@ test/payload.db
 test/evals/eval-results/index.html
 # Versioned eval run snapshots (local only — used for run comparison in dashboard)
 test/evals/eval-results/runs/
+
+# Shared upgrade sources and publish list generated during CLI builds
+/packages/create-payload-app/src/upgrade-shared/
+/packages/codemod/src/upgrade-shared/

@@ -6,8 +6,11 @@ import React, { useCallback, useMemo } from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectInputProps } from './Input.js'
 
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
@@ -89,6 +92,11 @@ const SelectFieldComponent: React.FC<SelectFieldClientProps> = (props) => {
     [readOnly, disabled, hasMany, setValue, onChangeFromProps],
   )
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
+  const inputID = generateFieldID(path, editDepth, uuid, 'input')
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
@@ -99,6 +107,7 @@ const SelectFieldComponent: React.FC<SelectFieldClientProps> = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      errorID={errorID}
       filterOption={
         selectFilterOptions
           ? ({ label, value }, search) =>
@@ -108,6 +117,7 @@ const SelectFieldComponent: React.FC<SelectFieldClientProps> = (props) => {
           : undefined
       }
       hasMany={hasMany}
+      inputId={inputID}
       isClearable={isClearable}
       isSortable={isSortable}
       Label={Label}
