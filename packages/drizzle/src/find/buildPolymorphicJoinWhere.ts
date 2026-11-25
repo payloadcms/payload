@@ -329,21 +329,25 @@ const resolveWherePath = ({
     return { type: 'invalid', pathPlan }
   }
 
+  let column: Column | SQL = sql`null`
+
+  if (fieldContext) {
+    const columnName = shouldUseVersionTable
+      ? `version_${pathPlan.columnPath}`
+      : pathPlan.columnPath
+
+    if (fieldContext.isLocalized) {
+      column = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][columnName]
+    } else {
+      const tableColumnName = shouldUseVersionTable && schemaPath === 'id' ? 'parent' : columnName
+
+      column = table[tableColumnName]
+    }
+  }
+
   return {
     type: 'scalar',
-    column: fieldContext
-      ? fieldContext.isLocalized
-        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][
-            shouldUseVersionTable ? `version_${pathPlan.columnPath}` : pathPlan.columnPath
-          ]
-        : table[
-            shouldUseVersionTable
-              ? schemaPath === 'id'
-                ? 'parent'
-                : `version_${pathPlan.columnPath}`
-              : pathPlan.columnPath
-          ]
-      : sql`null`,
+    column,
     fieldContext,
     pathPlan,
     queryValueContext,
