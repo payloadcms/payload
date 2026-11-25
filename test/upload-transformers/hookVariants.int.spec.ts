@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -38,6 +39,42 @@ test.suite('Upload variants hook', { config: './config.ts' }, () => {
       width: 1600,
     })
     expect(doc.variants?.thumbnail?.filename).toEqual(expect.any(String))
+  })
+
+  test('should name a variant with the extension of its own type', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(doc.filename).toMatch(/\.mp4$/)
+    expect(doc.variants?.thumbnail?.mimeType).toBe('image/png')
+    expect(doc.variants?.thumbnail?.filename).toMatch(/\.png$/)
+  })
+
+  test('should give a duplicated video its own thumbnail file', async ({ payload }) => {
+    const source = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    const copy = await payload.duplicate({
+      id: source.id,
+      collection: hookVariantMediaSlug,
+      overrideAccess: true,
+    })
+
+    const copyThumbnailFilename = copy.variants?.thumbnail?.filename
+
+    expect(copyThumbnailFilename).toEqual(expect.any(String))
+    expect(copyThumbnailFilename).not.toBe(source.variants?.thumbnail?.filename)
+    expect(fs.existsSync(path.resolve(dirname, 'media', copyThumbnailFilename as string))).toBe(
+      true,
+    )
   })
 
   test('should combine the variants of two hook owners for one MIME type', async ({ payload }) => {
