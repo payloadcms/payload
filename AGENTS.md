@@ -89,6 +89,10 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
   - Use `err` not `error`, use `msg` not `message` in object form
 
+### Field and Input Components
+
+Keep extracted Input components reusable without a Payload Form. Read form state, form UUID and edit depth in the Field component, and pass the resulting values, callbacks and IDs into the Input as props. Preserve explicit ID overrides and form-independent defaults for standalone callers. `CheckboxField` generating an ID and passing it to `CheckboxInput` is an existing example of this boundary.
+
 ### React Component File Structure
 
 Each React component should have its own named folder:
