@@ -59,7 +59,9 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
     { config: { fields: Field[]; flattenedFields: ReturnType<typeof flattenAllFields> } }
   > = {}
   const tableNameMap = new Map<string, string>()
-  const tables: Record<string, GenericTable> = {}
+  const tables: Record<string, GenericTable> = {
+    [getTableName(parentsTable)]: parentsTable,
+  }
 
   for (const [slug, fixture] of Object.entries(fixtures)) {
     const tableName = getTableName(fixture.table)
