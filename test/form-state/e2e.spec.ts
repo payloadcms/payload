@@ -1,4 +1,4 @@
-import type { BrowserContext, CDPSession, Page } from '@playwright/test'
+import type { BrowserContext, CDPSession, Page, Request } from '@playwright/test'
 import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
@@ -174,6 +174,54 @@ test.describe('Form State', () => {
         minimumNumberOfRequests: 1,
       },
     )
+  })
+
+  test('should send form state for a change made while a previous form state request was pending', async () => {
+    await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
+    const field = page.locator('#field-title')
+    await expect(field).toBeVisible()
+
+    let deliverHeldReply: (() => Promise<void>) | undefined
+
+    // Hold the reply to the form state request sent for the first change
+    await page.route(postsUrl.create, async (route) => {
+      if (
+        route.request().method() === 'POST' &&
+        route.request().postData()?.includes('first value')
+      ) {
+        const response = await route.fetch()
+        deliverHeldReply = () => route.fulfill({ response })
+        return
+      }
+
+      await route.continue()
+    })
+
+    await field.fill('first value')
+    await expect.poll(() => typeof deliverHeldReply).toBe('function')
+
+    const formStateRequestBodies: string[] = []
+
+    const trackFormStateRequest = (request: Request) => {
+      if (request.method() === 'POST' && request.url() === postsUrl.create) {
+        formStateRequestBodies.push(request.postData() ?? '')
+      }
+    }
+
+    page.on('request', trackFormStateRequest)
+
+    // Change the field again, then deliver the held reply within the 250ms onChange debounce of that change
+    await field.fill('second value')
+    await deliverHeldReply?.()
+
+    await expect
+      .poll(() => formStateRequestBodies.some((body) => body.includes('second value')))
+      .toBe(true)
+
+    page.off('request', trackFormStateRequest)
+    await page.unroute(postsUrl.create)
   })
 
   test('should send `lastRenderedPath` only when necessary', async () => {

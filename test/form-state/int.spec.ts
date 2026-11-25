@@ -1,6 +1,7 @@
 import type { FieldState, FormState, Payload, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { dequal } from 'dequal/lite'
 import path from 'path'
 import { createLocalReq, getAccessResults } from 'payload'
 import React from 'react'
@@ -17,6 +18,8 @@ import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { renderDocumentHandler } from '../../packages/next/src/views/Document/handleServerFunction.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
@@ -1002,6 +1005,54 @@ describe('Form State', () => {
       },
       computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
+  })
+
+  it('should keep the onChange snapshot when the form changed locally while a form state request was pending', () => {
+    // The form state as of the last onChange, which sent the request
+    const requestState: FormState = {
+      title: { initialValue: '', passesCondition: true, valid: true, value: 'A' },
+    }
+
+    const prevStateRef = { current: requestState }
+
+    // While the request was pending, the user changed the field again
+    const currentState: FormState = {
+      title: { ...requestState.title, value: 'AB' },
+    }
+
+    // The reply for the earlier request lands before the debounced onChange for that change has run
+    const newState = fieldReducer(currentState, {
+      type: 'MERGE_SERVER_STATE',
+      prevStateRef,
+      serverState: {
+        title: { ...requestState.title, errorMessage: 'Server error', valid: false },
+      },
+    })
+
+    expect(newState.title?.value).toBe('AB')
+    expect(prevStateRef.current).toBe(requestState)
+    // Form only runs onChange when its state differs from the snapshot
+    expect(dequal(newState, prevStateRef.current)).toBe(false)
+  })
+
+  it('should advance the onChange snapshot when the form did not change locally while a form state request was pending', () => {
+    const requestState: FormState = {
+      title: { initialValue: '', passesCondition: true, valid: true, value: 'A' },
+    }
+
+    const prevStateRef = { current: requestState }
+
+    const newState = fieldReducer(requestState, {
+      type: 'MERGE_SERVER_STATE',
+      prevStateRef,
+      serverState: {
+        title: { ...requestState.title, errorMessage: 'Server error', valid: false },
+      },
+    })
+
+    expect(newState.title?.valid).toBe(false)
+    // The merged reply must not trigger another onChange, otherwise every reply would send a new request
+    expect(prevStateRef.current).toBe(newState)
   })
 
   it('should preserve client row data after reorder and delete during autosave', () => {

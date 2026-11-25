@@ -225,7 +225,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         incomingState: serverState,
       })
 
-      prevStateRef.current = newState
+      // Only move the onChange snapshot if nothing changed locally since it was taken.
+      // Otherwise a change made while the request was pending would never trigger its own onChange.
+      if (dequal(state || {}, prevStateRef.current || {})) {
+        prevStateRef.current = newState
+      }
 
       return newState
     }
