@@ -363,7 +363,7 @@ In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply t
 
 Register sizes from the transformer's `init` with `registerUploadVariants`. Each collection must have uploads enabled, and each size needs a unique name that does not conflict with a built-in upload field or contain path separators. A transformer registers sizes on a collection once, and several transformers can register sizes on one collection (see [Several variants owners](#several-variants-owners)). Pass its configured `slug` as `transformerSlug`; Payload uses this to identify the owner when planning request-time sizes.
 
-The transformer that registers a collection's sizes owns those sizes. Payload saves each owner on the collection's sanitized config as `upload.variantOwners`, a list of `{ slug, mimeTypes, variantNames }`. When the owner can build the main file and the sizes from the original at request time, Payload does not run Sharp on uploads to that collection. Payload stores only the original, and the owner builds the main file and each size when they are requested, so they match. When the owner cannot build the file, for example because it does not accept the file's MIME type or no original is stored, Sharp processes the upload as usual.
+The transformer that registers a collection's sizes owns those sizes. Payload saves each owner on the collection's sanitized config as `upload.variantOwners`, a list of `{ slug, mimeTypes, variantNames }`. When an owner can build the main file and the sizes from the original at request time, Payload does not run Sharp on uploads of a MIME type that owner makes variants for. Payload stores only the original, and the owner builds the main file and each size when they are requested, so they match. Uploads of other MIME types are not affected. When the owner cannot build the file, for example because it does not accept the file's MIME type or no original is stored, Sharp processes the upload as usual.
 
 <Banner type="warning">
   The stored main file of such a collection is the uncropped original. Use the
@@ -417,7 +417,7 @@ More than one transformer can register variants on a collection. For example, Sh
 - Two owners of one name must give it the same `admin` and `generateImageName` options.
 - A transformer registers variants on a collection once.
 
-Payload throws a startup error when a rule is broken. A variant that no owner makes for a file's MIME type is saved as `null`.
+Payload throws a startup error when a rule is broken. On a collection with more than one variants owner, when Sharp or a `transformVariant` owner takes part in an upload, Payload saves every variant that no owner made for that upload as `null`.
 
 #### Handing off to an image service
 
@@ -505,7 +505,7 @@ Payload calls `transformVariant` once for each variant your transformer register
 | `{ status: 'skip' }`                            | Saves the variant as `null`. The upload succeeds |
 | An error is thrown                              | The upload fails with the generic upload error   |
 
-Payload measures common image types, such as PNG, JPEG and WebP, itself. Pass `width` and `height` when the file is a type that Payload cannot measure. Otherwise Payload saves the variant with no size and names its file without one, for example `video-thumbnail.pdf`.
+Payload measures common image types, such as PNG, JPEG and WebP, itself. Pass `width` and `height` when the file is a type that Payload cannot measure. Otherwise Payload saves the variant with no size and names its file without one, for example `video-thumbnail.pdf`. Payload does not use `generateImageName` for a variant with no size, as for [sizes with no stored file](#sizes-with-no-stored-file). The file name is `<name>-<variantName>.<ext>`.
 
 How the hook runs:
 
@@ -514,7 +514,7 @@ How the hook runs:
 - `source` is the main file after the pipeline. `originalSource` is the retained original. Read the saved crop and focal point from `doc._transforms`.
 - After the hook returns a file, Payload runs the other planned `transformFile` stages whose `mimeTypes` match the returned file's type. Set `type` on the `File` you return.
 - A thrown error is logged on the server and fails the upload. Use `skip` for an expected failure, such as a codec the transformer cannot read.
-- Payload saves `null` for every collection variant that no owner made for the upload, so an entry from an earlier file does not stay.
+- On a collection with more than one variants owner, Payload saves `null` for every variant that no owner made for the upload, so an entry from an earlier file does not stay.
 - For a client upload (`clientUploads`), Payload downloads the whole file when a transformer with this hook will run, because the hook reads the file.
 
 ```ts
@@ -649,7 +649,7 @@ At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` 
 
 You can register more than one `sharpTransformer` (each with its own `slug`), for example to give different collections different dynamic-resize defaults. Each upload is processed by the instance whose `collections` lists that collection. A collection listed in the `collections` of more than one instance throws at startup.
 
-Payload does not run Sharp on uploads to a collection whose sizes another transformer registered, when that transformer can build the files at request time. See [Sizes with no stored file](#sizes-with-no-stored-file). Do not list that collection in `sharpTransformer({ collections })`: Sharp then processes its uploads, and the main file can differ from the other transformer's sizes.
+Payload does not run Sharp on an upload whose MIME type has a variants owner that builds its variants on request. See [Sizes with no stored file](#sizes-with-no-stored-file). You can list a collection that another transformer registered sizes on in `sharpTransformer({ collections })` when Sharp's MIME types do not overlap that owner's. An overlap is a startup error. See [Several variants owners](#several-variants-owners).
 
 See [Variants](./overview#variants) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 
