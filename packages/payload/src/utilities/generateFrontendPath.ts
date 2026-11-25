@@ -48,7 +48,11 @@ export async function generateFrontendPathLocal<
       return null
     }
 
-    const req = await createPayloadRequest({ payload, req: options.req })
+    const req = await createPayloadRequest({
+      fallbackLocale: options.req?.fallbackLocale,
+      payload,
+      req: options.req,
+    })
 
     return (
       (await collection.generateFrontendPath({
@@ -69,7 +73,11 @@ export async function generateFrontendPathLocal<
     return null
   }
 
-  const req = await createPayloadRequest({ payload, req: options.req })
+  const req = await createPayloadRequest({
+    fallbackLocale: options.req?.fallbackLocale,
+    payload,
+    req: options.req,
+  })
 
   return (
     (await global.generateFrontendPath({

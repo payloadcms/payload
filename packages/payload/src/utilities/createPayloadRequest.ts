@@ -1,4 +1,4 @@
-import type { Payload, RequestContext, TypedLocale, User } from '../index.js'
+import type { Payload, RequestContext, TypedFallbackLocale, User } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
@@ -88,7 +88,7 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
 export type CreatePayloadRequestArgs = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: TypedFallbackLocale
   locale?: string
   payload: Payload
   req?: Partial<PayloadRequest>

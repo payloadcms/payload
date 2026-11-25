@@ -134,6 +134,7 @@ export default buildConfigWithDefaults({
       {
         slug: localizedPostsSlug,
         access: openAccess,
+        generateFrontendPath: ({ doc }) => (doc.title ? `/posts/${doc.title}` : null),
         admin: {
           useAsTitle: 'title',
         },

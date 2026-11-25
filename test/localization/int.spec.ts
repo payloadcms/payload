@@ -13,13 +13,12 @@ import type {
   WithLocalizedRelationship,
 } from './payload-types.js'
 
-import { isMongoose, mongooseList } from '../__helpers/shared/isMongoose.js'
-import { devUser } from '../credentials.js'
-
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
+import { isMongoose, mongooseList } from '../__helpers/shared/isMongoose.js'
+import { devUser } from '../credentials.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
@@ -6345,6 +6344,20 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
 
       expect(inEnglish.totalDocs).toBeGreaterThan(0)
       expect(inSpanish.totalDocs).toBe(0)
+    })
+  })
+
+  test.describe('generateFrontendPath', () => {
+    test('should keep the fallbackLocale of the request', async ({ payload }) => {
+      const req = await createPayloadRequest({ fallbackLocale: false, payload })
+
+      await payload.generateFrontendPath({
+        collection: localizedPostsSlug,
+        doc: { title: 'hello' },
+        req,
+      })
+
+      expect(req.fallbackLocale).toBe(false)
     })
   })
 })
