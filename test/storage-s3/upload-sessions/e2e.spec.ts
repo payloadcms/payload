@@ -493,6 +493,76 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await context.close()
   })
 
+  test('should keep offering to select the file when parts finish after a resumed upload failed', async ({
+    browser,
+  }) => {
+    const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
+
+    await pickFile(page)
+    await expect.poll(() => log.partPuts).toBeGreaterThan(0)
+    await page.reload()
+    // Routes outlive the reload, so the resumed upload goes through the route below first.
+    releaseParts()
+
+    let releaseLateParts = () => {}
+    const latePartsReleased = new Promise<void>((resolve) => {
+      releaseLateParts = resolve
+    })
+    const getPartNumber = (url: string) => new URL(url).searchParams.get('partNumber')
+
+    // Registered after the logging route, so it runs first. Part 1 is rejected for good, while
+    // the other parts are held until the upload has already failed.
+    await page.route(
+      (url) => url.host === s3Host,
+      async (route) => {
+        if (route.request().method() !== 'PUT') {
+          return route.fallback()
+        }
+
+        if (getPartNumber(route.request().url()) === '1') {
+          return route.fulfill({ headers: { 'access-control-allow-origin': '*' }, status: 400 })
+        }
+
+        await latePartsReleased
+        await route.fallback()
+      },
+    )
+
+    const [chooser] = await Promise.all([
+      page.waitForEvent('filechooser'),
+      page.locator('[data-sonner-toast]').getByRole('button', { name: 'Select a file' }).click(),
+    ])
+
+    await chooser.setFiles(filePath)
+
+    const recoveryToast = page.locator('[data-sonner-toast]', { hasText: 'was interrupted' })
+
+    // The description is only set when the offer shows again after a failed resume.
+    await expect(recoveryToast.getByText('Upload failed with status 400')).toBeVisible()
+
+    // Waits for the response, not `requestfinished`: the upload only reads the status, and an
+    // empty S3 part response is not always reported as finished.
+    const latePartsFinished = Promise.all(
+      ['2', '3'].map((partNumber) =>
+        page.waitForResponse(
+          (response) =>
+            response.request().method() === 'PUT' && getPartNumber(response.url()) === partNumber,
+        ),
+      ),
+    )
+
+    releaseLateParts()
+    await latePartsFinished
+    // A late progress report would replace the offer with a progress toast that has no action.
+    // Nothing else happens after it, so give the page time to render one if it came.
+    await page.waitForTimeout(500)
+
+    await expect(page.getByText(/^Uploading .*%$/)).toHaveCount(0)
+    await expect(recoveryToast.getByRole('button', { name: 'Select a file' })).toBeVisible()
+
+    await context.close()
+  })
+
   test('should still warn about unsaved changes elsewhere while a save continues in the background', async ({
     browser,
   }) => {
