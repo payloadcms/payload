@@ -71,7 +71,10 @@ export type SegmentedUploadCapability = {
    * rule. Runs before a session is persisted and again before every later session action.
    */
   authorize?: (args: { collectionSlug: string; req: PayloadRequest }) => Promise<void> | void
-  /** Commits the provider upload and returns the committed object size for verification. */
+  /**
+   * Commits the provider upload and returns the committed object size for verification. Core can
+   * call it again after the object is committed, so it must then only finish any cleanup.
+   */
   complete: (args: {
     object: ReservedObject
     providerState: ProviderState
@@ -87,6 +90,16 @@ export type SegmentedUploadCapability = {
     req: PayloadRequest
     segments: UploadSegment[]
   }) => Promise<UploadSegmentRequest[]>
+  /**
+   * The size of the committed object, or `null` while there is none. Core asks before it
+   * reconciles, so a completion whose response was lost still finishes once the provider no
+   * longer reports the uploaded segments. Only report an object that is fully written.
+   */
+  getStoredSize?: (args: {
+    object: ReservedObject
+    providerState: ProviderState
+    req: PayloadRequest
+  }) => Promise<null | number>
   /**
    * Starts the provider upload. Throw an `APIError` with a 4xx status for failures a retry cannot
    * fix; core marks the session `failed` so it stops counting against the user's quota.

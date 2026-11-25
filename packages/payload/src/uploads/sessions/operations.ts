@@ -6,6 +6,9 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import type { UploadInstructions } from '../types.js'
 import type {
   ClientUploadSession,
+  ProviderState,
+  ReconciledSegments,
+  ReservedObject,
   SegmentedUploadCapability,
   UploadSegment,
   UploadSegmentRequest,
@@ -281,7 +284,7 @@ export const getUploadSessionInstructions = async ({
   }
 
   const storage = getInitiatedStorage({ session })
-  const reconciled = await segmented.reconcile({ ...storage, req })
+  const reconciled = await reconcileSegments({ ...storage, req, segmented, session })
 
   const missingSegments = getMissingSegments({ reconciled, segments: session.transfer.segments })
   const windowSize = session.transfer.concurrency * 2
@@ -982,7 +985,13 @@ const commitStorage = async ({
   const initiatedSession = await ensureInitiated({ isLeaseHeld: true, req, segmented, session })
   const { object, providerState } = getInitiatedStorage({ session: initiatedSession })
 
-  const reconciled = await segmented.reconcile({ object, providerState, req })
+  const reconciled = await reconcileSegments({
+    object,
+    providerState,
+    req,
+    segmented,
+    session: initiatedSession,
+  })
   const missingSegments = getMissingSegments({
     reconciled,
     segments: initiatedSession.transfer.segments,
@@ -1262,6 +1271,35 @@ const hasValidFileReferences = ({ session }: { session: UploadSessionDoc }): boo
     session.fileReferencesValidUntil &&
     new Date(session.fileReferencesValidUntil).getTime() > Date.now(),
   )
+
+/**
+ * A committed object holds every segment, even once the provider has forgotten the upload that
+ * confirmed them (S3 lists no parts for a completed multipart upload).
+ */
+const reconcileSegments = async ({
+  object,
+  providerState,
+  req,
+  segmented,
+  session,
+}: {
+  object: ReservedObject
+  providerState: ProviderState
+  req: PayloadRequest
+  segmented: SegmentedUploadCapability
+  session: UploadSessionDoc
+}): Promise<ReconciledSegments> => {
+  const storedSize = await segmented.getStoredSize?.({ object, providerState, req })
+
+  if (typeof storedSize === 'number') {
+    return session.transfer.segments.map(({ end, number, start }) => ({
+      number,
+      size: end - start,
+    }))
+  }
+
+  return segmented.reconcile({ object, providerState, req })
+}
 
 const getMissingSegments = ({
   reconciled,

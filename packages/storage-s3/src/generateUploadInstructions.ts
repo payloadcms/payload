@@ -4,8 +4,7 @@ import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'paylo
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
-import { Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAllowed, assertUploadInstructionsAccess } from 'payload/internal'
 
 interface Args {
   access?: UploadInstructionsAccess
@@ -33,8 +32,8 @@ export const generateUploadInstructions = ({
     overrideAccess,
     req,
   }) => {
-    if (!overrideAccess && (access ? !(await access({ collectionSlug, req })) : !req.user)) {
-      throw new Forbidden(req.t)
+    if (!overrideAccess) {
+      await assertUploadInstructionsAccess({ access, collectionSlug, req })
     }
 
     assertClientUploadAllowed({

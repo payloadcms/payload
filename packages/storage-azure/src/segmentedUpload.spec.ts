@@ -2,9 +2,10 @@ import type { ContainerClient } from '@azure/storage-blob'
 import type { PayloadRequest, ReservedObject } from 'payload'
 
 import { StorageSharedKeyCredential } from '@azure/storage-blob'
+import { UPLOAD_STAGING_PREFIX } from 'payload/internal'
 import { describe, expect, it, vi } from 'vitest'
 
-import { createSegmentedUpload, UPLOAD_STAGING_PREFIX } from './segmentedUpload.js'
+import { createSegmentedUpload } from './segmentedUpload.js'
 
 const object: ReservedObject = {
   _objectKey: 'key',
@@ -228,6 +229,31 @@ describe('Azure segmented uploads', () => {
       beginCopyFromURL.mock.invocationCallOrder[0]!,
     )
     expect(stagingDelete).toHaveBeenCalled()
+  })
+
+  it.each([
+    { expected: 10, properties: { contentLength: 10, copyStatus: 'success' } },
+    { expected: null, properties: { contentLength: 0, copyStatus: 'pending' } },
+    { expected: null, properties: { contentLength: 0, copyStatus: 'failed' } },
+  ])(
+    'should report the final blob as stored only once its copy is $properties.copyStatus',
+    async ({ expected, properties }) => {
+      const capability = createCapability({
+        final: { getProperties: vi.fn().mockResolvedValue(properties) },
+      })
+
+      await expect(capability.getStoredSize!({ object, providerState: {}, req })).resolves.toBe(
+        expected,
+      )
+    },
+  )
+
+  it('should report nothing stored before the final blob exists', async () => {
+    const capability = createCapability({
+      final: { getProperties: vi.fn().mockRejectedValue(restError(404)) },
+    })
+
+    await expect(capability.getStoredSize!({ object, providerState: {}, req })).resolves.toBeNull()
   })
 
   it('should discard staged blocks and delete an orphaned final blob when aborting', async () => {

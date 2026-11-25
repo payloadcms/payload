@@ -10,8 +10,11 @@ import {
   resolveSignedURLKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
-import { Forbidden } from 'payload'
-import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/internal'
+import {
+  assertClientUploadAllowed,
+  assertUploadInstructionsAccess,
+  createClientUploadReceipt,
+} from 'payload/internal'
 
 import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
 
@@ -68,11 +71,8 @@ export function createVercelBlobAdapter({
         overrideAccess,
         req,
       }) => {
-        if (
-          !overrideAccess &&
-          (clientUploadsAccess ? !(await clientUploadsAccess({ collectionSlug, req })) : !req.user)
-        ) {
-          throw new Forbidden(req.t)
+        if (!overrideAccess) {
+          await assertUploadInstructionsAccess({ access: clientUploadsAccess, collectionSlug, req })
         }
 
         assertClientUploadAllowed({ collection, filename, mimeType })

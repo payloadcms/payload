@@ -17,6 +17,7 @@ export { getNestedRelationshipReadConstraint } from '../database/nestedRelations
 export { getLLMInstructions } from '../llm-instructions/getInstructions.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
+export { assertUploadInstructionsAccess } from '../uploads/assertUploadInstructionsAccess.js'
 export {
   createClientUploadReceipt,
   resignClientUploadReceipt,
@@ -45,6 +46,15 @@ export {
 } from '../uploads/sessions/operations.js'
 export { planSegments, shouldUseSegmentedUpload } from '../uploads/sessions/planSegments.js'
 export { uploadSessionsCollectionSlug } from '../uploads/sessions/slug.js'
+export {
+  getStagedPartNumber,
+  getStagedPartPath,
+  getUploadStagingPath,
+  mapWithConcurrency,
+  toReservedObject,
+  UPLOAD_STAGING_PREFIX,
+  withPermanentStorageErrors,
+} from '../uploads/sessions/storageHelpers.js'
 export {
   getUploadFilePath,
   getUploadTransformerInternal,

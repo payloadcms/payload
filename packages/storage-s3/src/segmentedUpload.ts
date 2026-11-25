@@ -17,7 +17,11 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
-import { APIError, Forbidden } from 'payload'
+import {
+  assertUploadInstructionsAccess,
+  toReservedObject,
+  withPermanentStorageErrors,
+} from 'payload/internal'
 
 const MiB = 1024 * 1024
 const GiB = 1024 * MiB
@@ -68,11 +72,8 @@ export const createSegmentedUpload = ({
       })
     },
 
-    authorize: async ({ collectionSlug, req }) => {
-      if (access ? !(await access({ collectionSlug, req })) : !req.user) {
-        throw new Forbidden(req.t)
-      }
-    },
+    authorize: ({ collectionSlug, req }) =>
+      assertUploadInstructionsAccess({ access, collectionSlug, req }),
 
     complete: async ({ object, providerState }) => {
       const client = getStorageClient()
@@ -128,41 +129,52 @@ export const createSegmentedUpload = ({
       )
     },
 
-    initiate: async ({ collectionSlug, docPrefix, filename, mimeType, req }) => {
-      const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
-        collectionPrefix,
-        collectionSlug,
-        docPrefix,
-        filename,
-        req,
-        useCompositePrefixes,
-      })
+    getStoredSize: async ({ object }) => {
+      try {
+        const head = await getStorageClient().send(
+          new HeadObjectCommand({ Bucket: bucket, Key: object.storageFilePath }),
+        )
 
-      const { UploadId } = await withPermanentErrors({
+        return head.ContentLength ?? null
+      } catch (err) {
+        if (isNotFound({ err })) {
+          return null
+        }
+
+        throw err
+      }
+    },
+
+    initiate: async ({ collectionSlug, docPrefix, filename, mimeType, req }) => {
+      const object = toReservedObject(
+        await resolveSignedURLKey({
+          collectionPrefix,
+          collectionSlug,
+          docPrefix,
+          filename,
+          req,
+          useCompositePrefixes,
+        }),
+      )
+
+      const { UploadId } = await withPermanentStorageErrors({
+        getPermanentStatus: getClientFaultStatus,
         operation: () =>
           getStorageClient().send(
             new CreateMultipartUploadCommand({
               ACL: acl,
               Bucket: bucket,
               ContentType: mimeType,
-              Key: storageFilePath,
+              Key: object.storageFilePath,
             }),
           ),
       })
 
-      if (!UploadId || !uploadReference._objectKey) {
+      if (!UploadId) {
         throw new Error('S3 multipart upload could not be initiated.')
       }
 
-      return {
-        object: {
-          _objectKey: uploadReference._objectKey,
-          filename: sanitizedFilename,
-          prefix: uploadReference.prefix,
-          storageFilePath,
-        },
-        providerState: { uploadId: UploadId } satisfies S3ProviderState,
-      }
+      return { object, providerState: { uploadId: UploadId } satisfies S3ProviderState }
     },
 
     limits: {
@@ -218,28 +230,9 @@ const listParts = async ({
 }
 
 /**
- * Converts S3 client faults (a missing bucket, denied access, an invalid request) into a 4xx
- * `APIError`, so core marks the session failed instead of retrying it until it expires.
+ * S3 client faults (a missing bucket, denied access, an invalid request) are permanent.
  * Timeouts and throttling stay retryable.
  */
-const withPermanentErrors = async <T>({
-  operation,
-}: {
-  operation: () => Promise<T>
-}): Promise<T> => {
-  try {
-    return await operation()
-  } catch (err) {
-    const status = getClientFaultStatus(err)
-
-    if (status) {
-      throw new APIError(`Storage rejected the upload (${(err as Error).name}).`, status)
-    }
-
-    throw err
-  }
-}
-
 const getClientFaultStatus = (err: unknown): null | number => {
   if (typeof err !== 'object' || err === null || !('$fault' in err) || err.$fault !== 'client') {
     return null
