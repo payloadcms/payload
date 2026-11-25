@@ -118,6 +118,8 @@ export const HomePage: GlobalConfig = {
 }
 ```
 
+This example assumes [localization](./localization) is enabled. Without it, `req.locale` is `undefined`.
+
 You can also call it from your own code with `payload.generateFrontendPath({ global: 'home-page', doc, req })`. To learn more, see [Collection frontend paths](./collections#frontend-path).
 
 ## Admin Options
