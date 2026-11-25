@@ -1,6 +1,7 @@
 import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import type { UpgradePlan } from '../upgrade-shared/index.js'
 import type { DispatchDeps } from './dispatch.js'
 import type { Agent } from './selectAgent.js'
 
@@ -10,11 +11,13 @@ import { AGENTS } from './selectAgent.js'
 const claude = AGENTS.find((a) => a.id === 'claude')!
 
 const FLAGS = { dry: false, force: false, tag: 'canary' }
+const plan = { targetVersion: '4.0.0-canary.20' } as UpgradePlan
 
 function makeDeps(overrides: Partial<DispatchDeps> = {}): DispatchDeps {
   return {
     detectAgents: () => [claude],
     isInteractive: true,
+    prepare: async () => plan,
     promptChoice: async () => ({ agent: claude, kind: 'agent' }),
     renderPrompt: () => 'PROMPT-TEXT',
     runMechanical: async () => ({ failed: false }),
@@ -27,15 +30,19 @@ function makeDeps(overrides: Partial<DispatchDeps> = {}): DispatchDeps {
 describe('runDispatch', () => {
   afterEach(() => vi.restoreAllMocks())
 
-  it('prints the prompt and does not spawn when the choice is print', async () => {
+  it('should retain prior confirmation when printing the prompt without spawning', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
     const spawnAgent = vi.fn()
+    const prepare = vi.fn(async () => plan)
+    const renderPrompt = vi.fn(() => 'PROMPT-TEXT')
 
     const result = await runDispatch(
-      { path: '.', upgradeFlags: FLAGS },
-      makeDeps({ isInteractive: false, spawnAgent }),
+      { path: '.', upgradeFlags: { ...FLAGS, yes: true } },
+      makeDeps({ isInteractive: false, prepare, renderPrompt, spawnAgent }),
     )
 
+    expect(prepare).toHaveBeenCalledWith({ path: '.', shouldConfirm: false, tag: FLAGS.tag })
+    expect(renderPrompt).toHaveBeenCalledWith(plan, { yes: true })
     expect(result).toEqual({ failed: false })
     expect(log).toHaveBeenCalledWith('PROMPT-TEXT')
     expect(spawnAgent).not.toHaveBeenCalled()
@@ -45,13 +52,19 @@ describe('runDispatch', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
     const runMechanical = vi.fn(async () => ({ failed: false }))
     const spawnAgent = vi.fn()
+    const prepare = vi.fn(async () => plan)
 
     const result = await runDispatch(
       { path: './app', upgradeFlags: FLAGS },
-      makeDeps({ promptChoice: async () => ({ kind: 'run' }), runMechanical, spawnAgent }),
+      makeDeps({ prepare, promptChoice: async () => ({ kind: 'run' }), runMechanical, spawnAgent }),
     )
 
-    expect(runMechanical).toHaveBeenCalledWith({ flags: FLAGS, path: './app' })
+    expect(prepare).toHaveBeenCalledWith({ path: './app', shouldConfirm: true, tag: FLAGS.tag })
+    expect(runMechanical).toHaveBeenCalledWith({
+      flags: { ...FLAGS, tag: plan.targetVersion },
+      path: './app',
+      plan,
+    })
     expect(spawnAgent).not.toHaveBeenCalled()
     expect(log).not.toHaveBeenCalledWith('PROMPT-TEXT')
     expect(result).toEqual({ failed: false })

@@ -1,3 +1,6 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+
 import { Icon as Icon_9c1a3ff8a9adb7b1e4b7a5cd42725bdb } from 'src/graphics/Icon/index.tsx'
 import { Logo as Logo_217937c36742cdefe571d11857c968fa } from 'src/graphics/Logo/index.tsx'
 
