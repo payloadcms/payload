@@ -30,6 +30,7 @@ import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
   cannotCreateDefaultLocale,
+  copyLocalizedStatusSlug,
   defaultLocale,
   englishTitle,
   globalWithDraftsSlug,
@@ -588,6 +589,15 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
+    {
+      slug: copyLocalizedStatusSlug,
+      fields: [{ name: 'title', type: 'text', localized: true }],
       versions: {
         drafts: {
           localizeStatus: true,
