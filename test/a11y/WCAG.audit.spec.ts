@@ -9475,8 +9475,11 @@ test.describe('WCAG 2.2 Level AA', () => {
           if (phase === 'saving') {
             await expect(dialog.locator('[data-dialog-action="confirm"]')).toBeDisabled()
           }
-          releaseRequest.resolve()
+          if (phase === 'saving') {
+            releaseRequest.resolve()
+          }
           await expect(dialog).not.toBeVisible()
+          releaseRequest.resolve()
           await expect(help).toBeEnabled()
           await expect(help).toBeChecked()
           await page.reload()
@@ -9484,6 +9487,73 @@ test.describe('WCAG 2.2 Level AA', () => {
           await expect(help).toBeChecked()
         } finally {
           releaseRequest.resolve()
+          await page.unroute(preferenceURL, handlePreference)
+        }
+      })
+    }
+
+    for (const isResetSuccessful of [true, false]) {
+      test(`should keep the reset dialog open until reset ${isResetSuccessful ? 'succeeds' : 'fails'}`, async () => {
+        const releaseReset = Promise.withResolvers<void>()
+        const resetStarted = Promise.withResolvers<void>()
+        const resetFinished = Promise.withResolvers<void>()
+        let hasResetStarted = false
+        let storedValue: { showHelpTooltips: boolean } | null = { showHelpTooltips: false }
+        const preferenceURL = (url: URL) => url.pathname.startsWith('/api/payload-preferences')
+        const handlePreference = async (route: Route) => {
+          const method = route.request().method()
+          const path = new URL(route.request().url()).pathname
+
+          if (path.endsWith('/showHelpTooltips') && method === 'GET') {
+            await route.fulfill({ json: { value: storedValue } })
+          } else if (path === '/api/payload-preferences' && method === 'DELETE') {
+            hasResetStarted = true
+            resetStarted.resolve()
+            await releaseReset.promise
+            if (isResetSuccessful) {
+              storedValue = null
+            }
+            await route.fulfill({
+              json: { message: isResetSuccessful ? 'Preferences reset' : 'Reset failed' },
+              status: isResetSuccessful ? 200 : 500,
+            })
+            resetFinished.resolve()
+          } else {
+            await route.fallback()
+          }
+        }
+
+        await page.route(preferenceURL, handlePreference)
+        try {
+          await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+          const help = page.getByRole('checkbox', { name: 'Show Guidance Tips', exact: true })
+
+          await expect(help).toBeEnabled()
+          await expect(help).not.toBeChecked()
+          await page.getByRole('button', { name: 'Reset Preferences', exact: true }).click()
+          const dialog = page.getByRole('dialog', { name: 'Reset Preferences', exact: true })
+
+          await page.keyboard.press('Escape')
+          await expect(dialog).not.toBeVisible()
+          await page.getByRole('button', { name: 'Reset Preferences', exact: true }).click()
+          await dialog.getByRole('button', { name: 'Confirm', exact: true }).click()
+          await resetStarted.promise
+          await page.keyboard.press('Escape')
+          await expect(dialog).toBeVisible()
+          await expect(dialog.getByRole('button', { name: 'Cancel', exact: true })).toBeDisabled()
+          await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeDisabled()
+          releaseReset.resolve()
+          await expect(dialog).not.toBeVisible()
+          await expect(help).toBeEnabled()
+          await expect(help).toBeChecked({ checked: isResetSuccessful })
+          await page.reload()
+          await expect(help).toBeEnabled()
+          await expect(help).toBeChecked({ checked: isResetSuccessful })
+        } finally {
+          releaseReset.resolve()
+          if (hasResetStarted) {
+            await resetFinished.promise
+          }
           await page.unroute(preferenceURL, handlePreference)
         }
       })
@@ -9498,12 +9568,17 @@ test.describe('WCAG 2.2 Level AA', () => {
         serverURL,
       })
       const original = await page.request.get(preferenceURL)
-      const originalPreference = original.ok() ? await original.json() : undefined
+      expect(original.ok()).toBe(true)
+      const originalPreference = await original.json()
       const hasSavedPreference = originalPreference?.id !== undefined
       const savedValue = originalPreference?.value
 
       try {
-        await page.request.post(preferenceURL, { data: { value: { showHelpTooltips: true } } })
+        const setup = await page.request.post(preferenceURL, {
+          data: { value: { showHelpTooltips: true } },
+        })
+
+        expect(setup.ok()).toBe(true)
         await page.goto(accountURL)
         const settings = page.locator('.payload-settings__accessibility')
         const help = settings.getByRole('checkbox', { name: 'Show Guidance Tips', exact: true })
@@ -9549,6 +9624,10 @@ test.describe('WCAG 2.2 Level AA', () => {
         await help.focus()
         await help.press('Space')
         expect((await restored).ok()).toBe(true)
+        const persisted = await page.request.get(preferenceURL)
+
+        expect(persisted.ok()).toBe(true)
+        expect((await persisted.json()).value).toEqual({ showHelpTooltips: true })
         await gotoCreatePost({ page, postsURL })
         await expect(page.locator('.required-fields-info')).toBeVisible()
         await editor.focus()
@@ -9557,11 +9636,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         ).toBeVisible()
         await expect(editor).toHaveAccessibleDescription(/Press Escape, then Tab or Shift\+Tab/)
       } finally {
-        if (!hasSavedPreference) {
-          await page.request.delete(preferenceURL)
-        } else {
-          await page.request.post(preferenceURL, { data: { value: savedValue } })
-        }
+        const cleanup = !hasSavedPreference
+          ? await page.request.delete(preferenceURL)
+          : await page.request.post(preferenceURL, { data: { value: savedValue } })
+
+        expect(cleanup.ok()).toBe(true)
         await page.goto(accountURL)
       }
     })

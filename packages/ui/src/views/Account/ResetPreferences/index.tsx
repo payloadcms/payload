@@ -3,7 +3,7 @@ import type { User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import { Fragment, useCallback } from 'react'
+import { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '../../../elements/Button/index.js'
@@ -20,6 +20,7 @@ export const ResetPreferences: React.FC<{
 }> = ({ user }) => {
   const { openModal } = useModal()
   const { flushHelpTooltips, resetHelpTooltips } = useAccessibility()
+  const [isResetting, setIsResetting] = useState(false)
   const { t } = useTranslation()
   const {
     config: {
@@ -45,6 +46,7 @@ export const ResetPreferences: React.FC<{
     )
 
     try {
+      setIsResetting(true)
       await flushHelpTooltips()
       const res = await fetch(
         formatAdminURL({
@@ -71,6 +73,8 @@ export const ResetPreferences: React.FC<{
       }
     } catch (_err) {
       // swallow error
+    } finally {
+      setIsResetting(false)
     }
   }, [apiRoute, flushHelpTooltips, resetHelpTooltips, user])
 
@@ -83,6 +87,7 @@ export const ResetPreferences: React.FC<{
       </div>
       <ConfirmationModal
         body={t('general:resetPreferencesDescription')}
+        closeOnEsc={!isResetting}
         confirmingLabel={t('general:resettingPreferences')}
         heading={t('general:resetPreferences')}
         modalSlug={confirmResetModalSlug}
