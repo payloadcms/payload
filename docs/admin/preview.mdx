@@ -67,7 +67,7 @@ If your application requires a fully qualified URL, such as within deploying to 
 
 ```ts
 preview: (doc, { frontendPath, req }) =>
-  `${req.protocol}//${req.host}${frontendPath}` // highlight-line
+  frontendPath ? `${req.protocol}//${req.host}${frontendPath}` : null // highlight-line
 ```
 
 ## Draft Preview
