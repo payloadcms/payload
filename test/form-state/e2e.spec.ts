@@ -1,4 +1,4 @@
-import type { BrowserContext, CDPSession, Page, Request } from '@playwright/test'
+import type { BrowserContext, CDPSession, Page } from '@playwright/test'
 import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
@@ -31,6 +31,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -176,21 +177,31 @@ test.describe('Form State', () => {
     )
   })
 
-  test('should send form state for a change made while a previous form state request was pending', async () => {
-    await page.goto(postsUrl.create)
-    await waitForFormReady(page)
+  test('should send form state for a change made while a previous form state request was pending', async ({
+    browser,
+  }) => {
+    const conditionsUrl = new AdminUrlUtil(serverURL, conditionsSlug)
 
-    const field = page.locator('#field-title')
-    await expect(field).toBeVisible()
+    // Separate context so the fake clock does not affect other tests
+    const clockContext = await browser.newContext()
+    const clockPage = await clockContext.newPage()
+
+    // The onChange debounce is a browser timeout. Controlling the clock guarantees
+    // the held reply is merged before the debounce for the second change runs.
+    await clockPage.clock.install()
+
+    await clockPage.goto(conditionsUrl.create)
+    await waitForFormReady(clockPage)
+
+    const showField = clockPage.locator('#field-showField')
+    const conditionalField = clockPage.locator('#field-conditionalRowField')
+    await expect(conditionalField).toBeHidden()
 
     let deliverHeldReply: (() => Promise<void>) | undefined
 
     // Hold the reply to the form state request sent for the first change
-    await page.route(postsUrl.create, async (route) => {
-      if (
-        route.request().method() === 'POST' &&
-        route.request().postData()?.includes('first value')
-      ) {
+    await clockPage.route(conditionsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && !deliverHeldReply) {
         const response = await route.fetch()
         deliverHeldReply = () => route.fulfill({ response })
         return
@@ -199,29 +210,37 @@ test.describe('Form State', () => {
       await route.continue()
     })
 
-    await field.fill('first value')
+    await showField.check()
     await expect.poll(() => typeof deliverHeldReply).toBe('function')
 
-    const formStateRequestBodies: string[] = []
+    const formStateRequests: { args: { formState: FormState } }[][] = []
 
-    const trackFormStateRequest = (request: Request) => {
-      if (request.method() === 'POST' && request.url() === postsUrl.create) {
-        formStateRequestBodies.push(request.postData() ?? '')
+    clockPage.on('request', (request) => {
+      if (request.method() === 'POST' && request.url() === conditionsUrl.create) {
+        formStateRequests.push(request.postDataJSON())
       }
-    }
+    })
 
-    page.on('request', trackFormStateRequest)
+    // From here on, no timers run until the clock is resumed
+    await clockPage.clock.pauseAt(await clockPage.evaluate(() => Date.now() + 1000))
 
-    // Change the field again, then deliver the held reply within the 250ms onChange debounce of that change
-    await field.fill('second value')
+    // Change the field again while the first request is pending
+    await showField.uncheck()
     await deliverHeldReply?.()
 
+    // The held reply passes the condition, so the field is shown once the reply is merged
+    await expect(conditionalField).toBeVisible()
+
+    // Let the debounce for the second change run
+    await clockPage.clock.resume()
+
     await expect
-      .poll(() => formStateRequestBodies.some((body) => body.includes('second value')))
+      .poll(() =>
+        formStateRequests.some((body) => body?.[0]?.args?.formState?.showField?.value === false),
+      )
       .toBe(true)
 
-    page.off('request', trackFormStateRequest)
-    await page.unroute(postsUrl.create)
+    await clockContext.close()
   })
 
   test('should send `lastRenderedPath` only when necessary', async () => {
