@@ -45,16 +45,31 @@ export const getSchedulePublishTask = ({
       }
 
       let publishSpecificLocale: string
+      let unpublishSpecificLocale: string | undefined
 
-      if (input?.type === 'publish' && input.locale && req.payload.config.localization) {
+      if (input.locale && req.payload.config.localization) {
         const matchedLocale = req.payload.config.localization.locales.find(
           ({ code }) => code === input.locale,
         )
 
         if (matchedLocale) {
-          publishSpecificLocale = input.locale
+          if (_status === 'published') {
+            publishSpecificLocale = input.locale
+          } else {
+            unpublishSpecificLocale = input.locale
+          }
         }
       }
+
+      // A job without a locale acts on every locale, as on main. With localized status, the update
+      // otherwise runs in the default locale only: the schedule drawer's "All" published the default
+      // locale alone, and an unpublish, which the drawer queues without a locale, unpublished it alone.
+      const isAllLocales = Boolean(req.payload.config.localization) && !input.locale
+      const allLocalesArgs = isAllLocales
+        ? _status === 'published'
+          ? { publishAllLocales: true }
+          : { unpublishAllLocales: true }
+        : {}
 
       if (input.doc) {
         // input.doc.value is always a string (#10481); coerce back to the real ID type.
@@ -71,6 +86,8 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          ...(unpublishSpecificLocale ? { locale: unpublishSpecificLocale } : {}),
+          ...allLocalesArgs,
           overrideAccess: user === null,
           publishSpecificLocale: publishSpecificLocale!,
           user,
@@ -84,6 +101,8 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          ...(unpublishSpecificLocale ? { locale: unpublishSpecificLocale } : {}),
+          ...allLocalesArgs,
           overrideAccess: user === null,
           publishSpecificLocale: publishSpecificLocale!,
           user,

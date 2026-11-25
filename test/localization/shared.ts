@@ -38,6 +38,8 @@ export const localeRestrictedSlug = 'locale-restricted'
 
 export const globalWithDraftsSlug = 'global-drafts'
 export const localizedStatusSharedGlobalSlug = 'localized-status-shared-global'
+export const scheduledLocalizedStatusSlug = 'scheduled-localized-status'
+export const scheduledLocalizedStatusGlobalSlug = 'scheduled-localized-status-global'
 
 export const localeValidationSlug = 'locale-validation'
 export const localeValidationGlobalSlug = 'locale-validation-global'
