@@ -19,6 +19,7 @@ Only add a rule here for a mistake agents repeat, can't learn from the code, and
 - Search for an existing utility or type before writing a new one.
 - Use separate `import type` statements for types, even from the same module.
 - Render config labels with `getTranslation` from `@payloadcms/translations`. Don't branch on label types yourself.
+- Memoize arrays and objects passed to custom hooks instead of passing inline literals, where reference identity affects behavior.
 - Never hardcode user-facing strings. Add keys in English first: `packages/translations/src/languages/` for core, the plugin's `src/translations/`, or the feature's `i18n.ts` in `richtext-lexical`. Use the `generate-translations` skill to translate core and plugin keys.
 - Build admin and API URLs with `formatAdminURL` from `payload/shared`, and query strings with `qs-esm`. Never concatenate them by hand.
 - In server functions, views, and endpoints, keep `overrideAccess: false` (the default) and pass `user`. `overrideAccess: true` on behalf of a user bypasses access control.
@@ -34,6 +35,7 @@ Only add a rule here for a mistake agents repeat, can't learn from the code, and
 - Use logical properties (`margin-inline-start`, `inset-inline`, etc.) instead of physical ones, for RTL.
 - Use the tokens in `packages/ui/src/css/` (`--spacer-*`, semantic `--color-*`, `--radius-*`, `--stroke-width-*`, `--elevation-*`, `--text-*`) instead of raw values. Round to the nearest spacer or use `calc()` with one. Never use `--ramp-*` outside `colors.css`.
 - Shared CSS also runs in Shadow DOM. Define token defaults on both `:root` and `:host` (also inside media queries), add `:host(...)` equivalents for theme and enhanced-contrast selectors without raising document specificity, and keep document-only resets and Admin Panel layout out of `:host`.
+- Verify the affected states of shared token or theme changes in the document and in a shadow root that loads the stylesheet.
 
 ## Tests
 
@@ -42,6 +44,7 @@ Only add a rule here for a mistake agents repeat, can't learn from the code, and
 - Add tests to an existing suite and config when one fits, instead of creating a new one.
 - Integration tests import `test` from `test/__helpers/int/vitest.ts` inside one root `test.suite(name, { config: './config.ts' }, ...)`. The fixture initializes, resets, and seeds Payload, so don't do it yourself. Use `test.options(name, { db: 'drizzle' }, fn)` for database-specific tests.
 - Existing suites with `resetBetweenTests: false` seed once and manage their own cleanup between tests. New suites use the default per-test reset.
+- Clean up side effects the fixture doesn't handle, such as files, external resources, and environment changes.
 - Only generate visual regression baselines with `pnpm test:visual:update`, which uses the pinned Docker image. Host-generated baselines fail on CI.
 - Dev and e2e run with Next.js `cacheComponents` (disable with `PAYLOAD_DISABLE_CACHE_COMPONENTS=true`). Tag tests whose behavior differs between modes with `@also-without-cache-components`.
 
