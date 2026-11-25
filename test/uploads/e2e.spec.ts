@@ -3039,6 +3039,17 @@ describe('Uploads', () => {
     await saveDocAndAssert(page, '#action-save', 'error')
   })
 
+  test('should show an invalid file type error when the selected file does not match the accepted mime types', async () => {
+    await gotoAndWaitForForm(page, pdfOnlyURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+      'Invalid file type',
+    )
+    await expect(page.locator('#field-filemanager-filename')).toBeHidden()
+    await closeAllToasts(page)
+  })
+
   test('should prevent invalid mimetype disguised as valid mimetype', async () => {
     await gotoAndWaitForForm(page, fileMimeTypeURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))

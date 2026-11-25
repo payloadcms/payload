@@ -2,7 +2,7 @@
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, validateMimeType } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -10,6 +10,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
+import { isFileTypeAccepted } from '../../utilities/isFileTypeAccepted.js'
 import { pasteURLDrawerSlug } from './UploadFromURLModal/index.js'
 
 type UseUploadFromUrlArgs = {
@@ -65,7 +66,7 @@ export const useUploadFromUrl = ({
 
   const acceptFetchedBlob = useCallback(
     ({ blob, url }: { blob: Blob; url: string }): boolean => {
-      if (uploadConfig?.mimeTypes?.length && !validateMimeType(blob.type, uploadConfig.mimeTypes)) {
+      if (!isFileTypeAccepted({ file: blob, mimeTypes: uploadConfig?.mimeTypes })) {
         toast.error(t('error:invalidFileType'))
         setUploadStatus('failed')
         return false
