@@ -9,9 +9,12 @@ export default buildConfigWithDefaults({
         access: {
           read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }),
         },
-        fields: [{ name: 'title', type: 'text', localized: true }],
+        fields: [
+          { name: 'title', type: 'text', localized: true },
+          { name: 'parent', type: 'relationship', hasMany: false, relationTo: Versions.slug },
+          { name: 'children', type: 'join', collection: [Versions.slug], on: 'parent' },
+        ],
         hierarchy: {
-          joinField: { name: 'children' },
           parentFieldName: 'parent',
         },
       },

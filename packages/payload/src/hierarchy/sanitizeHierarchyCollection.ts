@@ -96,9 +96,6 @@ export const sanitizeHierarchyCollection = (
       : rawCollectionSpecific
         ? { fieldName: rawCollectionSpecific.fieldName ?? 'hierarchyType' }
         : false
-  const joinField = collectionConfig.hierarchy.joinField
-    ? collectionConfig.hierarchy.joinField
-    : undefined
   const slugify =
     collectionConfig.hierarchy.slugify ?? ((text: string) => defaultSlugify(text) ?? '')
   const treeLimit = collectionConfig.hierarchy.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
@@ -152,7 +149,6 @@ export const sanitizeHierarchyCollection = (
     },
     allowHasMany,
     collectionSpecific,
-    joinField,
     parentFieldName,
     relatedCollections: {},
     slugField,

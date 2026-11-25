@@ -45,19 +45,12 @@ test.suite('Folders Helpers', { config: './config.ts', resetBetweenTests: false 
       }
     })
 
-    test('should add join field when configured', ({ payload }) => {
+    test('should add the folder contents join', ({ payload }) => {
       const foldersCollection = payload.collections[folderSlug].config
 
-      if (foldersCollection.hierarchy !== false && foldersCollection.hierarchy.joinField) {
-        const joinFieldName = foldersCollection.hierarchy.joinField.name
-        const joinField = foldersCollection.fields.find(
-          (f: any) => f.name === joinFieldName && f.type === 'join',
-        )
-
-        expect(joinField).toBeDefined()
-
-        expect(joinField?.type).toBe('join')
-      }
+      expect(foldersCollection.fields.filter((field) => field.type === 'join')).toMatchObject([
+        { name: '_h_contents' },
+      ])
     })
 
     test('should add virtual path fields', ({ payload }) => {

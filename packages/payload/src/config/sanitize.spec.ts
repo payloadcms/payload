@@ -3,6 +3,8 @@ import type { Config } from './types.js'
 import { describe, expect, it } from 'vitest'
 
 import { InvalidConfiguration } from '../errors/InvalidConfiguration.js'
+import { getHierarchyFieldName, HIERARCHY_CONTENTS_FIELD } from '../hierarchy/constants.js'
+import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { sanitizeConfig } from './sanitize.js'
 
 const configDefaults: Config = {
@@ -15,6 +17,38 @@ const configDefaults: Config = {
 }
 
 describe('sanitizeConfig', () => {
+  it('should register automatic hierarchy contents only once when resolving again', () => {
+    const config = sanitizeConfig({
+      ...configDefaults,
+      collections: [
+        { slug: 'folders', fields: [], folders: true },
+        {
+          slug: 'pages',
+          fields: [
+            {
+              name: getHierarchyFieldName('folders'),
+              type: 'relationship',
+              relationTo: 'folders',
+            },
+          ],
+        },
+      ],
+    })
+
+    resolveHierarchyCollections(config)
+
+    const folders = config.collections.find(({ slug }) => slug === 'folders')!
+
+    expect(
+      folders.fields.filter(
+        (field) => field.type === 'join' && field.name === HIERARCHY_CONTENTS_FIELD,
+      ),
+    ).toHaveLength(1)
+    expect(
+      folders.polymorphicJoins.filter(({ field }) => field.name === HIERARCHY_CONTENTS_FIELD),
+    ).toHaveLength(1)
+  })
+
   it.each([
     { cookiePrefix: undefined, expected: 'payload' },
     { cookiePrefix: '', expected: 'payload' },

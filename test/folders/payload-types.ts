@@ -169,7 +169,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'translated-labels';
+      _h_contents: 'payload-folders' | 'posts' | 'media' | 'translated-labels';
     };
   };
   collectionsSelect: {
@@ -248,7 +248,7 @@ export interface PayloadFolder {
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
   folderType?: ('posts' | 'media' | 'translated-labels')[] | null;
-  documentsAndFolders?: {
+  _h_contents?: {
     docs?: (
       | {
           relationTo?: 'payload-folders';
@@ -522,7 +522,7 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   _h_slugPath?: T;
   _h_titlePath?: T;
   folderType?: T;
-  documentsAndFolders?: T;
+  _h_contents?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
