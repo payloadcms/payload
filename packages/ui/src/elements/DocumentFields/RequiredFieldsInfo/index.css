@@ -1,21 +1,15 @@
 @layer payload-default {
   .required-fields-info {
     display: flex;
-    justify-content: flex-end;
-    margin-block-end: var(--spacer-2);
+    align-items: center;
+    gap: var(--spacer-1);
+    margin: 0;
+    margin-block-end: var(--spacer-4);
+    text-align: start;
   }
 
-  .required-fields-info__content {
-    position: fixed;
-    inset: auto;
-    margin: var(--spacer-0);
-    padding: var(--spacer-2-5);
-    max-inline-size: min(calc(var(--spacer-6) * 8), calc(100vw - var(--spacer-4)));
-    color: var(--color-text);
-    background: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-medium);
-    box-shadow: var(--elevation-300-tooltip);
-    font: inherit;
+  .required-fields-info__icon {
+    display: flex;
+    flex-shrink: 0;
   }
 }

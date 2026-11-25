@@ -30,6 +30,7 @@ import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.
 import { useTranslation } from '../../providers/Translation/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Button } from '../Button/index.js'
+import { RequiredFieldsInfo } from '../DocumentFields/RequiredFieldsInfo/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass } from './index.js'
 import './index.css'
@@ -329,6 +330,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
             </div>
             {selectedFields.length === 0 ? null : (
               <div className={`${baseClass}__edit`}>
+                <RequiredFieldsInfo />
                 <div className="render-fields">
                   {selectedFields.map((option, i) => {
                     const {

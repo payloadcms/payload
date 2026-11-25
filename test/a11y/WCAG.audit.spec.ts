@@ -2166,7 +2166,7 @@ test.describe('WCAG 2.2 Level AA', () => {
             expect(bounds).not.toBeNull()
             expect(bounds!.x).toBeGreaterThanOrEqual(0)
             expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
-            const helpBounds = await page.locator('.required-fields-info button').boundingBox()
+            const helpBounds = await page.locator('.required-fields-info').boundingBox()
 
             expect(helpBounds).not.toBeNull()
             expect(
@@ -9266,19 +9266,32 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should show required-field help in editable document forms and drawers',
       { tag: ['@document-editing'] },
       async () => {
-        await gotoCreatePost({ page, postsURL })
         const message = 'Fields marked with * are required.'
 
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+        await expect(page.locator('.required-fields-info')).toHaveText(message)
+        const accountHelpBounds = await page.locator('.required-fields-info').boundingBox()
+        const emailBounds = await page.locator('#field-email').boundingBox()
+
+        expect(accountHelpBounds!.y + accountHelpBounds!.height).toBeLessThanOrEqual(emailBounds!.y)
+        await gotoCreatePost({ page, postsURL })
         await expect(page.locator('.document-fields')).toBeVisible()
         await expectRequiredState({ input: page.locator('#field-title') })
         await expect(page.locator('.required-fields-info')).toBeVisible()
-        await expect(page.getByRole('button', { name: message, exact: true })).toBeVisible()
+        await expect(page.locator('.required-fields-info')).toHaveText(message)
+        await expect(page.locator('.required-fields-info button')).toHaveCount(0)
+        const helpBounds = await page.locator('.required-fields-info').boundingBox()
+        const titleBounds = await page.locator('#field-title').boundingBox()
+
+        expect(helpBounds!.x).toBeCloseTo(titleBounds!.x, 0)
+        expect(helpBounds!.y + helpBounds!.height).toBeLessThanOrEqual(titleBounds!.y)
         await page.locator('#relatedPost-add-new button').click()
         const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
 
         await expect(drawer).toBeVisible()
         await expect(drawer.locator('.document-fields')).toBeVisible()
-        await expect(drawer.getByRole('button', { name: message, exact: true })).toBeVisible()
+        await expect(drawer.locator('.required-fields-info')).toHaveText(message)
+        await expect(drawer.locator('.required-fields-info button')).toHaveCount(0)
         await expect(drawer.locator('.required-fields-info')).toBeVisible()
       },
     )

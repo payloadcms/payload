@@ -212,6 +212,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'hierarchy:searchLabel',
   'hierarchy:searchResults',
 
+  'general:accessibilitySettings',
   'general:all',
   'general:aboutToDeleteCount',
   'general:aboutToDelete',

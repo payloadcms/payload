@@ -5,7 +5,6 @@ import { fieldIsSidebar } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { useAccessibility } from '../../providers/Accessibility/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { TrashBanner } from '../TrashBanner/index.js'
 import { RequiredFieldsInfo } from './RequiredFieldsInfo/index.js'
@@ -41,7 +40,6 @@ export const DocumentFields: React.FC<Args> = ({
   readOnly,
   schemaPathSegments,
 }) => {
-  const { shouldShowHelpTooltips } = useAccessibility()
   const { hasSidebarFields, mainFields, sidebarFields } = useMemo(() => {
     if (disableSidebar) {
       return {
@@ -84,8 +82,8 @@ export const DocumentFields: React.FC<Args> = ({
       <div className={`${baseClass}__main`}>
         <Gutter className={`${baseClass}__edit`}>
           {isTrashed && <TrashBanner />}
+          {!readOnly && <RequiredFieldsInfo />}
           {BeforeFields}
-          {!readOnly && shouldShowHelpTooltips && <RequiredFieldsInfo />}
           <RenderFields
             className={`${baseClass}__fields`}
             fields={mainFields}
