@@ -33,7 +33,10 @@ import type { QueryResult } from 'pg'
 
 import type { DrizzleResolvedOperator, Operators } from './queries/operatorMap.js'
 
-/** Snapshot fields shared by legacy table-map and current DDL formats. */
+/**
+ * Snapshot fields shared by the legacy table-map format, full DDL states, and Postgres delta
+ * snapshots (`type: 'base'` holds `ddl`, `type: 'diff'` holds `deltas` against `prevIds`).
+ */
 export type DrizzleSnapshotJSON = {
   [key: string]: unknown
   ddl?: {
@@ -48,6 +51,7 @@ export type DrizzleSnapshotJSON = {
   prevId?: string
   prevIds?: string[]
   tables?: Record<string, unknown>
+  type?: 'base' | 'diff'
   version: string
 }
 
@@ -130,8 +134,7 @@ export type Insert = (args: {
 
 /**
  * drizzle-kit v1 replaced the separate `filterSchema`/`tablesFilter`/`extensionsFilter`
- * push arguments with a single entities-filter config, and `pushSchema` now returns
- * `hints` instead of `warnings`/`hasDataLoss`.
+ * push arguments with a single entities-filter config.
  */
 export type EntitiesFilterConfig = {
   entities?: unknown
@@ -153,21 +156,61 @@ export type RequireDrizzleKit = () => Promise<{
   generateMigration: (
     prev: DrizzleSnapshotJSON,
     cur: DrizzleSnapshotJSON,
-    options?: { hints?: DrizzleMigrationHint[] },
-  ) => Promise<string[]>
+    options?: DrizzleMigrationOptions,
+  ) => Promise<DrizzleMigrationResult>
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
     entitiesConfig?: EntitiesFilterConfig,
     migrationsConfig?: { schema?: string; table?: string },
-    options?: { hints?: DrizzleMigrationHint[] },
+    options?: DrizzleMigrationOptions,
   ) => Promise<{
     apply: () => Promise<void>
-    hints: { hint: string; statement?: string }[]
+    /** Every hint the run applied, including answers given at interactive prompts. */
+    hints: DrizzleMigrationHint[]
     sqlStatements: string[]
+    /** Data-loss items to confirm before calling `apply` when running interactively. */
+    warnings: { hint: string; statement?: string }[]
   }>
-  upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
+  /**
+   * Builds a schema state from a folder of stored snapshots. Only dialects that store delta
+   * snapshots provide it; the others read their latest full-state snapshot directly.
+   */
+  reconstruct?: (
+    snapshots: Record<string, DrizzleSnapshotJSON>,
+    id?: string,
+  ) => Promise<DrizzleSnapshotJSON>
+  /**
+   * Converts a folder of stored snapshots (`{ [fileName]: snapshot }`) to the latest format.
+   * Postgres also turns full states into one `base` snapshot followed by `diff` snapshots.
+   * Snapshot ids are kept, so the conversion can run in memory on every read.
+   */
+  upSnapshots: (snapshots: Record<string, unknown>) => Promise<{
+    hints: string[]
+    snapshots: Record<string, DrizzleSnapshotJSON>
+  }>
 }>
+
+export type DrizzleMigrationOptions = {
+  hints?: DrizzleMigrationHint[]
+  /**
+   * Ask rename-or-create questions in the terminal when stdin is a TTY. Without a TTY,
+   * drizzle-kit falls back to `hints` and throws `missing_hints` for anything unresolved.
+   */
+  interactive?: boolean
+}
+
+export type DrizzleMigrationResult = {
+  /** Every hint the run applied, including answers given at interactive prompts. */
+  hints: DrizzleMigrationHint[]
+  /**
+   * The snapshot to store for this migration. Postgres returns a `base` or `diff` snapshot;
+   * SQLite stores full states, so it is undefined there and the `generateDrizzleJson` result is
+   * stored instead.
+   */
+  snapshot?: DrizzleSnapshotJSON
+  sqlStatements: string[]
+}
 
 export type Migration = {
   down: ({

@@ -1,7 +1,7 @@
 import type { DynamicMigrationTemplate } from 'payload'
 
 import { randomUUID } from 'crypto'
-import { readdirSync, readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 
 import type { DrizzleAdapter } from '../types.js'
 import type { SizesToVariantsTableRenames } from './getSizesToVariantsRenames.js'
@@ -10,6 +10,7 @@ import {
   findSizesToVariantsFieldCollision,
   getSizesToVariantsRenames,
 } from './getSizesToVariantsRenames.js'
+import { readPreviousSchemaState } from './readPreviousSchemaState.js'
 
 type SnapshotIndex = {
   columns: ({ expression: string } | string)[]
@@ -49,6 +50,7 @@ type Snapshot = {
  * applied. The next generated migration then diffs from the renamed columns instead of dropping
  * them, and still picks up every other schema change the upgrade brings. Without a previous
  * snapshot (a project that has only ever used `push`) there's nothing to update, so none is written.
+ * The snapshot is a full state; on Postgres, the next read converts it into the delta chain.
  */
 export const buildDynamicPredefinedSizesToVariantsMigration = ({
   packageName,
@@ -76,29 +78,17 @@ export const buildDynamicPredefinedSizesToVariantsMigration = ({
   }
 }
 
-/** The latest snapshot in the migrations directory, upgraded to drizzle-kit's current format. */
+/** The schema state the project's migrations left behind, in drizzle-kit's current format. */
 async function readLatestSnapshot({
   adapter,
 }: {
   adapter: DrizzleAdapter
 }): Promise<Snapshot | undefined> {
-  const dir = adapter.migrationDir
-  const latestSnapshotFile = readdirSync(dir)
-    .filter((file) => file.endsWith('.json'))
-    .sort()
-    .reverse()[0]
-
-  if (!latestSnapshotFile) {
-    return undefined
-  }
-
-  const { generateDrizzleJson, upSnapshot } = await adapter.requireDrizzleKit()
-  const currentVersion = (await generateDrizzleJson(adapter.schema)).version
-  const snapshot = JSON.parse(readFileSync(`${dir}/${latestSnapshotFile}`, 'utf8')) as Snapshot
-
-  return upSnapshot && snapshot.version < currentVersion
-    ? (upSnapshot(snapshot) as Snapshot)
-    : snapshot
+  return (await readPreviousSchemaState({
+    dir: adapter.migrationDir,
+    kit: await adapter.requireDrizzleKit(),
+    payload: adapter.payload,
+  })) as Snapshot | undefined
 }
 
 function applySizesToVariantsRenames({

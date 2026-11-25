@@ -1,34 +1,39 @@
-import type { DrizzleMigrationHint, DrizzleSnapshotJSON, RequireDrizzleKit } from '../types.js'
+import type {
+  DrizzleMigrationHint,
+  DrizzleMigrationResult,
+  DrizzleSnapshotJSON,
+  RequireDrizzleKit,
+} from '../types.js'
 
-type MissingCreateHint = {
-  entity: string[]
-  kind: string
-  type: 'rename_or_create'
-}
+import { getMissingHints } from './migrationHints.js'
 
 /**
- * Predefined data migrations copy their data explicitly and create new schema entities rather than
- * renaming old ones. Resolve only that ambiguity; never accept data-loss confirmations here.
+ * Generates a migration without prompting, treating every ambiguous entity as newly created.
+ * Predefined data migrations copy their data explicitly, and DOWN migrations start from the
+ * renames reversed from UP (`initialHints`), so creating is the right answer for everything left.
+ * Data-loss confirmations are never accepted here.
  */
 export const generateMigrationWithCreateHints = async ({
   after,
   before,
   generateMigration,
+  initialHints = [],
 }: {
   after: DrizzleSnapshotJSON
   before: DrizzleSnapshotJSON
   generateMigration: Awaited<ReturnType<RequireDrizzleKit>>['generateMigration']
-}): Promise<string[]> => {
-  const hints: DrizzleMigrationHint[] = []
+  initialHints?: DrizzleMigrationHint[]
+}): Promise<DrizzleMigrationResult> => {
+  const hints: DrizzleMigrationHint[] = [...initialHints]
   const resolvedHints = new Set<string>()
 
   while (true) {
     try {
       return await generateMigration(before, after, { hints: [...hints] })
     } catch (error) {
-      const missingHints = getMissingCreateHints({ error })
+      const missingHints = getMissingHints({ error })
 
-      if (!missingHints?.length) {
+      if (!missingHints?.length || missingHints.some(({ type }) => type !== 'rename_or_create')) {
         throw error
       }
 
@@ -49,30 +54,4 @@ export const generateMigrationWithCreateHints = async ({
       }
     }
   }
-}
-
-const getMissingCreateHints = ({ error }: { error: unknown }): MissingCreateHint[] | undefined => {
-  if (
-    !error ||
-    typeof error !== 'object' ||
-    !('code' in error) ||
-    error.code !== 'missing_hints' ||
-    !('missingHints' in error) ||
-    !Array.isArray(error.missingHints)
-  ) {
-    return undefined
-  }
-
-  const isCreateHint = (hint: unknown): hint is MissingCreateHint =>
-    !!hint &&
-    typeof hint === 'object' &&
-    'type' in hint &&
-    hint.type === 'rename_or_create' &&
-    'kind' in hint &&
-    typeof hint.kind === 'string' &&
-    'entity' in hint &&
-    Array.isArray(hint.entity) &&
-    hint.entity.every((part) => typeof part === 'string')
-
-  return error.missingHints.every(isCreateHint) ? error.missingHints : undefined
 }

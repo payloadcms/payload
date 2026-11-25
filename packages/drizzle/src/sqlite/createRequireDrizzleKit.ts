@@ -1,11 +1,11 @@
 import type * as DrizzleKit from 'drizzle-kit/payload/sqlite'
-import type { SQL } from 'drizzle-orm'
 
-import { sql } from 'drizzle-orm'
 import nodeModule from 'node:module'
 import { dynamicImport } from 'payload'
 
 import type { RequireDrizzleKit } from '../types.js'
+
+type Kit = Awaited<ReturnType<RequireDrizzleKit>>
 
 export const createRequireDrizzleKit =
   ({
@@ -23,37 +23,27 @@ export const createRequireDrizzleKit =
 
     return {
       generateDrizzleJson,
-      generateMigration: generateMigration as unknown as Awaited<
-        ReturnType<RequireDrizzleKit>
-      >['generateMigration'],
-      // drizzle-kit v1's SQLite push takes a raw `SQLiteClient` ({ query, run, batch }) rather
-      // than the drizzle instance (and has no entities filter). We adapt the drizzle instance
-      // into that shape via its driver-agnostic raw-SQL methods so this works for libsql and D1.
-      pushSchema: (schema, drizzle, _entitiesConfig, migrationsConfig, options) => {
-        const db = drizzle as unknown as {
-          all: <T>(query: SQL) => Promise<T[]>
-          run: (query: SQL) => Promise<unknown>
-        }
+      // SQLite stores full states, so the result has no `snapshot` and there is no `reconstruct`.
+      generateMigration: async (before, after, options) => {
+        const result = (await generateMigration(
+          before as Parameters<typeof generateMigration>[0],
+          after as Parameters<typeof generateMigration>[1],
+          options as Parameters<typeof generateMigration>[2],
+        )) as Awaited<ReturnType<Kit['generateMigration']>>
 
-        const client = {
-          batch: async (statements: string[]) => {
-            for (const statement of statements) {
-              await db.run(sql.raw(statement))
-            }
-          },
-          query: <T>(queryString: string) => db.all<T>(sql.raw(queryString)),
-          run: async (queryString: string) => {
-            await db.run(sql.raw(queryString))
-          },
+        // TODO: remove when drizzle-kit fixes this. The drizzle-kit preview for 1.0.0-rc.6 drops
+        // the indexes of a recreated table after recreating it, when they are already gone with
+        // the old table. 1.0.0-rc.5 emitted `DROP INDEX IF EXISTS` here.
+        return {
+          ...result,
+          sqlStatements: result.sqlStatements.map((statement) =>
+            statement.replace(/^DROP INDEX (?!IF EXISTS )/, 'DROP INDEX IF EXISTS '),
+          ),
         }
-
-        return pushSchema(
-          schema,
-          client,
-          migrationsConfig,
-          options as Parameters<typeof pushSchema>[3],
-        )
       },
-      upSnapshot: (snapshot) => up(snapshot as Parameters<typeof up>[0]),
+      // Accepts libsql and D1 drizzle instances. The adapter's instance is typed as a union of
+      // every dialect.
+      pushSchema: pushSchema as unknown as Kit['pushSchema'],
+      upSnapshots: (snapshots) => up(snapshots) as ReturnType<Kit['upSnapshots']>,
     }
   }

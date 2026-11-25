@@ -144,12 +144,13 @@ describe('Drizzle snapshot contracts', () => {
     expect(legacy).type.toBeAssignableTo<Snapshot>()
   })
 
-  test('should accept SQLite upgrade results and reject PostgreSQL result envelopes as snapshots', () => {
-    type SQLiteUpgradeResult = ReturnType<typeof upgradeSQLiteSnapshot>
-    type PostgresUpgradeResult = ReturnType<typeof upgradePostgresSnapshot>
+  test('should accept upgraded snapshots from both dialects and reject the result envelopes', () => {
+    type SQLiteUpgradeResult = Awaited<ReturnType<typeof upgradeSQLiteSnapshot>>
+    type PostgresUpgradeResult = Awaited<ReturnType<typeof upgradePostgresSnapshot>>
 
-    expect<SQLiteUpgradeResult>().type.toBeAssignableTo<Snapshot>()
-    expect<PostgresUpgradeResult['snapshot']>().type.toBeAssignableTo<Snapshot>()
+    expect<SQLiteUpgradeResult['snapshots'][string]>().type.toBeAssignableTo<Snapshot>()
+    expect<PostgresUpgradeResult['snapshots'][string]>().type.toBeAssignableTo<Snapshot>()
+    expect<SQLiteUpgradeResult>().type.not.toBeAssignableTo<Snapshot>()
     expect<PostgresUpgradeResult>().type.not.toBeAssignableTo<Snapshot>()
   })
 })

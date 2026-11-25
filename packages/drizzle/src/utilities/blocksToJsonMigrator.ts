@@ -527,7 +527,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     this.resetSchema()
     await this.adapter.init()
 
-    const statements = await generateMigrationWithCreateHints({
+    const { sqlStatements: statements } = await generateMigrationWithCreateHints({
       after: drizzleJsonAfter,
       before: drizzleJsonBefore,
       generateMigration,

@@ -20,6 +20,7 @@ const makeMigrationDir = () => {
 /** A 3.x snapshot: a camelCase `heroLarge` size stored as `sizes_*`, plus an unrelated table. */
 const legacySnapshot = {
   id: 'previous-snapshot-id',
+  dialect: 'postgresql',
   tables: {
     'public.media': {
       name: 'media',
@@ -41,6 +42,14 @@ const legacySnapshot = {
     },
   },
   version: '7',
+}
+
+/**
+ * A kit that returns stored snapshots unchanged and has no `reconstruct`, so the latest file is the
+ * previous state. Format upgrades are covered by the adapter specs.
+ */
+const identityKit = {
+  upSnapshots: (snapshots: Record<string, unknown>) => Promise.resolve({ hints: [], snapshots }),
 }
 
 const makePayload = ({ migrationDir }: { migrationDir: string }) =>
@@ -72,8 +81,7 @@ const makePayload = ({ migrationDir }: { migrationDir: string }) =>
           },
         },
       },
-      requireDrizzleKit: () =>
-        Promise.resolve({ generateDrizzleJson: () => Promise.resolve({ version: '7' }) }),
+      requireDrizzleKit: () => Promise.resolve(identityKit),
       schema: {},
       tableNameMap: new Map([['media', 'media']]),
       versionsSuffix: '_v',
@@ -146,9 +154,7 @@ describe('buildDynamicPredefinedSizesToVariantsMigration', () => {
     }
     const payload = makePayload({ migrationDir })
 
-    payload.db.requireDrizzleKit = () => ({
-      generateDrizzleJson: () => Promise.resolve({ version: '9' }),
-    })
+    payload.db.requireDrizzleKit = () => Promise.resolve(identityKit)
     fs.writeFileSync(
       path.join(migrationDir, '20260101_000000_initial.json'),
       JSON.stringify(snapshot),

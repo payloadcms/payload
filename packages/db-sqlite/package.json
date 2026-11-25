@@ -104,7 +104,7 @@
     "@libsql/client": "0.14.0",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.15.0",
-    "drizzle-kit": "1.0.0-rc.5",
+    "drizzle-kit": "https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315",
     "drizzle-orm": "1.0.0-rc.5",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",

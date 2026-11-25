@@ -12,7 +12,7 @@ describe('PostgreSQL migration generation', () => {
       schema,
       entries: schema.table('entries', { id: integer().primaryKey() }),
     })
-    const statements = await generateMigration(defaultDrizzleSnapshot, after)
+    const { sqlStatements: statements } = await generateMigration(defaultDrizzleSnapshot, after)
 
     expect(statements).toContain('CREATE SCHEMA IF NOT EXISTS "custom";\n')
     expect(
