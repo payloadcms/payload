@@ -331,6 +331,7 @@ Examples:
 ### Pull Requests
 
 - Only push or open PRs when asked, and open them as drafts unless told otherwise.
+- For stacked PRs, use GitHub's native stacked pull requests via the `gh stack` extension (`gh stack init`, `add`, `submit`, or `gh stack link` for existing branches), not independent PRs that link to each other.
 - Fixes need two PRs, one against `main` (v4) and one against `3.x` (v3), each linking the other. Features go to `main` only. If a fix should land on one branch only, say why in the PR description and in the chat.
 - Keep descriptions short and informal, backports included, since the PR body becomes the squashed commit body.
 - If the change can be seen in the browser, including a fixed behavior, record it with the `record-pr-demo` skill, showing before and after when there is a before. Use screenshots only for static visual changes.
