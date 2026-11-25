@@ -1540,12 +1540,6 @@ export type Config = {
    * @see https://payloadcms.com/docs/email/overview
    */
   email?: EmailAdapter | Promise<EmailAdapter>
-  /**
-   * Allow `GET /api/access?includeSchema=true` to disclose readable field paths, labels, and types.
-   * Callers with conditional read access can discover this metadata without reading a document.
-   * @default false
-   */
-  enableAccessSchema?: boolean
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**

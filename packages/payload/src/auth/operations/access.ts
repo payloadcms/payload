@@ -6,12 +6,13 @@ import { getAccessResults } from '../getAccessResults.js'
 
 type Arguments = {
   req: PayloadRequest
+  skipFieldPermissions?: boolean
 }
 
 export const accessOperation = async (args: Arguments): Promise<SanitizedPermissions> => {
-  const { req } = args
+  const { req, skipFieldPermissions } = args
 
   adminInitTelemetry(req)
 
-  return getAccessResults({ req })
+  return getAccessResults({ req, skipFieldPermissions })
 }

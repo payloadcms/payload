@@ -2,7 +2,6 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
-import { includeAccessSchema } from '../includeAccessSchema.js'
 import { accessOperation } from '../operations/access.js'
 
 export const accessHandler: PayloadHandler = async (req) => {
@@ -12,16 +11,20 @@ export const accessHandler: PayloadHandler = async (req) => {
   })
 
   try {
+    const skipFieldPermissions = req.searchParams.get('includeFields') === 'false'
     const results = await accessOperation({
       req,
+      skipFieldPermissions,
     })
 
-    if (
-      req.payload.config.enableAccessSchema === true &&
-      req.searchParams.get('includeSchema') === 'true'
-    ) {
-      headers.set('Cache-Control', 'private, no-store')
-      return Response.json(includeAccessSchema({ permissions: results, req }), { headers })
+    if (skipFieldPermissions) {
+      for (const permissions of [
+        ...Object.values(results.collections ?? {}),
+        ...Object.values(results.globals ?? {}),
+      ]) {
+        const entityPermissions: Partial<typeof permissions> = permissions
+        delete entityPermissions.fields
+      }
     }
 
     return Response.json(results, {
