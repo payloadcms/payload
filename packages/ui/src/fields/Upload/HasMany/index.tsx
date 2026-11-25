@@ -6,6 +6,7 @@ import React from 'react'
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 
@@ -46,6 +47,8 @@ export function UploadComponentHasMany(props: Props) {
     serverURL,
     showCollectionSlug = false,
   } = props
+
+  const { t } = useTranslation()
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
@@ -132,6 +135,7 @@ export function UploadComponentHasMany(props: Props) {
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}
                         {...draggableSortableItemProps.listeners}
+                        aria-label={`${t('general:dragToReorder')} ${value.filename}`}
                       >
                         <AlignJustifiedIcon />
                       </div>
