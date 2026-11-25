@@ -109,7 +109,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_D5E7E2D8 as GenNodeUnion,
+  LexicalNodes_F0C4E4FB as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
@@ -1883,10 +1883,13 @@ describe('Types testing', () => {
       })
 
       test('SerializedRelationshipNode: generated <-> runtime', () => {
-        // The relationship node excludes upload collections, so compare against the
-        // relationship member as it actually appears in the generated union.
+        // The generated union leaves out upload collections and collections with
+        // `enableRichTextRelationship: false`, which the runtime default can't know about, so
+        // compare against the slugs the generated union actually contains.
         type GenRelationshipInUnion = Extract<GenNodeUnion, { type: 'relationship' }>
-        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<SerializedRelationshipNode>()
+        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<
+          SerializedRelationshipNode<GenRelationshipInUnion['relationTo']>
+        >()
         expect<SerializedRelationshipNode>().type.toBeAssignableFrom<GenRelationshipInUnion>()
       })
 
@@ -1962,6 +1965,7 @@ describe('Types testing', () => {
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
+        | 'payload-llm-instructions'
         | 'payload-locked-documents'
         | 'payload-migrations'
         | 'payload-preferences'
@@ -1993,6 +1997,7 @@ describe('Types testing', () => {
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
+        | 'payload-llm-instructions'
         | 'payload-locked-documents'
         | 'payload-migrations'
         | 'payload-preferences'
