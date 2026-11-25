@@ -35,6 +35,7 @@ export type HierarchyViewData = {
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
   childrenData: PaginatedDocs
+  childrenWhere?: Where
   joinedDocuments?: {
     docs: ({
       _collectionSlug: string

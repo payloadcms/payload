@@ -1,10 +1,11 @@
 'use client'
 
-import type { CollectionPreferences, ListViewClientProps } from 'payload'
+import type { CollectionPreferences, HierarchyViewData, ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
@@ -25,6 +26,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getHierarchyListURL } from './getHierarchyListURL.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
@@ -33,6 +35,7 @@ import { TypeFilter } from './TypeFilter/index.js'
 import './index.css'
 
 const baseClass = 'hierarchy-list'
+type JoinedDocuments = NonNullable<HierarchyViewData['joinedDocuments']>
 
 export function HierarchyListView(props: ListViewClientProps) {
   const {
@@ -85,6 +88,23 @@ export function HierarchyListView(props: ListViewClientProps) {
   const { setStepNav } = useStepNav()
   const { parent, refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
+  const { serverFunction } = useServerFunctions()
+  const initialJoinedDocuments = hierarchyData?.joinedDocuments
+  const [joinedPage, setJoinedPage] = useState<{
+    data: JoinedDocuments
+    initial: JoinedDocuments
+  }>()
+  const joinedDocuments =
+    joinedPage?.initial === initialJoinedDocuments
+      ? (joinedPage?.data ?? initialJoinedDocuments)
+      : initialJoinedDocuments
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
+  const isLoadingDocumentsRef = useRef(false)
+  const latestJoinedPage = useRef(initialJoinedDocuments)
+
+  useEffect(() => {
+    latestJoinedPage.current = initialJoinedDocuments
+  }, [initialJoinedDocuments])
 
   // Callback for when a new document is created
   const handleSave = useCallback(() => {
@@ -98,7 +118,9 @@ export function HierarchyListView(props: ListViewClientProps) {
       ...(preferences ?? {}),
       documentLayout: nextLayout,
     }))
-    router.refresh()
+    if (!initialJoinedDocuments) {
+      router.refresh()
+    }
   }
 
   // Get search from URL params
@@ -266,7 +288,10 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   const typeFilterFromURL = searchParams.get('typeFilter')
   const selectedTypes = useMemo(
-    () => (typeFilterFromURL ? typeFilterFromURL.split(',') : typeOptions.map((opt) => opt.value)),
+    () =>
+      typeFilterFromURL === null
+        ? typeOptions.map((opt) => opt.value)
+        : typeFilterFromURL.split(',').filter(Boolean),
     [typeFilterFromURL, typeOptions],
   )
 
@@ -281,7 +306,7 @@ export function HierarchyListView(props: ListViewClientProps) {
 
       // Only add typeFilter if not all types are selected
       const allSelected = values.length === typeOptions.length
-      if (!allSelected && values.length > 0) {
+      if (!allSelected) {
         currentParams.typeFilter = values.join(',')
       } else {
         delete currentParams.typeFilter
@@ -319,22 +344,92 @@ export function HierarchyListView(props: ListViewClientProps) {
       }))
   }, [hierarchyData?.relatedDocumentsByCollection, selectedTypes])
 
-  const collectionData = hierarchyData
-    ? {
-        [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-        ...Object.fromEntries(
-          Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
-            ([slug, related]) => [slug, { docs: related.result.docs }],
-          ),
-        ),
+  const loadMoreDocuments = async (onLastPage: () => void) => {
+    if (
+      isLoadingDocumentsRef.current ||
+      !joinedDocuments?.hasNextPage ||
+      !initialJoinedDocuments ||
+      parentId === null
+    ) {
+      return
+    }
+
+    isLoadingDocumentsRef.current = true
+    setIsLoadingDocuments(true)
+    try {
+      const data = (await serverFunction({
+        name: 'get-joined-hierarchy-documents',
+        args: {
+          collectionSlug,
+          page: joinedDocuments.page + 1,
+          parentID: parentId,
+          search: searchFromURL || undefined,
+          typeFilter: typeFilterFromURL === null ? undefined : selectedTypes,
+        },
+      })) as JoinedDocuments | undefined
+      if (latestJoinedPage.current !== initialJoinedDocuments) {
+        return
       }
-    : {}
+      if (!data) {
+        toast.error(t('error:unknown'))
+        return
+      }
+      const existing = new Set(
+        joinedDocuments.docs.map((doc) => `${doc._collectionSlug}:${doc.id}`),
+      )
+      if (!data.hasNextPage) {
+        onLastPage()
+      }
+      setJoinedPage({
+        data: {
+          ...data,
+          docs: [
+            ...joinedDocuments.docs,
+            ...data.docs.filter((doc) => !existing.has(`${doc._collectionSlug}:${doc.id}`)),
+          ],
+        },
+        initial: initialJoinedDocuments,
+      })
+    } catch {
+      if (latestJoinedPage.current === initialJoinedDocuments) {
+        toast.error(t('error:unknown'))
+      }
+    } finally {
+      isLoadingDocumentsRef.current = false
+      setIsLoadingDocuments(false)
+    }
+  }
+
+  const collectionData = useMemo(() => {
+    if (!hierarchyData) {
+      return {}
+    }
+
+    const data = {
+      [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+      ...Object.fromEntries(
+        Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(([slug, related]) => [
+          slug,
+          { docs: related.result.docs },
+        ]),
+      ),
+    }
+    for (const doc of joinedDocuments?.docs ?? []) {
+      const group = (data[doc._collectionSlug] ??= { docs: [] })
+      group.docs.push(doc)
+    }
+    return data
+  }, [collectionSlug, hierarchyData, joinedDocuments])
+  const viewKey = JSON.stringify([collectionSlug, parentId, searchFromURL, typeFilterFromURL])
 
   return (
     <Fragment>
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
-        <DocumentSelectionProvider collectionData={collectionData}>
+        <DocumentSelectionProvider
+          collectionData={collectionData}
+          preserveSelectionWithinScope={joinedDocuments ? viewKey : undefined}
+        >
           <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
@@ -399,24 +494,24 @@ export function HierarchyListView(props: ListViewClientProps) {
             </ListControlsBar>
 
             <HierarchyTable
-              baseFilter={baseFilter}
               childrenData={filteredChildrenData}
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
               HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
               hierarchyLabel={collectionLabel}
-              key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
+              isLoadingDocuments={isLoadingDocuments}
+              joinedDocuments={joinedDocuments}
+              key={`${viewKey}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},
               )
                 .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
                 .join(',')}`}
               layout={layout}
-              parentFieldName={parentFieldName}
+              onLoadMoreDocuments={loadMoreDocuments}
               parentId={parentId}
               relatedGroups={filteredRelatedGroups}
               search={searchFromURL}
-              useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
           </div>
         </DocumentSelectionProvider>

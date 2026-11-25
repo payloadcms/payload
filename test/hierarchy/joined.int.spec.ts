@@ -6,6 +6,8 @@ import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Verify the Admin read without exposing its implementation.
 import { getJoinedHierarchyDocuments } from '../../packages/ui/src/views/List/getJoinedHierarchyDocuments.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Verify the initial hierarchy view and its fallback.
+import { handleHierarchy } from '../../packages/ui/src/views/List/handleHierarchy.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   joinedFolders as folders,
@@ -134,6 +136,47 @@ test.suite('Joined hierarchy documents', { config: './joined.config.ts' }, () =>
       ).resolves.toBeUndefined()
     },
   )
+
+  test('should keep unrestricted child folders visible when filtering by type', async ({
+    payload,
+  }) => {
+    const req = await createRequest(payload)
+    const { config } = payload.collections[folders]
+    const parent = await payload.create({
+      overrideAccess: true,
+      collection: folders,
+      data: { name: 'Editorial' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: folders,
+      data: { '_h_joined-folders': parent.id, name: 'Unrestricted' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: folders,
+      data: { '_h_joined-folders': parent.id, hierarchyType: [media], name: 'Media only' },
+    })
+    await payload.create({
+      overrideAccess: true,
+      collection: folders,
+      data: { '_h_joined-folders': parent.id, hierarchyType: [pages], name: 'Pages only' },
+    })
+
+    const result = await handleHierarchy({
+      collectionConfig: config,
+      collectionSlug: folders,
+      parentId: parent.id,
+      req,
+      typeFilter: [media],
+      user: req.user,
+    })
+
+    expect(result.childrenData.docs.map((doc) => doc.name).sort()).toEqual([
+      'Media only',
+      'Unrestricted',
+    ])
+  })
 })
 
 async function createRequest(payload: Payload) {
