@@ -6,8 +6,10 @@ import type { UploadTransformation } from '../../transformers/uploadTransformerB
 import type { FileData, FileSizes, FileToSave } from '../../types.js'
 
 import { getUnplannedSafeFileName } from '../../getSafeFilename.js'
+import { isProcessableImage } from '../../isProcessableImage.js'
 import { isRequestTimeFile } from '../../isRequestTimeFile.js'
 import { parseFilename } from '../../parseFilename.js'
+import { probeImageSize } from '../../probeImageSize.js'
 import { generateImageSizeFilename } from '../utils/generateImageSizeFilename.js'
 
 /**
@@ -61,9 +63,18 @@ export async function buildVariantOutputs({
 
   for (const result of sizeResults) {
     const sizeName = result.fieldPath.slice('variants.'.length)
+    const savedEntry = currentFileData?.variants?.[sizeName]
+    // An update merges into the saved entry, so a new entry must clear the marker an earlier owner
+    // wrote when it built the size at request time, and replace the earlier storage fields.
+    const replacedEntryFields = {
+      ...(isRequestTimeFile({ entry: savedEntry }) ? { _stored: null } : {}),
+      _objectKey: objectKey,
+      prefix: storedPrefix,
+    }
 
     if (!result.file) {
       variants[sizeName] = {
+        ...(savedEntry ? replacedEntryFields : {}),
         filename: null,
         filesize: null,
         height: null,
@@ -85,20 +96,24 @@ export async function buildVariantOutputs({
       (imageSize) => imageSize.name === sizeName,
     )
 
-    let imageName = imageSizeConfig?.generateImageName
-      ? imageSizeConfig.generateImageName({
-          extension: sizeExt,
-          height: result.height!,
-          originalName: baseName,
-          sizeName,
-          width: result.width!,
-        })
-      : generateImageSizeFilename({
-          extension: sizeExt,
-          height: result.height!,
-          outputImageName: baseName,
-          width: result.width!,
-        })
+    const size = getVariantSize({ buffer: sizeBuffer, mimeType: sizeMimeType, result })
+
+    let imageName = !size
+      ? `${baseName}-${sizeName}${sizeExt ? `.${sizeExt}` : ''}`
+      : imageSizeConfig?.generateImageName
+        ? imageSizeConfig.generateImageName({
+            extension: sizeExt,
+            height: size.height,
+            originalName: baseName,
+            sizeName,
+            width: size.width,
+          })
+        : generateImageSizeFilename({
+            extension: sizeExt,
+            height: size.height,
+            outputImageName: baseName,
+            width: size.width,
+          })
 
     if (!disableLocalStorage || shouldStageCloudFiles) {
       imageName = await getUnplannedSafeFileName({
@@ -116,19 +131,13 @@ export async function buildVariantOutputs({
     }
 
     variants[sizeName] = {
-      // An update merges into the saved entry, so a size that is stored again must clear the
-      // marker an earlier owner wrote when it built the size at request time.
-      ...(isRequestTimeFile({ entry: currentFileData?.variants?.[sizeName] })
-        ? { _stored: null }
-        : {}),
-      _objectKey: objectKey,
+      ...replacedEntryFields,
       filename: imageName,
       filesize: sizeBuffer.length,
-      height: result.height!,
+      height: size?.height ?? null,
       mimeType: sizeMimeType,
-      prefix: storedPrefix,
       url: null,
-      width: result.width!,
+      width: size?.width ?? null,
     }
 
     if (!plannedSizeBuffers.has(imageName)) {
@@ -142,4 +151,36 @@ export async function buildVariantOutputs({
   }
 
   return { files, sizeBuffers, variants }
+}
+
+/**
+ * The variant's size: the one its maker gave, or else the one core measures when the file is an
+ * image type core can read. `undefined` when neither is known, so the variant is saved with no
+ * size and named without one.
+ */
+function getVariantSize({
+  buffer,
+  mimeType,
+  result,
+}: {
+  buffer: Buffer
+  mimeType: string
+  result: UploadTransformation
+}): { height: number; width: number } | undefined {
+  if (result.height !== undefined && result.width !== undefined) {
+    return { height: result.height, width: result.width }
+  }
+
+  if (!isProcessableImage(mimeType)) {
+    return undefined
+  }
+
+  try {
+    const { height, width } = probeImageSize(buffer)
+
+    return { height, width }
+  } catch {
+    // Not a readable image, so the size stays unknown.
+    return undefined
+  }
 }

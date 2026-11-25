@@ -136,10 +136,16 @@ export type TransformVariantArgs<TOptions = unknown> = {
 export type TransformVariantResult =
   | {
       file: File
-      /** The file's height. Core cannot measure an image without Sharp, so pass it when known. */
+      /**
+       * The file's height. Core measures common image types itself. Pass it for a file type core
+       * cannot measure, or the variant is saved with no size.
+       */
       height?: number
       status: 'complete'
-      /** The file's width. Core cannot measure an image without Sharp, so pass it when known. */
+      /**
+       * The file's width. Core measures common image types itself. Pass it for a file type core
+       * cannot measure, or the variant is saved with no size.
+       */
       width?: number
     }
   | { status: 'skip' }

@@ -54,6 +54,36 @@ test.suite('Upload variants hook', { config: './config.ts' }, () => {
     expect(doc.variants?.thumbnail?.filename).toMatch(/\.png$/)
   })
 
+  test('should measure a variant image that the hook gives no size for', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: { posterBehaviour: 'no-size' },
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(doc.variants?.thumbnail).toMatchObject({ height: 1600, width: 1600 })
+    expect(doc.variants?.thumbnail?.filename).toMatch(/-1600x1600\.png$/)
+  })
+
+  test('should save no size and a name without one for a variant that core cannot measure', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: { posterBehaviour: 'pdf' },
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(doc.variants?.thumbnail).toMatchObject({
+      filename: 'christmas-mariachi-in-guadalajara-thumbnail.pdf',
+      height: null,
+      mimeType: 'application/pdf',
+      width: null,
+    })
+  })
+
   test('should give a duplicated video its own thumbnail file', async ({ payload }) => {
     const source = await payload.create({
       collection: hookVariantMediaSlug,
@@ -123,6 +153,33 @@ test.suite('Upload variants hook', { config: './config.ts' }, () => {
     expect(video.variants?.card).toMatchObject({ filename: null, url: null })
   })
 
+  test('should not keep an old hook variant when a video is replaced by an image', async ({
+    payload,
+  }) => {
+    const video = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(video.variants?.blurhash?.filename).toEqual(expect.any(String))
+
+    const image = await payload.update({
+      id: video.id,
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(imagePath),
+      overrideAccess: true,
+    })
+
+    expect(image.variants).toMatchObject({
+      blurhash: { filename: null, height: null, mimeType: null, url: null, width: null },
+      card: { height: 300, mimeType: 'image/png', width: 300 },
+      thumbnail: { height: 100, mimeType: 'image/png', width: 100 },
+    })
+  })
+
   test('should not keep old variants when no hook owner can transform the new video', async ({
     payload,
   }) => {
@@ -144,6 +201,34 @@ test.suite('Upload variants hook', { config: './config.ts' }, () => {
     })
 
     expect(video.variants).toMatchObject({
+      blurhash: { filename: null, url: null },
+      card: { filename: null, url: null },
+      thumbnail: { filename: null, url: null },
+    })
+  })
+
+  test('should not keep old variants when an image is replaced by a WebM that no owner can transform', async ({
+    payload,
+  }) => {
+    const image = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(imagePath),
+      overrideAccess: true,
+    })
+
+    expect(image.variants?.thumbnail?.filename).toEqual(expect.any(String))
+
+    const webm = await payload.update({
+      id: image.id,
+      collection: hookVariantMediaSlug,
+      data: { blurBehaviour: 'ineligible', posterBehaviour: 'ineligible' },
+      file: await getFileByPath(webmPath),
+      overrideAccess: true,
+    })
+
+    expect(webm.mimeType).toBe('video/webm')
+    expect(webm.variants).toMatchObject({
       blurhash: { filename: null, url: null },
       card: { filename: null, url: null },
       thumbnail: { filename: null, url: null },

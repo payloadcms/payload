@@ -33,12 +33,18 @@ const readFixturePng = async () =>
     type: 'image/png',
   })
 
+/** A file type that core cannot measure. */
+const readFixturePdf = async () =>
+  new File([await fs.readFile(path.resolve(dirname, '../uploads/test-pdf.pdf'))], 'frame.pdf', {
+    type: 'application/pdf',
+  })
+
 const isHookVariantMedia = ({ collectionSlug }: { collectionSlug: string }) =>
   collectionSlug === hookVariantMediaSlug
 
 /**
  * Makes `thumbnail` for videos. `posterBehaviour` on the document picks the result, so one
- * fixture covers ineligible, complete, skip and throw.
+ * fixture covers ineligible, complete, skip and throw, a PNG with no size and a PDF.
  */
 export const posterTransformer: UploadTransformer = {
   slug: 'poster',
@@ -60,6 +66,14 @@ export const posterTransformer: UploadTransformer = {
 
     if (doc.posterBehaviour === 'throw') {
       throw new Error('poster: cannot read this video')
+    }
+
+    if (doc.posterBehaviour === 'no-size') {
+      return { file: await readFixturePng(), status: 'complete' }
+    }
+
+    if (doc.posterBehaviour === 'pdf') {
+      return { file: await readFixturePdf(), status: 'complete' }
     }
 
     return { file: await readFixturePng(), height: 1600, status: 'complete', width: 1600 }

@@ -39,7 +39,7 @@ export default buildConfig({
 
 `upload.transformers` is the only transformer configuration surface — there is no per-collection or per-field transformer list. Each transformer decides, per request or per upload, which collections and MIME types it applies to.
 
-Every transformer must declare a unique, non-empty `slug`. Payload throws a startup error if two transformers share a slug, if a transformer's `mimeTypes` array is empty or contains a malformed pattern, or if a declared capability (`init`, `canTransform`, `transformFile`, `handleRequest`) isn't a function.
+Every transformer must declare a unique, non-empty `slug`. Payload throws a startup error if two transformers share a slug, if a transformer's `mimeTypes` array is empty or contains a malformed pattern, or if a declared capability (`init`, `canTransform`, `transformFile`, `handleRequest`, `transformVariant`) isn't a function.
 
 ### Registering a transformer changes the file endpoint
 
@@ -505,7 +505,7 @@ Payload calls `transformVariant` once for each variant your transformer register
 | `{ status: 'skip' }`                            | Saves the variant as `null`. The upload succeeds |
 | An error is thrown                              | The upload fails with the generic upload error   |
 
-Pass `width` and `height` when you know them. Payload cannot measure an image without Sharp.
+Payload measures common image types, such as PNG, JPEG and WebP, itself. Pass `width` and `height` when the file is a type that Payload cannot measure. Otherwise Payload saves the variant with no size and names its file without one, for example `video-thumbnail.pdf`.
 
 How the hook runs:
 

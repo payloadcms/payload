@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../../types/index.js'
+import type { UploadTransformer } from '../../transformers/types.js'
 import type { UploadTransformation } from '../../transformers/uploadTransformerBridge.js'
 import type { FileData, FileToSave, FocalPoint, OriginalFileData } from '../../types.js'
 import type { UploadTransformerOutput } from '../runUploadTransformers.js'
@@ -15,7 +16,7 @@ import { canResizeImage } from '../../canResizeImage.js'
 import { getFileExtension, getSanitizedUploadFilename } from '../../getFileTypeIdentity.js'
 import { getImageSize } from '../../getImageSize.js'
 import { getSafeFileName, getUnplannedSafeFileName } from '../../getSafeFilename.js'
-import { getHookVariantOwners, getVariantOwners } from '../../getVariantOwners.js'
+import { getHookVariantOwners, getVariantOwner, getVariantOwners } from '../../getVariantOwners.js'
 import { isProcessableImage } from '../../isProcessableImage.js'
 import { isRequestTimeFile } from '../../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../../requestTimeFileData.js'
@@ -236,17 +237,16 @@ export async function buildUploadOutput({
     }
   }
 
-  // A bridge saves the sizes it builds. Without one, any variant that no owner made is saved as
-  // null when the file's type has a hook owner, so no variant from an earlier file stays.
-  const variantResults =
-    !transformed?.bridgeTransformer &&
-    getHookVariantOwners({
+  const variantResults = [
+    ...sizeResults,
+    ...getUnmadeVariantResults({
+      bridgeSlug: transformed?.bridgeTransformer?.slug,
       mimeType: file.mimetype,
+      sizeResults,
       transformers: req.payload.config.upload?.transformers ?? [],
       upload: collection.upload,
-    }).length > 0
-      ? [...sizeResults, ...getUnmadeVariantResults({ sizeResults, upload: collection.upload })]
-      : sizeResults
+    }),
+  ]
 
   if (variantResults.length > 0) {
     const sizes = await buildVariantOutputs({
@@ -335,21 +335,39 @@ export async function buildUploadOutput({
 
 /**
  * A result with no file for each collection variant that no owner made for this upload, so each
- * one is saved as null.
+ * one is saved as null and no variant from an earlier file stays. A bridge saves the sizes it
+ * builds:
+ * - Without a bridge, every variant that was not made is null when the file's type has a hook
+ *   owner.
+ * - With a bridge, on a collection with several owners, every variant whose owner for this file
+ *   is not the bridge is null. A collection with one owner keeps its other entries.
  */
 function getUnmadeVariantResults({
+  bridgeSlug,
+  mimeType,
   sizeResults,
+  transformers,
   upload,
 }: {
+  /** The slug of the upload bridge that ran, if one did. */
+  bridgeSlug?: string
+  mimeType: string
   sizeResults: UploadTransformation[]
+  transformers: UploadTransformer[]
   upload: SanitizedCollectionConfig['upload']
 }): UploadTransformation[] {
   const madePaths = new Set(sizeResults.map(({ fieldPath }) => fieldPath))
+  const hasHookOwner = getHookVariantOwners({ mimeType, transformers, upload }).length > 0
+  const hasSeveralOwners = (upload.variantOwners?.length ?? 0) > 1
+  const isSavedAsNull = (variantName: string): boolean =>
+    bridgeSlug
+      ? hasSeveralOwners && getVariantOwner({ mimeType, upload, variantName })?.slug !== bridgeSlug
+      : hasHookOwner
+  const nullNames = (upload.variants ?? [])
+    .map(({ name }) => name)
+    .filter((name) => !madePaths.has(`variants.${name}`) && isSavedAsNull(name))
 
-  return (upload.variants ?? [])
-    .map(({ name }) => `variants.${name}` as const)
-    .filter((fieldPath) => !madePaths.has(fieldPath))
-    .map((fieldPath) => ({ fieldPath }))
+  return nullNames.map((name) => ({ fieldPath: `variants.${name}` as const }))
 }
 
 /** The saved fields when the retained original becomes the main file again, as on a crop reset. */
