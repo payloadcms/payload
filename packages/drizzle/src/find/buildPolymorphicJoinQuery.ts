@@ -158,9 +158,7 @@ export const buildPolymorphicJoinQuery = ({
             return isPostgres ? '%' : '*'
           }
 
-          return isPostgres
-            ? segment.replace(/[\\%_]/g, '\\$&')
-            : segment.replace(/[[*?]/g, '[$&]')
+          return isPostgres ? segment.replace(/[\\%_]/g, '\\$&') : segment.replace(/[[*?]/g, '[$&]')
         })
         .join('.')
       const expectedDotCount = pathSegments.length - 1
