@@ -7,6 +7,7 @@ import {
   type CollectionSlug,
   combineQueries,
   type FlattenedField,
+  getLocalizedPaths,
   getQueryDraftsSort,
   type JoinQuery,
   type SanitizedCollectionConfig,
@@ -124,6 +125,20 @@ export const buildJoinAggregation = async ({
       const condition = resolveWhereForCollection({
         collectionSlug,
         flattenedFields: targetConfig.flattenedFields,
+        // Access filters may query hidden fields. Caller paths were validated before reaching the adapter.
+        isQueryablePath: (path) => {
+          const paths = getLocalizedPaths({
+            collectionSlug,
+            fields: targetConfig.flattenedFields,
+            incomingPath: path,
+            locale,
+            overrideAccess: true,
+            parentIsLocalized: false,
+            payload: adapter.payload,
+          })
+
+          return paths.length > 0 && paths.every(({ complete, invalid }) => complete && !invalid)
+        },
         usesObjectIDs: !adapter.payload.collections[collectionSlug]?.customIDType,
         where: whereJoin,
       })
