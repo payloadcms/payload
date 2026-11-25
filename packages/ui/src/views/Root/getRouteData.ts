@@ -17,6 +17,7 @@ import { formatAdminURL, isNumber } from 'payload/shared'
 
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
+import { hasHierarchyContents } from '../../elements/Hierarchy/hasHierarchyContents.js'
 import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { DocumentView } from '../Document/index.js'
@@ -202,10 +203,15 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
+        const hasSingleHierarchyView =
+          hasHierarchyContents({ collection: collectionConfig }) &&
+          collectionConfig.admin.components?.views?.list?.Component === undefined
+
         if (
-          collectionConfig.hierarchy &&
-          (searchParams.view === 'hierarchy' ||
-            (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy'))
+          hasSingleHierarchyView ||
+          (collectionConfig.hierarchy &&
+            (searchParams.view === 'hierarchy' ||
+              (!searchParams.view && collectionPreferences?.listViewType === 'hierarchy')))
         ) {
           ViewToRender = {
             Component: HierarchyView,

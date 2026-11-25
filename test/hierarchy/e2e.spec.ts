@@ -565,7 +565,7 @@ test.describe('Hierarchy Sidebar', () => {
   })
 
   test.describe('Folder title edit action', () => {
-    test('should keep the unfiltered default list when viewing a selected folder from All Folders', async () => {
+    test('should scope the default hierarchy view to the selected folder', async () => {
       const folder = await payload.create({
         collection: 'folders',
         data: { name: 'Default list parent' },
@@ -587,11 +587,9 @@ test.describe('Hierarchy Sidebar', () => {
         await page.goto(`${foldersURL.list}?parentFolder=${folder.id}`)
 
         await expect(page.getByRole('heading', { name: folder.name, level: 1 })).toBeVisible()
-        await expect(page.getByRole('columnheader', { name: 'Parent' })).toBeVisible()
-        await expect(page.getByText(child.name, { exact: true })).toBeVisible()
-        await expect(
-          page.getByRole('grid').getByText(unrelatedFolder.name, { exact: true }),
-        ).toBeVisible()
+        const contents = page.locator('.hierarchy-tables')
+        await expect(contents.getByText(child.name, { exact: true })).toBeVisible()
+        await expect(contents.getByText(unrelatedFolder.name, { exact: true })).toHaveCount(0)
       } finally {
         await payload.delete({ id: child.id, collection: 'folders', overrideAccess: true })
         await payload.delete({
@@ -603,7 +601,7 @@ test.describe('Hierarchy Sidebar', () => {
       }
     })
 
-    for (const mode of ['list', 'hierarchy'] as const) {
+    for (const mode of ['default', 'hierarchy'] as const) {
       test(`should edit the current folder from the ${mode} title`, async () => {
         const folder = await payload.create({
           collection: 'folders',
@@ -619,11 +617,6 @@ test.describe('Hierarchy Sidebar', () => {
         const rootURL = mode === 'hierarchy' ? foldersURL.hierarchy : foldersURL.list
 
         try {
-          if (mode === 'list') {
-            await page.goto(foldersURL.hierarchy)
-            await page.getByRole('button', { name: 'All Folders', exact: true }).click()
-          }
-
           await page.goto(rootURL)
           await expect(page.locator('.list-header .hierarchy-edit-button')).toHaveCount(0)
           await expect(page.locator('.hierarchy-tables__edit-button')).toHaveCount(0)

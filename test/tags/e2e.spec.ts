@@ -209,6 +209,37 @@ test.describe('Tags', () => {
     await expect(page.locator('.hierarchy-tables table')).toHaveCount(1)
   })
 
+  test('should show hierarchy contents by default and search in Table without losing focus', async () => {
+    const tree = await openTagsTree()
+    const header = page.locator('.hierarchy-list-header')
+
+    await expect(header.getByRole('heading', { name: 'Tags', exact: true })).toBeVisible()
+    await expect(header.getByRole('button', { name: /^(All Tags|By Tag)$/i })).toHaveCount(0)
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+    await page.getByRole('radio', { name: 'Grid' }).click()
+
+    const documents = page.getByRole('list', { name: 'Documents' })
+    await expect(documents.getByRole('link', { name: 'Traditional Tiramisu' })).toBeVisible()
+
+    const search = page.locator('#search-filter-input')
+    await search.fill('tiramisu')
+
+    const table = page.locator('.hierarchy-tables table')
+    await expect(table.getByRole('link', { name: 'Traditional Tiramisu' })).toBeVisible()
+    await expect(table.getByText('tiramisu.png', { exact: true })).toBeVisible()
+    await expect(table.getByText('mushroom-risotto.png', { exact: true })).toHaveCount(0)
+    await expect(documents).toHaveCount(0)
+    await expect(search).toBeFocused()
+
+    await search.fill('')
+    await expect(documents.getByRole('link', { name: 'Traditional Tiramisu' })).toBeVisible()
+    await expect(page.getByRole('radio', { name: 'Grid' })).toBeChecked()
+    await page.getByRole('radio', { name: 'Table' }).click()
+    await expect(table).toBeVisible()
+  })
+
   test('should load all child tags and only paginate documents', async () => {
     const [archive] = await createTagChain(['Recipe archive'])
     const total = DEFAULT_HIERARCHY_LIST_LIMIT + 1
