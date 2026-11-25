@@ -102,6 +102,8 @@ export const resaveChildren =
             400,
           )
         }
+
+        throw err
       }
     }
 
