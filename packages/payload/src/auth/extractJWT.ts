@@ -3,6 +3,8 @@ import type { AuthStrategyFunctionArgs } from './index.js'
 
 import { parseCookies } from '../utilities/parseCookies.js'
 
+type ExtractJWTArgs = { method?: string } & Omit<AuthStrategyFunctionArgs, 'strategyName'>
+
 type ExtractionMethod = (args: {
   headers: Headers
   method?: string
@@ -10,6 +12,8 @@ type ExtractionMethod = (args: {
 }) => null | string
 
 const SAFE_METHODS = ['GET', 'HEAD']
+
+const isSafeMethod = (method: string): boolean => SAFE_METHODS.includes(method.toUpperCase())
 
 /**
  * A cross-site top-level navigation (link click, or the redirect back from an identity
@@ -32,7 +36,7 @@ const isSafeTopLevelNavigation = ({
     return false
   }
 
-  return !method || SAFE_METHODS.includes(method.toUpperCase())
+  return !method || isSafeMethod(method)
 }
 
 /**
@@ -80,11 +84,15 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return cookieToken
     }
 
-    // Sec-Fetch-Site is omitted by browsers for same-origin navigations over plain HTTP on
-    // non-localhost hosts (it is only sent to potentially trustworthy origins). Its absence is
-    // therefore inconclusive rather than cross-site — fall back to validating the Referer
-    // header's origin against the same csrf allowlist.
-    if (!secFetchSite) {
+    const isIframeNavigation =
+      secFetchSite === 'cross-site' &&
+      headers.get('Sec-Fetch-Mode') === 'navigate' &&
+      headers.get('Sec-Fetch-Dest') === 'iframe' &&
+      (!method || isSafeMethod(method))
+
+    // Even same-origin navigations can lack Sec-Fetch-Site over plain HTTP outside localhost.
+    // When it's missing, or for a cross-site iframe navigation, require a Referer origin listed in csrf.
+    if (!secFetchSite || isIframeNavigation) {
       const referer = headers.get('Referer')
 
       if (referer) {
@@ -112,9 +120,9 @@ const extractionMethods: Record<string, ExtractionMethod> = {
   },
 }
 
-export const extractJWT = (args: Omit<AuthStrategyFunctionArgs, 'strategyName'>): null | string => {
+export const extractJWT = (args: ExtractJWTArgs): null | string => {
   const { headers, payload, req } = args
-  const method = req?.method
+  const method = req?.method ?? args.method
 
   const extractionOrder = payload.config.auth.jwtOrder
 

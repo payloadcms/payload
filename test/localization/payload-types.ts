@@ -62,29 +62,32 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_501FFC9E".
+ * via the `definition` "LexicalNodes_1F3E020A".
  */
-export type LexicalNodes_501FFC9E =
+export type LexicalNodes_1F3E020A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_501FFC9E>
+  | SerializedParagraphNode<LexicalNodes_1F3E020A>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
       /**
+       * @deprecated
        * Lexical's internal serialization version for this node type.
        */
-      version: number;
+      version?: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_501FFC9E>
+  | SerializedQuoteNode<LexicalNodes_1F3E020A>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
       | 'nested-arrays'
       | 'nested-field-tables'
       | 'localized-drafts'
+      | 'localized-query-targets'
+      | 'localized-query-references'
       | 'localized-date-fields'
       | 'all-fields-localized'
       | 'locale-validation'
@@ -114,11 +117,23 @@ export type LexicalNodes_501FFC9E =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_501FFC9E, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_501FFC9E, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_501FFC9E>
-  | SerializedListItemNode<LexicalNodes_501FFC9E>
-  | SerializedHeadingNode<LexicalNodes_501FFC9E>;
+  | SerializedAutoLinkNode<LexicalNodes_1F3E020A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_1F3E020A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_1F3E020A>
+  | SerializedListItemNode<LexicalNodes_1F3E020A>
+  | SerializedHeadingNode<LexicalNodes_1F3E020A>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3DE324E4".
+ */
+export type LexicalNodes_3DE324E4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3DE324E4>
+  | SerializedListNode<LexicalNodes_3DE324E4>
+  | SerializedListItemNode<LexicalNodes_3DE324E4>
+  | SerializedHeadingNode<LexicalNodes_3DE324E4, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -133,6 +148,8 @@ export interface Config {
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
     'localized-drafts': LocalizedDraft;
+    'localized-query-targets': LocalizedQueryTarget;
+    'localized-query-references': LocalizedQueryReference;
     'localized-date-fields': LocalizedDateField;
     'all-fields-localized': AllFieldsLocalized;
     'locale-validation': LocaleValidation;
@@ -161,6 +178,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -169,6 +187,8 @@ export interface Config {
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
+    'localized-query-targets': LocalizedQueryTargetsSelect<false> | LocalizedQueryTargetsSelect<true>;
+    'localized-query-references': LocalizedQueryReferencesSelect<false> | LocalizedQueryReferencesSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
     'locale-validation': LocaleValidationSelect<false> | LocaleValidationSelect<true>;
@@ -197,6 +217,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -282,7 +303,7 @@ export interface LocaleValidationBlock {
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_501FFC9E> | null;
+  lexical?: LexicalRichText<LexicalNodes_1F3E020A> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -325,6 +346,19 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
       }[]
     | null;
   password?: string | null;
@@ -535,6 +569,44 @@ export interface Content {
 export interface LocalizedDraft {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-targets".
+ */
+export interface LocalizedQueryTarget {
+  id: string;
+  title?: string | null;
+  category?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-references".
+ */
+export interface LocalizedQueryReference {
+  id: string;
+  target?: (string | null) | LocalizedQueryTarget;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1372,6 +1444,14 @@ export interface PayloadLockedDocument {
         value: string | LocalizedDraft;
       } | null)
     | ({
+        relationTo: 'localized-query-targets';
+        value: string | LocalizedQueryTarget;
+      } | null)
+    | ({
+        relationTo: 'localized-query-references';
+        value: string | LocalizedQueryReference;
+      } | null)
+    | ({
         relationTo: 'localized-date-fields';
         value: string | LocalizedDateField;
       } | null)
@@ -1506,6 +1586,28 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1667,6 +1769,30 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
  */
 export interface LocalizedDraftsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-targets_select".
+ */
+export interface LocalizedQueryTargetsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-query-references_select".
+ */
+export interface LocalizedQueryReferencesSelect<T extends boolean = true> {
+  target?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1841,6 +1967,11 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -2376,6 +2507,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-status-shared-global".
  */
 export interface LocalizedStatusSharedGlobal {
@@ -2823,6 +2970,8 @@ export interface CollectionQueryWidget {
       | 'nested-arrays'
       | 'nested-field-tables'
       | 'localized-drafts'
+      | 'localized-query-targets'
+      | 'localized-query-references'
       | 'localized-date-fields'
       | 'all-fields-localized'
       | 'locale-validation'
@@ -2875,6 +3024,8 @@ export interface ActivityWidget {
           | 'nested-arrays'
           | 'nested-field-tables'
           | 'localized-drafts'
+          | 'localized-query-targets'
+          | 'localized-query-references'
           | 'localized-date-fields'
           | 'all-fields-localized'
           | 'locale-validation'
@@ -2902,7 +3053,7 @@ export interface ActivityWidget {
         )[]
       | null;
   };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2923,6 +3074,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number;
   textFormat?: number;
   textStyle?: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2935,6 +3087,7 @@ export interface SerializedTextNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2945,11 +3098,13 @@ export interface SerializedTabNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
 export interface SerializedLineBreakNode {
   type: 'linebreak';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2961,6 +3116,7 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2968,6 +3124,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -2984,6 +3141,7 @@ export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElement
 export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -3042,6 +3200,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat;
     indent: number;
     type: 'root';
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
 }

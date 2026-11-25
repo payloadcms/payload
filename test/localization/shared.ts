@@ -29,6 +29,8 @@ export const publicationHookSlug = 'publication-hook'
 export const publicationHookGlobalSlug = 'publication-hook-global'
 
 export const localizedDraftsSlug = 'localized-drafts'
+export const localizedQueryTargetsSlug = 'localized-query-targets'
+export const localizedQueryReferencesSlug = 'localized-query-references'
 export const usersSlug = 'users'
 export const blocksWithLocalizedSameName = 'blocks-same-name'
 export const cannotCreateDefaultLocale = 'cannot-create-default-locale'
