@@ -30,14 +30,15 @@ const legacySnapshot = {
       uniqueConstraints: {},
     },
   },
+  enums: {},
   version: '6',
   views: {},
 }
 
 describe('SQLite snapshot upgrades', () => {
-  it('should return the upgraded snapshot directly and preserve existing table definitions', async () => {
-    const { generateDrizzleJson, generateMigration, upSnapshot } = await requireDrizzleKit()
-    const upgraded = upSnapshot(legacySnapshot)
+  it('should upgrade a legacy snapshot folder and preserve existing table definitions', async () => {
+    const { generateDrizzleJson, generateMigration, upSnapshots } = await requireDrizzleKit()
+    const upgraded = (await upSnapshots({ '0001.json': legacySnapshot })).snapshots['0001.json']
 
     expect(upgraded).toMatchObject({
       id: legacySnapshot.id,
@@ -57,7 +58,7 @@ describe('SQLite snapshot upgrades', () => {
         title: text(),
       }),
     })
-    const statements = await generateMigration(upgraded, after)
+    const { sqlStatements: statements } = await generateMigration(upgraded, after)
 
     expect(statements).toHaveLength(1)
     expect(statements[0]).toMatch(/ALTER TABLE ["`]entries["`] ADD ["`]description["`] text/)

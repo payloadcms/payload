@@ -43,7 +43,7 @@ describe('generateMigrationWithCreateHints', () => {
         code: 'missing_hints',
       })
 
-      const statements = await generateMigrationWithCreateHints({
+      const { sqlStatements: statements } = await generateMigrationWithCreateHints({
         after,
         before,
         generateMigration,

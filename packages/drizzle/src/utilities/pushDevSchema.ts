@@ -4,12 +4,7 @@ import prompts from 'prompts'
 import type { BasePostgresAdapter } from '../postgres/types.js'
 import type { DrizzleAdapter, DrizzleMigrationHint, PostgresDB, RawTable } from '../types.js'
 
-import {
-  getDroppedEntitiesFromError,
-  promptDataLoss,
-  promptRenameSource,
-  resolveMigrationHints,
-} from './resolveMigrationHints.js'
+import { getMissingHints } from './migrationHints.js'
 
 const previousSchema: {
   localeCodes: null | string[]
@@ -51,7 +46,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
 
   const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
 
-  const push = (hints: DrizzleMigrationHint[]) =>
+  const push = (hints: DrizzleMigrationHint[] = []) =>
     pushSchema(
       adapter.schema,
       adapter.drizzle,
@@ -63,59 +58,39 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
         tables: tablesFilter,
       },
       undefined,
-      { hints },
+      // In a terminal, drizzle-kit asks whether ambiguous entities were renamed or created, and
+      // returns data loss as warnings to confirm before `apply`.
+      { hints, interactive: true },
     )
 
-  // Prompts when Drizzle can't tell a rename from a create, or when the push loses data.
-  const { apply, hints } = await resolveMigrationHints({
-    chooseRenameSource: promptRenameSource,
-    confirmDataLoss: promptDataLoss,
-    // Push diffs against the live database, so there is no previous snapshot to list dropped
-    // entities from. Creating every ambiguous entity makes drizzle-kit report the entities it
-    // would drop (those holding data) as data-loss confirmations; those are the rename candidates.
-    getDroppedEntities: async ({ hints: currentHints, pending }) => {
-      try {
-        await push([
-          ...currentHints,
-          ...pending.map(({ entity, kind }) => ({ type: 'create' as const, entity, kind })),
-        ])
-        return []
-      } catch (error) {
-        return getDroppedEntitiesFromError({ error })
-      }
-    },
-    run: push,
-  })
+  let pushResult: Awaited<ReturnType<typeof push>>
 
-  const warnings = hints.map(({ hint }) => hint)
+  try {
+    pushResult = await push()
+  } catch (error) {
+    // Without a terminal, drizzle-kit can't ask and reports what it needs instead. Data loss can
+    // still be confirmed through the prompt below; a rename-or-create question can't.
+    const missingHints = getMissingHints({ error })
 
-  if (warnings.length) {
-    let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`
-
-    message += `Accept warnings and push schema to database?`
-
-    const { confirm: acceptWarnings } = await prompts(
-      {
-        name: 'confirm',
-        type: 'confirm',
-        initial: false,
-        message,
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-
-    // Exit if user does not accept warnings.
-    // Q: Is this the right type of exit for this interaction?
-    if (!acceptWarnings) {
-      process.exit(0)
+    if (!missingHints || missingHints.some(({ type }) => type !== 'confirm_data_loss')) {
+      throw error
     }
+
+    await confirmWarnings({
+      warnings: missingHints.map(
+        ({ entity, kind }) =>
+          `You're about to delete ${kind} ${entity.filter((part) => part !== 'public').join('.')}`,
+      ),
+    })
+
+    pushResult = await push(
+      missingHints.map(({ entity, kind }) => ({ type: 'confirm_data_loss', entity, kind })),
+    )
   }
 
-  await apply()
+  await confirmWarnings({ warnings: pushResult.warnings.map(({ hint }) => hint) })
+
+  await pushResult.apply()
   const migrationsTable = adapter.schemaName
     ? `"${adapter.schemaName}"."payload_migrations"`
     : '"payload_migrations"'
@@ -140,5 +115,30 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
       drizzle,
       raw: `UPDATE ${migrationsTable} SET updated_at = CURRENT_TIMESTAMP WHERE batch = '-1'`,
     })
+  }
+}
+
+const confirmWarnings = async ({ warnings }: { warnings: string[] }) => {
+  if (!warnings.length) {
+    return
+  }
+
+  const { confirm: acceptWarnings } = await prompts(
+    {
+      name: 'confirm',
+      type: 'confirm',
+      initial: false,
+      message: `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\nAccept warnings and push schema to database?`,
+    },
+    {
+      onCancel: () => {
+        process.exit(0)
+      },
+    },
+  )
+
+  // Exit if user does not accept warnings.
+  if (!acceptWarnings) {
+    process.exit(0)
   }
 }

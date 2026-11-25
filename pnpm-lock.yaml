@@ -134,8 +134,8 @@ importers:
         specifier: 16.4.7
         version: 16.4.7
       drizzle-kit:
-        specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
+        specifier: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315
+        version: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
@@ -377,8 +377,8 @@ importers:
         specifier: 2.15.0
         version: 2.15.0
       drizzle-kit:
-        specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
+        specifier: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315
+        version: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
@@ -445,8 +445,8 @@ importers:
         specifier: 2.15.0
         version: 2.15.0
       drizzle-kit:
-        specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
+        specifier: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315
+        version: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
@@ -488,8 +488,8 @@ importers:
         specifier: 2.15.0
         version: 2.15.0
       drizzle-kit:
-        specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
+        specifier: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315
+        version: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
@@ -525,8 +525,8 @@ importers:
         specifier: 2.15.0
         version: 2.15.0
       drizzle-kit:
-        specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
+        specifier: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315
+        version: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
@@ -2387,7 +2387,7 @@ importers:
         version: link:../packages/email-resend
       '@payloadcms/figma':
         specifier: latest
-        version: 1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)
+        version: 1.0.0-beta.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -2536,8 +2536,8 @@ importers:
         specifier: 16.4.7
         version: 16.4.7
       drizzle-kit:
-        specifier: 1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
+        specifier: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315
+        version: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7))
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
@@ -6414,15 +6414,15 @@ packages:
     resolution: {integrity: sha512-7FNeNl8NCE7aINx7WXiKQrPYZWC/hvrTsmk6zmxbI7LTXE7hVek/n8AfVgpe2y82zl3w0HvCHN0bVKMBoJcC0w==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@1.0.0-beta.1':
-    resolution: {integrity: sha512-C2XcRfqqU69V/+Nb4PU08ikRJs9AezERrrcoEPfsPkUSQW6bcAhzu5QgCEnrlNf4Ndire8ScOD2unlAf/Fg1kw==}
+  '@payloadcms/figma@1.0.0-beta.2':
+    resolution: {integrity: sha512-G25gRKvFLvFDnAvKJ1mkBlGTntAvAMfYjMJ2T+qqzXKMsndXfIikzRVP3GYTVbKixo4U6m76WIMtojElkweciQ==}
     hasBin: true
     peerDependencies:
-      '@payloadcms/plugin-cloud-storage': '>=4.0.0-beta.0 <4.0.0-internal'
-      '@payloadcms/richtext-lexical': '>=4.0.0-beta.0 <4.0.0-internal'
-      '@payloadcms/translations': '>=4.0.0-beta.0 <4.0.0-internal'
-      '@payloadcms/ui': '>=4.0.0-beta.0 <4.0.0-internal'
-      payload: '>=4.0.0-beta.0 <4.0.0-internal'
+      '@payloadcms/plugin-cloud-storage': '>=4.0.0-beta.8 <4.0.0-internal'
+      '@payloadcms/richtext-lexical': '>=4.0.0-beta.8 <4.0.0-internal'
+      '@payloadcms/translations': '>=4.0.0-beta.8 <4.0.0-internal'
+      '@payloadcms/ui': '>=4.0.0-beta.8 <4.0.0-internal'
+      payload: '>=4.0.0-beta.8 <4.0.0-internal'
       react: 19.3.1
     peerDependenciesMeta:
       '@payloadcms/plugin-cloud-storage':
@@ -10066,13 +10066,18 @@ packages:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
-  drizzle-kit@1.0.0-rc.5:
-    resolution: {integrity: sha512-8glQN7iFK3e1aOIoRit1NtslcsqE/rnlqNw/1jUC5Ph4RFVh/E5Jricxd6Nu2ugj2HlFZlZ6O4006AwqJ9e24g==}
+  drizzle-kit@https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315:
+    resolution: {integrity: sha512-GPfaQSHTn/fq8K9z/dFUUFQOv6Su7XzL9gNEGwlngh6qzymAJ9rytDuOs5hAmp1VY3Yb6mTrhNnqQpHyQnfFDw==, tarball: https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315}
+    version: 0.0.0-preview-ee63315
+    engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
       drizzle-orm: '>=1.0.0-rc.5'
+      oxc-parser: ^0.157.0
     peerDependenciesMeta:
       drizzle-orm:
+        optional: true
+      oxc-parser:
         optional: true
 
   drizzle-orm@1.0.0-rc.5:
@@ -14807,11 +14812,6 @@ packages:
   util-extend@1.0.3:
     resolution: {integrity: sha512-mLs5zAK+ctllYBj+iAQvlDCwoxU/WDOUaJkcFudeiAX6OajC6BKXJUa9a+tbtkC11dz2Ufb7h0lyvIOVn4LADA==}
 
-  uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
-    hasBin: true
-
   uuid@14.0.0:
     resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
     hasBin: true
@@ -19373,7 +19373,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.6.0
     optional: true
 
-  '@payloadcms/figma@1.0.0-beta.1(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)':
+  '@payloadcms/figma@1.0.0-beta.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.3.1)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@cloudflare/workers-types': 5.20260716.1
@@ -19401,7 +19401,6 @@ snapshots:
       tar: 7.5.22
       terminal-link: 5.0.0
       ts-morph: 21.0.1
-      uuid: 10.0.0
     optionalDependencies:
       '@payloadcms/plugin-cloud-storage': link:packages/plugin-cloud-storage
       '@payloadcms/richtext-lexical': link:packages/richtext-lexical
@@ -23606,15 +23605,15 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)):
+  drizzle-kit@https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)):
     optionalDependencies:
       drizzle-orm: 1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
 
-  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)):
+  drizzle-kit@https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)):
     optionalDependencies:
       drizzle-orm: 1.0.0-rc.5(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
 
-  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)):
+  drizzle-kit@https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)):
     optionalDependencies:
       drizzle-orm: 1.0.0-rc.5(@cloudflare/workers-types@5.20260716.1)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.10.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.6.7)
 
@@ -28960,8 +28959,6 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   util-extend@1.0.3: {}
-
-  uuid@10.0.0: {}
 
   uuid@14.0.0: {}
 

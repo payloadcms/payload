@@ -2,7 +2,6 @@ import type { DrizzleSnapshotJSON } from '../../../types.js'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import fs from 'fs'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -11,6 +10,7 @@ import type { PathsToQuery } from './types.js'
 
 import { generateMigrationWithCreateHints } from '../../../utilities/generateMigrationWithCreateHints.js'
 import { getTransaction } from '../../../utilities/getTransaction.js'
+import { readPreviousSchemaState } from '../../../utilities/readPreviousSchemaState.js'
 import { groupUpSQLStatements } from './groupUpSQLStatements.js'
 import { migrateRelationships } from './migrateRelationships.js'
 import { traverseFields } from './traverseFields.js'
@@ -51,35 +51,28 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
-  const { generateDrizzleJson, generateMigration, upSnapshot } = await adapter.requireDrizzleKit()
-  const drizzleJsonAfter = (await generateDrizzleJson(adapter.schema)) as DrizzleSnapshotJSON
+  const kit = await adapter.requireDrizzleKit()
+  const drizzleJsonAfter = (await kit.generateDrizzleJson(adapter.schema)) as DrizzleSnapshotJSON
 
-  // Get the previous migration snapshot
-  const previousSnapshot = fs
-    .readdirSync(dir)
-    .filter((file) => file.endsWith('.json') && !file.endsWith('relationships_v2_v3.json'))
-    .sort()
-    .reverse()?.[0]
+  // The schema state the project's v2 migrations left behind.
+  const drizzleJsonBefore = await readPreviousSchemaState({
+    dir,
+    kit,
+    payload,
+    shouldIncludeFile: (fileName) => !fileName.endsWith('relationships_v2_v3.json'),
+  })
 
-  if (!previousSnapshot) {
+  if (!drizzleJsonBefore) {
     throw new Error(
       `No previous migration schema file found! A prior migration from v2 is required to migrate to v3.`,
     )
   }
 
-  let drizzleJsonBefore = JSON.parse(
-    fs.readFileSync(`${dir}/${previousSnapshot}`, 'utf8'),
-  ) as DrizzleSnapshotJSON
-
-  if (upSnapshot && drizzleJsonBefore.version < drizzleJsonAfter.version) {
-    drizzleJsonBefore = upSnapshot(drizzleJsonBefore)
-  }
-
   // The v3 relationship columns are new entities whose data is copied explicitly below.
-  const generatedSQL = await generateMigrationWithCreateHints({
+  const { sqlStatements: generatedSQL } = await generateMigrationWithCreateHints({
     after: drizzleJsonAfter,
     before: drizzleJsonBefore,
-    generateMigration,
+    generateMigration: kit.generateMigration,
   })
 
   if (!generatedSQL.length) {

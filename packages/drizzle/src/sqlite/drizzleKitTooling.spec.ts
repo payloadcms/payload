@@ -70,7 +70,7 @@ const schema = ${
         }
 const before = await tooling.generateDrizzleJson({})
 const after = await tooling.generateDrizzleJson(schema)
-const statements = await tooling.generateMigration(before, after)
+const { sqlStatements: statements } = await tooling.generateMigration(before, after)
 assert.ok(statements.some(sql => sql.includes('CREATE TABLE')))
 if (${isSQLite}) {
 const { createClient } = require('@libsql/client')

@@ -87,7 +87,7 @@
     "dequal": "2.0.3",
     "diff": "^9.0.0",
     "dotenv": "16.4.7",
-    "drizzle-kit": "1.0.0-rc.5",
+    "drizzle-kit": "https://pkg.pr.new/drizzle-team/drizzle-orm/drizzle-kit@ee63315",
     "drizzle-orm": "1.0.0-rc.5",
     "escape-html": "1.0.3",
     "execa": "5.1.1",

@@ -5,17 +5,12 @@ import path from 'path'
 import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter, DrizzleMigrationHint, DrizzleSnapshotJSON } from '../types.js'
-import type { ChooseRenameSource, ConfirmDataLoss } from './resolveMigrationHints.js'
+import type { DrizzleAdapter, DrizzleMigrationResult, DrizzleSnapshotJSON } from '../types.js'
 
+import { generateMigrationWithCreateHints } from './generateMigrationWithCreateHints.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
-import {
-  getDroppedSnapshotEntities,
-  invertMigrationHints,
-  promptDataLoss,
-  promptRenameSource,
-  resolveMigrationHints,
-} from './resolveMigrationHints.js'
+import { getMissingHints, invertMigrationHints } from './migrationHints.js'
+import { readPreviousSchemaState } from './readPreviousSchemaState.js'
 
 export const buildCreateMigration = ({
   executeMethod,
@@ -36,7 +31,8 @@ export const buildCreateMigration = ({
       fs.mkdirSync(dir)
     }
 
-    const { generateDrizzleJson, generateMigration, upSnapshot } = await this.requireDrizzleKit()
+    const kit = await this.requireDrizzleKit()
+    const { generateDrizzleJson, generateMigration } = kit
 
     const drizzleJsonAfter = await generateDrizzleJson(this.schema)
 
@@ -81,46 +77,33 @@ export const buildCreateMigration = ({
       }
     }
 
-    let drizzleJsonBefore = this.defaultDrizzleSnapshot as DrizzleSnapshotJSON
-
     if (!upSQL) {
-      // Get latest migration snapshot
-      const latestSnapshot = fs
-        .readdirSync(dir)
-        .filter((file) => file.endsWith('.json'))
-        .sort()
-        .reverse()?.[0]
-
-      if (latestSnapshot) {
-        drizzleJsonBefore = JSON.parse(fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'))
-
-        if (upSnapshot && drizzleJsonBefore.version < drizzleJsonAfter.version) {
-          drizzleJsonBefore = upSnapshot(drizzleJsonBefore)
-        }
-      }
+      const drizzleJsonBefore =
+        (await readPreviousSchemaState({ dir, kit, payload })) ??
+        (this.defaultDrizzleSnapshot as DrizzleSnapshotJSON)
 
       payload.logger.info('Starting migration: generating UP statements...')
-      let upHints: DrizzleMigrationHint[] = []
 
-      const sqlStatementsUp = await resolveMigrationHints({
-        ...getHintDecisionHandlers({ forceAcceptWarning, shouldPrompt }),
-        getDroppedEntities: () =>
-          getDroppedSnapshotEntities({ after: drizzleJsonAfter, before: drizzleJsonBefore }),
-        run: (hints) => {
-          upHints = hints
-          return generateMigration(drizzleJsonBefore, drizzleJsonAfter, { hints })
-        },
+      const up = await generateUpMigration({
+        after: drizzleJsonAfter,
+        before: drizzleJsonBefore,
+        forceAcceptWarning,
+        generateMigration,
+        shouldPrompt,
       })
 
       payload.logger.info('Migration UP complete. Generating DOWN statements...')
-      // DOWN reverses the renames chosen for UP; everything else it re-creates or drops.
-      const sqlStatementsDown = await resolveMigrationHints({
-        chooseRenameSource: () => Promise.resolve(null),
-        confirmDataLoss: () => Promise.resolve(true),
-        getDroppedEntities: () => [],
-        initialHints: invertMigrationHints({ hints: upHints }),
-        run: (hints) => generateMigration(drizzleJsonAfter, drizzleJsonBefore, { hints }),
+
+      // DOWN reverses the renames chosen for UP, so it never asks again.
+      const down = await generateMigrationWithCreateHints({
+        after: drizzleJsonBefore,
+        before: drizzleJsonAfter,
+        generateMigration,
+        initialHints: invertMigrationHints({ hints: up.hints }),
       })
+
+      const sqlStatementsUp = up.sqlStatements
+      const sqlStatementsDown = down.sqlStatements
 
       payload.logger.info('Migration DOWN statements generation complete.')
 
@@ -150,8 +133,8 @@ export const buildCreateMigration = ({
         }
       }
 
-      // write schema
-      fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+      // Postgres returns a delta snapshot to store; SQLite stores the full state.
+      fs.writeFileSync(`${filePath}.json`, JSON.stringify(up.snapshot ?? drizzleJsonAfter, null, 2))
     }
 
     const data = getMigrationTemplate({
@@ -175,27 +158,39 @@ export const buildCreateMigration = ({
 }
 
 /**
- * Decides how ambiguous renames and data-loss changes are resolved: `forceAcceptWarning` creates
- * every ambiguous entity and accepts data loss, interactive runs prompt, and anything else leaves
- * the handlers unset so the migration fails with an explanatory error.
+ * Generates the UP migration. Interactive runs let drizzle-kit ask rename-or-create questions in
+ * the terminal; `forceAcceptWarning` treats every ambiguous entity as newly created. Without a
+ * terminal, drizzle-kit can't ask, so an ambiguous change fails with instructions.
  */
-const getHintDecisionHandlers = ({
+const generateUpMigration = async ({
+  after,
+  before,
   forceAcceptWarning,
+  generateMigration,
   shouldPrompt,
 }: {
+  after: DrizzleSnapshotJSON
+  before: DrizzleSnapshotJSON
   forceAcceptWarning?: boolean
+  generateMigration: Parameters<typeof generateMigrationWithCreateHints>[0]['generateMigration']
   shouldPrompt: boolean
-}): { chooseRenameSource?: ChooseRenameSource; confirmDataLoss?: ConfirmDataLoss } => {
+}): Promise<DrizzleMigrationResult> => {
   if (forceAcceptWarning) {
-    return {
-      chooseRenameSource: () => Promise.resolve(null),
-      confirmDataLoss: () => Promise.resolve(true),
+    return generateMigrationWithCreateHints({ after, before, generateMigration })
+  }
+
+  try {
+    return await generateMigration(before, after, { interactive: shouldPrompt })
+  } catch (error) {
+    if (getMissingHints({ error })) {
+      throw new Error(
+        `${error instanceof Error ? error.message : String(error)}\n\nRun migrate:create in an ` +
+          `interactive terminal to answer these questions, or pass --force-accept-warning to ` +
+          `create every ambiguous entity as new.`,
+        { cause: error },
+      )
     }
-  }
 
-  if (shouldPrompt) {
-    return { chooseRenameSource: promptRenameSource, confirmDataLoss: promptDataLoss }
+    throw error
   }
-
-  return {}
 }
