@@ -29,7 +29,9 @@ export const Articles: CollectionConfig = {
   access: { read: () => ({ published: { equals: true } }) },
   fields: [
     { name: 'title', type: 'text', required: true },
-    { name: 'published', type: 'checkbox' },
+    { name: 'published', type: 'checkbox', hidden: true },
+    { name: 'settings', type: 'json' },
+    { name: 'variant', type: 'select', hasMany: true, options: ['pub', 'public'] },
     { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
     { name: 'otherTopics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
   ],
@@ -40,6 +42,7 @@ export const Notes: CollectionConfig = {
   access: { read: () => true },
   fields: [
     { name: 'title', type: 'text', required: true },
+    { name: 'variant', type: 'text' },
     { name: 'topics', type: 'relationship', relationTo: topicsSlug },
   ],
 }
