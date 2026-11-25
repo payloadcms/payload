@@ -40,38 +40,40 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
   const { afterDashboard, beforeDashboard } = payload.config.admin.components
 
   return (
-    <Gutter className={baseClass}>
-      {beforeDashboard &&
-        RenderServerComponent({
-          Component: beforeDashboard,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            server,
-            user,
-          } satisfies ServerProps,
-        })}
-      <ModularDashboard {...props} />
-      {afterDashboard &&
-        RenderServerComponent({
-          Component: afterDashboard,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            server,
-            user,
-          } satisfies ServerProps,
-        })}
-    </Gutter>
+    <main className={baseClass}>
+      <Gutter>
+        {beforeDashboard &&
+          RenderServerComponent({
+            Component: beforeDashboard,
+            importMap: payload.importMap,
+            serverProps: {
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              server,
+              user,
+            } satisfies ServerProps,
+          })}
+        <ModularDashboard {...props} />
+        {afterDashboard &&
+          RenderServerComponent({
+            Component: afterDashboard,
+            importMap: payload.importMap,
+            serverProps: {
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              server,
+              user,
+            } satisfies ServerProps,
+          })}
+      </Gutter>
+    </main>
   )
 }
