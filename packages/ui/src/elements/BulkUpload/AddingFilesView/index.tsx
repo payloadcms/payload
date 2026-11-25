@@ -78,7 +78,6 @@ export function AddingFilesView({ modalSlug }: Props) {
   return (
     <>
       <DialogModal className={baseClass} size="large" slug={modalSlug}>
-        {/* Lets users drop more files anywhere on the modal, instead of opening "Add files" */}
         <Dropzone
           className={`${baseClass}__dropzone`}
           disabled={!canAddFiles}

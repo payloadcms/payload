@@ -17,9 +17,8 @@ import './index.css'
 const baseClass = 'page-controls'
 
 /**
- * The page controls stick to the bottom of the list, and their height changes, for example when
- * they show the list selection. Other content that sticks to the bottom, such as the list drop
- * message, reads this variable from the shared parent element to stay above them.
+ * Set on the parent element, so other content that sticks to the bottom, such as the list drop
+ * message, can stay above the page controls when their height changes.
  */
 const heightVariable = '--page-controls-height'
 

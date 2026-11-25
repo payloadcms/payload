@@ -1464,7 +1464,6 @@ describe('Dashboard', () => {
         element.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }))
       })
       await expect(dropzone).toHaveClass(/dragging/)
-      // The drag state changes only the border and background, so the content stays the same
       await expect(icon).toBeVisible()
       await expect(widget.getByRole('button', { name: 'Upload files' })).toBeVisible()
       await expect(

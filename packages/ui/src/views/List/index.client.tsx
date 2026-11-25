@@ -147,8 +147,6 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  // One rule for the Bulk Upload button and the drop area, so the keyboard path and the drop path
-  // stay in step
   const canBulkUpload =
     hasCreatePermission &&
     isBulkUploadEnabled &&

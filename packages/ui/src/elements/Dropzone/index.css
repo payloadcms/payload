@@ -50,15 +50,12 @@
       position: relative;
     }
 
-    /* `isolation` keeps the line's z-index inside the dropzone, so it cannot cover sticky headers or
-       footers outside it */
+    /* Stops the line's z-index from covering sticky headers and footers outside the dropzone */
     &.dropzone--style-outline.dragging {
       isolation: isolate;
     }
 
-    /* The dashed line is a layer above the content, not an `outline`: positioned content inside the
-       dropzone, such as a file preview, paints over an outline. It is absolutely positioned, so the
-       content does not move when a drag starts. */
+    /* Not an `outline`: positioned content, such as a file preview, paints over an outline */
     &.dropzone--style-outline.dragging::after {
       content: '';
       position: absolute;

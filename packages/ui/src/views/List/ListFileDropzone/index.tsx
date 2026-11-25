@@ -13,8 +13,7 @@ import './index.css'
 const baseClass = 'list-file-dropzone'
 
 /**
- * Lets users drop files on the items of an upload collection's list view to open bulk upload with those files.
- * The "Bulk Upload" button in the list header stays the keyboard-accessible way to do the same thing.
+ * Keyboard users open bulk upload with the "Bulk Upload" button in the list header instead.
  */
 export function ListFileDropzone({
   children,
@@ -23,9 +22,6 @@ export function ListFileDropzone({
 }: {
   children: React.ReactNode
   collectionConfig: ClientCollectionConfig
-  /**
-   * When false, renders the children without a drop target.
-   */
   isEnabled: boolean
 }) {
   const { t } = useTranslation()

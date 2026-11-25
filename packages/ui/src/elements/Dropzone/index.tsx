@@ -6,8 +6,7 @@ import './index.css'
 const baseClass = 'dropzone'
 
 /**
- * Dropzones handle only drags that carry files. Other drags, such as moving a rich text block or
- * dragging text into an input, must reach the page without being cancelled.
+ * Dropzones handle only file drags, so other drags, such as a rich text block, reach the page.
  */
 const isFileDrag = (e: DragEvent) => Boolean(e.dataTransfer?.types.includes('Files'))
 
@@ -27,15 +26,14 @@ export type Props = {
   /**
    * - `default`: a dashed box with a background
    * - `none`: no styles
-   * - `outline`: no styles until files are dragged over it, then a dashed outline. Use it to make a
-   *   large area, such as a list or a modal, a drop target. Dropzones nested inside it still get the drag.
+   * - `outline`: no styles until files are dragged over it, then a dashed outline. Dropzones nested
+   *   inside it still get the drag.
    * @default 'default'
    */
   readonly dropzoneStyle?: 'default' | 'none' | 'outline'
   readonly hasError?: boolean
   /**
-   * Only a `default` style dropzone can take focus. The other styles wrap content that has its own
-   * focusable elements.
+   * Only a `default` style dropzone can take focus.
    * @default true
    */
   readonly isFocusable?: boolean
@@ -123,9 +121,8 @@ export function Dropzone({
   }, [])
 
   /**
-   * Added in the capture phase, so it runs before any element inside the dropzone can handle the
-   * drop and stop it. The browser sends no `dragleave` after a drop, so without this the drag
-   * state would stay on.
+   * Runs in the capture phase, before an element inside the dropzone can stop the drop. The browser
+   * sends no `dragleave` after a drop, so without this the drag state would stay on.
    */
   const resetDragState = React.useCallback(() => {
     enteredTargetsRef.current = []

@@ -16,9 +16,7 @@
     height: min(720px, var(--dialog-max-height));
   }
 
-  /* The dropzone wraps the header, body and actions footer. It keeps the dialog's flex column, so
-     the body can still fill the space between the header and the footer. Higher specificity than
-     `.dropzone.dropzone--style-outline`, which unsets all styles. */
+  /* Higher specificity than `.dropzone.dropzone--style-outline`, which unsets all styles */
   .dropzone.dropzone--style-outline.bulk-upload--file-manager__dropzone {
     display: flex;
     flex: 1 1 auto;

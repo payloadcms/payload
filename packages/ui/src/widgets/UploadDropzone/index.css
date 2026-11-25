@@ -22,7 +22,6 @@
       background: var(--color-bg);
     }
 
-    /* Matches the list and bulk upload drop areas: the content stays visible during a drag */
     &.dragging {
       border-color: var(--color-border-selected);
       background: var(--color-bg-secondary);

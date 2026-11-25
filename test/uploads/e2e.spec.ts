@@ -2362,7 +2362,6 @@ describe('Uploads', () => {
           await expect(dropzone).toHaveClass(/dragging/)
         }
 
-        // Moving the drag out of the list, onto the nav, removes the drop message
         await drag.moveTo({ x: box.x / 2, y: box.y + 200 })
         await expect(dropzone).not.toHaveClass(/dragging/)
       } finally {
@@ -2410,7 +2409,6 @@ describe('Uploads', () => {
     test('should keep the drop message above the page controls on a narrow screen', async () => {
       const originalViewport = page.viewportSize()
 
-      // On narrow screens the page controls also hold the list selection
       await page.setViewportSize({ width: 390, height: 420 })
 
       try {
@@ -2514,7 +2512,6 @@ describe('Uploads', () => {
       const dropzone = bulkUploadModal.locator('.bulk-upload--file-manager__dropzone')
       await waitForDropzoneToHandleDrags({ locator: dropzone })
 
-      // Rich text block handles and text drops rely on these events reaching the document
       const eventsAtDocument = await bulkUploadModal
         .locator('.bulk-upload--file-manager__editView')
         .evaluate((element) => {
@@ -3714,9 +3711,8 @@ async function dispatchDragEvent({
 }
 
 /**
- * Waits until a dropzone handles drag events. With Next.js, `page.goto` can return before React
- * hydrates the page and the dropzone adds its listeners, so a synthetic event sent too early does
- * nothing. This sends a file `dragenter` until the dropzone shows its drag state, then resets it.
+ * With Next.js, `page.goto` can return before the dropzone adds its listeners, so an early
+ * synthetic event does nothing. Sends a file `dragenter` until the dropzone reacts, then resets it.
  */
 async function waitForDropzoneToHandleDrags({ locator }: { locator: Locator }) {
   const files = [{ name: 'probe.png', type: 'image/png' }]
