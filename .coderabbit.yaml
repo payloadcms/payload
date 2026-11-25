@@ -4,5 +4,6 @@
 reviews:
   high_level_summary: false
   auto_review:
+    drafts: true
     base_branches:
       - '^3\.x$'
