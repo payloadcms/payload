@@ -4,6 +4,9 @@ export const topicsSlug = 'topics'
 export const articlesSlug = 'articles'
 export const draftArticlesSlug = 'draft-articles'
 export const notesSlug = 'notes'
+export const mediaSlug = 'join-media'
+export const mediaArticlesSlug = 'media-articles'
+export const mediaNotesSlug = 'media-notes'
 
 export const Topics: CollectionConfig = {
   slug: topicsSlug,
@@ -17,6 +20,7 @@ export const Topics: CollectionConfig = {
       collection: [articlesSlug, draftArticlesSlug, notesSlug],
       on: 'topics',
     },
+    { name: 'articles', type: 'join', collection: articlesSlug, on: 'topics' },
   ],
 }
 
@@ -49,5 +53,37 @@ export const DraftArticles: CollectionConfig = {
     { name: 'visible', type: 'checkbox' },
     { name: 'tags', type: 'select', hasMany: true, options: ['featured', 'other'] },
     { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+  ],
+}
+
+export const Media: CollectionConfig = {
+  slug: mediaSlug,
+  access: { read: () => true },
+  upload: { disableLocalStorage: true },
+  fields: [
+    {
+      name: 'members',
+      type: 'join',
+      collection: [mediaArticlesSlug, mediaNotesSlug],
+      on: 'media',
+    },
+  ],
+}
+
+export const MediaArticles: CollectionConfig = {
+  slug: mediaArticlesSlug,
+  access: { read: () => true },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    { name: 'media', type: 'upload', hasMany: true, relationTo: mediaSlug },
+  ],
+}
+
+export const MediaNotes: CollectionConfig = {
+  slug: mediaNotesSlug,
+  access: { read: () => true },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    { name: 'media', type: 'upload', relationTo: mediaSlug },
   ],
 }

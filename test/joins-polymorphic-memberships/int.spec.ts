@@ -1,9 +1,94 @@
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { articlesSlug, draftArticlesSlug, notesSlug, topicsSlug } from './collections/index.js'
+import {
+  articlesSlug,
+  draftArticlesSlug,
+  mediaArticlesSlug,
+  mediaNotesSlug,
+  mediaSlug,
+  notesSlug,
+  topicsSlug,
+} from './collections/index.js'
 
-test.suite('Polymorphic joins through relationships', { config: './config.ts' }, () => {
+test.suite('Joins through relationships and uploads', { config: './config.ts' }, () => {
+  test.options(
+    'should respect read access for a regular join when reading a draft',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const visibleArticle = await payload.create({
+        collection: articlesSlug,
+        data: { title: 'Visible', published: true, topics: [topic.id] },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: articlesSlug,
+        data: { title: 'Hidden', published: false, topics: [topic.id] },
+        overrideAccess: true,
+      })
+
+      const draft = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        draft: true,
+        joins: { articles: { count: true } },
+        overrideAccess: false,
+      })
+
+      expect(draft.articles).toMatchObject({
+        docs: [visibleArticle.id],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
+    'should join through single and hasMany upload fields',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const data = Buffer.from('join fixture')
+      const media = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: { name: 'fixture.txt', data, mimetype: 'text/plain', size: data.length },
+        overrideAccess: true,
+      })
+      const article = await payload.create({
+        collection: mediaArticlesSlug,
+        data: { title: 'Article', media: [media.id] },
+        overrideAccess: true,
+      })
+      const note = await payload.create({
+        collection: mediaNotesSlug,
+        data: { title: 'Note', media: media.id },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: media.id,
+        collection: mediaSlug,
+        depth: 0,
+        joins: { members: { count: true, sort: 'title' } },
+        overrideAccess: false,
+      })
+
+      expect(result.members).toMatchObject({
+        docs: [
+          { relationTo: mediaArticlesSlug, value: article.id },
+          { relationTo: mediaNotesSlug, value: note.id },
+        ],
+        totalDocs: 2,
+      })
+    },
+  )
+
   test.options(
     'should match hasMany members by document ID when reading a draft version',
     { db: 'drizzle' },

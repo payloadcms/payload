@@ -114,17 +114,19 @@ export const buildPolymorphicJoinQuery = ({
     const fields = shouldUseVersionTable
       ? buildVersionCollectionFields(adapter.payload.config, target.config, true)
       : target.config.flattenedFields
-    // Version rows nest configured fields under `version`, including relationship fields.
+    // Version rows nest configured fields under `version`, including relationship and upload fields.
     const relationshipFieldPath = shouldUseVersionTable ? `version.${field.on}` : field.on
     const relationshipField = getFieldByPath({ fields, path: relationshipFieldPath })?.field
+    const isRelationshipOrUpload =
+      relationshipField?.type === 'relationship' || relationshipField?.type === 'upload'
 
-    if (relationshipField?.type === 'relationship' && Array.isArray(relationshipField.relationTo)) {
+    if (isRelationshipOrUpload && Array.isArray(relationshipField.relationTo)) {
       throw new Error(
         `Polymorphic join collection "${collection}" does not support relationTo arrays at "${field.on}"`,
       )
     }
 
-    if (relationshipField?.type === 'relationship' && relationshipField.hasMany) {
+    if (isRelationshipOrUpload && relationshipField.hasMany) {
       const relationshipTable = adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]
       const relationshipPath = resolveRelationshipPath({
         adapter,
