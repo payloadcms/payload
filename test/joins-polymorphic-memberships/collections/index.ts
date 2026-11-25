@@ -35,6 +35,12 @@ export const Topics: CollectionConfig = {
       on: 'related_sections.primaryTopic',
     },
     {
+      name: 'localizedSectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'details.sections.topic',
+    },
+    {
       name: 'percentMembers',
       type: 'join',
       collection: [sectionArticlesSlug],
@@ -117,6 +123,18 @@ export const SectionArticles: CollectionConfig = {
   access: { read: () => true },
   fields: [
     { name: 'title', type: 'text', required: true },
+    {
+      name: 'details',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          name: 'sections',
+          type: 'array',
+          fields: [{ name: 'topic', type: 'relationship', relationTo: topicsSlug }],
+        },
+      ],
+    },
     { name: 'topics%archived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
     { name: 'topicsXarchived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
     {

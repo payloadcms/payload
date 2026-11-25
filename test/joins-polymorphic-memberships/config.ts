@@ -22,6 +22,13 @@ export default buildConfigWithDefaults({
       MediaNotes,
       SectionArticles,
     ],
+    localization: {
+      defaultLocale: 'en',
+      locales: [
+        { code: 'en', label: 'English' },
+        { code: 'es', label: 'Spanish' },
+      ],
+    },
   },
   suite: 'joins-polymorphic-memberships',
 })

@@ -199,6 +199,56 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
   )
 
   test.options(
+    'should join through a localized group array for the requested locale',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const article = await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Matching', details: { sections: [{ topic: topic.id }] } },
+        locale: 'en',
+        overrideAccess: true,
+      })
+      const spanishArticle = await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Spanish', details: { sections: [{ topic: topic.id }] } },
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      const english = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { localizedSectionMembers: { count: true } },
+        locale: 'en',
+        overrideAccess: false,
+      })
+      const spanish = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { localizedSectionMembers: { count: true } },
+        locale: 'es',
+        overrideAccess: false,
+      })
+
+      expect(english.localizedSectionMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: article.id }],
+        totalDocs: 1,
+      })
+      expect(spanish.localizedSectionMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: spanishArticle.id }],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
     'should join on a single relationship inside an array',
     { db: 'drizzle' },
     async ({ payload }) => {

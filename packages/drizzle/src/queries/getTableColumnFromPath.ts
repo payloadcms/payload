@@ -152,14 +152,24 @@ export const getTableColumnFromPath = ({
 
     switch (field.type) {
       case 'array': {
+        // Localized groups use a locale table for scalar fields, but their array tables
+        // are named under the group's base table and carry their own _locale column.
+        const arrayParentTableName =
+          adapter.localesSuffix && tableName.endsWith(adapter.localesSuffix)
+            ? tableName.slice(0, -adapter.localesSuffix.length)
+            : tableName
         newTableName = adapter.tableNameMap.get(
-          `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
+          `${arrayParentTableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
         )
 
-        const arrayParentTable = aliasTable || adapter.tables[tableName]
+        const arrayParentTable = aliasTable || adapter.tables[arrayParentTableName]
 
         constraintPath = `${fieldStoragePath}.`
-        if (locale && isFieldLocalized && adapter.payload.config.localization) {
+        if (
+          locale &&
+          (isFieldLocalized || parentIsLocalized) &&
+          adapter.payload.config.localization
+        ) {
           const conditions = [eq(arrayParentTable.id, adapter.tables[newTableName]._parentID)]
 
           if (selectLocale) {
@@ -193,7 +203,7 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           parentAliasTable: aliasTable,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          parentIsLocalized: false,
           pathSegments: pathSegments.slice(1),
           rootTableName,
           selectFields,
@@ -344,7 +354,12 @@ export const getTableColumnFromPath = ({
       }
 
       case 'group': {
-        if (locale && isFieldLocalized && adapter.payload.config.localization) {
+        if (
+          locale &&
+          isFieldLocalized &&
+          adapter.payload.config.localization &&
+          !pathEntersArray({ fields: field.flattenedFields, pathSegments: pathSegments.slice(1) })
+        ) {
           newTableName = `${tableName}${adapter.localesSuffix}`
 
           let condition = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID)
@@ -1097,4 +1112,30 @@ export const getTableColumnFromPath = ({
   }
 
   throw new APIError(`Cannot find field for path at ${fieldPath}`)
+}
+
+const pathEntersArray = ({
+  fields,
+  pathSegments,
+}: {
+  fields: FlattenedField[]
+  pathSegments: string[]
+}): boolean => {
+  let currentFields = fields
+
+  for (const segment of pathSegments) {
+    const field = currentFields.find((field) => field.name === segment)
+
+    if (field?.type === 'array') {
+      return true
+    }
+
+    if (field?.type !== 'group' && field?.type !== 'tab') {
+      return false
+    }
+
+    currentFields = field.flattenedFields
+  }
+
+  return false
 }
