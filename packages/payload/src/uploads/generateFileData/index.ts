@@ -4,7 +4,9 @@ import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type { ExternalUploadSource } from '../sanitizeUploadData.js'
+import type { FileSource } from '../transformers/types.js'
 import type { FileData, FileToSave } from '../types.js'
+import type { UploadTransformerOutput } from './runUploadTransformers.js'
 
 import { MissingFile } from '../../errors/index.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
@@ -18,8 +20,13 @@ import { resolveUploadEdits } from './edits/resolveUploadEdits.js'
 import { buildUploadOutput } from './output/buildUploadOutput.js'
 import { planSourceRebuild } from './plan/planSourceRebuild.js'
 import { planUploadStages, withoutAppliedKeys } from './plan/planUploadStages.js'
-import { runUploadTransformers } from './runUploadTransformers.js'
+import { runHookOwnersOnSource, runUploadTransformers } from './runUploadTransformers.js'
 import { downloadClientUpload, needsFullClientUpload } from './source/downloadClientUpload.js'
+import {
+  getCheckedClientUploadSource,
+  hasDeferredContentChecks,
+  shouldReadClientUploadByRanges,
+} from './source/readClientUploadByRanges.js'
 import { readUploadSource } from './source/readUploadSource.js'
 import { getStoredOriginal, selectUploadSource } from './source/selectUploadSource.js'
 import { checkFileAndUseDetectedType } from './utils/checkFileAndUseDetectedType.js'
@@ -67,6 +74,8 @@ type ResolvedEdits = Awaited<ReturnType<typeof resolveUploadEdits>>
  * rather than the full file. To avoid loading such files into memory unnecessarily, no
  * transformer runs unless the full bytes are available, a temp file is not read when local
  * storage is disabled, and it is copied straight to its destination when local storage is enabled.
+ * Hook owners are the exception: when they are the only stages, they read a client upload by byte
+ * ranges from storage (see source/readClientUploadByRanges.ts).
  */
 export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   const {
@@ -238,7 +247,11 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     return assemble({ data: incomingFileData, files: [] })
   }
 
-  file = await checkFileAndUseDetectedType({ collection, file, req })
+  // A client upload with deferred checks is checked below, over byte ranges or after a download.
+  if (!hasDeferredContentChecks({ collection, file })) {
+    file = await checkFileAndUseDetectedType({ collection, file, req })
+  }
+
   let earlierPlan = rebuild.earlierPlan
 
   if (edits.isWaitingForFile) {
@@ -289,9 +302,14 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     pipelineOriginalDoc = createOriginalDoc({ doc: pipelineDoc })
   }
 
-  // A client upload can arrive with only a header probe or no contents. Download it only when a
-  // stage needs its bytes, which `canTransform` decides here with the real document.
-  if (needsFullClientUpload({ file, pipelineDoc, stages })) {
+  // A client upload can arrive with only a header probe or no contents. When only hook owners or
+  // its content checks read it, read it by byte ranges. Otherwise download it only when a stage
+  // or a check needs its bytes, which `canTransform` decides here with the real document.
+  const rangedSource = shouldReadClientUploadByRanges({ collection, file, stages })
+    ? await getCheckedClientUploadSource({ collection, file, req })
+    : undefined
+
+  if (!rangedSource && needsFullClientUpload({ collection, file, pipelineDoc, stages })) {
     const download = await downloadClientUpload({ collection, fetchFullClientUpload, file, req })
     file = download.file
 
@@ -315,20 +333,16 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   let output: Awaited<ReturnType<typeof buildUploadOutput>>
 
   try {
-    // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
-    // need the whole file, so leave such an upload untouched rather than buffering it.
-    const transformed =
-      (stages.pipeline.length > 0 || stages.hookOwners.length > 0) && hasFullFileContents(file)
-        ? await runUploadTransformers({
-            collectionSlug: collection.slug,
-            cropSize,
-            file,
-            pipelineDoc,
-            pipelineOriginalDoc,
-            req,
-            stages,
-          })
-        : undefined
+    const transformed = await runPlannedStages({
+      collectionSlug: collection.slug,
+      cropSize,
+      file,
+      pipelineDoc,
+      pipelineOriginalDoc,
+      rangedSource,
+      req,
+      stages,
+    })
 
     output = await buildUploadOutput({
       collection,
@@ -394,6 +408,29 @@ async function assembleResult<T>({
     } as T,
     files,
   }
+}
+
+/** Runs the planned stages on the file, or on the ranged source when there is one. */
+async function runPlannedStages({
+  rangedSource,
+  ...args
+}: {
+  /** A client upload read by byte ranges. Only hook owners are planned for it. */
+  rangedSource?: FileSource
+} & Parameters<typeof runUploadTransformers>[0]): Promise<undefined | UploadTransformerOutput> {
+  const { stages } = args
+
+  if (stages.pipeline.length === 0 && stages.hookOwners.length === 0) {
+    return undefined
+  }
+
+  if (rangedSource) {
+    return runHookOwnersOnSource({ ...args, fileSource: rangedSource })
+  }
+
+  // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
+  // need the whole file, so leave such an upload untouched rather than buffering it.
+  return hasFullFileContents(args.file) ? runUploadTransformers(args) : undefined
 }
 
 /** The transformer `doc`: the document as the operation would save it, with the resolved edits. */

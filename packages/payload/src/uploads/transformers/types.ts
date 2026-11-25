@@ -7,6 +7,7 @@ import type { Document, JsonObject, PayloadRequest } from '../../types/index.js'
  * A lazy, storage-neutral, read-only view of a file. No bytes are read until a method is
  * called, and each call reads the file again. A byte range is up to `numberOfBytes` bytes
  * starting at `startByte`. A range that runs past `sizeInBytes` stops at the end of the file.
+ * A source over a client upload in storage makes one storage request for each call.
  */
 export type FileSource = {
   filename: string

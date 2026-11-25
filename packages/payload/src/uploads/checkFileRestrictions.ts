@@ -65,6 +65,7 @@ export const checkFileRestrictions = async ({
   checkFileContents = true,
   collection,
   file,
+  hasValidISOBaseMediaBoxes,
   req,
 }: checkFileRestrictionsParams): Promise<{ ext: string; mime: string } | undefined> => {
   const errors: string[] = []
@@ -183,12 +184,15 @@ export const checkFileRestrictions = async ({
   if (
     detected &&
     isISOBaseMediaMimeType(detected.mime) &&
-    (hasFullFileContents(file) || configMimeTypes.length > 0)
+    (hasValidISOBaseMediaBoxes !== undefined ||
+      hasFullFileContents(file) ||
+      configMimeTypes.length > 0)
   ) {
     const isValidISOBaseMedia =
-      isTempFile && tempFilePath
+      hasValidISOBaseMediaBoxes ??
+      (isTempFile && tempFilePath
         ? await validateISOBaseMediaFile(tempFilePath)
-        : await validateISOBaseMediaBuffer(file.data)
+        : await validateISOBaseMediaBuffer(file.data))
 
     if (!isValidISOBaseMedia) {
       errors.push('Invalid or corrupted ISO base media file.')

@@ -498,6 +498,8 @@ async function buildOriginalOutput({
 }): Promise<{ original: OriginalFileData; originalFileToSave?: FileToSave }> {
   const staticPath = collection.upload.staticDir
   const isTransformed = Boolean(transformed?.transformedMainFile)
+  // The stages keep the incoming file whenever they change the main file.
+  const transformedOriginalFile = isTransformed ? transformed?.originalFile : undefined
   const originalFilename =
     retainedOriginal?.filename ??
     providerOriginal?.filename ??
@@ -542,9 +544,9 @@ async function buildOriginalOutput({
   return {
     original,
     originalFileToSave:
-      isTransformed && !retainedOriginal && !providerOriginal
+      transformedOriginalFile && !retainedOriginal && !providerOriginal
         ? {
-            buffer: Buffer.from(await transformed!.originalFile.arrayBuffer()),
+            buffer: Buffer.from(await transformedOriginalFile.arrayBuffer()),
             path: `${staticPath}/${originalFilename}`,
             role: { type: 'original' },
           }

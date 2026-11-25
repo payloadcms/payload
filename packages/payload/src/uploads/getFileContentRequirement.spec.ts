@@ -18,14 +18,50 @@ describe('getFileContentRequirement', () => {
   it.each([
     ['the full file when local storage is enabled', video({ disableLocalStorage: false }), 'full'],
     ['nothing for a non-image file with no mime type allow list', video(), 'none'],
+    // A video's allow-list and content checks can run over byte ranges.
     [
-      'the full file when a mime type allow list is configured',
+      'nothing for a video when a mime type allow list is configured',
       video({ mimeTypes: ['video/*'] }),
+      'none',
+    ],
+    [
+      'nothing for a video when a mime type allow list overrides restricted type checks',
+      video({ allowRestrictedFileTypes: true, mimeTypes: ['video/*'] }),
+      'none',
+    ],
+    [
+      'nothing for ISO base media audio when a mime type allow list is configured',
+      file('song.m4a', 'audio/mp4', { mimeTypes: ['audio/*'] }),
+      'none',
+    ],
+    [
+      'the full file for a PDF when a mime type allow list is configured',
+      file('document.pdf', 'application/pdf', { mimeTypes: ['application/pdf'] }),
       'full',
     ],
     [
-      'the full file when a mime type allow list overrides restricted type checks',
-      video({ allowRestrictedFileTypes: true, mimeTypes: ['video/*'] }),
+      'the full file for an image when a mime type allow list is configured',
+      png({ mimeTypes: ['image/*'] }),
+      'full',
+    ],
+    [
+      'the full file for an ISO base media image when a mime type allow list is configured',
+      file('photo.avif', 'image/avif', { mimeTypes: ['image/*'] }),
+      'full',
+    ],
+    [
+      'the full file for an SVG named as a video when a mime type allow list is configured',
+      file('clip.svg', 'video/mp4', { mimeTypes: ['video/*'] }),
+      'full',
+    ],
+    [
+      'the full file for XML named as a video when a mime type allow list is configured',
+      file('clip.xml', 'video/mp4', { mimeTypes: ['video/*'] }),
+      'full',
+    ],
+    [
+      'the full file for an SVG when a mime type allow list is configured',
+      file('logo.svg', 'image/svg+xml', { mimeTypes: ['image/*'] }),
       'full',
     ],
     ['only the header for an image with no configured adjustments', png(), 'header'],

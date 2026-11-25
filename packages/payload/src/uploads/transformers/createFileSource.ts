@@ -38,7 +38,7 @@ export function createFileSource({ file }: { file: File }): FileSource {
  * Checks a requested range against the file size. An omitted `numberOfBytes` means "to the end",
  * and a range that runs past the end stops there, so a fixed-size header read works on any file.
  */
-function resolveByteRange({
+export function resolveByteRange({
   numberOfBytes,
   sizeInBytes,
   startByte,

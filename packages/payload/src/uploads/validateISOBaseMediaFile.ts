@@ -1,5 +1,7 @@
 import fs from 'fs/promises'
 
+import type { FileSource } from './transformers/types.js'
+
 const MAX_BOX_COUNT = 10_000
 const QUICKTIME_FIRST_BOX_TYPES = new Set(['free', 'mdat', 'moov', 'wide'])
 
@@ -88,6 +90,43 @@ export const validateISOBaseMediaBuffer = async (buffer: Buffer): Promise<boolea
   validateBoxStructure(buffer.length, (position, length) =>
     Promise.resolve(buffer.subarray(position, position + length)),
   )
+
+class TooManyReadsError extends Error {}
+
+/**
+ * Checks the top-level boxes through a `FileSource`, reading only each box header. Each read can
+ * be a storage request, so the check stops after `maxReads` reads with `'tooManyReads'`, for
+ * example on a fragmented MP4 with many `moof`/`mdat` pairs.
+ */
+export const validateISOBaseMediaSource = async ({
+  fileSource,
+  maxReads,
+}: {
+  fileSource: FileSource
+  maxReads: number
+}): Promise<'invalid' | 'tooManyReads' | 'valid'> => {
+  let readCount = 0
+
+  try {
+    const isValid = await validateBoxStructure(fileSource.sizeInBytes, async (position, length) => {
+      if (++readCount > maxReads) {
+        throw new TooManyReadsError()
+      }
+
+      return Buffer.from(
+        await fileSource.readFileBytes({ numberOfBytes: length, startByte: position }),
+      )
+    })
+
+    return isValid ? 'valid' : 'invalid'
+  } catch (error) {
+    if (error instanceof TooManyReadsError) {
+      return 'tooManyReads'
+    }
+
+    throw error
+  }
+}
 
 export const validateISOBaseMediaFile = async (filePath: string): Promise<boolean> => {
   let fileHandle: Awaited<ReturnType<typeof fs.open>> | undefined
