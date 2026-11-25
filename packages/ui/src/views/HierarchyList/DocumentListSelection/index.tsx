@@ -5,6 +5,7 @@ import React, { Fragment, useMemo } from 'react'
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { EditMany } from '../../../elements/EditMany/index.js'
+import { AssignMany } from '../../../elements/Hierarchy/AssignMany/index.js'
 import { MoveMany } from '../../../elements/Hierarchy/MoveMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany } from '../../../elements/PublishMany/index.js'
@@ -64,7 +65,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   const { t } = useTranslation()
 
   const count = getTotalCount()
-  const groupedSelections = getSelectionsForActions()
+  const groupedSelections = useMemo(() => getSelectionsForActions(), [getSelectionsForActions])
 
   const collectionSlugs = Object.keys(groupedSelections)
   const singleCollectionSelected = collectionSlugs.length === 1
@@ -84,6 +85,17 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   const hasManyRelatedSelection = Object.keys(groupedSelections).some(
     (slug) => slug !== hierarchySlug && hierarchyConfig?.relatedCollections?.[slug]?.hasMany,
   )
+  const canAssignMany =
+    hasManyRelatedSelection &&
+    Object.keys(groupedSelections).every(
+      (slug) => slug !== hierarchySlug && hierarchyConfig?.relatedCollections?.[slug]?.hasMany,
+    )
+  const parentTitleField = hierarchyCollectionConfig?.admin?.useAsTitle || 'id'
+  const rawParentTitle = parent?.[parentTitleField]
+  const currentParentTitle =
+    typeof rawParentTitle === 'string' || typeof rawParentTitle === 'number'
+      ? String(rawParentTitle)
+      : undefined
 
   const { relatedCollectionSlugs } = useMemo(
     () =>
@@ -195,10 +207,22 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
         ),
         hierarchySlug && !hasManyRelatedSelection && (
           <MoveMany
-            currentParentID={parent?.id || null}
+            currentParentID={parent?.id ?? null}
             hierarchySlug={hierarchySlug}
             Icon={hierarchyIcon}
             key="bulk-move"
+            onSuccess={handleActionSuccess}
+            requiredCollections={requiredCollections}
+            selections={groupedSelections}
+          />
+        ),
+        hierarchySlug && canAssignMany && (
+          <AssignMany
+            currentParentID={parent?.id ?? null}
+            currentParentTitle={currentParentTitle}
+            hierarchySlug={hierarchySlug}
+            Icon={hierarchyIcon}
+            key="bulk-assign"
             onSuccess={handleActionSuccess}
             requiredCollections={requiredCollections}
             selections={groupedSelections}
