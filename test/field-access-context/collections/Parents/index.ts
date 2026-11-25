@@ -1,9 +1,19 @@
 import type { CollectionConfig } from 'payload'
 
-import { childrenSlug, parentsSlug, recordAccess } from '../../shared.js'
+import { childrenSlug, parentsSlug, recordAccess, recordUpdateOperation } from '../../shared.js'
 
 export const Parents: CollectionConfig = {
   slug: parentsSlug,
+  hooks: {
+    beforeOperation: [
+      ({ args, operation }) => {
+        if (operation === 'update') {
+          recordUpdateOperation({ slug: parentsSlug })
+        }
+        return args
+      },
+    ],
+  },
   access: {
     create: () => true,
     delete: () => true,
@@ -15,6 +25,39 @@ export const Parents: CollectionConfig = {
     singularName: 'FieldAccessContextParent',
   },
   fields: [
+    {
+      name: 'count',
+      type: 'number',
+    },
+    {
+      name: 'metadata',
+      type: 'json',
+    },
+    {
+      name: 'saveInstruction',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        beforeChange: [
+          ({ siblingData, value }) => {
+            if (value) {
+              siblingData.title = value
+            }
+            return value
+          },
+        ],
+      },
+    },
+    {
+      name: 'nested',
+      type: 'group',
+      fields: [
+        {
+          name: 'note',
+          type: 'text',
+        },
+      ],
+    },
     {
       name: 'title',
       type: 'text',

@@ -1,9 +1,16 @@
 import { createPayloadRequest } from 'payload'
-import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } from './shared.js'
+import {
+  childrenSlug,
+  globalSlug,
+  parentsSlug,
+  readAccessLog,
+  readUpdateOperationLog,
+  resetAccessLog,
+  resetUpdateOperationLog,
+} from './shared.js'
 
 const childIDs: (number | string)[] = []
 const parentIDs: (number | string)[] = []
@@ -21,6 +28,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
     childIDs.length = 0
 
     resetAccessLog()
+    resetUpdateOperationLog()
   })
 
   test('should pass collectionSlug to local create field access callbacks', async ({ payload }) => {
@@ -225,6 +233,251 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
     expect(
       log.filter((e) => e.fieldName === 'accessUpdateProbe' && e.collectionSlug === undefined),
     ).toHaveLength(0)
+  })
+
+  test('should preserve extra top-level data and configured field values', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: parentsSlug,
+      data: { title: 'original' },
+      overrideAccess: true,
+    })
+    parentIDs.push(doc.id)
+    const updateSpy = vi.spyOn(payload.db, 'updateOne')
+    const metadata = { arbitrary: true, nested: { customValue: 1 } }
+
+    try {
+      const updated = await payload.update({
+        collection: parentsSlug,
+        id: doc.id,
+        data: {
+          title: 'changed',
+          extra: true,
+          nested: { note: 'allowed', extra: true },
+          metadata,
+        } as never,
+        overrideAccess: false,
+      })
+      const writtenData = updateSpy.mock.calls[0]![0].data
+
+      expect(writtenData).toHaveProperty('extra', true)
+      expect(writtenData.nested).toMatchObject({ note: 'allowed', extra: true })
+      expect(updated.metadata).toEqual(metadata)
+      expect(updated.title).toBe('changed')
+    } finally {
+      updateSpy.mockRestore()
+    }
+  })
+
+  test('should make configured virtual input available to hooks without persisting it', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({
+      collection: parentsSlug,
+      data: { title: 'original' },
+      overrideAccess: true,
+    })
+    parentIDs.push(doc.id)
+    await payload.update({
+      collection: parentsSlug,
+      id: doc.id,
+      data: { saveInstruction: 'from virtual input' },
+      overrideAccess: false,
+    })
+    const stored = await payload.db.findOne({
+      collection: parentsSlug,
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(stored?.title).toBe('from virtual input')
+    expect(stored).not.toHaveProperty('saveInstruction')
+  })
+
+  test.options.describe('MongoDB', { db: 'mongo' }, () => {
+    test('should preserve raw operators in direct collection adapter updates', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: parentsSlug,
+        data: { title: 'original' },
+        overrideAccess: true,
+      })
+      parentIDs.push(doc.id)
+
+      for (const returning of [false, true]) {
+        await payload.db.updateOne({
+          collection: parentsSlug,
+          data: { $inc: { count: 1 }, $unset: { title: 1 } },
+          id: doc.id,
+          returning,
+        })
+      }
+
+      const updated = await payload.findByID({
+        collection: parentsSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.count).toBe(2)
+      expect(updated.title).toBeUndefined()
+    })
+
+    test('should preserve raw operators in direct global adapter updates', async ({ payload }) => {
+      await payload.updateGlobal({
+        slug: globalSlug,
+        data: { globalReadProbe: 'original' },
+        overrideAccess: true,
+      })
+
+      for (const returning of [false, true]) {
+        await payload.db.updateGlobal({
+          data: { $inc: { count: 1 }, $unset: { globalReadProbe: 1 } },
+          returning,
+          slug: globalSlug,
+        })
+      }
+
+      const updated = await payload.findGlobal({ slug: globalSlug, overrideAccess: true })
+
+      expect(updated.count).toBe(2)
+      expect(updated.globalReadProbe).toBeUndefined()
+    })
+  })
+
+  test('should strip unsupported collection update keys before persistence', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({
+      collection: parentsSlug,
+      data: { title: 'original' },
+      overrideAccess: true,
+    })
+    parentIDs.push(doc.id)
+
+    await payload.update({
+      collection: parentsSlug,
+      data: { title: 'ordinary' },
+      id: doc.id,
+      overrideAccess: false,
+    })
+    expect(readUpdateOperationLog()).toContain(parentsSlug)
+    resetUpdateOperationLog()
+
+    const updateSpy = vi.spyOn(payload.db, 'updateOne')
+
+    try {
+      for (const data of [
+        { $extra: { title: 'ignored' } },
+        { $unknownField: 'ignored', title: 'changed' },
+      ]) {
+        await payload.update({ collection: parentsSlug, data, id: doc.id, overrideAccess: false })
+      }
+
+      const updated = await payload.findByID({
+        collection: parentsSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.title).toBe('changed')
+      expect(readUpdateOperationLog()).toHaveLength(2)
+      expect(updateSpy).toHaveBeenCalledTimes(2)
+      for (const [args] of updateSpy.mock.calls) {
+        expect(args.data).not.toHaveProperty('$extra')
+        expect(args.data).not.toHaveProperty('$unknownField')
+      }
+    } finally {
+      updateSpy.mockRestore()
+    }
+  })
+
+  test('should strip unsupported bulk update keys before persistence', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: parentsSlug,
+      data: { title: 'original' },
+      overrideAccess: true,
+    })
+    parentIDs.push(doc.id)
+
+    await payload.update({
+      collection: parentsSlug,
+      data: { title: 'ordinary' },
+      overrideAccess: false,
+      where: { id: { equals: doc.id } },
+    })
+    expect(readUpdateOperationLog()).toContain(parentsSlug)
+    resetUpdateOperationLog()
+
+    const updateSpy = vi.spyOn(payload.db, 'updateOne')
+
+    try {
+      for (const data of [
+        { $extra: { title: 'ignored' } },
+        { $unknownField: 'ignored', title: 'changed' },
+      ]) {
+        await payload.update({
+          collection: parentsSlug,
+          data,
+          overrideAccess: false,
+          where: { id: { equals: doc.id } },
+        })
+      }
+
+      const updated = await payload.findByID({
+        collection: parentsSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.title).toBe('changed')
+      expect(readUpdateOperationLog()).toHaveLength(2)
+      expect(updateSpy).toHaveBeenCalledTimes(2)
+      for (const [args] of updateSpy.mock.calls) {
+        expect(args.data).not.toHaveProperty('$extra')
+        expect(args.data).not.toHaveProperty('$unknownField')
+      }
+    } finally {
+      updateSpy.mockRestore()
+    }
+  })
+
+  test('should strip unsupported global update keys before persistence', async ({ payload }) => {
+    await payload.updateGlobal({
+      data: { globalReadProbe: 'original' },
+      overrideAccess: true,
+      slug: globalSlug,
+    })
+
+    await payload.updateGlobal({
+      data: { globalReadProbe: 'ordinary' },
+      overrideAccess: false,
+      slug: globalSlug,
+    })
+    expect(readUpdateOperationLog()).toContain(globalSlug)
+    resetUpdateOperationLog()
+
+    const updateSpy = vi.spyOn(payload.db, 'updateGlobal')
+
+    try {
+      for (const data of [
+        { $extra: { globalReadProbe: 'ignored' } },
+        { $unknownField: 'ignored', globalReadProbe: 'changed' },
+      ]) {
+        await payload.updateGlobal({ data, overrideAccess: false, slug: globalSlug })
+      }
+
+      const updated = await payload.findGlobal({ overrideAccess: true, slug: globalSlug })
+
+      expect(updated.globalReadProbe).toBe('changed')
+      expect(readUpdateOperationLog()).toHaveLength(2)
+      expect(updateSpy).toHaveBeenCalledTimes(2)
+      for (const [args] of updateSpy.mock.calls) {
+        expect(args.data).not.toHaveProperty('$extra')
+        expect(args.data).not.toHaveProperty('$unknownField')
+      }
+    } finally {
+      updateSpy.mockRestore()
+    }
   })
 
   test('should pass collectionSlug to findDistinct field access callbacks', async ({ payload }) => {
