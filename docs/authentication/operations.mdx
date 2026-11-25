@@ -71,6 +71,19 @@ query {
 
 Document access can also be queried on a collection/global basis. Access on a global can be queried like `http://localhost:3000/api/global-slug/access`, Collection document access can be queried like `http://localhost:3000/api/collection-slug/access/:id`.
 
+### Read schema
+
+Set `enableAccessSchema: true` in your Payload config to register
+`GET /api/{collection-slug}/schema` and `GET /api/globals/{global-slug}/schema`.
+The response contains the entity's `slug` and a JSON Schema in `schema`.
+Enabling the collection route reserves `schema` as a GET path within each collection.
+
+The caller must have entity read access. The schema describes readable fields and omits hidden
+fields, admin descriptions, and custom JSON or rich-text schema overrides. Populated relationships
+are represented as objects without expanding the related collection schema. Conditional read
+access can expose metadata even when no documents match. Fetch document values through the
+normal REST routes, which apply document-specific access rules.
+
 ## Me
 
 Returns either a logged in user with token or null when there is no logged in user.

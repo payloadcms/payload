@@ -31,7 +31,7 @@ export const filterFieldsByAccess = ({
   blocks?: FlattenedBlock[]
   fields: FlattenedField[]
   permissions: SanitizedDocumentPermissions
-  shouldExcludeField: (allowedOperations: AllowedFieldOperations) => boolean
+  shouldExcludeField: (allowedOperations: AllowedFieldOperations, field: FlattenedField) => boolean
 }): FlattenedField[] => {
   const filterFields = (
     nestedFields: FlattenedField[],
@@ -52,7 +52,7 @@ export const filterFieldsByAccess = ({
         validate: isOperationAllowed('validate'),
       }
 
-      if (shouldExcludeField(allowedOperations)) {
+      if (shouldExcludeField(allowedOperations, field)) {
         continue
       }
 

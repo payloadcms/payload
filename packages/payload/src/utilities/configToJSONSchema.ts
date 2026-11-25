@@ -1,6 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
+import { getTranslation } from '@payloadcms/translations'
 import { createHash } from 'crypto'
 
 import type { Auth } from '../auth/types.js'
@@ -402,6 +403,8 @@ export type FieldsToJSONSchemaArgs = {
   i18n?: I18n
   /** Allows you to define new top-level interfaces that can be re-used in the output schema. */
   interfaceNameDefinitions: Map<string, JSONSchema4>
+  /** Expose only field metadata suitable for REST schema discovery. */
+  isAccessDiscovery?: boolean
   /**
    * Allows you to append raw TS source to `payload-types.ts`. Identical
    * strings de-dupe naturally, so the same helper written from many fields
@@ -418,6 +421,7 @@ export function fieldsToJSONSchema({
   forceInlineBlocks,
   i18n,
   interfaceNameDefinitions,
+  isAccessDiscovery = false,
   typeStringDefinitions,
   variant = 'output',
 }: FieldsToJSONSchemaArgs): {
@@ -427,6 +431,8 @@ export function fieldsToJSONSchema({
   required: string[]
 } {
   const requiredFieldNames = new Set<string>()
+  const relatedDocumentSchema = ({ slug }: { slug: string }): JSONSchema4 =>
+    isAccessDiscovery ? { type: 'object' } : { $ref: `#/$defs/${slug}` }
 
   // Registers a named-interface (group/tab/array/select) def and returns its `$ref` name. For input,
   // shares the read-shaped def when byte-identical; otherwise registers an `Input`-suffixed twin so
@@ -464,7 +470,9 @@ export function fieldsToJSONSchema({
         // `isOptionalOnInput` controls the `?`: on input, defaulted fields can be omitted.
         const isOptionalOnInput = variant === 'input' && hasDefaultValue
 
-        const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
+        const fieldDescription = isAccessDiscovery
+          ? undefined
+          : entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
         if (fieldDescription) {
           baseFieldSchema.description = fieldDescription
@@ -487,6 +495,7 @@ export function fieldsToJSONSchema({
                   forceInlineBlocks,
                   i18n,
                   interfaceNameDefinitions,
+                  isAccessDiscovery,
                   typeStringDefinitions,
                   variant,
                 }),
@@ -528,6 +537,7 @@ export function fieldsToJSONSchema({
                         forceInlineBlocks,
                         i18n,
                         interfaceNameDefinitions,
+                        isAccessDiscovery,
                         typeStringDefinitions,
                         variant,
                       })
@@ -587,6 +597,7 @@ export function fieldsToJSONSchema({
                   forceInlineBlocks,
                   i18n,
                   interfaceNameDefinitions,
+                  isAccessDiscovery,
                   typeStringDefinitions,
                   variant,
                 }),
@@ -618,13 +629,11 @@ export function fieldsToJSONSchema({
                         {
                           type: collectionIDFieldTypes[collection],
                         },
-                        {
-                          $ref: `#/$defs/${collection}`,
-                        },
+                        relatedDocumentSchema({ slug: collection }),
                       ],
                     },
                   },
-                  required: ['collectionSlug', 'value'],
+                  required: [isAccessDiscovery ? 'relationTo' : 'collectionSlug', 'value'],
                 })),
               }
             } else {
@@ -633,9 +642,7 @@ export function fieldsToJSONSchema({
                   {
                     type: collectionIDFieldTypes[field.collection],
                   },
-                  {
-                    $ref: `#/$defs/${field.collection}`,
-                  },
+                  relatedDocumentSchema({ slug: field.collection }),
                 ],
               }
             }
@@ -657,12 +664,13 @@ export function fieldsToJSONSchema({
           }
 
           case 'json': {
-            fieldSchema = field.jsonSchema?.schema || {
+            const configuredSchema = isAccessDiscovery ? undefined : field.jsonSchema?.schema
+            fieldSchema = configuredSchema || {
               ...baseFieldSchema,
               type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
             }
 
-            if (field.interfaceName && field.jsonSchema?.schema) {
+            if (field.interfaceName && configuredSchema) {
               fieldSchema = {
                 $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
               }
@@ -688,17 +696,12 @@ export function fieldsToJSONSchema({
           }
 
           case 'point': {
+            const coordinates: JSONSchema4[] = [{ type: 'number' }, { type: 'number' }]
+
             fieldSchema = {
               ...baseFieldSchema,
               type: withNullableJSONSchemaType('array', isRequired),
-              items: [
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'number',
-                },
-              ],
+              ...(isAccessDiscovery ? { prefixItems: coordinates } : { items: coordinates }),
               maxItems: 2,
               minItems: 2,
             }
@@ -729,7 +732,7 @@ export function fieldsToJSONSchema({
                 : {
                     oneOf: [
                       { type: collectionIDFieldTypes[relation] },
-                      { $ref: `#/$defs/${relation}` },
+                      relatedDocumentSchema({ slug: relation }),
                     ],
                   }
 
@@ -784,9 +787,7 @@ export function fieldsToJSONSchema({
                           {
                             type: collectionIDFieldTypes[field.relationTo],
                           },
-                          {
-                            $ref: `#/$defs/${field.relationTo}`,
-                          },
+                          relatedDocumentSchema({ slug: field.relationTo }),
                         ],
                       },
               }
@@ -808,7 +809,7 @@ export function fieldsToJSONSchema({
                       isRequired,
                     ),
                   },
-                  { $ref: `#/$defs/${field.relationTo}` },
+                  relatedDocumentSchema({ slug: field.relationTo }),
                 ],
               }
             }
@@ -816,6 +817,14 @@ export function fieldsToJSONSchema({
             break
           }
           case 'richText': {
+            if (isAccessDiscovery) {
+              // Editor serializers may describe block fields outside the entity's permission tree.
+              fieldSchema = {
+                type: isRequired ? ['array', 'object'] : ['array', 'object', 'null'],
+              }
+              break
+            }
+
             if (!field?.editor) {
               throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
             }
@@ -914,6 +923,7 @@ export function fieldsToJSONSchema({
                 forceInlineBlocks,
                 i18n,
                 interfaceNameDefinitions,
+                isAccessDiscovery,
                 typeStringDefinitions,
                 variant,
               }),
@@ -947,13 +957,21 @@ export function fieldsToJSONSchema({
           }
         }
 
-        if ('jsonSchema' in field && Array.isArray(field.jsonSchema)) {
+        if (!isAccessDiscovery && 'jsonSchema' in field && Array.isArray(field.jsonSchema)) {
           for (const schema of field.jsonSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema!, variant })
           }
         }
 
         if (fieldSchema! && fieldAffectsData(field)) {
+          if (isAccessDiscovery && field.label && i18n) {
+            const label = getTranslation(field.label, i18n)
+
+            if (typeof label === 'string') {
+              fieldSchema = { ...fieldSchema, title: label }
+            }
+          }
+
           if (isRequired && !isOptionalOnInput && fieldSchema.required !== false) {
             requiredFieldNames.add(field.name)
           }
@@ -978,6 +996,7 @@ export function entityToJSONSchema(
   i18n?: I18n,
   forceInlineBlocks?: boolean,
   variant: SchemaVariant = 'output',
+  isAccessDiscovery = false,
 ): JSONSchema4 {
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
@@ -1005,7 +1024,7 @@ export function entityToJSONSchema(
     mutableFields = mutableFields.map((field) =>
       field === customIdField ? { ...field, required: true } : field,
     )
-  } else {
+  } else if (!isAccessDiscovery) {
     mutableFields.unshift(idField)
   }
 
@@ -1028,6 +1047,7 @@ export function entityToJSONSchema(
   }
 
   if (
+    !isAccessDiscovery &&
     'auth' in entity &&
     entity.auth &&
     (!entity.auth?.disableLocalStrategy ||
@@ -1049,6 +1069,7 @@ export function entityToJSONSchema(
     forceInlineBlocks,
     i18n,
     interfaceNameDefinitions,
+    isAccessDiscovery,
     typeStringDefinitions,
     variant,
   })
@@ -1060,7 +1081,7 @@ export function entityToJSONSchema(
   }
 
   // The `User`-union discriminator (read-side, e.g. `req.user`); not part of create/update data.
-  if (isAuthCollection && !isInput) {
+  if (isAuthCollection && !isInput && !isAccessDiscovery) {
     fieldsSchema.properties = {
       ...fieldsSchema.properties,
       collection: { type: 'string', enum: [entity.slug] },
@@ -1075,7 +1096,7 @@ export function entityToJSONSchema(
     ...fieldsSchema,
   }
 
-  const entityDescription = entityOrFieldToJsDocs({ entity, i18n })
+  const entityDescription = isAccessDiscovery ? undefined : entityOrFieldToJsDocs({ entity, i18n })
 
   if (entityDescription) {
     jsonSchema.description = entityDescription
@@ -1097,12 +1118,14 @@ export function entityToStandaloneJSONSchema({
   defaultIDType,
   entity,
   i18n,
+  isAccessDiscovery,
   variant = 'output',
 }: {
   config: SanitizedConfig
   defaultIDType: 'number' | 'text'
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   i18n?: I18n
+  isAccessDiscovery?: boolean
   variant?: SchemaVariant
 }): JSONSchema4 {
   const definitions = new Map<string, JSONSchema4>()
@@ -1118,6 +1141,7 @@ export function entityToStandaloneJSONSchema({
     i18n,
     true, // forceInlineBlocks
     variant,
+    isAccessDiscovery,
   )
 
   // Timezone fields `$ref` supportedTimezones, which lives on the root config schema, so add it here.

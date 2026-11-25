@@ -28,6 +28,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'db'
   | 'editor'
   | 'email'
+  | 'enableAccessSchema'
   | 'endpoints'
   | 'graphQL'
   | 'hooks'
@@ -97,6 +98,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'cors',
   'csrf',
   'email',
+  'enableAccessSchema',
   'custom',
   'graphQL',
   'jobs',

@@ -19,6 +19,12 @@ const createRequest = async ({
   })
 
 test.suite('baseAccess', { config: './config.ts' }, () => {
+  test('should leave schema routes disabled by default', async ({ restClient }) => {
+    const response = await restClient.GET(`/globals/${settingsSlug}/schema`, { auth: false })
+
+    expect(response.status).toBe(404)
+  })
+
   test('should combine base and collection query constraints', async ({ payload }) => {
     for (const data of [
       {

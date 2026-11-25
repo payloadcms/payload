@@ -16,6 +16,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
+import { readSchemaEndpoint } from '../../utilities/readSchemaEndpoint.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -152,6 +153,10 @@ export const sanitizeGlobal = (
   if (global.endpoints !== false) {
     if (!global.endpoints) {
       global.endpoints = []
+    }
+
+    if (config.enableAccessSchema === true) {
+      global.endpoints.push(readSchemaEndpoint)
     }
 
     for (const endpoint of defaultGlobalEndpoints) {

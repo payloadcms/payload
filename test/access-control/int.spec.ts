@@ -128,6 +128,61 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     }
   })
 
+  test('should describe only readable collection fields in the REST schema', async ({
+    restClient,
+  }) => {
+    const response = await restClient.GET(`/${slug}/schema`, { auth: false })
+    const result = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+    expect(result.slug).toBe(slug)
+    expect(result.schema.$schema).toBe('https://json-schema.org/draft/2020-12/schema')
+    expect(result.schema.properties.title).toMatchObject({
+      title: 'Title',
+      type: ['string', 'null'],
+    })
+    expect(result.schema.properties.reference.oneOf).toContainEqual({ type: 'object' })
+    expect(result.schema.properties).not.toHaveProperty('restrictedField')
+    expect(result.schema.properties.group.properties).not.toHaveProperty('restrictedGroupText')
+
+    const denied = await restClient.GET(`/${fullyRestrictedSlug}/schema`, { auth: false })
+
+    expect(denied.status).toBe(403)
+  })
+
+  test('should omit hidden fields and generated auth properties from REST schemas', async ({
+    restClient,
+  }) => {
+    const hiddenFields = await restClient.GET(`/${hiddenFieldsSlug}/schema`, { auth: false })
+    const hiddenSchema = (await hiddenFields.json()).schema
+
+    expect(hiddenFields.status).toBe(200)
+    expect(hiddenSchema.properties).not.toHaveProperty('hidden')
+    expect(hiddenSchema.properties.partiallyHiddenGroup.properties).toHaveProperty('name')
+    expect(hiddenSchema.properties.partiallyHiddenGroup.properties).not.toHaveProperty('value')
+
+    const authCollection = await restClient.GET(`/${publicUsersSlug}/schema`, { auth: false })
+    const authSchema = (await authCollection.json()).schema
+
+    expect(authCollection.status).toBe(200)
+    expect(authSchema.properties).not.toHaveProperty('password')
+    expect(authSchema.properties).not.toHaveProperty('collection')
+  })
+
+  test('should describe only readable global fields in the REST schema', async ({ restClient }) => {
+    const response = await restClient.GET('/globals/settings/schema', { auth: false })
+    const result = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(result.slug).toBe('settings')
+    expect(result.schema.properties.test).toMatchObject({
+      title: 'Allow access to test global',
+      type: ['boolean', 'null'],
+    })
+    expect(result.schema.properties).not.toHaveProperty('secret')
+  })
+
   test.describe('Fields', () => {
     test.describe('fallback values', () => {
       const createdIDs: (number | string)[] = []

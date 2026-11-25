@@ -1540,6 +1540,12 @@ export type Config = {
    * @see https://payloadcms.com/docs/email/overview
    */
   email?: EmailAdapter | Promise<EmailAdapter>
+  /**
+   * Enable the REST read-schema endpoints for collections and globals.
+   * Readable field metadata can be discovered even when conditional access matches no documents.
+   * @default false
+   */
+  enableAccessSchema?: boolean
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**

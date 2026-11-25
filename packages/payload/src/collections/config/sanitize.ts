@@ -29,6 +29,7 @@ import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/stor
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { readSchemaEndpoint } from '../../utilities/readSchemaEndpoint.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -241,6 +242,10 @@ export const sanitizeCollection = (
       for (const endpoint of uploadCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
       }
+    }
+
+    if (config.enableAccessSchema === true) {
+      sanitized.endpoints.push(readSchemaEndpoint)
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
