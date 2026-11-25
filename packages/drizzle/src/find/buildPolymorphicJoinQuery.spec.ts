@@ -261,9 +261,7 @@ describe('buildPolymorphicJoinQuery', () => {
     })
     const parentTableName = getTableName(pgParentsTable)
     const articleTableName = getTableName(pgArticlesTable)
-    const fields: Field[] = [
-      { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
-    ]
+    const fields: Field[] = [{ name: 'parent', relationTo: 'join-parents', type: 'relationship' }]
     const pgDB = pgDrizzle.mock()
     const pgAdapter = {
       drizzle: pgDB,
