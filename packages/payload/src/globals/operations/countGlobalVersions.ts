@@ -2,6 +2,7 @@ import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -23,7 +24,8 @@ export type Arguments = {
 export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   args: Arguments,
 ): Promise<{ totalDocs: number }> => {
-  const { disableErrors, global, overrideAccess, where } = args
+  const { disableErrors, global, overrideAccess, where: incomingWhere } = args
+  const where = cloneWhere(incomingWhere)
   const req = args.req!
   const { payload } = req
 

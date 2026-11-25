@@ -6,6 +6,7 @@ import type { Collection } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -64,8 +65,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     showHiddenFields,
     sort,
     trash = false,
-    where,
+    where: incomingWhere,
   } = args
+
+  const where = cloneWhere(incomingWhere)
 
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
@@ -89,14 +92,6 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
   const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
 
-  await validateQueryPaths({
-    collectionConfig,
-    overrideAccess: overrideAccess!,
-    req,
-    versionFields,
-    where: where!,
-  })
-
   await validateSortQuery({
     collectionConfig,
     overrideAccess: overrideAccess!,
@@ -116,6 +111,14 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
   })
 
   sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
+  await validateQueryPaths({
+    collectionConfig,
+    overrideAccess: overrideAccess!,
+    req,
+    versionFields,
+    where: where!,
+  })
 
   const select = sanitizeSelect({
     fields: versionFields,

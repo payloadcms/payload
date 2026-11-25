@@ -1,5 +1,12 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, HasManyRelationshipOperator, Operator, Sort, Where } from 'payload'
+import type {
+  Collection,
+  FlattenedField,
+  HasManyRelationshipOperator,
+  Operator,
+  Sort,
+  Where,
+} from 'payload'
 
 import {
   aliasedTable,
@@ -17,6 +24,7 @@ import {
 } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath, QueryError } from 'payload'
+import { getNestedRelationshipReadConstraint } from 'payload/internal'
 import {
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
@@ -805,11 +813,91 @@ function buildHasManyRelationshipCondition({
     case 'contains':
       return exists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
 
-    case 'equals':
+    case 'equals': {
+      const readConstraint = getNestedRelationshipReadConstraint(where)
+
+      if (readConstraint) {
+        // Related documents the caller cannot read must not affect the result: only a readable
+        // related document that fails the query excludes the parent.
+        const readableRelatedDocumentSubquery = buildReadableRelatedDocumentSubquery({
+          adapter,
+          locale: relationshipLocale,
+          readConstraint,
+          relatedCollection,
+          relatedTableName,
+          relationshipTable,
+          relationTo: relationshipField.relationTo,
+        })
+
+        return notExists(
+          buildRelationshipRowsSubquery(
+            and(exists(readableRelatedDocumentSubquery), notExists(relatedDocumentSubquery))!,
+          ),
+        )
+      }
+
       // All related documents match when no relationship row points to one that fails.
       return notExists(buildRelationshipRowsSubquery(notExists(relatedDocumentSubquery)))
+    }
 
     case 'not_equals':
       return notExists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
   }
+}
+
+/**
+ * Builds a subquery that finds the related document a relationship row points to, if the caller
+ * can read it. It uses its own table alias and joins so it can sit beside the main related
+ * document subquery.
+ */
+function buildReadableRelatedDocumentSubquery({
+  adapter,
+  locale,
+  readConstraint,
+  relatedCollection,
+  relatedTableName,
+  relationshipTable,
+  relationTo,
+}: {
+  adapter: DrizzleAdapter
+  locale?: string
+  readConstraint: Where
+  relatedCollection: Collection
+  relatedTableName: string
+  relationshipTable: Table
+  relationTo: string
+}) {
+  const { newAliasTable: readableRelatedTable } = getTableAlias({
+    adapter,
+    tableName: relatedTableName,
+  })
+  const readableJoins: BuildQueryJoinAliases = []
+  const readableWhere = parseParams({
+    adapter,
+    aliasTable: readableRelatedTable,
+    context: { sort: undefined },
+    fields: relatedCollection.config.flattenedFields,
+    joins: readableJoins,
+    locale,
+    parentIsLocalized: false,
+    selectFields: {},
+    tableName: relatedTableName,
+    where: readConstraint,
+  })
+
+  let readableSubquery = (adapter.drizzle as any)
+    .select({ id: readableRelatedTable.id })
+    .from(readableRelatedTable)
+    .$dynamic()
+
+  for (const join of readableJoins) {
+    readableSubquery = readableSubquery[join.type ?? 'leftJoin'](join.table, join.condition)
+  }
+
+  return readableSubquery.where(
+    and(
+      eq(readableRelatedTable.id, (relationshipTable as any)[`${relationTo}ID`]),
+      ...(readableWhere ? [readableWhere] : []),
+    ),
+  )
 }

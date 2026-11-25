@@ -3,6 +3,7 @@ import type { ClientFieldWithOptionalType, ServerComponentProps } from './Field.
 
 export type GenericErrorProps = {
   readonly alignCaret?: 'center' | 'left' | 'right'
+  readonly id?: string
   readonly message?: string
   readonly path?: string
   readonly showError?: boolean

@@ -11,10 +11,106 @@ import {
 } from '../../../../../test/__helpers/components/PopupTestRoot/index.js'
 import { Modal } from '../../elements/Modal/index.js'
 import { Popup, PopupList } from '../../elements/Popup/index.js'
+import {
+  getComposedParent,
+  getRootNode,
+  isComposedDescendant,
+  isWithinInertTree,
+} from '../../utilities/shadowDom.js'
+import { ModalProvider as PayloadModalProvider } from '../Modal/index.js'
 import { ModalFocusProvider, useModalFocus } from './index.js'
 
 describe('document', () => runPopupFocusTests({ isShadowRoot: false }))
 describe('shadow root', () => runPopupFocusTests({ isShadowRoot: true }))
+
+test('should traverse shadow roots from another document', async () => {
+  const frame = document.createElement('iframe')
+
+  document.body.append(frame)
+
+  try {
+    const frameDocument = frame.contentDocument!
+    const host = frameDocument.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    const button = frameDocument.createElement('button')
+
+    frameDocument.body.append(host)
+    shadow.append(button)
+    host.inert = true
+
+    expect(getRootNode({ element: button })).toBe(shadow)
+    expect(getRootNode({ element: host })).toBe(frameDocument)
+    expect(getComposedParent({ element: button })).toBe(host)
+    expect(isComposedDescendant({ ancestor: host, element: button })).toBe(true)
+    expect(isWithinInertTree({ element: button })).toBe(true)
+  } finally {
+    frame.remove()
+  }
+})
+
+test('should restore shadow background attributes when the modal provider unmounts', async () => {
+  const host = document.createElement('div')
+  const shadow = host.attachShadow({ mode: 'open' })
+  const mount = document.createElement('div')
+  const background = document.createElement('button')
+
+  background.setAttribute('aria-hidden', 'false')
+  shadow.append(mount, background)
+  document.body.append(host)
+
+  const screen = await render(
+    <PayloadModalProvider>
+      <Modal openOnInit slug="unmount-shadow-modal">
+        <h2>Unmount shadow modal</h2>
+        <button type="button">Modal action</button>
+      </Modal>
+      <ModalContainer />
+    </PayloadModalProvider>,
+    { container: mount },
+  )
+  let hasUnmounted = false
+
+  try {
+    await expect.poll(() => background.inert).toBe(true)
+    await expect.poll(() => background.getAttribute('aria-hidden')).toBe('true')
+    await screen.unmount()
+    hasUnmounted = true
+    expect(background.hasAttribute('inert')).toBe(false)
+    expect(background.getAttribute('aria-hidden')).toBe('false')
+  } finally {
+    if (!hasUnmounted) {
+      await screen.unmount()
+    }
+    host.remove()
+  }
+})
+
+test('should release shadow focus listeners when focus leaves their tree', async () => {
+  const host = document.createElement('div')
+  const shadow = host.attachShadow({ mode: 'open' })
+  const button = document.createElement('button')
+
+  button.textContent = 'Shadow opener'
+  shadow.append(button)
+  document.body.append(host)
+
+  const removeListener = vi.spyOn(shadow, 'removeEventListener')
+  const screen = await render(
+    <ModalFocusProvider>
+      <button type="button">Outside shadow</button>
+    </ModalFocusProvider>,
+  )
+
+  try {
+    button.focus()
+    await screen.getByRole('button', { name: 'Outside shadow' }).click()
+    expect(removeListener.mock.calls.some(([type]) => type === 'focusin')).toBe(true)
+  } finally {
+    await screen.unmount()
+    host.remove()
+    vi.restoreAllMocks()
+  }
+})
 
 function runPopupFocusTests({ isShadowRoot }: { isShadowRoot: boolean }) {
   function Root({ children }: { children: ReactNode }) {

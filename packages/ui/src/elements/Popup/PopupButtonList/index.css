@@ -35,6 +35,11 @@
   }
 
   .popup-button-list__button {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    font-family: inherit;
     cursor: pointer;
     text-align: inherit;
     text-decoration: none;
