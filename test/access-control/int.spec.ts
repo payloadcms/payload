@@ -86,45 +86,62 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
   })
 
-  test('should skip field permissions when requested through the access endpoint', async ({
+  test('should include only readable field metadata when access schema discovery is enabled', async ({
     restClient,
   }) => {
-    const field = payload.collections[slug].config.fields.find(
-      (field) => field.type === 'text' && field.name === 'restrictedField',
-    )
+    const options = { auth: false }
+    const baseline = await restClient.GET('/access', options)
+    const disabled = await restClient.GET('/access?includeSchema=true', options)
+    const permissions = await baseline.json()
 
-    if (!field || field.type !== 'text' || !field.access) {
-      throw new Error('Expected a text field with access control')
-    }
+    expect(disabled.status).toBe(200)
+    expect(await disabled.json()).toEqual(permissions)
 
-    const readField = vitest.spyOn(field.access, 'read')
+    const originalSetting = payload.config.enableAccessSchema
+    payload.config.enableAccessSchema = true
 
     try {
-      const options = { auth: false }
-      const entityResponse = await restClient.GET('/access?includeFields=false', options)
+      const response = await restClient.GET('/access?includeSchema=true', options)
+      const result = await response.json()
 
-      expect(entityResponse.status).toBe(200)
-      expect(readField).not.toHaveBeenCalled()
-
-      const fullResponse = await restClient.GET('/access', options)
-
-      expect(fullResponse.status).toBe(200)
-      expect(readField).toHaveBeenCalled()
-
-      const full = await fullResponse.json()
-      const entities = await entityResponse.json()
-
-      expect(full.collections[slug].fields).toBeDefined()
-      expect(full.globals.settings.fields).toBeDefined()
-      expect(entities.collections[slug]).not.toHaveProperty('fields')
-      expect(entities.globals.settings).not.toHaveProperty('fields')
-      expect(entities.collections[slug].read).toEqual({
-        permission: true,
-        where: { title: { not_equals: 'archived' } },
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+      expect(result.collections[slug].read).toEqual(permissions.collections[slug].read)
+      expect(result.collections[slug].fields).toEqual(permissions.collections[slug].fields)
+      expect(result.collections[slug].schema).toContainEqual({
+        label: 'Title',
+        path: 'title',
+        type: 'text',
       })
-      expect(entities.globals.settings.read).toBe(true)
+      expect(result.collections[slug].schema).not.toContainEqual(
+        expect.objectContaining({ path: 'restrictedField' }),
+      )
+      expect(result.collections[slug].schema).not.toContainEqual(
+        expect.objectContaining({ path: 'group.restrictedGroupText' }),
+      )
+      expect(result.collections[fullyRestrictedSlug]?.schema).toBeUndefined()
+
+      const { fields, schema } = result.collections[hiddenFieldsSlug]
+      const hiddenFieldPaths = schema.map(({ path }: { path: string }) => path)
+
+      expect(fields.partiallyHiddenGroup).toBe(true)
+      expect(hiddenFieldPaths).toContain('partiallyHiddenGroup.name')
+      expect(hiddenFieldPaths).not.toContain('partiallyHiddenGroup.value')
+      expect(hiddenFieldPaths).not.toContain('hidden')
+      expect(result.globals.settings.schema).toContainEqual({
+        label: 'Allow access to test global',
+        path: 'test',
+        type: 'checkbox',
+      })
+      expect(result.globals.settings.schema).not.toContainEqual(
+        expect.objectContaining({ path: 'secret' }),
+      )
+
+      const unchanged = await restClient.GET('/access', options)
+
+      expect(await unchanged.json()).toEqual(permissions)
     } finally {
-      readField.mockRestore()
+      payload.config.enableAccessSchema = originalSetting
     }
   })
 

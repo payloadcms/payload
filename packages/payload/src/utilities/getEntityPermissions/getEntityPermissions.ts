@@ -42,7 +42,6 @@ type Args<TEntityType extends 'collection' | 'global'> = {
    */
   operations: AllOperations[]
   req: PayloadRequest
-  skipFieldPermissions?: boolean
 } & (
   | {
       fetchData: false
@@ -89,16 +88,7 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update', 'validate']
 export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,
 ): Promise<ReturnType<TEntityType>> {
-  const {
-    id,
-    data: _data,
-    entity,
-    entityType,
-    fetchData,
-    operations,
-    req,
-    skipFieldPermissions,
-  } = args
+  const { id, data: _data, entity, entityType, fetchData, operations, req } = args
   const { locale: _locale, user } = req
 
   const locale = _locale ? _locale : undefined
@@ -141,9 +131,15 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   const isLoggedIn = !!user
 
   const fieldsPermissions: FieldsPermissions = {}
+  // A permission tree is reusable only within this entity calculation. The caller's
+  // cache can be shared across collections and globals with different access rules.
+  const blockPermissionCache = new WeakMap<object, Map<string, BlockPermissions>>()
+
   const entityPermissions: ReturnType<TEntityType> = {
     fields: fieldsPermissions,
   }
+
+  const promises: Promise<void>[] = []
 
   // Phase 1: Resolve all access functions to get where queries
   const accessResults: {
@@ -219,15 +215,6 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
   // Await all where query DB calls in parallel
   await Promise.all(wherePromises)
-
-  if (skipFieldPermissions) {
-    return entityPermissions
-  }
-
-  // A permission tree is reusable only within this entity calculation. The caller's
-  // cache can be shared across collections and globals with different access rules.
-  const blockPermissionCache = new WeakMap<object, Map<string, BlockPermissions>>()
-  const promises: Promise<void>[] = []
 
   populateFieldPermissions({
     id,

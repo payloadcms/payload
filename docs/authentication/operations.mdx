@@ -16,7 +16,15 @@ The Access operation returns what a logged in user can and can't do with the col
 
 `GET http://localhost:3000/api/access`
 
-Set `?includeFields=false` to skip field access checks and omit `fields` from collection and global permissions.
+Set `enableAccessSchema: true` in your Payload config to support `GET /api/access?includeSchema=true`.
+The response adds a `schema` array of `{ path, label, type }` entries to each readable collection and
+global. Paths use dot notation for fields inside groups and named tabs. Arrays and blocks are
+represented by their field path.
+
+Enabling this option exposes the names, labels, and types of non-hidden fields that the Access
+operation reports as readable, including for anonymous callers when permitted. A conditional
+collection read rule can expose metadata even when the caller has no matching documents.
+Document reads still enforce access to each document and its values.
 
 Example response:
 
