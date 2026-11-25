@@ -12,6 +12,7 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
+import { registerRootDescription } from '../../../utils/registerRootDescription.js'
 import { $moveBlock } from './moveBlock.js'
 
 /** Move the current top-level line, including decorator nodes, without a pointer. */
@@ -22,6 +23,11 @@ export function useKeyboardReordering({
   editor: LexicalEditor
   instructionsID: string
 }) {
+  useEffect(
+    () => registerRootDescription({ descriptionID: instructionsID, editor }),
+    [editor, instructionsID],
+  )
+
   useEffect(() => {
     const $moveLine = ({ direction, event }: { direction: -1 | 1; event: KeyboardEvent }) => {
       if (
@@ -70,28 +76,4 @@ export function useKeyboardReordering({
       ),
     )
   }, [editor])
-
-  useEffect(() => {
-    let restore: (() => void) | undefined
-    const unregister = editor.registerRootListener((root) => {
-      restore?.()
-      if (!root) {
-        return
-      }
-      const description = root.getAttribute('aria-describedby')
-      root.setAttribute('aria-describedby', [description, instructionsID].filter(Boolean).join(' '))
-      restore = () => {
-        if (description === null) {
-          root.removeAttribute('aria-describedby')
-        } else {
-          root.setAttribute('aria-describedby', description)
-        }
-      }
-    })
-
-    return () => {
-      unregister()
-      restore?.()
-    }
-  }, [editor, instructionsID])
 }

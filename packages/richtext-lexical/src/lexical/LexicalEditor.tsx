@@ -5,7 +5,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { useTranslation } from '@payloadcms/ui'
+import { useAccessibility, useTranslation } from '@payloadcms/ui'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -40,7 +40,9 @@ export const LexicalEditor: React.FC<
   const isEditable = useLexicalEditable()
   const { t } = useTranslation<Record<string, never>, string>()
   const instructionsID = React.useId()
-  const hasTabIndentation = isEditable && editorConfig.features.enabledFeatures.includes('indent')
+  const { shouldShowHelpTooltips } = useAccessibility()
+  const shouldShowKeyboardHint =
+    shouldShowHelpTooltips && isEditable && editorConfig.features.enabledFeatures.includes('indent')
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -112,7 +114,7 @@ export const LexicalEditor: React.FC<
               <div className="editor" ref={onRef}>
                 <LexicalContentEditable
                   editorConfig={editorConfig}
-                  instructionsID={hasTabIndentation ? instructionsID : undefined}
+                  instructionsID={shouldShowKeyboardHint ? instructionsID : undefined}
                 />
               </div>
             </div>
@@ -197,7 +199,7 @@ export const LexicalEditor: React.FC<
           }
         })}
       </div>
-      {hasTabIndentation && (
+      {shouldShowKeyboardHint && (
         <p className="ContentEditable__keyboard-hint" id={instructionsID}>
           {t('lexical:indent:keyboardHint')}
         </p>

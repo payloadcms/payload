@@ -338,6 +338,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:goBack',
   'general:groupByLabel',
   'general:enhancedContrastMode',
+  'general:showHelpTooltips',
   'general:hideSidebar',
   'general:increment',
   'general:isEditing',

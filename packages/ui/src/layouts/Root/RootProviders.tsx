@@ -14,6 +14,7 @@ import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
+import { AccessibilityProvider } from '../../providers/Accessibility/index.js'
 import { AdminTranslationProvider } from '../../providers/AdminTranslation/index.js'
 import { AuthProvider } from '../../providers/Auth/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
@@ -105,37 +106,39 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                 <CloseModalOnRouteChange />
                                 <AuthProvider permissions={permissions} user={user}>
                                   <PreferencesProvider>
-                                    <HierarchyProvider>
-                                      <RootThemeProvider
-                                        highContrastMode={highContrastMode}
-                                        theme={theme}
-                                      >
-                                        <EmbedProvider embed={embed}>
-                                          <LocaleProvider locale={locale}>
-                                            <StepNavProvider>
-                                              <LoadingOverlayProvider>
-                                                <DocumentEventsProvider>
-                                                  <NavProvider initialIsOpen={isNavOpen}>
-                                                    <UploadSessionsProvider>
-                                                      <UploadHandlersProvider>
-                                                        <DndContext
-                                                          collisionDetection={pointerWithin}
-                                                          // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                          id={dndContextID}
-                                                        >
-                                                          <ProgressBar />
-                                                          {children}
-                                                        </DndContext>
-                                                      </UploadHandlersProvider>
-                                                    </UploadSessionsProvider>
-                                                  </NavProvider>
-                                                </DocumentEventsProvider>
-                                              </LoadingOverlayProvider>
-                                            </StepNavProvider>
-                                          </LocaleProvider>
-                                        </EmbedProvider>
-                                      </RootThemeProvider>
-                                    </HierarchyProvider>
+                                    <AccessibilityProvider>
+                                      <HierarchyProvider>
+                                        <RootThemeProvider
+                                          highContrastMode={highContrastMode}
+                                          theme={theme}
+                                        >
+                                          <EmbedProvider embed={embed}>
+                                            <LocaleProvider locale={locale}>
+                                              <StepNavProvider>
+                                                <LoadingOverlayProvider>
+                                                  <DocumentEventsProvider>
+                                                    <NavProvider initialIsOpen={isNavOpen}>
+                                                      <UploadSessionsProvider>
+                                                        <UploadHandlersProvider>
+                                                          <DndContext
+                                                            collisionDetection={pointerWithin}
+                                                            // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                            id={dndContextID}
+                                                          >
+                                                            <ProgressBar />
+                                                            {children}
+                                                          </DndContext>
+                                                        </UploadHandlersProvider>
+                                                      </UploadSessionsProvider>
+                                                    </NavProvider>
+                                                  </DocumentEventsProvider>
+                                                </LoadingOverlayProvider>
+                                              </StepNavProvider>
+                                            </LocaleProvider>
+                                          </EmbedProvider>
+                                        </RootThemeProvider>
+                                      </HierarchyProvider>
+                                    </AccessibilityProvider>
                                   </PreferencesProvider>
                                   <ModalContainer />
                                   <StayLoggedInModal />

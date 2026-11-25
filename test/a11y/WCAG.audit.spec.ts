@@ -2141,7 +2141,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
   test.describe('1.4.10 Reflow (AA)', () => {
     test(
-      'should keep instruction tabs visible without required-fields help at 320px',
+      'should keep instruction tabs visible with required-fields help at 320px',
       { tag: ['@document-editing'] },
       async () => {
         const viewport = page.viewportSize()!
@@ -2158,7 +2158,7 @@ test.describe('WCAG 2.2 Level AA', () => {
             name: 'System instructions (read-only)',
             exact: true,
           })
-          await expect(page.locator('.required-fields-info')).toHaveCount(0)
+          await expect(page.locator('.required-fields-info')).toBeVisible()
 
           for (const tab of [additionalTab, systemTab]) {
             const bounds = await tab.boundingBox()
@@ -2166,6 +2166,16 @@ test.describe('WCAG 2.2 Level AA', () => {
             expect(bounds).not.toBeNull()
             expect(bounds!.x).toBeGreaterThanOrEqual(0)
             expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
+            const helpBounds = await page.locator('.required-fields-info button').boundingBox()
+
+            expect(helpBounds).not.toBeNull()
+            expect(
+              helpBounds!.y + helpBounds!.height <= bounds!.y ||
+                bounds!.y + bounds!.height <= helpBounds!.y ||
+                helpBounds!.x + helpBounds!.width <= bounds!.x ||
+                bounds!.x + bounds!.width <= helpBounds!.x,
+            ).toBe(true)
+            await tab.click({ trial: true })
           }
 
           await additionalTab.focus()
@@ -9253,29 +9263,296 @@ test.describe('WCAG 2.2 Level AA', () => {
     )
 
     test(
-      'should omit required-field help from document forms and drawers',
+      'should show required-field help in editable document forms and drawers',
       { tag: ['@document-editing'] },
       async () => {
-        // PYLD-4389: defer this control until its placement has been redesigned.
         await gotoCreatePost({ page, postsURL })
         const message = 'Fields marked with * are required.'
 
         await expect(page.locator('.document-fields')).toBeVisible()
         await expectRequiredState({ input: page.locator('#field-title') })
-        await expect(page.locator('.required-fields-info')).toHaveCount(0)
-        await expect(page.getByRole('button', { name: message, exact: true })).toHaveCount(0)
+        await expect(page.locator('.required-fields-info')).toBeVisible()
+        await expect(page.getByRole('button', { name: message, exact: true })).toBeVisible()
         await page.locator('#relatedPost-add-new button').click()
         const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
 
         await expect(drawer).toBeVisible()
         await expect(drawer.locator('.document-fields')).toBeVisible()
-        await expect(drawer.getByRole('button', { name: message, exact: true })).toHaveCount(0)
-        await expect(drawer.locator('.required-fields-info')).toHaveCount(0)
+        await expect(drawer.getByRole('button', { name: message, exact: true })).toBeVisible()
+        await expect(drawer.locator('.required-fields-info')).toBeVisible()
       },
     )
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should preserve block-reordering instructions when saved guidance loads disabled', async () => {
+      const viewport = page.viewportSize()!
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/showHelpTooltips',
+        serverURL,
+      })
+      const releasePreference = Promise.withResolvers<void>()
+      const preferenceRequested = Promise.withResolvers<void>()
+      const handlePreference = async (route: Route) => {
+        if (route.request().method() !== 'GET') {
+          await route.fallback()
+          return
+        }
+        preferenceRequested.resolve()
+        await releasePreference.promise
+        await route.fulfill({ json: { value: { showHelpTooltips: false } } })
+      }
+
+      await page.route(preferenceURL, handlePreference)
+      try {
+        await gotoCreatePost({ page, postsURL })
+        await preferenceRequested.promise
+        const editor = page.locator('[data-field-path="content"] [contenteditable="true"]')
+
+        await expect(editor).toHaveAccessibleDescription(/Press Escape.*Move Up:/)
+        releasePreference.resolve()
+        await expect(page.locator('.ContentEditable__keyboard-hint')).toHaveCount(0)
+        await expect(editor).not.toHaveAccessibleDescription(/Press Escape/)
+        await expect(editor).toHaveAccessibleDescription(/Move Up: Alt \+ Shift \+ ↑/)
+        await page.setViewportSize({ height: viewport.height, width: 600 })
+        await expect(editor).not.toHaveAttribute('aria-describedby')
+      } finally {
+        await page.setViewportSize(viewport)
+        releasePreference.resolve()
+        await page.unroute(preferenceURL, handlePreference)
+      }
+    })
+
+    test('should disable guidance while its preference loads or saves', async () => {
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/showHelpTooltips',
+        serverURL,
+      })
+      const releaseLoad = Promise.withResolvers<void>()
+      const releaseSave = Promise.withResolvers<void>()
+      const loadRequested = Promise.withResolvers<void>()
+      const saveRequested = Promise.withResolvers<void>()
+      const handlePreference = async (route: Route) => {
+        if (route.request().method() === 'GET') {
+          loadRequested.resolve()
+          await releaseLoad.promise
+          await route.fulfill({ json: { value: { showHelpTooltips: false } } })
+        } else if (route.request().method() === 'POST') {
+          saveRequested.resolve()
+          await releaseSave.promise
+          await route.fulfill({ json: {} })
+        } else {
+          await route.fallback()
+        }
+      }
+
+      await page.route(preferenceURL, handlePreference)
+      try {
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+        await loadRequested.promise
+        const help = page.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+
+        await expect(help).toBeDisabled()
+        releaseLoad.resolve()
+        await expect(help).toBeEnabled()
+        await expect(help).not.toBeChecked()
+        await help.focus()
+        await help.press('Space')
+        await saveRequested.promise
+        await expect(help).toBeDisabled()
+        await expect(help).not.toBeChecked()
+        releaseSave.resolve()
+        await expect(help).toBeEnabled()
+        await expect(help).toBeChecked()
+        await expect(help).toBeFocused()
+      } finally {
+        releaseLoad.resolve()
+        releaseSave.resolve()
+        await page.unroute(preferenceURL, handlePreference)
+      }
+    })
+
+    test('should re-enable guidance without changing its value when saving fails', async () => {
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/showHelpTooltips',
+        serverURL,
+      })
+      const handlePreference = async (route: Route) => {
+        await route.fulfill({
+          json: route.request().method() === 'GET' ? { value: { showHelpTooltips: false } } : {},
+          status: route.request().method() === 'GET' ? 200 : 500,
+        })
+      }
+
+      await page.route(preferenceURL, handlePreference)
+      try {
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+        const help = page.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+
+        await expect(help).toBeEnabled()
+        await expect(help).not.toBeChecked()
+        await help.focus()
+        const failedSave = page.waitForResponse(
+          (response) => response.url() === preferenceURL && response.request().method() === 'POST',
+        )
+
+        await help.press('Space')
+        expect((await failedSave).status()).toBe(500)
+        await expect(help).toBeEnabled()
+        await expect(help).not.toBeChecked()
+        await expect(help).toBeFocused()
+      } finally {
+        await page.unroute(preferenceURL, handlePreference)
+      }
+    })
+
+    for (const phase of ['loading', 'saving'] as const) {
+      test(`should reset guidance safely while ${phase}`, async () => {
+        const accountURL = formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL })
+        const releaseRequest = Promise.withResolvers<void>()
+        const requestStarted = Promise.withResolvers<void>()
+        let storedValue: { showHelpTooltips: boolean } | null = { showHelpTooltips: true }
+        let shouldHoldLoad = true
+        const preferenceURL = (url: URL) => url.pathname.startsWith('/api/payload-preferences')
+        const handlePreference = async (route: Route) => {
+          const method = route.request().method()
+          const path = new URL(route.request().url()).pathname
+
+          if (path.endsWith('/showHelpTooltips') && method === 'GET') {
+            if (phase === 'loading' && shouldHoldLoad) {
+              requestStarted.resolve()
+              await releaseRequest.promise
+              await route.fulfill({ json: { value: { showHelpTooltips: false } } })
+            } else {
+              await route.fulfill({ json: { value: storedValue } })
+            }
+          } else if (path.endsWith('/showHelpTooltips') && method === 'POST') {
+            requestStarted.resolve()
+            await releaseRequest.promise
+            storedValue = route.request().postDataJSON().value
+            await route.fulfill({ json: {} })
+          } else if (path === '/api/payload-preferences' && method === 'DELETE') {
+            shouldHoldLoad = false
+            storedValue = null
+            await route.fulfill({ json: { message: 'Preferences reset' } })
+          } else {
+            await route.fallback()
+          }
+        }
+
+        await page.route(preferenceURL, handlePreference)
+        try {
+          await page.goto(accountURL)
+          const help = page.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+
+          if (phase === 'saving') {
+            await expect(help).toBeEnabled()
+            await help.focus()
+            await help.press('Space')
+          }
+          await requestStarted.promise
+          await expect(help).toBeDisabled()
+          await page.getByRole('button', { name: 'Reset Preferences', exact: true }).click()
+          const dialog = page.getByRole('dialog', { name: 'Reset Preferences', exact: true })
+
+          await dialog.getByRole('button', { name: 'Confirm', exact: true }).click()
+          if (phase === 'saving') {
+            await expect(dialog.locator('[data-dialog-action="confirm"]')).toBeDisabled()
+          }
+          releaseRequest.resolve()
+          await expect(dialog).not.toBeVisible()
+          await expect(help).toBeEnabled()
+          await expect(help).toBeChecked()
+          await page.reload()
+          await expect(help).toBeEnabled()
+          await expect(help).toBeChecked()
+        } finally {
+          releaseRequest.resolve()
+          await page.unroute(preferenceURL, handlePreference)
+        }
+      })
+    }
+
+    test('should save the keyboard-operated help setting and hide optional field guidance', async () => {
+      test.setTimeout(60000)
+      const accountURL = formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL })
+      const preferenceURL = formatAdminURL({
+        apiRoute: '/api',
+        path: '/payload-preferences/showHelpTooltips',
+        serverURL,
+      })
+      const original = await page.request.get(preferenceURL)
+      const originalPreference = original.ok() ? await original.json() : undefined
+      const hasSavedPreference = originalPreference?.id !== undefined
+      const savedValue = originalPreference?.value
+
+      try {
+        await page.request.post(preferenceURL, { data: { value: { showHelpTooltips: true } } })
+        await page.goto(accountURL)
+        const settings = page.locator('.payload-settings__accessibility')
+        const help = settings.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+
+        await expect(
+          settings.getByRole('checkbox', { name: 'Enhanced Contrast Mode', exact: true }),
+        ).toBeVisible()
+        await expect(help).toBeChecked()
+        await help.focus()
+        const saved = page.waitForResponse(
+          (response) =>
+            response.url().includes('/payload-preferences/showHelpTooltips') &&
+            response.request().method() === 'POST',
+        )
+
+        await help.press('Space')
+        expect((await saved).ok()).toBe(true)
+        await expect(help).toBeEnabled()
+        await expect(help).not.toBeChecked()
+        await expect(help).toBeFocused()
+        await page.reload()
+        await expect(help).not.toBeChecked()
+        await gotoCreatePost({ page, postsURL })
+        const editor = page.locator('[data-field-path="content"] [contenteditable="true"]')
+
+        await expect(editor).toBeVisible()
+        await expect(page.locator('.required-fields-info')).toHaveCount(0)
+        await expect(page.locator('.ContentEditable__keyboard-hint')).toHaveCount(0)
+        await expect(editor).not.toHaveAccessibleDescription(/Press Escape, then Tab or Shift\+Tab/)
+        await expectRequiredState({ input: page.locator('#field-title') })
+        await editor.focus()
+        await editor.press('Escape')
+        await editor.press('Tab')
+        await expect(editor).not.toBeFocused()
+
+        await page.goto(accountURL)
+        const restored = page.waitForResponse(
+          (response) =>
+            response.url().includes('/payload-preferences/showHelpTooltips') &&
+            response.request().method() === 'POST',
+        )
+
+        await help.focus()
+        await help.press('Space')
+        expect((await restored).ok()).toBe(true)
+        await gotoCreatePost({ page, postsURL })
+        await expect(page.locator('.required-fields-info')).toBeVisible()
+        await editor.focus()
+        await expect(
+          page.locator('[data-field-path="content"] .ContentEditable__keyboard-hint'),
+        ).toBeVisible()
+        await expect(editor).toHaveAccessibleDescription(/Press Escape, then Tab or Shift\+Tab/)
+      } finally {
+        if (!hasSavedPreference) {
+          await page.request.delete(preferenceURL)
+        } else {
+          await page.request.post(preferenceURL, { data: { value: savedValue } })
+        }
+        await page.goto(accountURL)
+      }
+    })
+
     test('should name list filter condition controls and support adding and removing conditions by keyboard', async () => {
       // PYLD-3836
       const filters = await openPostsFilter({ page, postsURL })

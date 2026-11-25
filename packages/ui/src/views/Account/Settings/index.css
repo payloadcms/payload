@@ -26,6 +26,21 @@
     }
   }
 
+  .payload-settings__accessibility {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    h4 {
+      margin: 0;
+      margin-block-end: var(--spacer-3);
+      font-size: var(--text-heading-small-font-size);
+      font-weight: var(--text-heading-small-font-weight);
+      line-height: var(--text-heading-small-line-height);
+      letter-spacing: var(--text-heading-small-letter-spacing);
+    }
+  }
+
   .payload-settings__language,
   .payload-settings__theme {
     display: flex;

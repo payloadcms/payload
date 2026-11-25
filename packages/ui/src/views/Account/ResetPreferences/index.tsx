@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
+import { useAccessibility } from '../../../providers/Accessibility/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -18,6 +19,7 @@ export const ResetPreferences: React.FC<{
   readonly user?: User
 }> = ({ user }) => {
   const { openModal } = useModal()
+  const { flushHelpTooltips, resetHelpTooltips } = useAccessibility()
   const { t } = useTranslation()
   const {
     config: {
@@ -43,6 +45,7 @@ export const ResetPreferences: React.FC<{
     )
 
     try {
+      await flushHelpTooltips()
       const res = await fetch(
         formatAdminURL({
           apiRoute,
@@ -61,6 +64,7 @@ export const ResetPreferences: React.FC<{
       const message = json.message
 
       if (res.ok) {
+        resetHelpTooltips()
         toast.success(message)
       } else {
         toast.error(message)
@@ -68,7 +72,7 @@ export const ResetPreferences: React.FC<{
     } catch (_err) {
       // swallow error
     }
-  }, [apiRoute, user])
+  }, [apiRoute, flushHelpTooltips, resetHelpTooltips, user])
 
   return (
     <Fragment>
