@@ -4,12 +4,15 @@ import type { UploadTransformation } from '../transformers/uploadTransformerBrid
 import type { PlannedHookOwner } from '../transformState/planUpload.js'
 
 import { createFileSource } from '../transformers/createFileSource.js'
+import { matchesMimeType } from '../transformers/matchesMimeType.js'
 import { transformUploadFile } from '../transformers/transformUploadFile.js'
+import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 
 /**
  * Makes one hook owner's stored variants. Core calls the owner's `transformVariant` once for each
- * variant it owns, then runs the other eligible stages on each result. A skipped variant has no
- * file, so it is saved as null, as a Sharp size that is too small to make is.
+ * variant it owns, then runs the later stages on each result: the planned main-file stages that
+ * accept the variant file's MIME type. A skipped variant has no file, so it is saved as null, as
+ * a Sharp size that is too small to make is.
  */
 export async function runVariantHooks({
   claims,
@@ -39,7 +42,6 @@ export async function runVariantHooks({
   signal: AbortSignal
   stagesThatRun: UploadTransformer[]
 }): Promise<UploadTransformation[]> {
-  const laterStages = stagesThatRun.filter((stage) => stage !== ownerTransformer)
   const results: UploadTransformation[] = []
 
   for (const variantName of owner.variantNames) {
@@ -68,7 +70,7 @@ export async function runVariantHooks({
       getOptions,
       originalDoc: pipelineOriginalDoc,
       originalFile,
-      pipeline: laterStages,
+      pipeline: getLaterStages({ mimeType: result.file.type, ownerTransformer, stagesThatRun }),
       req,
     })
     // A later stage can change the file, so the hook's size is kept only for its own file.
@@ -84,4 +86,22 @@ export async function runVariantHooks({
   }
 
   return results
+}
+
+/** The planned main-file stages for a variant file: no bridge, not the owner, and its MIME type. */
+function getLaterStages({
+  mimeType,
+  ownerTransformer,
+  stagesThatRun,
+}: {
+  mimeType: string
+  ownerTransformer: UploadTransformer
+  stagesThatRun: UploadTransformer[]
+}): UploadTransformer[] {
+  return stagesThatRun.filter(
+    (stage) =>
+      stage !== ownerTransformer &&
+      !getUploadTransformerInternal(stage)?.transformUpload &&
+      stage.mimeTypes.some((pattern) => matchesMimeType({ mimeType, pattern })),
+  )
 }

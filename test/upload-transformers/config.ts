@@ -14,7 +14,13 @@ import { SeveralOwnersMedia } from './collections/SeveralOwnersMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
 import { VariantMedia } from './collections/VariantMedia/index.js'
 import { contractTransformers } from './contractFixtures.js'
-import { blurTransformer, posterTransformer, recordingVideoStage } from './hookVariantFixtures.js'
+import {
+  blurTransformer,
+  posterTransformer,
+  recordingStage,
+  recordingVideoOnlyStage,
+  stageAndHookOwnerTransformer,
+} from './hookVariantFixtures.js'
 import {
   convertedVariantMediaSlug,
   hookVariantMediaSlug,
@@ -92,7 +98,9 @@ export default buildConfigWithDefaults({
         }),
         posterTransformer,
         blurTransformer,
-        recordingVideoStage,
+        stageAndHookOwnerTransformer,
+        recordingStage,
+        recordingVideoOnlyStage,
         requestVariantsTransformer,
         ...testTransformers,
         ...contractTransformers,

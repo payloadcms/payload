@@ -657,6 +657,8 @@ export interface ContractMedia {
 export interface HookVariantMedia {
   id: string;
   posterBehaviour?: string | null;
+  blurBehaviour?: string | null;
+  hasStageOwner?: boolean | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -713,6 +715,17 @@ export interface HookVariantMedia {
       _stored?: boolean | null;
     };
     blurhash?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+    preview?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -1220,6 +1233,8 @@ export interface ContractMediaSelect<T extends boolean = true> {
  */
 export interface HookVariantMediaSelect<T extends boolean = true> {
   posterBehaviour?: T;
+  blurBehaviour?: T;
+  hasStageOwner?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1278,6 +1293,19 @@ export interface HookVariantMediaSelect<T extends boolean = true> {
               _stored?: T;
             };
         blurhash?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+        preview?:
           | T
           | {
               url?: T;

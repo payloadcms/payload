@@ -1,10 +1,10 @@
 import type { Document, PayloadRequest } from '../../types/index.js'
+import type { HookVariantOwner } from '../getVariantOwners.js'
 import type { PlannedTransformerPipeline } from '../transformers/planTransformerPipeline.js'
 import type { CanTransformArgs, UploadTransformer } from '../transformers/types.js'
-import type { VariantsOwner } from '../types.js'
 
 import { ValidationError } from '../../errors/ValidationError.js'
-import { getVariantOwners } from '../getVariantOwners.js'
+import { getHookVariantOwners, getVariantOwners } from '../getVariantOwners.js'
 import {
   getCandidateTransformers,
   getCanTransformResult,
@@ -21,9 +21,7 @@ import { isClaimRequired, isFocalPointKey } from './transformKeyClaims.js'
 export type PlannedHookOwner = {
   /** The `options` from the transformer's own `canTransform` result, or `undefined`. */
   options: unknown
-  owner: VariantsOwner
-  transformer: Required<Pick<UploadTransformer, 'transformVariant'>> & UploadTransformer
-}
+} & HookVariantOwner
 
 export type UploadPlan = {
   /** The variants owners whose `transformVariant` runs, in the order they registered. */
@@ -227,23 +225,13 @@ async function planHookOwners({
     mimeType: args.mimeType,
     transformers,
   })
-  const hookOwners: PlannedHookOwner[] = []
+  const plannedHookOwners: PlannedHookOwner[] = []
 
-  for (const owner of getVariantOwners({ mimeType: args.mimeType, upload })) {
-    const transformer = transformers.find(({ slug }) => slug === owner.slug)
-
-    if (typeof transformer?.transformVariant !== 'function') {
-      continue
-    }
-
-    const hookTransformer = transformer as PlannedHookOwner['transformer']
+  for (const hookOwner of getHookVariantOwners({ mimeType: args.mimeType, transformers, upload })) {
+    const { transformer } = hookOwner
 
     if (stagePlan.pipeline.includes(transformer)) {
-      hookOwners.push({
-        options: stagePlan.options.get(transformer),
-        owner,
-        transformer: hookTransformer,
-      })
+      plannedHookOwners.push({ ...hookOwner, options: stagePlan.options.get(transformer) })
       continue
     }
 
@@ -255,15 +243,14 @@ async function planHookOwners({
     const result = await getCanTransformResult({ args, transformer })
 
     if (isEligible({ result })) {
-      hookOwners.push({
+      plannedHookOwners.push({
+        ...hookOwner,
         options: typeof result === 'object' ? result.options : undefined,
-        owner,
-        transformer: hookTransformer,
       })
     }
   }
 
-  return hookOwners
+  return plannedHookOwners
 }
 
 /**

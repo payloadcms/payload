@@ -1,10 +1,16 @@
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { recordedPosterOptions, recordedStageFileTypes } from './hookVariantFixtures.js'
+import {
+  recordedPosterOptions,
+  recordedStageFileTypes,
+  recordedVideoOnlyStageFileTypes,
+  resetHookVariantRecords,
+  stageOwnerCanTransformCalls,
+} from './hookVariantFixtures.js'
 import { hookVariantMediaSlug } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -15,8 +21,7 @@ const imagePath = path.resolve(dirname, 'image.png')
 
 test.suite('Upload variants hook', { config: './config.ts' }, () => {
   test.afterEach(() => {
-    recordedStageFileTypes.length = 0
-    recordedPosterOptions.length = 0
+    resetHookVariantRecords()
   })
 
   test('should store the video thumbnail that the hook owner makes', async ({ payload }) => {
@@ -79,6 +84,33 @@ test.suite('Upload variants hook', { config: './config.ts' }, () => {
     })
 
     expect(video.variants?.card).toMatchObject({ filename: null, url: null })
+  })
+
+  test('should not keep old variants when no hook owner can transform the new video', async ({
+    payload,
+  }) => {
+    const image = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(imagePath),
+      overrideAccess: true,
+    })
+
+    expect(image.variants?.thumbnail?.filename).toEqual(expect.any(String))
+
+    const video = await payload.update({
+      id: image.id,
+      collection: hookVariantMediaSlug,
+      data: { blurBehaviour: 'ineligible', posterBehaviour: 'ineligible' },
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(video.variants).toMatchObject({
+      blurhash: { filename: null, url: null },
+      card: { filename: null, url: null },
+      thumbnail: { filename: null, url: null },
+    })
   })
 
   test('should keep Sharp as the owner for images on the same collection', async ({ payload }) => {
@@ -167,5 +199,51 @@ test.suite('Upload variants hook', { config: './config.ts' }, () => {
     })
 
     expect(recordedStageFileTypes).toEqual(['video/mp4', 'image/png', 'image/png'])
+  })
+
+  test('should not run a stage for videos on a PNG variant', async ({ payload }) => {
+    await payload.create({
+      collection: hookVariantMediaSlug,
+      data: {},
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(recordedVideoOnlyStageFileTypes).toEqual(['video/mp4'])
+  })
+
+  test('should call canTransform once for a main-file stage that also makes variants with the hook', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({
+      collection: hookVariantMediaSlug,
+      data: { hasStageOwner: true },
+      file: await getFileByPath(videoPath),
+      overrideAccess: true,
+    })
+
+    expect(doc.variants?.preview?.filename).toEqual(expect.any(String))
+    expect(stageOwnerCanTransformCalls.count).toBe(1)
+  })
+
+  test('should log the error when the hook throws', async ({ payload }) => {
+    const loggedError = vi.spyOn(payload.logger, 'error')
+
+    try {
+      await expect(
+        payload.create({
+          collection: hookVariantMediaSlug,
+          data: { posterBehaviour: 'throw' },
+          file: await getFileByPath(videoPath),
+          overrideAccess: true,
+        }),
+      ).rejects.toMatchObject({ name: 'FileUploadError' })
+
+      expect(loggedError).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'poster: cannot read this video' }),
+      )
+    } finally {
+      loggedError.mockRestore()
+    }
   })
 })

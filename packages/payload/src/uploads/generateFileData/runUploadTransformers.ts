@@ -38,7 +38,7 @@ export type UploadTransformerOutput = {
 /**
  * Runs the upload stages on the incoming file. With an upload bridge, the bridge drives the stages
  * once for the main file and once for each size. Otherwise the stages run once for the main file,
- * and each hook owner makes its variants. Every other variant is saved as null.
+ * and each planned hook owner makes its variants.
  *
  * The stages can change `pipelineDoc._transforms`. Only the main task's changes are kept: size
  * tasks share a read-only copy of the main task's result.
@@ -76,6 +76,7 @@ export async function runUploadTransformers({
   let sizeResults: UploadTransformation[] = []
   let hookOwnerSlugs: string[] = []
 
+  // Hook owners do not run on the bridge path until Sharp moves onto the hook.
   if (bridgeTransformer) {
     const bridge = getUploadTransformerInternal(bridgeTransformer)!
     let sizeTaskDoc: Readonly<Document> | undefined
@@ -154,12 +155,6 @@ export async function runUploadTransformers({
       }
 
       hookOwnerSlugs = hookOwners.map(({ owner }) => owner.slug)
-      sizeResults.push(
-        ...getUnmadeVariantResults({
-          sizeResults,
-          upload: req.payload.collections[collectionSlug]?.config.upload,
-        }),
-      )
     }
   }
 
@@ -184,23 +179,4 @@ async function toWebFile({ file }: { file: NonNullable<PayloadRequest['file']> }
   const webFile = new File([fileContents], file.name, { type: file.mimetype })
 
   return file.tempFilePath ? setUploadFilePath(webFile, file.tempFilePath) : webFile
-}
-
-/**
- * A result with no file for each collection variant that no owner made for this upload, so each
- * one is saved as null. Without it, a variant from an earlier file could stay on the document.
- */
-function getUnmadeVariantResults({
-  sizeResults,
-  upload,
-}: {
-  sizeResults: UploadTransformation[]
-  upload?: { variants?: { name: string }[] }
-}): UploadTransformation[] {
-  const madePaths = new Set(sizeResults.map(({ fieldPath }) => fieldPath))
-
-  return (upload?.variants ?? [])
-    .map(({ name }) => `variants.${name}` as const)
-    .filter((fieldPath) => !madePaths.has(fieldPath))
-    .map((fieldPath) => ({ fieldPath }))
 }
