@@ -67,7 +67,14 @@ export const SectionArticles: CollectionConfig = {
     {
       name: 'related_sections',
       type: 'array',
-      fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+      fields: [
+        { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        {
+          name: 'nested',
+          type: 'array',
+          fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+        },
+      ],
     },
     {
       name: 'relatedXsections',

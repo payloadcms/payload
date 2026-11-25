@@ -37,7 +37,7 @@ test.suite('Polymorphic joins through relationships', { config: './config.ts' },
         collection: sectionArticlesSlug,
         data: {
           title: 'Other path',
-          related_sections: [{ topics: [otherTopic.id] }],
+          related_sections: [{ nested: [{ topics: [topic.id] }], topics: [otherTopic.id] }],
           relatedXsections: [{ topics: [topic.id] }],
         },
         overrideAccess: true,

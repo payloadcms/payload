@@ -147,13 +147,18 @@ export const buildPolymorphicJoinQuery = ({
       }
 
       const relationshipLocale = relationshipPath.locale
-      // Only array positions are wildcards; underscores in field names must stay literal.
+      // Array positions are the only wildcards. Escape field names and keep each wildcard
+      // within one segment so a deeper relationship path cannot match.
       const relationshipPathPattern = relationshipPath.path
         .split('%')
         .map((segment) => segment.replace(/[\\%_]/g, '\\$&'))
         .join('%')
+      const expectedDotCount = relationshipPath.path.split('.').length - 1
       const relationshipPathCondition = relationshipPath.path.includes('%')
-        ? sql`${relationshipTable.path} like ${relationshipPathPattern} escape '\\'`
+        ? and(
+            sql`${relationshipTable.path} like ${relationshipPathPattern} escape '\\'`,
+            sql`length(${relationshipTable.path}) - length(replace(${relationshipTable.path}, '.', '')) = ${expectedDotCount}`,
+          )
         : eq(relationshipTable.path, relationshipPath.path)
       // The relationship row belongs to the target row's ID, which is a version ID for drafts.
       const relationshipRowCondition = and(
