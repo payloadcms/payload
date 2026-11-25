@@ -86,6 +86,48 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
   })
 
+  test('should skip field permissions when requested through the access endpoint', async ({
+    restClient,
+  }) => {
+    const field = payload.collections[slug].config.fields.find(
+      (field) => field.type === 'text' && field.name === 'restrictedField',
+    )
+
+    if (!field || field.type !== 'text' || !field.access) {
+      throw new Error('Expected a text field with access control')
+    }
+
+    const readField = vitest.spyOn(field.access, 'read')
+
+    try {
+      const options = { auth: false }
+      const entityResponse = await restClient.GET('/access?includeFields=false', options)
+
+      expect(entityResponse.status).toBe(200)
+      expect(readField).not.toHaveBeenCalled()
+
+      const fullResponse = await restClient.GET('/access', options)
+
+      expect(fullResponse.status).toBe(200)
+      expect(readField).toHaveBeenCalled()
+
+      const full = await fullResponse.json()
+      const entities = await entityResponse.json()
+
+      expect(full.collections[slug].fields).toBeDefined()
+      expect(full.globals.settings.fields).toBeDefined()
+      expect(entities.collections[slug]).not.toHaveProperty('fields')
+      expect(entities.globals.settings).not.toHaveProperty('fields')
+      expect(entities.collections[slug].read).toEqual({
+        permission: true,
+        where: { title: { not_equals: 'archived' } },
+      })
+      expect(entities.globals.settings.read).toBe(true)
+    } finally {
+      readField.mockRestore()
+    }
+  })
+
   test.describe('Fields', () => {
     test.describe('fallback values', () => {
       const createdIDs: (number | string)[] = []

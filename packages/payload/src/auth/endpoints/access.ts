@@ -11,9 +11,21 @@ export const accessHandler: PayloadHandler = async (req) => {
   })
 
   try {
+    const skipFieldPermissions = req.searchParams.get('includeFields') === 'false'
     const results = await accessOperation({
       req,
+      skipFieldPermissions,
     })
+
+    if (skipFieldPermissions) {
+      for (const permissions of [
+        ...Object.values(results.collections ?? {}),
+        ...Object.values(results.globals ?? {}),
+      ]) {
+        const entityPermissions: Partial<typeof permissions> = permissions
+        delete entityPermissions.fields
+      }
+    }
 
     return Response.json(results, {
       headers,
