@@ -6,6 +6,9 @@ import type {
   PayloadRequest,
   TransformDefinition,
   TransformFileResult,
+  TransformVariantArgs,
+  TransformVariantResult,
+  UploadTransformer,
 } from 'payload'
 import type { generatePayloadFileURL as generatePayloadFileURLFromShared } from 'payload/shared'
 
@@ -17,6 +20,16 @@ import type { UploadTransforms } from './payload-types.js'
 describe('upload transformer contracts', () => {
   test('should require a file when a transformFile result is complete', () => {
     expect<{ status: 'complete' }>().type.not.toBeAssignableTo<TransformFileResult>()
+  })
+
+  test('should require a file when a transformVariant result is complete', () => {
+    expect<{ status: 'complete' }>().type.not.toBeAssignableTo<TransformVariantResult>()
+  })
+
+  test('should type transformVariant as an optional hook that takes TransformVariantArgs', () => {
+    expect<UploadTransformer['transformVariant']>().type.toBe<
+      ((args: TransformVariantArgs) => Promise<TransformVariantResult>) | undefined
+    >()
   })
 
   test('should require a response when a handleTransformRequest result is complete', () => {
