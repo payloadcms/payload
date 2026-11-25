@@ -146,6 +146,19 @@ describe('SEO Plugin', () => {
       await expect(preview).toContainText('This is a test meta title')
       await expect(preview).toContainText('My new amazing SEO description')
     })
+
+    test('should update the search result preview URL when the slug changes', async () => {
+      await page.goto(url.edit(id))
+      await waitForFormReady(page)
+      const previewClass = '#field-meta > div > div.render-fields > div:nth-child(5)'
+
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
+      await expect(page.locator(previewClass)).toContainText('/en/test-page')
+
+      await page.locator('#field-slug').fill('updated-slug')
+
+      await expect(page.locator(previewClass)).toContainText('/en/updated-slug')
+    })
   })
 
   describe('i18n', () => {
