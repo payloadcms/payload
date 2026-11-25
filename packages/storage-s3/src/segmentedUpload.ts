@@ -137,7 +137,9 @@ export const createSegmentedUpload = ({
 
         return head.ContentLength ?? null
       } catch (err) {
-        if (isNotFound({ err })) {
+        // Without s3:ListBucket, S3 answers 403 instead of 404 for a key that does not exist yet.
+        // Reconcile then reads the parts, and a committed object still answers with its size.
+        if (isNotFound({ err }) || getHTTPStatus({ err }) === 403) {
           return null
         }
 
@@ -238,10 +240,7 @@ const getClientFaultStatus = (err: unknown): null | number => {
     return null
   }
 
-  const status =
-    '$metadata' in err && typeof err.$metadata === 'object' && err.$metadata !== null
-      ? (err.$metadata as { httpStatusCode?: number }).httpStatusCode
-      : undefined
+  const status = getHTTPStatus({ err })
 
   if (status === 408 || status === 429) {
     return null
@@ -249,6 +248,16 @@ const getClientFaultStatus = (err: unknown): null | number => {
 
   return status && status >= 400 && status < 500 ? status : 400
 }
+
+/** S3 reports HEAD errors without a body, so their status is often the only usable signal. */
+const getHTTPStatus = ({ err }: { err: unknown }): number | undefined =>
+  typeof err === 'object' &&
+  err !== null &&
+  '$metadata' in err &&
+  typeof err.$metadata === 'object' &&
+  err.$metadata !== null
+    ? (err.$metadata as { httpStatusCode?: number }).httpStatusCode
+    : undefined
 
 const isNotFound = ({ err }: { err: unknown }): boolean =>
   typeof err === 'object' &&
