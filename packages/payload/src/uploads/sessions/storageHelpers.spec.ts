@@ -74,6 +74,27 @@ describe('upload session storage helpers', () => {
     expect((error as APIError).message).toBe('Storage rejected the upload (AccessDenied).')
   })
 
+  it.each([
+    {
+      expected: 'ApiError',
+      fault: new (class ApiError extends Error {})('Not Found'),
+      getReason: undefined,
+    },
+    {
+      expected: 'notFound',
+      fault: Object.assign(new Error('Not Found'), { reason: 'notFound' }),
+      getReason: (err: unknown) => (err as { reason: string }).reason,
+    },
+  ])('should name a permanent fault $expected', async ({ expected, fault, getReason }) => {
+    const error = await withPermanentStorageErrors({
+      getPermanentStatus: () => 404,
+      getReason,
+      operation: () => Promise.reject(fault),
+    }).catch((err: unknown) => err)
+
+    expect((error as APIError).message).toBe(`Storage rejected the upload (${expected}).`)
+  })
+
   it('should rethrow a temporary storage fault unchanged', async () => {
     const fault = new Error('timeout')
 

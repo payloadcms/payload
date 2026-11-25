@@ -84,10 +84,13 @@ export const getStagedPartNumber = ({
  */
 export const withPermanentStorageErrors = async <T>({
   getPermanentStatus,
+  getReason = getErrorName,
   operation,
 }: {
   /** The 4xx status of a fault a retry cannot fix, or `null` to rethrow the error unchanged. */
   getPermanentStatus: (err: unknown) => null | number
+  /** Names the fault in the error message. Defaults to the error's name, or its class. */
+  getReason?: (err: unknown) => string
   operation: () => Promise<T>
 }): Promise<T> => {
   try {
@@ -96,14 +99,20 @@ export const withPermanentStorageErrors = async <T>({
     const status = getPermanentStatus(err)
 
     if (status) {
-      throw new APIError(
-        `Storage rejected the upload (${err instanceof Error ? err.name : 'Error'}).`,
-        status,
-      )
+      throw new APIError(`Storage rejected the upload (${getReason(err)}).`, status)
     }
 
     throw err
   }
+}
+
+/** Some SDKs leave `name` as the generic `Error`, so their class names the fault instead. */
+const getErrorName = (err: unknown): string => {
+  if (!(err instanceof Error)) {
+    return 'Error'
+  }
+
+  return err.name !== 'Error' ? err.name : err.constructor.name
 }
 
 /**
