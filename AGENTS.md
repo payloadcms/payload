@@ -57,7 +57,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 - Always use object parameters for function arguments: `fn({ name }: { name: string })` not `fn(name: string)` (improves backwards-compatibility)
 - Prefer types over interfaces (except when extending external types)
-- Never cast with `as any` or `as unknown as X`, including in tests. Fix the types instead.
+- Avoid `as any` and `as unknown as X`, including in tests. Fix the types instead, or add a comment explaining why the cast is needed.
 - Prefer functions over classes (classes only for errors/adapters)
 - Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
 - Search for an existing utility or type before writing a new one.
