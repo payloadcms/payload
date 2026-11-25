@@ -28,6 +28,18 @@ export const Topics: CollectionConfig = {
       collection: [sectionArticlesSlug],
       on: 'related_sections.topics',
     },
+    {
+      name: 'percentMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'topics%archived',
+    },
+    {
+      name: 'sectionPercentMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.topics%archived',
+    },
   ],
 }
 
@@ -99,11 +111,16 @@ export const SectionArticles: CollectionConfig = {
   access: { read: () => true },
   fields: [
     { name: 'title', type: 'text', required: true },
+    { name: 'topics%archived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+    { name: 'topicsXarchived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
     {
       name: 'related_sections',
       type: 'array',
       fields: [
         { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        { name: 'Topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        { name: 'topics%archived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        { name: 'topicsXarchived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
         {
           name: 'nested',
           type: 'array',

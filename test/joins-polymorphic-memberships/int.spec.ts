@@ -91,6 +91,114 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
   )
 
   test.options(
+    'should preserve percent signs in relationship field names',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Archived' },
+        overrideAccess: true,
+      })
+      const matchingArticle = await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Matching', 'topics%archived': [topic.id] },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Other field', topicsXarchived: [topic.id] },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { percentMembers: { count: true } },
+        overrideAccess: false,
+      })
+
+      expect(result.percentMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: matchingArticle.id }],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
+    'should match array relationship field names case-sensitively',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const matchingArticle = await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Matching', related_sections: [{ topics: [topic.id] }] },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Other case', related_sections: [{ Topics: [topic.id] }] },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { sectionMembers: { count: true } },
+        overrideAccess: false,
+      })
+
+      expect(result.sectionMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: matchingArticle.id }],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
+    'should preserve percent signs inside array relationship field names',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Archived' },
+        overrideAccess: true,
+      })
+      const matchingArticle = await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Matching', related_sections: [{ 'topics%archived': [topic.id] }] },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Other field', related_sections: [{ topicsXarchived: [topic.id] }] },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { sectionPercentMembers: { count: true } },
+        overrideAccess: false,
+      })
+
+      expect(result.sectionPercentMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: matchingArticle.id }],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
     'should match nested array relationships without treating underscores as wildcards',
     { db: 'drizzle' },
     async ({ payload }) => {
