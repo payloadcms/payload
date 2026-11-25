@@ -94,21 +94,29 @@ export const validateISOBaseMediaBuffer = async (buffer: Buffer): Promise<boolea
 class TooManyReadsError extends Error {}
 
 /**
- * Checks the top-level boxes through a `FileSource`, reading only each box header. Each read can
- * be a storage request, so the check stops after `maxReads` reads with `'tooManyReads'`, for
- * example on a fragmented MP4 with many `moof`/`mdat` pairs.
+ * Checks the top-level boxes through a `FileSource`, reading only each box header. A header inside
+ * `fileStart` is taken from it. Each other read can be a storage request, so the check stops after
+ * `maxReads` of them with `'tooManyReads'`, for example on a fragmented MP4 with many
+ * `moof`/`mdat` pairs.
  */
 export const validateISOBaseMediaSource = async ({
   fileSource,
+  fileStart = Buffer.alloc(0),
   maxReads,
 }: {
   fileSource: FileSource
+  /** The first bytes of the file, when the caller already read them. */
+  fileStart?: Buffer
   maxReads: number
 }): Promise<'invalid' | 'tooManyReads' | 'valid'> => {
   let readCount = 0
 
   try {
     const isValid = await validateBoxStructure(fileSource.sizeInBytes, async (position, length) => {
+      if (position + length <= fileStart.length) {
+        return fileStart.subarray(position, position + length)
+      }
+
       if (++readCount > maxReads) {
         throw new TooManyReadsError()
       }

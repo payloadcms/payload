@@ -565,7 +565,7 @@ const withReadOptions = ({
  * Reads at most `maxBytes` from the response body, then cancels the reader - so a handler that
  * ignores the range hint and starts streaming the whole file is still cut short on our end.
  */
-export const readBoundedPrefix = async ({
+const readBoundedPrefix = async ({
   maxBytes,
   response,
 }: {

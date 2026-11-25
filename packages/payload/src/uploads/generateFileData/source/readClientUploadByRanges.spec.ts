@@ -74,7 +74,7 @@ const createCollection = ({ mimeTypes }: { mimeTypes?: string[] } = {}) =>
   }) as unknown as SanitizedCollectionConfig
 
 /** A request whose upload handler serves `stored` with HTTP Range. */
-const createReq = ({ stored }: { stored: Buffer }) => {
+const createReq = ({ contentType, stored }: { contentType?: string; stored: Buffer }) => {
   const handler = vi.fn(async (req: PayloadRequest) => {
     const info = getRangeRequestInfo({
       fileSize: stored.length,
@@ -88,7 +88,10 @@ const createReq = ({ stored }: { stored: Buffer }) => {
     const body =
       info.type === 'partial' ? stored.subarray(info.rangeStart, info.rangeEnd + 1) : stored
 
-    return new Response(body, { headers: info.headers, status: info.status })
+    return new Response(body, {
+      headers: { ...info.headers, ...(contentType && { 'Content-Type': contentType }) },
+      status: info.status,
+    })
   })
   const req = {
     context: {},
@@ -228,12 +231,14 @@ describe('hasDeferredContentChecks', () => {
 describe('getCheckedClientUploadSource', () => {
   const getSource = ({
     collection = createCollection(),
+    contentType,
     stored,
   }: {
     collection?: SanitizedCollectionConfig
+    contentType?: string
     stored: Buffer
   }) => {
-    const { handler, req } = createReq({ stored })
+    const { handler, req } = createReq({ contentType, stored })
     const source = getCheckedClientUploadSource({
       collection,
       file: { ...probedClientUpload, size: stored.length },
@@ -299,9 +304,32 @@ describe('getCheckedClientUploadSource', () => {
     expect(await source).toBeUndefined()
   })
 
+  it('should read the box headers inside the first bytes without another request', async () => {
+    // Both boxes of the MP4 start inside the bytes read to find its type.
+    const { handler, source } = getSource({ stored: MINIMAL_MP4 })
+
+    await source
+
+    expect(getRangeHeaders(handler)).toEqual(['bytes=0-4099'])
+  })
+
+  it('should return a source when the provider content type is the claimed type', async () => {
+    const { source } = getSource({ contentType: 'video/mp4', stored: MINIMAL_MP4 })
+
+    expect(await source).toMatchObject({ mimeType: 'video/mp4' })
+  })
+
+  it('should return no source when the provider content type is not the claimed type', async () => {
+    // The download path saves the provider's type, so that path and its checks run instead.
+    const { source } = getSource({ contentType: 'video/quicktime', stored: MINIMAL_MP4 })
+
+    expect(await source).toBeUndefined()
+  })
+
   it('should return no source when the box check needs too many reads', async () => {
-    // A fragmented MP4 can have many top-level boxes. Each one is a storage request.
-    const freeBoxes = Array.from({ length: 200 }, () => {
+    // A fragmented MP4 can have many top-level boxes. Each one past the first bytes is a storage
+    // request.
+    const freeBoxes = Array.from({ length: 600 }, () => {
       const box = Buffer.alloc(8)
       box.writeUInt32BE(8)
       box.write('free', 4, 'latin1')

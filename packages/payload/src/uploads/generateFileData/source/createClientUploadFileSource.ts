@@ -3,10 +3,16 @@ import type { FileSource } from '../../transformers/types.js'
 import type { UploadInstructions } from '../../types.js'
 
 import { APIError } from '../../../errors/APIError.js'
-import { fetchUploadResponse, readBoundedPrefix } from '../../getFileFromUploadInstructions.js'
+import { fetchUploadResponse } from '../../getFileFromUploadInstructions.js'
 import { resolveByteRange } from '../../transformers/createFileSource.js'
 
 type ByteRange = { endByte: number; startByte: number }
+
+/**
+ * How the upload handler answers a range, once a response showed it. `ignored` means its partial
+ * responses hold the whole file from byte 0, as R2's do under Miniflare.
+ */
+type RangeHandling = 'honored' | 'ignored' | 'unknown'
 
 /**
  * A `FileSource` over a client upload that is already in storage. Each read makes one call to the
@@ -24,7 +30,14 @@ export function createClientUploadFileSource({
   /** A client upload with an upload reference. Its bytes are read from storage, not from `data`. */
   file: NonNullable<PayloadRequest['file']>
   req: PayloadRequest
-}): FileSource {
+}): {
+  fileSource: FileSource
+  /**
+   * The `Content-Type` of the first storage response: `undefined` before any read, and `null`
+   * when storage sent none. The download path saves this type in place of the client's claim.
+   */
+  getProviderContentType: () => null | string | undefined
+} {
   const sizeInBytes = file.size
   // Read by the name the object was stored under. Something earlier in the operation, such as a
   // hook, can rename the request file, so a verified receipt's filename comes first.
@@ -37,8 +50,10 @@ export function createClientUploadFileSource({
     size: sizeInBytes,
     uploadReference: file.uploadReference as UploadInstructions['file']['uploadReference'],
   }
+  const rangeHandling: { value: RangeHandling } = { value: 'unknown' }
+  let providerContentType: null | string | undefined
 
-  const fetchRange = async ({ range, signal }: { range: ByteRange; signal?: AbortSignal }) => {
+  const getRangeChunks = async ({ range, signal }: { range: ByteRange; signal?: AbortSignal }) => {
     const response = await fetchUploadResponse({
       collectionSlug,
       file: storedFile,
@@ -48,12 +63,16 @@ export function createClientUploadFileSource({
       uploadConfig: req.payload.collections[collectionSlug]!.config.upload,
     })
 
+    if (providerContentType === undefined) {
+      providerContentType = response.headers.get('Content-Type')
+    }
+
     assertRangeResponse({ range, response, sizeInBytes })
 
-    return response
+    return readRangeChunks({ range, rangeHandling, response })
   }
 
-  return {
+  const fileSource: FileSource = {
     filename: file.name,
     mimeType: file.mimetype,
     readFileBytes: async ({ numberOfBytes, signal, startByte }) => {
@@ -64,10 +83,15 @@ export function createClientUploadFileSource({
         return new Uint8Array(0)
       }
 
-      const bytes = readRangeBytes({ range, response: await fetchRange({ range, signal }) })
+      const chunks: Uint8Array[] = []
+
+      for await (const chunk of await getRangeChunks({ range, signal })) {
+        chunks.push(chunk)
+      }
+
       signal?.throwIfAborted()
 
-      return bytes
+      return new Uint8Array(Buffer.concat(chunks))
     },
     sizeInBytes,
     streamFile: async ({ numberOfBytes, signal, startByte = 0 } = {}) => {
@@ -77,12 +101,14 @@ export function createClientUploadFileSource({
       const stream =
         range.endByte === range.startByte
           ? new ReadableStream<Uint8Array>({ start: (controller) => controller.close() })
-          : streamRangeBytes({ range, response: await fetchRange({ range, signal }) })
+          : toReadableStream({ chunks: await getRangeChunks({ range, signal }) })
 
       // Piping with a signal errors the stream and cancels the storage read when it aborts.
       return signal ? stream.pipeThrough(new TransformStream(), { signal }) : stream
     },
   }
+
+  return { fileSource, getProviderContentType: () => providerContentType }
 }
 
 const notReadableError = (): APIError => new APIError('Uploaded source is not readable.', 400)
@@ -104,9 +130,11 @@ function assertRangeResponse({
   const contentLength = response.headers.get('Content-Length')
 
   const isExpectedResponse =
-    response.status === 206
+    response.body !== null &&
+    (response.status === 206
       ? response.headers.get('Content-Range') === expectedContentRange
-      : response.status === 200 && (contentLength === null || Number(contentLength) === sizeInBytes)
+      : response.status === 200 &&
+        (contentLength === null || Number(contentLength) === sizeInBytes))
 
   if (!isExpectedResponse) {
     void response.body?.cancel().catch(() => {})
@@ -115,93 +143,127 @@ function assertRangeResponse({
 }
 
 /**
- * The bytes of the range. A partial body starts at `startByte`. A body with more bytes than the
- * range is the whole file from byte 0: R2 under Miniflare sends one with a 206, and a handler that
- * ignores the range sends one with a 200. A body with fewer bytes than asked fails.
+ * The bytes of the range, from a response body, without loading more than one chunk at a time.
+ *
+ * A partial body starts at `startByte`. A whole body starts at byte 0: a handler that ignores the
+ * range sends one with a 200, and R2 under Miniflare sends one with a 206. Such a 206 is found when
+ * its body has more bytes than the range. From then on, `rangeHandling` is `ignored` and each 206
+ * is read as a whole body. Before that is known, a range from a later byte is held in memory until
+ * the body shows which kind it is. A body with fewer bytes than asked fails.
  */
-async function readRangeBytes({
+async function* readRangeChunks({
   range: { endByte, startByte },
+  rangeHandling,
   response,
 }: {
   range: ByteRange
+  rangeHandling: { value: RangeHandling }
   response: Response
-}): Promise<Uint8Array> {
+}): AsyncGenerator<Uint8Array> {
+  const reader = response.body!.getReader()
   const rangeLength = endByte - startByte
-  // One byte more than a whole body needs, so an exact partial body is read to its end and does
-  // not need a cancel, which some adapters log as an error.
-  const bytes = await readBoundedPrefix({ maxBytes: endByte + 1, response })
-
-  if (response.status === 206 && bytes.length === rangeLength) {
-    return new Uint8Array(bytes)
-  }
-
-  if (bytes.length < endByte) {
-    throw notReadableError()
-  }
-
-  return new Uint8Array(bytes.subarray(startByte, endByte))
-}
-
-/**
- * Streams the bytes of the range without loading them into memory. A body that ends early errors
- * the stream. An over-long partial body (R2 under Miniflare) is the whole file from byte 0. From
- * the first byte, its bytes are the range's bytes only for a range that starts at byte 0, so such a
- * body errors the stream when the range starts later.
- */
-function streamRangeBytes({
-  range: { endByte, startByte },
-  response,
-}: {
-  range: ByteRange
-  response: Response
-}): ReadableStream<Uint8Array> {
-  if (!response.body) {
-    return new ReadableStream({ start: (controller) => controller.error(notReadableError()) })
-  }
-
-  const reader = response.body.getReader()
   const isPartial = response.status === 206
-  const shouldFailOnExtraBytes = isPartial && startByte > 0
-  let bytesToSkip = isPartial ? 0 : startByte
-  let bytesToSend = endByte - startByte
+  const heldChunks: Uint8Array[] = []
+  let isWholeBody = !isPartial || rangeHandling.value === 'ignored'
 
-  return new ReadableStream<Uint8Array>({
-    cancel: (reason) => reader.cancel(reason),
-    pull: async (controller) => {
-      for (;;) {
+  try {
+    // From byte 0 the two kinds of body start with the same bytes, so only a later byte waits.
+    if (!isWholeBody && rangeHandling.value === 'unknown' && startByte > 0) {
+      let heldLength = 0
+
+      while (heldLength <= rangeLength) {
         const { done, value } = await reader.read()
 
         if (done) {
-          return bytesToSend > 0 ? controller.error(notReadableError()) : controller.close()
+          break
         }
 
-        const skippedLength = Math.min(bytesToSkip, value.length)
-        const chunk = value.subarray(skippedLength)
-        const rangeChunk = chunk.subarray(0, bytesToSend)
-        bytesToSkip -= skippedLength
-        bytesToSend -= rangeChunk.length
+        heldChunks.push(value)
+        heldLength += value.length
+      }
 
-        if (rangeChunk.length > 0) {
-          controller.enqueue(rangeChunk)
+      isWholeBody = heldLength > rangeLength
+    }
+
+    if (isPartial && isWholeBody) {
+      rangeHandling.value = 'ignored'
+    }
+
+    let bytesToSkip = isWholeBody ? startByte : 0
+    let bytesToSend = rangeLength
+
+    for (;;) {
+      const { done, value } = heldChunks.length
+        ? { done: false as const, value: heldChunks.shift()! }
+        : await reader.read()
+
+      if (done) {
+        if (bytesToSend > 0) {
+          throw notReadableError()
         }
 
-        if (chunk.length > rangeChunk.length) {
-          await reader.cancel()
-
-          return shouldFailOnExtraBytes ? controller.error(notReadableError()) : controller.close()
+        if (isPartial && !isWholeBody) {
+          rangeHandling.value = 'honored'
         }
 
-        // The rest of a whole body is not needed. A partial body is read to its end instead, so
-        // the next read can find extra bytes, and an exact body needs no cancel.
-        if (bytesToSend === 0 && !isPartial) {
-          await reader.cancel()
+        return
+      }
 
-          return controller.close()
+      const skippedLength = Math.min(bytesToSkip, value.length)
+      const chunk = value.subarray(skippedLength)
+      const rangeChunk = chunk.subarray(0, bytesToSend)
+      bytesToSkip -= skippedLength
+      bytesToSend -= rangeChunk.length
+
+      if (rangeChunk.length > 0) {
+        yield rangeChunk
+      }
+
+      // The rest of a whole body is not needed.
+      if (isWholeBody && bytesToSend === 0) {
+        return
+      }
+
+      if (chunk.length > rangeChunk.length) {
+        // A partial body with more bytes than the range. From byte 0 it is a whole body, and the
+        // bytes sent are right. A later byte gets here only after earlier responses had only the
+        // range. The bytes sent may then be the file's first bytes, so the read fails.
+        if (startByte > 0) {
+          throw notReadableError()
         }
 
-        if (rangeChunk.length > 0) {
-          return
+        rangeHandling.value = 'ignored'
+
+        return
+      }
+    }
+  } finally {
+    // A body read to its end needs no cancel, which some adapters log as an error.
+    await reader.cancel().catch(() => {})
+  }
+}
+
+/** A stream that pulls each chunk from `chunks`, and stops the reads when it is cancelled. */
+function toReadableStream({
+  chunks,
+}: {
+  chunks: AsyncGenerator<Uint8Array>
+}): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    cancel: async () => {
+      await chunks.return(undefined)
+    },
+    pull: async (controller) => {
+      try {
+        const { done, value } = await chunks.next()
+
+        if (done) {
+          controller.close()
+        } else {
+          controller.enqueue(value)
         }
+      } catch (error) {
+        controller.error(error)
       }
     },
   })

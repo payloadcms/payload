@@ -512,7 +512,7 @@ describe('generateFileData - client uploads read by byte ranges', () => {
   ])
 
   /** Serves `stored` with HTTP Range, as the storage adapters do on a client-upload read. */
-  const createRangeHandler = ({ stored }: { stored: Buffer }) =>
+  const createRangeHandler = ({ contentType, stored }: { contentType?: string; stored: Buffer }) =>
     vi.fn(async (req: PayloadRequest) => {
       const info = getRangeRequestInfo({
         fileSize: stored.length,
@@ -521,18 +521,24 @@ describe('generateFileData - client uploads read by byte ranges', () => {
       const body =
         info.type === 'partial' ? stored.subarray(info.rangeStart, info.rangeEnd + 1) : stored
 
-      return new Response(body, { headers: info.headers, status: info.status })
+      return new Response(body, {
+        headers: { ...info.headers, ...(contentType && { 'Content-Type': contentType }) },
+        status: info.status,
+      })
     })
 
   const posterOwner = { slug: 'poster', mimeTypes: ['video/mp4'], variantNames: ['thumbnail'] }
 
   /** Starts from the file that `getFileFromUploadInstructions` returns for a 'none' requirement. */
   const runRangedClientUpload = ({
+    contentType,
     mimeTypes,
     stored = MINIMAL_MP4,
     transformers,
     variantOwners = [posterOwner],
   }: {
+    /** The `Content-Type` that storage sends for the object. */
+    contentType?: string
     mimeTypes?: string[]
     stored?: Buffer
     transformers: UploadTransformer[]
@@ -544,7 +550,7 @@ describe('generateFileData - client uploads read by byte ranges', () => {
         data: stored,
       }),
     )
-    const handler = createRangeHandler({ stored })
+    const handler = createRangeHandler({ contentType, stored })
     const logger = { error: vi.fn(), warn: vi.fn() }
     const upload = {
       disableLocalStorage: true,
@@ -607,6 +613,46 @@ describe('generateFileData - client uploads read by byte ranges', () => {
     expect(transformVariant.mock.calls[0]![0].originalSource.sizeInBytes).toBe(MINIMAL_MP4.length)
   })
 
+  it('should save the provider content type of a ranged client upload', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      contentType: 'video/mp4',
+      transformers: [
+        {
+          slug: 'poster',
+          mimeTypes: ['video/mp4'],
+          transformVariant: async () => ({ status: 'skip' }),
+        },
+      ],
+    })
+
+    expect((await result).data).toMatchObject({ mimeType: 'video/mp4' })
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+  })
+
+  it('should download the client upload when the provider content type is not the claimed type', async () => {
+    const transformVariant = vi.fn(async () => ({ status: 'skip' as const }))
+
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      contentType: 'video/quicktime',
+      transformers: [{ slug: 'poster', mimeTypes: ['video/mp4'], transformVariant }],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
+  it('should download a video in a collection with MIME types when the provider content type is not the claimed type', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      contentType: 'video/quicktime',
+      mimeTypes: ['video/*'],
+      transformers: [],
+      variantOwners: [],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
   it('should download the client upload when a main-file stage also runs', async () => {
     const { fetchFullClientUpload, result } = runRangedClientUpload({
       transformers: [
@@ -628,7 +674,7 @@ describe('generateFileData - client uploads read by byte ranges', () => {
   })
 
   it('should download the client upload when its box check needs too many reads', async () => {
-    const freeBoxes = Array.from({ length: 200 }, () =>
+    const freeBoxes = Array.from({ length: 600 }, () =>
       Buffer.concat([Buffer.from([0, 0, 0, 8]), Buffer.from('free')]),
     )
     const transformVariant = vi.fn(async () => ({ status: 'skip' as const }))
@@ -687,7 +733,7 @@ describe('generateFileData - client uploads read by byte ranges', () => {
   })
 
   it('should download a video in a collection with MIME types when its box check needs too many reads', async () => {
-    const freeBoxes = Array.from({ length: 200 }, () =>
+    const freeBoxes = Array.from({ length: 600 }, () =>
       Buffer.concat([Buffer.from([0, 0, 0, 8]), Buffer.from('free')]),
     )
 

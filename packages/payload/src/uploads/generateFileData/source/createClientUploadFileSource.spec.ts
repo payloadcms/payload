@@ -38,7 +38,7 @@ const createSource = ({
       logger: { error: vi.fn() },
     },
   } as unknown as PayloadRequest
-  const fileSource = createClientUploadFileSource({
+  const { fileSource, getProviderContentType } = createClientUploadFileSource({
     collectionSlug: 'media',
     file: {
       name: 'clip.mp4',
@@ -50,7 +50,17 @@ const createSource = ({
     req,
   })
 
-  return { fileSource, handlerSpy }
+  return { fileSource, getProviderContentType, handlerSpy }
+}
+
+/** Answers every range with the whole file, as R2 does under Miniflare. */
+const wholeFileHandler: Handler = async (req) => {
+  const [, start, end] = req.headers.get('range')!.match(/^bytes=(\d+)-(\d+)$/)!
+
+  return new Response(bytes, {
+    headers: { 'Content-Range': `bytes ${start}-${end}/${bytes.length}` },
+    status: 206,
+  })
 }
 
 const readStream = async (stream: ReadableStream<Uint8Array>) =>
@@ -164,19 +174,60 @@ describe('createClientUploadFileSource', () => {
     expect(await readStream(stream)).toEqual(bytes.subarray(0, 5))
   })
 
-  it('should fail a stream from a later byte when the partial response has the whole file', async () => {
-    // Its first bytes are the file's first bytes, not the range's, and they cannot be taken back.
+  it('should stream the asked bytes from a later byte when the partial response has the whole file', async () => {
+    const { fileSource } = createSource({ handler: wholeFileHandler })
+
+    const stream = await fileSource.streamFile({ numberOfBytes: 5, startByte: 10 })
+
+    expect(await readStream(stream)).toEqual(bytes.subarray(10, 15))
+  })
+
+  it('should stream the asked bytes after a read found that partial responses have the whole file', async () => {
+    const { fileSource } = createSource({ handler: wholeFileHandler })
+
+    const read = await fileSource.readFileBytes({ numberOfBytes: 10, startByte: 90 })
+    const stream = await fileSource.streamFile({ numberOfBytes: 5, startByte: 10 })
+
+    expect(Buffer.from(read)).toEqual(bytes.subarray(90, 100))
+    expect(await readStream(stream)).toEqual(bytes.subarray(10, 15))
+  })
+
+  it('should fail a stream with more bytes than the range after partial responses had only the range', async () => {
+    let isFirstCall = true
     const { fileSource } = createSource({
-      handler: async () =>
-        new Response(bytes, { headers: { 'Content-Range': 'bytes 10-14/100' }, status: 206 }),
+      handler: async (req, args) => {
+        if (isFirstCall) {
+          isFirstCall = false
+          return rangeHandler(req, args)
+        }
+
+        return wholeFileHandler(req, args)
+      },
     })
 
+    await fileSource.readFileBytes({ numberOfBytes: 10, startByte: 90 })
     const stream = await fileSource.streamFile({ numberOfBytes: 5, startByte: 10 })
 
     await expect(readStream(stream)).rejects.toMatchObject({
       message: 'Uploaded source is not readable.',
       status: 400,
     })
+  })
+
+  it('should give the content type of the first response', async () => {
+    const { fileSource, getProviderContentType } = createSource({
+      handler: async (req, args) => {
+        const response = await rangeHandler(req, args)
+        response.headers.set('Content-Type', 'video/quicktime')
+        return response
+      },
+    })
+
+    expect(getProviderContentType()).toBeUndefined()
+
+    await fileSource.readFileBytes({ numberOfBytes: 10, startByte: 0 })
+
+    expect(getProviderContentType()).toBe('video/quicktime')
   })
 
   it('should reject a partial response for another range', async () => {

@@ -67,9 +67,10 @@ export function shouldReadClientUploadByRanges({
 /**
  * The ranged source of a client upload, after the content checks that the full download would
  * run: the type and allow-list check on the first bytes, and the ISO base media box check over
- * ranges. An invalid file fails with the same error as after a download. Undefined when the checks
- * need the whole file: the first bytes are not a type these checks cover, or the box check needs
- * too many reads. The caller then downloads the file.
+ * ranges. An invalid file fails with the same error as after a download. Undefined when the
+ * download path must run: storage gives another type than the client claimed, the first bytes are
+ * not a type these checks cover, or the box check needs too many reads. The caller then downloads
+ * the file.
  */
 export async function getCheckedClientUploadSource({
   collection,
@@ -80,13 +81,25 @@ export async function getCheckedClientUploadSource({
   file: IncomingFile
   req: PayloadRequest
 }): Promise<FileSource | undefined> {
-  const fileSource = createClientUploadFileSource({ collectionSlug: collection.slug, file, req })
+  const { fileSource, getProviderContentType } = createClientUploadFileSource({
+    collectionSlug: collection.slug,
+    file,
+    req,
+  })
   const firstBytes = Buffer.from(
     await fileSource.readFileBytes({
       numberOfBytes: FILE_TYPE_SAMPLE_BYTE_LENGTH,
       startByte: 0,
     }),
   )
+  const providerContentType = getProviderContentType()
+
+  // The download path saves the type that storage gives. When it is not the client's claim, that
+  // path and its full checks run instead.
+  if (providerContentType && providerContentType !== file.mimetype) {
+    return undefined
+  }
+
   const detected = await fileTypeFromBuffer(firstBytes)
 
   // Only these types are checked the same way from their first bytes as from the whole file.
@@ -95,7 +108,11 @@ export async function getCheckedClientUploadSource({
   }
 
   const boxCheck = isISOBaseMediaMimeType(detected.mime)
-    ? await validateISOBaseMediaSource({ fileSource, maxReads: MAX_BOX_HEADER_READS })
+    ? await validateISOBaseMediaSource({
+        fileSource,
+        fileStart: firstBytes,
+        maxReads: MAX_BOX_HEADER_READS,
+      })
     : undefined
 
   if (boxCheck === 'tooManyReads') {

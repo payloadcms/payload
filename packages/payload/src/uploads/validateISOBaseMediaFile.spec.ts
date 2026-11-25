@@ -145,6 +145,23 @@ describe('validateISOBaseMediaSource', () => {
     ).resolves.toBe('tooManyReads')
   })
 
+  it('should not read a box header that the first bytes hold', async () => {
+    const content = Buffer.concat([
+      box('ftyp', fileTypeContent('isom')),
+      box('free'),
+      box('mdat', Buffer.alloc(100)),
+      box('moov', Buffer.alloc(20)),
+    ])
+    const fileSource = toSource(content)
+    const readFileBytes = vi.spyOn(fileSource, 'readFileBytes')
+
+    // The `ftyp` header at 0 and the `free` header at 20 end inside the first 36 bytes.
+    await expect(
+      validateISOBaseMediaSource({ fileSource, fileStart: content.subarray(0, 36), maxReads: 2 }),
+    ).resolves.toBe('valid')
+    expect(readFileBytes.mock.calls.map(([{ startByte }]) => startByte)).toEqual([28, 136])
+  })
+
   it('should read only the box headers', async () => {
     const fileSource = toSource(
       Buffer.concat([box('ftyp', fileTypeContent('isom')), box('mdat', Buffer.alloc(100_000))]),

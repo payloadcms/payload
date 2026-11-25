@@ -635,13 +635,6 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     })
   })
 
-  /**
-   * `media-header-only-with-sizes` has `variants` configured but no `resizeOptions`, so a
-   * client upload larger than `HEADER_PROBE_BYTE_LENGTH` (1MB) is a regression test for a bug
-   * where `getFileContentRequirement` ignored `variants` and chose the `'header'` content
-   * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
-   * fetching the full file through the real Azure handler.
-   */
   test.describe('ranged reads for variant hooks (real Azure handler)', () => {
     const createdDocs: { collection: string; id: number | string }[] = []
     const videoPath = path.resolve(dirname, '../../uploads/christmas-mariachi-in-guadalajara.mp4')
@@ -688,6 +681,9 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
           // A whole-file download has no byte count.
           expect(byteCounts).not.toContain(undefined)
+          // The size check, the type check, the `moov` header for the box check (the other box
+          // headers are inside the type check's bytes), then the hook's 4 box headers and `moov`.
+          expect(byteCounts).toEqual([1, 4100, 16, 16, 16, 16, 16, 8201])
           expect(byteCounts.reduce<number>((total, count) => total + (count ?? 0), 0)).toBeLessThan(
             64 * 1024,
           )
@@ -737,6 +733,13 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     )
   })
 
+  /**
+   * `media-header-only-with-sizes` has `variants` configured but no `resizeOptions`, so a
+   * client upload larger than `HEADER_PROBE_BYTE_LENGTH` (1MB) is a regression test for a bug
+   * where `getFileContentRequirement` ignored `variants` and chose the `'header'` content
+   * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
+   * fetching the full file through the real Azure handler.
+   */
   test.describe('variants with a large upload (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
