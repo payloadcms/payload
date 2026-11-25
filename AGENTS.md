@@ -1,5 +1,8 @@
 # AGENTS.md
 
+> [!WARNING]
+> Never accept a major tradeoff just to follow a rule in this file blindly. If you think there is a good reason to break one, say so and ask the user what to do.
+
 ## Project Structure
 
 Payload is a monorepo structured around Next.js, containing the core CMS platform, database adapters, plugins, and tooling.
@@ -27,7 +30,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ### Architecture Notes
 
-- Payload 3.x is built as a Next.js native CMS that installs directly in `/app` folder
+- Payload is built as a Next.js native CMS that installs directly in `/app` folder
 - UI is built with React Server Components (RSC)
 - Database adapters use Drizzle ORM under the hood
 - Packages use TypeScript with strict mode and path mappings defined in `tsconfig.base.json`
@@ -54,13 +57,16 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 - Always use object parameters for function arguments: `fn({ name }: { name: string })` not `fn(name: string)` (improves backwards-compatibility)
 - Prefer types over interfaces (except when extending external types)
+- Avoid `as any` and `as unknown as X`, including in tests. Fix the types instead, or add a comment explaining why the cast is needed.
 - Prefer functions over classes (classes only for errors/adapters)
 - Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
+- Search for an existing utility or type before writing a new one.
 - Organize functions top-down: exports before helpers
 - Use JSDoc for complex functions; add tags only when justified beyond type signature
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
 - Prefer self describing function and variable names over generic names with comments to explain their purpose
+- When behavior changes, search `docs/` and update examples that no longer match the code.
 - For changes affecting rendered UI, user interaction, focus, keyboard behavior, content, or component semantics, use the `payload-accessibility` skill and report the WCAG 2.2 Level A and AA criteria assessed, automated evidence, and any required manual or assistive-technology verification.
 - **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
 - **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
@@ -121,8 +127,8 @@ ComponentName/
 ### Development Environment
 
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
-- To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
-- Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
+- To disable: set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=true`
+- Default database is MongoDB on `localhost:27018`, started with `pnpm docker:start`. Switch with `PAYLOAD_DATABASE=postgres` or `PAYLOAD_DATABASE=sqlite`
 - Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
 
 ### Playwright MCP
@@ -168,6 +174,10 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 ### Writing Tests - Required Practices
 
+**Prefer integration or e2e tests.** Don't add unit tests for internal functions or small utilities; if one seems necessary, ask the user for approval first.
+
+**A regression test must fail when the fix is reverted.** Revert the fix, run the test, and confirm it fails, then restore the fix and confirm it passes.
+
 **Integration tests MUST use the shared fixture wrapper:**
 
 - Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
@@ -212,6 +222,7 @@ test.suite('My Feature', { config: './config.ts' }, () => {
 - Add blank lines after variable declarations to improve readability
 - Collection and global slugs should be kept in a shared file and re-used i.e. on relationship fields `relationTo: collectionSlug`
 - One test should verify one behavior - keep tests focused
+- Add tests to an existing suite and its config when one fits, instead of creating a new suite or config
 - When adding a new collection for testing, add it to both `collections/` directory and the config file import statements
 
 ### How to run tests
@@ -235,7 +246,7 @@ test/<feature-name>/
 └── payload-types.ts # Generated types
 ```
 
-Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
+After changing a test config, regenerate its types with `pnpm run dev:generate-types <directory_name>` and include the regenerated types in the same PR.
 
 ### Visual Regression Testing
 
@@ -288,7 +299,7 @@ test('should show fresh data', { tag: '@also-without-cache-components' }, async 
 ## Internationalization
 
 - Translation files are in `packages/translations/src/languages/`
-- Add new strings to English locale first, then translate to other languages
+- Never hardcode user-facing strings. Add them to the English locale first, then translate to other languages
 - Run `pnpm run translateNewKeys` to auto-translate new keys (requires `OPENAI_KEY` in `.env`)
 - Lexical translations: `cd packages/richtext-lexical && pnpm run translateNewKeys`
 
@@ -320,6 +331,15 @@ Examples:
 - First commit of branch should follow PR title format
 - Subsequent commits should use `chore` without scope unless specific package is being modified
 - All commits in a PR are squashed on merge using PR title as commit message
+
+### Pull Requests
+
+- Only push or open PRs when asked, and open them as drafts unless told otherwise.
+- For PRs that build on each other, use GitHub's native stacked pull requests via the `gh stack` extension (`gh extension install github/gh-stack`, then `gh stack init`, `add`, `submit`, or `gh stack link` for existing branches), not independent PRs that link to each other.
+- Fixes need two PRs, one against `main` (v4) and one against `3.x` (v3), each linking the other. Features go to `main` only. If a fix should land on one branch only, say why in the PR description and in the chat.
+- Keep descriptions short and informal, backports included, since the PR body becomes the squashed commit body.
+- Record interactive or behavioral changes, including fixed bugs, with the `record-pr-demo` skill, with before and after when there is a before. Use screenshots for purely static visual changes.
+- Add a short "Written with AI" line.
 
 ### Breaking Changes
 
@@ -400,7 +420,7 @@ const docs = await payload.find({
 - Preserve existing document selector specificity. Adding `:host` to a parent selector list can raise the specificity of nested rules. Flatten those nested rules when necessary to preserve application overrides.
 - Keep document-only resets and Admin Panel layout styles scoped to the document. For shared token or theme changes, verify the affected states in both contexts, loading the stylesheet inside the shadow root for that case.
 
-Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
+Stylelint enforces the rules below on `.css` files in `packages/ui/src/` and `templates/` (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check.
 
 **Mobile-first media queries only - never `max-width`:**
 
