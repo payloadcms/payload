@@ -20,6 +20,7 @@ Only add a rule here for a mistake agents repeat, can't learn from the code, and
 - Use separate `import type` statements for types, even from the same module.
 - Render config labels with `getTranslation` from `@payloadcms/translations`. Don't branch on label types yourself.
 - Memoize arrays and objects passed to custom hooks instead of passing inline literals, where reference identity affects behavior.
+- Keep Input components usable without a Payload Form. The Field component reads form state, form UUID, and edit depth and passes values, callbacks, and IDs to the Input as props, like `CheckboxField` and `CheckboxInput`.
 - Never hardcode user-facing strings. Add keys in English first: `packages/translations/src/languages/` for core, the plugin's `src/translations/`, or the feature's `i18n.ts` in `richtext-lexical`. Use the `generate-translations` skill to translate core and plugin keys.
 - Build admin and API URLs with `formatAdminURL` from `payload/shared`, and query strings with `qs-esm`. Never concatenate them by hand.
 - In server functions, views, and endpoints, keep `overrideAccess: false` (the default) and pass `user`. `overrideAccess: true` on behalf of a user bypasses access control.
