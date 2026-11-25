@@ -420,12 +420,6 @@ export default buildConfigWithDefaults({
         ],
         folders: {
           collectionSpecific: { fieldName: 'folderType' },
-          joinField: {
-            name: 'children',
-            admin: {
-              defaultColumns: ['title', 'name', 'description'],
-            },
-          },
         },
         versions: false,
       },

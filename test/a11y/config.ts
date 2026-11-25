@@ -29,11 +29,7 @@ const FolderCollection = {
       required: true,
     },
   ],
-  folders: {
-    joinField: {
-      name: 'documentsAndFolders',
-    },
-  },
+  folders: true,
 } satisfies CollectionConfig
 
 const MediaAltCollection = {

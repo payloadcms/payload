@@ -255,7 +255,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts';
+      _h_contents: 'payload-folders' | 'posts';
     };
   };
   collectionsSelect: {
@@ -384,7 +384,7 @@ export interface PayloadFolder {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  documentsAndFolders?: {
+  _h_contents?: {
     docs?: (
       | {
           relationTo?: 'payload-folders';
@@ -803,7 +803,7 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   createdAt?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
-  documentsAndFolders?: T;
+  _h_contents?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
