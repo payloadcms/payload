@@ -1,3 +1,5 @@
+import { dequal } from 'dequal/lite'
+
 import { getFilePreviewSrc } from '../../../elements/Upload/getFilePreviewSrc.js'
 
 export type VersionFile = {
@@ -41,7 +43,12 @@ export function getFileComparison({
     return null
   }
 
-  const hasChanged = !isSameFile({ fileFrom, fileTo })
+  const hasChanged =
+    !isSameFile({ fileFrom, fileTo }) ||
+    !dequal(
+      getStoredFileState({ versionData: versionFromData }),
+      getStoredFileState({ versionData: versionToData }),
+    )
 
   if (modifiedOnly && !hasChanged) {
     return null
@@ -90,4 +97,21 @@ function isSameFile({
     fileFrom.width === fileTo.width &&
     fileFrom.height === fileTo.height
   )
+}
+
+/**
+ * The stored state that can change while the file details above stay the same:
+ * - `_objectKey`: with managed cloud storage, a new file can keep its filename and get only a
+ *   new object key.
+ * - `_transforms`: with request-time processing, a moved crop changes only the saved transforms.
+ *
+ * A missing value and `null` mean the same, so versions saved before these fields existed match.
+ */
+function getStoredFileState({ versionData }: { versionData: VersionData }) {
+  const data = (versionData ?? {}) as Record<string, unknown>
+
+  return {
+    objectKey: data._objectKey ?? null,
+    transforms: data._transforms ?? null,
+  }
 }

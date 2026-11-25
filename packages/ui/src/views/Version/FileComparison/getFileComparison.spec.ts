@@ -116,6 +116,65 @@ describe('getFileComparison', () => {
     ).toBe(false)
   })
 
+  it('should mark the file as changed when only the stored object key differs', () => {
+    expect(
+      getFileComparison({
+        modifiedOnly: true,
+        versionFromData: { ...imageVersion, _objectKey: 'object-key-1' },
+        versionToData: { ...imageVersion, _objectKey: 'object-key-2' },
+      })?.hasChanged,
+    ).toBe(true)
+  })
+
+  it('should not mark the file as changed when the stored object key is the same', () => {
+    expect(
+      getFileComparison({
+        modifiedOnly: false,
+        versionFromData: { ...imageVersion, _objectKey: 'object-key-1' },
+        versionToData: {
+          ...imageVersion,
+          _objectKey: 'object-key-1',
+          title: 'New title',
+          url: '/api/media/file/photo.png?version=2',
+        },
+      })?.hasChanged,
+    ).toBe(false)
+  })
+
+  it('should mark the file as changed when only the saved crop moved', () => {
+    expect(
+      getFileComparison({
+        modifiedOnly: true,
+        versionFromData: {
+          ...imageVersion,
+          _transforms: { crop: { height: 300, width: 300, x: 0, y: 0 } },
+        },
+        versionToData: {
+          ...imageVersion,
+          _transforms: { crop: { height: 300, width: 300, x: 100, y: 0 } },
+        },
+      })?.hasChanged,
+    ).toBe(true)
+  })
+
+  it('should not mark the file as changed when the saved transforms are the same', () => {
+    expect(
+      getFileComparison({
+        modifiedOnly: false,
+        versionFromData: {
+          ...imageVersion,
+          _transforms: { crop: { height: 300, width: 300, x: 0, y: 0 } },
+        },
+        versionToData: {
+          ...imageVersion,
+          _transforms: { crop: { height: 300, width: 300, x: 0, y: 0 } },
+          title: 'New title',
+          url: '/api/media/file/photo.png?version=2',
+        },
+      })?.hasChanged,
+    ).toBe(false)
+  })
+
   it('should return null for an unchanged file when only modified fields are shown', () => {
     expect(
       getFileComparison({
