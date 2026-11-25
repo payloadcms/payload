@@ -575,6 +575,39 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       expect(linkNode.fields.doc).not.toHaveProperty('frontendPath')
     })
 
+    test('should not save the frontend path of internal links when creating a document', async ({
+      payload,
+    }) => {
+      const richTextDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNodeToSave = (
+        richTextDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode
+      ).children[3] as SerializedLinkNode
+
+      linkNodeToSave.fields.doc!.frontendPath = '/stale-path'
+
+      const createdDoc = await payload.create({
+        collection: richTextFieldsSlug,
+        data: { lexicalCustomFields: richTextDoc.lexicalCustomFields, title: 'copy' },
+        overrideAccess: true,
+      })
+
+      const savedDoc = await payload.findByID({
+        id: createdDoc.id,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNode = (savedDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode)
+        .children[3] as SerializedLinkNode
+
+      expect(linkNode.fields.doc).not.toHaveProperty('frontendPath')
+    })
+
     test('should populate relationship node', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({

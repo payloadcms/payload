@@ -1,6 +1,9 @@
+import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { PayloadRequest } from 'payload'
 
 import type { SerializedLinkNode } from './schema.js'
+
+import { recurseNodeTree } from '../../../utilities/recurseNodeTree.js'
 
 export const attachFrontendPath = async ({
   node,
@@ -27,10 +30,20 @@ export const attachFrontendPath = async ({
   })
 }
 
-export const stripFrontendPath = ({ node }: { node: SerializedLinkNode }): SerializedLinkNode => {
-  if (node.fields?.doc && 'frontendPath' in node.fields.doc) {
-    delete node.fields.doc.frontendPath
+export const stripFrontendPaths = ({
+  value,
+}: {
+  value?: null | SerializedEditorState
+}): null | SerializedEditorState | undefined => {
+  const flattenedNodes: SerializedLexicalNode[] = []
+
+  recurseNodeTree({ flattenedNodes, nodes: value?.root?.children ?? [] })
+
+  for (const node of flattenedNodes) {
+    if (node.type === 'link') {
+      delete (node as SerializedLinkNode).fields?.doc?.frontendPath
+    }
   }
 
-  return node
+  return value
 }

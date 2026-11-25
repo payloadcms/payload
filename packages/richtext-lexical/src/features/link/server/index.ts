@@ -17,7 +17,7 @@ import { createNode } from '../../typeUtilities.js'
 import { createPayloadLinkTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
-import { attachFrontendPath, stripFrontendPath } from './frontendPath.js'
+import { attachFrontendPath, stripFrontendPaths } from './frontendPath.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import {
@@ -172,6 +172,9 @@ export const LinkFeature = createServerFeature<
 
         return schemaMap
       },
+      hooks: {
+        beforeChange: [stripFrontendPaths],
+      },
       i18n,
       markdownTransformers: [
         createPayloadLinkTransformer({ internalDocToHref: props.internalDocToHref }),
@@ -195,7 +198,6 @@ export const LinkFeature = createServerFeature<
           graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
           hooks: {
             afterPopulate: [attachFrontendPath],
-            beforeChange: [stripFrontendPath],
           },
           jsonSchema: createLinkNodeJSONSchema(sanitizedFieldsWithoutText),
           node: LinkNode,
