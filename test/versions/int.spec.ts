@@ -624,7 +624,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
         expect(countAfterSecond.totalDocs).toBe(countAfterFirst.totalDocs)
 
-        // Third autosave â€” still same count
+        // Third autosave — still same count
         await payload.update({
           id: published.id,
           autosave: true,
@@ -735,7 +735,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        // description is required but missing â€” duplicate should still succeed as a draft
+        // description is required but missing — duplicate should still succeed as a draft
         const duplicatedDoc = await payload.duplicate({
           id: originalDoc.id,
           collection: draftCollectionSlug,
@@ -2516,7 +2516,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           .spyOn(payload.db, 'updateVersion')
           .mockRejectedValueOnce(new Error('concurrent update conflict'))
 
-        // Should not throw â€” updateLatestVersion catches the error and saveVersion falls back to createVersion
+        // Should not throw — updateLatestVersion catches the error and saveVersion falls back to createVersion
         const result = await payload.update({
           id: doc.id,
           autosave: true,
@@ -2537,8 +2537,8 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           where: { parent: { equals: doc.id } },
         })
 
-        // create â†’ 1 version, first autosave updates in place â†’ still 1 version on autosave collection (it creates a new autosave),
-        // second autosave failed update â†’ fell back to create â†’ one extra version
+        // create → 1 version, first autosave updates in place → still 1 version on autosave collection (it creates a new autosave),
+        // second autosave failed update → fell back to create → one extra version
         expect(totalDocs).toBeGreaterThan(1)
 
         await cleanupDocuments({
