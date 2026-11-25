@@ -318,7 +318,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
     // need the whole file, so leave such an upload untouched rather than buffering it.
     const transformed =
-      stages.pipeline.length > 0 && hasFullFileContents(file)
+      (stages.pipeline.length > 0 || stages.hookOwners.length > 0) && hasFullFileContents(file)
         ? await runUploadTransformers({
             collectionSlug: collection.slug,
             cropSize,

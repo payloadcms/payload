@@ -39,10 +39,9 @@ export async function planTransformerPipeline({
     mimeType: args.mimeType,
     transformers,
   })) {
-    const result: CanTransformResult =
-      typeof transformer.canTransform === 'function' ? await transformer.canTransform(args) : true
+    const result = await getCanTransformResult({ args, transformer })
 
-    if (result !== true && (typeof result !== 'object' || result?.canTransform !== true)) {
+    if (!isEligible({ result })) {
       continue
     }
 
@@ -55,6 +54,22 @@ export async function planTransformerPipeline({
   }
 
   return { claims, options, pipeline }
+}
+
+/** The transformer's own `canTransform` result. A transformer without one is always eligible. */
+export async function getCanTransformResult({
+  args,
+  transformer,
+}: {
+  args: CanTransformArgs
+  transformer: UploadTransformer
+}): Promise<CanTransformResult> {
+  return typeof transformer.canTransform === 'function' ? transformer.canTransform(args) : true
+}
+
+/** Whether a `canTransform` result lets the transformer run. */
+export function isEligible({ result }: { result: CanTransformResult }): boolean {
+  return result === true || (typeof result === 'object' && result?.canTransform === true)
 }
 
 /**

@@ -171,6 +171,7 @@ export interface Config {
     'request-variants-media': RequestVariantsMedia;
     'several-owners-media': SeveralOwnersMedia;
     'contract-media': ContractMedia;
+    'hook-variant-media': HookVariantMedia;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -188,6 +189,7 @@ export interface Config {
     'request-variants-media': RequestVariantsMediaSelect<false> | RequestVariantsMediaSelect<true>;
     'several-owners-media': SeveralOwnersMediaSelect<false> | SeveralOwnersMediaSelect<true>;
     'contract-media': ContractMediaSelect<false> | ContractMediaSelect<true>;
+    'hook-variant-media': HookVariantMediaSelect<false> | HookVariantMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -650,6 +652,81 @@ export interface ContractMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hook-variant-media".
+ */
+export interface HookVariantMedia {
+  id: string;
+  posterBehaviour?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+    blurhash?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -703,6 +780,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'contract-media';
         value: string | ContractMedia;
+      } | null)
+    | ({
+        relationTo: 'hook-variant-media';
+        value: string | HookVariantMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -1135,6 +1216,84 @@ export interface ContractMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hook-variant-media_select".
+ */
+export interface HookVariantMediaSelect<T extends boolean = true> {
+  posterBehaviour?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+        blurhash?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1250,6 +1409,7 @@ export interface CollectionQueryWidget {
       | 'request-variants-media'
       | 'several-owners-media'
       | 'contract-media'
+      | 'hook-variant-media'
       | 'users';
     where?:
       | {
@@ -1282,6 +1442,7 @@ export interface ActivityWidget {
           | 'request-variants-media'
           | 'several-owners-media'
           | 'contract-media'
+          | 'hook-variant-media'
           | 'users'
         )[]
       | null;
@@ -1304,6 +1465,7 @@ export interface UploadDropzoneWidget {
           | 'request-variants-media'
           | 'several-owners-media'
           | 'contract-media'
+          | 'hook-variant-media'
         )[]
       | null;
   };

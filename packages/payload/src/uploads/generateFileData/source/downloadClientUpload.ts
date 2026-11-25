@@ -14,16 +14,17 @@ type IncomingFile = NonNullable<PayloadRequest['file']>
  * Whether a stage needs the bytes of a client upload that arrived with only a header probe or no
  * contents (see getFileContentRequirement.ts). The content requirement covers what the upload
  * bridge needs for its configuration, but not saved keys that it claims. A focal point only
- * guides sizes, which the content requirement already covers, so it needs no download.
+ * guides sizes, which the content requirement already covers, so it needs no download. A planned
+ * hook owner reads the file to make its variants.
  */
 export function needsFullClientUpload({
   file,
   pipelineDoc,
-  stages: { bridgeTransformer, pipeline, plan },
+  stages: { bridgeTransformer, hookOwners, pipeline, plan },
 }: {
   file: IncomingFile
   pipelineDoc: Document
-  stages: Pick<UploadStages, 'bridgeTransformer' | 'pipeline' | 'plan'>
+  stages: Pick<UploadStages, 'bridgeTransformer' | 'hookOwners' | 'pipeline' | 'plan'>
 }): boolean {
   if (hasFullFileContents(file) || !file.uploadReference) {
     return false
@@ -38,6 +39,7 @@ export function needsFullClientUpload({
 
   return (
     isBridgeApplyingSavedKey ||
+    hookOwners.length > 0 ||
     pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.transformUpload)
   )
 }
