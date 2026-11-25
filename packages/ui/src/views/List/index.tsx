@@ -351,6 +351,7 @@ export const renderListView = async (
         collection: collectionSlug,
         depth: 0,
         disableErrors: true,
+        joins: false,
         overrideAccess: false,
         req,
         user,
@@ -478,9 +479,7 @@ export const renderListView = async (
     // Extract typeFilter from searchParams (comma-separated list of collection slugs)
     const typeFilterParam = searchParams?.typeFilter
     const typeFilter =
-      typeof typeFilterParam === 'string' && typeFilterParam.length > 0
-        ? typeFilterParam.split(',')
-        : undefined
+      typeof typeFilterParam === 'string' ? typeFilterParam.split(',').filter(Boolean) : undefined
 
     hierarchyData = await handleHierarchy({
       baseFilter: baseFilterConstraint,
@@ -490,6 +489,7 @@ export const renderListView = async (
       permissions,
       req,
       search: typeof query?.search === 'string' ? query.search : undefined,
+      shouldLoadJoinedDocuments: !drawerSlug,
       typeFilter,
       user,
     })
