@@ -2669,6 +2669,52 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
+      test('should preserve formula-prefixed values as text in CSV files', async ({ payload }) => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: '=Quarterly total',
+            excerpt: '+Projected increase',
+            localized: '-Adjustment',
+            group: {
+              value: '@Owner',
+            },
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          overrideAccess: true,
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['title', 'excerpt', 'localized', 'group.value'],
+            format: 'csv',
+            locale: 'en',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run({ overrideAccess: true })
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id, overrideAccess: true })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        expect(data[0]).toMatchObject({
+          title: "'=Quarterly total",
+          excerpt: "'+Projected increase",
+          localized: "'-Adjustment",
+          group_value: "'@Owner",
+        })
+
+        await payload.delete({ collection: 'exports', id: doc.id, overrideAccess: true })
+        await payload.delete({ collection: 'pages', id: page.id, overrideAccess: true })
+      })
+
       test('should preserve Hebrew characters in CSV download via streaming endpoint', async ({
         payload,
         restClient,

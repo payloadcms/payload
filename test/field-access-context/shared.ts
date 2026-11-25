@@ -13,6 +13,19 @@ export type AccessLogEntry = {
 }
 
 const accessLog: AccessLogEntry[] = []
+const updateOperationLog: string[] = []
+
+export const recordUpdateOperation = ({ slug }: { slug: string }): string[] => {
+  updateOperationLog.push(slug)
+  return updateOperationLog
+}
+
+export const readUpdateOperationLog = (): string[] => [...updateOperationLog]
+
+export const resetUpdateOperationLog = (): string[] => {
+  updateOperationLog.length = 0
+  return updateOperationLog
+}
 
 export const pushAccessLog = (entry: AccessLogEntry): void => {
   accessLog.push(entry)
