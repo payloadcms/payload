@@ -8,6 +8,7 @@ import {
   mediaNotesSlug,
   mediaSlug,
   notesSlug,
+  sectionArticlesSlug,
   topicsSlug,
 } from './collections/index.js'
 
@@ -85,6 +86,54 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
           { relationTo: mediaNotesSlug, value: note.id },
         ],
         totalDocs: 2,
+      })
+    },
+  )
+
+  test.options(
+    'should match nested array relationships without treating underscores as wildcards',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const otherTopic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Other' },
+        overrideAccess: true,
+      })
+      const matchingArticle = await payload.create({
+        collection: sectionArticlesSlug,
+        data: {
+          title: 'Matching',
+          related_sections: [{ topics: [topic.id] }, { topics: [topic.id] }],
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: sectionArticlesSlug,
+        data: {
+          title: 'Other path',
+          related_sections: [{ nested: [{ topics: [topic.id] }], topics: [otherTopic.id] }],
+          relatedXsections: [{ topics: [topic.id] }],
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { sectionMembers: { count: true } },
+        overrideAccess: false,
+      })
+
+      expect(result.sectionMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: matchingArticle.id }],
+        totalDocs: 1,
       })
     },
   )

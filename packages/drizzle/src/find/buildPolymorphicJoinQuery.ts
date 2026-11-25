@@ -140,7 +140,6 @@ export const buildPolymorphicJoinQuery = ({
       if (
         !relationshipTable ||
         !relationshipPath ||
-        relationshipPath.path !== relationshipFieldPath ||
         !parentColumn ||
         (parentCollectionSlug && relationshipField.relationTo !== parentCollectionSlug)
       ) {
@@ -150,10 +149,23 @@ export const buildPolymorphicJoinQuery = ({
       }
 
       const relationshipLocale = relationshipPath.locale
+      // Array positions are the only wildcards. Escape field names and keep each wildcard
+      // within one segment so a deeper relationship path cannot match.
+      const relationshipPathPattern = relationshipPath.path
+        .split('%')
+        .map((segment) => segment.replace(/[\\%_]/g, '\\$&'))
+        .join('%')
+      const expectedDotCount = relationshipPath.path.split('.').length - 1
+      const relationshipPathCondition = relationshipPath.path.includes('%')
+        ? and(
+            sql`${relationshipTable.path} like ${relationshipPathPattern} escape '\\'`,
+            sql`length(${relationshipTable.path}) - length(replace(${relationshipTable.path}, '.', '')) = ${expectedDotCount}`,
+          )
+        : eq(relationshipTable.path, relationshipPath.path)
       // The relationship row belongs to the target row's ID, which is a version ID for drafts.
       const relationshipRowCondition = and(
         eq(table['id'], relationshipTable.parent),
-        eq(relationshipTable.path, relationshipPath.path),
+        relationshipPathCondition,
         relationshipPath.isLocalized && relationshipLocale && relationshipLocale !== 'all'
           ? eq(relationshipTable.locale, relationshipLocale)
           : undefined,

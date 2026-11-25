@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const topicsSlug = 'topics'
 export const articlesSlug = 'articles'
 export const draftArticlesSlug = 'draft-articles'
+export const sectionArticlesSlug = 'section-articles'
 export const notesSlug = 'notes'
 export const mediaSlug = 'join-media'
 export const mediaArticlesSlug = 'media-articles'
@@ -21,6 +22,12 @@ export const Topics: CollectionConfig = {
       on: 'topics',
     },
     { name: 'articles', type: 'join', collection: articlesSlug, on: 'topics' },
+    {
+      name: 'sectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.topics',
+    },
   ],
 }
 
@@ -85,5 +92,29 @@ export const MediaNotes: CollectionConfig = {
   fields: [
     { name: 'title', type: 'text', required: true },
     { name: 'media', type: 'upload', relationTo: mediaSlug },
+  ],
+}
+export const SectionArticles: CollectionConfig = {
+  slug: sectionArticlesSlug,
+  access: { read: () => true },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    {
+      name: 'related_sections',
+      type: 'array',
+      fields: [
+        { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        {
+          name: 'nested',
+          type: 'array',
+          fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+        },
+      ],
+    },
+    {
+      name: 'relatedXsections',
+      type: 'array',
+      fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+    },
   ],
 }
