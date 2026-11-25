@@ -4,9 +4,7 @@ import { render } from 'vitest-browser-react'
 import { UploadComponentHasMany } from './index.js'
 
 vi.mock('../../../providers/Translation/index.js', () => ({
-  useTranslation: () => ({
-    t: (key: string) => (key === 'general:dragToReorder' ? 'Drag to reorder' : key),
-  }),
+  useTranslation: () => ({ t: () => 'Drag to reorder' }),
 }))
 
 vi.mock('../RelationshipContent/index.js', () => ({
@@ -29,9 +27,9 @@ test('should give each drag handle an accessible name with the filename', async 
   )
 
   await expect
-    .element(screen.getByRole('button', { name: 'Drag to reorder first.png' }))
+    .element(screen.getByRole('button', { name: 'Drag to reorder: first.png' }))
     .toBeInTheDocument()
   await expect
-    .element(screen.getByRole('button', { name: 'Drag to reorder second.png' }))
+    .element(screen.getByRole('button', { name: 'Drag to reorder: second.png' }))
     .toBeInTheDocument()
 })

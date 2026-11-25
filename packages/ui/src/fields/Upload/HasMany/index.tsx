@@ -135,7 +135,7 @@ export function UploadComponentHasMany(props: Props) {
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}
                         {...draggableSortableItemProps.listeners}
-                        aria-label={`${t('general:dragToReorder')} ${value.filename}`}
+                        aria-label={`${t('general:dragToReorder')}: ${value.filename}`}
                       >
                         <AlignJustifiedIcon />
                       </div>
