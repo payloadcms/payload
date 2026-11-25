@@ -14,6 +14,7 @@ import { canResizeImage } from '../../canResizeImage.js'
 import { getFileExtension, getSanitizedUploadFilename } from '../../getFileTypeIdentity.js'
 import { getImageSize } from '../../getImageSize.js'
 import { getSafeFileName, getUnplannedSafeFileName } from '../../getSafeFilename.js'
+import { getVariantOwners } from '../../getVariantOwners.js'
 import { isProcessableImage } from '../../isProcessableImage.js'
 import { isRequestTimeFile } from '../../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../../requestTimeFileData.js'
@@ -274,35 +275,46 @@ export async function buildUploadOutput({
     fileData._stored = null
   }
 
-  // A bridge stores only the sizes it owns. Otherwise the transformer that registered the sizes
-  // builds each one from the original when it is requested, if it runs at request time. A planned
-  // bridge does not run when the saved keys are applied at request time.
-  const variantsTransformerSlug = collection.upload.variantsTransformerSlug
+  // A bridge stores only the sizes it owns. A planned bridge does not run when the saved keys are
+  // applied at request time.
+  // Each owner that is not the bridge and made nothing at upload builds its variants from the
+  // original when they are requested, if it runs at request time.
+  if (fileData.original) {
+    const requestTimeNames: string[] = []
 
-  if (
-    (collection.upload.variants ?? []).length > 0 &&
-    variantsTransformerSlug &&
-    transformed?.bridgeTransformer?.slug !== variantsTransformerSlug &&
-    fileData.original &&
-    (await canBuildAtRequest({
-      collectionSlug: collection.slug,
-      documentID,
-      mimeType: file.mimetype,
-      pipelineDoc,
-      pipelineOriginalDoc,
-      req,
-      requiredTransformerSlug: variantsTransformerSlug,
-    }))
-  ) {
-    fileData.variants = await getRequestTimeVariants({
-      collection,
-      documentID,
-      filename: fileData.filename!,
-      original: fileData.original,
-      prefix,
-      req,
-      staticPath: disableLocalStorage ? undefined : staticDir!,
-    })
+    for (const owner of getVariantOwners({ mimeType: file.mimetype, upload: collection.upload })) {
+      if (
+        transformed?.bridgeTransformer?.slug !== owner.slug &&
+        !transformed?.hookOwnerSlugs.includes(owner.slug) &&
+        (await canBuildAtRequest({
+          collectionSlug: collection.slug,
+          documentID,
+          mimeType: file.mimetype,
+          pipelineDoc,
+          pipelineOriginalDoc,
+          req,
+          requiredTransformerSlug: owner.slug,
+        }))
+      ) {
+        requestTimeNames.push(...owner.variantNames)
+      }
+    }
+
+    if (requestTimeNames.length > 0) {
+      fileData.variants = {
+        ...fileData.variants,
+        ...(await getRequestTimeVariants({
+          collection,
+          documentID,
+          filename: fileData.filename!,
+          original: fileData.original,
+          prefix,
+          req,
+          staticPath: disableLocalStorage ? undefined : staticDir!,
+          variantNames: requestTimeNames,
+        })),
+      }
+    }
   }
 
   return { fileData, files }

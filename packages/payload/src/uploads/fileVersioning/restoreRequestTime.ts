@@ -8,6 +8,7 @@ import { ValidationError } from '../../errors/ValidationError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
+import { getVariantOwner } from '../getVariantOwners.js'
 import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../requestTimeFileData.js'
@@ -105,12 +106,19 @@ export async function runRequestTimeFileRestore<T>({
     throw new APIError('No compatible transformer can restore the file at request time.', 400)
   }
 
+  const restoreBuild = unstoredVariantNames.length > 0 ? await getRequestTimeBuild() : undefined
   const canBuildVariants =
-    unstoredVariantNames.length > 0 &&
-    areVariantsBuildableAtRequest({
-      requestTimeBuild: await getRequestTimeBuild(),
-      variantsTransformerSlug: collection.upload.variantsTransformerSlug,
-    })
+    restoreBuild !== undefined &&
+    unstoredVariantNames.every((variantName) =>
+      areVariantsBuildableAtRequest({
+        requestTimeBuild: restoreBuild,
+        variantsOwnerSlug: getVariantOwner({
+          mimeType: original.mimeType,
+          upload: collection.upload,
+          variantName,
+        })?.slug,
+      }),
+    )
 
   // A size that this version built at request time must still be buildable. A size that the version
   // did not have is left out when it cannot be built, as an upload leaves it out.

@@ -44,6 +44,7 @@ export async function getRequestTimeVariants({
   req,
   reservedFilenames = [],
   staticPath,
+  variantNames,
 }: {
   collection: SanitizedCollectionConfig
   documentID?: number | string
@@ -55,13 +56,17 @@ export async function getRequestTimeVariants({
   /** Other names this document keeps, such as its stored variants. */
   reservedFilenames?: string[]
   staticPath?: string
+  /** Only these variants. All of the collection's variants when not given. */
+  variantNames?: string[]
 }): Promise<FileSizes> {
   const { name: baseName } = parseFilename(filename)
   const baseExt = getFileExtension(original.filename)
   const plannedNames = new Set([filename, original.filename, ...reservedFilenames])
   const variants: FileSizes = {}
 
-  for (const { name: variantName } of collection.upload.variants ?? []) {
+  for (const { name: variantName } of (collection.upload.variants ?? []).filter(
+    ({ name }) => !variantNames || variantNames.includes(name),
+  )) {
     const variantFilename = await getUnplannedSafeFileName({
       canUseName: (name) => !plannedNames.has(name),
       collectionSlug: collection.slug,

@@ -139,7 +139,7 @@ describe('planUploadPipeline', () => {
     {
       name: 'keep the bridge when it registered the variants',
       expected: ['sharp'],
-      variantsTransformerSlug: 'sharp',
+      variantOwnerSlug: 'sharp',
     },
     {
       name: 'keep the bridge when the collection has no variants',
@@ -154,7 +154,7 @@ describe('planUploadPipeline', () => {
       isOwnCollection = false,
       mimeType = 'image/png',
       variants = [{ name: 'card' }],
-      variantsTransformerSlug = 'owner',
+      variantOwnerSlug = 'owner',
     }) => {
       const doc = { _transforms: { crop } }
 
@@ -166,7 +166,18 @@ describe('planUploadPipeline', () => {
         pipelineOriginalDoc: Object.freeze(doc),
         req: {
           payload: {
-            collections: { media: { config: { upload: { variants, variantsTransformerSlug } } } },
+            collections: {
+              media: {
+                config: {
+                  upload: {
+                    variantOwners: [
+                      { slug: variantOwnerSlug, mimeTypes: ['image/*'], variantNames: ['card'] },
+                    ],
+                    variants,
+                  },
+                },
+              },
+            },
             config: {
               upload: { transformers: [sharpBridge({ isOwnCollection }), variantsOwner] },
             },
