@@ -46,23 +46,20 @@
     align-items: center;
   }
 
+  /*
+   * Only the background is tinted. The diff text colors do not reach the 4.5:1 contrast that the
+   * small file details need on these backgrounds, so the text keeps the default theme colors.
+   */
   .version-file-comparison__side--from .version-file-comparison__file--changed {
     background-color: var(--diff-delete-parent-bg);
-    color: var(--diff-delete-parent-color);
   }
 
   .version-file-comparison__side--from .version-file-comparison__file--changed .file-meta__url a {
-    color: var(--diff-delete-parent-color);
     text-decoration-line: line-through;
   }
 
   .version-file-comparison__side--to .version-file-comparison__file--changed {
     background-color: var(--diff-create-parent-bg);
-    color: var(--diff-create-parent-color);
-  }
-
-  .version-file-comparison__side--to .version-file-comparison__file--changed .file-meta__url a {
-    color: var(--diff-create-parent-color);
   }
 
   @media (min-width: 768px) {
