@@ -442,16 +442,29 @@ export type checkFileRestrictionsParams = {
   req: PayloadRequest
 }
 
+/** A transformer that registered variants on a collection with `registerUploadVariants`. */
+export type VariantsOwner = {
+  /** The MIME patterns it makes variants for: its transformer's `mimeTypes`. */
+  mimeTypes: string[]
+  /** The transformer's `slug`. */
+  slug: string
+  /** The names of the variants it makes. */
+  variantNames: string[]
+}
+
 export type SanitizedUploadConfig = {
   staticDir: UploadConfig['staticDir']
+  /**
+   * The transformers that registered `variants`. Each variant name has at most one owner for a
+   * MIME type. Use `getVariantOwners` or `getVariantOwner` to find the owners of a file.
+   */
+  variantOwners?: VariantsOwner[]
   /**
    * The collection's image sizes, as written at startup by a registered transformer such as
    * `sharpTransformer({ collections: { <slug>: { variants } } })`. Names and admin options
    * only — not authored on the collection.
    */
   variants?: ImageSize[]
-  /** The `slug` of the transformer that registered `variants` with `registerUploadVariants`. */
-  variantsTransformerSlug?: string
 } & UploadConfig
 
 export type File = {
