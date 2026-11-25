@@ -262,13 +262,24 @@ export async function VersionView(props: DocumentViewServerProps) {
     },
   })
 
-  const fileComparison = collectionConfig?.upload
-    ? getFileComparison({
-        modifiedOnly,
-        versionFromData: versionFrom?.version,
-        versionToData: versionTo.version,
-      })
-    : null
+  let FileComparison: React.ReactNode = null
+
+  if (collectionConfig?.upload) {
+    const fileComparison = getFileComparison({
+      modifiedOnly,
+      versionFromData: versionFrom?.version,
+      versionToData: versionTo.version,
+    })
+
+    if (fileComparison) {
+      FileComparison = (
+        <VersionFileComparison
+          comparison={fileComparison}
+          showPreview={collectionConfig.upload.displayPreview ?? true}
+        />
+      )
+    }
+  }
 
   const versionToCreatedAtFormatted = versionTo.updatedAt
     ? formatDate({
@@ -442,14 +453,7 @@ export async function VersionView(props: DocumentViewServerProps) {
   return (
     <DefaultVersionView
       canUpdate={docPermissions?.update}
-      FileComparison={
-        fileComparison ? (
-          <VersionFileComparison
-            comparison={fileComparison}
-            showPreview={collectionConfig.upload.displayPreview ?? true}
-          />
-        ) : undefined
-      }
+      FileComparison={FileComparison}
       modifiedOnly={modifiedOnly}
       RenderedDiff={RenderedDiff}
       selectedLocales={selectedLocales}
