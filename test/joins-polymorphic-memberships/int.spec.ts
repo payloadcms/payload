@@ -199,6 +199,50 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
   )
 
   test.options(
+    'should join on a single relationship inside an array',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const matchingArticle = await payload.create({
+        collection: sectionArticlesSlug,
+        data: {
+          title: 'Matching',
+          related_sections: [{ primaryTopic: topic.id }, { primaryTopic: topic.id }],
+        },
+        overrideAccess: true,
+      })
+      const otherTopic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Other' },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: sectionArticlesSlug,
+        data: { title: 'Unrelated', related_sections: [{ primaryTopic: otherTopic.id }] },
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        joins: { primarySectionMembers: { count: true } },
+        overrideAccess: false,
+      })
+
+      expect(result.primarySectionMembers).toMatchObject({
+        docs: [{ relationTo: sectionArticlesSlug, value: matchingArticle.id }],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
     'should match nested array relationships without treating underscores as wildcards',
     { db: 'drizzle' },
     async ({ payload }) => {

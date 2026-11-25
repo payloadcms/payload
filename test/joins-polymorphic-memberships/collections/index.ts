@@ -29,6 +29,12 @@ export const Topics: CollectionConfig = {
       on: 'related_sections.topics',
     },
     {
+      name: 'primarySectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.primaryTopic',
+    },
+    {
       name: 'percentMembers',
       type: 'join',
       collection: [sectionArticlesSlug],
@@ -117,6 +123,7 @@ export const SectionArticles: CollectionConfig = {
       name: 'related_sections',
       type: 'array',
       fields: [
+        { name: 'primaryTopic', type: 'relationship', relationTo: topicsSlug },
         { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
         { name: 'Topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
         { name: 'topics%archived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
