@@ -17,6 +17,7 @@ import React, {
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useModalFocus } from '../../providers/ModalFocus/index.js'
 import { ThemeProvider } from '../../providers/Theme/index.js'
+import { isComposedDescendant } from '../../utilities/shadowDom.js'
 import './index.css'
 import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
 import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
@@ -518,7 +519,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // and we should close. If it doesn't contain our trigger, it's a child popup
     // and we should stay open to avoid closing parent when interacting with child.
     const isInsideChildPopup =
-      clickedPopupContent && !clickedPopupContent.contains(triggerRef.current)
+      clickedPopupContent &&
+      !isComposedDescendant({ ancestor: clickedPopupContent, element: triggerRef.current })
 
     if (isOutsidePopup && isOutsideTrigger && !isInsideChildPopup) {
       setActive(false)
