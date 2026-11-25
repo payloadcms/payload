@@ -20,7 +20,7 @@ const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
-  isVersionedTarget?: boolean
+  shouldUseVersionTable?: boolean
   locale?: string
   table: GenericTable
   where: Where
@@ -54,7 +54,7 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
-  isVersionedTarget = false,
+  shouldUseVersionTable = false,
   locale,
   table,
   where,
@@ -73,7 +73,7 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
-          isVersionedTarget,
+          shouldUseVersionTable,
           locale,
           table,
           where: nestedWhere,
@@ -92,7 +92,7 @@ export const buildPolymorphicJoinWhere = ({
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
-      isVersionedTarget,
+      shouldUseVersionTable,
       schemaPath: key,
       table,
       wherePlan,
@@ -264,7 +264,7 @@ export const buildPolymorphicJoinWhere = ({
 const resolveWherePath = ({
   adapter,
   collection,
-  isVersionedTarget,
+  shouldUseVersionTable,
   schemaPath,
   table,
   wherePlan,
@@ -309,7 +309,7 @@ const resolveWherePath = ({
       jsonExpression: getHasManySelectExpression({
         adapter,
         collection,
-        isVersionedTarget,
+        shouldUseVersionTable,
         pathPlan,
         table,
       }),
@@ -334,10 +334,10 @@ const resolveWherePath = ({
     column: fieldContext
       ? fieldContext.isLocalized
         ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][
-            isVersionedTarget ? `version_${pathPlan.columnPath}` : pathPlan.columnPath
+            shouldUseVersionTable ? `version_${pathPlan.columnPath}` : pathPlan.columnPath
           ]
         : table[
-            isVersionedTarget
+            shouldUseVersionTable
               ? schemaPath === 'id'
                 ? 'parent'
                 : `version_${pathPlan.columnPath}`
@@ -353,13 +353,13 @@ const resolveWherePath = ({
 const getHasManySelectExpression = ({
   adapter,
   collection,
-  isVersionedTarget,
+  shouldUseVersionTable,
   pathPlan,
   table,
 }: {
   adapter: DrizzleAdapter
   collection: string
-  isVersionedTarget?: boolean
+  shouldUseVersionTable?: boolean
   pathPlan: WherePathPlan
   table: GenericTable
 }): string => {
@@ -372,7 +372,7 @@ const getHasManySelectExpression = ({
     .map((pathSegment) => toSnakeCase(pathSegment))
     .join('_')
   const valuesTableName = adapter.tableNameMap.get(
-    isVersionedTarget
+    shouldUseVersionTable
       ? `${getTableName(table)}_version_${selectTablePath}`
       : `${toSnakeCase(collection)}_${selectTablePath}`,
   )

@@ -93,11 +93,11 @@ export const buildPolymorphicJoinQuery = ({
     }
 
     // A join can mix draft-enabled targets with targets that only have live rows.
-    const isVersionedTarget = Boolean(
+    const shouldUseVersionTable = Boolean(
       (versions || draftsEnabled) && hasDraftsEnabled(target.config),
     )
     const tableName = adapter.tableNameMap.get(
-      isVersionedTarget
+      shouldUseVersionTable
         ? `_${toSnakeCase(collection)}${adapter.versionsSuffix}`
         : toSnakeCase(collection),
     )
@@ -111,18 +111,20 @@ export const buildPolymorphicJoinQuery = ({
       throw new Error(`Polymorphic join collection "${collection}" has no "id" column`)
     }
 
-    const fields = isVersionedTarget
+    const fields = shouldUseVersionTable
       ? buildVersionCollectionFields(adapter.payload.config, target.config, true)
       : target.config.flattenedFields
     // Version rows nest configured fields under `version`, including relationship fields.
-    const relationshipFieldPath = isVersionedTarget ? `version.${field.on}` : field.on
+    const relationshipFieldPath = shouldUseVersionTable ? `version.${field.on}` : field.on
     const relationshipField = getFieldByPath({ fields, path: relationshipFieldPath })?.field
 
-    if (
-      relationshipField?.type === 'relationship' &&
-      relationshipField.hasMany &&
-      typeof relationshipField.relationTo === 'string'
-    ) {
+    if (relationshipField?.type === 'relationship' && Array.isArray(relationshipField.relationTo)) {
+      throw new Error(
+        `Polymorphic join collection "${collection}" does not support relationTo arrays at "${field.on}"`,
+      )
+    }
+
+    if (relationshipField?.type === 'relationship' && relationshipField.hasMany) {
       const relationshipTable = adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]
       const relationshipPath = resolveRelationshipPath({
         adapter,
@@ -157,23 +159,23 @@ export const buildPolymorphicJoinQuery = ({
 
       return {
         collection,
-        isVersionedTarget,
+        shouldUseVersionTable,
         parentColumn,
         relationshipRowCondition,
         relationshipTable,
         table,
       }
-    }
+    } else {
+      const relationshipColumnName = relationshipFieldPath.replaceAll('.', '_')
+      const parentColumn = table[relationshipColumnName]
+      if (!parentColumn) {
+        throw new Error(
+          `Polymorphic join collection "${collection}" has no "${relationshipColumnName}" column`,
+        )
+      }
 
-    const relationshipColumnName = relationshipFieldPath.replaceAll('.', '_')
-    const parentColumn = table[relationshipColumnName]
-    if (!parentColumn) {
-      throw new Error(
-        `Polymorphic join collection "${collection}" has no "${relationshipColumnName}" column`,
-      )
+      return { collection, shouldUseVersionTable, parentColumn, table }
     }
-
-    return { collection, isVersionedTarget, parentColumn, table }
   })
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
@@ -186,18 +188,19 @@ export const buildPolymorphicJoinQuery = ({
   for (const collectionTable of collectionTables) {
     const {
       collection,
-      isVersionedTarget,
+      shouldUseVersionTable,
       parentColumn,
       relationshipRowCondition,
       relationshipTable,
       table,
     } = collectionTable
 
-    const sortColumn =
-      table[isVersionedTarget ? (sortPath === 'id' ? 'parent' : `version_${sortPath}`) : sortPath]
+    const versionSortColumnName = sortPath === 'id' ? 'parent' : `version_${sortPath}`
+    const sortColumnName = shouldUseVersionTable ? versionSortColumnName : sortPath
+    const sortColumn = table[sortColumnName]
     // Return the document ID so the join resolver can load a versioned target by its parent.
     const selectFields = {
-      id: isVersionedTarget ? table['parent'] : table['id'],
+      id: shouldUseVersionTable ? table['parent'] : table['id'],
       parent: sql`${parentColumn}`.as('parent'),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
@@ -207,7 +210,7 @@ export const buildPolymorphicJoinQuery = ({
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
-            isVersionedTarget,
+            shouldUseVersionTable,
             locale,
             table,
             where,
@@ -245,9 +248,9 @@ export const buildPolymorphicJoinQuery = ({
     }
 
     // Older versions may contain the same relationship; exclude them before counting and paging.
-    if (collectionWhere || isVersionedTarget) {
+    if (collectionWhere || shouldUseVersionTable) {
       collectionQuery = collectionQuery.where(
-        and(collectionWhere, isVersionedTarget ? eq(table['latest'], true) : undefined),
+        and(collectionWhere, shouldUseVersionTable ? eq(table['latest'], true) : undefined),
       )
     }
 

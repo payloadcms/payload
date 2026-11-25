@@ -319,6 +319,32 @@ describe('buildPolymorphicJoinQuery', () => {
     ).toThrow('Polymorphic join collection "articles" has no database table')
   })
 
+  it('rejects a hasMany relationship with a relationTo array explicitly', () => {
+    const adapterWithPolymorphicRelationship = createAdapter({
+      articles: {
+        fields: [
+          {
+            name: 'parent',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: ['join-parents', 'other'],
+          },
+        ],
+        table: tableWithoutParent,
+      },
+    })
+    const singleCollectionField = {
+      ...joinField,
+      collection: ['articles'],
+    } as unknown as FlattenedJoinField
+
+    expect(() =>
+      buildQuery({ adapter: adapterWithPolymorphicRelationship, field: singleCollectionField }),
+    ).toThrow(
+      'Polymorphic join collection "articles" does not support relationTo arrays at "parent"',
+    )
+  })
+
   it.each([
     [
       'id',
