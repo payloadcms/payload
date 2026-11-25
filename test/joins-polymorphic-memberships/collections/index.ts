@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const topicsSlug = 'topics'
 export const articlesSlug = 'articles'
 export const draftArticlesSlug = 'draft-articles'
+export const sectionArticlesSlug = 'section-articles'
 export const notesSlug = 'notes'
 export const mediaSlug = 'join-media'
 export const mediaArticlesSlug = 'media-articles'
@@ -21,6 +22,36 @@ export const Topics: CollectionConfig = {
       on: 'topics',
     },
     { name: 'articles', type: 'join', collection: articlesSlug, on: 'topics' },
+    {
+      name: 'sectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.topics',
+    },
+    {
+      name: 'primarySectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.primaryTopic',
+    },
+    {
+      name: 'localizedSectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'details.sections.topic',
+    },
+    {
+      name: 'percentMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'topics%archived',
+    },
+    {
+      name: 'sectionPercentMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.topics%archived',
+    },
   ],
 }
 
@@ -85,5 +116,47 @@ export const MediaNotes: CollectionConfig = {
   fields: [
     { name: 'title', type: 'text', required: true },
     { name: 'media', type: 'upload', relationTo: mediaSlug },
+  ],
+}
+export const SectionArticles: CollectionConfig = {
+  slug: sectionArticlesSlug,
+  access: { read: () => true },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    {
+      name: 'details',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          name: 'sections',
+          type: 'array',
+          fields: [{ name: 'topic', type: 'relationship', relationTo: topicsSlug }],
+        },
+      ],
+    },
+    { name: 'topics%archived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+    { name: 'topicsXarchived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+    {
+      name: 'related_sections',
+      type: 'array',
+      fields: [
+        { name: 'primaryTopic', type: 'relationship', relationTo: topicsSlug },
+        { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        { name: 'Topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        { name: 'topics%archived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        { name: 'topicsXarchived', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+        {
+          name: 'nested',
+          type: 'array',
+          fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+        },
+      ],
+    },
+    {
+      name: 'relatedXsections',
+      type: 'array',
+      fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+    },
   ],
 }

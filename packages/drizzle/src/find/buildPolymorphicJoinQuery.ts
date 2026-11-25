@@ -8,9 +8,11 @@ import { buildVersionCollectionFields, getFieldByPath } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
+import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
+import { getTableColumnFromPath } from '../queries/getTableColumnFromPath.js'
 import { resolveRelationshipPath } from '../queries/resolveRelationshipPath.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
@@ -126,21 +128,23 @@ export const buildPolymorphicJoinQuery = ({
       )
     }
 
+    const relationshipPath = isRelationshipOrUpload
+      ? resolveRelationshipPath({
+          adapter,
+          fields,
+          locale,
+          parentIsLocalized: false,
+          path: relationshipFieldPath,
+        })
+      : null
+
     if (isRelationshipOrUpload && relationshipField.hasMany) {
       const relationshipTable = adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]
-      const relationshipPath = resolveRelationshipPath({
-        adapter,
-        fields,
-        locale,
-        parentIsLocalized: false,
-        path: relationshipFieldPath,
-      })
       const parentColumn = relationshipTable?.[`${relationshipField.relationTo}ID`]
 
       if (
         !relationshipTable ||
         !relationshipPath ||
-        relationshipPath.path !== relationshipFieldPath ||
         !parentColumn ||
         (parentCollectionSlug && relationshipField.relationTo !== parentCollectionSlug)
       ) {
@@ -150,10 +154,32 @@ export const buildPolymorphicJoinQuery = ({
       }
 
       const relationshipLocale = relationshipPath.locale
+      const pathSegments = relationshipPath.path.split('.')
+      const isPostgres = adapter.name === 'postgres'
+      // Array markers are tracked separately so a literal `%` in a field name stays literal.
+      const relationshipPathPattern = pathSegments
+        .map((segment, index) => {
+          if (relationshipPath.arrayPositionIndices.includes(index)) {
+            return isPostgres ? '%' : '*'
+          }
+
+          return isPostgres ? segment.replace(/[\\%_]/g, '\\$&') : segment.replace(/[[*?]/g, '[$&]')
+        })
+        .join('.')
+      const expectedDotCount = pathSegments.length - 1
+      // SQLite GLOB compares field names case-sensitively; the dot count keeps wildcards in one segment.
+      const relationshipPathCondition = relationshipPath.arrayPositionIndices.length
+        ? and(
+            isPostgres
+              ? sql`${relationshipTable.path} like ${relationshipPathPattern} escape '\\'`
+              : sql`${relationshipTable.path} glob ${relationshipPathPattern}`,
+            sql`length(${relationshipTable.path}) - length(replace(${relationshipTable.path}, '.', '')) = ${expectedDotCount}`,
+          )
+        : eq(relationshipTable.path, relationshipPath.path)
       // The relationship row belongs to the target row's ID, which is a version ID for drafts.
       const relationshipRowCondition = and(
         eq(table['id'], relationshipTable.parent),
-        eq(relationshipTable.path, relationshipPath.path),
+        relationshipPathCondition,
         relationshipPath.isLocalized && relationshipLocale && relationshipLocale !== 'all'
           ? eq(relationshipTable.locale, relationshipLocale)
           : undefined,
@@ -168,6 +194,34 @@ export const buildPolymorphicJoinQuery = ({
         table,
       }
     } else {
+      if (relationshipPath?.arrayPositionIndices.length) {
+        // A singular reference inside an array is a column on the array table.
+        const arrayJoins: BuildQueryJoinAliases = []
+        const resolvedColumn = getTableColumnFromPath({
+          adapter,
+          collectionPath: relationshipFieldPath,
+          fields,
+          joins: arrayJoins,
+          locale,
+          parentIsLocalized: false,
+          pathSegments: relationshipFieldPath.split('.'),
+          selectFields: {},
+          tableName,
+          value: undefined,
+        })
+        const parentColumn = resolvedColumn.columnName
+          ? resolvedColumn.table[resolvedColumn.columnName]
+          : undefined
+
+        if (!parentColumn) {
+          throw new Error(
+            `Polymorphic join collection "${collection}" has no supported relationship at "${field.on}"`,
+          )
+        }
+
+        return { arrayJoins, collection, parentColumn, shouldUseVersionTable, table }
+      }
+
       const relationshipColumnName = relationshipFieldPath.replaceAll('.', '_')
       const parentColumn = table[relationshipColumnName]
       if (!parentColumn) {
@@ -189,6 +243,7 @@ export const buildPolymorphicJoinQuery = ({
 
   for (const collectionTable of collectionTables) {
     const {
+      arrayJoins,
       collection,
       parentColumn,
       relationshipRowCondition,
@@ -226,7 +281,8 @@ export const buildPolymorphicJoinQuery = ({
     })
     // Multiple relationship rows can match one target; count and page the document once.
     const shouldDeduplicate =
-      Boolean(relationshipTable) || (hasLocalizedWhere && (!locale || locale === 'all'))
+      Boolean(relationshipTable || arrayJoins?.length) ||
+      (hasLocalizedWhere && (!locale || locale === 'all'))
     let collectionQuery = (
       shouldDeduplicate ? db.selectDistinct(selectFields) : db.select(selectFields)
     )
@@ -235,6 +291,10 @@ export const buildPolymorphicJoinQuery = ({
 
     if (relationshipTable) {
       collectionQuery = collectionQuery.innerJoin(relationshipTable, relationshipRowCondition)
+    }
+
+    for (const { condition, table: arrayTable } of arrayJoins ?? []) {
+      collectionQuery = collectionQuery.innerJoin(arrayTable, condition)
     }
 
     if (hasLocalizedWhere) {

@@ -90,7 +90,7 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
       like,
       not_like: notLike,
     },
-    payload: { collections },
+    payload: { collections, config: { localization: false } },
     tableNameMap,
     tables,
   } as unknown as DrizzleAdapter
@@ -267,6 +267,7 @@ describe('buildPolymorphicJoinQuery', () => {
       drizzle: pgDB,
       name: 'postgres',
       payload: {
+        config: { localization: false },
         collections: {
           articles: { config: { fields, flattenedFields: flattenAllFields({ fields }) } },
         },
