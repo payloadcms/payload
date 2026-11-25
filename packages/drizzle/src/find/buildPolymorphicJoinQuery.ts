@@ -159,10 +159,10 @@ export const buildPolymorphicJoinQuery = ({
 
       return {
         collection,
-        shouldUseVersionTable,
         parentColumn,
         relationshipRowCondition,
         relationshipTable,
+        shouldUseVersionTable,
         table,
       }
     } else {
@@ -174,7 +174,7 @@ export const buildPolymorphicJoinQuery = ({
         )
       }
 
-      return { collection, shouldUseVersionTable, parentColumn, table }
+      return { collection, parentColumn, shouldUseVersionTable, table }
     }
   })
   const sortField = getSortField({ adapter, collections, sort })
@@ -188,10 +188,10 @@ export const buildPolymorphicJoinQuery = ({
   for (const collectionTable of collectionTables) {
     const {
       collection,
-      shouldUseVersionTable,
       parentColumn,
       relationshipRowCondition,
       relationshipTable,
+      shouldUseVersionTable,
       table,
     } = collectionTable
 
@@ -200,7 +200,7 @@ export const buildPolymorphicJoinQuery = ({
     const sortColumn = table[sortColumnName]
     // Return the document ID so the join resolver can load a versioned target by its parent.
     const selectFields = {
-      id: shouldUseVersionTable ? table['parent'] : table['id'],
+      id: sql`${shouldUseVersionTable ? table['parent'] : table['id']}`.as('id'),
       parent: sql`${parentColumn}`.as('parent'),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
@@ -210,8 +210,8 @@ export const buildPolymorphicJoinQuery = ({
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
-            shouldUseVersionTable,
             locale,
+            shouldUseVersionTable,
             table,
             where,
             wherePlan,
@@ -263,7 +263,8 @@ export const buildPolymorphicJoinQuery = ({
 
   const subQueryAlias = `${columnName}_subquery`
   // A versioned parent has a separate version ID; relationships point at its document ID.
-  const parentID = adapter.tables[currentTableName][versions ? 'parent' : 'id']
+  const parentIDColumn = adapter.tables[currentTableName][versions ? 'parent' : 'id']
+  const parentID = sql`${sql.identifier(currentTableName)}.${sql.identifier(parentIDColumn.name)}`
   const parentConstraint = eq(parentID, sql`${sql.identifier(subQueryAlias)}."parent"`)
   const countExpression = shouldCount
     ? sql`${db

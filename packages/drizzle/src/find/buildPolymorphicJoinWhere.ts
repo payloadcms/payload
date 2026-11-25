@@ -20,8 +20,8 @@ const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
-  shouldUseVersionTable?: boolean
   locale?: string
+  shouldUseVersionTable?: boolean
   table: GenericTable
   where: Where
   wherePlan: PolymorphicJoinWherePlan
@@ -54,8 +54,8 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
-  shouldUseVersionTable = false,
   locale,
+  shouldUseVersionTable = false,
   table,
   where,
   wherePlan,
@@ -73,8 +73,8 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
-          shouldUseVersionTable,
           locale,
+          shouldUseVersionTable,
           table,
           where: nestedWhere,
           wherePlan,
@@ -92,8 +92,8 @@ export const buildPolymorphicJoinWhere = ({
     const resolvedPath = resolveWherePath({
       adapter,
       collection,
-      shouldUseVersionTable,
       schemaPath: key,
+      shouldUseVersionTable,
       table,
       wherePlan,
     })
@@ -264,8 +264,8 @@ export const buildPolymorphicJoinWhere = ({
 const resolveWherePath = ({
   adapter,
   collection,
-  shouldUseVersionTable,
   schemaPath,
+  shouldUseVersionTable,
   table,
   wherePlan,
 }: {
@@ -309,8 +309,8 @@ const resolveWherePath = ({
       jsonExpression: getHasManySelectExpression({
         adapter,
         collection,
-        shouldUseVersionTable,
         pathPlan,
+        shouldUseVersionTable,
         table,
       }),
       pathPlan,
@@ -353,14 +353,14 @@ const resolveWherePath = ({
 const getHasManySelectExpression = ({
   adapter,
   collection,
-  shouldUseVersionTable,
   pathPlan,
+  shouldUseVersionTable,
   table,
 }: {
   adapter: DrizzleAdapter
   collection: string
-  shouldUseVersionTable?: boolean
   pathPlan: WherePathPlan
+  shouldUseVersionTable?: boolean
   table: GenericTable
 }): string => {
   if (pathPlan.fieldsByCollection.get(collection)?.type !== 'hasManySelect') {

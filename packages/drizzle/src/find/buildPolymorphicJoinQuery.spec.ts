@@ -5,6 +5,8 @@ import type { Field, FlattenedJoinField, Where } from 'payload'
 import { createClient } from '@libsql/client'
 import { getTableName, like, notLike } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
+import { drizzle as pgDrizzle } from 'drizzle-orm/node-postgres'
+import { alias, integer as pgInteger, pgSchema, serial } from 'drizzle-orm/pg-core'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { flattenAllFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -246,6 +248,58 @@ describe('buildPolymorphicJoinQuery', () => {
     expect(result.count).toBeDefined()
     expect(query.sql).toContain('select count(*) from')
     expect(query.sql).toContain('"join_parents"."id" = "children_subquery"."parent"')
+  })
+
+  it('uses the parent alias and mapped ID column in a custom-schema count', () => {
+    const customSchema = pgSchema('custom')
+    const pgParentsTable = customSchema.table('join_parents', {
+      id: serial('custom_id').primaryKey(),
+    })
+    const pgArticlesTable = customSchema.table('join_articles', {
+      id: serial('id').primaryKey(),
+      parent: pgInteger('parent_id'),
+    })
+    const parentTableName = getTableName(pgParentsTable)
+    const articleTableName = getTableName(pgArticlesTable)
+    const fields: Field[] = [
+      { name: 'parent', relationTo: 'join-parents', type: 'relationship' },
+    ]
+    const pgDB = pgDrizzle.mock()
+    const pgAdapter = {
+      drizzle: pgDB,
+      name: 'postgres',
+      payload: {
+        collections: {
+          articles: { config: { fields, flattenedFields: flattenAllFields({ fields }) } },
+        },
+      },
+      tableNameMap: new Map([['articles', articleTableName]]),
+      tables: {
+        [articleTableName]: pgArticlesTable,
+        [parentTableName]: pgParentsTable,
+      },
+    } as unknown as DrizzleAdapter
+    const result = buildPolymorphicJoinQuery({
+      adapter: pgAdapter,
+      currentTableName: parentTableName,
+      field: {
+        collection: ['articles'],
+        name: 'children',
+        on: 'parent',
+        type: 'join',
+      } as FlattenedJoinField,
+      limit: 0,
+      path: '',
+      shouldCount: true,
+    })
+    const query = pgDB
+      .select({ count: result.count!, documents: result.documents })
+      .from(alias(pgParentsTable, parentTableName))
+      .toSQL()
+
+    expect(query.sql).toContain('from "custom"."join_parents" "join_parents"')
+    expect(query.sql).toContain('"join_parents"."custom_id" = "children_subquery"."parent"')
+    expect(query.sql).not.toContain('"custom"."join_parents"."custom_id"')
   })
 
   it('adds limit and page offset to the document query', () => {
