@@ -91,7 +91,7 @@ export const createPayloadLinkTransformer = (
     }
 
     const textContent = exportChildren(node)
-    return `[${textContent}](${url})`
+    return `[${textContent}](${url.replaceAll('(', '%28').replaceAll(')', '%29')})`
   },
   importRegExp: /(?<!!)\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)/,
   regExp: /(?<!!)\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)$/,

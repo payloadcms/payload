@@ -862,6 +862,63 @@ test.suite('Lexical', { config: './config.ts' }, () => {
     )
   })
 
+  test('should encode parentheses in markdown link URLs', async ({ payload }) => {
+    const newLexicalDoc = await payload.create({
+      collection: lexicalFieldsSlug,
+      data: {
+        lexicalWithBlocks: {
+          root: {
+            type: 'root',
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'link',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'wiki',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    fields: {
+                      linkType: 'custom',
+                      url: 'https://example.com/wiki/Foo_(bar)',
+                    },
+                    format: '',
+                    indent: 0,
+                    version: 3,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
+        title: 'Lexical Markdown Parentheses Test',
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
+      '[wiki](https://example.com/wiki/Foo_%28bar%29)',
+    )
+  })
+
   test.describe('upload markdown: Lexical → Markdown (export)', () => {
     test('exports upload node to markdown placeholder when unpopulated', async ({ payload }) => {
       const newLexicalDoc = await payload.create({
