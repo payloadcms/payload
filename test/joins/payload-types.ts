@@ -373,8 +373,10 @@ export interface AccessJoinArticle {
     | number
     | boolean
     | null;
+  content?: Section[] | null;
   items?:
     | {
+        heading?: string | null;
         tags?: ('available' | 'unavailable')[] | null;
         id?: string | null;
       }[]
@@ -469,6 +471,7 @@ export interface AccessJoinNote {
   details_status?: string | null;
   items?:
     | {
+        heading?: string | null;
         tags?: ('available' | 'unavailable')[] | null;
         id?: string | null;
       }[]
@@ -1684,9 +1687,21 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
   articleTags?: T;
   owner?: T;
   settings?: T;
+  content?:
+    | T
+    | {
+        section?:
+          | T
+          | {
+              heading?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   items?:
     | T
     | {
+        heading?: T;
         tags?: T;
         id?: T;
       };
@@ -1730,6 +1745,7 @@ export interface AccessJoinNotesSelect<T extends boolean = true> {
   items?:
     | T
     | {
+        heading?: T;
         tags?: T;
         id?: T;
       };
@@ -2542,4 +2558,10 @@ export interface LexicalRichText<TNode> {
 declare module 'payload' {
   // @ts-ignore 
   export interface GeneratedTypes extends Config {}
+}
+export interface Section {
+  heading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'section';
 }

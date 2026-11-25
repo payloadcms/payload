@@ -2949,21 +2949,34 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       ).rejects.toThrow('The following path cannot be queried: localizedTags.equals')
     })
 
-    test('should reject polymorphic join constraints for has-many fields in arrays', async ({
+    test('should apply polymorphic join access constraints to has-many fields in arrays', async ({
       payload,
     }) => {
-      const { parent } = await createConstrainedJoinDocuments(payload)
+      const { children, parent } = await createConstrainedJoinDocuments(payload)
+      await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          parent: parent.id,
+          title: 'Child with tags',
+          items: [{ tags: ['available'] }],
+        },
+        overrideAccess: true,
+      })
 
-      await expect(
-        payload.findByID({
-          id: parent.id,
-          collection: accessJoinParentsSlug,
-          context: { useArrayHasManyAccessConstraint: true },
-          depth: 1,
-          overrideAccess: false,
-          user,
-        }),
-      ).rejects.toThrow('The following path cannot be queried: items.tags.exists')
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useArrayHasManyAccessConstraint: true },
+        depth: 0,
+        joins: { children: { count: true } },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs.map(({ value }) => value).sort()).toEqual(
+        children.map(({ id }) => id).sort(),
+      )
+      expect(result.children.totalDocs).toBe(children.length)
     })
 
     test('should reject unsupported has-many select access operators', async ({ payload }) => {

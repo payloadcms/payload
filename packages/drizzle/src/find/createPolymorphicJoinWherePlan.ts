@@ -1,6 +1,7 @@
 import type { Column } from 'drizzle-orm'
 
-import { type FlattenedField, getFieldByPath, type Where } from 'payload'
+import { type FlattenedField, type Where } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
@@ -15,13 +16,15 @@ export type ScalarWhereField = {
   type: 'scalar'
 }
 
-type CollectionWhereField = { field: FlattenedField; type: 'hasManySelect' } | ScalarWhereField
+type CollectionWhereField =
+  | { field: FlattenedField; type: 'collectionQuery' | 'hasManySelect' }
+  | ScalarWhereField
 
 export type WherePathPlan = {
   columnPath: string
   fieldsByCollection: Map<string, CollectionWhereField>
   schemaPath: string
-  type: 'hasManySelect' | 'invalid' | 'scalar'
+  type: 'collectionQuery' | 'hasManySelect' | 'invalid' | 'scalar'
 }
 
 export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
@@ -29,11 +32,11 @@ export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
 /**
  * Analyzes every leaf path in a polymorphic join where clause before SQL is built. Each plan entry
  * records the flattened column path, the compatible field shape for each target collection, and
- * whether the path uses a scalar column or a has-many select value table. A field may be absent
+ * whether the path uses a column, a has-many select value table, or nested rows. A field may be absent
  * from some target collections; those branches compare against SQL NULL or an empty JSON array.
  *
- * Paths are marked as invalid when their storage shapes conflict, require separate-row
- * traversal, have no matching field, lack a required column, or collide after path flattening.
+ * Paths are marked as invalid when their storage shapes conflict, have no matching field,
+ * lack a required column, or collide after path flattening.
  *
  * @returns A plan keyed by each unique schema path in `where`.
  * @throws If a target collection or its mapped database table is not available in the adapter.
@@ -81,13 +84,16 @@ export const createPolymorphicJoinWherePlan = ({
     const fieldsByCollection = new Map<string, CollectionWhereField>()
     let isFieldPresent = schemaPath === 'id' || schemaPath === 'relationTo'
     let hasManySelect = false
+    let hasCollectionQuery = false
     let hasUnsupportedFieldShape = false
-    const scalarQueryValueSignatures = new Set<string>()
+    const columnQueryValueSignatures = new Set<string>()
+    const collectionQueryValueSignatures = new Set<string>()
 
     for (const { collection, collectionConfig, table, tableName } of collectionContexts) {
-      const fieldAtPath = getFieldByPath({
-        fields: collectionConfig.flattenedFields,
-        path: schemaPath,
+      const fieldAtPath = resolveQueryFieldPath({
+        adapter,
+        flattenedFields: collectionConfig.flattenedFields,
+        pathSegments: schemaPath.split('.'),
       })
 
       if (schemaPath === 'id') {
@@ -96,39 +102,49 @@ export const createPolymorphicJoinWherePlan = ({
         if (!idColumn) {
           hasUnsupportedFieldShape = true
         } else {
-          scalarQueryValueSignatures.add(`id:${idColumn.getSQLType()}`)
+          columnQueryValueSignatures.add(`id:${idColumn.getSQLType()}`)
           fieldsByCollection.set(collection, {
             type: 'scalar',
             field:
-              fieldAtPath?.field ??
-              ({
-                name: 'id',
-                type: isUUIDType(adapter.idType) ? 'text' : 'number',
-              } as FlattenedField),
-            isUUID: !fieldAtPath && isUUIDType(adapter.idType),
+              fieldAtPath.status === 'field'
+                ? fieldAtPath.field
+                : ({
+                    name: 'id',
+                    type: isUUIDType(adapter.idType) ? 'text' : 'number',
+                  } as FlattenedField),
+            isUUID: fieldAtPath.status !== 'field' && isUUIDType(adapter.idType),
           })
         }
 
         continue
       }
 
-      if (!fieldAtPath) {
-        if (
-          pathHasUnsupportedNestedContainer({
-            fields: collectionConfig.flattenedFields,
-            path: schemaPath,
-          })
-        ) {
-          hasUnsupportedFieldShape = true
-        }
-
+      if (fieldAtPath.status !== 'field') {
+        hasUnsupportedFieldShape ||= fieldAtPath.status === 'unsupported'
         continue
       }
 
       isFieldPresent = true
 
-      if (pathHasSeparateRows({ fields: collectionConfig.flattenedFields, path: schemaPath })) {
-        hasUnsupportedFieldShape = true
+      if (fieldAtPath.requiresCollectionQuery) {
+        const field = fieldAtPath.field
+        const hasManyValues = 'hasMany' in field && field.hasMany
+        const hasUnsupportedManyValues = hasManyValues && field.type !== 'select'
+        const hasPolymorphicValues =
+          (field.type === 'relationship' || field.type === 'upload') &&
+          Array.isArray(field.relationTo)
+        const isContainer = ['array', 'blocks', 'group', 'tab'].includes(field.type)
+
+        if (hasUnsupportedManyValues || hasPolymorphicValues || isContainer) {
+          hasUnsupportedFieldShape = true
+          continue
+        }
+
+        hasCollectionQuery = true
+        collectionQueryValueSignatures.add(
+          `${hasManyValues ? 'many' : 'one'}:${getFieldQueryValueSignature({ field })}`,
+        )
+        fieldsByCollection.set(collection, { type: 'collectionQuery', field })
         continue
       }
 
@@ -162,25 +178,49 @@ export const createPolymorphicJoinWherePlan = ({
         ...(fieldAtPath.pathHasLocalized && { isLocalized: true }),
         isUUID: fieldColumn.columnType === 'PgUUID',
       })
-      scalarQueryValueSignatures.add(
-        getScalarQueryValueSignature({ column: fieldColumn, field: fieldAtPath.field }),
+      columnQueryValueSignatures.add(
+        getFieldQueryValueSignature({ column: fieldColumn, field: fieldAtPath.field }),
       )
     }
 
-    const hasColumnPathCollision = (schemaPathsByColumnPath.get(columnPath)?.size ?? 0) > 1
     const isInvalid =
-      hasColumnPathCollision ||
       !isFieldPresent ||
       hasUnsupportedFieldShape ||
-      (hasManySelect && scalarQueryValueSignatures.size > 0) ||
-      scalarQueryValueSignatures.size > 1
+      (hasManySelect && columnQueryValueSignatures.size > 0) ||
+      (hasCollectionQuery && (hasManySelect || columnQueryValueSignatures.size > 0)) ||
+      collectionQueryValueSignatures.size > 1 ||
+      columnQueryValueSignatures.size > 1
+
+    let type: WherePathPlan['type'] = 'scalar'
+
+    if (isInvalid) {
+      type = 'invalid'
+    } else if (hasCollectionQuery) {
+      type = 'collectionQuery'
+    } else if (hasManySelect) {
+      type = 'hasManySelect'
+    }
 
     plan.set(schemaPath, {
-      type: isInvalid ? 'invalid' : hasManySelect ? 'hasManySelect' : 'scalar',
+      type,
       columnPath,
       fieldsByCollection,
       schemaPath,
     })
+  }
+
+  for (const schemaPaths of schemaPathsByColumnPath.values()) {
+    const pathPlans = [...schemaPaths].map((schemaPath) => plan.get(schemaPath)!)
+    const columnPlans = pathPlans.filter((pathPlan) => pathPlan.type !== 'collectionQuery')
+    const collectionQueryPlans = pathPlans.filter((pathPlan) => pathPlan.type === 'collectionQuery')
+
+    for (const collidingPlans of [columnPlans, collectionQueryPlans]) {
+      if (collidingPlans.length > 1) {
+        for (const pathPlan of collidingPlans) {
+          pathPlan.type = 'invalid'
+        }
+      }
+    }
   }
 
   return plan
@@ -194,11 +234,11 @@ const textQueryFieldTypes = new Set<FlattenedField['type']>([
   'textarea',
 ])
 
-const getScalarQueryValueSignature = ({
+const getFieldQueryValueSignature = ({
   column,
   field,
 }: {
-  column: Column
+  column?: Column
   field: FlattenedField
 }): string => {
   if (field.type === 'select' || field.type === 'radio') {
@@ -213,7 +253,7 @@ const getScalarQueryValueSignature = ({
     return 'text'
   }
 
-  return `${field.type}:${column.getSQLType()}`
+  return `${field.type}:${column?.getSQLType() ?? ''}`
 }
 
 const getWhereSchemaPaths = (where: Where): string[] => {
@@ -240,46 +280,81 @@ const getColumnPath = (schemaPath: string): string =>
     .map((segment) => sanitizePathSegment(segment))
     .join('_')
 
-const pathHasSeparateRows = ({ fields, path }: { fields: FlattenedField[]; path: string }) => {
-  const pathSegments = path.split('.')
-
-  for (let segmentIndex = 1; segmentIndex < pathSegments.length; segmentIndex++) {
-    const fieldAtParentPath = getFieldByPath({
-      fields,
-      path: pathSegments.slice(0, segmentIndex).join('.'),
-    })
-
-    if (fieldAtParentPath?.field.type === 'array' || fieldAtParentPath?.field.type === 'blocks') {
-      return true
+type ResolvedQueryFieldPath =
+  | {
+      field: FlattenedField
+      pathHasLocalized: boolean
+      requiresCollectionQuery: boolean
+      status: 'field'
     }
-  }
+  | { status: 'missing' | 'unsupported' }
 
-  return false
-}
-
-const pathHasUnsupportedNestedContainer = ({
-  fields,
-  path,
+function resolveQueryFieldPath({
+  adapter,
+  flattenedFields,
+  parentIsLocalized = false,
+  pathSegments,
+  requiresCollectionQuery = false,
 }: {
-  fields: FlattenedField[]
-  path: string
-}) => {
-  const pathSegments = path.split('.')
+  adapter: DrizzleAdapter
+  flattenedFields: FlattenedField[]
+  parentIsLocalized?: boolean
+  pathSegments: string[]
+  requiresCollectionQuery?: boolean
+}): ResolvedQueryFieldPath {
+  const [name, ...remainingSegments] = pathSegments
+  const field = flattenedFields.find((field) => field.name === name)
 
-  for (let segmentIndex = 1; segmentIndex < pathSegments.length; segmentIndex++) {
-    const fieldAtParentPath = getFieldByPath({
-      fields,
-      path: pathSegments.slice(0, segmentIndex).join('.'),
+  if (!field) {
+    return { status: 'missing' }
+  }
+
+  const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
+  const pathHasLocalized = parentIsLocalized || Boolean(field.localized)
+  const localization = adapter.payload.config?.localization
+
+  if (isFieldLocalized && localization && localization.localeCodes.includes(remainingSegments[0])) {
+    remainingSegments.shift()
+  }
+
+  if (remainingSegments.length === 0) {
+    return { field, pathHasLocalized, requiresCollectionQuery, status: 'field' }
+  }
+
+  const hasArrayOrBlock = field.type === 'array' || field.type === 'blocks'
+  let nestedFields: FlattenedField[][]
+
+  if ('flattenedFields' in field) {
+    nestedFields = [field.flattenedFields]
+  } else if (field.type === 'blocks') {
+    nestedFields = field.blocks.map((block) =>
+      typeof block === 'string'
+        ? adapter.payload.blocks[block].flattenedFields
+        : block.flattenedFields,
+    )
+  } else {
+    return { status: 'unsupported' }
+  }
+
+  let firstFieldPath: ResolvedQueryFieldPath = { status: 'missing' }
+
+  for (const flattenedFields of nestedFields) {
+    const resolvedPath = resolveQueryFieldPath({
+      adapter,
+      flattenedFields,
+      parentIsLocalized: pathHasLocalized,
+      pathSegments: remainingSegments,
+      requiresCollectionQuery: requiresCollectionQuery || hasArrayOrBlock,
     })
 
-    if (!fieldAtParentPath) {
-      return false
+    if (resolvedPath.status === 'unsupported') {
+      return resolvedPath
     }
 
-    if (!['group', 'tab'].includes(fieldAtParentPath.field.type)) {
-      return true
+    if (resolvedPath.status === 'field' && firstFieldPath.status === 'missing') {
+      firstFieldPath = resolvedPath
     }
   }
 
-  return false
+  return firstFieldPath
 }
