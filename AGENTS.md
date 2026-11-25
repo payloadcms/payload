@@ -16,6 +16,7 @@ Only add a rule here for a mistake agents repeat, can't learn from the code, and
 
 - Use object parameters, `fn({ name }: { name: string })`, not positional arguments, for backwards compatibility.
 - Avoid `as any` and `as unknown as X`, including in tests. Fix the types, or comment why the cast is needed.
+- Search for an existing utility or type before writing a new one.
 - Render config labels with `getTranslation` from `@payloadcms/translations`. Don't branch on label types yourself.
 - Never hardcode user-facing strings. Add keys to the English locale in `packages/translations/src/languages/` first.
 - Build admin and API URLs with `formatAdminURL` from `payload/shared`, and query strings with `qs-esm`. Never concatenate them by hand.
