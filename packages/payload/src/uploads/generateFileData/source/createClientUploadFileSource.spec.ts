@@ -192,6 +192,16 @@ describe('createClientUploadFileSource', () => {
     expect(await readStream(stream)).toEqual(bytes.subarray(10, 15))
   })
 
+  it('should stream the asked bytes after a read of the whole file from a handler that always sends the whole file', async () => {
+    const { fileSource } = createSource({ handler: wholeFileHandler })
+
+    const read = await fileSource.readFileBytes({ numberOfBytes: 100, startByte: 0 })
+    const stream = await fileSource.streamFile({ numberOfBytes: 5, startByte: 10 })
+
+    expect(Buffer.from(read)).toEqual(bytes)
+    expect(await readStream(stream)).toEqual(bytes.subarray(10, 15))
+  })
+
   it('should fail a stream with more bytes than the range after partial responses had only the range', async () => {
     let isFirstCall = true
     const { fileSource } = createSource({

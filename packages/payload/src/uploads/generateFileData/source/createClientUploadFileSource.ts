@@ -69,7 +69,7 @@ export function createClientUploadFileSource({
 
     assertRangeResponse({ range, response, sizeInBytes })
 
-    return readRangeChunks({ range, rangeHandling, response })
+    return readRangeChunks({ range, rangeHandling, response, sizeInBytes })
   }
 
   const fileSource: FileSource = {
@@ -155,14 +155,18 @@ async function* readRangeChunks({
   range: { endByte, startByte },
   rangeHandling,
   response,
+  sizeInBytes,
 }: {
   range: ByteRange
   rangeHandling: { value: RangeHandling }
   response: Response
+  sizeInBytes: number
 }): AsyncGenerator<Uint8Array> {
   const reader = response.body!.getReader()
   const rangeLength = endByte - startByte
   const isPartial = response.status === 206
+  // A response for the whole file looks the same whether or not the handler honours the range.
+  const isWholeFileRange = startByte === 0 && endByte === sizeInBytes
   const heldChunks: Uint8Array[] = []
   let isWholeBody = !isPartial || rangeHandling.value === 'ignored'
 
@@ -202,7 +206,7 @@ async function* readRangeChunks({
           throw notReadableError()
         }
 
-        if (isPartial && !isWholeBody) {
+        if (isPartial && !isWholeBody && !isWholeFileRange) {
           rangeHandling.value = 'honored'
         }
 
@@ -238,7 +242,7 @@ async function* readRangeChunks({
       }
     }
   } finally {
-    // A body read to its end needs no cancel, which some adapters log as an error.
+    // cancel is a no-op on a finished body, so an exact range does not trigger adapter cancel logs.
     await reader.cancel().catch(() => {})
   }
 }
