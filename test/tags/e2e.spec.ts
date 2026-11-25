@@ -109,6 +109,25 @@ test.describe('Tags', () => {
     return createdTag
   }
 
+  const createPostWithTags = async (title: string) => {
+    const { docs: tags } = await payload.find({
+      collection: tagsSlug,
+      overrideAccess: true,
+      where: { name: { in: ['Italian', 'Dinner'] } },
+    })
+    const italian = tags.find((tag) => tag.name === 'Italian')!
+    const dinner = tags.find((tag) => tag.name === 'Dinner')!
+    const post = await payload.create({
+      collection: postsSlug,
+      data: { title, [`_h_${tagsSlug}`]: [italian.id, dinner.id] },
+      overrideAccess: true,
+    })
+
+    createdPostIds.push(post.id)
+
+    return { dinner, italian, post }
+  }
+
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
@@ -249,6 +268,124 @@ test.describe('Tags', () => {
     await expect(documents.getByRole('row', { name: /Recipe archive note/ })).toHaveCount(total)
     await expect(pager).toHaveCount(0)
     await expect(documents).toBeFocused()
+  })
+
+  test('should add a tag without replacing existing document tags', async () => {
+    const { dinner, italian, post } = await createPostWithTags('Tag membership add')
+    const tree = await openTagsTree()
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+
+    await page
+      .locator('.hierarchy-tables table')
+      .getByRole('row', { name: /Tag membership add/ })
+      .getByRole('checkbox')
+      .check()
+    await page.getByRole('button', { name: 'Add Tag' }).press('Enter')
+
+    const modal = page.locator('.hierarchy-modal:visible')
+
+    await expect(modal).toBeVisible()
+    await modal.getByRole('button', { name: 'Seasons', exact: true }).click()
+    await modal.getByRole('checkbox', { name: 'Spring' }).check()
+    await modal.getByRole('button', { name: 'Confirm' }).click()
+    await expect(modal).toBeHidden()
+
+    const { docs: springTags } = await payload.find({
+      collection: tagsSlug,
+      overrideAccess: true,
+      where: { name: { equals: 'Spring' } },
+    })
+
+    await expect
+      .poll(async () => {
+        const { docs } = await payload.find({
+          collection: postsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: { id: { equals: post.id } },
+        })
+
+        return docs[0]?.[`_h_${tagsSlug}`]
+      })
+      .toEqual(expect.arrayContaining([italian.id, dinner.id, springTags[0]!.id]))
+  })
+
+  test('should remove only the current tag from a document', async () => {
+    const { dinner, post } = await createPostWithTags('Tag membership remove')
+    const tree = await openTagsTree()
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+
+    await page
+      .locator('.hierarchy-tables table')
+      .getByRole('row', { name: /Tag membership remove/ })
+      .getByRole('checkbox')
+      .check()
+    await page.getByRole('button', { name: 'Remove from Italian' }).click()
+
+    await expect
+      .poll(async () => {
+        const { docs } = await payload.find({
+          collection: postsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: { id: { equals: post.id } },
+        })
+
+        return docs[0]?.[`_h_${tagsSlug}`]
+      })
+      .toEqual([dinner.id])
+    await expect(page.getByRole('row', { name: /Tag membership remove/ })).toHaveCount(0)
+  })
+
+  test('should reparent a selected tag', async () => {
+    const { docs: parents } = await payload.find({
+      collection: tagsSlug,
+      overrideAccess: true,
+      where: { name: { in: ['Italian', 'Seasons'] } },
+    })
+    const italian = parents.find((tag) => tag.name === 'Italian')!
+    const seasons = parents.find((tag) => tag.name === 'Seasons')!
+    const childTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Tag Reparent Child', [`_h_${tagsSlug}`]: italian.id },
+      overrideAccess: true,
+    })
+    createdTagIds.push(childTag.id)
+
+    const tree = await openTagsTree()
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+
+    await page
+      .locator('.hierarchy-tables table')
+      .getByRole('row', { name: /Tag Reparent Child/ })
+      .getByRole('checkbox')
+      .check()
+    await page.getByRole('button', { name: 'Move', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Move to...' }).click()
+
+    const modal = page.locator('.hierarchy-modal:visible')
+
+    await modal.getByRole('checkbox', { name: 'Seasons' }).check()
+    await modal.getByRole('button', { name: 'Confirm' }).click()
+
+    await expect
+      .poll(async () => {
+        const { docs } = await payload.find({
+          collection: tagsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: { id: { equals: childTag.id } },
+        })
+
+        return docs[0]?.[`_h_${tagsSlug}`]
+      })
+      .toBe(seasons.id)
   })
 
   test.describe('hierarchy relationship field', () => {
