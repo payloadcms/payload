@@ -30,7 +30,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ### Architecture Notes
 
-- Payload 3.x is built as a Next.js native CMS that installs directly in `/app` folder
+- Payload is built as a Next.js native CMS that installs directly in `/app` folder
 - UI is built with React Server Components (RSC)
 - Database adapters use Drizzle ORM under the hood
 - Packages use TypeScript with strict mode and path mappings defined in `tsconfig.base.json`
@@ -123,8 +123,8 @@ ComponentName/
 ### Development Environment
 
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
-- To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
-- Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
+- To disable: set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=true`
+- Default database is MongoDB on `localhost:27018`, started with `pnpm docker:start`. Switch with `PAYLOAD_DATABASE=postgres` or `PAYLOAD_DATABASE=sqlite`
 - Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
 
 ### Playwright MCP
@@ -172,7 +172,7 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 **Prefer integration or e2e tests.** Don't add unit tests for internal functions or small utilities; if one seems necessary, ask the user for approval first.
 
-**A regression test must fail when the fix is reverted.** Revert the fix, run the test, and confirm it fails.
+**A regression test must fail when the fix is reverted.** Revert the fix, run the test, and confirm it fails, then restore the fix and confirm it passes.
 
 **Integration tests MUST use the shared fixture wrapper:**
 
@@ -242,7 +242,7 @@ test/<feature-name>/
 └── payload-types.ts # Generated types
 ```
 
-After changing a test config, regenerate its types with `pnpm run dev:generate-types <directory_name>` and commit them in the same PR.
+After changing a test config, regenerate its types with `pnpm run dev:generate-types <directory_name>` and include the regenerated types in the same PR.
 
 ### Visual Regression Testing
 
@@ -331,10 +331,10 @@ Examples:
 ### Pull Requests
 
 - Only push or open PRs when asked, and open them as drafts unless told otherwise.
-- For stacked PRs, use GitHub's native stacked pull requests via the `gh stack` extension (`gh stack init`, `add`, `submit`, or `gh stack link` for existing branches), not independent PRs that link to each other.
+- For PRs that build on each other, use GitHub's native stacked pull requests via the `gh stack` extension (`gh extension install github/gh-stack`, then `gh stack init`, `add`, `submit`, or `gh stack link` for existing branches), not independent PRs that link to each other.
 - Fixes need two PRs, one against `main` (v4) and one against `3.x` (v3), each linking the other. Features go to `main` only. If a fix should land on one branch only, say why in the PR description and in the chat.
 - Keep descriptions short and informal, backports included, since the PR body becomes the squashed commit body.
-- If the change can be seen in the browser, including a fixed behavior, record it with the `record-pr-demo` skill, showing before and after when there is a before. Use screenshots only for static visual changes.
+- Record interactive or behavioral changes, including fixed bugs, with the `record-pr-demo` skill, with before and after when there is a before. Use screenshots for purely static visual changes.
 - Add a short "Written with AI" line.
 
 ### Breaking Changes
@@ -416,7 +416,7 @@ const docs = await payload.find({
 - Preserve existing document selector specificity. Adding `:host` to a parent selector list can raise the specificity of nested rules. Flatten those nested rules when necessary to preserve application overrides.
 - Keep document-only resets and Admin Panel layout styles scoped to the document. For shared token or theme changes, verify the affected states in both contexts, loading the stylesheet inside the shadow root for that case.
 
-Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
+Stylelint enforces the rules below on `.css` files in `packages/ui/src/` and `templates/` (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check.
 
 **Mobile-first media queries only - never `max-width`:**
 
