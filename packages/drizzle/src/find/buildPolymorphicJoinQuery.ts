@@ -8,8 +8,8 @@ import { buildVersionCollectionFields, getFieldByPath } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { BuildQueryJoinAliases } from '../queries/buildQuery.js'
+import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
 import { getTableColumnFromPath } from '../queries/getTableColumnFromPath.js'

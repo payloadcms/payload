@@ -152,7 +152,7 @@ export const getTableColumnFromPath = ({
 
     switch (field.type) {
       case 'array': {
-        // Localized groups use a locale table for scalar fields, but their array tables
+        // Localized groups use a locale table for fields like text, but their array tables
         // are named under the group's base table and carry their own _locale column.
         const arrayParentTableName =
           adapter.localesSuffix && tableName.endsWith(adapter.localesSuffix)
