@@ -638,6 +638,7 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
+  constrainedRelationship?: (string | null) | Text;
   richtext?: {
     root: {
       type: string;
@@ -1518,6 +1519,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasManyPolymorphic?: T;
   relationshipHasManyPolymorphic2?: T;
   zeroDepthRelationship?: T;
+  constrainedRelationship?: T;
   richtext?: T;
   richtextWithConstrainedRelationship?: T;
   richtextWithCustomDiff?: T;

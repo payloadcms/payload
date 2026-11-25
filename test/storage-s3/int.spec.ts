@@ -1,5 +1,7 @@
-import type { Payload } from 'payload'
+import type { File, Payload } from 'payload'
 
+import { HeadObjectCommand } from '@aws-sdk/client-s3'
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -19,6 +21,7 @@ import {
 import {
   clearTestBucket,
   createTestBucket,
+  getAWSClient,
   getTestBucketName,
   verifyUploads,
 } from './test-utils.js'
@@ -358,6 +361,136 @@ describe('@payloadcms/storage-s3', () => {
       })
     })
 
+    it('should keep filenames unique when equivalent prefixes resolve to the same folder', async () => {
+      const original = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      const equivalentPrefixes = [null, 1, '', '.', 'folder%25', `${prefix}/`, `./${prefix}`]
+      const uploads = []
+
+      for (const equivalentPrefix of equivalentPrefixes) {
+        uploads.push(
+          await payload.create({
+            collection: mediaWithPrefixSlug,
+            data: { prefix: equivalentPrefix as string },
+            file: getFileNamed({ filename: 'image.png', sourcePath: '../uploads/small.png' }),
+          }),
+        )
+      }
+
+      const storedOriginal = await getAWSClient().send(
+        new HeadObjectCommand({
+          Bucket: getTestBucketName(),
+          Key: `${prefix}/${original.filename}`,
+        }),
+      )
+
+      expect(storedOriginal.ContentLength).toBe(original.filesize)
+      expect(new Set([original, ...uploads].map(({ filename }) => filename)).size).toBe(
+        uploads.length + 1,
+      )
+      expect(uploads.map((upload) => upload.prefix)).toStrictEqual(
+        equivalentPrefixes.map(() => prefix),
+      )
+    })
+
+    it('should keep filenames unique when equivalent nested prefixes are used', async () => {
+      const first = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: { prefix: 'nested' },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      const second = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: { prefix: `./${prefix}/nested/` },
+        file: getFileNamed({ filename: 'image.png', sourcePath: '../uploads/small.png' }),
+      })
+
+      expect([first.prefix, second.prefix]).toStrictEqual([`${prefix}/nested`, `${prefix}/nested`])
+      expect(second.filename).toBe('image-1.png')
+    })
+
+    it('should keep filenames unique when an update with a file keeps the stored prefix', async () => {
+      const original = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      await payload.db.updateOne({
+        collection: mediaWithPrefixSlug,
+        data: { prefix: null },
+        id: original.id,
+      })
+
+      const other = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/small.png'),
+      })
+
+      const {
+        docs: [user],
+      } = await payload.find({ collection: 'users', limit: 1 })
+
+      const updated = await payload.update({
+        collection: mediaWithPrefixSlug,
+        data: {},
+        file: getFileNamed({ filename: 'image.png', sourcePath: '../uploads/small.png' }),
+        id: other.id,
+        overrideAccess: false,
+        user,
+      })
+
+      const storedOriginal = await getAWSClient().send(
+        new HeadObjectCommand({
+          Bucket: getTestBucketName(),
+          Key: `${prefix}/${original.filename}`,
+        }),
+      )
+
+      expect(storedOriginal.ContentLength).toBe(original.filesize)
+      expect(updated.filename).toBe('image-1.png')
+      expect(updated.prefix).toBe(prefix)
+    })
+
+    it('should keep the collection prefix when an update moves a file to the collection folder', async () => {
+      const nested = await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: { prefix: 'nested' },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      const updated = await payload.update({
+        collection: mediaWithPrefixSlug,
+        data: { prefix: `./${prefix}` },
+        file: getFileNamed({ filename: 'image.png', sourcePath: '../uploads/small.png' }),
+        id: nested.id,
+      })
+
+      expect(updated.prefix).toBe(prefix)
+    })
+
+    it('should reject a prefix inside the object folder of another upload', async () => {
+      await payload.create({
+        collection: mediaWithPrefixSlug,
+        data: { _objectKey: 'stored-key' },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      const upload = payload.create({
+        collection: mediaWithPrefixSlug,
+        data: { prefix: 'stored-key' },
+        file: getFileNamed({ filename: 'image.png', sourcePath: '../uploads/small.png' }),
+      })
+
+      await expect(upload).rejects.toThrow('The provided prefix is not allowed.')
+    })
+
     it('supports multi-tenant scenario with dynamic prefix from hook', async () => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
@@ -383,3 +516,9 @@ describe('@payloadcms/storage-s3', () => {
     })
   })
 })
+
+function getFileNamed({ filename, sourcePath }: { filename: string; sourcePath: string }): File {
+  const data = fs.readFileSync(path.resolve(dirname, sourcePath))
+
+  return { name: filename, data, mimetype: 'image/png', size: data.byteLength }
+}

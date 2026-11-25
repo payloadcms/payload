@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
-import { defaultAccess } from '../auth/defaultAccess.js'
+import { defaultAdminPanelUserAccess } from '../auth/defaultAdminPanelUserAccess.js'
 
 export const lockedDocumentsCollectionSlug = 'payload-locked-documents'
 
@@ -61,10 +61,10 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
   return {
     slug: lockedDocumentsCollectionSlug,
     access: {
-      create: defaultAccess,
-      delete: defaultAccess,
-      read: defaultAccess,
-      update: defaultAccess,
+      create: defaultAdminPanelUserAccess,
+      delete: defaultAdminPanelUserAccess,
+      read: defaultAdminPanelUserAccess,
+      update: defaultAdminPanelUserAccess,
     },
     admin: {
       hidden: true,

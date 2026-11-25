@@ -7,6 +7,7 @@ import type { PayloadRequest, PopulateType, Sort, Where } from '../../types/inde
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { getLocalizedPaths } from '../../database/getLocalizedPaths.js'
 import { prefixWherePaths } from '../../database/prefixWherePaths.js'
@@ -81,8 +82,10 @@ export const findDistinctOperation = async (
       populate,
       showHiddenFields = false,
       trash = false,
-      where,
+      where: incomingWhere,
     } = args
+
+    const where = cloneWhere(incomingWhere)
 
     const req = args.req!
     const { locale, payload } = req

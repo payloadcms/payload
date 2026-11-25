@@ -30,7 +30,7 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
@@ -47,9 +47,11 @@ import {
   defaultValuesSlug,
   errorOnUnnamedFieldsSlug,
   fieldsPersistanceSlug,
+  global2Slug,
   postsSlug,
   relationASlug,
   relationBSlug,
+  simpleSlug,
   writeInputSlug,
 } from './shared.js'
 
@@ -91,6 +93,139 @@ describe('database', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('update data', () => {
+    const createdIDs: (number | string)[] = []
+    let previousGlobalText: null | string
+
+    beforeEach(async () => {
+      const global = await payload.findGlobal({ slug: global2Slug, overrideAccess: true })
+
+      previousGlobalText = global.text ?? null
+    })
+
+    afterEach(async () => {
+      vi.restoreAllMocks()
+      for (const id of createdIDs) {
+        await payload.delete({ collection: simpleSlug, id, overrideAccess: true })
+      }
+      createdIDs.length = 0
+      await payload.updateGlobal({
+        slug: global2Slug,
+        data: { text: previousGlobalText },
+        overrideAccess: true,
+      })
+    })
+
+    it('should remove unsupported collection update keys before persistence', async () => {
+      const doc = await payload.create({ collection: simpleSlug, data: { text: 'original' } })
+      createdIDs.push(doc.id)
+      const updateSpy = vi.spyOn(payload.db, 'updateOne')
+
+      const updated = await payload.update({
+        collection: simpleSlug,
+        id: doc.id,
+        data: { text: 'changed', $extra: { value: 1 }, $other: true } as never,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(updated.text).toBe('changed')
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(updateSpy.mock.calls[0]![0].data).not.toHaveProperty('$extra')
+      expect(updateSpy.mock.calls[0]![0].data).not.toHaveProperty('$other')
+    })
+
+    it('should remove unsupported bulk update keys before persistence', async () => {
+      const doc = await payload.create({ collection: simpleSlug, data: { text: 'original' } })
+      createdIDs.push(doc.id)
+      const updateSpy = vi.spyOn(payload.db, 'updateOne')
+
+      const result = await payload.update({
+        collection: simpleSlug,
+        where: { id: { equals: doc.id } },
+        data: { text: 'changed', $extra: { value: 1 } } as never,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.docs[0]?.text).toBe('changed')
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(updateSpy.mock.calls[0]![0].data).not.toHaveProperty('$extra')
+    })
+
+    it('should remove unsupported global update keys before persistence', async () => {
+      const updateSpy = vi.spyOn(payload.db, 'updateGlobal')
+
+      const updated = await payload.updateGlobal({
+        slug: global2Slug,
+        data: { text: 'changed', $extra: { value: 1 } } as never,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(updated.text).toBe('changed')
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(updateSpy.mock.calls[0]![0].data).not.toHaveProperty('$extra')
+    })
+
+    it('should preserve ordinary extra update input', async () => {
+      const doc = await payload.create({ collection: simpleSlug, data: { text: 'original' } })
+      createdIDs.push(doc.id)
+      const updateSpy = vi.spyOn(payload.db, 'updateOne')
+
+      await payload.update({
+        collection: simpleSlug,
+        id: doc.id,
+        data: { text: 'changed', extra: true } as never,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(updateSpy.mock.calls[0]![0].data).toHaveProperty('extra', true)
+    })
+
+    describe('MongoDB', { db: 'mongo' }, () => {
+      it('should preserve raw operators in direct collection adapter updates', async () => {
+        const doc = await payload.create({ collection: simpleSlug, data: { text: 'original' } })
+        createdIDs.push(doc.id)
+
+        for (const returning of [false, true]) {
+          await payload.db.updateOne({
+            collection: simpleSlug,
+            id: doc.id,
+            data: { $inc: { number: 1 }, $unset: { text: 1 } },
+            returning,
+          })
+        }
+
+        const updated = await payload.findByID({ collection: simpleSlug, id: doc.id })
+
+        expect(updated.number).toBe(2)
+        expect(updated.text).toBeUndefined()
+      })
+
+      it('should preserve raw operators in direct global adapter updates', async () => {
+        await payload.updateGlobal({ slug: global2Slug, data: { text: 'original' } })
+
+        for (const { returning, text } of [
+          { returning: false, text: 'without returned document' },
+          { returning: true, text: 'with returned document' },
+        ]) {
+          await payload.db.updateGlobal({
+            slug: global2Slug,
+            data: { $set: { text } },
+            returning,
+          })
+
+          const updated = await payload.findGlobal({ slug: global2Slug })
+
+          expect(updated.text).toBe(text)
+        }
+      })
+    })
   })
 
   it(
@@ -958,6 +1093,51 @@ describe('database', () => {
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
     })
+
+    it(
+      'should not return related documents used for sorting even with allowAdditionalKeys true',
+      { db: 'mongo' },
+      async () => {
+        const simple = await payload.create({
+          collection: 'simple',
+          data: { text: 'sorted simple' },
+        })
+
+        const category = await payload.create({
+          collection: 'categories',
+          data: { simple: simple.id, title: 'sorted category' },
+        })
+
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { category: category.id, title: 'sorted post' },
+        })
+
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+
+        payload.db.allowAdditionalKeys = true
+
+        try {
+          for (const sort of ['category.title', 'category.simple.text']) {
+            const result = await payload.find({
+              collection: postsSlug,
+              depth: 0,
+              sort,
+              where: { id: { equals: post.id } },
+            })
+
+            expect(result.docs).toHaveLength(1)
+            expect(result.docs[0]).not.toHaveProperty('__category')
+            expect(result.docs[0]).not.toHaveProperty('____category')
+          }
+        } finally {
+          payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+          await payload.delete({ id: post.id, collection: postsSlug })
+          await payload.delete({ id: category.id, collection: 'categories' })
+          await payload.delete({ id: simple.id, collection: 'simple' })
+        }
+      },
+    )
   })
 
   it('should query hasMany select field with contains operator', async () => {
@@ -6018,6 +6198,40 @@ describe('database', () => {
     expect(res.blocks).toHaveLength(1)
     expect(res.blocks[0]?.nested).toHaveLength(1)
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
+  })
+
+  it('should delete nested block rows when their parent block is removed', async () => {
+    if (payload.db.name === 'mongoose') {
+      return
+    }
+
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        blocks: [{ blockType: 'block-third', nested: [{ blockType: 'block-fourth', nested: [] }] }],
+        title: 'title',
+      },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: 'posts',
+      data: { blocks: [] },
+      overrideAccess: true,
+    })
+
+    // Nested block rows reference the document, not their parent block, so they are not
+    // removed by a cascade. Left behind, they get merged into any block that later takes
+    // the same `_path`.
+    const db = payload.db as unknown as PostgresAdapter
+    const nestedTable = db.tables[db.tableNameMap.get('posts_blocks_block_fourth')!]!
+    const rows = await db.drizzle
+      .select()
+      .from(nestedTable)
+      .where(sql`${nestedTable._parentID} = ${post.id}`)
+
+    expect(rows).toHaveLength(0)
   })
 
   it('should ignore blocks that exist in the db but not in the config', async () => {

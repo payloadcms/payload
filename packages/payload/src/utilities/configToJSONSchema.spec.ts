@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import { compile } from 'json-schema-to-typescript'
 import { describe, it, expect } from 'vitest'
 
 import type { Config } from '../config/types.js'
@@ -8,6 +9,22 @@ import { configToJSONSchema } from './configToJSONSchema.js'
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
+  it('should generate never for empty supported timezones', async () => {
+    const config = await sanitizeConfig({
+      admin: {
+        timezones: {
+          defaultTimezone: 'Europe/London',
+          supportedTimezones: [],
+        },
+      },
+      collections: [],
+    } as Config)
+    const schema = configToJSONSchema(config, 'text')
+    const types = await compile(schema, 'Config', { unreachableDefinitions: true })
+
+    expect(types).toContain('export type SupportedTimezones = never;')
+  })
+
   it('should handle optional arrays with required fields', async () => {
     // @ts-expect-error
     const config: Config = {

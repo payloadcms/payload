@@ -2449,6 +2449,50 @@ describe('@payloadcms/plugin-import-export', () => {
         await payload.delete({ collection: 'pages', id: page.id })
       })
 
+      it('should preserve formula-prefixed values as text in CSV files', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: '=Quarterly total',
+            excerpt: '+Projected increase',
+            localized: '-Adjustment',
+            group: {
+              value: '@Owner',
+            },
+            _status: 'published',
+          },
+          locale: 'en',
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['title', 'excerpt', 'localized', 'group.value'],
+            format: 'csv',
+            locale: 'en',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        expect(data[0]).toMatchObject({
+          title: "'=Quarterly total",
+          excerpt: "'+Projected increase",
+          localized: "'-Adjustment",
+          group_value: "'@Owner",
+        })
+
+        await payload.delete({ collection: 'exports', id: doc.id })
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
       it('should preserve Hebrew characters in CSV download via streaming endpoint', async () => {
         const hebrewTitle = 'Hebrew BOM Test'
         const hebrewLocalized = 'בדיקה עברית'

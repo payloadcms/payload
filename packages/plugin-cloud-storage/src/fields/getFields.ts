@@ -6,7 +6,10 @@ import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 import { getBeforeChangeHook } from '../hooks/beforeChange.js'
-import { getNormalizeUploadPrefixFieldHook } from '../hooks/normalizeUploadPrefix.js'
+import {
+  getNormalizeUploadPrefixFieldHook,
+  getRestoreStoredPrefixFieldHook,
+} from '../hooks/normalizeUploadPrefix.js'
 
 interface Args {
   adapter?: GeneratedAdapter
@@ -227,6 +230,10 @@ export const getFields = ({
         beforeChange: [
           ...(existingPrefixField?.hooks?.beforeChange || []),
           getNormalizeUploadPrefixFieldHook({ collectionPrefix: prefix, useCompositePrefixes }),
+        ],
+        beforeValidate: [
+          getRestoreStoredPrefixFieldHook(),
+          ...(existingPrefixField?.hooks?.beforeValidate || []),
         ],
       },
     } as TextField)

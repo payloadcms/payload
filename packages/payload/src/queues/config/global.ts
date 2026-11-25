@@ -3,6 +3,8 @@ import type { GlobalConfig } from '../../globals/config/types.js'
 import type { TaskType } from './types/taskTypes.js'
 import type { WorkflowTypes } from './types/workflowTypes.js'
 
+import { defaultAdminPanelUserAccess } from '../../auth/defaultAdminPanelUserAccess.js'
+
 export const jobStatsGlobalSlug = 'payload-jobs-stats'
 
 /**
@@ -35,6 +37,10 @@ export type JobStats = {
 export const getJobStatsGlobal: (config: Config) => GlobalConfig = (config) => {
   return {
     slug: jobStatsGlobalSlug,
+    access: {
+      read: defaultAdminPanelUserAccess,
+      update: defaultAdminPanelUserAccess,
+    },
     admin: {
       group: 'System',
       hidden: true,

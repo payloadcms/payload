@@ -59,6 +59,14 @@ export const aggregatePaginate = async ({
     aggregation.push({ $limit: limit })
   }
 
+  const sortLookupAliases = getSortLookupAliases({ sortAggregation })
+
+  if (sortLookupAliases.length > 0) {
+    aggregation.push({
+      $project: Object.fromEntries(sortLookupAliases.map((alias) => [alias, 0])),
+    })
+  }
+
   if (joinAggregation) {
     for (const stage of joinAggregation) {
       aggregation.push(stage)
@@ -115,4 +123,25 @@ export const aggregatePaginate = async ({
   }
 
   return result
+}
+
+/**
+ * Relationship sorts join the full related document under a temporary alias.
+ * Each hop gets its own top-level field (`__author`, then `____author.org`),
+ * so the first segment of every alias is collected.
+ */
+const getSortLookupAliases = ({
+  sortAggregation,
+}: {
+  sortAggregation?: PipelineStage[]
+}): string[] => {
+  const aliases = new Set<string>()
+
+  for (const stage of sortAggregation ?? []) {
+    if ('$lookup' in stage && typeof stage.$lookup.as === 'string') {
+      aliases.add(stage.$lookup.as.split('.')[0]!)
+    }
+  }
+
+  return [...aliases]
 }

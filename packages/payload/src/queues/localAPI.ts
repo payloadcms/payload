@@ -60,8 +60,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           /**
            * If set to false, access control as defined in jobsConfig.access.queue will be run.
            * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
+           * Without a custom jobsConfig.access.queue, access is limited to the admin auth collection.
            *
            * @default true
            */
@@ -84,8 +83,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           /**
            * If set to false, access control as defined in jobsConfig.access.queue will be run.
            * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
+           * Without a custom jobsConfig.access.queue, access is limited to the admin auth collection.
            *
            * @default true
            */
@@ -114,7 +112,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
     if (!overrideAccess) {
       /**
-       * By default, jobsConfig.access.queue will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       * By default, jobsConfig.access.queue limits access to the admin auth collection.
        */
       const accessFn = payload.config.jobs?.access?.queue ?? (() => true)
       const hasAccess = await accessFn({ req })
@@ -264,8 +262,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     /**
      * If set to false, access control as defined in jobsConfig.access.run will be run.
      * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Without a custom jobsConfig.access.run, access is limited to the admin auth collection.
      *
      * @default true
      */
@@ -319,8 +316,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     /**
      * If set to false, access control as defined in jobsConfig.access.run will be run.
      * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Without a custom jobsConfig.access.run, access is limited to the admin auth collection.
      *
      * @default true
      */
@@ -350,8 +346,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     /**
      * If set to false, access control as defined in jobsConfig.access.cancel will be run.
      * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Without a custom jobsConfig.access.cancel, access is limited to the admin auth collection.
      *
      * @default true
      */
@@ -365,7 +360,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     const overrideAccess = args.overrideAccess !== false
     if (!overrideAccess) {
       /**
-       * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       * By default, jobsConfig.access.cancel limits access to the admin auth collection.
        */
       const accessFn = payload.config.jobs?.access?.cancel ?? (() => true)
       const hasAccess = await accessFn({ req })
@@ -419,8 +414,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     /**
      * If set to false, access control as defined in jobsConfig.access.cancel will be run.
      * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
+     * Without a custom jobsConfig.access.cancel, access is limited to the admin auth collection.
      *
      * @default true
      */
@@ -432,7 +426,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     const overrideAccess = args.overrideAccess !== false
     if (!overrideAccess) {
       /**
-       * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+       * By default, jobsConfig.access.cancel limits access to the admin auth collection.
        */
       const accessFn = payload.config.jobs?.access?.cancel ?? (() => true)
       const hasAccess = await accessFn({ req })
