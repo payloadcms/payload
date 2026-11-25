@@ -446,7 +446,7 @@ export type checkFileRestrictionsParams = {
  * A transformer that registered variants on a collection with `registerUploadVariants`.
  *
  * @experimental This shape can change in a minor release while transformers move onto the
- * variants hook.
+ * planned variants hook.
  */
 export type VariantsOwner = {
   /** The MIME patterns it makes variants for: its transformer's `mimeTypes`. */
@@ -464,7 +464,7 @@ export type SanitizedUploadConfig = {
    * has at most one owner for a MIME type. Written at startup by `registerUploadVariants`.
    *
    * @experimental This shape can change in a minor release while transformers move onto the
-   * variants hook.
+   * planned variants hook.
    */
   variantOwners?: VariantsOwner[]
   /**
