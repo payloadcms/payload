@@ -5,9 +5,9 @@ export function renderHelp({ command }: { command: string }): string {
 
 Commands:
   (none)              Run transforms only against [path] (default: cwd)
-  upgrade             Pick how to run the full v3 -> v4 upgrade
-  upgrade run         Bump Payload deps, install, then run transforms in cwd
-  upgrade prompt      Print the upgrade orchestration prompt
+  upgrade             Detect the project and choose an upgrade target
+  upgrade run         Preview and install compatible releases; migrate v3 -> v4 when selected
+  upgrade prompt      Print a project-specific upgrade prompt
 
 Transform options:
   --transform <name>  Run a single transform by name
@@ -17,9 +17,11 @@ Transform options:
 
 Upgrade options:
   --agent <name>      Coding agent to hand off to (claude, codex); skips the picker
-  --tag <dist-tag>    Dist-tag to resolve Payload versions from
+  --tag <target>      Exact Payload version or dist-tag (required without a terminal)
+  --package-manager <name>  Use npm, pnpm, yarn, or bun for installation
   --dry, --dry-run    Preview changes; write and install nothing
   --force             Skip the dirty-git-tree warning
+  --yes               Skip upgrade confirmation after preview; still choose a target
 
 General options:
   -h, --help          Show this help

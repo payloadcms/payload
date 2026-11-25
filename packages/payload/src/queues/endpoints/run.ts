@@ -2,8 +2,8 @@ import type { Endpoint } from '../../config/types.js'
 import type { SanitizedJobsConfig } from '../config/types/index.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { stripUserOnCrossSiteNavigation } from '../../auth/stripUserOnCrossSiteNavigation.js'
 import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
-import { ignoreCrossSiteNavigationUser } from './ignoreCrossSiteNavigationUser.js'
 
 /**
  * /api/payload-jobs/run endpoint
@@ -23,7 +23,7 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    ignoreCrossSiteNavigationUser(req)
+    stripUserOnCrossSiteNavigation(req)
 
     const accessFn = jobsConfig.access?.run ?? defaultAccess
 

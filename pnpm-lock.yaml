@@ -348,6 +348,9 @@ importers:
       oxfmt:
         specifier: ^0.73.0
         version: 0.73.0
+      semver:
+        specifier: ^7.8.5
+        version: 7.8.5
       tar:
         specifier: ^7.5.22
         version: 7.5.22
@@ -367,6 +370,9 @@ importers:
       '@types/node':
         specifier: 24.12.3
         version: 24.12.3
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.8.0
 
   packages/db-d1-sqlite:
     dependencies:
