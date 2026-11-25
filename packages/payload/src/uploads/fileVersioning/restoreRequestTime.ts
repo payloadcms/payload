@@ -87,9 +87,12 @@ export async function runRequestTimeFileRestore<T>({
       roles.flatMap((role) => (role.type === 'size' ? [role.sizeKey] : [])),
     ),
   )
+  const getOwnerSlug = (variantName: string) =>
+    getVariantOwner({ mimeType: original.mimeType, upload: collection.upload, variantName })?.slug
+  // A variant with no owner for this file's MIME type is not made for it, as at upload.
   const unstoredVariantNames = (collection.upload.variants ?? [])
     .map(({ name }) => name)
-    .filter((name) => !storedVariantNames.has(name))
+    .filter((name) => !storedVariantNames.has(name) && getOwnerSlug(name) !== undefined)
   const selectedVariants = (selected.variants ?? {}) as Record<string, JsonObject | null>
   const hasRequestTimeVariant = unstoredVariantNames.some((name) =>
     isRequestTimeFile({ entry: selectedVariants[name] }),
@@ -112,11 +115,7 @@ export async function runRequestTimeFileRestore<T>({
     unstoredVariantNames.every((variantName) =>
       areVariantsBuildableAtRequest({
         requestTimeBuild: restoreBuild,
-        variantsOwnerSlug: getVariantOwner({
-          mimeType: original.mimeType,
-          upload: collection.upload,
-          variantName,
-        })?.slug,
+        variantsOwnerSlug: getOwnerSlug(variantName),
       }),
     )
 

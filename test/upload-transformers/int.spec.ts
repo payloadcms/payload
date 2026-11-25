@@ -543,5 +543,38 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
       expect(doc.variants.thumbnail?._stored).not.toBe(false)
       expect(doc.variants.thumbnail?.filename ?? null).toBeNull()
     })
+
+    test("should restore a PDF version when Sharp's variants have no owner for PDFs", async () => {
+      const created = await uploadFixture({
+        collection: severalOwnersMediaSlug,
+        fixture: 'test-pdf.pdf',
+      })
+
+      await payload.update({
+        id: created.id,
+        collection: severalOwnersMediaSlug,
+        data: {},
+        overrideAccess: true,
+      })
+
+      const { docs: versions } = await payload.findVersions({
+        collection: severalOwnersMediaSlug,
+        overrideAccess: true,
+        sort: 'createdAt',
+        where: { parent: { equals: created.id } },
+      })
+
+      const restored = (await payload.restoreVersion({
+        id: versions[0]!.id,
+        collection: severalOwnersMediaSlug,
+        overrideAccess: true,
+      })) as unknown as SeveralOwnersDoc
+
+      expect(restored.variants.preview).toMatchObject({
+        _stored: false,
+        filename: expect.stringMatching(/-preview\.pdf$/),
+      })
+      expect(restored.variants.thumbnail?.filename ?? null).toBeNull()
+    })
   })
 })

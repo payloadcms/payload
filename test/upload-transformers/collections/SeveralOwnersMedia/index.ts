@@ -18,5 +18,5 @@ export const SeveralOwnersMedia: CollectionConfig = {
   upload: {
     staticDir: path.resolve(dirname, '../../media'),
   },
-  versions: false,
+  versions: true,
 }
