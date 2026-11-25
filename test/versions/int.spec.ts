@@ -624,7 +624,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
         expect(countAfterSecond.totalDocs).toBe(countAfterFirst.totalDocs)
 
-        // Third autosave — still same count
+        // Third autosave â€” still same count
         await payload.update({
           id: published.id,
           autosave: true,
@@ -735,7 +735,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        // description is required but missing — duplicate should still succeed as a draft
+        // description is required but missing â€” duplicate should still succeed as a draft
         const duplicatedDoc = await payload.duplicate({
           id: originalDoc.id,
           collection: draftCollectionSlug,
@@ -2516,7 +2516,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           .spyOn(payload.db, 'updateVersion')
           .mockRejectedValueOnce(new Error('concurrent update conflict'))
 
-        // Should not throw — updateLatestVersion catches the error and saveVersion falls back to createVersion
+        // Should not throw â€” updateLatestVersion catches the error and saveVersion falls back to createVersion
         const result = await payload.update({
           id: doc.id,
           autosave: true,
@@ -2537,8 +2537,8 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           where: { parent: { equals: doc.id } },
         })
 
-        // create → 1 version, first autosave updates in place → still 1 version on autosave collection (it creates a new autosave),
-        // second autosave failed update → fell back to create → one extra version
+        // create â†’ 1 version, first autosave updates in place â†’ still 1 version on autosave collection (it creates a new autosave),
+        // second autosave failed update â†’ fell back to create â†’ one extra version
         expect(totalDocs).toBeGreaterThan(1)
 
         await cleanupDocuments({
@@ -5477,12 +5477,13 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         }),
       ).rejects.toMatchObject({ status: 403 })
 
-      // A job queued before the user lost access must still be denied when it runs
+      // Queue directly to verify the job itself also enforces the scheduling user's access
       const queuedJob = await payload.jobs.queue({
         input: {
+          type: 'publish',
           doc: {
             relationTo: draftCollectionSlug,
-            value: draft.id,
+            value: String(draft.id),
           },
           locale: 'en',
           user: {
@@ -6125,34 +6126,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(newJobs).toEqual([])
       })
 
-      test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
-        const req = await createPayloadRequest({ payload, user })
-        const unrelatedJob = await payload.db.create({
-          collection: 'payload-jobs',
-          data: {
-            input: {},
-            taskSlug: 'inline',
-          },
-        })
-
-        await schedulePublishHandler({
-          deleteID: unrelatedJob.id,
-          req,
-          user,
-        })
-
-        const result = await payload.findByID({
-          id: unrelatedJob.id,
-          collection: 'payload-jobs',
-          overrideAccess: true,
-        })
-
-        expect(result.id).toBe(unrelatedJob.id)
-      })
-
-      test('should not schedule publish for a document without publish permission', async ({
-        payload,
-      }) => {
+      test('should not schedule a publish without publish permission', async ({ payload }) => {
         const req = await createPayloadRequest({ payload, user })
 
         await payload.update({
@@ -6170,7 +6144,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             date: new Date(Date.now() + 60_000),
             doc: {
               relationTo: draftCollectionSlug,
-              value: draftDoc.id,
+              value: String(draftDoc.id),
             },
             req,
             user,
@@ -6181,13 +6155,94 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           collection: 'payload-jobs',
           overrideAccess: true,
           where: {
-            taskSlug: {
-              equals: 'schedulePublish',
+            'input.doc.value': {
+              equals: String(draftDoc.id),
             },
           },
         })
 
         expect(totalDocs).toBe(0)
+      })
+
+      test('should not cancel a scheduled publish without publish permission', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await schedulePublishHandler({
+          type: 'unpublish',
+          date: new Date(Date.now() + 60_000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: String(draftDoc.id),
+          },
+          req,
+          user,
+        })
+
+        const [scheduledJob] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: {
+              'input.doc.value': {
+                equals: String(draftDoc.id),
+              },
+            },
+          })
+        ).docs
+
+        await payload.update({
+          id: draftDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            restrictedToUpdate: true,
+          },
+          overrideAccess: true,
+        })
+
+        await expect(
+          schedulePublishHandler({
+            deleteID: scheduledJob.id,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const result = await payload.findByID({
+          id: scheduledJob.id,
+          collection: 'payload-jobs',
+          overrideAccess: true,
+        })
+
+        expect(result.id).toBe(scheduledJob.id)
+      })
+
+      test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const unrelatedJob = await payload.db.create({
+          collection: 'payload-jobs',
+          data: {
+            input: {},
+            taskSlug: 'inline',
+          },
+        })
+
+        await expect(
+          schedulePublishHandler({
+            deleteID: unrelatedJob.id,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const result = await payload.findByID({
+          id: unrelatedJob.id,
+          collection: 'payload-jobs',
+          overrideAccess: true,
+        })
+
+        expect(result.id).toBe(unrelatedJob.id)
       })
 
       test('should not schedule publish for a collection without scheduled publish enabled', async ({
@@ -6231,62 +6286,6 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             user,
           }),
         ).rejects.toMatchObject({ status: 403 })
-      })
-
-      test('should not delete a scheduled publish event for a document without publish permission', async ({
-        payload,
-      }) => {
-        const req = await createPayloadRequest({ payload, user })
-
-        await schedulePublishHandler({
-          type: 'publish',
-          date: new Date(Date.now() + 60_000),
-          doc: {
-            relationTo: draftCollectionSlug,
-            value: draftDoc.id,
-          },
-          req,
-          user,
-        })
-
-        const [scheduledJob] = (
-          await payload.find({
-            collection: 'payload-jobs',
-            overrideAccess: true,
-            where: {
-              taskSlug: {
-                equals: 'schedulePublish',
-              },
-            },
-          })
-        ).docs
-
-        expect(scheduledJob).toBeDefined()
-
-        await payload.update({
-          id: draftDoc.id,
-          collection: draftCollectionSlug,
-          data: {
-            restrictedToUpdate: true,
-          },
-          overrideAccess: true,
-        })
-
-        await expect(
-          schedulePublishHandler({
-            deleteID: scheduledJob!.id,
-            req,
-            user,
-          }),
-        ).rejects.toMatchObject({ status: 403 })
-
-        const result = await payload.findByID({
-          id: scheduledJob!.id,
-          collection: 'payload-jobs',
-          overrideAccess: true,
-        })
-
-        expect(result.id).toBe(scheduledJob!.id)
       })
 
       test('should not schedule global publish without publish permission', async ({ payload }) => {

@@ -90,14 +90,10 @@ describe('extractJWT', () => {
 
       it('rejects a navigation with an unsafe method', () => {
         const headers = makeHeaders(navigationHeaders)
+        const req = { headers, method: 'POST', payload } as PayloadRequest
 
-        expect(
-          extractJWT({
-            headers,
-            payload,
-            req: { method: 'POST' } as PayloadRequest,
-          }),
-        ).toBeNull()
+        expect(extractJWT(req)).toBeNull()
+        expect(extractJWT({ headers, payload, req })).toBeNull()
       })
 
       it('rejects a navigation into a frame', () => {

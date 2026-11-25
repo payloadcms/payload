@@ -1,7 +1,7 @@
-import type { Where } from 'payload'
+import type { FlattenedField, Where } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated, QueryError } from 'payload'
+import { createArrayFromCommaDelineated, getFieldByPath, QueryError } from 'payload'
 
 type ResolvedCollectionCondition =
   | { matches: 'all-documents' }
@@ -10,12 +10,12 @@ type ResolvedCollectionCondition =
 
 export function resolveWhereForCollection({
   collectionSlug,
-  fieldNames,
+  flattenedFields,
   usesObjectIDs,
   where,
 }: {
   collectionSlug: string
-  fieldNames: Set<string>
+  flattenedFields: FlattenedField[]
   usesObjectIDs: boolean
   where: Where
 }): ResolvedCollectionCondition {
@@ -31,7 +31,7 @@ export function resolveWhereForCollection({
           conditions: value.map((nestedWhere) =>
             resolveWhereForCollection({
               collectionSlug,
-              fieldNames,
+              flattenedFields,
               usesObjectIDs,
               where: nestedWhere,
             }),
@@ -55,8 +55,11 @@ export function resolveWhereForCollection({
       continue
     }
 
-    // Preserve the fallback reader's treatment of unavailable fields as nonmatching.
-    if (key !== 'id' && !fieldNames.has(key)) {
+    // Missing fields remain nonmatching; valid nested fields keep their original constraints.
+    if (
+      key !== 'id' &&
+      !hasConfiguredFieldPath({ flattenedFields, path: key.replace(/__/g, '.') })
+    ) {
       return { matches: 'no-documents' }
     }
 
@@ -81,6 +84,30 @@ export function resolveWhereForCollection({
   }
 
   return combineConditions({ conditions, operator: 'and' })
+}
+
+function hasConfiguredFieldPath({
+  flattenedFields,
+  path,
+}: {
+  flattenedFields: FlattenedField[]
+  path: string
+}): boolean {
+  const segments = path.split('.')
+
+  for (let index = 1; index < segments.length; index++) {
+    const container = getFieldByPath({
+      fields: flattenedFields,
+      path: segments.slice(0, index).join('.'),
+    })?.field
+
+    // Each parent in the path must contain nested fields; a matching sibling does not count.
+    if (!container || !('flattenedFields' in container)) {
+      return false
+    }
+  }
+
+  return Boolean(getFieldByPath({ fields: flattenedFields, path }))
 }
 
 function combineConditions({
