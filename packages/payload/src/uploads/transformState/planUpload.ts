@@ -217,9 +217,10 @@ async function getVariantsOwnerThatBuildsAtRequest({
 }
 
 /**
- * The plan without the upload bridges that do not own the collection. The transformer that
- * registered the sizes owns the collection's files, so a bridge must not build a main file that
- * differs from those sizes. A bridge that the collection is configured on still runs.
+ * The plan without the upload bridges that are not the variants owner for this file. The owner
+ * that builds this MIME type's variants at request time also builds the main file, so a bridge
+ * must not build a main file that differs from those variants. The owner and a bridge that the
+ * collection is configured on still run.
  */
 function withoutBridgesThatDoNotOwnCollection({
   collectionSlug,

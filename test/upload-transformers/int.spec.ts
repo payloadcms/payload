@@ -17,6 +17,7 @@ import {
   outsideFitMediaSlug,
   requestVariantsMediaSlug,
   resizePreviewMediaSlug,
+  severalOwnersMediaSlug,
   transformerMediaSlug,
   usersSlug,
   variantMediaSlug,
@@ -507,6 +508,40 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
         filename: 'image-50x50.webp',
         mimeType: 'image/webp',
       })
+    })
+  })
+
+  test.describe('Several variants owners', () => {
+    type SeveralOwnersDoc = {
+      variants: Record<
+        'preview' | 'thumbnail',
+        { _stored?: boolean | null; filename?: null | string; width?: null | number } | null
+      >
+    }
+
+    test("should store Sharp's image variants when a request-time owner makes variants for PDFs", async () => {
+      const doc = (await uploadFixture({
+        collection: severalOwnersMediaSlug,
+        fixture: 'image.png',
+      })) as unknown as SeveralOwnersDoc
+
+      expect(doc.variants.thumbnail).toMatchObject({ filename: 'image-100x100.png', width: 100 })
+      expect(doc.variants.thumbnail?._stored).not.toBe(false)
+      expect(doc.variants.preview?._stored).not.toBe(false)
+    })
+
+    test("should save request-time entries for a PDF only for the request-time owner's variants", async () => {
+      const doc = (await uploadFixture({
+        collection: severalOwnersMediaSlug,
+        fixture: 'test-pdf.pdf',
+      })) as unknown as SeveralOwnersDoc
+
+      expect(doc.variants.preview).toMatchObject({
+        _stored: false,
+        filename: expect.stringMatching(/-preview\.pdf$/),
+      })
+      expect(doc.variants.thumbnail?._stored).not.toBe(false)
+      expect(doc.variants.thumbnail?.filename ?? null).toBeNull()
     })
   })
 })

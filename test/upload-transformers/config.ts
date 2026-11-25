@@ -9,6 +9,7 @@ import { ConvertedVariantMedia } from './collections/ConvertedVariantMedia/index
 import { OutsideFitMedia } from './collections/OutsideFitMedia/index.js'
 import { RequestVariantsMedia } from './collections/RequestVariantsMedia/index.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
+import { SeveralOwnersMedia } from './collections/SeveralOwnersMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
 import { VariantMedia } from './collections/VariantMedia/index.js'
 import { contractTransformers } from './contractFixtures.js'
@@ -16,10 +17,12 @@ import {
   convertedVariantMediaSlug,
   outsideFitMediaSlug,
   resizePreviewMediaSlug,
+  severalOwnersMediaSlug,
   variantMediaSlug,
 } from './shared.js'
 import {
   countingDynamicOnlySharp,
+  pdfPreviewTransformer,
   requestVariantsTransformer,
   testTransformers,
 } from './transformerFixtures.js'
@@ -42,6 +45,7 @@ export default buildConfigWithDefaults({
       VariantMedia,
       ConvertedVariantMedia,
       RequestVariantsMedia,
+      SeveralOwnersMedia,
       ContractMedia,
     ],
     typescript: {
@@ -66,11 +70,15 @@ export default buildConfigWithDefaults({
                 { name: 'webp', formatOptions: { format: 'webp' }, height: 50, width: 50 },
               ],
             },
+            [severalOwnersMediaSlug]: {
+              variants: [{ name: 'thumbnail', height: 100, width: 100 }],
+            },
           },
         }),
         requestVariantsTransformer,
         ...testTransformers,
         ...contractTransformers,
+        pdfPreviewTransformer,
       ],
     },
   },

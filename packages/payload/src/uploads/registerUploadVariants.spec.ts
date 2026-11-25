@@ -174,6 +174,29 @@ describe('registerUploadVariants', () => {
     )
   })
 
+  it.for([
+    { name: 'no admin options and empty ones', first: undefined, second: {} },
+    {
+      name: 'the same admin options in another key order',
+      first: { disabled: { column: true, filter: false } },
+      second: { disabled: { filter: false, column: true } },
+    },
+  ])('should accept two owners of one name with $name', ({ first, second }) => {
+    const config = registerUploadVariants({
+      collections: { media: { variants: [{ name: 'thumbnail', admin: first }] } },
+      config: makeConfig(),
+      transformerSlug: 'sharp',
+    })
+
+    expect(() =>
+      registerUploadVariants({
+        collections: { media: { variants: [{ name: 'thumbnail', admin: second }] } },
+        config,
+        transformerSlug: 'video',
+      }),
+    ).not.toThrow()
+  })
+
   it('should throw when one transformer registers the same collection twice', () => {
     expect(() =>
       registerAll([

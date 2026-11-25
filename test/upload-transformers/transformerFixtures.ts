@@ -3,7 +3,7 @@ import type { UploadTransformer } from 'payload'
 import { registerUploadVariants } from 'payload'
 import sharp from 'sharp'
 
-import { requestVariantsMediaSlug } from './shared.js'
+import { requestVariantsMediaSlug, severalOwnersMediaSlug } from './shared.js'
 
 /**
  * Call counters for the fake transformers below, reset by each test that needs
@@ -202,6 +202,29 @@ export const requestVariantsTransformer: UploadTransformer = {
     }),
   // Not JPEG, so a test can upload a file that this transformer cannot build at request time.
   mimeTypes: ['image/png'],
+}
+
+/**
+ * Registers a `preview` variant for PDFs and builds it from the original when it is requested, as
+ * a document preview service would. It never runs at upload.
+ */
+export const pdfPreviewTransformer: UploadTransformer = {
+  slug: 'pdf-preview',
+  canTransform: ({ collectionSlug, operation, purpose }) =>
+    collectionSlug === severalOwnersMediaSlug &&
+    operation === 'request' &&
+    purpose === 'persisted-default',
+  handleRequest: async ({ getOriginalFile }) => ({
+    response: await getOriginalFile(),
+    status: 'continue',
+  }),
+  init: (config) =>
+    registerUploadVariants({
+      collections: { [severalOwnersMediaSlug]: { variants: [{ name: 'preview' }] } },
+      config,
+      transformerSlug: 'pdf-preview',
+    }),
+  mimeTypes: ['application/pdf'],
 }
 
 export const testTransformers: UploadTransformer[] = [

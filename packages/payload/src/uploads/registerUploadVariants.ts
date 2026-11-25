@@ -204,7 +204,7 @@ function getOwnerErrors({
 
       if (
         existing &&
-        (JSON.stringify(existing.admin) !== JSON.stringify(variant.admin) ||
+        (!areSameAdminOptions({ a: existing.admin, b: variant.admin }) ||
           existing.generateImageName !== variant.generateImageName)
       ) {
         errors.push(
@@ -215,6 +215,33 @@ function getOwnerErrors({
   }
 
   return errors
+}
+
+/**
+ * Whether two `admin` options are the same, whatever the order of their keys. A missing value and
+ * an empty object are the same, as are a key set to `undefined` and a missing key.
+ */
+function areSameAdminOptions({ a, b }: { a: unknown; b: unknown }): boolean {
+  const isAObject = isPlainObject(a)
+  const isBObject = isPlainObject(b)
+
+  if (!isAObject && !isBObject) {
+    return a === b
+  }
+
+  if ((!isAObject && a !== undefined) || (!isBObject && b !== undefined)) {
+    return false
+  }
+
+  const aObject = isAObject ? a : {}
+  const bObject = isBObject ? b : {}
+  const keys = new Set([...Object.keys(aObject), ...Object.keys(bObject)])
+
+  return [...keys].every((key) => areSameAdminOptions({ a: aObject[key], b: bObject[key] }))
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 /** The first pattern in `a` that one MIME type can match together with a pattern in `b`. */
