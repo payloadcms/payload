@@ -5,6 +5,7 @@ import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/s
 import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
+import { getJoinedHierarchyDocumentsHandler } from '../views/List/getJoinedHierarchyDocuments.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { getActivityWidgetDocsHandler } from '../widgets/Activity/utils/getActivityWidgetDocs.js'
 import { buildFormStateHandler } from './buildFormState.js'
@@ -32,6 +33,7 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'form-state': buildFormStateHandler,
   'get-activity-widget-docs': getActivityWidgetDocsHandler,
   'get-default-layout': getDefaultLayoutHandler,
+  'get-joined-hierarchy-documents': getJoinedHierarchyDocumentsHandler,
   'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,

@@ -1,6 +1,6 @@
 'use client'
 
-import type { PaginatedDocs, Where } from 'payload'
+import type { HierarchyViewData, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -11,7 +11,7 @@ import {
   isImage,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { HierarchyDocument } from '../../../elements/Hierarchy/Tree/types.js'
@@ -19,6 +19,7 @@ import type { DocumentLayout } from '../../../elements/LayoutToggle/index.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
@@ -54,8 +55,6 @@ const CollectionCell: SlotColumn<TableRow>['Cell'] = ({ row }) => (
 )
 
 export type HierarchyTableProps = {
-  /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
-  baseFilter?: Where
   childrenData?: PaginatedDocs<HierarchyDocument>
   /** Collections available for creation (for empty state) */
   collections?: CollectionOption[]
@@ -64,32 +63,34 @@ export type HierarchyTableProps = {
   /** Resolved hierarchy icon component */
   HierarchyIcon?: React.ReactNode
   hierarchyLabel: string
+  isLoadingDocuments?: boolean
+  joinedDocuments?: HierarchyViewData['joinedDocuments']
   layout?: DocumentLayout
-  parentFieldName?: string
+  onLoadMoreDocuments?: (onLastPage: () => void) => void
   parentId: null | number | string
   /** Base filters for related collections (keyed by collection slug) */
   relatedBaseFilters?: Record<string, Where>
   relatedGroups: RelatedGroup[]
   search?: string
-  useAsTitle: string
 }
 
 export function HierarchyTable({
-  baseFilter,
   childrenData,
   collections,
   collectionSlug,
   hasCreatePermission,
   HierarchyIcon,
   hierarchyLabel,
+  isLoadingDocuments,
+  joinedDocuments,
   layout = 'table',
-  parentFieldName,
+  onLoadMoreDocuments,
   parentId,
   relatedBaseFilters,
   relatedGroups,
   search,
-  useAsTitle,
 }: HierarchyTableProps) {
+  const resultsRef = useRef<HTMLDivElement>(null)
   const { i18n, t } = useTranslation()
   const { clearRouteCache } = useRouteCache()
   const {
@@ -100,18 +101,7 @@ export function HierarchyTable({
     getEntityConfig,
   } = useConfig()
 
-  // Children pagination state
-  const [childDocs, setChildDocs] = useState(childrenData?.docs || [])
-  const [childPaginationData, setChildPaginationData] = useState<Partial<PaginatedDocs>>({
-    hasNextPage: childrenData?.hasNextPage || false,
-    hasPrevPage: childrenData?.hasPrevPage || false,
-    limit: childrenData?.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
-    page: childrenData?.page || 1,
-    pagingCounter: childrenData?.pagingCounter || 1,
-    totalDocs: childrenData?.totalDocs || 0,
-    totalPages: childrenData?.totalPages || 1,
-  })
-  const [childLoading, setChildLoading] = useState(false)
+  const childDocs = childrenData?.docs
 
   // Related groups pagination state (per collection)
   const [relatedState, setRelatedState] = useState<
@@ -154,75 +144,6 @@ export function HierarchyTable({
       return locked ? row._userEditing : undefined
     },
     [isLocked],
-  )
-
-  // Page change for children
-  const handlePageChangeChildren = useCallback(
-    async (page: number) => {
-      if (childLoading) {
-        return
-      }
-
-      setChildLoading(true)
-
-      try {
-        const parentCondition = parentId
-          ? { [parentFieldName]: { equals: parentId } }
-          : {
-              or: [
-                { [parentFieldName]: { exists: false } },
-                { [parentFieldName]: { equals: null } },
-              ],
-            }
-
-        const searchCondition = search ? { [useAsTitle]: { like: search } } : undefined
-        const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
-
-        const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
-          { addQueryPrefix: true },
-        )
-        const url = formatAdminURL({
-          apiRoute,
-          path: `/${collectionSlug}${queryString}`,
-          serverURL,
-        })
-
-        const response = await fetch(url, { credentials: 'include' })
-
-        if (!response.ok) {
-          throw new Error('Failed to load page')
-        }
-
-        const result: PaginatedDocs = await response.json()
-
-        setChildDocs(result.docs)
-        setChildPaginationData({
-          hasNextPage: result.hasNextPage,
-          hasPrevPage: result.hasPrevPage,
-          limit: result.limit,
-          page: result.page,
-          pagingCounter: result.pagingCounter,
-          totalDocs: result.totalDocs,
-          totalPages: result.totalPages,
-        })
-      } catch (_error) {
-        // Silently fail
-      } finally {
-        setChildLoading(false)
-      }
-    },
-    [
-      apiRoute,
-      baseFilter,
-      childLoading,
-      collectionSlug,
-      parentFieldName,
-      parentId,
-      search,
-      serverURL,
-      useAsTitle,
-    ],
   )
 
   // Page change for a related collection
@@ -317,7 +238,6 @@ export function HierarchyTable({
     [
       apiRoute,
       getEntityConfig,
-      parentFieldName,
       parentId,
       relatedBaseFilters,
       relatedGroups,
@@ -349,7 +269,7 @@ export function HierarchyTable({
   // Build children data for table
   const childTableData: TableRow[] = useMemo(
     () =>
-      childDocs.map((doc) => ({
+      childDocs?.map((doc) => ({
         ...doc,
         id: doc.id,
         _allowedCollections: allowedCollectionsFieldName
@@ -359,24 +279,20 @@ export function HierarchyTable({
         _collectionSlug: collectionSlug,
         _hasChildren: Boolean(doc._hasChildren),
         _hierarchyIcon: HierarchyIcon,
-      })),
+      })) ?? [],
     [HierarchyIcon, allowedCollectionsFieldName, childDocs, childrenLabel, collectionSlug],
   )
 
-  const hasChildren = (childPaginationData.totalDocs || 0) > 0
-  const hasRelated = relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
+  const hasChildren = childTableData.length > 0
+  const hasRelated = joinedDocuments
+    ? joinedDocuments.docs.length > 0
+    : relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
 
   // Unified groups array
   type GroupState = {
     docs: TableRow[]
-    isChildren: boolean
-    isHierarchyEnabled: boolean
-    isLoading: boolean
     label: string
-    onCheckboxChange: (row: TableRow) => void
-    onPageChange: (page: number) => void
-    onSelectAllChange: () => void
-    paginationData: PaginatedDocs
+    pagination?: { data: PaginatedDocs; onChange: (page: number) => void }
     slug: string
   }
 
@@ -388,30 +304,7 @@ export function HierarchyTable({
       groups.push({
         slug: collectionSlug,
         docs: childTableData,
-        isChildren: true,
-        isHierarchyEnabled: true,
-        isLoading: childLoading,
         label: childrenLabel,
-        onCheckboxChange: (row: TableRow) =>
-          toggleSelection({
-            id: row.id,
-            collectionSlug,
-            metadata: {
-              allowedCollections: row._allowedCollections as string[] | undefined,
-            },
-          }),
-        onPageChange: (page: number) => void handlePageChangeChildren(page),
-        onSelectAllChange: () => toggleAllInCollection({ collectionSlug }),
-        paginationData: {
-          docs: childDocs,
-          hasNextPage: childPaginationData.hasNextPage || false,
-          hasPrevPage: childPaginationData.hasPrevPage || false,
-          limit: childPaginationData.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
-          page: childPaginationData.page || 1,
-          pagingCounter: childPaginationData.pagingCounter || 1,
-          totalDocs: childPaginationData.totalDocs || 0,
-          totalPages: childPaginationData.totalPages || 1,
-        },
       })
     }
 
@@ -435,49 +328,94 @@ export function HierarchyTable({
       groups.push({
         slug: group.collectionSlug,
         docs: relatedTableData,
-        isChildren: false,
-        isHierarchyEnabled: false,
-        isLoading: state.isLoading,
         label: relatedLabel,
-        onCheckboxChange: (row: TableRow) =>
-          toggleSelection({
-            id: row.id,
-            collectionSlug: group.collectionSlug,
-            metadata: {}, // Related items don't have allowedCollections - their collection slug is the constraint
-          }),
-        onPageChange: (page: number) => void handlePageChangeRelated(group.collectionSlug, page),
-        onSelectAllChange: () => toggleAllInCollection({ collectionSlug: group.collectionSlug }),
-        paginationData: {
-          docs: state.docs || [],
-          hasNextPage: state.hasNextPage || false,
-          hasPrevPage: state.hasPrevPage || false,
-          limit: state.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
-          page: state.page || 1,
-          pagingCounter: state.pagingCounter || 1,
-          totalDocs: state.totalDocs || 0,
-          totalPages: state.totalPages || 1,
+        pagination: {
+          data: {
+            docs: state.docs || [],
+            hasNextPage: state.hasNextPage || false,
+            hasPrevPage: state.hasPrevPage || false,
+            limit: state.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
+            page: state.page || 1,
+            pagingCounter: state.pagingCounter || 1,
+            totalDocs: state.totalDocs || 0,
+            totalPages: state.totalPages || 1,
+          },
+          onChange: (page: number) => void handlePageChangeRelated(group.collectionSlug, page),
         },
       })
     }
 
     return groups
   }, [
-    childDocs,
-    childLoading,
-    childPaginationData,
     childrenLabel,
     childTableData,
     collectionSlug,
     getEntityConfig,
-    handlePageChangeChildren,
     handlePageChangeRelated,
     hasChildren,
     i18n,
     relatedGroups,
     relatedState,
-    toggleAllInCollection,
-    toggleSelection,
   ])
+
+  const combinedRows = useMemo(
+    () => [
+      ...allGroups.flatMap((group) => group.docs),
+      ...(joinedDocuments?.docs ?? []).map((doc): TableRow => ({
+        ...doc,
+        _collectionLabel:
+          getTranslation(
+            getEntityConfig({ collectionSlug: doc._collectionSlug })?.labels?.plural,
+            i18n,
+          ) || doc._collectionSlug,
+        _userEditing: doc._userEditing as TableRow['_userEditing'],
+      })),
+    ],
+    [allGroups, getEntityConfig, i18n, joinedDocuments],
+  )
+  const documentRows = useMemo(
+    () => combinedRows.filter((row) => row._collectionSlug !== collectionSlug),
+    [collectionSlug, combinedRows],
+  )
+
+  const handleCheckboxChange = useCallback(
+    (row: TableRow) => {
+      toggleSelection({
+        id: row.id,
+        collectionSlug: row._collectionSlug,
+        metadata: { allowedCollections: row._allowedCollections as string[] | undefined },
+      })
+    },
+    [toggleSelection],
+  )
+
+  const handleSelectAllChange = useCallback(
+    (checked: boolean) => {
+      for (const row of combinedRows) {
+        if (
+          !isLocked({ id: row.id, collectionSlug: row._collectionSlug }) &&
+          isSelected({ id: row.id, collectionSlug: row._collectionSlug }) !== checked
+        ) {
+          handleCheckboxChange(row)
+        }
+      }
+    },
+    [combinedRows, handleCheckboxChange, isLocked, isSelected],
+  )
+
+  const getRowSelectionLabel = useCallback(
+    (row: TableRow) => {
+      const titleField = getEntityConfig({ collectionSlug: row._collectionSlug })?.admin?.useAsTitle
+      const rawTitle = titleField ? row[titleField] : row.id
+      const title =
+        typeof rawTitle === 'string' || typeof rawTitle === 'number'
+          ? String(rawTitle)
+          : String(row.id)
+
+      return t('general:selectLabel', { label: `${row._collectionLabel}: ${title}` })
+    },
+    [getEntityConfig, t],
+  )
 
   const hierarchyConfig = getEntityConfig({ collectionSlug })?.hierarchy
   const isFolder =
@@ -513,6 +451,73 @@ export function HierarchyTable({
     [t],
   )
 
+  const getGridItemClassName = (row: TableRow) =>
+    isSelected({ id: row.id, collectionSlug: row._collectionSlug })
+      ? 'card-grid__item--selected'
+      : undefined
+
+  const getRowKey = (row: TableRow) =>
+    joinedDocuments ? `${row._collectionSlug}:${row.id}` : row.id
+
+  const renderGridCard = (row: TableRow) => {
+    const isHierarchyItem = row._collectionSlug === collectionSlug
+    const config = getEntityConfig({ collectionSlug: row._collectionSlug })
+    const titleField = config?.admin?.useAsTitle || 'id'
+    const rawTitle = row[titleField]
+    const title =
+      typeof rawTitle === 'string' || typeof rawTitle === 'number'
+        ? String(rawTitle)
+        : String(row.id)
+    const editURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${row._collectionSlug}/${encodeURIComponent(String(row.id))}`,
+    })
+    const hierarchyURL = getHierarchyListURL({
+      adminRoute,
+      collectionSlug,
+      parentFieldName: hierarchyParentFieldName,
+      parentID: row.id,
+    })
+    const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
+    const thumbnailSrc =
+      !isHierarchyItem && mimeType && isImage(mimeType)
+        ? getBestFitFromSizes({
+            sizes: row.sizes as Record<string, { url?: string; width?: number }>,
+            thumbnailURL: row.thumbnailURL as string,
+            url: row.url as string,
+            width: row.width as number,
+          })
+        : !isHierarchyItem && typeof row.thumbnailURL === 'string'
+          ? row.thumbnailURL
+          : undefined
+    const isRowLocked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+
+    return (
+      <DocumentCard
+        href={isHierarchyItem ? hierarchyURL : editURL}
+        isSelected={isSelected({ id: row.id, collectionSlug: row._collectionSlug })}
+        onSelect={isRowLocked ? undefined : () => handleCheckboxChange(row)}
+        placeholder={
+          isHierarchyItem ? (
+            (row._hierarchyIcon ?? (isFolder ? <FolderIcon /> : <TagIcon />))
+          ) : (
+            <DocumentIcon />
+          )
+        }
+        thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
+        title={title}
+      >
+        {isHierarchyItem ? (
+          <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
+            {t('general:edit')}
+          </Link>
+        ) : (
+          row._collectionLabel
+        )}
+      </DocumentCard>
+    )
+  }
+
   if (!hasChildren && !hasRelated) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
 
@@ -538,108 +543,118 @@ export function HierarchyTable({
     )
   }
 
-  return (
-    <div className={baseClass}>
-      {allGroups.map((group) => (
-        <TableSection key={group.slug}>
-          <TableSection.Header heading={group.label}>
-            <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
-          </TableSection.Header>
-          <TableSection.Content>
-            {layout === 'grid' ? (
-              <CardGrid
-                ariaLabel={group.label}
-                getItemClassName={(row) =>
-                  isSelected({ id: row.id, collectionSlug: group.slug })
-                    ? 'card-grid__item--selected'
-                    : undefined
-                }
-                getKey={(row) => row.id}
-                items={group.docs}
-                renderItem={(row) => {
-                  const config = getEntityConfig({ collectionSlug: group.slug })
-                  const titleField = config?.admin?.useAsTitle || 'id'
-                  const rawTitle = row[titleField]
-                  const title =
-                    typeof rawTitle === 'string' || typeof rawTitle === 'number'
-                      ? String(rawTitle)
-                      : String(row.id)
-                  const editURL = formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${group.slug}/${encodeURIComponent(String(row.id))}`,
-                  })
-                  const hierarchyURL = getHierarchyListURL({
-                    adminRoute,
-                    collectionSlug: group.slug,
-                    parentFieldName: hierarchyParentFieldName,
-                    parentID: row.id,
-                  })
-                  const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
-                  const thumbnailSrc =
-                    !group.isChildren && mimeType && isImage(mimeType)
-                      ? getBestFitFromSizes({
-                          sizes: row.sizes as Record<string, { url?: string; width?: number }>,
-                          thumbnailURL: row.thumbnailURL as string,
-                          url: row.url as string,
-                          width: row.width as number,
-                        })
-                      : !group.isChildren && typeof row.thumbnailURL === 'string'
-                        ? row.thumbnailURL
-                        : undefined
-                  const isRowLocked = isLocked({ id: row.id, collectionSlug: group.slug })
+  const documentPagination = joinedDocuments?.hasNextPage && (
+    <div
+      aria-label={t('general:documents')}
+      className={`${baseClass}__plane-pagination`}
+      role="group"
+    >
+      <span className="sr-only" role="status">
+        {joinedDocuments.docs.length} {t('general:of')} {joinedDocuments.totalDocs}
+      </span>
+      <Button
+        buttonStyle="ghost"
+        extraButtonProps={{
+          'aria-busy': isLoadingDocuments,
+          'aria-disabled': isLoadingDocuments,
+        }}
+        margin={false}
+        onClick={(event) => {
+          const button = event.currentTarget
+          onLoadMoreDocuments?.(() => {
+            if (document.activeElement === button) {
+              resultsRef.current?.focus({ preventScroll: true })
+            }
+          })
+        }}
+      >
+        {t(isLoadingDocuments ? 'general:loading' : 'general:loadMore')}
+      </Button>
+    </div>
+  )
 
-                  return (
-                    <DocumentCard
-                      href={group.isChildren ? hierarchyURL : editURL}
-                      isSelected={isSelected({ id: row.id, collectionSlug: group.slug })}
-                      onSelect={isRowLocked ? undefined : () => group.onCheckboxChange(row)}
-                      placeholder={
-                        group.isChildren ? (
-                          (row._hierarchyIcon ?? (isFolder ? <FolderIcon /> : <TagIcon />))
-                        ) : (
-                          <DocumentIcon />
-                        )
-                      }
-                      thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
-                      title={title}
-                    >
-                      {group.isChildren ? (
-                        <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
-                          {t('general:edit')}
-                        </Link>
-                      ) : (
-                        group.label
-                      )}
-                    </DocumentCard>
-                  )
-                }}
-              />
-            ) : (
-              <SlotTable
-                collectionSlug={group.slug}
-                columns={columns}
-                data={group.docs}
-                enableCheckbox={true}
-                enableDragHandle={false}
-                enableHeader={true}
-                enableSelectAll={true}
-                getRowLockedUser={getRowLockedUser}
-                mergeCheckboxHeader={false}
-                onCheckboxChange={group.onCheckboxChange}
-                onSelectAllChange={group.onSelectAllChange}
-                parentId={parentId}
-                selectedIds={
-                  new Set(
-                    group.docs
-                      .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
-                      .map((row) => row.id),
-                  )
-                }
-              />
-            )}
-          </TableSection.Content>
-        </TableSection>
-      ))}
+  const renderGrid = (docs: TableRow[], label: string) => (
+    <CardGrid
+      ariaLabel={label}
+      getItemClassName={getGridItemClassName}
+      getKey={getRowKey}
+      items={docs}
+      renderItem={renderGridCard}
+    />
+  )
+
+  const renderTable = (
+    docs: TableRow[],
+    slug: string,
+    onSelectAllChange: (checked: boolean) => void,
+  ) => (
+    <SlotTable
+      collectionSlug={slug}
+      columns={columns}
+      data={docs}
+      enableCheckbox={true}
+      enableDragHandle={false}
+      enableHeader={true}
+      enableSelectAll={true}
+      getRowId={getRowKey}
+      getRowLockedUser={getRowLockedUser}
+      getRowSelectionLabel={joinedDocuments ? getRowSelectionLabel : undefined}
+      mergeCheckboxHeader={false}
+      onCheckboxChange={handleCheckboxChange}
+      onSelectAllChange={onSelectAllChange}
+      parentId={parentId}
+      selectedIds={
+        new Set(
+          docs
+            .filter((row) => isSelected({ id: row.id, collectionSlug: row._collectionSlug }))
+            .map(getRowKey),
+        )
+      }
+    />
+  )
+
+  if (!joinedDocuments) {
+    return (
+      <div className={baseClass}>
+        {allGroups.map((group) => (
+          <TableSection key={group.slug}>
+            <TableSection.Header heading={group.label}>
+              {group.pagination && <SimplePagination {...group.pagination} />}
+            </TableSection.Header>
+            <TableSection.Content>
+              {layout === 'grid'
+                ? renderGrid(group.docs, group.label)
+                : renderTable(group.docs, group.slug, () =>
+                    toggleAllInCollection({ collectionSlug: group.slug }),
+                  )}
+            </TableSection.Content>
+          </TableSection>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      aria-label={t('general:documents')}
+      className={baseClass}
+      ref={resultsRef}
+      role="region"
+      tabIndex={-1}
+    >
+      <TableSection>
+        <TableSection.Content>
+          {layout === 'table' ? (
+            renderTable(combinedRows, collectionSlug, handleSelectAllChange)
+          ) : (
+            <div className={`${baseClass}__joined-grids`}>
+              {hasChildren && renderGrid(childTableData, childrenLabel)}
+              {hasRelated && renderGrid(documentRows, t('general:documents'))}
+            </div>
+          )}
+          {documentPagination}
+        </TableSection.Content>
+      </TableSection>
     </div>
   )
 }

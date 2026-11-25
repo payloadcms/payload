@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -127,13 +128,127 @@ test.describe('Tags', () => {
     for (const id of createdPostIds) {
       await payload.delete({ id, collection: postsSlug, overrideAccess: true })
     }
-    for (const id of createdTagIds) {
+    for (const id of createdTagIds.toReversed()) {
       await payload.delete({ id, collection: tagsSlug, overrideAccess: true })
     }
   })
 
   test.afterEach(async () => {
     await page.unrouteAll()
+  })
+
+  test('should reuse cards for mixed tag members shown in a shared table and separate grids', async () => {
+    const { docs: italianTags } = await payload.find({
+      collection: tagsSlug,
+      overrideAccess: true,
+      where: { name: { equals: 'Italian' } },
+    })
+    const childTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Italian Grid Subtag', [`_h_${tagsSlug}`]: italianTags[0].id },
+      overrideAccess: true,
+    })
+    createdTagIds.push(childTag.id)
+
+    const tree = await openTagsTree()
+
+    await expandNode(tree, 'Cuisines')
+    await enterParent(tree, 'Italian')
+
+    const table = page.locator('.hierarchy-tables table')
+    await expect(table).toHaveCount(1)
+    await expect(table.getByRole('columnheader', { name: 'Collection' })).toBeVisible()
+    await expect(
+      table.getByRole('checkbox', { name: 'Select Posts: Traditional Tiramisu' }),
+    ).toBeVisible()
+    const tagName = table
+      .getByRole('link', { name: 'Italian Grid Subtag', exact: true })
+      .getByText('Italian Grid Subtag')
+    const postName = table
+      .getByRole('link', { name: 'Traditional Tiramisu', exact: true })
+      .getByText('Traditional Tiramisu')
+
+    await expect(tagName).toBeVisible()
+    await expect(postName).toBeVisible()
+    await expect
+      .poll(async () => {
+        const [tagBox, postBox] = await Promise.all([tagName.boundingBox(), postName.boundingBox()])
+        return tagBox && postBox ? tagBox.x - postBox.x : undefined
+      })
+      .toBeCloseTo(0)
+    await expect(page.getByRole('group', { name: 'Tags', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('group', { name: 'Documents', exact: true })).toHaveCount(0)
+    await page.getByRole('radio', { name: 'Grid' }).click()
+
+    const hierarchyGrid = page.getByRole('list', { name: 'Tags' })
+    const documentGrid = page.getByRole('list', { name: 'Documents' })
+
+    await expect(hierarchyGrid).toHaveCount(1)
+    await expect(documentGrid).toHaveCount(1)
+    await expect(
+      hierarchyGrid.getByRole('link', { name: 'Italian Grid Subtag', exact: true }),
+    ).toBeVisible()
+    await expect(hierarchyGrid.locator('.card-grid__item')).toHaveCount(1)
+    await expect(documentGrid.getByRole('link', { name: 'Traditional Tiramisu' })).toBeVisible()
+    await expect(documentGrid.getByRole('link', { name: 'Guide to Italian Cuisine' })).toBeVisible()
+    await expect(documentGrid.getByRole('link', { name: /mushroom-risotto.png/ })).toBeVisible()
+    await expect(
+      documentGrid.locator('.document-card', { hasText: 'mushroom-risotto.png' }).locator('img'),
+    ).toHaveAttribute('src', /mushroom-risotto/)
+
+    await expect(page.getByRole('group', { name: 'Tags', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('group', { name: 'Documents', exact: true })).toHaveCount(0)
+
+    const postCard = documentGrid.locator('.document-card', { hasText: 'Traditional Tiramisu' })
+
+    await postCard.click()
+    await expect(postCard).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('button', { name: 'Move', exact: true })).toHaveCount(0)
+
+    await page.getByRole('radio', { name: 'Table' }).click()
+    await expect(page.locator('.hierarchy-tables table')).toHaveCount(1)
+  })
+
+  test('should load all child tags and only paginate documents', async () => {
+    const [archive] = await createTagChain(['Recipe archive'])
+    const total = DEFAULT_HIERARCHY_LIST_LIMIT + 1
+
+    for (let index = 1; index <= total; index++) {
+      const tag = await payload.create({
+        collection: tagsSlug,
+        data: { name: `Recipe archive subtag ${index}`, [`_h_${tagsSlug}`]: archive.id },
+        overrideAccess: true,
+      })
+      createdTagIds.push(tag.id)
+
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { title: `Recipe archive note ${index}`, [`_h_${tagsSlug}`]: [archive.id] },
+        overrideAccess: true,
+      })
+      createdPostIds.push(post.id)
+    }
+
+    const tree = await openTagsTree()
+    await enterParent(tree, archive.name)
+
+    const documents = page.getByRole('region', { name: 'Documents', exact: true })
+    const pager = documents.getByRole('group', { name: 'Documents', exact: true })
+    const loadMore = pager.getByRole('button', { name: 'Load more' })
+
+    await expect(documents.getByRole('row', { name: /Recipe archive subtag/ })).toHaveCount(total)
+    await expect(documents.getByRole('group', { name: 'Tags', exact: true })).toHaveCount(0)
+    await expect(loadMore).toBeVisible()
+    await expect(pager.getByRole('status')).toHaveClass('sr-only')
+    await expect(pager.getByRole('status')).toHaveText(
+      `${DEFAULT_HIERARCHY_LIST_LIMIT} of ${total}`,
+    )
+    await loadMore.focus()
+    await page.keyboard.press('Enter')
+
+    await expect(documents.getByRole('row', { name: /Recipe archive note/ })).toHaveCount(total)
+    await expect(pager).toHaveCount(0)
+    await expect(documents).toBeFocused()
   })
 
   test.describe('hierarchy relationship field', () => {
