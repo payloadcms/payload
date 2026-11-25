@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const topicsSlug = 'topics'
 export const articlesSlug = 'articles'
 export const draftArticlesSlug = 'draft-articles'
+export const sectionArticlesSlug = 'section-articles'
 export const notesSlug = 'notes'
 
 export const Topics: CollectionConfig = {
@@ -16,6 +17,12 @@ export const Topics: CollectionConfig = {
       type: 'join',
       collection: [articlesSlug, draftArticlesSlug, notesSlug],
       on: 'topics',
+    },
+    {
+      name: 'sectionMembers',
+      type: 'join',
+      collection: [sectionArticlesSlug],
+      on: 'related_sections.topics',
     },
   ],
 }
@@ -49,5 +56,23 @@ export const DraftArticles: CollectionConfig = {
     { name: 'visible', type: 'checkbox' },
     { name: 'tags', type: 'select', hasMany: true, options: ['featured', 'other'] },
     { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
+  ],
+}
+
+export const SectionArticles: CollectionConfig = {
+  slug: sectionArticlesSlug,
+  access: { read: () => true },
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    {
+      name: 'related_sections',
+      type: 'array',
+      fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+    },
+    {
+      name: 'relatedXsections',
+      type: 'array',
+      fields: [{ name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug }],
+    },
   ],
 }
