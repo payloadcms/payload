@@ -276,6 +276,43 @@ describe('@payloadcms/plugin-mcp', () => {
     })
   })
 
+  describe('Trailing slash', () => {
+    // Next.js redirects `/api/mcp` to `/api/mcp/` when `trailingSlash: true` is set
+    const initializeRequest = {
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'initialize',
+      params: {
+        capabilities: {},
+        clientInfo: { name: 'test-client', version: '1.0.0' },
+        protocolVersion: '2025-03-26',
+      },
+    }
+
+    it.each(['/mcp', '/mcp/', '/mcp/?trailing=slash'] as const)(
+      'should answer initialize at /api%s',
+      async (path) => {
+        const apiKey = await getApiKey()
+        const response = await restClient.POST(path, {
+          body: JSON.stringify(initializeRequest),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        expect(response.status).toBe(200)
+
+        const json = await parseStreamResponse(response)
+        expect(json.id).toBe(1)
+        expect(json.jsonrpc).toBe('2.0')
+        expect(json.result.protocolVersion).toBeDefined()
+        expect(json.result.serverInfo).toBeDefined()
+      },
+    )
+  })
+
   describe('List', () => {
     it('should list tools', async () => {
       const apiKey = await getApiKey()
