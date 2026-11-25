@@ -524,7 +524,7 @@ export const enTranslations = {
     selectValue: 'Select a value',
     settings: 'Settings',
     showAllLabel: 'Show all {{label}}',
-    showHelpTooltips: 'Show guidance tips',
+    showHelpTooltips: 'Show Guidance Tips',
     shownInTable: 'Shown in table',
     showSidebar: 'Show sidebar',
     skipToContent: 'Skip to content',

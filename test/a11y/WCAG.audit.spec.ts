@@ -9365,7 +9365,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       try {
         await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
         await loadRequested.promise
-        const help = page.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+        const help = page.getByRole('checkbox', { name: 'Show Guidance Tips', exact: true })
 
         await expect(help).toBeDisabled()
         releaseLoad.resolve()
@@ -9403,7 +9403,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.route(preferenceURL, handlePreference)
       try {
         await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
-        const help = page.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+        const help = page.getByRole('checkbox', { name: 'Show Guidance Tips', exact: true })
 
         await expect(help).toBeEnabled()
         await expect(help).not.toBeChecked()
@@ -9459,7 +9459,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.route(preferenceURL, handlePreference)
         try {
           await page.goto(accountURL)
-          const help = page.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+          const help = page.getByRole('checkbox', { name: 'Show Guidance Tips', exact: true })
 
           if (phase === 'saving') {
             await expect(help).toBeEnabled()
@@ -9506,7 +9506,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.request.post(preferenceURL, { data: { value: { showHelpTooltips: true } } })
         await page.goto(accountURL)
         const settings = page.locator('.payload-settings__accessibility')
-        const help = settings.getByRole('checkbox', { name: 'Show guidance tips', exact: true })
+        const help = settings.getByRole('checkbox', { name: 'Show Guidance Tips', exact: true })
 
         await expect(
           settings.getByRole('checkbox', { name: 'Enhanced Contrast Mode', exact: true }),
