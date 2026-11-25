@@ -16,6 +16,7 @@ describe('parseFlags', () => {
       tag: undefined,
       transform: undefined,
       upgrade: undefined,
+      yes: false,
     })
   })
 
@@ -74,14 +75,17 @@ describe('parseFlags', () => {
     })
   })
 
-  it('parses `upgrade run` with tag, force, and dry, always operating on cwd', () => {
-    expect(parseFlags(['upgrade', 'run', '--tag', 'latest', '--force', '--dry'])).toMatchObject({
+  it('parses an explicit upgrade target and confirmation choice, always operating on cwd', () => {
+    expect(
+      parseFlags(['upgrade', 'run', '--tag', 'latest', '--force', '--dry', '--yes']),
+    ).toMatchObject({
       command: 'upgrade',
       dry: true,
       force: true,
       path: process.cwd(),
       tag: 'latest',
       upgrade: 'run',
+      yes: true,
     })
   })
 

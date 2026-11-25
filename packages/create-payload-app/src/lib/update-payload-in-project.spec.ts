@@ -17,22 +17,20 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const mocks = vi.hoisted(() => ({
   getPackageManager: vi.fn(),
-  installPackages: vi.fn(),
-  resolvePackageVersion: vi.fn(),
+  execa: vi.fn(),
+  fetchRegistry: vi.fn(),
 }))
 
-vi.mock('../utils/resolvePackageVersion.js', async (importOriginal) => ({
+vi.mock('../upgrade-shared/index.js', async (importOriginal) => ({
   ...(await importOriginal()),
-  resolvePackageVersion: mocks.resolvePackageVersion,
+  createRegistryClient: () => mocks.fetchRegistry,
 }))
 
 vi.mock('./get-package-manager.js', () => ({
   getPackageManager: mocks.getPackageManager,
 }))
 
-vi.mock('./install-packages.js', () => ({
-  installPackages: mocks.installPackages,
-}))
+vi.mock('execa', () => ({ default: mocks.execa }))
 
 describe('Payload project updates', () => {
   let projectDir: string
@@ -44,8 +42,23 @@ describe('Payload project updates', () => {
     projectDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-update-project-'))
     templateRoot = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-update-template-'))
     mocks.getPackageManager.mockResolvedValue('pnpm')
-    mocks.installPackages.mockResolvedValue({ success: true })
-    mocks.resolvePackageVersion.mockResolvedValue('4.2.0')
+    mocks.fetchRegistry.mockResolvedValue({
+      'dist-tags': { latest: '4.2.0', beta: '4.2.0' },
+      versions: { '3.0.0': {}, '4.0.0': {}, '4.1.0': {}, '4.2.0': {} },
+    })
+    mocks.execa.mockImplementation(async (_command, _args, { cwd }) => {
+      const data = fse.readJsonSync(path.join(cwd, 'package.json'))
+
+      for (const [name, version] of Object.entries({
+        ...data.dependencies,
+        ...data.devDependencies,
+      })) {
+        if (name === 'payload' || name.startsWith('@payloadcms/')) {
+          fse.outputJsonSync(path.join(cwd, 'node_modules', name, 'package.json'), { version })
+        }
+      }
+      return { exitCode: 0 }
+    })
   })
 
   afterEach(() => {
@@ -58,6 +71,11 @@ describe('Payload project updates', () => {
     fse.writeJsonSync(path.join(projectDir, 'package.json'), {
       dependencies: { payload: '4.2.0', '@payloadcms/ui': '4.2.0' },
     })
+    for (const name of ['payload', '@payloadcms/ui']) {
+      fse.outputJsonSync(path.join(projectDir, 'node_modules', name, 'package.json'), {
+        version: '4.2.0',
+      })
+    }
     fse.outputFileSync(
       path.join(projectDir, 'payload.config.ts'),
       "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: process.env.ADMIN_ROUTE } })",
@@ -68,16 +86,16 @@ describe('Payload project updates', () => {
     })
 
     expect(result).toEqual({ message: 'Payload v4.2.0 is already up to date.', success: true })
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'src/app'))).toBe(false)
   })
 
-  it('should update every installed Payload dependency to one version without a Next config', async () => {
+  it('should update core dependencies within their Payload major without a Next config', async () => {
     fse.writeJsonSync(path.join(projectDir, 'package.json'), {
       dependencies: {
-        '@payloadcms/db-mongodb': '^3.0.0',
-        '@payloadcms/richtext-lexical': '^3.0.0',
-        payload: '^3.0.0',
+        '@payloadcms/db-mongodb': '^4.0.0',
+        '@payloadcms/richtext-lexical': '^4.0.0',
+        payload: '^4.0.0',
         react: '^19.0.0',
       },
     })
@@ -85,19 +103,17 @@ describe('Payload project updates', () => {
     const result = await updatePayloadPackages({ projectDir, versionOrTag: 'beta' })
 
     expect(result).toEqual({ message: 'Payload updated successfully.', success: true })
-    expect(mocks.resolvePackageVersion).toHaveBeenCalledOnce()
-    expect(mocks.resolvePackageVersion).toHaveBeenCalledWith({
-      packageName: 'payload',
-      versionOrTag: 'beta',
-    })
-    expect(mocks.installPackages).toHaveBeenCalledWith({
-      packageManager: 'pnpm',
-      packagesToInstall: [
-        'payload@4.2.0',
-        '@payloadcms/db-mongodb@4.2.0',
-        '@payloadcms/richtext-lexical@4.2.0',
-      ],
-      projectDir,
+    expect(mocks.fetchRegistry).toHaveBeenCalledWith('payload')
+    expect(mocks.execa).toHaveBeenCalledWith(
+      'pnpm',
+      ['install'],
+      expect.objectContaining({ cwd: projectDir, reject: false }),
+    )
+    expect(fse.readJsonSync(path.join(projectDir, 'package.json')).dependencies).toEqual({
+      '@payloadcms/db-mongodb': '4.2.0',
+      '@payloadcms/richtext-lexical': '4.2.0',
+      payload: '4.2.0',
+      react: '^19.0.0',
     })
   })
 
@@ -112,10 +128,10 @@ describe('Payload project updates', () => {
     const result = await updatePayloadPackages({ projectDir, versionOrTag: 'beta' })
 
     expect(result).toEqual({ message: 'Payload updated successfully.', success: true })
-    expect(mocks.installPackages).toHaveBeenCalledWith({
-      packageManager: 'pnpm',
-      packagesToInstall: ['payload@4.2.0', '@payloadcms/ui@4.2.0'],
-      projectDir,
+    expect(mocks.execa).toHaveBeenCalledOnce()
+    expect(fse.readJsonSync(path.join(projectDir, 'package.json')).dependencies).toEqual({
+      '@payloadcms/ui': '4.2.0',
+      payload: '4.2.0',
     })
   })
 
@@ -134,10 +150,10 @@ describe('Payload project updates', () => {
     const result = await updatePayloadPackages({ projectDir, versionOrTag: 'beta' })
 
     expect(result).toEqual({ message: 'Payload updated successfully.', success: true })
-    expect(mocks.installPackages).toHaveBeenCalledWith({
-      packageManager: 'pnpm',
-      packagesToInstall: ['payload@4.2.0', '@payloadcms/ui@4.2.0', '@payloadcms/graphql@4.2.0'],
-      projectDir,
+    expect(mocks.execa).toHaveBeenCalledOnce()
+    expect(fse.readJsonSync(path.join(projectDir, 'package.json'))).toEqual({
+      dependencies: { '@payloadcms/ui': '4.2.0', payload: '4.2.0' },
+      devDependencies: { '@payloadcms/graphql': '4.2.0', vitest: '^4.0.0' },
     })
   })
 
@@ -342,7 +358,7 @@ describe('Payload project updates', () => {
       }),
     ).rejects.toThrow(/routes.admin.*duplicate/)
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
   })
 
@@ -436,7 +452,7 @@ describe('Payload project updates', () => {
       }),
     ).rejects.toThrow('routes.admin')
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
   })
 
@@ -480,7 +496,7 @@ describe('Payload project updates', () => {
       }),
     ).rejects.toThrow('routes.admin')
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toBe('existing layout')
     expect(fse.existsSync(path.join(payloadDir, 'admin'))).toBe(false)
   })
@@ -501,7 +517,7 @@ describe('Payload project updates', () => {
         }),
       ).rejects.toThrow('routes.admin')
 
-      expect(mocks.installPackages).not.toHaveBeenCalled()
+      expect(mocks.execa).not.toHaveBeenCalled()
       expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
     },
   )
@@ -535,7 +551,7 @@ describe('Payload project updates', () => {
       updatePayloadInNextProject({ appDetails: nextDetails({ projectDir, appDir: 'app' }) }),
     ).rejects.toThrow('admin.importMap.importMapFile')
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
   })
 
@@ -736,8 +752,8 @@ function writeFiles({ files, root }: { files: Record<string, string>; root: stri
 function writeProjectPackage(projectDir: string): void {
   fse.writeJsonSync(path.join(projectDir, 'package.json'), {
     dependencies: {
-      '@payloadcms/ui': '^3.0.0',
-      payload: '^3.0.0',
+      '@payloadcms/ui': '^4.0.0',
+      payload: '^4.0.0',
     },
   })
 }

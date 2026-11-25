@@ -5,10 +5,11 @@ import packageJson from '../../package.json'
 import { renderUpgradePrompt } from './prompt.js'
 
 describe('renderUpgradePrompt', () => {
-  it('emits a project-agnostic upgrade command', () => {
+  it('should retain this CLI version in the published upgrade command', () => {
     const out = renderUpgradePrompt()
 
-    expect(out).toContain('npx @payloadcms/codemod upgrade run')
+    expect(out).toContain(`npx @payloadcms/codemod@${packageJson.version} upgrade run`)
+    expect(out).not.toContain('--yes')
   })
 
   it('should document the minimum Node.js version required by the CLI', () => {
@@ -24,10 +25,17 @@ describe('renderUpgradePrompt', () => {
     expect(out).not.toContain('npx @payloadcms/codemod upgrade run')
   })
 
-  it('documents --tag as an inline option rather than baking a value', () => {
-    const out = renderUpgradePrompt()
+  it('should retain the selected target and confirmation choice in follow-up commands', () => {
+    for (const kind of ['migrate', 'update'] as const) {
+      const out = renderUpgradePrompt({
+        currentVersion: '3.90.0',
+        kind,
+        targetVersion: '4.0.0-beta.11',
+        yes: true,
+      })
 
-    expect(out).toContain('--tag <dist-tag>')
+      expect(out).toContain('upgrade run --tag 4.0.0-beta.11 --yes')
+    }
   })
 
   it('orders the steps: pre-upgrade before payload slice before Next before verify', () => {

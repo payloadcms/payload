@@ -1,501 +1,62 @@
 # AGENTS.md
 
-## Project Structure
-
-Payload is a monorepo structured around Next.js, containing the core CMS platform, database adapters, plugins, and tooling.
-
-### Key Directories
-
-- `packages/` - All publishable packages
-  - `packages/payload` - Core Payload package containing the main CMS logic
-  - `packages/ui` - Admin UI components (React Server Components)
-  - `packages/next` - Next.js integration layer
-  - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
-  - `packages/drizzle` - Drizzle ORM integration
-  - `packages/kv-redis` - Redis key-value store adapter
-  - `packages/richtext-*` - Rich text editors (Lexical)
-  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Vercel Blob, R2)
-  - `packages/email-*` - Email adapters (Nodemailer, Resend)
-  - `packages/plugin-*` - Additional functionality plugins
-  - `packages/graphql` - GraphQL API layer
-  - `packages/translations` - i18n translations
-- `test/` - Test suites organized by feature area. Each directory contains a granular Payload config and test files
-- `docs/` - Documentation (deployed to payloadcms.com)
-- `tools/` - Monorepo tooling
-- `templates/` - Production-ready project templates
-- `examples/` - Example implementations
-
-### Architecture Notes
-
-- Payload 3.x is built as a Next.js native CMS that installs directly in `/app` folder
-- UI is built with React Server Components (RSC)
-- Database adapters use Drizzle ORM under the hood
-- Packages use TypeScript with strict mode and path mappings defined in `tsconfig.base.json`
-- Source files are in `src/`, compiled outputs go to `dist/`
-- Monorepo uses pnpm workspaces and Turbo for builds
-
-## Quick Start
-
-1. `pnpm install`
-2. `pnpm run build:core`
-3. `pnpm run dev` (MongoDB) or `pnpm run dev:postgres`
-
-## Build Commands
-
-- `pnpm install` - Install all dependencies
-- `pnpm turbo` - All Turbo commands should be run from root with pnpm - not with `turbo` directly
-- `pnpm run build` or `pnpm run build:core` - Build core packages (excludes plugins and storage adapters)
-- `pnpm run build:all` - Build all packages
-- `pnpm run build:<directory_name>` - Build specific package (e.g. `pnpm run build:db-mongodb`, `pnpm run build:ui`)
-
-## Development
-
-### Coding Patterns and Best Practices
-
-- Always use object parameters for function arguments: `fn({ name }: { name: string })` not `fn(name: string)` (improves backwards-compatibility)
-- Prefer types over interfaces (except when extending external types)
-- Prefer functions over classes (classes only for errors/adapters)
-- Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
-- Organize functions top-down: exports before helpers
-- Use JSDoc for complex functions; add tags only when justified beyond type signature
-- Use `import type` for types, regular `import` for values, separate statements even from same module
-- Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
-- Prefer self describing function and variable names over generic names with comments to explain their purpose
-- For changes affecting rendered UI, user interaction, focus, keyboard behavior, content, or component semantics, use the `payload-accessibility` skill and report the WCAG 2.2 Level A and AA criteria assessed, automated evidence, and any required manual or assistive-technology verification.
-- **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
-- **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
-
-  ```typescript
-  // BAD - creates new array every render, breaks hook memoization
-  const [Drawer] = useHierarchyDrawer({
-    filterByCollection: [collectionSlug],
-  })
-
-  // GOOD - memoized, stable reference
-  const filterByCollection = useMemo(() => [collectionSlug], [collectionSlug])
-  const [Drawer] = useHierarchyDrawer({
-    filterByCollection,
-  })
-  ```
-
-- Commenting Guidelines
-
-  - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
-  - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
-  - Type definitions: Property/interface documentation is always acceptable.
-
-- Logger Usage (`payload.logger.error`)
-  - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
-  - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
-  - Use `err` not `error`, use `msg` not `message` in object form
-
-### React Component File Structure
-
-Each React component should have its own named folder:
-
-```
-ComponentName/
-├── index.tsx       # Component implementation
-└── index.css       # Styles (if applicable)
-```
-
-- **Do:** Create a folder per component with `index.tsx` and `index.css`
-- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.css` file
-- Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
-- New styles should be written in plain CSS, not SCSS - SCSS is being phased out and is no longer linted (see [Writing CSS](#writing-css))
-
-### Running Dev Server
-
-- `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
-- `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
-- `pnpm run dev:postgres` - Run dev server with Postgres
-
-### Running the Payload CLI
-
-`pnpm payload <directory_name> <command> [...args]` runs the real Payload CLI against a test suite config. The first argument selects the test folder (e.g. `pnpm payload fields generate:types` uses `test/fields/config.ts`); everything after it is forwarded to the CLI unchanged. Run `pnpm payload <directory_name>` with no command to list all commands.
-
-### Development Environment
-
-- Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
-- To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
-- Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
-- Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
-
-### Playwright MCP
-
-You should have access to the Playwright MCP server. This MCP server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
-
-**Prerequisites:**
-
-- The dev server MUST be running (`pnpm run dev`) before using the MCP
-- First call `browser_install` to set up the browser if needed
-
-**Key tools (not exhaustive):**
-
-- `browser_navigate` - Navigate to a URL
-- `browser_snapshot` - Get accessibility snapshot of current page
-- `browser_click` - Click elements (requires `ref` from snapshot)
-- `browser_fill_form` - Fill form fields
-- `browser_take_screenshot` - Capture screenshot (use `fullPage: true` for full page)
-
-**Screenshots for visual verification:**
-
-Use `browser_take_screenshot` to visually verify UI state. Useful for:
-
-- Confirming layout and styling look correct
-- Checking component rendering (tags, forms, tables)
-- Debugging UI issues that aren't visible in accessibility snapshots
-
-```
-browser_take_screenshot()                    # Viewport only
-browser_take_screenshot({ fullPage: true })  # Full scrollable page
-```
-
-Screenshots are saved to `.playwright-mcp/` and displayed inline.
-
-**Usage flow:**
-
-1. Ensure dev server is running on `localhost:3000`
-2. Call `browser_navigate` to open a page
-3. Call `browser_snapshot` to get element refs
-4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.
-
-## Testing
-
-### Writing Tests - Required Practices
-
-**Integration tests MUST use the shared fixture wrapper:**
-
-- Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
-- Wrap Payload-backed tests in one root `test.suite('My Feature', { config: './config.ts' }, () => { ... })`
-- Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
-- Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
-  Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
-- Existing suites that intentionally manage shared state can set `resetBetweenTests: false`. The fixture
-  resets and seeds once for the file, and the suite keeps responsibility for between-test cleanup.
-  New suites should use the default per-test reset behavior.
-- Use `test.suite('My Feature', {}, () => { ... })` only for integration tests that do not use Payload
-- Use `test.options('Name', { db: 'drizzle' }, callback)` for database-specific tests, and
-  `test.options.describe('Name', { db: 'mongo' }, callback)` for database-specific groups.
-  Keep the name first and use one call so VS Code does not discover the options as a fake test.
-
-```typescript
-import { expect } from 'vitest'
-
-import { test } from '../__helpers/int/vitest.js'
-
-test.suite('My Feature', { config: './config.ts' }, () => {
-  test('should create a record', async ({ payload }) => {
-    const record = await payload.create({
-      collection: 'my-collection',
-      data: { title: 'Test' },
-    })
-
-    expect(record.title).toBe('Test')
-  })
-})
-```
-
-**Tests MUST be self-contained and clean up side effects not handled by their fixtures:**
-
-- Integration-test database records are cleared automatically by the shared fixture
-- Clean up files, external resources, environment changes, and other non-database side effects
-- For multiple tests with similar cleanup needs, use `test.afterEach` to centralize cleanup logic
-
-**Additional test guidelines:**
-
-- Use descriptive test names starting with "should" (e.g., "should create document with custom ID")
-- Add blank lines after variable declarations to improve readability
-- Collection and global slugs should be kept in a shared file and re-used i.e. on relationship fields `relationTo: collectionSlug`
-- One test should verify one behavior - keep tests focused
-- When adding a new collection for testing, add it to both `collections/` directory and the config file import statements
-
-### How to run tests
-
-- `pnpm run test` - Run all tests (integration + components + e2e)
-- `pnpm run test:int` - Integration tests (MongoDB, recommended)
-- `pnpm run test:int <dir>` - Specific test suite (e.g. `fields`)
-- `pnpm run test:int:postgres|sqlite` - Integration tests with other databases
-- `pnpm run test:e2e` - Playwright tests (add `:headed` or `:debug` suffix)
-- `pnpm run test:unit|components|types` - Other test suites
-
-### Test Structure
-
-Each test directory in `test/` follows this pattern:
-
-```
-test/<feature-name>/
-├── config.ts        # Lightweight Payload config for testing
-├── int.spec.ts      # Integration tests (Vitest)
-├── e2e.spec.ts      # End-to-end tests (Playwright)
-└── payload-types.ts # Generated types
-```
-
-Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
-
-### Visual Regression Testing
-
-Screenshot comparisons live alongside normal e2e tests and are opt-in via the `visual()` helper,
-which applies the `@visual` tag for you:
-
-```ts
-import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
-import { visual } from '../__helpers/e2e/visual.js'
-
-visual('renders the posts list view', async () => {
-  await page.goto(url.list)
-  await expectScreenshot({ page, name: 'posts-list-view.png' })
-})
-```
-
-- Baselines are committed PNGs next to their spec file (`__snapshots__/<spec-file>/<name>.png`).
-- **Baselines must be generated/updated inside the pinned Playwright Docker image**, never on a
-  bare host — font rendering differs enough between operating systems to fail the comparison on
-  CI even when nothing visually changed. Use `pnpm test:visual:update`.
-- On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI — e.g.
-  `.css`/`.scss`/`.tsx`/`.jsx`/`.svg` files, any `e2e.spec.ts`/`__snapshots__/**`, or fixture
-  config the current `@visual` tests render (see `needs_visual` in `.github/workflows/main.yml`
-  for the full path list).
-- If the `visual-regression` CI job fails, reproduce and inspect the diff locally with
-  `pnpm test:visual` — there is no CI-posted comment.
-
-### Cache Components
-
-The dev server and e2e tests run with Next.js `cacheComponents` enabled. To disable it, set
-`PAYLOAD_DISABLE_CACHE_COMPONENTS=true` (e.g. `PAYLOAD_DISABLE_CACHE_COMPONENTS=true pnpm dev`).
-
-Tag a test `@also-without-cache-components` to run it a second time with it disabled, in one extra
-CI job that collects these tests from every suite. Use it for behavior that differs between modes:
-
-```ts
-test('should show fresh data', { tag: '@also-without-cache-components' }, async () => {
-  // ...
-})
-```
-
-## Linting & Formatting
-
-- `pnpm run lint` - Lint `packages/` and `tools/` with [oxlint](https://oxc.rs/docs/guide/usage/linter) (config: `oxlint.config.ts`). Runs in CI.
-- `pnpm run lint:fix` - Fix linting issues
-- `pnpm oxlint <paths>` - Lint one package or specific files (e.g. `pnpm oxlint packages/plugin-mcp`). Add `--fix` to fix issues
-- `pnpm run format` - Format the repo with [oxfmt](https://oxc.rs/docs/guide/usage/formatter) (config: `oxfmt.config.ts`)
-- `pnpm run format:check` - Check formatting (runs in CI)
-
-## Internationalization
-
-- Translation files are in `packages/translations/src/languages/`
-- Add new strings to English locale first, then translate to other languages
-- Run `pnpm run translateNewKeys` to auto-translate new keys (requires `OPENAI_KEY` in `.env`)
-- Lexical translations: `cd packages/richtext-lexical && pnpm run translateNewKeys`
-
-## Commit & PR Guidelines
-
-This repository follows [Conventional Commits](https://www.conventionalcommits.org/).
-
-Don't introduce breaking changes unless they fall under one of the exceptions in `docs/migration-guide/versioning.mdx`. The v4 migration guide records past breaking changes and is not permission to add new ones. If a change can't be made without breaking, flag it instead of working around it.
-
-### PR Title Format
-
-`<type>(<scope>): <title>`
-
-- Title must start with lowercase letter
-- Types: `build`, `chore`, `ci`, `docs`, `examples`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `templates`, `test`
-- Prefer `feat` for new features, `fix` for bug fixes
-- Scopes match package names: `db-*`, `richtext-*`, `storage-*`, `plugin-*`, `ui`, `next`, `graphql`, `translations`, etc.
-- Choose most relevant scope if multiple packages modified, or omit scope entirely
-
-Examples:
-
-- `feat(db-mongodb): add support for transactions`
-- `feat(richtext-lexical): add options to hide block handles`
-- `fix(ui): json field type ignoring editorOptions`
-- `feat: add new collection functionality`
-
-### Commit Guidelines
-
-- First commit of branch should follow PR title format
-- Subsequent commits should use `chore` without scope unless specific package is being modified
-- All commits in a PR are squashed on merge using PR title as commit message
-
-### Breaking Changes
-
-Mark breaking PRs with `!` in the title and add a `## Breaking Changes` section to the body. The releaser copies that section, alone, into the GitHub release notes. It must state who is affected and what to do, with a `diff` block when user code changes. Without the section, the release notes show the first paragraph of the body.
-
-## Additional Resources
-
-- LLMS.txt: <https://payloadcms.com/llms.txt>
-- LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
-- Node version: ^24.22.3 || >=26.13.1
-- pnpm version: ^11.28.6
-
-## Admin Panel
-
-The admin panel is made up of both client and server react components.
-
-### Patterns
-
-ALWAYS use `formatAdminURL` when formatting api and admin routes.
-
-**Building API URLs with query parameters:** Use `qs-esm` to build query strings with proper object syntax instead of manual string concatenation.
-
-Incorrect:
-
-```typescript
-const whereClause = parentId
-  ? `where[${parentFieldName}][equals]=${parentId}`
-  : `where[or][0][${parentFieldName}][exists]=false&where[or][1][${parentFieldName}][equals]=`
-
-const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${limit}&page=${page}`
-```
-
-Correct:
-
-```typescript
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
-
-const where = parentId
-  ? { [parentFieldName]: { equals: parentId } }
-  : {
-      or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
-    }
-
-const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true })
-const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
-```
-
-**Building server functions, views, or endpoints:** Keep `overrideAccess` set to `false` (the default) and pass the authenticated `user` to payload operations. Setting `overrideAccess: true` bypasses access control and is a security vulnerability when an operation acts on behalf of a user.
-
-Incorrect:
-
-```typescript
-// INSECURE - explicitly bypasses all access control
-const docs = await payload.find({
-  collection: 'posts',
-  overrideAccess: true,
-})
-```
-
-Correct:
-
-```typescript
-// SECURE - respects access control for the current user
-const docs = await payload.find({
-  collection: 'posts',
-  overrideAccess: false,
-  user,
-})
-```
-
-### Writing CSS
-
-**Support document and Shadow DOM contexts when writing or reviewing shared CSS:**
-
-- Define shared token defaults on both `:root` and `:host`, including defaults inside media queries.
-- Include equivalent shadow-host selectors for theme and enhanced-contrast rules, e.g. `html[data-enhanced-contrast] .control` and `:host([data-enhanced-contrast]) .control`. Apply this to component-specific adjustments as well as shared palettes.
-- Preserve existing document selector specificity. Adding `:host` to a parent selector list can raise the specificity of nested rules. Flatten those nested rules when necessary to preserve application overrides.
-- Keep document-only resets and Admin Panel layout styles scoped to the document. For shared token or theme changes, verify the affected states in both contexts, loading the stylesheet inside the shadow root for that case.
-
-Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
-
-**Mobile-first media queries only - never `max-width`:**
-
-```css
-/* BAD - rejected by plugin/no-max-width-media-query */
-@media (max-width: 768px) {
-  ...;
-}
-
-/* GOOD */
-@media (min-width: 768px) {
-  ...;
-}
-```
-
-**Only the four canonical breakpoints are allowed in a media query** (`plugin/no-non-standard-breakpoints`): `400px`, `768px`, `1024px`, `1440px`. Don't invent one-off breakpoint values.
-
-**Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
-Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
-
-**Never put `:has()` above a universal subject** (`plugin/no-has-above-universal-subject`). With `X:has(…) *`, Chrome restyles every element under `X` whenever the `:has()` may have changed. Move the condition onto the subject or give the subject a class, e.g. `.row__fields > *:not(:only-child)` instead of `.row__fields:has(> *:nth-child(2)) > *`.
-
-**Prefer logical properties over physical properties** for RTL support:
-
-```css
-/* BAD - physical properties don't flip for RTL */
-padding-left: var(--spacer-3);
-margin-right: var(--spacer-2);
-border-left: 1px solid var(--color-border);
-left: 0;
-
-/* GOOD - logical properties adapt automatically */
-padding-inline-start: var(--spacer-3);
-margin-inline-end: var(--spacer-2);
-border-inline-start: var(--stroke-width-small) solid var(--color-border);
-inset-inline-start: 0;
-```
-
-Use `padding-inline`/`padding-block`, `margin-inline`/`margin-block`, `inset-inline`/`inset-block`, and `border-inline`/`border-block` (with their `-start`/`-end` variants) instead of the `-left`/`-right`/`-top`/`-bottom` equivalents where a direction is implied.
-
-**Prioritize design tokens over hardcoded pixel/rem values:**
-
-Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css`, not a raw pixel or rem value:
-
-| Token          | Pixel |
-| -------------- | ----- |
-| `--spacer-0`   | 0px   |
-| `--spacer-1`   | 4px   |
-| `--spacer-1-5` | 6px   |
-| `--spacer-2`   | 8px   |
-| `--spacer-2-5` | 12px  |
-| `--spacer-3`   | 16px  |
-| `--spacer-4`   | 24px  |
-| `--spacer-5`   | 32px  |
-| `--spacer-6`   | 40px  |
-
-- If the value needed isn't an exact token, round to the nearest `--spacer-*` token rather than hand-writing a one-off value.
-- If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
-- The same principle applies to other token families:
-  - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
-  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
-  - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
-  - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
-  - **Typography:** use `--text-*` tokens from `typography.css`.
-
-**No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
-
-- Pixel values may have at most one decimal place (e.g. `0.5px` is fine, `13.523px` is not).
-- Box-model and position properties - `width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, `min-`/`max-width`/`height` - must be whole numbers with no decimals at all.
-- `font-size`, `letter-spacing`, `line-height`, and custom properties (`--*`) are exempt, since a `var()` can't be statically traced to the property it ends up on.
-
-### RSC/Client Bundling Rules
-
-These rules prevent production bundling issues where client code gets evaluated in server context.
-
-**1. Avoid barrel exports (`export *`) - always use explicit named exports:**
-
-Barrel exports cause bundling issues, break tree-shaking, and can break client/server boundaries in production. Always use explicit named exports.
-
-```typescript
-// BAD - barrel export
-export * from '../../elements/SomeComponent/exports.js'
-
-// GOOD - explicit named exports
-export { SomeComponent } from '../../elements/SomeComponent/index.js'
-export { AnotherComponent } from '../../elements/AnotherComponent/index.js'
-```
-
-**2. Server components must import client components from `exports/client/index.js`:**
-
-When a `.server.tsx` file needs to render a client component, it must import from the client exports bundle, not via relative path. Relative imports don't respect `'use client'` boundaries in production builds.
-
-```typescript
-// BAD - relative import doesn't work in prod
-import { MyClientComponent } from './MyComponent.js'
-
-// GOOD - import from client exports bundle
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { MyClientComponent } from '../../exports/client/index.js'
-```
-
-**Testing bundling changes:** Always test with `pnpm prepare-run-test-against-prod` followed by `pnpm dev:prod <suite>`. Dev mode (`pnpm dev`) doesn't catch these issues.
+> [!WARNING]
+> Never accept a major tradeoff just to follow a rule in this file blindly. If you think there is a good reason to break one, say so and ask the user what to do.
+
+Only add a rule here for a mistake agents repeat, can't learn from the code, and no linter or CI check catches at error level.
+
+## Commands
+
+- `pnpm run dev <dir>` runs the dev server with `test/<dir>/config.ts` (default `_community`, MongoDB from `pnpm docker:start`, `PAYLOAD_DATABASE=postgres` or `sqlite` to switch). It auto-logs in as `dev@payloadcms.com` / `test`.
+- `pnpm payload <dir> <command>` runs the Payload CLI against `test/<dir>/config.ts`.
+- `pnpm run test:e2e <dir>` runs one suite. `pnpm run test:int <dir>` filters by path, so `fields` also runs `fields-relationship`.
+- After changing a test config, run `pnpm run dev:generate-types <dir>` and include the regenerated types in the same PR.
+
+## Code
+
+- Use object parameters, `fn({ name }: { name: string })`, not positional arguments, for backwards compatibility.
+- Avoid `as any` and `as unknown as X`, including in tests. Fix the types, or comment why the cast is needed.
+- Search for an existing utility or type before writing a new one.
+- Use separate `import type` statements for types, even from the same module.
+- Render config labels with `getTranslation` from `@payloadcms/translations`. Don't branch on label types yourself.
+- Memoize arrays and objects passed to custom hooks instead of passing inline literals, where reference identity affects behavior.
+- Keep Input components usable without a Payload Form. The Field component reads form state, form UUID, and edit depth and passes values, callbacks, and IDs to the Input as props, like `CheckboxField` and `CheckboxInput`.
+- Never hardcode user-facing strings. Add keys in English first: `packages/translations/src/languages/` for core, the plugin's `src/translations/`, or the feature's `i18n.ts` in `richtext-lexical`. Use the `generate-translations` skill to translate core and plugin keys.
+- Build admin and API URLs with `formatAdminURL` from `payload/shared`, and query strings with `qs-esm`. Never concatenate them by hand.
+- In server functions, views, and endpoints, keep `overrideAccess: false` (the default) and pass `user`. `overrideAccess: true` on behalf of a user bypasses access control.
+- Use explicit named re-exports, never `export *`, which breaks client/server boundaries in production.
+- Server components import client components from `exports/client/index.js` (disabling `payload/no-imports-from-exports-dir` inline), never by relative path, which ignores `'use client'` in production. `pnpm dev` doesn't catch this, so verify with `pnpm prepare-run-test-against-prod` and then `pnpm dev:prod <dir>`.
+- For UI changes (rendering, interaction, focus, keyboard, content, semantics), use the `payload-accessibility` skill.
+- When behavior changes, update affected examples in `docs/`.
+
+## CSS
+
+- Write new styles in plain CSS, not SCSS.
+- Stylelint only checks `packages/ui/src/` and `templates/`. Elsewhere, follow its rules by hand: `min-width` media queries only, breakpoints 400/768/1024/1440px only, no `!important`, no `:has()` above a universal subject, and no sub-pixel values.
+- Use logical properties (`margin-inline-start`, `inset-inline`, etc.) instead of physical ones, for RTL.
+- Use the tokens in `packages/ui/src/css/` (`--spacer-*`, semantic `--color-*`, `--radius-*`, `--stroke-width-*`, `--elevation-*`, `--text-*`) instead of raw values. Round to the nearest spacer or use `calc()` with one. Never use `--ramp-*` outside `colors.css`.
+- Shared CSS also runs in Shadow DOM. Define token defaults on both `:root` and `:host` (also inside media queries), add `:host(...)` equivalents for theme and enhanced-contrast selectors without raising document specificity, and keep document-only resets and Admin Panel layout out of `:host`.
+- Verify the affected states of shared token or theme changes in the document and in a shadow root that loads the stylesheet.
+
+## Tests
+
+- Prefer integration or e2e tests. Ask before adding unit tests for internal functions or small utilities.
+- A regression test must fail when the fix is reverted. Revert the fix, run the test, and confirm it fails, then restore the fix and confirm it passes.
+- Add tests to an existing suite and config when one fits, instead of creating a new one.
+- Integration tests import `test` from `test/__helpers/int/vitest.ts` inside one root `test.suite(name, { config: './config.ts' }, ...)`. The fixture initializes, resets, and seeds Payload, so don't do it yourself. Use `test.options(name, { db: 'drizzle' }, fn)` for database-specific tests.
+- Existing suites with `resetBetweenTests: false` seed once and manage their own cleanup between tests. New suites use the default per-test reset.
+- Clean up side effects the fixture doesn't handle, such as files, external resources, and environment changes.
+- Only generate visual regression baselines with `pnpm test:visual:update`, which uses the pinned Docker image. Host-generated baselines fail on CI.
+- Dev and e2e run with Next.js `cacheComponents` (disable with `PAYLOAD_DISABLE_CACHE_COMPONENTS=true`). Tag tests whose behavior differs between modes with `@also-without-cache-components`.
+
+## Commits and PRs
+
+- PR titles are `<type>(<scope>): <lowercase title>`, with a type and an optional scope from `.github/workflows/pr-title.yml`. The scope is usually the package name. PRs are squashed with the title as message, so the first commit uses the same format and later ones use `chore`.
+- Don't introduce breaking changes unless they fall under an exception in `docs/migration-guide/versioning.mdx`. The v4 migration guide is not permission to add new ones. If a change can't avoid breaking, flag it.
+- Breaking PRs get `!` in the title and a `## Breaking Changes` section saying who is affected and what to do, with a `diff` block when user code changes. The release notes copy that section alone.
+- Only push or open PRs when asked, and open them as drafts unless told otherwise.
+- For PRs that build on each other, use GitHub's native stacked pull requests via the `gh stack` extension (`gh extension install github/gh-stack`, then `gh stack init`, `add`, `submit`, or `gh stack link` for existing branches), not independent PRs that link to each other.
+- Fixes need two PRs, one against `main` (v4) and one against `3.x` (v3), each linking the other. Features go to `main` only. If a fix should land on one branch only, say why in the PR description and in the chat.
+- Keep descriptions short and informal, backports included, since the PR body becomes the squashed commit body.
+- Record interactive or behavioral changes, including fixed bugs, with the `record-pr-demo` skill, with before and after when there is a before. Use screenshots for purely static visual changes.
+- Add a short "Written with AI" line.
