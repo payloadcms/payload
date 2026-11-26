@@ -358,7 +358,7 @@ export interface AccessJoinArticle {
    */
   coordinates?: [number, number] | null;
   tags?: ('allowed-marker' | 'available' | 'not-permitted' | 'unavailable')[] | null;
-  mixedTags?: ('available' | 'not-permitted')[] | null;
+  mixedTags?: ('available' | 'not-permitted' | 'unavailable')[] | null;
   variantValue?: string | null;
   variantSelect?: ('available' | 'unavailable') | null;
   localizedTags?: ('available' | 'unavailable')[] | null;
@@ -452,7 +452,7 @@ export interface AccessJoinNote {
    */
   coordinates?: [number, number] | null;
   tags?: ('allowed-marker' | 'available' | 'not-permitted' | 'unavailable')[] | null;
-  mixedTags?: ('available' | 'not-permitted') | null;
+  mixedTags?: ('available' | 'not-permitted' | 'unavailable') | null;
   variantValue?: number | null;
   variantSelect?: ('available' | 'unavailable') | null;
   localizedTags?: ('available' | 'unavailable')[] | null;

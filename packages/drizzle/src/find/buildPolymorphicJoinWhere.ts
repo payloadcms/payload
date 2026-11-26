@@ -106,6 +106,19 @@ export const buildPolymorphicJoinWhere = ({
         throw new QueryError([{ path: `${key}.${payloadOperator}` }])
       }
 
+      // `sanitizeQueryValue` only turns `contains` into a whole-value match for has-many selects, so
+      // the single-select branch would match substrings (`available` inside `unavailable`). Use
+      // whole-value matching on every branch. `like` has no whole-value equivalent.
+      if (resolvedPath.pathPlan.type === 'mixedSelect') {
+        if (payloadOperator === 'like' || payloadOperator === 'not_like') {
+          throw new QueryError([{ path: `${key}.${payloadOperator}` }])
+        }
+
+        if (payloadOperator === 'contains') {
+          payloadOperator = 'equals'
+        }
+      }
+
       if (resolvedPath.type === 'hasManySelect') {
         if (!supportedJSONQueryOperators.has(payloadOperator)) {
           throw new QueryError([{ path: `${key}.${payloadOperator}` }])
