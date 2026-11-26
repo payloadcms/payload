@@ -201,6 +201,10 @@ export type ADD_ROW = {
 
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
+  /**
+   * See `keepCurrentValidation` in `mergeServerFormState`.
+   */
+  keepCurrentValidation?: boolean
   prevStateRef: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
