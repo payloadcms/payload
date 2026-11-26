@@ -1,7 +1,7 @@
 import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
-import { defaultAccess } from '../auth/defaultAccess.js'
+import { defaultAdminPanelUserAccess } from '../auth/defaultAdminPanelUserAccess.js'
 import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
 
@@ -58,9 +58,9 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   i18n: {},
   jobs: {
     access: {
-      cancel: defaultAccess,
-      queue: defaultAccess,
-      run: defaultAccess,
+      cancel: defaultAdminPanelUserAccess,
+      queue: defaultAdminPanelUserAccess,
+      run: defaultAdminPanelUserAccess,
     },
     deleteJobOnComplete: true,
     depth: 0,
@@ -140,9 +140,9 @@ export const addDefaultsToConfig = (config: Config): Config => {
     depth: 0,
     ...(config.jobs || {}),
     access: {
-      cancel: defaultAccess,
-      queue: defaultAccess,
-      run: defaultAccess,
+      cancel: defaultAdminPanelUserAccess,
+      queue: defaultAdminPanelUserAccess,
+      run: defaultAdminPanelUserAccess,
       ...(config.jobs?.access || {}),
     },
   } as JobsConfig

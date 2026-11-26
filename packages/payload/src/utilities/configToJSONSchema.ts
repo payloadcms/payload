@@ -1224,6 +1224,13 @@ export function authCollectionToOperationsJSONSchema(
 export function timezonesToJSONSchema(
   supportedTimezones: SanitizedConfig['admin']['timezones']['supportedTimezones'],
 ): JSONSchema4 {
+  if (supportedTimezones.length === 0) {
+    return {
+      description: 'Supported timezones in IANA format.',
+      tsType: 'never',
+    }
+  }
+
   return {
     description: 'Supported timezones in IANA format.',
     enum: supportedTimezones.map((timezone) =>

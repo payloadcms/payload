@@ -5,6 +5,7 @@ import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -45,8 +46,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     select: incomingSelect,
     showHiddenFields,
     sort,
-    where,
+    where: incomingWhere,
   } = args
+
+  const where = cloneWhere(incomingWhere)
   const req = args.req!
   const { fallbackLocale, locale, payload } = req
 

@@ -21,4 +21,7 @@ export const fakeCustomIDsSlug = 'fake-custom-ids'
 
 export const relationshipsMigrationSlug = 'relationships-migration'
 
+export const simpleSlug = 'simple'
+export const global2Slug = 'global-2'
+
 export const writeInputSlug = 'write-input'

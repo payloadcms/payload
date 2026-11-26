@@ -134,10 +134,45 @@ export async function validateSearchParam({
   }
 
   if ((isNestedHasManyQuery || isJoinContainsQuery) && nestedCollectionSlug) {
+    const nestedCollectionConfig = req.payload.collections[nestedCollectionSlug]!.config
+
+    // Resolve permissions before starting the nested validation below, so a rejection from it
+    // cannot occur while this function is still awaiting and before `Promise.all` observes it.
+    if (!overrideAccess) {
+      if (!policies.collections![nestedCollectionSlug]) {
+        policies.collections![nestedCollectionSlug] = await getEntityPermissions({
+          blockReferencesPermissions,
+          entity: nestedCollectionConfig,
+          entityType: 'collection',
+          fetchData: false,
+          operations: ['read'],
+          req: isolateObjectProperty(req, 'transactionID'),
+        })
+      }
+
+      const nestedCollectionReadPermission = policies.collections![nestedCollectionSlug].read
+
+      if (!nestedCollectionReadPermission?.permission) {
+        errors.push({ path: incomingPath })
+        return
+      }
+
+      // The nested query runs directly against the related collection, so its read access
+      // constraint must be applied to the same related documents the user's query matches.
+      // Otherwise the nested query can match documents the user cannot read.
+      if (nestedCollectionReadPermission.where) {
+        const mutableConstraint = constraint as Record<string, Record<string, unknown>>
+
+        mutableConstraint[incomingPath]![operator] = {
+          and: [val, nestedCollectionReadPermission.where],
+        }
+      }
+    }
+
     // Validate the nested query against the related collection.
     promises.push(
       validateQueryPaths({
-        collectionConfig: req.payload.collections[nestedCollectionSlug]!.config,
+        collectionConfig: nestedCollectionConfig,
         errors,
         overrideAccess,
         policies,

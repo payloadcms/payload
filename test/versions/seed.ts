@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url'
 
 import type { DraftPost } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { devUser } from '../credentials.js'
 import {
   generateLexicalData,
   generateRelationshipLexicalData,
@@ -296,6 +296,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc1ID,
         updated: false,
       }) as any,
+      constrainedRelationship: otherUserDocID,
       richtextWithConstrainedRelationship: generateRelationshipLexicalData(otherUserDocID),
       richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
         text: 'richtextWithCustomDiff',
@@ -468,6 +469,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc2ID,
         updated: true,
       }) as any,
+      constrainedRelationship: doc2ID,
       richtextWithConstrainedRelationship: generateRelationshipLexicalData(doc2ID),
       richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
         text: 'richtextWithCustomDiff2',

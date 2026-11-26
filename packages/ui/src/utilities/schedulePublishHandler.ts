@@ -19,6 +19,7 @@ export type SchedulePublishHandlerArgs = {
 
 type ScheduledPublishJob = {
   input?: SchedulePublishTaskInput
+  taskSlug?: string
 } & TypeWithID
 
 export type GetUpcomingScheduledPublishHandlerArgs = {
@@ -69,7 +70,24 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
 
   await canAccessAdmin({ req })
 
-  if (date && !deleteID) {
+  if (deleteID) {
+    const job = await payload.db.findOne<ScheduledPublishJob>({
+      collection: 'payload-jobs',
+      req,
+      where: { id: { equals: deleteID } },
+    })
+
+    if (!job || job.taskSlug !== 'schedulePublish') {
+      throw new Forbidden(req.t)
+    }
+
+    await assertCanSchedulePublish({
+      id: job.input?.doc?.value,
+      collectionSlug: job.input?.doc?.relationTo,
+      globalSlug: job.input?.global,
+      req,
+    })
+  } else {
     await assertCanSchedulePublish({
       id: doc?.value,
       collectionSlug: doc?.relationTo,
@@ -87,6 +105,8 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
           and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
         },
       })
+
+      return { message: i18n.t('general:success') }
     }
 
     const publishType = type || 'publish'
@@ -164,12 +184,21 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
   return { message: i18n.t('general:success') }
 }
 
+/**
+ * Throws `Forbidden` unless the target is exactly one collection document or global with
+ * scheduled publish enabled, and the current user has publish permission on it.
+ */
 async function assertCanSchedulePublish({
   id,
   collectionSlug,
   globalSlug,
   req,
-}: { req: PayloadRequest } & GetUpcomingScheduledPublishHandlerArgs): Promise<void> {
+}: {
+  collectionSlug?: string
+  globalSlug?: string
+  id?: number | string
+  req: PayloadRequest
+}): Promise<void> {
   const { payload } = req
 
   const collectionConfig = collectionSlug ? payload.collections[collectionSlug]?.config : undefined

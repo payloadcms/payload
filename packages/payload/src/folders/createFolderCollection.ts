@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, Option, SelectField } from '../fields/config/types.js'
 
-import { defaultAccess } from '../auth/defaultAccess.js'
+import { defaultAdminPanelUserAccess } from '../auth/defaultAdminPanelUserAccess.js'
 import { buildFolderField } from './buildFolderField.js'
 import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
@@ -41,11 +41,11 @@ export const createFolderCollection = ({
   return {
     slug,
     access: {
-      create: defaultAccess,
-      delete: defaultAccess,
-      read: defaultAccess,
-      readVersions: defaultAccess,
-      update: defaultAccess,
+      create: defaultAdminPanelUserAccess,
+      delete: defaultAdminPanelUserAccess,
+      read: defaultAdminPanelUserAccess,
+      readVersions: defaultAdminPanelUserAccess,
+      update: defaultAdminPanelUserAccess,
     },
     admin: {
       hidden: !debug,

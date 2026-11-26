@@ -269,7 +269,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: postReferencesSlug,
-      access: openAccess,
+      access: { ...openAccess, readVersions: () => true },
       fields: [
         {
           name: 'post',
@@ -282,6 +282,11 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'relationship',
           hasMany: false,
           relationTo: slug,
+        },
+        {
+          name: 'postTitle',
+          type: 'text',
+          virtual: 'singlePost.title',
         },
         {
           name: 'joinedPosts',
@@ -308,6 +313,7 @@ export const getConfig: () => Partial<Config> = () => ({
           on: 'polymorphicReference',
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: unrestrictedSlug,
@@ -418,6 +424,11 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'postLabel',
           type: 'text',
           virtual: 'post.restrictedField',
+        },
+        {
+          name: 'unrestrictedDoc',
+          type: 'relationship',
+          relationTo: unrestrictedSlug,
         },
       ],
     },
