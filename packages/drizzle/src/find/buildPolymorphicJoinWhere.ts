@@ -337,7 +337,9 @@ const resolveWherePath = ({
       }
 
       const { jsonColumnPath, jsonPathSegments } = collectionFieldForBranch
-      const jsonColumn = table[jsonColumnPath] as Column | undefined
+      const jsonColumn = table[
+        shouldUseVersionTable ? `version_${jsonColumnPath}` : jsonColumnPath
+      ] as Column | undefined
 
       if (!jsonColumn) {
         return { type: 'invalid', pathPlan }

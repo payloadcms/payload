@@ -506,6 +506,52 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
   )
 
   test.options(
+    'should filter versioned members by a draft json sub-path',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const article = await payload.create({
+        collection: draftArticlesSlug,
+        data: {
+          settings: { featured: false },
+          title: 'Settings',
+          topics: [topic.id],
+          visible: true,
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: article.id,
+        collection: draftArticlesSlug,
+        data: { settings: { featured: true } },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      const draft = await payload.findByID({
+        id: topic.id,
+        collection: topicsSlug,
+        depth: 0,
+        draft: true,
+        joins: {
+          members: { count: true, where: { 'settings.featured': { equals: true } } },
+        },
+        overrideAccess: false,
+      })
+
+      expect(draft.members).toMatchObject({
+        docs: [{ relationTo: draftArticlesSlug, value: article.id }],
+        totalDocs: 1,
+      })
+    },
+  )
+
+  test.options(
     'should filter draft members by the document createdAt timestamp',
     { db: 'drizzle' },
     async ({ payload }) => {
