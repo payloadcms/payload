@@ -2118,6 +2118,8 @@ export interface RelationshipField {
     relationTo: 'text-fields';
     value: string | TextField;
   } | null;
+  relationToCollapsible?: (string | null) | CollapsibleField;
+  relationToGroup?: (string | null) | GroupField;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -4340,6 +4342,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipDrawerHasManyPolymorphic?: T;
   relationshipDrawerWithAllowCreateFalse?: T;
   relationshipDrawerWithFilterOptions?: T;
+  relationToCollapsible?: T;
+  relationToGroup?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

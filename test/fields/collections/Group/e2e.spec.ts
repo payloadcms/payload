@@ -8,6 +8,7 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -15,7 +16,7 @@ import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { groupFieldsSlug } from '../../slugs.js'
+import { groupFieldsSlug, relationshipFieldsSlug } from '../../slugs.js'
 import { namedGroupDoc } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -129,6 +130,41 @@ describe('Group', () => {
 
       await expect(nolabelGroupChildField).toBeVisible()
     })
+  })
+
+  test('should render fields of groups below the fold in a document drawer', async () => {
+    const {
+      docs: [relatedDoc],
+    } = await payload.find({ collection: groupFieldsSlug, limit: 1 })
+    const {
+      docs: [relationshipDoc],
+    } = await payload.find({ collection: relationshipFieldsSlug, limit: 1 })
+    await payload.update({
+      collection: relationshipFieldsSlug,
+      id: relationshipDoc!.id,
+      data: { relationToGroup: relatedDoc!.id },
+    })
+
+    await page.goto(new AdminUrlUtil(serverURL, relationshipFieldsSlug).edit(relationshipDoc!.id))
+    await openDocDrawer({
+      page,
+      selector: '#field-relationToGroup button.relationship--single-value__drawer-toggler',
+    })
+
+    // These groups sit below the visible area of the drawer, which is not scrolled
+    const drawer = page.locator('[id^=doc-drawer_group-fields_1_]')
+    const unnamedGroupField = drawer.locator('input[name="insideUnnamedGroup"]')
+    const nestedGroupField = drawer.locator(
+      'input[name="deeplyNestedGroup.insideNestedUnnamedGroup"]',
+    )
+
+    await expect(unnamedGroupField).toHaveValue(namedGroupDoc.insideUnnamedGroup ?? '')
+    await expect(nestedGroupField).toHaveValue(
+      namedGroupDoc.deeplyNestedGroup?.insideNestedUnnamedGroup ?? '',
+    )
+
+    await nestedGroupField.fill('nested text in drawer')
+    await expect(nestedGroupField).toHaveValue('nested text in drawer')
   })
 
   describe.skip('A11y', () => {
