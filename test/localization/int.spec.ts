@@ -2271,6 +2271,32 @@ describe('Localization', () => {
         expect(allLocales.nav.layout.en[0].text).toBe('english text')
         expect(allLocales.nav.layout.es ?? null).toBeNull()
       })
+
+      it('should still validate non-localized fields when duplicating without the active locale', async () => {
+        const doc = await payload.create({
+          collection: withRequiredLocalizedFields,
+          data: {
+            nav: {
+              layout: [{ blockType: 'text', text: 'english text' }],
+            },
+            title: 'hello',
+          },
+          locale: defaultLocale,
+        })
+
+        await expect(
+          payload.duplicate({
+            id: doc.id,
+            collection: withRequiredLocalizedFields,
+            data: { sharedCode: 'invalid' },
+            locale: spanishLocale,
+            selectedLocales: [defaultLocale],
+          }),
+        ).rejects.toMatchObject({
+          name: 'ValidationError',
+          data: { errors: [{ path: 'sharedCode' }] },
+        })
+      })
     })
 
     describe('Localized group and tabs', () => {

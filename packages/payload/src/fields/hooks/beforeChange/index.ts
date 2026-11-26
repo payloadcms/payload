@@ -25,6 +25,10 @@ export type Args<T extends JsonObject> = {
   operation: Operation
   overrideAccess?: boolean
   req: PayloadRequest
+  /**
+   * Skip validation for localized fields only. Non-localized fields are still validated.
+   */
+  skipLocalizedFieldValidation?: boolean
   skipValidation?: boolean
 }
 
@@ -50,6 +54,7 @@ export const beforeChange = async <T extends JsonObject>({
   operation,
   overrideAccess,
   req,
+  skipLocalizedFieldValidation,
   skipValidation,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
@@ -78,6 +83,7 @@ export const beforeChange = async <T extends JsonObject>({
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
+    skipLocalizedFieldValidation,
     skipValidation,
     submittedTopLevelFieldNames,
   })

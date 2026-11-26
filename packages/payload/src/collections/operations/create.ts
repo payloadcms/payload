@@ -339,9 +339,10 @@ export const createOperation = async <
 
     // When duplicating into a subset of locales that excludes the active one,
     // `duplicatedFromDoc` is empty at `req.locale` by design: nothing is written
-    // there. `beforeChange` validates that one locale, so required fields would
-    // always fail. The selected locales travel in `docWithLocales`, which
-    // validation never reads.
+    // there. `beforeChange` validates that one locale, so required localized fields
+    // would always fail. The selected locales travel in `docWithLocales`, which
+    // validation never reads. Non-localized fields are the same in every locale and
+    // are still validated.
     const isDuplicatingWithoutActiveLocale = Boolean(
       isDuplicating && selectedLocales?.length && locale && !selectedLocales.includes(locale),
     )
@@ -359,9 +360,8 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess,
       req,
-      skipValidation:
-        (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
-        isDuplicatingWithoutActiveLocale,
+      skipLocalizedFieldValidation: isDuplicatingWithoutActiveLocale,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
     if (isDuplicatingWithoutActiveLocale && selectedLocales) {

@@ -188,6 +188,11 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'sharedCode',
+          type: 'text',
+          validate: (value: unknown) => value !== 'invalid' || 'sharedCode cannot be "invalid"',
+        },
+        {
           type: 'tabs',
           tabs: [
             {
