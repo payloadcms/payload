@@ -2,6 +2,14 @@ import path from 'path'
 import { pathToFileURL } from 'url'
 
 /**
+ * Builds the source of an `import()` expression for `eval`. The specifier is emitted as a
+ * JSON string literal so quotes and backslashes in it cannot end the literal early (for example
+ * a config path like `/Users/O'Brien/app`, which `pathToFileURL` does not percent-encode).
+ */
+export const buildImportExpression = (importPath: string): string =>
+  `import(${JSON.stringify(importPath)})`
+
+/**
  * Dynamically imports a module from a file path or module specifier.
  *
  * Uses a direct `import()` in Vitest (where eval'd imports fail with ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING),
@@ -24,5 +32,5 @@ export async function dynamicImport<T = unknown>(modulePathOrSpecifier: string):
   // Without the eval, the Next.js bundler will throw this error when encountering the import statement:
   // ⚠ Compiled with warnings in X.Xs
   // Critical dependency: the request of a dependency is an expression
-  return await eval(`import('${importPath}')`)
+  return await eval(buildImportExpression(importPath))
 }
