@@ -133,6 +133,10 @@ export const AccessJoinArticles: CollectionConfig = {
         return { 'settings.approved': { exists: false } }
       }
 
+      if (req.context.useLeafSubpathAccessConstraint) {
+        return { 'title.tags': { equals: 'available' } }
+      }
+
       return {
         availability: { not_equals: 'missing' },
         tags: { equals: 'available' },
