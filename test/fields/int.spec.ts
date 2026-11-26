@@ -1462,6 +1462,60 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two'])
     })
 
+    test('should query hasMany localized values in the requested locale', async ({ payload }) => {
+      await payload.update({
+        id: doc.id,
+        collection: 'select-fields',
+        data: {
+          selectHasManyLocalized: ['two'],
+        },
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      const findIDs = async ({ locale, value }: { locale: string; value: string }) => {
+        const { docs } = await payload.find({
+          collection: 'select-fields',
+          depth: 0,
+          locale,
+          overrideAccess: true,
+          where: { selectHasManyLocalized: { equals: value } },
+        })
+
+        return docs.map(({ id }) => id)
+      }
+
+      expect(await findIDs({ locale: 'en', value: 'one' })).toContain(doc.id)
+      expect(await findIDs({ locale: 'es', value: 'two' })).toContain(doc.id)
+      expect(await findIDs({ locale: 'es', value: 'one' })).not.toContain(doc.id)
+    })
+
+    test.options(
+      'should query hasMany localized values across all locales',
+      { db: 'drizzle' },
+      async ({ payload }) => {
+        await payload.update({
+          id: doc.id,
+          collection: 'select-fields',
+          data: {
+            selectHasManyLocalized: ['two'],
+          },
+          locale: 'es',
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.find({
+          collection: 'select-fields',
+          depth: 0,
+          locale: 'all',
+          overrideAccess: true,
+          where: { selectHasManyLocalized: { equals: 'one' } },
+        })
+
+        expect(docs.map(({ id }) => id)).toContain(doc.id)
+      },
+    )
+
     test('retains hasMany updates', async ({ payload }) => {
       const { id } = await payload.create({
         collection: 'select-fields',
