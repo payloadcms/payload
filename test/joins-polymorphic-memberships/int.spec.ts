@@ -16,7 +16,7 @@ import {
 test.suite('Joins through relationships and uploads', { config: './config.ts' }, () => {
   test.options(
     'should apply each MongoDB target schema before counting and paging members',
-    { db: 'mongo' },
+    { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
     async ({ payload }) => {
       const topic = await payload.create({
         collection: topicsSlug,
