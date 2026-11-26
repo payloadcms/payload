@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { videosSlug } from '../../shared.js'
+import { slowSaveTitle, waitWhileSaveIsHeld } from '../saveGate.js'
 
 export const Videos: CollectionConfig = {
   slug: videosSlug,
@@ -8,6 +9,17 @@ export const Videos: CollectionConfig = {
     create: ({ req }) => Boolean(req.user) && req.headers.get('x-disallow-create') !== 'true',
     read: () => true,
     update: ({ req }) => Boolean(req.user) && req.headers.get('x-disallow-update') !== 'true',
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data }) => {
+        if (data?.title === slowSaveTitle) {
+          await waitWhileSaveIsHeld()
+        }
+
+        return data
+      },
+    ],
   },
   fields: [
     {

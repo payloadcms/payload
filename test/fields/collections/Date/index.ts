@@ -19,6 +19,15 @@ const DateFields: CollectionConfig = {
   },
   fields: [
     {
+      name: 'dateRange',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Date/components/RangePicker/index.js#RangePicker',
+        },
+      },
+    },
+    {
       name: 'default',
       type: 'date',
       required: true,
