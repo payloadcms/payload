@@ -231,31 +231,6 @@ describe('Azure segmented uploads', () => {
     expect(stagingDelete).toHaveBeenCalled()
   })
 
-  it.each([
-    { expected: 10, properties: { contentLength: 10, copyStatus: 'success' } },
-    { expected: null, properties: { contentLength: 0, copyStatus: 'pending' } },
-    { expected: null, properties: { contentLength: 0, copyStatus: 'failed' } },
-  ])(
-    'should report the final blob as stored only once its copy is $properties.copyStatus',
-    async ({ expected, properties }) => {
-      const capability = createCapability({
-        final: { getProperties: vi.fn().mockResolvedValue(properties) },
-      })
-
-      await expect(capability.getStoredSize!({ object, providerState: {}, req })).resolves.toBe(
-        expected,
-      )
-    },
-  )
-
-  it('should report nothing stored before the final blob exists', async () => {
-    const capability = createCapability({
-      final: { getProperties: vi.fn().mockRejectedValue(restError(404)) },
-    })
-
-    await expect(capability.getStoredSize!({ object, providerState: {}, req })).resolves.toBeNull()
-  })
-
   it('should discard staged blocks and delete an orphaned final blob when aborting', async () => {
     const stagingDelete = vi.fn().mockResolvedValue({})
     const finalDelete = vi.fn().mockResolvedValue({})

@@ -94,6 +94,9 @@ export type SegmentedUploadCapability = {
    * The size of the committed object, or `null` while there is none. Core asks before it
    * reconciles, so a completion whose response was lost still finishes once the provider no
    * longer reports the uploaded segments. Only report an object that is fully written.
+   *
+   * Only needed when `reconcile` stops reporting segments once the upload is committed, like S3
+   * multipart uploads. Azure keeps the block list on the final blob, so it leaves this out.
    */
   getStoredSize?: (args: {
     object: ReservedObject

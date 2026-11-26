@@ -174,17 +174,6 @@ export const createSegmentedUpload = ({
       )
     },
 
-    getStoredSize: async ({ object }) => {
-      const properties = await getProperties({ blob: getFinalBlob({ object }) })
-
-      // Azure creates the destination as soon as it accepts a copy, so only a finished copy counts.
-      if (!properties || (properties.copyStatus && properties.copyStatus !== 'success')) {
-        return null
-      }
-
-      return properties.contentLength ?? null
-    },
-
     initiate: async ({ collectionSlug, docPrefix, filename, mimeType, req }) => {
       // Azure has no call that starts a block upload, so check the container up front: a missing
       // one would otherwise only surface after the browser started sending blocks.
