@@ -11,6 +11,7 @@ import {
   getQueryDraftsSort,
   type JoinQuery,
   type SanitizedCollectionConfig,
+  type Where,
 } from 'payload'
 import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
@@ -88,6 +89,7 @@ export const buildJoinAggregation = async ({
     } = joins?.[join.joinPath] || {}
 
     const pageEnd = (page || 1) * limitJoin
+    const matchWhere = omitEmptyConditions({ where: whereJoin })
     const aggregatedFields: FlattenedField[] = []
     for (const collectionSlug of join.field.collection) {
       const { collectionConfig } = getCollection({ adapter, collectionSlug })
@@ -140,7 +142,7 @@ export const buildJoinAggregation = async ({
           return paths.length > 0 && paths.every(({ complete, invalid }) => complete && !invalid)
         },
         usesObjectIDs: !adapter.payload.collections[collectionSlug]?.customIDType,
-        where: whereJoin,
+        where: matchWhere,
       })
 
       if (condition.matches === 'no-documents') {
@@ -532,4 +534,21 @@ export const buildJoinAggregation = async ({
   }
 
   return aggregate
+}
+
+// MongoDB's query builder ignores empty clauses. Keep them from making an OR match all documents.
+function omitEmptyConditions({ where }: { where: Where }): Where {
+  return Object.fromEntries(
+    Object.entries(where).flatMap<[string, Where[string]]>(([key, value]) => {
+      if (Array.isArray(value) && ['and', 'or'].includes(key.toLowerCase())) {
+        const conditions = value
+          .map((condition) => omitEmptyConditions({ where: condition }))
+          .filter((condition) => Object.keys(condition).length > 0)
+
+        return conditions.length ? [[key, conditions]] : []
+      }
+
+      return value && Object.keys(value).length === 0 ? [] : [[key, value]]
+    }),
+  )
 }
