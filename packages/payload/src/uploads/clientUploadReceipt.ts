@@ -14,6 +14,8 @@ type ClientUploadReceipt = {
   filename: string
   filePrefix: string
   storageFilePath: string
+  /** The upload session that stored the file. A save keeps the session's object while it runs. */
+  uploadSessionID?: number | string
   userCollection: null | string
   userID: null | number | string
 }
@@ -32,6 +34,7 @@ export const createClientUploadReceipt = ({
   filePrefix,
   req,
   storageFilePath,
+  uploadSessionID,
 }: {
   _objectKey?: string
   adapterData?: Record<string, unknown>
@@ -41,6 +44,7 @@ export const createClientUploadReceipt = ({
   filePrefix: string
   req: PayloadRequest
   storageFilePath: string
+  uploadSessionID?: number | string
 }): `${string}.${string}` => {
   const data: ClientUploadReceipt = {
     ...(_objectKey !== undefined && { _objectKey }),
@@ -51,6 +55,7 @@ export const createClientUploadReceipt = ({
     filename,
     filePrefix,
     storageFilePath,
+    ...(uploadSessionID !== undefined && { uploadSessionID }),
     ...getUser(req),
   }
 
@@ -175,6 +180,9 @@ const isReceipt = (value: unknown): value is ClientUploadReceipt => {
     typeof data.storageFilePath === 'string' &&
     typeof data.filePrefix === 'string' &&
     typeof data.filename === 'string' &&
+    (data.uploadSessionID === undefined ||
+      typeof data.uploadSessionID === 'string' ||
+      (typeof data.uploadSessionID === 'number' && Number.isFinite(data.uploadSessionID))) &&
     (data.userCollection === null || typeof data.userCollection === 'string') &&
     (data.userID === null ||
       typeof data.userID === 'string' ||

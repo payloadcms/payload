@@ -41,6 +41,7 @@ import {
   MB,
 } from '../test-utils.js'
 import { maxActiveSessions } from './config.js'
+import { holdSlowSave, slowSaveTitle } from './saveGate.js'
 
 const sessionsPath = `/${uploadSessionsCollectionSlug}` as const
 
@@ -628,6 +629,69 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(swept?.status).toBe('cancelled')
     expect(swept?.cleanupCompletedAt).toBeTruthy()
     expect(await countStoredFiles()).toBe(0)
+  })
+
+  test('should keep the stored file while a save that checked its file reference is running', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+
+    const { file } = await completeStorage({ restClient, session })
+
+    await restClient.DELETE(`${sessionsPath}/${session.id}`)
+
+    // The references run out just as the save checks its receipt.
+    await expireFileReferences({ payload, session })
+
+    const slowSave = holdSlowSave()
+
+    try {
+      const save = createWithFileReference({ file, restClient, title: slowSaveTitle })
+
+      await slowSave.reached
+
+      // Listing runs the cleanup sweep while the save is still running.
+      await restClient.GET(sessionsPath)
+
+      expect(await countStoredFiles()).toBe(1)
+
+      slowSave.release()
+
+      const response = await save
+
+      expect(response.status).toBe(201)
+
+      const { doc } = await response.json()
+      const download = await restClient.GET(`/${videosSlug}/file/${doc.filename}`)
+
+      expect(download.status).toBe(200)
+    } finally {
+      slowSave.release()
+    }
+  })
+
+  test('should refuse a save whose file reference was checked after cleanup removed the file', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+
+    const { file } = await completeStorage({ restClient, session })
+
+    await restClient.DELETE(`${sessionsPath}/${session.id}`)
+    await expireFileReferences({ payload, session })
+    await restClient.GET(sessionsPath)
+
+    const response = await createWithFileReference({ file, restClient, title: 'Too late' })
+
+    expect(response.status).toBe(400)
+    expect((await response.json()).errors[0].message).toBe('Invalid upload reference.')
+    expect((await payload.count({ collection: videosSlug })).totalDocs).toBe(0)
   })
 
   test('should release the filename when the session is cancelled', async ({ restClient }) => {

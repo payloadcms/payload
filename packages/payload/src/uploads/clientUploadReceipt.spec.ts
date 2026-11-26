@@ -66,6 +66,40 @@ describe('clientUploadReceipt', () => {
     )
   })
 
+  it('should keep the upload session of a receipt through verification and re-signing', () => {
+    const signedReceipt = createClientUploadReceipt({ ...receiptArgs, uploadSessionID: 42 })
+
+    expect(verifyClientUploadReceipt({ req, signedReceipt }).uploadSessionID).toBe(42)
+    expect(
+      verifyClientUploadReceipt({
+        req,
+        signedReceipt: resignClientUploadReceipt({
+          adapterData: { providerUploadID: 'provider-1' },
+          req,
+          signedReceipt,
+        }),
+      }).uploadSessionID,
+    ).toBe(42)
+  })
+
+  it('should reject a receipt whose upload session is not an ID', () => {
+    const signedReceipt = signReceipt({
+      _objectKey: 'upload-1',
+      collectionSlug: 'media',
+      expiresAt: Date.now() + 60_000,
+      filename: 'photo.jpg',
+      filePrefix: 'media',
+      storageFilePath: 'media/upload-1/photo.jpg',
+      uploadSessionID: { id: 42 },
+      userCollection: 'users',
+      userID: 'user-1',
+    })
+
+    expect(() => verifyClientUploadReceipt({ req, signedReceipt })).toThrow(
+      'Invalid upload reference.',
+    )
+  })
+
   describe('resignClientUploadReceipt', () => {
     afterEach(() => {
       vi.useRealTimers()
