@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Page, Request } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import dotenv from 'dotenv'
@@ -494,7 +494,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await context.close()
   })
 
-  test('should keep offering to select the file when parts finish after a resumed upload failed', async ({
+  test('should stop the other parts and keep offering to select the file when a resumed upload fails', async ({
     browser,
   }) => {
     const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
@@ -505,14 +505,15 @@ test.describe('storage-s3 upload sessions E2E', () => {
     // Routes outlive the reload, so the resumed upload goes through the route below first.
     releaseParts()
 
-    let releaseLateParts = () => {}
-    const latePartsReleased = new Promise<void>((resolve) => {
-      releaseLateParts = resolve
+    let rejectFirstPart = () => {}
+    const firstPartRejected = new Promise<void>((resolve) => {
+      rejectFirstPart = resolve
     })
+    const heldParts: Request[] = []
     const getPartNumber = (url: string) => new URL(url).searchParams.get('partNumber')
 
-    // Registered after the logging route, so it runs first. Part 1 is rejected for good, while
-    // the other parts are held until the upload has already failed.
+    // Registered after the logging route, so it runs first. Part 1 is rejected for good once the
+    // other parts are sending. Those are never answered, so they can only end by being cancelled.
     await page.route(
       (url) => url.host === s3Host,
       async (route) => {
@@ -521,11 +522,12 @@ test.describe('storage-s3 upload sessions E2E', () => {
         }
 
         if (getPartNumber(route.request().url()) === '1') {
+          await firstPartRejected
+
           return route.fulfill({ headers: { 'access-control-allow-origin': '*' }, status: 400 })
         }
 
-        await latePartsReleased
-        await route.fallback()
+        heldParts.push(route.request())
       },
     )
 
@@ -535,28 +537,15 @@ test.describe('storage-s3 upload sessions E2E', () => {
     ])
 
     await chooser.setFiles(filePath)
+    await expect.poll(() => heldParts.length).toBe(2)
+    rejectFirstPart()
 
     const recoveryToast = page.locator('[data-sonner-toast]', { hasText: 'was interrupted' })
 
     // The description is only set when the offer shows again after a failed resume.
     await expect(recoveryToast.getByText('Upload failed with status 400')).toBeVisible()
-
-    // Waits for the response, not `requestfinished`: the upload only reads the status, and an
-    // empty S3 part response is not always reported as finished.
-    const latePartsFinished = Promise.all(
-      ['2', '3'].map((partNumber) =>
-        page.waitForResponse(
-          (response) =>
-            response.request().method() === 'PUT' && getPartNumber(response.url()) === partNumber,
-        ),
-      ),
-    )
-
-    releaseLateParts()
-    await latePartsFinished
-    // A late progress report would replace the offer with a progress toast that has no action.
-    // Nothing else happens after it, so give the page time to render one if it came.
-    await page.waitForTimeout(500)
+    // Left running, they would upload next to a retry and report progress that replaces the offer.
+    await expect.poll(() => heldParts.filter((request) => request.failure()).length).toBe(2)
 
     await expect(page.getByText(/^Uploading .*%$/)).toHaveCount(0)
     await expect(recoveryToast.getByRole('button', { name: 'Select a file' })).toBeVisible()
