@@ -5915,6 +5915,162 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
       })
 
+      test.for(['collection', 'global'] as const)(
+        'should reject duplicate scheduled events for a %s',
+        async (target, { payload }) => {
+          const req = await createPayloadRequest({ payload, user })
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            ...(target === 'collection'
+              ? { doc: { relationTo: draftCollectionSlug, value: draftDoc.id } }
+              : { global: draftGlobalSlug }),
+            req,
+          }
+
+          await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+          const result = await schedulePublishHandler({
+            ...args,
+            ...(target === 'collection'
+              ? { doc: { relationTo: draftCollectionSlug, value: String(draftDoc.id) } }
+              : {}),
+            timezone: 'Europe/London',
+          })
+
+          expect(result).toHaveProperty('error', req.i18n.t('version:duplicateScheduledEvent'))
+          const jobs = await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+
+          expect(jobs.totalDocs).toBe(1)
+        },
+      )
+
+      test.for(['time', 'action', 'locale', 'document', 'global'] as const)(
+        'should allow scheduled events with a different %s',
+        async (difference, { payload }) => {
+          const req = await createPayloadRequest({ payload, user })
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+            req,
+          }
+          const otherDoc =
+            difference === 'document'
+              ? await payload.create({
+                  collection: draftCollectionSlug,
+                  data: { title: 'another scheduled document', description: 'another document' },
+                  overrideAccess: true,
+                })
+              : undefined
+
+          await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+          await expect(
+            schedulePublishHandler({
+              ...args,
+              ...(difference === 'time' ? { date: new Date(date.getTime() + 60_000) } : {}),
+              ...(difference === 'action' ? { type: 'unpublish' as const } : {}),
+              ...(difference === 'locale' ? { localeToPublish: 'en' } : {}),
+              ...(difference === 'document'
+                ? { doc: { relationTo: draftCollectionSlug, value: otherDoc!.id } }
+                : {}),
+              ...(difference === 'global' ? { doc: undefined, global: draftGlobalSlug } : {}),
+            }),
+          ).resolves.not.toHaveProperty('error')
+          const jobs = await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+
+          expect(jobs.totalDocs).toBe(2)
+        },
+      )
+
+      test.for(['completed', 'failed'] as const)(
+        'should allow rescheduling after a previous event has %s',
+        async (state, { payload }) => {
+          const req = await createPayloadRequest({ payload, user })
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+            req,
+          }
+
+          await schedulePublishHandler(args)
+          await payload.update({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            data:
+              state === 'completed'
+                ? { completedAt: new Date().toISOString() }
+                : { hasError: true },
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+          await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+          const jobs = await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+
+          expect(jobs.totalDocs).toBe(2)
+        },
+      )
+
+      test('should recognize default publish and all-locales events as duplicates', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const date = new Date(Date.now() + 60_000)
+
+        await payload.db.create({
+          collection: 'payload-jobs',
+          data: {
+            taskSlug: 'schedulePublish',
+            waitUntil: date.toISOString(),
+            input: {
+              doc: { relationTo: draftCollectionSlug, value: String(draftDoc.id) },
+              locale: 'all',
+            },
+          },
+        })
+        const result = await schedulePublishHandler({
+          type: 'publish',
+          date,
+          doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+          req,
+        })
+
+        expect(result).toHaveProperty('error', req.i18n.t('version:duplicateScheduledEvent'))
+      })
+
+      test('should compare scheduled input values without SQL JSON query restrictions', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const args = {
+          type: 'publish' as const,
+          date: new Date(Date.now() + 60_000),
+          doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+          localeToPublish: 'café',
+          req,
+        }
+
+        await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+        await expect(schedulePublishHandler(args)).resolves.toHaveProperty(
+          'error',
+          req.i18n.t('version:duplicateScheduledEvent'),
+        )
+      })
+
       test('should create using schedule-publish', async ({ payload }) => {
         const currentDate = new Date()
 

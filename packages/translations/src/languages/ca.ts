@@ -773,6 +773,8 @@ export const caTranslations: DefaultTranslationsObject = {
     draft: 'Borrador',
     draftHasPublishedVersion: 'Esborrany (té versió publicada)',
     draftSavedSuccessfully: 'Borrador desat amb èxit.',
+    duplicateScheduledEvent:
+      'Aquest esdeveniment ja està programat per a aquesta hora. Trieu una altra hora o suprimiu l’esdeveniment existent.',
     lastSavedAgo: 'Desat fa {{distance}}',
     modifiedOnly: 'Només modificat',
     moreVersions: 'Més versions...',

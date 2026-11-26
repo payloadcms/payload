@@ -726,6 +726,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     draft: '草稿',
     draftHasPublishedVersion: '草稿（有已发布版本）',
     draftSavedSuccessfully: '草稿成功保存。',
+    duplicateScheduledEvent: '此事件已安排在此时间。请选择其他时间或删除现有事件。',
     lastSavedAgo: '{{distance}} 前已保存',
     modifiedOnly: '仅修改过的',
     moreVersions: '更多版本...',

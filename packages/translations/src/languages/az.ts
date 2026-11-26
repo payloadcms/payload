@@ -770,6 +770,8 @@ export const azTranslations: DefaultTranslationsObject = {
     draft: 'Qaralama',
     draftHasPublishedVersion: 'Qaralamalar (nəşr olunmuş versiyası var)',
     draftSavedSuccessfully: 'Qaralama uğurla yadda saxlandı.',
+    duplicateScheduledEvent:
+      'Bu hadisə artıq bu vaxta planlaşdırılıb. Başqa vaxt seçin və ya mövcud hadisəni silin.',
     lastSavedAgo: '{{distance}} əvvəl saxlanıldı',
     modifiedOnly: 'Yalnızca dəyişdirilmişdir',
     moreVersions: 'Daha çox versiyalar...',

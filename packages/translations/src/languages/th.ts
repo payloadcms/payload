@@ -735,6 +735,7 @@ export const thTranslations: DefaultTranslationsObject = {
     draft: 'ฉบับร่าง',
     draftHasPublishedVersion: 'ร่าง (มีรุ่นที่เผยแพร่แล้ว)',
     draftSavedSuccessfully: 'บันทึกร่างสำเร็จ',
+    duplicateScheduledEvent: 'กิจกรรมนี้ถูกกำหนดไว้ในเวลานี้แล้ว โปรดเลือกเวลาอื่นหรือลบกิจกรรมที่มีอยู่',
     lastSavedAgo: 'บันทึกเมื่อ {{distance}} ที่ผ่านมา',
     modifiedOnly: 'แก้ไขเท่านั้น',
     moreVersions: 'เพิ่มเวอร์ชั่น...',

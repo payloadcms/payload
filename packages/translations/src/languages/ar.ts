@@ -747,6 +747,8 @@ export const arTranslations: DefaultTranslationsObject = {
     draft: 'مسودّة',
     draftHasPublishedVersion: 'مسودة (لديها نسخة منشورة)',
     draftSavedSuccessfully: 'تمّ حفظ المسودّة بنجاح.',
+    duplicateScheduledEvent:
+      'تمت جدولة هذا الحدث بالفعل في هذا الوقت. اختر وقتًا آخر أو احذف الحدث الموجود.',
     lastSavedAgo: 'تم الحفظ قبل {{distance}}',
     modifiedOnly: 'تم التعديل فقط',
     moreVersions: 'المزيد من الإصدارات...',

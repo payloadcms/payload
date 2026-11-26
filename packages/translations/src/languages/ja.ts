@@ -766,6 +766,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     draft: 'ドラフト',
     draftHasPublishedVersion: 'ドラフト（公開版が存在する）',
     draftSavedSuccessfully: '下書きは正常に保存されました。',
+    duplicateScheduledEvent:
+      'このイベントはすでにこの日時に予定されています。別の日時を選択するか、既存のイベントを削除してください。',
     lastSavedAgo: '{{distance}}前に保存されました',
     modifiedOnly: '変更済みのみ',
     moreVersions: 'さらに多くのバージョン...',

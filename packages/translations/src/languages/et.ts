@@ -760,6 +760,8 @@ export const etTranslations: DefaultTranslationsObject = {
     draft: 'Mustand',
     draftHasPublishedVersion: 'Mustand (on avaldatud versioon)',
     draftSavedSuccessfully: 'Mustand edukalt salvestatud.',
+    duplicateScheduledEvent:
+      'See sündmus on sellele ajale juba ajastatud. Valige teine aeg või kustutage olemasolev sündmus.',
     lastSavedAgo: 'Salvestatud {{distance}} tagasi',
     modifiedOnly: 'Muudetud ainult',
     moreVersions: 'Rohkem versioone...',

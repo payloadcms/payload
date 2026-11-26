@@ -159,7 +159,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
     }
 
     try {
-      await schedulePublish({
+      const result = await schedulePublish({
         type,
         date,
         doc: collectionSlug
@@ -173,6 +173,16 @@ export const ScheduleDrawer: React.FC<Props> = ({
         timezone,
       })
 
+      if (
+        typeof result === 'object' &&
+        result !== null &&
+        'error' in result &&
+        typeof result.error === 'string'
+      ) {
+        toast.error(result.error)
+        return
+      }
+
       setDate(undefined)
       setNow(new Date())
       toast.success(t('version:scheduledSuccessfully'))
@@ -180,9 +190,9 @@ export const ScheduleDrawer: React.FC<Props> = ({
     } catch (err) {
       console.error(err)
       toast.error(err.message)
+    } finally {
+      setProcessing(false)
     }
-
-    setProcessing(false)
   }, [
     date,
     locale,

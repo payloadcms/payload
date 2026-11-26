@@ -2128,6 +2128,41 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
+    test('should keep a duplicate scheduled event as an error without clearing the date', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('duplicate scheduled event')
+      await page.locator('#field-description').fill('duplicate scheduled event description')
+      await saveDocAndAssert(page)
+      await page.locator('#schedule-publish-button').click()
+
+      const input = page.locator('.date-time-picker input')
+      const rows = page.locator('.schedule-publish__upcoming tbody tr')
+      const saveButton = page.locator('#scheduled-publish-save')
+
+      await input.fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+      await saveButton.click()
+      await expect(rows).toHaveCount(1)
+      await expect(input).toHaveValue('')
+      await input.fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+      const selectedDate = await input.inputValue()
+
+      await saveButton.click()
+      await expect(
+        page.getByText(
+          'This event is already scheduled for this time. Choose a different time or delete the existing event.',
+          { exact: true },
+        ),
+      ).toBeVisible()
+      await expect(input).toHaveValue(selectedDate)
+      await expect(saveButton).toBeEnabled()
+      await expect(rows).toHaveCount(1)
+
+      await page.locator('.cell-delete .btn').click()
+      await expect(rows).toHaveCount(0)
+    })
+
     test('should schedule publish', async () => {
       await page.goto(url.create)
       await page.locator('#field-title').fill('scheduled publish')

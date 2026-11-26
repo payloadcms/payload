@@ -779,6 +779,8 @@ export const roTranslations: DefaultTranslationsObject = {
     draft: 'Proiect',
     draftHasPublishedVersion: 'Proiect (are versiune publicată)',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
+    duplicateScheduledEvent:
+      'Acest eveniment este deja programat pentru această oră. Alegeți altă oră sau ștergeți evenimentul existent.',
     lastSavedAgo: 'Salvat acum {{distance}}',
     modifiedOnly: 'Modificat doar',
     moreVersions: 'Mai multe versiuni...',

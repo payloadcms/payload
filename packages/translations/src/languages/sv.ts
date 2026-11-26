@@ -768,6 +768,8 @@ export const svTranslations: DefaultTranslationsObject = {
     draft: 'Utkast',
     draftHasPublishedVersion: 'Utkast (har publicerad version)',
     draftSavedSuccessfully: 'Utkastet sparades',
+    duplicateScheduledEvent:
+      'Den här händelsen är redan schemalagd för den här tiden. Välj en annan tid eller ta bort den befintliga händelsen.',
     lastSavedAgo: 'Sparad för {{distance}} sedan',
     modifiedOnly: 'Endast ändringar',
     moreVersions: 'Fler versioner...',

@@ -111,12 +111,47 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
       return { message: i18n.t('general:success') }
     }
 
+    const publishType = type || 'publish'
+    const publishLocale = localeToPublish === 'all' ? undefined : localeToPublish
+    if (date) {
+      const { docs: pendingJobs } = await payload.db.find<ScheduledPublishJob>({
+        collection: 'payload-jobs',
+        limit: 0,
+        req,
+        where: {
+          and: [
+            { taskSlug: { equals: 'schedulePublish' } },
+            { waitUntil: { equals: date.toISOString() } },
+            { completedAt: { exists: false } },
+            { hasError: { not_equals: true } },
+          ],
+        },
+      })
+      const hasDuplicate = pendingJobs.some(({ input }) => {
+        const scheduledLocale = input?.locale === 'all' ? undefined : input?.locale
+        const hasSameTarget = doc
+          ? input?.doc?.relationTo === doc.relationTo &&
+            String(input?.doc?.value) === String(doc.value)
+          : input?.global === global
+
+        return (
+          hasSameTarget &&
+          (input?.type || 'publish') === publishType &&
+          scheduledLocale === publishLocale
+        )
+      })
+
+      if (hasDuplicate) {
+        return { error: i18n.t('version:duplicateScheduledEvent') }
+      }
+    }
+
     await payload.jobs.queue({
       input: {
-        type,
+        type: publishType,
         doc,
         global,
-        locale: localeToPublish,
+        locale: publishLocale,
         timezone,
         user:
           user && user.collection

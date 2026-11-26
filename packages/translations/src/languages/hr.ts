@@ -764,6 +764,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     draft: 'Nacrt',
     draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Nacrt uspješno spremljen.',
+    duplicateScheduledEvent:
+      'Ovaj je događaj već zakazan za ovo vrijeme. Odaberite drugo vrijeme ili izbrišite postojeći događaj.',
     lastSavedAgo: 'Spremljeno prije {{distance}}',
     modifiedOnly: 'Samo modificirano',
     moreVersions: 'Više verzija...',
