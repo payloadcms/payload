@@ -3435,6 +3435,23 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       ).rejects.toThrow('The following path cannot be queried: settings.approved.exists')
     })
 
+    test('should reject a sub-path of a field that cannot be descended into', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useLeafSubpathAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: title.tags')
+    })
+
     test('should preserve substring matching in REST join constraints', async ({
       payload,
       restClient,
