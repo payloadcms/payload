@@ -2297,6 +2297,28 @@ describe('Localization', () => {
           data: { errors: [{ path: 'sharedCode' }] },
         })
       })
+
+      it('should still validate localized fields when duplicating select locales with locale all', async () => {
+        const translations = { en: 'English text', es: 'Spanish text' }
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: { confirmation: translations, matchingText: translations } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.duplicate({
+            id: doc.id,
+            collection: localeValidationSlug,
+            data: { matchingText: { en: 'Different' } } as any,
+            // @ts-expect-error locale all writes are supported at runtime
+            locale: 'all',
+            selectedLocales: [defaultLocale],
+          }),
+        ).rejects.toThrow('Matching Text (en)')
+      })
     })
 
     describe('Localized group and tabs', () => {

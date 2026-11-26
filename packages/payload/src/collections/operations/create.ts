@@ -342,9 +342,14 @@ export const createOperation = async <
     // there. `beforeChange` validates that one locale, so required localized fields
     // would always fail. The selected locales travel in `docWithLocales`, which
     // validation never reads. Non-localized fields are the same in every locale and
-    // are still validated.
+    // are still validated. With `locale: 'all'` the duplicate carries every selected
+    // locale, so it is validated as usual.
     const isDuplicatingWithoutActiveLocale = Boolean(
-      isDuplicating && selectedLocales?.length && locale && !selectedLocales.includes(locale),
+      isDuplicating &&
+        selectedLocales?.length &&
+        locale &&
+        locale !== 'all' &&
+        !selectedLocales.includes(locale),
     )
 
     let resultWithLocales = await beforeChange<JsonObject>({
