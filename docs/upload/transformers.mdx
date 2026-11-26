@@ -281,7 +281,10 @@ There is no whole-file read. A transformer that needs the whole file in memory m
 
 <Banner type="warning">
   **Note:** When `sharpTransformer` is registered, it drives every image upload,
-  whether or not the collection is listed in its `collections`: every other
+  whether or not the collection is listed in its `collections`. The exception is
+  a collection whose sizes another transformer owns, when that transformer can
+  build the files at request time (see [Sizes with no stored
+  file](#sizes-with-no-stored-file)). When Sharp drives an upload, every other
   eligible transformer's `transformFile` runs inside Sharp's processing, once
   for the main file and once for each of the collection's `variants`. In each of
   these calls, a stage whose `canTransform` returned `options` gets its own
@@ -359,6 +362,15 @@ In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply t
 #### Sizes with no stored file
 
 Register sizes from the transformer's `init` with `registerUploadVariants`. Each collection must have uploads enabled, and each size needs a unique name that does not conflict with a built-in upload field or contain path separators. Only one transformer can register sizes on a collection. Pass its configured `slug` as `transformerSlug`; Payload uses this to identify the owner when planning request-time sizes.
+
+The transformer that registers a collection's sizes owns that collection's files. Payload saves its slug as the collection's `upload.variantsTransformerSlug`. When the owner can build the main file and the sizes from the original at request time, Payload does not run Sharp on uploads to that collection. Payload stores only the original, and the owner builds the main file and each size when they are requested, so they match. When the owner cannot build the file, for example because it does not accept the file's MIME type or no original is stored, Sharp processes the upload as usual.
+
+<Banner type="warning">
+  The stored main file of such a collection is the uncropped original. Use the
+  document's `url`, which points to the Payload file URL and serves the file
+  that the owner builds. Do not build a bucket or `staticDir` path from
+  `filename`: that path serves the original, without the saved crop.
+</Banner>
 
 ```ts
 import type { UploadTransformer } from 'payload'
@@ -544,6 +556,8 @@ export default buildConfig({
 At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, as `upload.variants`/`.crop`/`.focalPoint`. A `crop` or `focalPoint` set on `sharpTransformer` replaces the collection's own value; when it isn't set there, the collection's value is kept. So the Admin Panel, generated types, and the rest of core see the same sizes as before. Each generated size is stored on your documents under `variants.<name>`. `variants` exists only on the sanitized config: setting it (or the removed `imageSizes`) on the collection itself fails the build.
 
 You can register more than one `sharpTransformer` (each with its own `slug`), for example to give different collections different dynamic-resize defaults. Each upload is processed by the instance whose `collections` lists that collection. A collection listed in the `collections` of more than one instance throws at startup.
+
+Payload does not run Sharp on uploads to a collection whose sizes another transformer registered, when that transformer can build the files at request time. See [Sizes with no stored file](#sizes-with-no-stored-file). Do not list that collection in `sharpTransformer({ collections })`: Sharp then processes its uploads, and the main file can differ from the other transformer's sizes.
 
 See [Variants](./overview#variants) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 

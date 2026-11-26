@@ -158,6 +158,7 @@ export interface Config {
   collections: {
     'dynamic-media': DynamicMedia;
     'public-cloud-dynamic-media': PublicCloudDynamicMedia;
+    'restricted-dynamic-media': RestrictedDynamicMedia;
     'versioned-dynamic-media': VersionedDynamicMedia;
     'versioned-cloud-dynamic-media': VersionedCloudDynamicMedia;
     'payload-kv': PayloadKv;
@@ -171,6 +172,7 @@ export interface Config {
   collectionsSelect: {
     'dynamic-media': DynamicMediaSelect<false> | DynamicMediaSelect<true>;
     'public-cloud-dynamic-media': PublicCloudDynamicMediaSelect<false> | PublicCloudDynamicMediaSelect<true>;
+    'restricted-dynamic-media': RestrictedDynamicMediaSelect<false> | RestrictedDynamicMediaSelect<true>;
     'versioned-dynamic-media': VersionedDynamicMediaSelect<false> | VersionedDynamicMediaSelect<true>;
     'versioned-cloud-dynamic-media': VersionedCloudDynamicMediaSelect<false> | VersionedCloudDynamicMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -302,6 +304,17 @@ export interface User {
         expiresAt: string;
         refreshCount?: number | null;
         refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
       }[]
     | null;
   password?: string | null;
@@ -347,6 +360,59 @@ export interface PublicCloudDynamicMedia {
   };
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-dynamic-media".
+ */
+export interface RestrictedDynamicMedia {
+  id: string;
+  alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -491,6 +557,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'public-cloud-dynamic-media';
         value: string | PublicCloudDynamicMedia;
+      } | null)
+    | ({
+        relationTo: 'restricted-dynamic-media';
+        value: string | RestrictedDynamicMedia;
       } | null)
     | ({
         relationTo: 'versioned-dynamic-media';
@@ -658,6 +728,58 @@ export interface PublicCloudDynamicMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-dynamic-media_select".
+ */
+export interface RestrictedDynamicMediaSelect<T extends boolean = true> {
+  alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versioned-dynamic-media_select".
  */
 export interface VersionedDynamicMediaSelect<T extends boolean = true> {
@@ -799,6 +921,9 @@ export interface UsersSelect<T extends boolean = true> {
         expiresAt?: T;
         refreshCount?: T;
         refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -879,6 +1004,7 @@ export interface CollectionQueryWidget {
     relatedCollection:
       | 'dynamic-media'
       | 'public-cloud-dynamic-media'
+      | 'restricted-dynamic-media'
       | 'versioned-dynamic-media'
       | 'versioned-cloud-dynamic-media'
       | 'users';
@@ -907,6 +1033,7 @@ export interface ActivityWidget {
       | (
           | 'dynamic-media'
           | 'public-cloud-dynamic-media'
+          | 'restricted-dynamic-media'
           | 'versioned-dynamic-media'
           | 'versioned-cloud-dynamic-media'
           | 'users'
@@ -922,7 +1049,13 @@ export interface ActivityWidget {
 export interface UploadDropzoneWidget {
   data?: {
     excludedCollections?:
-      | ('dynamic-media' | 'public-cloud-dynamic-media' | 'versioned-dynamic-media' | 'versioned-cloud-dynamic-media')[]
+      | (
+          | 'dynamic-media'
+          | 'public-cloud-dynamic-media'
+          | 'restricted-dynamic-media'
+          | 'versioned-dynamic-media'
+          | 'versioned-cloud-dynamic-media'
+        )[]
       | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';

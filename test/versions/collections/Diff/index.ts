@@ -262,6 +262,12 @@ export const Diff: CollectionConfig = {
       maxDepth: 0,
     },
     {
+      name: 'constrainedRelationship',
+      type: 'relationship',
+      relationTo: textCollectionSlug,
+      maxDepth: 0,
+    },
+    {
       name: 'richtext',
       type: 'richText',
     },

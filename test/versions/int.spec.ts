@@ -2867,6 +2867,129 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
       })
 
+      test('issue #19670 / Security Audit: omitDeniedFields aligns indexes when invalid rows precede restricted rows', () => {
+        const data = {
+          items: [
+            null,
+            { id: '1', secret: 'forbidden-1', title: 'item-1' },
+          ],
+          nested: [
+            undefined,
+            {
+              subItems: [
+                'invalid-primitive',
+                { id: 's1', secret: 'forbidden-sub', text: 'sub-1' },
+              ],
+            },
+          ],
+        }
+
+        // In beforeValidate, stripNullRows removes invalid rows so onFieldAccess reports path 'items.0.secret'
+        const deniedPaths = new Set(['items.0.secret', 'nested.0.subItems.0.secret'])
+
+        const filtered = omitDeniedFields(data as any, deniedPaths)
+
+        expect(filtered.items).toEqual([
+          { id: '1', title: 'item-1' },
+        ])
+        expect((filtered.nested as any)[0].subItems).toEqual([
+          { id: 's1', text: 'sub-1' },
+        ])
+      })
+
+      test('issue #19670 / Security Audit: mergeDraftData recursively preserves nested groups and nested arrays in matching rows', () => {
+        const target: Record<string, unknown> = {
+          items: [
+            {
+              id: 'row-1',
+              title: 'old-title',
+              secretRow: 'keep-row-secret',
+              group: {
+                secretInGroup: 'keep-group-secret',
+                publicInGroup: 'old-group-val',
+              },
+              subItems: [
+                { id: 'sub-1', secretSub: 'keep-sub-secret', text: 'old-sub' },
+              ],
+            },
+            {
+              id: 'row-2',
+              title: 'removed-in-update',
+            },
+          ],
+          blocks: [
+            {
+              id: 'block-1',
+              blockType: 'customBlock',
+              heading: 'old-heading',
+              secretBlock: 'keep-block-secret',
+            },
+          ],
+        }
+
+        const incoming = {
+          blocks: [
+            {
+              id: 'block-1',
+              blockType: 'customBlock',
+              heading: 'new-heading',
+            },
+          ],
+          items: [
+            {
+              id: 'row-1',
+              group: {
+                publicInGroup: 'new-group-val',
+              },
+              subItems: [
+                { id: 'sub-1', text: 'new-sub' },
+              ],
+              title: 'new-title',
+            },
+            {
+              id: 'row-3',
+              title: 'newly-added-row',
+            },
+          ],
+        }
+
+        mergeDraftData({
+          incoming,
+          target,
+        })
+
+        const items = target.items as Array<Record<string, unknown>>
+        expect(items).toHaveLength(2)
+        // Matching row-1: title updated, secretRow preserved, group.public updated, group.secret preserved, sub-1 text updated, sub-1 secret preserved
+        expect(items[0]).toEqual({
+          id: 'row-1',
+          group: {
+            publicInGroup: 'new-group-val',
+            secretInGroup: 'keep-group-secret',
+          },
+          secretRow: 'keep-row-secret',
+          subItems: [
+            { id: 'sub-1', secretSub: 'keep-sub-secret', text: 'new-sub' },
+          ],
+          title: 'new-title',
+        })
+        // Unmatched newly added row-3
+        expect(items[1]).toEqual({
+          id: 'row-3',
+          title: 'newly-added-row',
+        })
+
+        // Blocks: block-1 heading updated, secretBlock preserved
+        const blocks = target.blocks as Array<Record<string, unknown>>
+        expect(blocks).toHaveLength(1)
+        expect(blocks[0]).toEqual({
+          id: 'block-1',
+          blockType: 'customBlock',
+          heading: 'new-heading',
+          secretBlock: 'keep-block-secret',
+        })
+      })
+
       test('issue #19670 / Finding 4: should not write unauthorized fields to pending draft during non-draft update', async ({
         payload,
       }) => {
@@ -7140,29 +7263,38 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       const req = await createPayloadRequest({ payload, user: secondaryAdminUser })
       const currentDate = new Date()
 
-      await schedulePublishHandler({
-        type: 'publish',
-        date: new Date(currentDate.getTime() + 3000),
-        doc: {
-          relationTo: draftCollectionSlug,
-          value: draft.id,
-        },
-        localeToPublish: 'en',
-        req,
-        user: secondaryAdminUser,
-      })
-
-      const queuedJob = (
-        await payload.find({
-          collection: 'payload-jobs',
-          overrideAccess: true,
-          where: {
-            'input.doc.value': {
-              equals: draft.id,
-            },
+      await expect(
+        schedulePublishHandler({
+          type: 'publish',
+          date: new Date(currentDate.getTime() + 3000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
           },
-        })
-      ).docs[0]
+          localeToPublish: 'en',
+          req,
+          user: secondaryAdminUser,
+        }),
+      ).rejects.toMatchObject({ status: 403 })
+
+      // Queue directly to verify the job itself also enforces the scheduling user's access
+      const queuedJob = await payload.jobs.queue({
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: String(draft.id),
+          },
+          locale: 'en',
+          user: {
+            relationTo: secondaryAdminUserCollectionSlug,
+            value: secondaryAdminUser.id,
+          },
+        },
+        overrideAccess: true,
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
 
       await wait(4000)
 
@@ -7794,6 +7926,98 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(newJobs).toEqual([])
       })
 
+      test('should not schedule a publish without publish permission', async ({ payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await payload.update({
+          id: draftDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            restrictedToUpdate: true,
+          },
+          overrideAccess: true,
+        })
+
+        await expect(
+          schedulePublishHandler({
+            type: 'publish',
+            date: new Date(Date.now() + 60_000),
+            doc: {
+              relationTo: draftCollectionSlug,
+              value: String(draftDoc.id),
+            },
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const { totalDocs } = await payload.count({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            'input.doc.value': {
+              equals: String(draftDoc.id),
+            },
+          },
+        })
+
+        expect(totalDocs).toBe(0)
+      })
+
+      test('should not cancel a scheduled publish without publish permission', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await schedulePublishHandler({
+          type: 'unpublish',
+          date: new Date(Date.now() + 60_000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: String(draftDoc.id),
+          },
+          req,
+          user,
+        })
+
+        const [scheduledJob] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: {
+              'input.doc.value': {
+                equals: String(draftDoc.id),
+              },
+            },
+          })
+        ).docs
+
+        await payload.update({
+          id: draftDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            restrictedToUpdate: true,
+          },
+          overrideAccess: true,
+        })
+
+        await expect(
+          schedulePublishHandler({
+            deleteID: scheduledJob.id,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const result = await payload.findByID({
+          id: scheduledJob.id,
+          collection: 'payload-jobs',
+          overrideAccess: true,
+        })
+
+        expect(result.id).toBe(scheduledJob.id)
+      })
+
       test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const unrelatedJob = await payload.db.create({
@@ -7804,11 +8028,13 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           },
         })
 
-        await schedulePublishHandler({
-          deleteID: unrelatedJob.id,
-          req,
-          user,
-        })
+        await expect(
+          schedulePublishHandler({
+            deleteID: unrelatedJob.id,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
 
         const result = await payload.findByID({
           id: unrelatedJob.id,

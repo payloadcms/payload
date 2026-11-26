@@ -52,7 +52,7 @@ Guidance lives in a single `AGENTS.md` at the repo root, read by Claude Code, Cu
 
 ### Context
 
-Project purpose, architecture, and coding guidelines. Located in `AGENTS.md`.
+Commands, conventions, and PR rules that agents can't infer from the code. Located in `AGENTS.md`.
 
 Without this, the AI won't know project conventions and may generate code that doesn't match the codebase conventions.
 

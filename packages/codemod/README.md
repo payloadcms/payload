@@ -22,59 +22,46 @@ With no arguments, runs every registered transform against the current directory
 
 ## `upgrade` command
 
-The `upgrade` command has three verbs.
+Run from the Payload project root. All three verbs detect the installed Payload version (or an unambiguous declared major when dependencies are not installed), then offer the latest release within that major separately from the CLI's latest release channel. Prerelease targets are labelled explicitly. Use `--tag <version-or-dist-tag>` to choose a target directly; this is required without an interactive terminal.
 
-### `upgrade` (pick how to run it)
+The package preview uses the core publish list for packages released together. Independently versioned plugins resolve to their own published releases compatible with the selected Payload version. Unrelated dependencies and independent overrides are preserved. Unresolved compatibility, conflicting pins, or unsupported local references stop the upgrade before files change.
 
-`npx @payloadcms/codemod upgrade` is the entry point. It detects installed coding-agent CLIs
-(`claude`, `codex`) and asks how you want to run the full v3 -> v4 upgrade, Next.js 16 included:
+### `upgrade` (choose how to run it)
 
-- Hand the orchestration prompt to a detected agent. The agent runs the whole sequence, calling
-  `upgrade run` for the mechanical slice as one step.
-- Run the mechanical steps here, the same work as `upgrade run`.
-- Just print the prompt to run it yourself or paste it elsewhere.
+```bash
+npx @payloadcms/codemod upgrade
+```
 
-Pin an agent with `--agent <claude|codex>` to skip the picker. When there is no TTY (CI), it prints
-the prompt instead of prompting.
+After choosing and reviewing the target, hand the project-specific prompt to an installed coding agent (`claude` or `codex`), run the mechanical steps, or print the prompt. `--agent <claude|codex>` selects an agent directly. Without a terminal, an explicit target prints the prompt. `--dry` previews the package changes without starting an agent, installing, or writing files.
 
-### `upgrade run` (mechanical slice)
+### `upgrade run` (install the selected releases)
 
-`npx @payloadcms/codemod upgrade run` performs the deterministic v3 -> v4 slice against the current
-directory (run it from your project root):
+```bash
+npx @payloadcms/codemod upgrade run --tag <version-or-dist-tag>
+```
 
-1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (its own prerelease id, else `beta`; override with `--tag <dist-tag>`).
-2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
-   lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
-   the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
-   versioned independently, so they are set to `latest` rather than lockstep-pinned.
-3. Installs with your detected package manager.
-4. Runs every registered transform against the now-v4 tree.
-5. Prints a report and points you at the bundled runbook for the rest.
+A same-major update changes the selected packages and installs them with the detected package manager. It does not run v3 -> v4 source transforms or raise the v4 toolchain floors.
 
-It does NOT upgrade Next.js. Payload v4 requires Next 16; run Next's own recommended agent
-workflow (linked from the bundled runbook) to bump Next and migrate the code together. The report
-prints the required Next target.
+For a v3 -> v4 migration, the command also previews and writes the TypeScript, `@types/node`, and Node engine floors. It verifies installed package versions before applying source transforms, then reports the remaining manual migration steps and bundled migration guide. With npm, this transitional install uses `--legacy-peer-deps`; framework upgrades and final peer verification remain required. If installation or verification fails, the command restores its own manifest changes when safe. Dependencies and the lockfile can still be partly changed, so reinstall with the original manifest before retrying.
+
+For Next.js projects, the mechanical slice does not upgrade Next.js. Follow the project-specific prompt and report to complete the Next.js 16 migration. Pre-upgrade migrations such as Slate -> Lexical must run while the project is still on v3.
 
 Flags:
 
-- `--tag <dist-tag>`: dist-tag to resolve Payload versions from. Defaults to the dist-tag this CLI was installed under (its own prerelease id, else `beta`).
-- `--dry`: preview the `package.json` changes and planned steps; write and install nothing.
+- `--tag <version-or-dist-tag>`: choose an exact Payload release or release channel.
+- `--dry`: preview package and toolchain changes; write and install nothing.
 - `--force`: skip the dirty-git-tree warning.
+- `--yes`: skip upgrade confirmation after the preview. This does not select a target or bypass compatibility checks. CPA supplies it after you confirm the complete package and toolchain preview; generated follow-up commands retain it.
 
-### `upgrade prompt` (print the prompt)
+### `upgrade prompt` (print the plan and prompt)
 
-`npx @payloadcms/codemod upgrade prompt` prints the orchestration prompt to stdout and exits. It is
-offline and stateless: it writes nothing and makes no network calls. The text is project-agnostic,
-so pipe it to any agent and run it from the project root. This is the same prompt the `upgrade`
-picker hands off, minus the detection and spawn.
+```bash
+npx @payloadcms/codemod upgrade prompt --tag <version-or-dist-tag>
+```
 
-The prompt sequences the upgrade (mechanical slice via `upgrade run`, then Next.js via Next's own
-codemods and agent workflow, then regeneration, judgment work, and verification) and points at the
-bundled runbook and migration guide for detail rather than restating them.
+Detects the project and reads registry metadata to print the package preview and a prompt for the selected target. It does not install dependencies, write project files, or start an agent. Same-major updates get an update prompt; v3 -> v4 migrations get the migration sequence and applicable framework steps.
 
-The mechanical-slice command inside the prompt re-invokes this CLI. A published install emits
-`npx @payloadcms/codemod`; a source checkout emits `node <bin>` so followers run the local build.
-Set `PAYLOAD_CODEMOD_COMMAND` to override the emitted token.
+The follow-up command pins the selected target and re-invokes this CLI. A published install emits `npx @payloadcms/codemod@<running-cli-version>` to retain the selected tooling release; a source checkout emits `node <bin>`. Set `PAYLOAD_CODEMOD_COMMAND` to override that token.
 
 ## How it works
 

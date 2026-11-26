@@ -58,7 +58,17 @@ function omitDeniedValue(
   currentPath: string,
 ): unknown {
   if (Array.isArray(value)) {
-    return value.map((item, index) =>
+    const isRowArray = value.some(
+      (item) => item != null && typeof item === 'object' && !Array.isArray(item),
+    )
+    const rows = isRowArray
+      ? value.filter(
+          (item): item is Record<string, unknown> =>
+            item != null && typeof item === 'object' && !Array.isArray(item),
+        )
+      : value
+
+    return rows.map((item, index) =>
       omitDeniedValue(item, deniedPaths, `${currentPath}.${index}`),
     )
   }

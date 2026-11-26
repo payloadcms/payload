@@ -218,7 +218,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             </div>
           )
         }
-        isCollapsed={row.collapsed}
+        isCollapsed={row.collapsed ?? Boolean(row.isLoading)}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >

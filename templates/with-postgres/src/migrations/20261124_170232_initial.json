@@ -383,19 +383,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "prefix": {
-          "name": "prefix",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "''"
-        },
-        "_objectkey": {
-          "name": "_objectkey",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp(3) with time zone",
@@ -744,19 +731,6 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
-        },
-        "version_prefix": {
-          "name": "version_prefix",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "''"
-        },
-        "version__objectkey": {
-          "name": "version__objectkey",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         },
         "version_updated_at": {
           "name": "version_updated_at",
@@ -1966,6 +1940,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "119a0387-1da6-4107-b1cb-72ce2053392a",
+  "id": "7f88470f-c5e0-4c54-8570-343c45a6985a",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

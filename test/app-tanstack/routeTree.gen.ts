@@ -9,19 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './app/__root'
-import { Route as PayloadRouteImport } from './app/_payload'
 import { Route as IndexRouteImport } from './app/index'
+import { Route as PayloadRouteImport } from './app/_payload'
+import { Route as ModalsRouteImport } from './app/modals'
 import { Route as PayloadAdminIndexRouteImport } from './app/_payload/admin.index'
-import { Route as PayloadApiSplatRouteImport } from './app/_payload/api.$'
 import { Route as PayloadAdminSplatRouteImport } from './app/_payload/admin.$'
+import { Route as PayloadApiSplatRouteImport } from './app/_payload/api.$'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PayloadRoute = PayloadRouteImport.update({
   id: '/_payload',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ModalsRoute = ModalsRouteImport.update({
+  id: '/modals',
+  path: '/modals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PayloadAdminIndexRoute = PayloadAdminIndexRouteImport.update({
@@ -29,25 +35,27 @@ const PayloadAdminIndexRoute = PayloadAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => PayloadRoute,
 } as any)
-const PayloadApiSplatRoute = PayloadApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => PayloadRoute,
-} as any)
 const PayloadAdminSplatRoute = PayloadAdminSplatRouteImport.update({
   id: '/admin/$',
   path: '/admin/$',
   getParentRoute: () => PayloadRoute,
 } as any)
+const PayloadApiSplatRoute = PayloadApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
+  getParentRoute: () => PayloadRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/modals': typeof ModalsRoute
   '/admin/$': typeof PayloadAdminSplatRoute
   '/api/$': typeof PayloadApiSplatRoute
   '/admin/': typeof PayloadAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/modals': typeof ModalsRoute
   '/admin/$': typeof PayloadAdminSplatRoute
   '/api/$': typeof PayloadApiSplatRoute
   '/admin': typeof PayloadAdminIndexRoute
@@ -56,25 +64,41 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_payload': typeof PayloadRouteWithChildren
+  '/modals': typeof ModalsRoute
   '/_payload/admin/$': typeof PayloadAdminSplatRoute
   '/_payload/api/$': typeof PayloadApiSplatRoute
   '/_payload/admin/': typeof PayloadAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin/$' | '/api/$' | '/admin/'
+  fullPaths: '/' | '/modals' | '/admin/$' | '/api/$' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/$' | '/api/$' | '/admin'
-  id: '__root__' | '/' | '/_payload' | '/_payload/admin/$' | '/_payload/api/$' | '/_payload/admin/'
+  to: '/' | '/modals' | '/admin/$' | '/api/$' | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/_payload'
+    | '/modals'
+    | '/_payload/admin/$'
+    | '/_payload/api/$'
+    | '/_payload/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PayloadRoute: typeof PayloadRouteWithChildren
+  ModalsRoute: typeof ModalsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_payload': {
       id: '/_payload'
       path: ''
@@ -82,11 +106,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayloadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/modals': {
+      id: '/modals'
+      path: '/modals'
+      fullPath: '/modals'
+      preLoaderRoute: typeof ModalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_payload/admin/': {
@@ -96,18 +120,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayloadAdminIndexRouteImport
       parentRoute: typeof PayloadRoute
     }
-    '/_payload/api/$': {
-      id: '/_payload/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof PayloadApiSplatRouteImport
-      parentRoute: typeof PayloadRoute
-    }
     '/_payload/admin/$': {
       id: '/_payload/admin/$'
       path: '/admin/$'
       fullPath: '/admin/$'
       preLoaderRoute: typeof PayloadAdminSplatRouteImport
+      parentRoute: typeof PayloadRoute
+    }
+    '/_payload/api/$': {
+      id: '/_payload/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof PayloadApiSplatRouteImport
       parentRoute: typeof PayloadRoute
     }
   }
@@ -125,11 +149,13 @@ const PayloadRouteChildren: PayloadRouteChildren = {
   PayloadAdminIndexRoute: PayloadAdminIndexRoute,
 }
 
-const PayloadRouteWithChildren = PayloadRoute._addFileChildren(PayloadRouteChildren)
+const PayloadRouteWithChildren =
+  PayloadRoute._addFileChildren(PayloadRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PayloadRoute: PayloadRouteWithChildren,
+  ModalsRoute: ModalsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

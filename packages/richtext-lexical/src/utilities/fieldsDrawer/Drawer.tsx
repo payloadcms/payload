@@ -14,6 +14,8 @@ export type FieldsDrawerProps = {
   readonly drawerTitle?: string
   readonly featureKey: string
   readonly fieldMapOverride?: ClientField[]
+  /** Writes server-initialized defaults into the node before the drawer accepts edits. */
+  readonly handleDrawerInitialize?: (args: { formState: FormState }) => void
   readonly handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
   readonly schemaFieldsPathOverride?: string
   readonly schemaPath: string
@@ -32,6 +34,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   drawerTitle,
   featureKey,
   fieldMapOverride,
+  handleDrawerInitialize,
   handleDrawerSubmit,
   schemaFieldsPathOverride,
   schemaPath,
@@ -54,6 +57,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
           data={data}
           featureKey={featureKey}
           fieldMapOverride={fieldMapOverride}
+          handleDrawerInitialize={handleDrawerInitialize}
           handleDrawerSubmit={(args, args2) => {
             // Simply close drawer - no need for useLexicalDrawer here as at this point,
             // we don't need to restore the cursor position. This is handled by the useEffect in useLexicalDrawer.

@@ -5,9 +5,11 @@ import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
+import type { UpgradePlan } from '../upgrade-shared/index.js'
 import type { Agent, DispatchChoice } from './selectAgent.js'
 
 import { runUpgrade } from './index.js'
+import { prepareUpgrade } from './prepare.js'
 import { renderUpgradePrompt } from './prompt.js'
 import { detectInstalledAgents, selectDispatch } from './selectAgent.js'
 import { resolveSelfCommand } from './selfCommand.js'
@@ -23,28 +25,49 @@ type RunDispatchArgs = {
 export type DispatchDeps = {
   detectAgents: () => Agent[]
   isInteractive: boolean
+  prepare: (args: {
+    packageManager?: UpgradeFlags['packageManager']
+    path: string
+    shouldConfirm: boolean
+    tag?: string
+  }) => Promise<undefined | UpgradePlan>
   promptChoice: (agents: Agent[]) => Promise<DispatchChoice>
-  renderPrompt: () => string
-  runMechanical: (args: { flags: UpgradeFlags; path: string }) => Promise<{ failed: boolean }>
+  renderPrompt: (
+    plan: UpgradePlan,
+    options?: Pick<UpgradeFlags, 'packageManager' | 'yes'>,
+  ) => string
+  runMechanical: (args: {
+    flags: UpgradeFlags
+    path: string
+    plan?: UpgradePlan
+  }) => Promise<{ failed: boolean }>
   spawnAgent: (args: { agent: Agent; cwd: string; promptFilePath: string }) => Promise<{
     code: number
   }>
   writePromptFile: (contents: string) => string
 }
 
-/**
- * Bare `upgrade`: pick how to run the full v3 -> v4 upgrade. Hands the
- * orchestration prompt to a detected coding agent, runs the mechanical slice
- * here, or prints the prompt for manual use.
- */
+/** Detect and preview the upgrade before choosing an agent, mechanical run, or printed prompt. */
 export async function runDispatch(
   { agentFlag, path, upgradeFlags }: RunDispatchArgs,
   deps: DispatchDeps = defaultDispatchDeps(),
 ): Promise<{ failed: boolean }> {
-  const installed = deps.detectAgents()
-
   let choice: DispatchChoice
+  let plan: undefined | UpgradePlan
   try {
+    plan = await deps.prepare({
+      path,
+      ...(upgradeFlags.packageManager ? { packageManager: upgradeFlags.packageManager } : {}),
+      shouldConfirm: !upgradeFlags.dry && !upgradeFlags.yes,
+      tag: upgradeFlags.tag,
+    })
+    if (!plan) {
+      return { failed: false }
+    }
+    if (upgradeFlags.dry) {
+      return deps.runMechanical({ flags: { ...upgradeFlags, tag: plan.targetVersion }, path, plan })
+    }
+    const installed = deps.detectAgents()
     choice = await selectDispatch({
       agentFlag,
       installed,
@@ -57,10 +80,16 @@ export async function runDispatch(
   }
 
   if (choice.kind === 'run') {
-    return deps.runMechanical({ flags: upgradeFlags, path })
+    return deps.runMechanical({ flags: { ...upgradeFlags, tag: plan.targetVersion }, path, plan })
   }
 
-  const promptText = deps.renderPrompt()
+  const promptText =
+    upgradeFlags.yes || upgradeFlags.packageManager
+      ? deps.renderPrompt(plan, {
+          ...(upgradeFlags.yes ? { yes: true } : {}),
+          ...(upgradeFlags.packageManager ? { packageManager: upgradeFlags.packageManager } : {}),
+        })
+      : deps.renderPrompt(plan)
 
   if (choice.kind === 'print') {
     console.log(promptText)
@@ -81,12 +110,23 @@ function defaultDispatchDeps(): DispatchDeps {
   return {
     detectAgents: detectInstalledAgents,
     isInteractive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
+    prepare: prepareUpgrade,
     promptChoice: promptChoiceFromTerminal,
-    renderPrompt: () => renderUpgradePrompt({ command: resolveSelfCommand() }),
+    renderPrompt: (plan, options = {}) =>
+      renderUpgradePrompt({
+        command: resolveSelfCommand(),
+        currentVersion: plan.project.currentVersion,
+        hasNext: plan.project.dependencies.some(
+          ({ name }) => name === 'next' || name === '@payloadcms/next',
+        ),
+        kind: plan.kind,
+        targetVersion: plan.targetVersion,
+        ...options,
+      }),
     runMechanical: (args) => runUpgrade(args),
     spawnAgent: spawnAgentInteractive,
     writePromptFile: (contents) => {
-      const dir = mkdtempSync(join(tmpdir(), 'payload-v4-upgrade-'))
+      const dir = mkdtempSync(join(tmpdir(), 'payload-upgrade-'))
       const filePath = join(dir, 'prompt.md')
       writeFileSync(filePath, contents)
       return filePath
@@ -96,7 +136,7 @@ function defaultDispatchDeps(): DispatchDeps {
 
 /** Clack select: each installed agent, then run the slice or print the prompt. */
 async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice> {
-  p.intro('Payload v3 -> v4 upgrade')
+  p.intro('Payload upgrade')
   const selection = await p.select({
     message: 'How do you want to run it?',
     options: [
@@ -106,7 +146,7 @@ async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice
         value: agent.id,
       })),
       {
-        hint: 'pin versions, install, run the codemods now',
+        hint: 'install the selected versions and run any required migration',
         label: 'Run the mechanical steps',
         value: 'run',
       },
@@ -139,7 +179,7 @@ function spawnAgentInteractive({
   cwd: string
   promptFilePath: string
 }): Promise<{ code: number }> {
-  const launchPrompt = `Read ${promptFilePath} and follow it to upgrade this project from Payload v3 to v4.`
+  const launchPrompt = `Read ${promptFilePath} and follow it to carry out the selected Payload upgrade.`
   return new Promise((resolveSpawn) => {
     const child = spawn(agent.command, [launchPrompt], { cwd, shell: false, stdio: 'inherit' })
     child.on('close', (code) => resolveSpawn({ code: code ?? 1 }))

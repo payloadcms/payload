@@ -44,14 +44,16 @@ export const validateSortQuery = async ({
 
   for (const sortField of sortFields) {
     const path = sortField.replace(/^-/, '').replace(/__/g, '.')
+    // Hidden fields must resolve here, including across relationships, so that
+    // validateQueryPaths can reject them instead of the sort path being skipped.
     const paths = getLocalizedPaths({
       collectionSlug: collectionConfig?.slug,
       fields,
       globalSlug: globalConfig?.slug,
       incomingPath: path,
       locale: req.locale!,
-      overrideAccess: true,
       payload: req.payload,
+      showHiddenFields: true,
     })
 
     if (path !== 'id' && path !== '_id' && paths.every(({ invalid }) => !invalid)) {

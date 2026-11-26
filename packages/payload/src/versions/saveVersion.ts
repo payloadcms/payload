@@ -172,10 +172,33 @@ export function mergeDraftData({
             (item) => isPlainObject(item) && 'id' in item && item.id === incomingItem.id,
           )
           if (isPlainObject(existingItem)) {
-            return {
-              ...existingItem,
-              ...incomingItem,
+            const mergedItem = deepCopyObjectSimple(existingItem)
+            let rowFields = nestedFields
+            if (
+              fieldConfig &&
+              'type' in fieldConfig &&
+              fieldConfig.type === 'blocks' &&
+              'blocks' in fieldConfig &&
+              Array.isArray(fieldConfig.blocks)
+            ) {
+              const matchedBlock = fieldConfig.blocks.find(
+                (b) =>
+                  (typeof b === 'string' ? b : b.slug) ===
+                  (incomingItem as Record<string, unknown>).blockType,
+              )
+              if (matchedBlock && typeof matchedBlock === 'object' && 'fields' in matchedBlock) {
+                rowFields = matchedBlock.fields
+              }
             }
+            mergeDraftData({
+              depth: depth + 1,
+              fields: rowFields,
+              incoming: incomingItem,
+              locale,
+              localeCodes,
+              target: mergedItem,
+            })
+            return mergedItem
           }
         }
         return incomingItem

@@ -13,7 +13,7 @@ import type {
 } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
-import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
+import { addBlockTablesToDelete } from './addBlockTablesToDelete.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'
 import { transformNumbers } from './numbers.js'
@@ -143,6 +143,10 @@ export const traverseFields = ({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      if (fieldData === undefined) {
+        return
+      }
+
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       const arrayPathPrefix = `${path || ''}${field.name}.`
 
@@ -255,19 +259,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
-      field.blocks.forEach((block) => {
-        const matchedBlock =
-          typeof block === 'string'
-            ? adapter.payload.config.blocks.find((each) => each.slug === block)
-            : block
-
-        blocksToDelete.add(
-          resolveBlockTableName(
-            matchedBlock,
-            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
-          ),
-        )
-      })
+      addBlockTablesToDelete({ adapter, baseTableName, blocksToDelete, field })
 
       // Block rows are replaced in full like array rows, so their path-keyed rows are cleared by
       // prefix too. Only the outermost array or blocks field registers one, as it covers every

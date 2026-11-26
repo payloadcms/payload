@@ -42,6 +42,7 @@
     box-shadow: var(--elevation-400-menu-panel);
     border: 0;
     margin: 0;
+    padding: 0;
   }
 
   .popup__content[data-theme='dark'] {

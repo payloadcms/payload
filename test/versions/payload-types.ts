@@ -334,6 +334,7 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {
     'autosave-global': AutosaveGlobal;
+    'autosave-without-localization-global': AutosaveWithoutLocalizationGlobal;
     'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobal;
     'draft-global': DraftGlobal;
     'draft-with-max-global': DraftWithMaxGlobal;
@@ -349,6 +350,7 @@ export interface Config {
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    'autosave-without-localization-global': AutosaveWithoutLocalizationGlobalSelect<false> | AutosaveWithoutLocalizationGlobalSelect<true>;
     'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobalSelect<false> | AutosaveWithDraftButtonGlobalSelect<true>;
     'draft-global': DraftGlobalSelect<false> | DraftGlobalSelect<true>;
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
@@ -1232,6 +1234,7 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
+  constrainedRelationship?: (string | null) | Text;
   richtext?: LexicalRichText<LexicalNodes_FE65E5AC> | null;
   richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_1FAC9198> | null;
   richtextWithCustomDiff?: LexicalRichText<LexicalNodes_FE65E5AC> | null;
@@ -2411,6 +2414,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasManyPolymorphic?: T;
   relationshipHasManyPolymorphic2?: T;
   zeroDepthRelationship?: T;
+  constrainedRelationship?: T;
   richtext?: T;
   richtextWithConstrainedRelationship?: T;
   richtextWithCustomDiff?: T;
@@ -2825,6 +2829,35 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-without-localization-global".
+ */
+export interface AutosaveWithoutLocalizationGlobal {
+  id: string;
+  title: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      } | null);
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-with-draft-button-global".
  */
 export interface AutosaveWithDraftButtonGlobal {
@@ -3168,6 +3201,19 @@ export interface PayloadJobsStat {
 export interface AutosaveGlobalSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-without-localization-global_select".
+ */
+export interface AutosaveWithoutLocalizationGlobalSelect<T extends boolean = true> {
+  title?: T;
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
