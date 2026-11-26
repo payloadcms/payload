@@ -592,6 +592,53 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         expect(result.docs[0].text).toEqual(update)
       })
 
+      test('should return field validation messages for bulk updates', async ({
+        payload,
+        restClient,
+      }) => {
+        const text = 'bulk-validate-message'
+        const firstDoc = await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            errorBeforeChange: false,
+            text,
+          },
+          overrideAccess: true,
+        })
+        const secondDoc = await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            errorBeforeChange: false,
+            text,
+          },
+          overrideAccess: true,
+        })
+
+        const response = await restClient.PATCH(`/${errorOnHookSlug}`, {
+          body: JSON.stringify({
+            text: 'fails-validation',
+          }),
+          query: { where: { text: { equals: text } } },
+        })
+        const result = await response.json()
+
+        expect(response.status).toEqual(400)
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(2)
+        expect(result.errors.map((error) => error.id)).toEqual(
+          expect.arrayContaining([firstDoc.id, secondDoc.id]),
+        )
+
+        // Each bulk error keeps the field error, so the message the field's
+        // validate returned is visible instead of only the field label.
+        for (const error of result.errors) {
+          expect(error.message).toBeDefined()
+          expect(error.data.errors).toHaveLength(1)
+          expect(error.data.errors[0].message).toEqual('Text failed custom validation')
+          expect(error.data.errors[0].path).toEqual('text')
+        }
+      })
+
       test('should bulk delete', async ({ restClient }) => {
         const count = 11
         for (let i = 0; i < count; i++) {

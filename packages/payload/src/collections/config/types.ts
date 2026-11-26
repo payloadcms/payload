@@ -907,6 +907,12 @@ export type Collection = {
 export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
+    /**
+     * Data carried by the failed document's error, when the error is public.
+     * For a validation failure this holds the field errors, including each
+     * field's own message.
+     */
+    data?: unknown
     id: DataFromCollectionSlug<TSlug>['id']
     isPublic: boolean
     message: string

@@ -472,6 +472,12 @@ export const updateOperation = async <
           id,
           isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
+          // Keep the error's data for public API errors, so a failed document's
+          // field errors reach the response. A custom validate message lives in
+          // the ValidationError data, not in the summary message, which only
+          // names the fields. Non-public errors keep no data: their details
+          // must not leak to the client.
+          ...(isPublic && error instanceof APIError && error.data ? { data: error.data } : {}),
         })
       } finally {
         // generateFileData can replace the document's file with its copy of the shared client

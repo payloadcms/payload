@@ -1,7 +1,12 @@
 import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  formatAdminURL,
+  mergeListSearchAndWhere,
+  parseErrorResponse,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -24,6 +29,23 @@ type UnpublishManyDrawerContentProps = {
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
+}
+
+/**
+ * Turns a bulk-operation error list into the messages worth showing: each
+ * error's own message, plus the field messages nested in its data. A bulk
+ * validation failure carries the field's own message there, while the error
+ * message itself only names the fields.
+ */
+const getBulkErrorMessages = ({ errors }: { errors: unknown }): string[] => {
+  const { fieldErrors, nonFieldErrors } = parseErrorResponse({ body: { errors } })
+
+  return [
+    ...nonFieldErrors
+      .map((error) => error.message)
+      .filter((message): message is string => typeof message === 'string' && message.length > 0),
+    ...fieldErrors.map((error) => error.message),
+  ]
 }
 
 export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProps) {
@@ -125,7 +147,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
 
             if (json?.errors.length > 0) {
               toast.error(json.message, {
-                description: json.errors.map((error) => error.message).join('\n'),
+                description: getBulkErrorMessages({ errors: json.errors }).join('\n'),
               })
             }
 
@@ -149,7 +171,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
           }
 
           if (json.errors) {
-            json.errors.forEach((error) => toast.error(error.message))
+            getBulkErrorMessages({ errors: json.errors }).forEach((message) => toast.error(message))
           } else {
             addDefaultError()
           }
