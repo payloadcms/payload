@@ -504,6 +504,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:draft',
   'version:draftHasPublishedVersion',
   'version:draftSavedSuccessfully',
+  'version:duplicateScheduledEvent',
   'version:lastSavedAgo',
   'version:modifiedOnly',
   'version:noFurtherVersionsFound',

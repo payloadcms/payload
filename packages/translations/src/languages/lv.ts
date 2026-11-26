@@ -603,6 +603,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     draft: 'Melnraksts',
     draftHasPublishedVersion: 'Projekts (ir publicēta versija)',
     draftSavedSuccessfully: 'Melnraksts veiksmīgi saglabāts.',
+    duplicateScheduledEvent:
+      'Šis notikums jau ir ieplānots šajā laikā. Izvēlieties citu laiku vai dzēsiet esošo notikumu.',
     lastSavedAgo: 'Pēdējo reizi saglabāts pirms {{distance}}',
     modifiedOnly: 'Tikai modificētie',
     moreVersions: 'Vairāk versijas...',

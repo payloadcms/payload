@@ -1704,6 +1704,67 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
+    test('should keep a duplicate scheduled event as an error without clearing the date', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('duplicate scheduled event')
+      await page.locator('#field-description').fill('duplicate scheduled event description')
+      await saveDocAndAssert(page)
+      await page.locator('#action-save-popup').click()
+      await page.locator('#schedule-publish').click()
+
+      const input = page.locator('.date-time-picker input')
+      const rows = page.locator('.schedule-publish__upcoming tbody tr')
+      const saveButton = page.locator('#scheduled-publish-save')
+
+      await input.fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+      await saveButton.click()
+      await expect(rows).toHaveCount(1)
+      await expect(input).toHaveValue('')
+      await input.fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+      const selectedDate = await input.inputValue()
+
+      await saveButton.click()
+      await expect(
+        page.getByText(
+          'This event is already scheduled for this time. Choose a different time or delete the existing event.',
+          { exact: true },
+        ),
+      ).toBeVisible()
+      await expect(input).toHaveValue(selectedDate)
+      await expect(saveButton).toBeEnabled()
+      await expect(rows).toHaveCount(1)
+
+      await page.locator('.cell-delete .btn').click()
+      await expect(rows).toHaveCount(0)
+    })
+
+    test('should disable past times before selecting a scheduling date', async ({ browser }) => {
+      const clockContext = await browser.newContext({ timezoneId: londonTimezone })
+      const clockPage = await clockContext.newPage()
+      const now = new Date()
+      now.setHours(12, 2, 0, 0)
+      await clockPage.clock.setSystemTime(now)
+
+      try {
+        await clockPage.goto(url.create)
+        await clockPage.locator('#field-title').fill('past scheduling time')
+        await clockPage.locator('#field-description').fill('past scheduling time description')
+        await saveDocAndAssert(clockPage)
+        await clockPage.locator('#action-save-popup').click()
+        await clockPage.locator('#schedule-publish').click()
+        await clockPage.locator('.date-time-picker input').click()
+
+        const firstTime = clockPage.locator('.react-datepicker__time-list-item').first()
+
+        await expect(firstTime).toHaveClass(/react-datepicker__time-list-item--disabled/)
+        await expect(clockPage.locator('.date-time-picker input')).toHaveValue('')
+      } finally {
+        await clockContext.close()
+      }
+    })
+
     test('should schedule publish', async () => {
       await page.goto(url.create)
       await page.locator('#field-title').fill('scheduled publish')

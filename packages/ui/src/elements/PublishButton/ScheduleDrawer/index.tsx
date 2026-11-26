@@ -151,7 +151,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
     }
 
     try {
-      await schedulePublish({
+      const result = await schedulePublish({
         type,
         date,
         doc: collectionSlug
@@ -165,15 +165,25 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         timezone,
       })
 
+      if (
+        typeof result === 'object' &&
+        result !== null &&
+        'error' in result &&
+        typeof result.error === 'string'
+      ) {
+        toast.error(result.error)
+        return
+      }
+
       setDate(undefined)
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
     } catch (err) {
       console.error(err)
       toast.error(err.message)
+    } finally {
+      setProcessing(false)
     }
-
-    setProcessing(false)
   }, [
     date,
     locale,
@@ -239,7 +249,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (date && isToday(date)) {
+    if (!date || isToday(date)) {
       return new Date()
     }
 

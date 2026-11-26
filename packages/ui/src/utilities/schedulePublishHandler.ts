@@ -1,4 +1,4 @@
-import type { SchedulePublishTaskInput, ServerFunction } from 'payload'
+import type { PayloadRequest, SchedulePublishTaskInput, ServerFunction, TypeWithID } from 'payload'
 
 import { canAccessAdmin, docAccessOperation, docAccessOperationGlobal, Forbidden } from 'payload'
 import { hasScheduledPublishEnabled } from 'payload/shared'
@@ -17,6 +17,10 @@ export type SchedulePublishHandlerArgs = {
   timezone?: string
 } & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
 
+type ScheduledPublishJob = {
+  input?: SchedulePublishTaskInput
+} & TypeWithID
+
 export type GetUpcomingScheduledPublishHandlerArgs = {
   collectionSlug?: string
   globalSlug?: string
@@ -30,6 +34,143 @@ export const getUpcomingScheduledPublishHandler: ServerFunction<
   const { payload } = req
 
   await canAccessAdmin({ req })
+
+  await assertCanSchedulePublish({ id, collectionSlug, globalSlug, req })
+
+  const { docs } = await payload.db.find<UpcomingEvent>({
+    collection: 'payload-jobs',
+    limit: 0,
+    sort: 'waitUntil',
+    where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
+  })
+
+  return docs.map((job) => ({
+    id: job.id,
+    input: {
+      type: job.input?.type === 'unpublish' ? 'unpublish' : 'publish',
+      locale: job.input?.locale,
+      timezone: job.input?.timezone,
+    },
+    waitUntil: job.waitUntil,
+  }))
+}
+
+export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
+  type,
+  date,
+  deleteID,
+  doc,
+  global,
+  localeToPublish,
+  req,
+  timezone,
+}) => {
+  const { i18n, payload, user } = req
+
+  await canAccessAdmin({ req })
+
+  if (date && !deleteID) {
+    await assertCanSchedulePublish({
+      id: doc?.value,
+      collectionSlug: doc?.relationTo,
+      globalSlug: global,
+      req,
+    })
+  }
+
+  try {
+    if (deleteID) {
+      await payload.delete({
+        collection: 'payload-jobs',
+        req,
+        where: {
+          and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
+        },
+      })
+    }
+
+    const publishType = type || 'publish'
+    const publishLocale = localeToPublish === 'all' ? undefined : localeToPublish
+    if (date) {
+      const { docs: pendingJobs } = await payload.db.find<ScheduledPublishJob>({
+        collection: 'payload-jobs',
+        limit: 0,
+        req,
+        where: {
+          and: [
+            { taskSlug: { equals: 'schedulePublish' } },
+            { waitUntil: { equals: date.toISOString() } },
+            { completedAt: { exists: false } },
+            { hasError: { not_equals: true } },
+          ],
+        },
+      })
+      const hasDuplicate = pendingJobs.some(({ input }) => {
+        const scheduledLocale = input?.locale === 'all' ? undefined : input?.locale
+        const hasSameTarget = doc
+          ? input?.doc?.relationTo === doc.relationTo &&
+            String(input?.doc?.value) === String(doc.value)
+          : input?.global === global
+
+        return (
+          hasSameTarget &&
+          (input?.type || 'publish') === publishType &&
+          scheduledLocale === publishLocale
+        )
+      })
+
+      if (hasDuplicate) {
+        return { error: i18n.t('version:duplicateScheduledEvent') }
+      }
+    }
+
+    await payload.jobs.queue({
+      input: {
+        type: publishType,
+        doc,
+        global,
+        locale: publishLocale,
+        timezone,
+        user:
+          user && user.collection
+            ? {
+                relationTo: user.collection,
+                value: user.id,
+              }
+            : undefined,
+      },
+      task: 'schedulePublish',
+      waitUntil: date,
+    })
+  } catch (err) {
+    let error
+
+    if (deleteID) {
+      error = `Error deleting scheduled publish event with ID ${deleteID}`
+    } else {
+      error = `Error scheduling ${type} for `
+      if (doc) {
+        error += `document with ID ${doc.value} in collection ${doc.relationTo}`
+      }
+    }
+
+    payload.logger.error({ err }, error)
+
+    return {
+      error,
+    }
+  }
+
+  return { message: i18n.t('general:success') }
+}
+
+async function assertCanSchedulePublish({
+  id,
+  collectionSlug,
+  globalSlug,
+  req,
+}: { req: PayloadRequest } & GetUpcomingScheduledPublishHandlerArgs): Promise<void> {
+  const { payload } = req
 
   const collectionConfig = collectionSlug ? payload.collections[collectionSlug]?.config : undefined
   const globalConfig = globalSlug
@@ -66,86 +207,4 @@ export const getUpcomingScheduledPublishHandler: ServerFunction<
   if (!hasPublishPermission) {
     throw new Forbidden(req.t)
   }
-
-  const { docs } = await payload.db.find<UpcomingEvent>({
-    collection: 'payload-jobs',
-    limit: 0,
-    sort: 'waitUntil',
-    where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
-  })
-
-  return docs.map((job) => ({
-    id: job.id,
-    input: {
-      type: job.input?.type === 'unpublish' ? 'unpublish' : 'publish',
-      locale: job.input?.locale,
-      timezone: job.input?.timezone,
-    },
-    waitUntil: job.waitUntil,
-  }))
-}
-
-export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
-  type,
-  date,
-  deleteID,
-  doc,
-  global,
-  localeToPublish,
-  req,
-  timezone,
-}) => {
-  const { i18n, payload, user } = req
-
-  await canAccessAdmin({ req })
-
-  try {
-    if (deleteID) {
-      await payload.delete({
-        collection: 'payload-jobs',
-        req,
-        where: {
-          and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
-        },
-      })
-    }
-
-    await payload.jobs.queue({
-      input: {
-        type,
-        doc,
-        global,
-        locale: localeToPublish,
-        timezone,
-        user:
-          user && user.collection
-            ? {
-                relationTo: user.collection,
-                value: user.id,
-              }
-            : undefined,
-      },
-      task: 'schedulePublish',
-      waitUntil: date,
-    })
-  } catch (err) {
-    let error
-
-    if (deleteID) {
-      error = `Error deleting scheduled publish event with ID ${deleteID}`
-    } else {
-      error = `Error scheduling ${type} for `
-      if (doc) {
-        error += `document with ID ${doc.value} in collection ${doc.relationTo}`
-      }
-    }
-
-    payload.logger.error({ err }, error)
-
-    return {
-      error,
-    }
-  }
-
-  return { message: i18n.t('general:success') }
 }

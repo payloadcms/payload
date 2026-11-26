@@ -607,6 +607,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     draft: 'খসড়া',
     draftHasPublishedVersion: 'খসড়া (প্রকাশিত সংস্করণ রয়েছে)',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
+    duplicateScheduledEvent:
+      'এই ইভেন্টটি ইতিমধ্যে এই সময়ের জন্য নির্ধারিত আছে। অন্য সময় বেছে নিন অথবা বিদ্যমান ইভেন্টটি মুছে দিন।',
     lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
     moreVersions: 'আরও সংস্করণ...',

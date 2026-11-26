@@ -600,6 +600,8 @@ export const csTranslations: DefaultTranslationsObject = {
     draft: 'Koncept',
     draftHasPublishedVersion: 'Koncept (má publikovanou verzi)',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
+    duplicateScheduledEvent:
+      'Tato událost je již naplánována na tento čas. Vyberte jiný čas nebo odstraňte stávající událost.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     modifiedOnly: 'Pouze upraveno',
     moreVersions: 'Více verzí...',
