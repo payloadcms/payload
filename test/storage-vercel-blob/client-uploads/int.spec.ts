@@ -229,6 +229,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
       bytes.length,
     )
     // In Node the SDK reports only the start of the upload; browsers report every chunk.
+    expect(progress.length).toBeGreaterThan(0)
     expect(loaded).toEqual([...loaded].sort((a, b) => a - b))
     expect(loaded.every((value) => value >= 0 && value <= bytes.length)).toBe(true)
     expect(progress.every(({ totalBytes }) => totalBytes === bytes.length)).toBe(true)
