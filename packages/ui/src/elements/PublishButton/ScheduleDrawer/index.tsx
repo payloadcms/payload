@@ -6,7 +6,7 @@ import type { Column, SchedulePublish } from 'payload'
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { endOfToday, isToday, startOfDay } from 'date-fns'
+import { endOfToday, isSameDay, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -249,12 +249,18 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (!date || isToday(date)) {
-      return new Date()
+    const now = new Date()
+    // The picker compares browser-local wall times, including the transposed displayed value.
+    const displayedNow = timezone
+      ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone))
+      : now
+
+    if (!displayedValue || isSameDay(displayedValue, displayedNow)) {
+      return displayedNow
     }
 
-    return startOfDay(new Date())
-  }, [date])
+    return startOfDay(displayedNow)
+  }, [displayedValue, timezone, userTimezone])
 
   return (
     <Drawer
