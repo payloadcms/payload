@@ -1,10 +1,11 @@
-import type { PayloadSDK } from '@payloadcms/sdk'
 import type { Page } from '@playwright/test'
 import type { UntypedPayloadTypes } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
 import { changeLocale, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -21,13 +22,13 @@ const dirname = path.dirname(filename)
 
 test.describe('Publish all locales', () => {
   const createdIDs: string[] = []
-  let sdk: PayloadSDK<UntypedPayloadTypes>
+  let payload: PayloadTestSDK<UntypedPayloadTypes>
   let publishAllLocalesURL: AdminUrlUtil
   let page: Page
   let serverURL: string
 
   test.beforeAll(async ({ browser }) => {
-    ;({ sdk, serverURL } = await initPayloadE2ENoConfig<UntypedPayloadTypes>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<UntypedPayloadTypes>({ dirname }))
     publishAllLocalesURL = new AdminUrlUtil(serverURL, validationCustomButtonsCollectionSlug)
 
     const context = await browser.newContext()
@@ -38,7 +39,11 @@ test.describe('Publish all locales', () => {
     await page.goto(publishAllLocalesURL.admin)
 
     for (const id of createdIDs) {
-      await sdk.delete({ collection: validationCustomButtonsCollectionSlug, id })
+      await payload.delete({
+        collection: validationCustomButtonsCollectionSlug,
+        id,
+        overrideAccess: true,
+      })
     }
     createdIDs.length = 0
   })
@@ -54,7 +59,11 @@ test.describe('Publish all locales', () => {
 
     await expect
       .poll(async () => {
-        const doc = await sdk.findByID({ collection: validationCustomButtonsCollectionSlug, id })
+        const doc = await payload.findByID({
+          collection: validationCustomButtonsCollectionSlug,
+          id,
+          overrideAccess: true,
+        })
 
         return doc._status
       })
@@ -111,7 +120,7 @@ test.describe('Publish all locales', () => {
     germanTitle?: string
     spanishTitle?: string
   }): Promise<string> {
-    const doc = await sdk.create({
+    const doc = await payload.create({
       collection: validationCustomButtonsCollectionSlug,
       data: {
         _status: 'draft',
@@ -120,6 +129,7 @@ test.describe('Publish all locales', () => {
       },
       draft: true,
       locale: 'en',
+      overrideAccess: true,
     })
     const id = String(doc.id)
 
@@ -131,7 +141,7 @@ test.describe('Publish all locales', () => {
       ['fr', frenchTitle],
     ]) {
       if (title) {
-        await sdk.update({
+        await payload.update({
           collection: validationCustomButtonsCollectionSlug,
           data: {
             _status: 'draft',
@@ -140,6 +150,7 @@ test.describe('Publish all locales', () => {
           draft: true,
           id,
           locale,
+          overrideAccess: true,
         })
       }
     }
@@ -154,11 +165,12 @@ test.describe('Publish all locales', () => {
   }
 
   async function getLocaleStatus({ id, locale }: { id: string; locale: string }): Promise<unknown> {
-    const doc = await sdk.findByID({
+    const doc = await payload.findByID({
       collection: validationCustomButtonsCollectionSlug,
       draft: true,
       id,
       locale,
+      overrideAccess: true,
     })
 
     return doc._status

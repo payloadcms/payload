@@ -92,6 +92,7 @@ const nextSuites: TestConfig[] = [
   { file: 'plugin-cloud-storage', shards: 1 },
   { file: 'storage-azure__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'storage-s3__client-uploads#client-uploads/config.ts', shards: 1 },
+  { file: 'storage-r2', shards: 1 },
   { file: 'storage-vercel-blob__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'plugin-form-builder', shards: 1 },
   { file: 'plugin-import-export', shards: 1 },

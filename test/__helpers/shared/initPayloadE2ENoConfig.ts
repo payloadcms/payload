@@ -1,9 +1,7 @@
 import type { PayloadTypesShape } from 'payload'
 
-import { PayloadSDK } from '@payloadcms/sdk'
 import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
-import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { getNextRootDir } from './getNextRootDir.js'
@@ -19,12 +17,6 @@ type Args = {
 
 type Result<T extends PayloadTypesShape> = {
   payload: PayloadTestSDK<T>
-  /**
-   * REST API client for the running server. It sends no token, so requests are authenticated by the
-   * config's `admin.autoLogin` user (the dev user unless a suite disables it). That keeps it valid
-   * across `reInitializeDB`, which recreates the user.
-   */
-  sdk: PayloadSDK<T>
   serverURL: string
 }
 
@@ -72,6 +64,5 @@ export async function initPayloadE2ENoConfig<T extends PayloadTypesShape>({
   return {
     serverURL,
     payload: new PayloadTestSDK<T>({ serverURL }),
-    sdk: new PayloadSDK<T>({ baseURL: formatAdminURL({ apiRoute: '/api', serverURL }) }),
   }
 }

@@ -46,7 +46,8 @@ export const handler: PayloadHandler = async (req) => {
       })
     } catch (err) {
       payload.logger.error(err)
-      return Response.json(err, {
+      // An Error's `message` isn't enumerable, so JSON would drop it.
+      return Response.json(err instanceof Error ? { ...err, message: err.message } : err, {
         status: httpStatus.BAD_REQUEST,
       })
     }

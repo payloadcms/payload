@@ -11,18 +11,6 @@ type AnyPayloadTestSDK = Pick<PayloadTestSDK<UntypedPayloadTypes>, 'serverURL'>
 const untyped = ({ serverURL }: AnyPayloadTestSDK) =>
   new PayloadTestSDK<UntypedPayloadTypes>({ serverURL })
 
-/**
- * The local-api endpoint answers a failed operation with the serialized error instead of throwing.
- */
-const isSerializedError = (
-  value: unknown,
-): value is { data?: { errors?: { message?: string }[] }; status: number } =>
-  typeof value === 'object' &&
-  value !== null &&
-  'status' in value &&
-  typeof value.status === 'number' &&
-  value.status >= 400
-
 export const upsertPreferences = async ({
   key,
   payload,
@@ -35,8 +23,8 @@ export const upsertPreferences = async ({
   value: unknown
 }) => {
   try {
-    const sdk = untyped(payload)
-    const { docs } = await sdk.find({
+    const untypedPayload = untyped(payload)
+    const { docs } = await untypedPayload.find({
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
@@ -53,7 +41,7 @@ export const upsertPreferences = async ({
     const userRelationship = { relationTo: user.collection, value: user.id }
 
     if (!prefs) {
-      return await sdk.create({
+      return await untypedPayload.create({
         collection: 'payload-preferences',
         data: { key, user: userRelationship, value },
         depth: 0,
@@ -66,18 +54,12 @@ export const upsertPreferences = async ({
         ? { ...prefs.value, ...value }
         : value
 
-    const updated = await sdk.update({
+    return await untypedPayload.update({
       id: prefs.id,
       collection: 'payload-preferences',
       data: { key, user: userRelationship, value: newValue },
       overrideAccess: true,
     })
-
-    if (isSerializedError(updated)) {
-      throw new Error(updated.data?.errors?.[0]?.message)
-    }
-
-    return updated
   } catch (e) {
     console.error('Error upserting prefs', e)
   }

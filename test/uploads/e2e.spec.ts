@@ -1,4 +1,3 @@
-import type { PayloadSDK } from '@payloadcms/sdk'
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -92,7 +91,6 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
 const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let sdk: PayloadSDK<Config>
 let serverURL: string
 let mediaURL: AdminUrlUtil
 let animatedTypeMediaURL: AdminUrlUtil
@@ -142,7 +140,7 @@ describe('Uploads', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
@@ -830,7 +828,11 @@ describe('Uploads', () => {
     // The per-size detail is no longer surfaced in the doc edit UI; verify the generated size
     // filename via the API instead.
     const mediaID = page.url().split('/').pop()
-    const doc = await sdk.findByID({ collection: animatedTypeMedia, id: mediaID as string })
+    const doc = await payload.findByID({
+      collection: animatedTypeMedia,
+      id: mediaID as string,
+      overrideAccess: true,
+    })
     expect(doc.variants?.squareSmall?.filename).toMatch(/480x480\.webp$/)
   })
 
@@ -910,7 +912,11 @@ describe('Uploads', () => {
     // The per-size detail is no longer surfaced in the doc edit UI; verify the custom generated
     // size filename via the API instead.
     const mediaID = page.url().split('/').pop()
-    const doc = await sdk.findByID({ collection: customFileNameMediaSlug, id: mediaID as string })
+    const doc = await payload.findByID({
+      collection: customFileNameMediaSlug,
+      id: mediaID as string,
+      overrideAccess: true,
+    })
     expect(doc.variants?.custom?.filename).toBe('custom-500x500.png')
   })
 
@@ -1067,9 +1073,10 @@ describe('Uploads', () => {
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
-    const mediaDoc = await sdk.findByID({
+    const mediaDoc = await payload.findByID({
       collection: adminUploadControlSlug,
       id: mediaID as string,
+      overrideAccess: true,
     })
     await expect
       .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
@@ -1088,9 +1095,10 @@ describe('Uploads', () => {
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
-    const mediaDoc = await sdk.findByID({
+    const mediaDoc = await payload.findByID({
       collection: adminUploadControlSlug,
       id: mediaID as string,
+      overrideAccess: true,
     })
     await expect
       .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
@@ -1226,7 +1234,11 @@ describe('Uploads', () => {
 
     const imageID = page.url().split('/').pop()
 
-    const uploadedImage = await sdk.findByID({ collection: mediaSlug, id: imageID as string })
+    const uploadedImage = await payload.findByID({
+      collection: mediaSlug,
+      id: imageID as string,
+      overrideAccess: true,
+    })
 
     expect(uploadedImage.mimeType).toEqual('image/png')
   })
@@ -1239,7 +1251,11 @@ describe('Uploads', () => {
 
     const mediaID = page.url().split('/').pop()
 
-    const mediaDoc = await sdk.findByID({ collection: withMetadataSlug, id: mediaID as string })
+    const mediaDoc = await payload.findByID({
+      collection: withMetadataSlug,
+      id: mediaID as string,
+      overrideAccess: true,
+    })
 
     // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
     const acceptableFileSizes = [2989]
@@ -1257,7 +1273,11 @@ describe('Uploads', () => {
 
     const mediaID = page.url().split('/').pop()
 
-    const mediaDoc = await sdk.findByID({ collection: withoutMetadataSlug, id: mediaID as string })
+    const mediaDoc = await payload.findByID({
+      collection: withoutMetadataSlug,
+      id: mediaID as string,
+      overrideAccess: true,
+    })
 
     const acceptableFileSizes = [2424, 2445]
 
@@ -1274,9 +1294,10 @@ describe('Uploads', () => {
 
     const jpegMediaID = page.url().split('/').pop()
 
-    const jpegMediaDoc = await sdk.findByID({
+    const jpegMediaDoc = await payload.findByID({
       collection: withOnlyJPEGMetadataSlug,
       id: jpegMediaID as string,
+      overrideAccess: true,
     })
 
     const acceptableFileSizesForJPEG = [3112]
@@ -1297,9 +1318,10 @@ describe('Uploads', () => {
 
     const webpMediaID = page.url().split('/').pop()
 
-    const webpMediaDoc = await sdk.findByID({
+    const webpMediaDoc = await payload.findByID({
       collection: withOnlyJPEGMetadataSlug,
       id: webpMediaID as string,
+      overrideAccess: true,
     })
 
     // With metadata, the animated image filesize would be 218762
@@ -2410,12 +2432,17 @@ describe('Uploads', () => {
       await createFocalCrop(page, 'top-left') // red square
       const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
-      const greenDoc = await sdk.findByID({
+      const greenDoc = await payload.findByID({
         collection: mediaSlug,
         id: greenSquareMediaID as string,
+        overrideAccess: true,
       })
 
-      const redDoc = await sdk.findByID({ collection: mediaSlug, id: redSquareMediaID as string })
+      const redDoc = await payload.findByID({
+        collection: mediaSlug,
+        id: redSquareMediaID as string,
+        overrideAccess: true,
+      })
 
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
@@ -2443,9 +2470,10 @@ describe('Uploads', () => {
       await updateFocalPosition(page) // red square
       const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
-      const redDoc = await sdk.findByID({
+      const redDoc = await payload.findByID({
         collection: focalOnlySlug,
         id: redSquareMediaID as string,
+        overrideAccess: true,
       })
 
       // without focal point update this generated size was equal to 1736
@@ -2517,7 +2545,7 @@ describe('Uploads', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()!
-      const cropped = await sdk.findByID({ collection: mediaSlug, id })
+      const cropped = await payload.findByID({ collection: mediaSlug, id, overrideAccess: true })
 
       expect(cropped._transforms?.crop).toMatchObject({ height: 600, width: 400 })
 
@@ -2526,7 +2554,7 @@ describe('Uploads', () => {
       await page.setInputFiles('.file-manager input[type="file"]', path.join(dirname, 'small.png'))
       await saveDocAndAssert(page)
 
-      const replaced = await sdk.findByID({ collection: mediaSlug, id })
+      const replaced = await payload.findByID({ collection: mediaSlug, id, overrideAccess: true })
 
       expect(replaced._transforms).toBeNull()
 
@@ -2713,7 +2741,7 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
     await saveDocAndAssert(page)
     const imageID = page.url().split('/').pop()!
-    const doc = await sdk.findByID({ collection: mediaSlug, id: imageID })
+    const doc = await payload.findByID({ collection: mediaSlug, id: imageID, overrideAccess: true })
     const filename = doc.filename as string
     const filePath = path.resolve(dirname, 'media', filename)
     const before = statSync(filePath)

@@ -50,7 +50,7 @@ export const buildSearchParams = (args: OperationArgs): string => {
     search.allSessions = String(args.allSessions)
   }
 
-  if (args.fallbackLocale) {
+  if (args.fallbackLocale || args.fallbackLocale === false) {
     search['fallback-locale'] = String(args.fallbackLocale)
   }
 
