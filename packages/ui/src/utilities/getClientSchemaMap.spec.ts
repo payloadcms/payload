@@ -107,4 +107,26 @@ describe('getClientSchemaMap', () => {
     expect(getLabel(fr, 'pages.password')).toBe('Mot de passe')
     expect(getLabel(fr, 'pages.confirm-password')).toBe('Confirmer le mot de passe')
   })
+
+  it('should rebuild the client schema map when the schema map comes from a different config', () => {
+    const previous = getClientSchemaMap({
+      collectionSlug: 'pages',
+      config: createConfig({ label: 'Title' }),
+      i18n: createI18n('en'),
+      payload,
+      schemaMap: new Map(),
+    })
+
+    // After a config reload the server schema map is rebuilt, so a new map means a new config
+    const next = getClientSchemaMap({
+      collectionSlug: 'pages',
+      config: createConfig({ label: 'Headline' }),
+      i18n: createI18n('en'),
+      payload,
+      schemaMap: new Map(),
+    })
+
+    expect(getLabel(previous, 'pages.title')).toBe('Title')
+    expect(getLabel(next, 'pages.title')).toBe('Headline')
+  })
 })
