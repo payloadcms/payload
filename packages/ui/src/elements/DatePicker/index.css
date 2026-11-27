@@ -597,6 +597,15 @@
     .react-datepicker__year-text--in-range
   ) {
     background-color: var(--color-bg-selected);
+
+    &:not(
+      .react-datepicker__day--disabled,
+      .react-datepicker__month-text--disabled,
+      .react-datepicker__quarter-text--disabled,
+      .react-datepicker__year-text--disabled
+    ) {
+      color: var(--color-text);
+    }
   }
 
   /* Disabled days */

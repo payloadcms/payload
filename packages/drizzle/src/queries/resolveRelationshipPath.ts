@@ -3,6 +3,7 @@ import type { FlattenedField, RelationshipField, UploadField } from 'payload'
 import type { DrizzleAdapter } from '../types.js'
 
 type ResolvedRelationshipPath = {
+  arrayPositionIndices: number[]
   field: RelationshipField | UploadField
   isLocalized: boolean
   locale?: string
@@ -62,6 +63,7 @@ export function resolveRelationshipPath({
   let currentFields = fields
   let isLocalized = parentIsLocalized
   let resolvedPath = pathPrefix
+  const arrayPositionIndices: number[] = []
 
   for (const segment of pathSegments) {
     const field = currentFields.find(({ name }) => name === segment)
@@ -77,6 +79,11 @@ export function resolveRelationshipPath({
 
     currentField = field
     resolvedPath = appendFieldToStoragePath({ field, path: resolvedPath })
+
+    if (field.type === 'array' || field.type === 'blocks') {
+      arrayPositionIndices.push(resolvedPath.split('.').length - 1)
+    }
+
     isLocalized = isLocalized || Boolean(field.localized)
 
     if ('flattenedFields' in field) {
@@ -97,6 +104,7 @@ export function resolveRelationshipPath({
   }
 
   return {
+    arrayPositionIndices,
     field: currentField,
     isLocalized,
     locale,

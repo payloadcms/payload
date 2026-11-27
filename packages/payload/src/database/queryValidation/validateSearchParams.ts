@@ -1,7 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { HasManyRelationshipOperator, PayloadRequest, WhereField } from '../../types/index.js'
+import type {
+  HasManyRelationshipOperator,
+  PayloadRequest,
+  Where,
+  WhereField,
+} from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -10,6 +15,7 @@ import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEn
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
+import { constrainNestedRelationshipQuery } from '../nestedRelationshipReadConstraint.js'
 import { prefixWherePaths } from '../prefixWherePaths.js'
 import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
@@ -118,10 +124,46 @@ export async function validateSearchParam({
   }
 
   if (isNestedHasManyQuery && relatedCollectionSlug) {
+    const relatedCollectionConfig = req.payload.collections[relatedCollectionSlug]!.config
+
+    // Resolve permissions before starting the nested validation below, so a rejection from it
+    // cannot occur while this function is still awaiting and before `Promise.all` observes it.
+    if (!overrideAccess) {
+      if (!policies.collections![relatedCollectionSlug]) {
+        policies.collections![relatedCollectionSlug] = await getEntityPermissions({
+          blockReferencesPermissions,
+          entity: relatedCollectionConfig,
+          entityType: 'collection',
+          fetchData: false,
+          operations: ['read'],
+          req: isolateObjectProperty(req, 'transactionID'),
+        })
+      }
+
+      const relatedCollectionReadPermission = policies.collections![relatedCollectionSlug].read
+
+      if (!relatedCollectionReadPermission?.permission) {
+        errors.push({ path: incomingPath })
+        return
+      }
+
+      // The nested query runs directly against the related collection, so its read access
+      // constraint must be applied to the same related documents the user's query matches.
+      // Otherwise the nested query can match documents the user cannot read.
+      if (relatedCollectionReadPermission.where) {
+        const mutableConstraint = constraint as Record<string, Record<string, unknown>>
+
+        mutableConstraint[incomingPath]![operator] = constrainNestedRelationshipQuery({
+          readConstraint: relatedCollectionReadPermission.where,
+          where: val as Where,
+        })
+      }
+    }
+
     // Validate the nested query against the related collection.
     promises.push(
       validateQueryPaths({
-        collectionConfig: req.payload.collections[relatedCollectionSlug]!.config,
+        collectionConfig: relatedCollectionConfig,
         errors,
         overrideAccess,
         policies,

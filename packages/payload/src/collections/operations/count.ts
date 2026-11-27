@@ -4,6 +4,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -43,8 +44,10 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     overrideAccess,
     req,
     trash = false,
-    where,
+    where: incomingWhere,
   } = args
+
+  const where = cloneWhere(incomingWhere)
 
   const { payload } = req!
 

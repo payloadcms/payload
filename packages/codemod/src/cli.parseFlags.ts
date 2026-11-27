@@ -1,5 +1,7 @@
 import { parseArgs } from 'node:util'
 
+import type { PackageManager } from './upgrade/types.js'
+
 export type CliCommand = 'upgrade'
 
 /**
@@ -18,11 +20,13 @@ export type CliFlags = {
   force: boolean
   help: boolean
   list: boolean
+  packageManager?: PackageManager
   path: string
   print: boolean
   tag?: string
   transform?: string
   upgrade?: UpgradeSubcommand
+  yes: boolean
 }
 
 export function parseFlags(argv: string[]): CliFlags {
@@ -36,11 +40,18 @@ export function parseFlags(argv: string[]): CliFlags {
       force: { type: 'boolean', default: false },
       help: { type: 'boolean', default: false, short: 'h' },
       list: { type: 'boolean', default: false },
+      'package-manager': { type: 'string' },
       print: { type: 'boolean', default: false },
       tag: { type: 'string' },
       transform: { type: 'string' },
+      yes: { type: 'boolean', default: false },
     },
   })
+
+  const packageManager = values['package-manager']
+  if (packageManager && !['bun', 'npm', 'pnpm', 'yarn'].includes(packageManager)) {
+    throw new Error('--package-manager must be npm, pnpm, yarn, or bun.')
+  }
 
   const isUpgrade = positionals[0] === 'upgrade'
   const command = isUpgrade ? 'upgrade' : undefined
@@ -56,11 +67,13 @@ export function parseFlags(argv: string[]): CliFlags {
     force: Boolean(values.force),
     help: Boolean(values.help),
     list: Boolean(values.list),
+    ...(packageManager ? { packageManager: packageManager as PackageManager } : {}),
     path,
     print: Boolean(values.print),
     tag: values.tag,
     transform: values.transform,
     upgrade,
+    yes: Boolean(values.yes),
   }
 }
 

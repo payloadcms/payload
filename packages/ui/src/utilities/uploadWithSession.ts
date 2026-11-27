@@ -284,8 +284,8 @@ export const resumeUploadSession = async ({
   const segments = new Map(session.transfer.segments.map((segment) => [segment.number, segment]))
   let concurrency = session.transfer.concurrency
   let stalledWindows = 0
-  // Set once this attempt fails. Parts still in flight must not report after that, or a late
-  // update would replace the retry offer the caller shows for the failure.
+  // Set once this attempt fails. The other parts stop then: otherwise they keep uploading next to
+  // a retry, and a late progress update would replace the retry offer the caller shows.
   let hasFailed = false
   const reportProgress = (progress: UploadSessionProgress) => {
     if (!hasFailed) {
@@ -305,7 +305,7 @@ export const resumeUploadSession = async ({
     }, 0)
 
     if (!requests.length) {
-      onProgress?.({
+      reportProgress({
         loaded: currentSession.isStorageComplete ? file.size : confirmedBytes,
         total: file.size,
       })
@@ -314,9 +314,11 @@ export const resumeUploadSession = async ({
 
     let windowBytes = 0
     const queue = [...requests]
+    const { controller: windowController, unlink: unlinkWindowSignal } =
+      createLinkedAbortController({ signal })
 
     const sendNext = async (): Promise<void> => {
-      const request = queue.shift()
+      const request = hasFailed ? undefined : queue.shift()
 
       if (!request) {
         return
@@ -327,7 +329,16 @@ export const resumeUploadSession = async ({
         body: file.slice(segment.start, segment.end),
         request,
         retries,
-        signal,
+        signal: windowController.signal,
+      }).catch((err: unknown) => {
+        // The first failure is the one this attempt reports. The parts it cancels end quietly.
+        if (hasFailed) {
+          return 'cancelled' as const
+        }
+
+        hasFailed = true
+        windowController.abort()
+        throw err
       })
 
       if (result === 'throttled') {
@@ -345,12 +356,11 @@ export const resumeUploadSession = async ({
       }
     }
 
-    await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, sendNext)).catch(
-      (err: unknown) => {
-        hasFailed = true
-        throw err
-      },
-    )
+    try {
+      await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, sendNext))
+    } finally {
+      unlinkWindowSignal()
+    }
 
     // A window where nothing was accepted (e.g. a CORS or permission problem) must not loop forever.
     stalledWindows = windowBytes ? 0 : stalledWindows + 1
@@ -510,6 +520,26 @@ const wait = ({ ms, signal }: { ms: number; signal?: AbortSignal }) =>
       { once: true },
     )
   })
+
+/**
+ * Returns a controller that also aborts when `signal` does, and a function that stops following
+ * `signal`. `AbortSignal.any` does the same but needs Safari 17.4.
+ */
+const createLinkedAbortController = ({ signal }: { signal?: AbortSignal }) => {
+  const controller = new AbortController()
+  const abort = () => controller.abort(signal?.reason)
+
+  if (signal?.aborted) {
+    abort()
+  } else {
+    signal?.addEventListener('abort', abort, { once: true })
+  }
+
+  return {
+    controller,
+    unlink: () => signal?.removeEventListener('abort', abort),
+  }
+}
 
 /** Exponential backoff with jitter. */
 const getRetryDelay = ({ attempt }: { attempt: number }) =>

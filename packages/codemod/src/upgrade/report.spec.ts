@@ -8,7 +8,6 @@ describe('renderReport', () => {
       floorsWritten: ['typescript', '@types/node', 'engines.node'],
       nextTarget: '16.9.3',
       overridesRemoved: ['pnpm.overrides.payload'],
-      placeholdersSkipped: ['@payloadcms/ui'],
       runbookPath: '/x/dist/runbook/payload-v4-upgrade.md',
       transforms: [
         { filesChanged: ['a.ts'], name: 'migrate-versions-default', notes: ['review X'] },
@@ -27,8 +26,6 @@ describe('renderReport', () => {
     expect(out).toContain('payload-v4-upgrade.md')
     expect(out).toContain('Floors written')
     expect(out).toContain('typescript')
-    expect(out).toContain('Left as-is')
-    expect(out).toContain('@payloadcms/ui')
   })
 
   it('flags a resolution mismatch as not confirmed v4', () => {
@@ -36,7 +33,6 @@ describe('renderReport', () => {
       floorsWritten: [],
       nextTarget: null,
       overridesRemoved: [],
-      placeholdersSkipped: [],
       runbookPath: '/x/runbook.md',
       transforms: [],
       versions: [{ name: 'payload', ok: false, resolved: '3.40.0', wrote: '4.0.0-canary.20' }],
@@ -52,7 +48,6 @@ describe('renderReport', () => {
       floorsWritten: [],
       nextTarget: null,
       overridesRemoved: [],
-      placeholdersSkipped: [],
       runbookPath: '/x/runbook.md',
       transforms: [],
       versions: [],
@@ -70,7 +65,6 @@ describe('renderReport', () => {
       floorsWritten: [],
       nextTarget: null,
       overridesRemoved: [],
-      placeholdersSkipped: [],
       runbookPath: '/x/runbook.md',
       transforms: [{ error: new Error('boom'), filesChanged: [], name: 'broken-transform' }],
       versions: [],

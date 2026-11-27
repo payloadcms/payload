@@ -70,9 +70,13 @@ export const createServerFunctionHandler = ({
       user,
     }
 
-    const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
+    const fn =
+      (extraServerFunctions && Object.hasOwn(extraServerFunctions, fnKey)
+        ? extraServerFunctions[fnKey]
+        : undefined) ||
+      (Object.hasOwn(baseServerFunctions, fnKey) ? baseServerFunctions[fnKey] : undefined)
 
-    if (!fn) {
+    if (typeof fn !== 'function') {
       throw new Error(`Unknown Server Function: ${fnKey}`)
     }
 

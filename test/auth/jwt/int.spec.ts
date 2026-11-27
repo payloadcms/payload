@@ -1,7 +1,7 @@
 import type { CollectionRefreshHook, Payload } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
-import { createPayloadRequestFromWebRequest } from 'payload'
+import { createPayloadRequest, createPayloadRequestFromWebRequest } from 'payload'
 import { v4 as uuid } from 'uuid'
 import { expect } from 'vitest'
 
@@ -42,6 +42,118 @@ test.suite(
 
       createdJWTUserIDs.length = 0
       createdRestrictedRelationshipIDs.length = 0
+    })
+
+    test.describe('Cross-site iframe cookie auth', () => {
+      const frontendOrigin = 'https://preview.example.com'
+      let originalCSRF: string[]
+      let token: string
+      let userID: number | string
+
+      test.beforeAll(async ({ payloadInstance: payload }) => {
+        const data = { email: `iframe-${uuid()}@example.com`, password }
+        const user = await payload.create({
+          collection: jwtUsersSlug as any,
+          data,
+          overrideAccess: true,
+        })
+        userID = user.id
+        const result = await payload.login({ collection: jwtUsersSlug as any, data })
+
+        token = result.token!
+      })
+
+      test.afterAll(async ({ payloadInstance: payload }) => {
+        await payload.delete({ id: userID, collection: jwtUsersSlug as any, overrideAccess: true })
+      })
+
+      test.beforeEach(({ payloadInstance: payload }) => {
+        originalCSRF = payload.config.csrf
+        payload.config.csrf = [frontendOrigin]
+      })
+
+      test.afterEach(({ payloadInstance: payload }) => {
+        payload.config.csrf = originalCSRF
+      })
+
+      test('should authenticate an iframe navigation from an allowed frontend', async ({
+        restClient,
+      }) => {
+        const response = await restClient.GET(`/${jwtUsersSlug}/me`, {
+          auth: false,
+          headers: {
+            Cookie: `payload-token=${token}`,
+            Referer: `${frontendOrigin}/preview`,
+            'Sec-Fetch-Dest': 'iframe',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.user?.id).toBe(userID)
+      })
+
+      for (const method of ['HEAD', undefined]) {
+        test(`should authenticate a trusted iframe when method is ${method}`, async ({
+          payload,
+        }) => {
+          const headers = new Headers({
+            Cookie: `payload-token=${token}`,
+            DisableAutologin: 'true',
+            Referer: `${frontendOrigin}/preview`,
+            'Sec-Fetch-Dest': 'iframe',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+          })
+          const req = await createPayloadRequest({ payload, req: { headers, method } })
+          const { user } = await payload.auth({ headers, req })
+
+          expect(user?.id).toBe(userID)
+        })
+      }
+
+      for (const [name, headers] of [
+        ['an unlisted referrer', { Referer: 'https://attacker.example/preview' }],
+        ['a missing referrer', { Referer: '' }],
+        ['a malformed referrer', { Referer: 'invalid' }],
+        ['an unlisted Origin', { Origin: 'https://attacker.example' }],
+        ['a fetch request', { 'Sec-Fetch-Mode': 'cors' }],
+        ['a non-iframe destination', { 'Sec-Fetch-Dest': 'empty' }],
+      ] as const) {
+        test(`should reject cookie auth with ${name}`, async ({ restClient }) => {
+          const response = await restClient.GET(`/${jwtUsersSlug}/me`, {
+            auth: false,
+            headers: {
+              Cookie: `payload-token=${token}`,
+              Referer: `${frontendOrigin}/preview`,
+              'Sec-Fetch-Dest': 'iframe',
+              'Sec-Fetch-Mode': 'navigate',
+              'Sec-Fetch-Site': 'cross-site',
+              ...headers,
+            },
+          })
+          const result = await response.json()
+
+          expect(result.user).toBeNull()
+        })
+      }
+
+      test('should reject an iframe POST even with an allowed referrer', async ({ restClient }) => {
+        const response = await restClient.POST(`/${jwtUsersSlug}/refresh-token`, {
+          auth: false,
+          headers: {
+            Cookie: `payload-token=${token}`,
+            Referer: `${frontendOrigin}/preview`,
+            'Sec-Fetch-Dest': 'iframe',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+          },
+        })
+
+        expect(response.status).toBe(403)
+      })
     })
 
     test('should return a user with read access from JWT authentication', async () => {

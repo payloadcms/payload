@@ -7,6 +7,46 @@ import { test } from '../__helpers/int/vitest.js'
 import { accessJoinArticlesSlug, accessJoinNotesSlug, accessJoinParentsSlug } from './shared.js'
 
 test.suite('Polymorphic join pagination', { config: './config.ts', db: 'mongo' }, () => {
+  test('should return each document once when multiple pages share a sort value', async ({
+    payload,
+  }) => {
+    const { parentID } = await createJoinedDocuments({ payload })
+
+    const notes = await createChildren({
+      collection: accessJoinNotesSlug,
+      parentID,
+      payload,
+      titles: Array<string>(24).fill('Accessibility'),
+    })
+
+    const articles = await createChildren({
+      collection: accessJoinArticlesSlug,
+      parentID,
+      payload,
+      titles: Array<string>(24).fill('Accessibility'),
+    })
+
+    const documents = []
+
+    for (let page = 1; page <= 5; page++) {
+      const children = await findJoinedPage({ count: true, limit: 10, page, parentID, payload })
+
+      documents.push(
+        ...(children?.docs ?? []).map(({ relationTo, value }) => ({ relationTo, value })),
+      )
+    }
+
+    const identity = ({ relationTo, value }: { relationTo: string; value: number | string }) =>
+      `${relationTo}:${value}`
+
+    expect(documents.map(identity).sort()).toEqual([...articles, ...notes].map(identity).sort())
+
+    if ((payload.db as unknown as MongooseAdapter).useJoinAggregations) {
+      expect(String(notes.at(-1)?.value) < String(articles[0]?.value)).toBe(true)
+      expect(documents).toEqual([...articles, ...notes])
+    }
+  })
+
   for (const useJoinAggregations of [true, false]) {
     for (const count of [true, false]) {
       test.describe(`aggregations=${useJoinAggregations}, count=${count}`, () => {
