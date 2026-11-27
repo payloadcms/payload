@@ -108,6 +108,7 @@ export type SQLiteD1Adapter = {
   binding: Args['binding']
   client: AnyD1Database
   drizzle: Drizzle
+  dropDatabase: DropDatabase
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.
    *
@@ -116,7 +117,7 @@ export type SQLiteD1Adapter = {
    * ```readReplicas: 'first-primary'```
    */
   readReplicas?: 'first-primary'
-} & BaseSQLiteAdapter &
+} & Omit<BaseSQLiteAdapter, 'dropDatabase'> &
   SQLiteDrizzleAdapter
 
 export type IDType = 'integer' | 'numeric' | 'text'
