@@ -107,6 +107,12 @@ export const sanitizeJoinField = ({
     throw new InvalidFieldJoin(join.field)
   }
 
+  if (relationshipField.pathCrossesBlocks) {
+    throw new APIError(
+      `Join field "${field.name}" cannot use "on" path "${field.on}" because it crosses a blocks field, which is not supported.`,
+    )
+  }
+
   if (relationshipField.pathHasLocalized) {
     join.getForeignPath = ({ locale }) => {
       return relationshipField.localizedPath.replace('<locale>', locale!)
