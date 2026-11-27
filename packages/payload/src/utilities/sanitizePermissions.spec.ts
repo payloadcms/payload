@@ -1558,6 +1558,59 @@ describe('recursivelySanitizePermissions', () => {
 })
 
 describe('sanitizePermissions', () => {
+  it('should sanitize shared block nodes independently without changing the input', () => {
+    const block = {
+      create: { permission: false },
+      read: { permission: true },
+      update: { permission: false },
+      fields: {
+        title: {
+          create: { permission: false },
+          read: { permission: false },
+          update: { permission: true },
+        },
+      },
+    }
+    const entity = {
+      create: { permission: false },
+      delete: { permission: false },
+      read: { permission: true },
+      update: { permission: false },
+      fields: {
+        layout: {
+          create: { permission: false },
+          read: { permission: true },
+          update: { permission: false },
+          blocks: { article: block },
+        },
+      },
+    }
+    const permissions: Permissions = {
+      canAccessAdmin: true,
+      collections: { first: entity, second: entity },
+      globals: { settings: entity },
+    }
+    const expectedEntity = {
+      read: true,
+      fields: {
+        layout: {
+          read: true,
+          blocks: { article: { read: true, fields: { title: { update: true } } } },
+        },
+      },
+    }
+    const before = structuredClone(permissions)
+    const sanitized = sanitizePermissions(permissions)
+
+    expect(sanitized).toEqual({
+      canAccessAdmin: true,
+      collections: { first: expectedEntity, second: expectedEntity },
+      globals: { settings: expectedEntity },
+    })
+    expect(permissions).toEqual(before)
+    expect(sanitizePermissions(permissions)).toEqual(sanitized)
+  })
+
   it('should not mutate the where returned by an access function', () => {
     const nobody = { id: { in: [] } }
     const anyPost = { or: [{ title: { equals: null } }, { title: { exists: true } }] }
