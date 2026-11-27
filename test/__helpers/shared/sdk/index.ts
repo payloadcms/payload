@@ -32,13 +32,14 @@ import type {
 import { formatAdminURL } from 'payload/shared'
 
 /**
- * Local API options that REST can't express. They pass straight through `/api/local-api`, and
- * `overrideAccess` defaults to `true` there like it does in the Local API.
+ * Local API options that REST can't express. They pass straight through `/api/local-api`.
+ * `overrideAccess` is required because the Local API defaults it to `false`, so each call states
+ * whether it bypasses access control.
  */
 type LocalOnlyOptions = {
   context?: RequestContext
   disableTransaction?: boolean
-  overrideAccess?: boolean
+  overrideAccess: boolean
   showHiddenFields?: boolean
 }
 
