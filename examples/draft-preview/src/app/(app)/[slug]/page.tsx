@@ -21,13 +21,10 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
+  const params =
+    pages.docs
+      ?.filter((doc) => doc.slug !== null && doc.slug !== 'home')
+      .map(({ slug }) => ({ slug })) || ''
 
   return params || []
 }
