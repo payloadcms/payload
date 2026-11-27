@@ -1,3 +1,4 @@
+import type { PayloadSDK } from '@payloadcms/sdk'
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
@@ -17,6 +18,8 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { Config } from '../../payload-types.js'
+
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   saveDocAndAssert,
@@ -26,7 +29,6 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -37,7 +39,7 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-let client: RESTClient
+let sdk: PayloadSDK<Config>
 let page: Page
 let serverURL: string
 let context: BrowserContext
@@ -47,7 +49,7 @@ let context: BrowserContext
 describe('Block fields', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL } = await initPayloadE2ENoConfig({
+    ;({ sdk, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -64,12 +66,6 @@ describe('Block fields', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -938,7 +934,7 @@ describe('Block fields', () => {
 
     test.afterEach(async () => {
       for (const id of createdIDs) {
-        await client.delete(id, { slug: 'block-fields' })
+        await sdk.delete({ collection: 'block-fields', id })
       }
       createdIDs.length = 0
     })
@@ -962,12 +958,11 @@ describe('Block fields', () => {
       const id = page.url().split('/').pop()!
       createdIDs.push(id)
 
-      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+      const doc = await sdk.findByID({ collection: 'block-fields', id })
 
-      expect(doc.configuration).toHaveLength(1)
-      expect(doc.configuration[0].blockType).toBe('conditionalReference')
-      expect(doc.configuration[0].testBlocks).toHaveLength(1)
-      expect(doc.configuration[0].testBlocks[0].blockType).toBe('testBlock')
+      expect(doc.configuration).toMatchObject([
+        { blockType: 'conditionalReference', testBlocks: [{ blockType: 'testBlock' }] },
+      ])
     })
 
     test('should keep the block type when a referenced blocks field in a group becomes visible', async () => {
@@ -989,12 +984,11 @@ describe('Block fields', () => {
       const id = page.url().split('/').pop()!
       createdIDs.push(id)
 
-      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+      const doc = await sdk.findByID({ collection: 'block-fields', id })
 
-      expect(doc.conditionalGroup.conditionalConfiguration).toHaveLength(1)
-      expect(doc.conditionalGroup.conditionalConfiguration[0].blockType).toBe(
-        'conditionalReference',
-      )
+      expect(doc.conditionalGroup?.conditionalConfiguration).toMatchObject([
+        { blockType: 'conditionalReference' },
+      ])
     })
 
     test('should retain a default inline block type when a top-level condition becomes true', async () => {
@@ -1015,10 +1009,9 @@ describe('Block fields', () => {
       const id = page.url().split('/').pop()!
       createdIDs.push(id)
 
-      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+      const doc = await sdk.findByID({ collection: 'block-fields', id })
 
-      expect(doc.testBlocks).toHaveLength(1)
-      expect(doc.testBlocks[0].blockType).toBe('testBlock')
+      expect(doc.testBlocks).toMatchObject([{ blockType: 'testBlock' }])
     })
 
     test('ensure static filterOptions are respected', async () => {

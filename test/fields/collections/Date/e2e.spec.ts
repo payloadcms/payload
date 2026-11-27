@@ -1,3 +1,4 @@
+import type { PayloadSDK } from '@payloadcms/sdk'
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -16,7 +17,6 @@ import { selectInput } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -34,7 +34,7 @@ const detroitTimezone = 'America/Detroit'
 
 let payload: PayloadTestSDK<Config>
 const browserContexts: BrowserContext[] = []
-let client: RESTClient
+let sdk: PayloadSDK<Config>
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -64,7 +64,7 @@ describe('Date', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -77,12 +77,6 @@ describe('Date', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -310,7 +304,7 @@ describe('Date', () => {
 
     const id = page.url().split('/').pop()
 
-    const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+    const doc = await sdk.findByID({ collection: 'date-fields', id: id! })
 
     await expect(() => {
       // Ensure that the time field does not contain milliseconds
@@ -342,7 +336,7 @@ describe('Date', () => {
 
     const id = page.url().split('/').pop()
 
-    const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+    const doc = await sdk.findByID({ collection: 'date-fields', id: id! })
 
     await expect(() => {
       // Ensure that the time with miliseconds field contains the exact miliseconds specified
@@ -386,7 +380,7 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+        const doc = await sdk.findByID({ collection: 'date-fields', id: id! })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
@@ -430,7 +424,7 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+        const doc = await sdk.findByID({ collection: 'date-fields', id: id! })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
@@ -474,7 +468,7 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+        const doc = await sdk.findByID({ collection: 'date-fields', id: id! })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
@@ -891,7 +885,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
   describe(`Date with TZ - Context: ${contextName}`, () => {
     beforeAll(async ({ browser }, testInfo) => {
       testInfo.setTimeout(TEST_TIMEOUT_LONG)
-      ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+      ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({
         dirname,
       }))
       url = new AdminUrlUtil(serverURL, dateFieldsSlug)
@@ -904,12 +898,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       await reInitializeDB({
         serverURL,
       })
-
-      if (client) {
-        await client.logout()
-      }
-      client = new RESTClient({ defaultSlug: 'users', serverURL })
-      await client.login()
 
       await ensureCompilationIsDone({ page, serverURL })
     })

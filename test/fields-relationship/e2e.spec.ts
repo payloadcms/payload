@@ -1233,7 +1233,7 @@ async function clearAllDocs(): Promise<void> {
   await clearCollectionDocs(versionedRelationshipFieldSlug)
 }
 
-async function clearCollectionDocs(collectionSlug: CollectionSlug): Promise<void> {
+async function clearCollectionDocs(collectionSlug: CollectionSlug<Config>): Promise<void> {
   await payload.delete({
     collection: collectionSlug,
     where: {

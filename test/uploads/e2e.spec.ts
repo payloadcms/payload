@@ -1,3 +1,4 @@
+import type { PayloadSDK } from '@payloadcms/sdk'
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -29,7 +30,6 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -92,7 +92,7 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
 const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
+let sdk: PayloadSDK<Config>
 let serverURL: string
 let mediaURL: AdminUrlUtil
 let animatedTypeMediaURL: AdminUrlUtil
@@ -142,7 +142,7 @@ describe('Uploads', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
@@ -201,12 +201,6 @@ describe('Uploads', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -836,12 +830,8 @@ describe('Uploads', () => {
     // The per-size detail is no longer surfaced in the doc edit UI; verify the generated size
     // filename via the API instead.
     const mediaID = page.url().split('/').pop()
-    const { doc } = await client.findByID({
-      id: mediaID as number | string,
-      slug: animatedTypeMedia,
-      auth: true,
-    })
-    expect(doc.variants.squareSmall.filename).toMatch(/480x480\.webp$/)
+    const doc = await sdk.findByID({ collection: animatedTypeMedia, id: mediaID as string })
+    expect(doc.variants?.squareSmall?.filename).toMatch(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -920,12 +910,8 @@ describe('Uploads', () => {
     // The per-size detail is no longer surfaced in the doc edit UI; verify the custom generated
     // size filename via the API instead.
     const mediaID = page.url().split('/').pop()
-    const { doc } = await client.findByID({
-      id: mediaID as number | string,
-      slug: customFileNameMediaSlug,
-      auth: true,
-    })
-    expect(doc.variants.custom.filename).toBe('custom-500x500.png')
+    const doc = await sdk.findByID({ collection: customFileNameMediaSlug, id: mediaID as string })
+    expect(doc.variants?.custom?.filename).toBe('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
@@ -1081,10 +1067,9 @@ describe('Uploads', () => {
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
-    const { doc: mediaDoc } = await client.findByID({
+    const mediaDoc = await sdk.findByID({
+      collection: adminUploadControlSlug,
       id: mediaID as string,
-      slug: adminUploadControlSlug,
-      auth: true,
     })
     await expect
       .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
@@ -1103,10 +1088,9 @@ describe('Uploads', () => {
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
-    const { doc: mediaDoc } = await client.findByID({
+    const mediaDoc = await sdk.findByID({
+      collection: adminUploadControlSlug,
       id: mediaID as string,
-      slug: adminUploadControlSlug,
-      auth: true,
     })
     await expect
       .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
@@ -1242,11 +1226,7 @@ describe('Uploads', () => {
 
     const imageID = page.url().split('/').pop()
 
-    const { doc: uploadedImage } = await client.findByID({
-      id: imageID as number | string,
-      slug: mediaSlug,
-      auth: true,
-    })
+    const uploadedImage = await sdk.findByID({ collection: mediaSlug, id: imageID as string })
 
     expect(uploadedImage.mimeType).toEqual('image/png')
   })
@@ -1259,17 +1239,13 @@ describe('Uploads', () => {
 
     const mediaID = page.url().split('/').pop()
 
-    const { doc: mediaDoc } = await client.findByID({
-      id: mediaID as number | string,
-      slug: withMetadataSlug,
-      auth: true,
-    })
+    const mediaDoc = await sdk.findByID({ collection: withMetadataSlug, id: mediaID as string })
 
     // EXIF plus the compact sRGB ICC profile embedded by sharp >= 0.33 (libvips 8.15+)
     const acceptableFileSizes = [2989]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeOne.filesize))
+      .poll(() => acceptableFileSizes.some((size) => size === mediaDoc.variants?.sizeOne?.filesize))
       .toBe(true)
   })
 
@@ -1281,16 +1257,12 @@ describe('Uploads', () => {
 
     const mediaID = page.url().split('/').pop()
 
-    const { doc: mediaDoc } = await client.findByID({
-      id: mediaID as number | string,
-      slug: withoutMetadataSlug,
-      auth: true,
-    })
+    const mediaDoc = await sdk.findByID({ collection: withoutMetadataSlug, id: mediaID as string })
 
     const acceptableFileSizes = [2424, 2445]
 
     await expect
-      .poll(() => acceptableFileSizes.includes(mediaDoc.variants.sizeTwo.filesize))
+      .poll(() => acceptableFileSizes.some((size) => size === mediaDoc.variants?.sizeTwo?.filesize))
       .toBe(true)
   })
 
@@ -1302,17 +1274,20 @@ describe('Uploads', () => {
 
     const jpegMediaID = page.url().split('/').pop()
 
-    const { doc: jpegMediaDoc } = await client.findByID({
-      id: jpegMediaID as number | string,
-      slug: withOnlyJPEGMetadataSlug,
-      auth: true,
+    const jpegMediaDoc = await sdk.findByID({
+      collection: withOnlyJPEGMetadataSlug,
+      id: jpegMediaID as string,
     })
 
     const acceptableFileSizesForJPEG = [3112]
 
     // without metadata appended, the jpeg image filesize would be 2424
     await expect
-      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.variants.sizeThree.filesize))
+      .poll(() =>
+        acceptableFileSizesForJPEG.some(
+          (size) => size === jpegMediaDoc.variants?.sizeThree?.filesize,
+        ),
+      )
       .toBe(true)
 
     await gotoAndWaitForForm(page, withOnlyJPEGMetadataURL.create)
@@ -1322,14 +1297,13 @@ describe('Uploads', () => {
 
     const webpMediaID = page.url().split('/').pop()
 
-    const { doc: webpMediaDoc } = await client.findByID({
-      id: webpMediaID as number | string,
-      slug: withOnlyJPEGMetadataSlug,
-      auth: true,
+    const webpMediaDoc = await sdk.findByID({
+      collection: withOnlyJPEGMetadataSlug,
+      id: webpMediaID as string,
     })
 
     // With metadata, the animated image filesize would be 218762
-    await expect.poll(() => webpMediaDoc.variants.sizeThree.filesize).toBe(211638)
+    await expect.poll(() => webpMediaDoc.variants?.sizeThree?.filesize).toBe(211638)
   })
 
   test('should show custom upload component', async () => {
@@ -2436,17 +2410,12 @@ describe('Uploads', () => {
       await createFocalCrop(page, 'top-left') // red square
       const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
-      const { doc: greenDoc } = await client.findByID({
-        id: greenSquareMediaID as number | string,
-        slug: mediaSlug,
-        auth: true,
+      const greenDoc = await sdk.findByID({
+        collection: mediaSlug,
+        id: greenSquareMediaID as string,
       })
 
-      const { doc: redDoc } = await client.findByID({
-        id: redSquareMediaID as number | string,
-        slug: mediaSlug,
-        auth: true,
-      })
+      const redDoc = await sdk.findByID({ collection: mediaSlug, id: redSquareMediaID as string })
 
       // green and red squares should have different sizes (colors make the difference)
       expect(greenDoc.filesize).toEqual(1205)
@@ -2474,14 +2443,13 @@ describe('Uploads', () => {
       await updateFocalPosition(page) // red square
       const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
-      const { doc: redDoc } = await client.findByID({
-        id: redSquareMediaID as number | string,
-        slug: focalOnlySlug,
-        auth: true,
+      const redDoc = await sdk.findByID({
+        collection: focalOnlySlug,
+        id: redSquareMediaID as string,
       })
 
       // without focal point update this generated size was equal to 1736
-      await expect.poll(() => redDoc.variants.focalTest.filesize).toBe(1586)
+      await expect.poll(() => redDoc.variants?.focalTest?.filesize).toBe(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -2549,7 +2517,7 @@ describe('Uploads', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()!
-      const { doc: cropped } = await client.findByID({ id, slug: mediaSlug, auth: true })
+      const cropped = await sdk.findByID({ collection: mediaSlug, id })
 
       expect(cropped._transforms?.crop).toMatchObject({ height: 600, width: 400 })
 
@@ -2558,7 +2526,7 @@ describe('Uploads', () => {
       await page.setInputFiles('.file-manager input[type="file"]', path.join(dirname, 'small.png'))
       await saveDocAndAssert(page)
 
-      const { doc: replaced } = await client.findByID({ id, slug: mediaSlug, auth: true })
+      const replaced = await sdk.findByID({ collection: mediaSlug, id })
 
       expect(replaced._transforms).toBeNull()
 
@@ -2745,7 +2713,7 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
     await saveDocAndAssert(page)
     const imageID = page.url().split('/').pop()!
-    const { doc } = await client.findByID({ id: imageID, slug: mediaSlug, auth: true })
+    const doc = await sdk.findByID({ collection: mediaSlug, id: imageID })
     const filename = doc.filename as string
     const filePath = path.resolve(dirname, 'media', filename)
     const before = statSync(filePath)

@@ -1,93 +1,46 @@
-import type { User } from 'payload'
+import type { UntypedPayloadTypes, User } from 'payload'
 
-import type { PayloadTestSDK } from '../shared/sdk/index.js'
-import type { GeneratedTypes } from '../shared/sdk/types.js'
+import { PayloadTestSDK } from '../shared/sdk/index.js'
 
-export const upsertPreferences = async <
-  TConfig extends GeneratedTypes<any>,
-  TGeneratedTypes extends GeneratedTypes<any>,
->({
+/**
+ * Preferences live in a collection every config has, so these helpers accept any suite's
+ * PayloadTestSDK and talk to the same server without the suite's types.
+ */
+type AnyPayloadTestSDK = Pick<PayloadTestSDK<UntypedPayloadTypes>, 'serverURL'>
+
+const untyped = ({ serverURL }: AnyPayloadTestSDK) =>
+  new PayloadTestSDK<UntypedPayloadTypes>({ serverURL })
+
+/**
+ * The local-api endpoint answers a failed operation with the serialized error instead of throwing.
+ */
+const isSerializedError = (
+  value: unknown,
+): value is { data?: { errors?: { message?: string }[] }; status: number } =>
+  typeof value === 'object' &&
+  value !== null &&
+  'status' in value &&
+  typeof value.status === 'number' &&
+  value.status >= 400
+
+export const upsertPreferences = async ({
+  key,
   payload,
   user,
   value,
-  key,
 }: {
   key: string
-  payload: PayloadTestSDK<TConfig>
+  payload: AnyPayloadTestSDK
   user: User
-  value: any
-}): Promise<TGeneratedTypes['collections']['payload-preferences']> => {
+  value: unknown
+}) => {
   try {
-    let prefs = await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
-        where: {
-          and: [
-            { key: { equals: key } },
-            { 'user.value': { equals: user.id } },
-            { 'user.relationTo': { equals: user.collection } },
-          ],
-        },
-        overrideAccess: true,
-      })
-      ?.then((res) => res.docs?.[0])
-
-    if (!prefs) {
-      prefs = await payload.create({
-        collection: 'payload-preferences',
-        depth: 0,
-        data: {
-          key,
-          user: {
-            relationTo: user.collection,
-            value: user.id,
-          },
-          value,
-        },
-        overrideAccess: true,
-      })
-    } else {
-      const newValue = typeof value === 'object' ? { ...(prefs?.value || {}), ...value } : value
-
-      prefs = await payload.update({
-        collection: 'payload-preferences',
-        id: prefs.id,
-        data: {
-          key,
-          user: {
-            collection: user.collection,
-            value: user.id,
-          },
-          value: newValue,
-        },
-        overrideAccess: true,
-      })
-
-      if (prefs?.status >= 400) {
-        throw new Error(prefs.data?.errors?.[0]?.message)
-      }
-
-      return prefs
-    }
-  } catch (e) {
-    console.error('Error upserting prefs', e)
-  }
-}
-
-export const deletePreferences = async <TConfig extends GeneratedTypes<any>>({
-  payload,
-  user,
-  key,
-}: {
-  key: string
-  payload: PayloadTestSDK<TConfig>
-  user: User
-}): Promise<void> => {
-  try {
-    await payload.delete({
+    const sdk = untyped(payload)
+    const { docs } = await sdk.find({
       collection: 'payload-preferences',
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
       where: {
         and: [
           { key: { equals: key } },
@@ -95,7 +48,61 @@ export const deletePreferences = async <TConfig extends GeneratedTypes<any>>({
           { 'user.relationTo': { equals: user.collection } },
         ],
       },
+    })
+    const prefs = docs[0]
+    const userRelationship = { relationTo: user.collection, value: user.id }
+
+    if (!prefs) {
+      return await sdk.create({
+        collection: 'payload-preferences',
+        data: { key, user: userRelationship, value },
+        depth: 0,
+        overrideAccess: true,
+      })
+    }
+
+    const newValue =
+      typeof value === 'object' && value !== null && typeof prefs.value === 'object'
+        ? { ...prefs.value, ...value }
+        : value
+
+    const updated = await sdk.update({
+      id: prefs.id,
+      collection: 'payload-preferences',
+      data: { key, user: userRelationship, value: newValue },
       overrideAccess: true,
+    })
+
+    if (isSerializedError(updated)) {
+      throw new Error(updated.data?.errors?.[0]?.message)
+    }
+
+    return updated
+  } catch (e) {
+    console.error('Error upserting prefs', e)
+  }
+}
+
+export const deletePreferences = async ({
+  key,
+  payload,
+  user,
+}: {
+  key: string
+  payload: AnyPayloadTestSDK
+  user: User
+}): Promise<void> => {
+  try {
+    await untyped(payload).delete({
+      collection: 'payload-preferences',
+      overrideAccess: true,
+      where: {
+        and: [
+          { key: { equals: key } },
+          { 'user.value': { equals: user.id } },
+          { 'user.relationTo': { equals: user.collection } },
+        ],
+      },
     })
   } catch (e) {
     console.error('Error deleting prefs', e)
