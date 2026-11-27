@@ -246,6 +246,16 @@ export const useFormSubmission = ({
     activeSaveUploadRef.current = undefined
   }, [setIsBackgroundProcessing, setDisabledBySubmission, setUploadProgress])
 
+  // Once the form unmounts, its save no longer owns `uploadProgress`, so later reports are ignored.
+  // A save that continues in the background shows its result in the upload session's own toast.
+  useEffect(
+    () => () => {
+      abandonSaveUploadProgress({ setUploadProgress, upload: activeSaveUploadRef.current })
+      activeSaveUploadRef.current = undefined
+    },
+    [setUploadProgress],
+  )
+
   const applyFieldErrors = useCallback(
     ({ errors }: { errors: ValidationFieldError[] }) => {
       if (errors.length === 0) {

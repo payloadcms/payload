@@ -500,14 +500,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total }))
 
-          if (fileValue instanceof File) {
-            fileUpload = trackSaveUploadProgress({
-              onChange: showCurrent,
-              totalBytes: fileValue.size,
-            })
-          } else {
-            showCurrent({ loadedBytes: 0, status: 'uploading', totalBytes: 0 })
-          }
+          // A form without a file gets a tracker too, so `finally` reports its outcome like any other.
+          fileUpload = trackSaveUploadProgress({
+            onChange: showCurrent,
+            totalBytes: fileValue instanceof File ? fileValue.size : 0,
+          })
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
