@@ -11,6 +11,7 @@ import { expect } from 'vitest'
 
 import type { DatabaseAdapterType } from '../../dbAdapters.js'
 
+import { handleVercelBlobUpload } from '../../../packages/storage-vercel-blob/src/client/handleVercelBlobUpload.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { prefix } from '../shared.js'
 
@@ -205,5 +206,31 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
     const { blobs } = await list()
     const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
+  })
+
+  test('should send a file to its pathname with the client handler', async ({ restClient }) => {
+    const bytes = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
+      body: JSON.stringify(uploadMetadata('media-with-prefix', bytes.length)),
+    })
+    const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
+    const progress: { loadedBytes: number; totalBytes: number }[] = []
+
+    await handleVercelBlobUpload({
+      data: instructions.data,
+      file: new File([bytes], 'image.png', { type: 'image/png' }),
+      onProgress: (value) => progress.push(value),
+    })
+
+    const loaded = progress.map(({ loadedBytes }) => loadedBytes)
+    const { blobs } = await list()
+
+    expect(blobs.find((blob) => blob.pathname === instructions.data.pathname)?.size).toBe(
+      bytes.length,
+    )
+    // In Node the SDK reports only the start of the upload; browsers report every chunk.
+    expect(loaded).toEqual([...loaded].sort((a, b) => a - b))
+    expect(loaded.every((value) => value >= 0 && value <= bytes.length)).toBe(true)
+    expect(progress.every(({ totalBytes }) => totalBytes === bytes.length)).toBe(true)
   })
 })

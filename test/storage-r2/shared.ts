@@ -1,3 +1,4 @@
 export const mediaSlug = 'media'
+export const mediaClientSlug = 'media-client'
 export const mediaWithPrefixSlug = 'media-with-prefix'
 export const prefix = 'test-prefix'

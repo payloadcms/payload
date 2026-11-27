@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { mediaClientSlug } from '../shared.js'
+
 export const MediaClient: CollectionConfig = {
-  slug: 'media-client',
+  slug: mediaClientSlug,
   upload: {
     disableLocalStorage: true,
   },
