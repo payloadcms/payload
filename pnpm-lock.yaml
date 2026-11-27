@@ -283,6 +283,9 @@ importers:
       prettier:
         specifier: ^3.5.0
         version: 3.5.3
+      semver:
+        specifier: ^7.8.5
+        version: 7.8.5
       tar:
         specifier: ^7.5.22
         version: 7.5.22
@@ -302,6 +305,9 @@ importers:
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.7.1
 
   packages/db-d1-sqlite:
     dependencies:

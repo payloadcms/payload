@@ -13,22 +13,20 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const mocks = vi.hoisted(() => ({
   getPackageManager: vi.fn(),
-  installPackages: vi.fn(),
-  getLatestPackageVersion: vi.fn(),
+  execa: vi.fn(),
+  fetchRegistry: vi.fn(),
 }))
 
-vi.mock('../utils/getLatestPackageVersion.js', async (importOriginal) => ({
+vi.mock('../upgrade-shared/index.js', async (importOriginal) => ({
   ...(await importOriginal()),
-  getLatestPackageVersion: mocks.getLatestPackageVersion,
+  createRegistryClient: () => mocks.fetchRegistry,
 }))
 
 vi.mock('./get-package-manager.js', () => ({
   getPackageManager: mocks.getPackageManager,
 }))
 
-vi.mock('./install-packages.js', () => ({
-  installPackages: mocks.installPackages,
-}))
+vi.mock('execa', () => ({ default: mocks.execa }))
 
 describe('Payload project updates', () => {
   let projectDir: string
@@ -38,8 +36,22 @@ describe('Payload project updates', () => {
     vi.stubEnv('JEST_WORKER_ID', '1')
     projectDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-update-project-'))
     mocks.getPackageManager.mockResolvedValue('pnpm')
-    mocks.installPackages.mockResolvedValue({ success: true })
-    mocks.getLatestPackageVersion.mockResolvedValue('3.99.0')
+    mocks.fetchRegistry.mockResolvedValue({
+      'dist-tags': { latest: '3.99.0' },
+      versions: { '3.0.0': {}, '3.99.0': {} },
+    })
+    mocks.execa.mockImplementation(async (_command, _args, { cwd }) => {
+      const data = fse.readJsonSync(path.join(cwd, 'package.json'))
+      for (const [name, version] of Object.entries({
+        ...data.dependencies,
+        ...data.devDependencies,
+      })) {
+        if (name === 'payload' || name.startsWith('@payloadcms/')) {
+          fse.outputJsonSync(path.join(cwd, 'node_modules', name, 'package.json'), { version })
+        }
+      }
+      return { exitCode: 0 }
+    })
   })
 
   afterEach(() => {
@@ -51,6 +63,11 @@ describe('Payload project updates', () => {
     fse.writeJsonSync(path.join(projectDir, 'package.json'), {
       dependencies: { payload: '3.99.0', '@payloadcms/ui': '3.99.0' },
     })
+    for (const name of ['payload', '@payloadcms/ui']) {
+      fse.outputJsonSync(path.join(projectDir, 'node_modules', name, 'package.json'), {
+        version: '3.99.0',
+      })
+    }
     fse.outputFileSync(
       path.join(projectDir, 'payload.config.ts'),
       "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: process.env.ADMIN_ROUTE } })",
@@ -59,7 +76,7 @@ describe('Payload project updates', () => {
     const result = await updatePayloadInProject(nextDetails({ projectDir, appDir: 'src/app' }))
 
     expect(result).toEqual({ message: 'Payload v3.99.0 is already up to date.', success: true })
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'src/app'))).toBe(false)
   })
 
@@ -249,7 +266,7 @@ describe('Payload project updates', () => {
       updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' })),
     ).rejects.toThrow(/routes.admin.*duplicate/)
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
   })
 
@@ -331,7 +348,7 @@ describe('Payload project updates', () => {
       updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' })),
     ).rejects.toThrow('routes.admin')
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
   })
 
@@ -369,7 +386,7 @@ describe('Payload project updates', () => {
       updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' })),
     ).rejects.toThrow('routes.admin')
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toBe('existing layout')
     expect(fse.existsSync(path.join(payloadDir, 'admin'))).toBe(false)
   })
@@ -387,7 +404,7 @@ describe('Payload project updates', () => {
         updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' })),
       ).rejects.toThrow('routes.admin')
 
-      expect(mocks.installPackages).not.toHaveBeenCalled()
+      expect(mocks.execa).not.toHaveBeenCalled()
       expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
     },
   )
@@ -421,7 +438,7 @@ describe('Payload project updates', () => {
       updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' })),
     ).rejects.toThrow('admin.importMap.importMapFile')
 
-    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(mocks.execa).not.toHaveBeenCalled()
     expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
   })
 

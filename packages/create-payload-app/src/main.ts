@@ -19,7 +19,7 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectAgent } from './lib/select-agent.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
-import { updatePayloadInProject } from './lib/update-payload-in-project.js'
+import { hasPayloadDependency, upgradeProject } from './lib/upgrade-project.js'
 import { getLatestPackageVersion } from './utils/getLatestPackageVersion.js'
 import { debug, error, info } from './utils/log.js'
 import {
@@ -65,6 +65,7 @@ export class Main {
 
         // Other
         '--no-git': Boolean,
+        '--payload-version': String,
 
         // Flags
         '--beta': Boolean,
@@ -86,16 +87,19 @@ export class Main {
   async init(): Promise<void> {
     try {
       const debugFlag = this.args['--debug']
+      const hasCreationArgs = Boolean(
+        this.args['--name'] ||
+          this.args._[0] ||
+          this.args['--template'] ||
+          this.args['--example'] ||
+          this.args['--local-template'] ||
+          this.args['--local-example'],
+      )
 
       // Set DEBUG env var for logger utility
       if (debugFlag) {
         process.env.DEBUG = 'true'
       }
-
-      const LATEST_VERSION = await getLatestPackageVersion({
-        debug: debugFlag,
-        packageName: 'payload',
-      })
 
       if (this.args['--help']) {
         helpMessage()
@@ -109,14 +113,21 @@ export class Main {
 
       // Detect if inside Next.js project
       const nextAppDetails = await getNextAppDetails(process.cwd())
-      const {
-        hasTopLevelLayout,
-        isPayloadInstalled,
-        isSupportedNextVersion,
-        nextAppDir,
-        nextConfigPath,
-        nextVersion,
-      } = nextAppDetails
+      const isCreatingProject =
+        hasCreationArgs && hasPayloadDependency({ projectDir: process.cwd() })
+      const { hasTopLevelLayout, isSupportedNextVersion, nextAppDir, nextVersion } = nextAppDetails
+      const nextConfigPath = isCreatingProject ? undefined : nextAppDetails.nextConfigPath
+
+      const projectDirForUpgrade = nextConfigPath ? path.dirname(nextConfigPath) : process.cwd()
+      if (!isCreatingProject && hasPayloadDependency({ projectDir: projectDirForUpgrade })) {
+        await upgradeProject({
+          cliArgs: this.args,
+          nextAppDetails: nextConfigPath ? nextAppDetails : undefined,
+          projectDir: projectDirForUpgrade,
+        })
+        p.outro(feedbackOutro())
+        return
+      }
 
       if (nextConfigPath && !isSupportedNextVersion) {
         p.log.warn(
@@ -126,26 +137,10 @@ export class Main {
         process.exit(0)
       }
 
-      // Upgrade Payload in existing project
-      if (isPayloadInstalled && nextConfigPath) {
-        p.log.warn(`Payload installation detected in current project.`)
-        const shouldUpdate = await p.confirm({
-          initialValue: false,
-          message: chalk.bold(`Upgrade Payload in this project?`),
-        })
-
-        if (!p.isCancel(shouldUpdate) && shouldUpdate) {
-          const { message, success: updateSuccess } = await updatePayloadInProject(nextAppDetails)
-          if (updateSuccess) {
-            info(message)
-          } else {
-            error(message)
-          }
-        }
-
-        p.outro(feedbackOutro())
-        process.exit(0)
-      }
+      const LATEST_VERSION = await getLatestPackageVersion({
+        debug: debugFlag,
+        packageName: 'payload',
+      })
 
       if (nextConfigPath) {
         this.args['--name'] = slugify(path.basename(path.dirname(nextConfigPath)))
@@ -300,6 +295,7 @@ export class Main {
       p.outro(feedbackOutro())
     } catch (err: unknown) {
       error(err instanceof Error ? err.message : 'An error occurred')
+      process.exitCode = 1
     }
   }
 }
