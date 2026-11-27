@@ -25,12 +25,22 @@ type Args = {
   addRandomSuffix?: boolean
   cacheControlMaxAge?: number
   collections: VercelBlobCollectionOptions
-  token: string
+  /**
+   * Read/write token. Client uploads require a read/write token to mint
+   * short-lived client tokens server-side; OIDC is not supported for the
+   * client-upload token exchange, so `clientUploads` cannot be used in
+   * OIDC-only mode.
+   */
+  token?: string
   useCompositePrefixes?: boolean
 }
 
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
 
+/**
+ * Builds the endpoint that issues and verifies Vercel Blob client-upload
+ * tokens. Requires a read/write `token`: minting client tokens has no OIDC path.
+ */
 export const getClientUploadRoute =
   ({
     access = defaultAccess,
