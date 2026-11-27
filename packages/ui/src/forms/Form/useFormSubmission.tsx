@@ -38,7 +38,7 @@ import {
   useOptionalUploadSessions,
 } from '../../providers/UploadSessions/index.js'
 import { requests } from '../../utilities/api.js'
-import { uploadRequest } from '../../utilities/uploadRequest.js'
+import { isSameOriginURL, uploadRequest } from '../../utilities/uploadRequest.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
@@ -505,7 +505,8 @@ export const useFormSubmission = ({
           if (
             typeof actionArg === 'string' &&
             formData.get('file') instanceof Blob &&
-            (uploadMethod === 'PATCH' || uploadMethod === 'POST' || uploadMethod === 'PUT')
+            (uploadMethod === 'PATCH' || uploadMethod === 'POST' || uploadMethod === 'PUT') &&
+            isSameOriginURL({ url: actionArg })
           ) {
             // The file is in this request, so it reports how much of it is sent.
             res = await uploadRequest({
