@@ -33,6 +33,12 @@ describe('incrementName', () => {
     expect(incrementName('my.photo.name.jpg')).toBe('my.photo.name-1.jpg')
   })
 
+  it('should keep incrementing suffixes beyond Number.MAX_SAFE_INTEGER', () => {
+    expect(incrementName('beleg-10000000000000000000.txt')).toBe('beleg-10000000000000000001.txt')
+    expect(incrementName('beleg-12345678901234567890.txt')).toBe('beleg-12345678901234567891.txt')
+    expect(incrementName('beleg-9007199254740993.txt')).toBe('beleg-9007199254740994.txt')
+  })
+
   it('should handle filenames with hyphens but no numeric suffix', () => {
     expect(incrementName('my-photo.jpg')).toBe('my-photo-1.jpg')
   })
