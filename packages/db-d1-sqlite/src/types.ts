@@ -1,7 +1,8 @@
+import type { D1Database as CloudflareD1Database } from '@cloudflare/workers-types'
 import type { ResultSet } from '@libsql/client'
 import type { BuildQueryJoinAliases, DrizzleAdapter, extendDrizzleTable } from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
-import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleConfig, IfNotImported, Relation, Relations, SQL } from 'drizzle-orm'
 import type { AnyD1Database, DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
@@ -25,8 +26,15 @@ type SQLiteSchemaHookArgs = {
 
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
+/**
+ * drizzle-orm's `AnyD1Database` is the global `D1Database` (from `wrangler types` or
+ * `@cloudflare/workers-types`) when the project declares one, and `any` otherwise. Fall back to
+ * the importable `@cloudflare/workers-types` type so the adapter is still typed without the global.
+ */
+type D1Binding = IfNotImported<AnyD1Database, CloudflareD1Database, AnyD1Database>
+
 export type Args = {
-  binding: AnyD1Database
+  binding: D1Binding
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.
    *
@@ -102,11 +110,11 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: AnyD1Database } & DrizzleD1Database<Record<string, any>>
+type Drizzle = { $client: D1Binding } & DrizzleD1Database<Record<string, any>>
 
 export type SQLiteD1Adapter = {
   binding: Args['binding']
-  client: AnyD1Database
+  client: D1Binding
   drizzle: Drizzle
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.

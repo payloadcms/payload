@@ -109,6 +109,7 @@
     "uuid": "14.0.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "4.20260218.0",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
     "payload": "workspace:*"
