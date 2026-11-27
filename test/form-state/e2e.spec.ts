@@ -31,6 +31,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { describe, beforeEach, afterEach } = test
@@ -174,6 +175,72 @@ test.describe('Form State', () => {
         minimumNumberOfRequests: 1,
       },
     )
+  })
+
+  test('should send form state for a change made while a previous form state request was pending', async ({
+    browser,
+  }) => {
+    const conditionsUrl = new AdminUrlUtil(serverURL, conditionsSlug)
+
+    // Separate context so the fake clock does not affect other tests
+    const clockContext = await browser.newContext()
+    const clockPage = await clockContext.newPage()
+
+    // The onChange debounce is a browser timeout. Controlling the clock guarantees
+    // the held reply is merged before the debounce for the second change runs.
+    await clockPage.clock.install()
+
+    await clockPage.goto(conditionsUrl.create)
+    await waitForFormReady(clockPage)
+
+    const showField = clockPage.locator('#field-showField')
+    const conditionalField = clockPage.locator('#field-conditionalRowField')
+    await expect(conditionalField).toBeHidden()
+
+    let deliverHeldReply: (() => Promise<void>) | undefined
+
+    // Hold the reply to the form state request sent for the first change
+    await clockPage.route(conditionsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && !deliverHeldReply) {
+        const response = await route.fetch()
+        deliverHeldReply = () => route.fulfill({ response })
+        return
+      }
+
+      await route.continue()
+    })
+
+    await showField.check()
+    await expect.poll(() => typeof deliverHeldReply).toBe('function')
+
+    const formStateRequests: { args: { formState: FormState } }[][] = []
+
+    clockPage.on('request', (request) => {
+      if (request.method() === 'POST' && request.url() === conditionsUrl.create) {
+        formStateRequests.push(request.postDataJSON())
+      }
+    })
+
+    // From here on, no timers run until the clock is resumed
+    await clockPage.clock.pauseAt(await clockPage.evaluate(() => Date.now() + 1000))
+
+    // Change the field again while the first request is pending
+    await showField.uncheck()
+    await deliverHeldReply?.()
+
+    // The held reply passes the condition, so the field is shown once the reply is merged
+    await expect(conditionalField).toBeVisible()
+
+    // Let the debounce for the second change run
+    await clockPage.clock.resume()
+
+    await expect
+      .poll(() =>
+        formStateRequests.some((body) => body?.[0]?.args?.formState?.showField?.value === false),
+      )
+      .toBe(true)
+
+    await clockContext.close()
   })
 
   test('should send `lastRenderedPath` only when necessary', async () => {
