@@ -1,6 +1,5 @@
 import type { DeleteVersions, FlattenedField, SanitizedCollectionConfig } from 'payload'
 
-import { inArray } from 'drizzle-orm'
 import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -60,7 +59,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
     await this.deleteWhere({
       db,
       tableName,
-      where: inArray(this.tables[tableName].id, ids),
+      where: this.operators.in(this.tables[tableName].id, ids),
     })
 
     markWrite(this)

@@ -1,6 +1,6 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { asc, desc, inArray, max, min } from 'drizzle-orm'
+import { asc, desc, max, min } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
@@ -170,7 +170,7 @@ export const findMany = async function find({
         orderedIDMap[id] = i
       })
       orderedIDs = Object.keys(orderedIDMap)
-      findManyArgs.where = inArray(adapter.tables[tableName].id, orderedIDs)
+      findManyArgs.where = adapter.operators.in(adapter.tables[tableName].id, orderedIDs)
     }
   } else {
     findManyArgs.limit = limit

@@ -1,7 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateJobs, Where } from 'payload'
 
-import { and, inArray, isNull, lte, or } from 'drizzle-orm'
+import { and, isNull, lte, or } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -105,7 +105,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
       .set(row)
       .where(
         and(
-          inArray(table.id, jobIDs),
+          this.operators.in(table.id, jobIDs),
           or(isNull(table.processingUntil), lte(table.processingUntil, now)),
         ),
       )

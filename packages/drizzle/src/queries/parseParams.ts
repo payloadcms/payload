@@ -18,7 +18,6 @@ import {
   isNull,
   like,
   notExists,
-  notInArray,
   or,
   sql,
 } from 'drizzle-orm'
@@ -447,7 +446,7 @@ export function parseParams({
                   queryOperator === 'not_in'
                 ) {
                   constraints.push(
-                    sql`(${notInArray(table[columnName], queryValue)} OR
+                    sql`(${adapter.operators.not_in(table[columnName], queryValue)} OR
                     ${table[columnName]}
                     IS
                     NULL)`,

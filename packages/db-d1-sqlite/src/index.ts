@@ -60,6 +60,7 @@ import type { Args, SQLiteD1Adapter } from './types.js'
 import { connect } from './connect.js'
 import { dropDatabase } from './dropDatabase.js'
 import { execute } from './execute.js'
+import { inJSONArray, notInJSONArray } from './operators.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -86,7 +87,9 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
     const operators = {
       ...operatorMap,
       contains: like,
+      in: inJSONArray,
       like,
+      not_in: notInJSONArray,
       not_like: notLike,
     } as unknown as Operators
 
