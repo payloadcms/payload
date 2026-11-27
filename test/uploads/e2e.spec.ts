@@ -25,6 +25,11 @@ import {
 } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import {
+  expectUploadProgressSequence,
+  recordToastHistory,
+  throttleUploads,
+} from '../__helpers/e2e/uploadProgress.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -1047,6 +1052,30 @@ describe('Uploads', () => {
     })
   })
 
+  test('should show upload progress, then processing, then the result when saving a file', async () => {
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './ios-image.jpeg'))
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('ios-image.jpeg')
+
+    const getToastHistory = await recordToastHistory({ page })
+    // 1.1 MB at 200 KB/s takes about 5 seconds to send.
+    const stopThrottling = await throttleUploads({ bytesPerSecond: 200 * 1024, page })
+
+    try {
+      await page.click('#action-save')
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully created', {
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    } finally {
+      await stopThrottling()
+    }
+
+    expectUploadProgressSequence({
+      fileName: 'ios-image.jpeg',
+      history: await getToastHistory(),
+    })
+  })
+
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
@@ -1403,6 +1432,7 @@ describe('Uploads', () => {
       '.bulk-upload--actions-bar__saveButtons button',
     )
     await saveButton.click()
+    await waitForBulkUploadResult(page)
     await closeAllToasts(page)
 
     await expect(
@@ -1443,6 +1473,7 @@ describe('Uploads', () => {
       .locator('.dropzone input[type="file"]')
       .setInputFiles([path.resolve(dirname, './test-image.png')])
     await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await waitForBulkUploadResult(page)
     await closeAllToasts(page)
 
     await expect(
@@ -1471,6 +1502,52 @@ describe('Uploads', () => {
   })
 
   describe('bulk uploads', () => {
+    test('should show the position and progress of each file in one toast', async () => {
+      await page.goto(mediaURL.list)
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ intervals: [500], timeout: 5000 })
+
+      await dropzoneInput.setInputFiles([
+        path.resolve(dirname, './ios-image.jpeg'),
+        path.resolve(dirname, './image.png'),
+      ])
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await expect(saveButton).toBeEnabled()
+      await closeAllToasts(page)
+
+      const getToastHistory = await recordToastHistory({ page })
+      const stopThrottling = await throttleUploads({ bytesPerSecond: 200 * 1024, page })
+
+      try {
+        await saveButton.click()
+        await waitForBulkUploadResult(page)
+      } finally {
+        await stopThrottling()
+      }
+
+      const history = await getToastHistory()
+      const firstFileIndex = history.findIndex((text) => text.startsWith('1 of 2 · '))
+      const secondFileIndex = history.findIndex((text) => text.startsWith('2 of 2 · '))
+
+      expectUploadProgressSequence({
+        fileName: 'ios-image.jpeg',
+        history,
+        prefix: '1 of 2 · ',
+      })
+      expect(secondFileIndex).toBeGreaterThan(firstFileIndex)
+      expect(history.at(-1)).toMatch(/^Uploaded 2 /)
+      // One toast for the batch: no second progress toast was stacked next to it.
+      await expect(page.locator('.payload-toast-container [data-sonner-toast]')).toHaveCount(1)
+    })
+
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
       await gotoAndWaitForForm(page, uploadsOne.create)
@@ -1514,6 +1591,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
@@ -1629,6 +1707,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
@@ -1692,6 +1771,7 @@ describe('Uploads', () => {
         .locator('.edit-many-bulk-uploads__header__actions button')
         .click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
@@ -1733,7 +1813,9 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
-      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to upload 2 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
@@ -1759,9 +1841,9 @@ describe('Uploads', () => {
         .click()
 
       await saveButton.click()
-      await expect(page.locator('.payload-toast-container')).toContainText(
-        'Successfully saved 2 files',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-success:has-text("Uploaded 2 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       await saveDocAndAssert(page)
@@ -1830,6 +1912,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await waitForBulkUploadResult(page)
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
@@ -1989,10 +2072,9 @@ describe('Uploads', () => {
       await saveButton.click()
 
       // Should show error message for failed files
-      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 1 files')
-      await expect(page.locator('.payload-toast-container')).toContainText(
-        'Successfully saved 1 files',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 1 of 2 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
@@ -2016,9 +2098,9 @@ describe('Uploads', () => {
 
       await saveButton.click()
 
-      await expect(page.locator('.payload-toast-container')).toContainText(
-        'Successfully saved 1 files',
-      )
+      await expect(
+        page.locator('.payload-toast-container .toast-success:has-text("Uploaded 1 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       await expect(bulkUploadModal).toBeHidden()
@@ -2061,7 +2143,9 @@ describe('Uploads', () => {
       await saveButton.click()
 
       // Should show error message for all failed files
-      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 3 files')
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to upload 3 ")'),
+      ).toBeVisible()
       await closeAllToasts(page)
 
       // Check that each file has exactly 1 error (the missing required field)
@@ -2119,11 +2203,8 @@ describe('Uploads', () => {
       await saveButton.click()
 
       // Should show mixed results: 1 successful, 2 failed
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Successfully saved 1 files',
-      )
       await expect(
-        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 2 files")'),
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 1 of 3 ")'),
       ).toBeVisible()
       await closeAllToasts(page)
       // After submission, the successful form (form 3) is removed from sidebar
@@ -2207,13 +2288,9 @@ describe('Uploads', () => {
       // (incl. uploading the 2MB file that hits the size limit) sequentially, which
       // can take longer than the default expect timeout under slower adapters, so
       // wait longer for the success toast to appear.
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Successfully saved 2 files',
-        { timeout: POLL_TOPASS_TIMEOUT },
-      )
       await expect(
-        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
-      ).toBeVisible()
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 2 of 3 ")'),
+      ).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
       // Verify the error message indicates file size limit
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
@@ -2255,11 +2332,8 @@ describe('Uploads', () => {
       const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Successfully saved 1 files',
-      )
       await expect(
-        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+        page.locator('.payload-toast-container .toast-warning:has-text("Uploaded 1 of 2 ")'),
       ).toBeVisible()
       await expect(
         page.locator(
@@ -3361,3 +3435,16 @@ describe('Uploads', () => {
     })
   })
 })
+
+/**
+ * Waits for the bulk upload toast to show the batch result. The toast appears as soon as the save
+ * starts, so closing toasts before the result would race it.
+ */
+async function waitForBulkUploadResult(page: Page): Promise<void> {
+  await expect(
+    page
+      .locator('.payload-toast-container .payload-toast-item')
+      .filter({ hasText: /(Uploaded \d+|Failed to upload \d+)/ })
+      .first(),
+  ).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+}

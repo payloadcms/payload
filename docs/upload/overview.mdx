@@ -543,11 +543,13 @@ Component paths use the same syntax as other [Custom Components](../custom-compo
 
 ## Upload Progress
 
-When a save includes a file, the Admin tracks how many bytes of it are sent. Progress counts the bytes the browser has sent: to Payload for regular uploads, or to the storage provider for [client uploads](/docs/upload/storage-adapters#upload-instructions). It does not include image resizing, hooks, or database writes, which happen after every byte is sent. Reaching 100% does not mean the document is saved; a hook or validation error can still fail the save.
+When a save includes a file, the Admin shows the transfer in the save's toast: "Uploading photo.png: 42%", then "Processing and saving photo.png…" once every byte is sent. The toast ends with the result of the save.
 
-Bulk uploads send files one at a time and report progress for the file being sent.
+Progress counts the bytes the browser has sent: to Payload for regular uploads, or to the storage provider for [client uploads](/docs/upload/storage-adapters#upload-instructions). It does not include image resizing, hooks, or database writes, which happen while the toast shows "Processing and saving". Reaching 100% does not mean the document is saved; a hook or validation error can still fail the save.
 
-Custom client upload handlers report progress through `onProgress`. See [Upload progress for custom handlers](/docs/upload/storage-adapters#custom-upload-progress). A handler that does not call it still works, but its upload reports no bytes until it finishes.
+Bulk uploads send files one at a time and show one toast for the batch, for example "3 of 10 · Uploading photo.png: 42%". The batch ends with one message: all uploaded, some uploaded and the rest need fixing, or all failed. Files that failed stay in the drawer so they can be fixed and saved again.
+
+Custom client upload handlers report progress through `onProgress`. See [Upload progress for custom handlers](/docs/upload/storage-adapters#custom-upload-progress). A handler that does not call it still works, but without a percentage: a save's toast stays on "Submitting…" until the save finishes (a save that shows no "Submitting…" toast, such as one that redirects, shows nothing until its result), and a bulk upload shows only the file name.
 
 ### Reading progress in custom components
 
@@ -555,7 +557,7 @@ Custom client upload handlers report progress through `onProgress`. See [Upload 
   **Experimental:** The shape of `uploadProgress` may change in a minor release.
 </Banner>
 
-Custom Admin components can read the progress:
+Custom Admin components can read the same progress the toast uses:
 
 - `useDocumentInfo().uploadProgress` is the upload of the current save: `status` (`'uploading'`, `'success'` or `'failed'`), `loadedBytes` and `totalBytes`. It is `undefined` until a save uploads a file. While `status` is `'uploading'` and `loadedBytes` equals `totalBytes`, the server is processing the file.
 - `useBulkUpload().uploadProgress` is the current or last bulk upload: `completed` (files saved), `total`, and `current`, which has the same fields plus `fileName`, `formID` and its one-based `index` in the batch.

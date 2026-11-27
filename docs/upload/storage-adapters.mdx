@@ -512,7 +512,7 @@ When providing upload instructions, set `uploadInstructions.useInAdmin` to `true
   release.
 </Banner>
 
-The Admin tracks [upload progress](/docs/upload/overview#upload-progress) for every upload. HTTP instructions, like S3 and GCS signed URLs, report it automatically. A handler created with `createClientUploadHandler` receives `onProgress` and should call it with the total bytes sent so far. The values must never go down, so keep the highest value when an SDK reports parallel parts out of order.
+The Admin shows [upload progress](/docs/upload/overview#upload-progress) for every upload. HTTP instructions, like S3 and GCS signed URLs, report it automatically. A handler created with `createClientUploadHandler` receives `onProgress` and should call it with the total bytes sent so far. The values must never go down, so keep the highest value when an SDK reports parallel parts out of order.
 
 Pass an SDK's progress callback through, or send your own requests with `uploadRequest`. It sends one request with `XMLHttpRequest`, which can report upload progress, and resolves to a standard `Response`. It sends cookies only to the same origin, so it is safe for signed storage URLs.
 
@@ -543,7 +543,7 @@ export const MyClientUploadHandler = createClientUploadHandler({
 })
 ```
 
-A handler that ignores `onProgress` keeps working, but its upload reports no bytes until it finishes.
+A handler that ignores `onProgress` keeps working. Until it finishes, a save's toast stays on "Submitting…" (a save without one, such as one that redirects, shows nothing until its result) and a bulk upload shows only the file name.
 
 `staticHandler` receives `params.operation`: `'read'` for an ordinary file request (treat a missing value as `'read'`, for backward compatibility), or `'transform'` when Payload is reading the file's bytes on behalf of a [file transformer](./transformers), which only happens when at least one transformer is configured. For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
 

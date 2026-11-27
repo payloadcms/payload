@@ -1,16 +1,36 @@
 'use client'
+import type { TFunction } from '@payloadcms/translations'
 import type { UploadTransferProgress } from 'payload'
 
 import type { UploadProgress } from '../../providers/DocumentInfo/types.js'
+import type { createProgressToast } from '../../providers/UploadSessions/browser.js'
 
-import { getUploadPercent } from '../../providers/UploadSessions/browser.js'
+import {
+  getUploadPercent,
+  getUploadProgressMessage,
+} from '../../providers/UploadSessions/browser.js'
 
-/** Tracks the progress of the file sent by a save and reports it through `onChange`. */
+/**
+ * Shows the progress of the file sent by a save, in the save's toast and in `uploadProgress`.
+ * The toast switches from "Submitting…" only once bytes are reported, so a save waiting on an
+ * upload session, which shows its own toast, keeps the plain one. So does a save whose client
+ * upload handler never calls `onProgress`.
+ */
 export const trackSaveUploadProgress = ({
+  fileName,
+  formatMessage = (message) => message,
   onChange,
+  progressToast,
+  t,
   totalBytes,
 }: {
+  fileName: string
+  /** Adds context to the toast text, e.g. the file's position in a bulk upload. */
+  formatMessage?: (message: string) => string
   onChange?: (progress: UploadProgress) => void
+  /** The toast that shows progress. Without it, only `onChange` is called. */
+  progressToast?: ReturnType<typeof createProgressToast>
+  t: TFunction
   totalBytes: number
 }) => {
   let lastProgress: UploadTransferProgress = { loadedBytes: 0, totalBytes }
@@ -36,6 +56,7 @@ export const trackSaveUploadProgress = ({
       lastPercent = percent
       lastProgress = progress
       emit({ ...progress, status: 'uploading' })
+      progressToast?.show(formatMessage(getUploadProgressMessage({ fileName, progress, t })))
     },
     /** Ends the upload state. A failed save keeps the bytes sent so far. */
     settle: ({ isSuccessful }: { isSuccessful: boolean }) => {

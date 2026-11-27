@@ -62,7 +62,7 @@ describe('Upload polymorphic with hasMany', () => {
 
     const saveButton = uploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText(/Uploaded \d+ /)
     await closeAllToasts(page)
 
     const firstFileInList = page.locator('.upload-field-card').first()
@@ -89,7 +89,7 @@ describe('Upload polymorphic with hasMany', () => {
 
     await expect(collectionSelector.locator('.rs__single-value')).toContainText('Upload 2')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText(/Uploaded \d+ /)
     await closeAllToasts(page)
 
     const svgItemInList = page.locator('.upload-field-card').nth(1)
@@ -116,7 +116,7 @@ describe('Upload polymorphic with hasMany', () => {
 
     const saveButton = uploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText(/Uploaded \d+ /)
     await closeAllToasts(page)
 
     const firstFileInList = page.locator('.upload-field-card').first()
@@ -143,7 +143,7 @@ describe('Upload polymorphic with hasMany', () => {
 
     await expect(collectionSelector.locator('.rs__single-value')).toContainText('Upload 2')
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText(/Uploaded \d+ /)
     await closeAllToasts(page)
 
     const svgItemInList = page.locator('.upload-field-card').nth(1)
@@ -164,7 +164,7 @@ describe('Upload polymorphic with hasMany', () => {
       .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
 
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText(/Uploaded \d+ /)
     await closeAllToasts(page)
 
     await expect(firstFileInList.locator('.upload-relationship-details__filename')).toBeVisible()
@@ -181,7 +181,7 @@ describe('Upload polymorphic with hasMany', () => {
       path.resolve(dirname, './collections/Upload/payload.jpg'),
     )
     await saveButton.click()
-    await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText(/Uploaded \d+ /)
     await closeAllToasts(page)
 
     await saveDocAndAssert(page)

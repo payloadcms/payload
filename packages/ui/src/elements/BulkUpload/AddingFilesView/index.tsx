@@ -14,6 +14,7 @@ import { DialogHeader } from '../../Dialog/DialogHeader/index.js'
 import { DialogModal } from '../../Dialog/DialogModal/index.js'
 import { DialogTitle } from '../../Dialog/DialogTitle/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
+import { LoadingOverlay } from '../../Loading/index.js'
 import { ActionsBar } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { discardBulkUploadModalSlug, DiscardWithoutSaving } from '../DiscardWithoutSaving/index.js'
@@ -44,6 +45,7 @@ export function AddingFilesView({ modalSlug }: Props) {
     hasSavePermission,
     hasSubmitted,
     isInitializing,
+    isUploading,
     resetUploadEdits,
     totalErrorCount,
     updateUploadEdits,
@@ -135,6 +137,9 @@ export function AddingFilesView({ modalSlug }: Props) {
         </div>
 
         <ActionsBar />
+
+        {/* Inside the dialog, so the upload progress toast, which moves into it, stays on top. */}
+        {isUploading && <LoadingOverlay animationDuration="250ms" overlayType="fullscreen" show />}
 
         {/* Nested Modals */}
         <AddFilesView
