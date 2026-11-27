@@ -28,6 +28,14 @@ export default buildConfigWithDefaults({
         upload: { staticDir: path.resolve(dirname, './media') },
         versions: false,
       },
+      {
+        slug: 'text-ids',
+        access: { create: () => true, delete: () => true, read: () => true, update: () => true },
+        fields: [
+          { name: 'id', type: 'text' },
+          { name: 'shortText', type: 'text', maxLength: 5 },
+        ],
+      },
     ],
     globals: [
       {

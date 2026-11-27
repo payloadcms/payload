@@ -66,7 +66,7 @@ export async function duplicate<
     init,
     json: options.data ?? {},
     method: 'POST',
-    path: `/${options.collection}/${options.id}/duplicate`,
+    path: `/${options.collection}/${encodeURIComponent(String(options.id))}/duplicate`,
   })
 
   const json = await response.json()

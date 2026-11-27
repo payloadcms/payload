@@ -37,7 +37,7 @@ export async function renameFile<
     init,
     json: { draft: options.draft, filename: options.filename },
     method: 'POST',
-    path: `/${options.collection}/${options.id}/rename`,
+    path: `/${options.collection}/${encodeURIComponent(String(options.id))}/rename`,
   })
 
   const json = await response.json()

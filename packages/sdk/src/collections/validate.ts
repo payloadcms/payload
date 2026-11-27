@@ -54,7 +54,7 @@ export async function validate<T extends PayloadTypesShape, TSlug extends Collec
     init,
     json: options.data ?? {},
     method: 'POST',
-    path: `/${options.collection}${options.id === undefined ? '' : `/${options.id}`}/validate`,
+    path: `/${options.collection}${options.id === undefined ? '' : `/${encodeURIComponent(String(options.id))}`}/validate`,
   })
 
   return response.json()

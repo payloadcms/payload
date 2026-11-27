@@ -28,7 +28,7 @@ export async function docAccess<T extends PayloadTypesShape, TSlug extends Colle
     init,
     json: options.data ?? {},
     method: 'POST',
-    path: `/${options.collection}/access${options.id === undefined ? '' : `/${options.id}`}`,
+    path: `/${options.collection}/access${options.id === undefined ? '' : `/${encodeURIComponent(String(options.id))}`}`,
   })
 
   return response.json()

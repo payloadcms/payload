@@ -653,6 +653,18 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
     await payload.delete({ id: media.id, collection: 'media', overrideAccess: true })
   })
 
+  test('should encode text IDs as one path segment', async ({ payload, sdk }) => {
+    const id = 'chapter/intro#1'
+    await payload.create({ collection: 'text-ids', data: { id }, overrideAccess: true })
+
+    expect((await sdk.docAccess({ id, collection: 'text-ids' })).update).toBe(true)
+    expect(
+      (await sdk.validate({ id, collection: 'text-ids', data: { shortText: 'too long' } })).valid,
+    ).toBe(false)
+
+    await payload.delete({ id, collection: 'text-ids', overrideAccess: true })
+  })
+
   test.describe('Error Handling', () => {
     test.afterEach(async ({ payload }) => {
       await payload.db.deleteMany({ collection: 'emails', where: { id: { exists: true } } })
