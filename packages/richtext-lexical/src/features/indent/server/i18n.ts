@@ -56,6 +56,10 @@ export const i18n: Partial<GenericLanguages> = {
     keyboardHint:
       'برای انتقال تمرکز به خارج از ویرایشگر، Escape و سپس Tab یا Shift+Tab را فشار دهید.',
   },
+  fi: {
+    decreaseLabel: 'Pienennä sisennystä',
+    increaseLabel: 'Suurenna sisennystä',
+  },
   fr: {
     decreaseLabel: "Diminuer l'indentation",
     increaseLabel: "Augmenter l'indentation",
