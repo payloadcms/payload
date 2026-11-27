@@ -1,5 +1,6 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { Page } from '@playwright/test'
+import type { UntypedPayloadTypes } from 'payload'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 import { expect, test } from '@playwright/test'
@@ -24,14 +25,14 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 test.describe('storage-azure client uploads E2E', () => {
   let page: Page
   let mediaWithDocPrefixURL: AdminUrlUtil
-  let payloadSDK: PayloadTestSDK<{ collections: Record<string, unknown> }>
+  let payloadSDK: PayloadTestSDK<UntypedPayloadTypes>
   let containerClient: ContainerClient
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
+    const { payload, serverURL } = await initPayloadE2ENoConfig<UntypedPayloadTypes>({ dirname })
 
-    payloadSDK = payload as unknown as typeof payloadSDK
+    payloadSDK = payload
     mediaWithDocPrefixURL = new AdminUrlUtil(serverURL, mediaWithDocPrefixSlug)
 
     const blobService = BlobServiceClient.fromConnectionString(

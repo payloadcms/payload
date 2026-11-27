@@ -1,3 +1,4 @@
+import type { PayloadSDK } from '@payloadcms/sdk'
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -6,7 +7,6 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
-import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 import type { Config, LocalizedPost } from './payload-types.js'
 
 import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
@@ -33,7 +33,6 @@ import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
@@ -87,7 +86,7 @@ const description = 'description'
 
 let page: Page
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
+let sdk: PayloadSDK<Config>
 let serverURL: string
 let richTextURL: AdminUrlUtil
 let urlLocaleRestricted: AdminUrlUtil
@@ -96,7 +95,7 @@ let context: BrowserContext
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
     urlRelationshipLocalized = new AdminUrlUtil(serverURL, relationshipLocalizedSlug)
@@ -113,9 +112,6 @@ describe('Localization', () => {
 
     context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
-
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
   })
 
   beforeEach(async () => {
@@ -561,10 +557,12 @@ describe('Localization', () => {
     )
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
-      await upsertPreferences<Config, GeneratedTypes<any>>({
+      const { user } = await sdk.me({ collection: 'users' })
+
+      await upsertPreferences({
         key: 'locale',
         payload,
-        user: client.user,
+        user,
         value: 'es',
       })
 

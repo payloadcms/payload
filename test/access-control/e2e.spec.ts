@@ -20,7 +20,6 @@ import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -830,9 +829,6 @@ describe('Access Control', () => {
 
     test('public users should not have access to access admin', async () => {
       await page.goto(url.logout)
-
-      const client = new RESTClient({ defaultSlug: 'users', serverURL })
-      await client.logout()
 
       const user = await payload.login({
         collection: publicUsersSlug,

@@ -1,8 +1,10 @@
+import type { PayloadTypesShape } from 'payload'
+
+import { PayloadSDK } from '@payloadcms/sdk'
 import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
-
-import type { GeneratedTypes } from './sdk/types.js'
 
 import { getNextRootDir } from './getNextRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
@@ -15,12 +17,18 @@ type Args = {
   prebuild?: boolean
 }
 
-type Result<T extends GeneratedTypes<T>> = {
+type Result<T extends PayloadTypesShape> = {
   payload: PayloadTestSDK<T>
+  /**
+   * REST API client for the running server. It sends no token, so requests are authenticated by the
+   * config's `admin.autoLogin` user (the dev user unless a suite disables it). That keeps it valid
+   * across `reInitializeDB`, which recreates the user.
+   */
+  sdk: PayloadSDK<T>
   serverURL: string
 }
 
-export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
+export async function initPayloadE2ENoConfig<T extends PayloadTypesShape>({
   dirname,
   prebuild,
 }: Args): Promise<Result<T>> {
@@ -64,5 +72,6 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   return {
     serverURL,
     payload: new PayloadTestSDK<T>({ serverURL }),
+    sdk: new PayloadSDK<T>({ baseURL: formatAdminURL({ apiRoute: '/api', serverURL }) }),
   }
 }

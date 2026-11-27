@@ -1,3 +1,4 @@
+import type { PayloadSDK } from '@payloadcms/sdk'
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -6,7 +7,6 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
-import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
@@ -22,7 +22,6 @@ import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -36,7 +35,7 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
+let sdk: PayloadSDK<Config>
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -45,7 +44,7 @@ let url: AdminUrlUtil
 describe('Textarea', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -58,12 +57,6 @@ describe('Textarea', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -151,10 +144,12 @@ describe('Textarea', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    await upsertPreferences<Config, GeneratedTypes<any>>({
+    const { user } = await sdk.me({ collection: 'users' })
+
+    await upsertPreferences({
       key: 'text-fields-list',
       payload,
-      user: client.user,
+      user,
       value: {
         columns: [
           {
