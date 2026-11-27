@@ -6,11 +6,14 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { PasswordFieldProps } from './types.js'
 
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
 import { PasswordInput } from './input.js'
@@ -82,6 +85,11 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     localizationConfig: config.localization || undefined,
   })
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
+  const inputID = generateFieldID(path, editDepth, uuid)
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
@@ -93,6 +101,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       description={description}
       Description={Description}
       Error={Error}
+      errorID={errorID}
+      id={inputID}
       inputRef={inputRef}
       Label={Label}
       label={label}

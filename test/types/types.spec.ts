@@ -109,7 +109,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_D5E7E2D8 as GenNodeUnion,
+  LexicalNodes_F0C4E4FB as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
@@ -1962,6 +1962,7 @@ describe('Types testing', () => {
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
+        | 'payload-llm-instructions'
         | 'payload-locked-documents'
         | 'payload-migrations'
         | 'payload-preferences'
@@ -1993,6 +1994,7 @@ describe('Types testing', () => {
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
+        | 'payload-llm-instructions'
         | 'payload-locked-documents'
         | 'payload-migrations'
         | 'payload-preferences'

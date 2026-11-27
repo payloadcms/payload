@@ -97,6 +97,34 @@ export default defineConfig({
       },
     },
     {
+      files: ['packages/ui/src/fields/**/[Ii]nput.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                allowTypeImports: true,
+                group: [
+                  '**/forms/Form',
+                  '**/forms/Form/context*',
+                  '**/forms/Form/index*',
+                  '**/forms/Form/useForm*',
+                  '**/forms/useField',
+                  '**/forms/useField/index*',
+                  '**/forms/RenderFields/context*',
+                  '**/forms/RowLabel/Context/**',
+                  '**/providers/EditDepth/**',
+                ],
+                message:
+                  'Keep extracted Inputs independent of Payload Form. Read form state and edit depth in the Field component and pass the required values and IDs as props.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: [
         'packages/tanstack-start/src/elements/RouterAdapter/**/*.{ts,tsx}',
         'packages/tanstack-start/src/routes/**/*.{ts,tsx}',

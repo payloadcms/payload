@@ -113,6 +113,12 @@ export const baseConfig: Partial<Config> = {
   admin: {
     components: {
       afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+      views: {
+        StandaloneInputs: {
+          Component: '/components/StandaloneInputs/index.js#StandaloneInputs',
+          path: '/standalone-inputs',
+        },
+      },
     },
     custom: {
       client: {

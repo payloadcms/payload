@@ -9,6 +9,7 @@ import * as qs from 'qs-esm'
 import { waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { patchPageMethods } from '../__setup/e2e/patchPageMethods.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -39,6 +40,254 @@ import {
 
 let postsURL: AdminUrlUtil
 let serverURL: string
+
+test.describe('Standalone modals', () => {
+  test.beforeEach(({ page }) => {
+    patchPageMethods(page)
+  })
+
+  test.beforeAll(async () => {
+    ;({ serverURL } = await initPayloadE2ENoConfig({
+      dirname: fileURLToPath(new URL('.', import.meta.url)),
+    }))
+  })
+
+  for (const { context, isShadow, path } of [
+    { context: 'document', isShadow: false, path: '/modals' },
+    { context: 'shadow root', isShadow: true, path: '/modals?shadow=true' },
+  ]) {
+    test(`should operate confirmation modals without admin providers in a ${context}`, async ({
+      page,
+    }) => {
+      await page.goto(`${serverURL}${path}`)
+
+      const trigger = page.getByRole('button', { name: 'Open confirmation', exact: true })
+      const dialog = page.getByRole('dialog', { name: 'Standalone confirmation', exact: true })
+
+      await expect(dialog).toBeHidden()
+      await trigger.press('Enter')
+      await expect(dialog).toBeVisible()
+      await expect(dialog.getByRole('heading')).toBeFocused()
+      await expect(page.getByRole('main')).toHaveCount(0)
+
+      for (const key of ['Tab', 'Shift+Tab']) {
+        for (let step = 0; step < 6; step++) {
+          await page.keyboard.press(key)
+          await expect
+            .poll(() =>
+              dialog.evaluate((element) => {
+                const root = element.getRootNode() as Document | ShadowRoot
+
+                return element.contains(root.activeElement)
+              }),
+            )
+            .toBe(true)
+        }
+      }
+
+      await expect
+        .poll(() =>
+          dialog.evaluate((element) => ({
+            height: element.getBoundingClientRect().height,
+            width: element.getBoundingClientRect().width,
+          })),
+        )
+        .toEqual(page.viewportSize())
+
+      const themeTarget = isShadow ? page.getByTestId('inner-shadow-host') : page.locator('html')
+
+      for (const theme of ['light', 'dark']) {
+        await themeTarget.evaluate((element, theme) => {
+          element.setAttribute('data-theme', theme)
+          element.setAttribute('data-enhanced-contrast', '')
+        }, theme)
+        await expect(themeTarget).toHaveAttribute('data-theme', theme)
+        await expect(themeTarget).toHaveAttribute('data-enhanced-contrast', '')
+        await scanA11y({
+          name: `standalone confirmation (${context}, ${theme}, enhanced contrast)`,
+          page,
+        })
+      }
+
+      await page.keyboard.press('Escape')
+      await expect(dialog).toBeHidden()
+      await expect(trigger).toBeFocused()
+      await expect(page.getByRole('main')).toBeVisible()
+      await trigger.press('Enter')
+      await dialog.getByRole('button', { name: 'Cancel action', exact: true }).press('Enter')
+      await expect(dialog).toBeHidden()
+      await expect(page.getByRole('status')).toHaveText('Cancelled')
+      await expect(trigger).toBeFocused()
+      await trigger.press('Enter')
+      await dialog.getByRole('button', { name: 'Confirm action', exact: true }).press('Enter')
+      await expect(dialog).toBeHidden()
+      await expect(page.getByRole('status')).toHaveText('Confirmed')
+      await expect(trigger).toBeFocused()
+    })
+  }
+
+  test('should isolate the background of an initially open shadow dialog', async ({ page }) => {
+    await page.goto(`${serverURL}/modals?shadow=true&modal=standalone-confirmation`)
+    await expect(page.locator('#standalone-confirmation').getByRole('heading')).toBeFocused()
+    await expect(page.getByTestId('document-background')).toHaveAttribute('inert', '')
+    await expect(page.getByTestId('outer-shadow-background')).toHaveAttribute('inert', '')
+    await page.keyboard.press('Escape')
+    await expect(page.locator('#standalone-confirmation')).toBeHidden()
+    await expect(page.getByTestId('document-background')).not.toHaveAttribute('inert')
+  })
+
+  test('should isolate and observe the host page around a slotted shadow widget', async ({
+    page,
+  }) => {
+    for (const slotAssignment of ['named', 'manual'] as const) {
+      await page.goto(`${serverURL}/modals?shadow=true`)
+      await page.getByRole('button', { name: 'Open confirmation', exact: true }).waitFor()
+      await page.getByTestId('shadow-host').evaluate((host, slotAssignment) => {
+        const wrapper = document.createElement('div')
+        const background = document.createElement('button')
+
+        wrapper.dataset.testid = 'slot-host'
+        background.dataset.testid = 'slotted-background'
+        background.textContent = 'Slotted background'
+        background.slot = 'background'
+        host.slot = 'widget'
+
+        const shadow = wrapper.attachShadow({ mode: 'open', slotAssignment })
+
+        shadow.innerHTML =
+          '<slot name="widget"></slot><slot name="background"></slot><button data-testid="slot-background">Beside the slot</button>'
+        host.before(wrapper)
+        wrapper.append(host, background)
+
+        if (slotAssignment === 'manual') {
+          shadow.querySelector<HTMLSlotElement>('slot[name="widget"]')!.assign(host)
+          shadow.querySelector<HTMLSlotElement>('slot[name="background"]')!.assign(background)
+        }
+      }, slotAssignment)
+      await page.getByRole('button', { name: 'Open confirmation', exact: true }).click()
+      await expect(page.getByTestId('slot-background')).toHaveAttribute('inert', '')
+      await page.getByTestId('slot-host').evaluate((host, slotAssignment) => {
+        const widget = host.querySelector<HTMLElement>('[data-testid="shadow-host"]')!
+        const background = host.querySelector<HTMLElement>('[data-testid="slotted-background"]')!
+
+        if (slotAssignment === 'manual') {
+          host
+            .shadowRoot!.querySelector<HTMLSlotElement>('slot[name="widget"]')!
+            .assign(widget, background)
+        } else {
+          background.slot = 'widget'
+        }
+      }, slotAssignment)
+      await expect(page.getByTestId('slotted-background')).toHaveAttribute('inert', '')
+      await page.getByTestId('slot-host').evaluate((host) => {
+        const sibling = document.createElement('button')
+
+        sibling.dataset.testid = 'slot-new-background'
+        sibling.textContent = 'Added beside the slot'
+        host.shadowRoot!.append(sibling)
+      })
+      await expect(page.getByTestId('slot-new-background')).toHaveAttribute('inert', '')
+      await page.keyboard.press('Escape')
+      await expect(page.getByTestId('slot-background')).not.toHaveAttribute('inert')
+      await expect(page.getByTestId('slot-background')).not.toHaveAttribute('aria-hidden')
+      await expect(page.getByTestId('slot-new-background')).not.toHaveAttribute('inert')
+      await expect(page.getByTestId('slotted-background')).not.toHaveAttribute('inert')
+      await expect(page.getByTestId('slotted-background')).not.toHaveAttribute('aria-hidden')
+    }
+  })
+
+  test('should isolate shadow and host backgrounds and restore their prior attributes', async ({
+    page,
+  }) => {
+    await page.goto(`${serverURL}/modals?shadow=true`)
+
+    const trigger = page.getByRole('button', { name: 'Open confirmation', exact: true })
+    const parent = page.locator('#standalone-confirmation')
+    const child = page.locator('#nested-confirmation')
+
+    await trigger.click()
+    await expect(page.getByTestId('document-background')).toHaveAttribute('inert', '')
+    await expect(page.getByTestId('document-prior-hidden')).toHaveAttribute('aria-hidden', 'true')
+    await expect(page.getByTestId('outer-shadow-background')).toHaveAttribute('inert', '')
+    await expect(page.getByTestId('shadow-existing-hidden')).toHaveAttribute('inert', '')
+
+    for (const testID of ['shadow-host', 'inner-shadow-host']) {
+      await page.getByTestId(testID).evaluate((host) => {
+        const sibling = document.createElement('button')
+
+        sibling.dataset.testid = `${host.dataset.testid}-new-background`
+        sibling.textContent = 'Added while modal is open'
+        host.shadowRoot!.append(sibling)
+      })
+      await expect(page.getByTestId(`${testID}-new-background`)).toHaveAttribute('inert', '')
+    }
+
+    const nestedTrigger = page.getByRole('button', { name: 'Open nested confirmation' })
+
+    await nestedTrigger.press('Enter')
+    await expect(child.getByRole('heading')).toBeFocused()
+    await expect(parent).toHaveAttribute('inert', '')
+    await page.keyboard.press('Escape')
+    await expect(child).toBeHidden()
+    await expect(parent).not.toHaveAttribute('inert')
+    await expect(nestedTrigger).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(parent).toBeHidden()
+    await expect(trigger).toBeFocused()
+
+    for (const testID of [
+      'document-background',
+      'outer-shadow-background',
+      'shadow-host-new-background',
+      'inner-shadow-host-new-background',
+    ]) {
+      await expect(page.getByTestId(testID)).not.toHaveAttribute('inert')
+    }
+    await expect(page.getByTestId('document-background')).not.toHaveAttribute('aria-hidden')
+    await expect(page.getByTestId('outer-shadow-background')).toHaveAttribute(
+      'aria-hidden',
+      'false',
+    )
+    await expect(page.getByTestId('document-prior-hidden')).toHaveAttribute('aria-hidden', 'false')
+    await expect(page.getByTestId('shadow-existing-inert')).toHaveAttribute('inert', 'preserved')
+    await expect(page.getByTestId('shadow-existing-inert')).toHaveAttribute('aria-hidden', 'false')
+    await expect(page.getByTestId('shadow-existing-hidden')).toHaveAttribute('aria-hidden', 'true')
+    await expect(page.getByTestId('shadow-existing-hidden')).not.toHaveAttribute('inert')
+  })
+
+  for (const activation of ['keyboard', 'pointer']) {
+    test(`should return focus to the surviving shadow popup trigger after ${activation} activation`, async ({
+      page,
+    }) => {
+      await page.goto(`${serverURL}/modals?shadow=true`)
+
+      const trigger = page.getByRole('button', { name: 'Modal actions', exact: true })
+      const nested = page.getByRole('menuitem', { name: 'More modal actions', exact: true })
+      const opener = page.getByRole('menuitem', {
+        name: 'Open confirmation from menu',
+        exact: true,
+      })
+
+      if (activation === 'keyboard') {
+        await trigger.press('Enter')
+        await nested.press('Enter')
+        await opener.press('Enter')
+      } else {
+        await trigger.click()
+        await nested.click()
+        await opener.click()
+      }
+
+      const dialog = page.locator('#standalone-confirmation')
+
+      await expect(dialog.getByRole('heading')).toBeFocused()
+      await expect(opener).toHaveCount(0)
+      await page.keyboard.press('Escape')
+      await expect(dialog).toBeHidden()
+      await expect(trigger).toBeFocused()
+    })
+  }
+})
 
 test.describe('Admin accessibility', () => {
   test.beforeAll(async () => {

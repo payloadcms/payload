@@ -11,10 +11,7 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useForm } from '../../forms/Form/context.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -25,9 +22,11 @@ export type SelectInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly errorID?: string
   readonly filterOption?: ReactSelectAdapterProps['filterOption']
   readonly hasMany?: boolean
   readonly id?: string
+  readonly inputId?: string
   readonly isClearable?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
@@ -59,8 +58,10 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     Description,
     description,
     Error,
+    errorID: errorIDFromProps,
     filterOption,
     hasMany = false,
+    inputId: inputIdFromProps,
     isClearable = true,
     isSortable = true,
     label,
@@ -79,12 +80,12 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     value,
   } = props
 
-  const { uuid } = useForm()
-  const editDepth = useEditDepth()
   const { i18n } = useTranslation()
 
-  const inputID = generateFieldID(path, editDepth, uuid, 'input')
-  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+  const inputID = inputIdFromProps ?? `input-${path.replace(/\./g, '__')}`
+  const errorID = showError
+    ? (errorIDFromProps ?? `field-error-${path.replace(/\./g, '__')}`)
+    : undefined
 
   let valueToRender
 
@@ -139,7 +140,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
+          Fallback={<FieldError id={errorID} path={path} showError={showError} />}
         />
         {BeforeInput}
         <ReactSelect

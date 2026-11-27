@@ -27,6 +27,7 @@ const nextSuites: TestConfig[] = [
   { file: 'joins', shards: 1 },
   { file: 'field-error-states', shards: 1 },
   { file: 'field-paths', shards: 1 },
+  { file: 'fields', shards: 1 },
   { file: 'fields-relationship', shards: 1 },
   { file: 'fields__collections__Array', shards: 1 },
   { file: 'fields__collections__Blocks', shards: 2 },

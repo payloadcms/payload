@@ -18,12 +18,17 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
+  const versionJoins =
+    joins &&
+    Object.fromEntries(
+      Object.entries(joins).map(([joinPath, joinQuery]) => [`version.${joinPath}`, joinQuery]),
+    )
 
   const result = await findMany({
     adapter: this,
     collectionSlug: collection,
     fields,
-    joins,
+    joins: versionJoins,
     limit,
     locale,
     page,

@@ -5,6 +5,7 @@ import type {
   IDTypeForCollectionSlug,
   UploadCollectionSlug,
 } from 'payload'
+import type { instructionsCollectionSlug } from 'payload/shared'
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
@@ -20,13 +21,23 @@ export type RelationshipData = {
 }[CollectionSlug]
 
 /**
- * Exclude upload collection slugs. This matches runtime behavior, as well as the json schema.
+ * Collections Payload always creates with `enableRichTextRelationship: false`, so the json schema
+ * never lists them.
  */
-export type NonUploadCollectionSlug = [Exclude<CollectionSlug, UploadCollectionSlug>] extends [
-  never,
-]
+type RelationshipDisabledCollectionSlug = typeof instructionsCollectionSlug
+
+type RelationshipCollectionSlug = Exclude<
+  Exclude<CollectionSlug, UploadCollectionSlug>,
+  RelationshipDisabledCollectionSlug
+>
+
+/**
+ * Exclude upload collection slugs and built-in collections that disable rich text relationships.
+ * This matches runtime behavior, as well as the json schema.
+ */
+export type NonUploadCollectionSlug = [RelationshipCollectionSlug] extends [never]
   ? CollectionSlug
-  : Exclude<CollectionSlug, UploadCollectionSlug>
+  : RelationshipCollectionSlug
 
 export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUploadCollectionSlug> = {
   [TSlug in TSlugs]: {

@@ -44,7 +44,9 @@ export type PasswordInputProps = {
   readonly description?: StaticDescription
   readonly Description?: React.ReactNode
   readonly Error?: React.ReactNode
+  readonly errorID?: string
   readonly field?: MarkOptional<TextFieldClient, 'type'>
+  readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly label: FieldBaseClient['label']

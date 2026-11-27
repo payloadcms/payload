@@ -24,4 +24,16 @@ describe('runInstall', () => {
 
     expect(spawn.mock.calls.map((c) => c[0])).toEqual(['npm', 'yarn', 'bun'])
   })
+  it('should allow transitional npm peers only during a major migration', async () => {
+    const spawn = vi.fn().mockResolvedValue({ code: 0 })
+
+    await runInstall({
+      packageManager: 'npm',
+      path: '/p',
+      shouldAllowTransitionalPeers: true,
+      spawn,
+    })
+
+    expect(spawn).toHaveBeenCalledWith('npm', ['install', '--legacy-peer-deps'], expect.any(Object))
+  })
 })

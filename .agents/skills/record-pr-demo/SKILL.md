@@ -31,7 +31,7 @@ Every scenario must export `presentation` with a change kind, title, and descrip
 
 Keep the default canvas and desktop viewport for ordinary demos. Use a smaller `--viewport` or `resizeWindow` only when demonstrating responsive reflow or breakpoints, or when the user explicitly requests different dimensions. Keep the canvas fixed while resizing the application. Do not shrink the viewport or canvas merely to crop surrounding content or emphasize a visual change.
 
-For a requested before/after comparison, set `change.kind: 'Bug'` on the real unfixed scenario and `'Fix'` on the corrected scenario. Set `kind: 'Bug'` on an individual step only when its action visibly demonstrates a failure; leave setup and ordinary navigation unmarked. Write a short description of the visible action or outcome, and assert that state in the script.
+For a before/after comparison, set `change.kind: 'Bug'` on the real unfixed scenario and `'Fix'` on the corrected scenario. Set `kind: 'Bug'` on an individual step only when its action visibly demonstrates a failure; leave setup and ordinary navigation unmarked. Write a short description of the visible action or outcome, and assert that state in the script.
 
 ## Accessibility demonstrations
 
@@ -40,7 +40,7 @@ Set `presentation.accessibility: true` when keyboard commands are part of the ev
 ## Workflow
 
 1. Inspect the feature, relevant diff, and available test configs. Choose the smallest existing Payload config that demonstrates the real feature. Create a temporary config only when no existing config can show it clearly.
-2. Write a brief plan in `/tmp` with the opening state, 2–6 visible actions, and the final proof a reviewer should see. Default to one current-state feature demo; create Before/After recordings only when requested. For annotation content and APIs, use [recording.md](references/recording.md#editorial-annotations-over-the-recording).
+2. Write a brief plan in `/tmp` with the opening state, 2–6 visible actions, and the final proof a reviewer should see. For a fix with a visible before, plan Before/After recordings of the bug and the fix; otherwise default to one current-state feature demo. For annotation content and APIs, use [recording.md](references/recording.md#editorial-annotations-over-the-recording).
 3. Start the relevant dev server and make its initial state deterministic. Do not expose credentials, personal data, tokens, or unrelated records.
 4. Read [recording.md](references/recording.md) and create a temporary scenario module in `/tmp`. Write readable, multi-line JavaScript with clear preparation and visible-step sections so the script is easy to review. Call `ready()` once after the opening UI is visible; this marks where the finished video starts. Make preparation repeatable so validation and recording each begin in the same state. Use optional `setup`/`teardown` hooks for API fixtures, or prepare content through the UI before `ready()`. Keep recording-only data in a disposable database. If creating content is part of the story, show that creation through the Admin.
 5. When recording through an agent, use the [recording job API](references/recording-jobs.md) and renew its lease only while the prompt is active. Use a take-specific label. For direct terminal use, run the candidate command from the repository root, for example `node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario /tmp/payload-pr-demo-feature.mjs --label feature-take-1`. It performs preflight checks, fast validation, human-paced recording, conversion, full decode verification, contact-sheet generation, hashing, manifest creation, and raw-video cleanup. Keep the demo concise enough to stay below the converter's default 10 MB budget.
@@ -53,12 +53,12 @@ Set `presentation.accessibility: true` when keyboard commands are part of the ev
    ```
 
 7. Stop and ask the user to approve, reject, or request another take. Do not call `gh`, open an upload UI, or otherwise upload the file yet.
-8. Only after explicit approval of that recording, read [publishing.md](references/publishing.md) and verify the reviewed manifest. Preserve the complete existing PR description and append a final `## Preview` section with the approved video in its own paragraph. Use a PR comment only when the user explicitly asks for one.
+8. Only after explicit approval of that recording, read [publishing.md](references/publishing.md) and verify the reviewed manifest. Preserve the complete existing PR description and append a final `## Preview` section with each approved video in its own paragraph. Use a PR comment only when the user explicitly asks for one.
 9. Verify the PR renders the uploaded video, then remove temporary scenarios, plans, raw recordings, and temporary fixture changes. Preserve the approved MP4 and its script snapshot until the upload is confirmed.
 
 ## Completion criteria
 
-- The recording tells one understandable visual story and ends on visible proof.
+- Each recording tells one understandable visual story and ends on visible proof.
 - The recorded walkthrough uses browser gestures; optional API fixtures establish only its starting data and clean up afterward.
 - The first decoded frame shows the intended opening UI, without a blank startup screen.
 - Pointer movement is smooth, clicks have readable dwell time and visible ring feedback, and the cursor stays visible above popup menus and dialogs.
