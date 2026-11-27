@@ -23,7 +23,8 @@ export const incrementName = (name: string): string => {
   } else {
     const matchedName = found[1]
     const matchedNumber = found[2]
-    const incremented = Number(matchedNumber) + 1
+    // BigInt keeps the increment exact above Number.MAX_SAFE_INTEGER, where `Number(n) + 1` can return n again
+    const incremented = BigInt(matchedNumber) + 1n
     incrementedName = `${matchedName}-${incremented}`
   }
   return `${incrementedName}.${extension}`
