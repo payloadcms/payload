@@ -177,7 +177,8 @@ export const updateDocument = async <
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
   const shouldLimitValidationToSubmittedFields =
     (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
-    unpublishAllLocales
+    unpublishAllLocales ||
+    (!draftArg && hasLocalizeStatusEnabled(collectionConfig) && data?._status === 'draft')
   const submittedTopLevelFieldNames = shouldLimitValidationToSubmittedFields
     ? getTopLevelFieldNames(data)
     : undefined

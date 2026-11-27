@@ -9,6 +9,18 @@ const LocalizedPosts: CollectionConfig = {
   },
   fields: [
     {
+      name: 'items',
+      type: 'array',
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+          localized: true,
+          required: true,
+        },
+      ],
+    },
+    {
       name: 'text',
       type: 'text',
       localized: true,
