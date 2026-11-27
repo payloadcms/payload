@@ -1,4 +1,10 @@
-import type { PayloadRequest, SchedulePublishTaskInput, ServerFunction, TypeWithID } from 'payload'
+import type {
+  PayloadRequest,
+  SchedulePublishTaskInput,
+  ServerFunction,
+  TypeWithID,
+  Where,
+} from 'payload'
 
 import { canAccessAdmin, docAccessOperation, docAccessOperationGlobal, Forbidden } from 'payload'
 import { hasScheduledPublishEnabled } from 'payload/shared'
@@ -109,12 +115,67 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
       return { message: i18n.t('general:success') }
     }
 
+    const publishType = type || 'publish'
+    const publishLocale = localeToPublish === 'all' ? undefined : localeToPublish
+    if (date) {
+      const targetWhere: Where[] = doc
+        ? [{ 'input.doc.relationTo': { equals: doc.relationTo } }]
+        : [{ 'input.global': { equals: global } }]
+
+      // SQL JSON queries restrict text values. For other custom IDs, narrow by collection
+      // and compare the ID below so valid documents can still be scheduled.
+      if (doc && /^[\w @.\-+:]*$/.test(String(doc.value))) {
+        const id = String(doc.value)
+        const ids: (number | string)[] = [id]
+        const numericID = Number(id)
+
+        if (Number.isFinite(numericID) && String(numericID) === id) {
+          ids.push(numericID)
+        }
+
+        targetWhere.push({ 'input.doc.value': { in: ids } })
+      }
+
+      const { docs: pendingJobs } = await payload.db.find<ScheduledPublishJob>({
+        collection: 'payload-jobs',
+        limit: 0,
+        req,
+        select: { input: true },
+        where: {
+          and: [
+            { taskSlug: { equals: 'schedulePublish' } },
+            { waitUntil: { equals: date.toISOString() } },
+            { completedAt: { exists: false } },
+            { hasError: { not_equals: true } },
+            ...targetWhere,
+          ],
+        },
+      })
+      const hasDuplicate = pendingJobs.some(({ input }) => {
+        const scheduledLocale = input?.locale === 'all' ? undefined : input?.locale
+        const hasSameTarget = doc
+          ? input?.doc?.relationTo === doc.relationTo &&
+            String(input?.doc?.value) === String(doc.value)
+          : input?.global === global
+
+        return (
+          hasSameTarget &&
+          (input?.type || 'publish') === publishType &&
+          scheduledLocale === publishLocale
+        )
+      })
+
+      if (hasDuplicate) {
+        return { error: i18n.t('version:duplicateScheduledEvent') }
+      }
+    }
+
     await payload.jobs.queue({
       input: {
-        type,
+        type: publishType,
         doc,
         global,
-        locale: localeToPublish,
+        locale: publishLocale,
         timezone,
         user:
           user && user.collection
@@ -139,10 +200,10 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
       }
     }
 
-    payload.logger.error({ err }, error)
+    payload.logger.error({ err, msg: error })
 
     return {
-      error,
+      error: i18n.t('error:unspecific'),
     }
   }
 

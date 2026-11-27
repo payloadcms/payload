@@ -604,6 +604,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     draft: 'Rascunho',
     draftHasPublishedVersion: 'Rascunho (tem versão publicada)',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
+    duplicateScheduledEvent:
+      'Este evento já está agendado para este horário. Escolha outro horário ou exclua o evento existente.',
     lastSavedAgo: 'Última gravação há {{distance}}',
     modifiedOnly: 'Modificado apenas',
     moreVersions: 'Mais versões...',

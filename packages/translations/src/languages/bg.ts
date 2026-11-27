@@ -602,6 +602,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     draft: 'Чернова',
     draftHasPublishedVersion: 'Чернова (има публикувана версия)',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
+    duplicateScheduledEvent:
+      'Това събитие вече е насрочено за този час. Изберете друг час или изтрийте съществуващото събитие.',
     lastSavedAgo: 'последно запазено преди {{distance}}',
     modifiedOnly: 'Само променени',
     moreVersions: 'Още версии...',

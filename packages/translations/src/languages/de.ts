@@ -613,6 +613,8 @@ export const deTranslations: DefaultTranslationsObject = {
     draft: 'Entwurf',
     draftHasPublishedVersion: 'Entwurf (hat veröffentlichte Version)',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
+    duplicateScheduledEvent:
+      'Dieses Ereignis ist bereits für diesen Zeitpunkt geplant. Wählen Sie einen anderen Zeitpunkt oder löschen Sie das vorhandene Ereignis.',
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     modifiedOnly: 'Nur modifiziert',
     moreVersions: 'Mehr Versionen...',

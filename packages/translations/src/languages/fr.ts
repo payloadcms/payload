@@ -618,6 +618,8 @@ export const frTranslations: DefaultTranslationsObject = {
     draft: 'Brouillon',
     draftHasPublishedVersion: 'Brouillon (a une version publiée)',
     draftSavedSuccessfully: 'Brouillon enregistré avec succès.',
+    duplicateScheduledEvent:
+      'Cet événement est déjà programmé à cette heure. Choisissez une autre heure ou supprimez l’événement existant.',
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     modifiedOnly: 'Modifié uniquement',
     moreVersions: 'Plus de versions...',

@@ -604,6 +604,8 @@ export const idTranslations: DefaultTranslationsObject = {
     draft: 'Draf',
     draftHasPublishedVersion: 'Draf (memiliki versi yang dipublikasikan)',
     draftSavedSuccessfully: 'Draf berhasil disimpan.',
+    duplicateScheduledEvent:
+      'Acara ini sudah dijadwalkan pada waktu ini. Pilih waktu lain atau hapus acara yang sudah ada.',
     lastSavedAgo: 'Terakhir disimpan {{distance}} yang lalu',
     modifiedOnly: 'Hanya yang diubah',
     moreVersions: 'Versi lainnya...',
