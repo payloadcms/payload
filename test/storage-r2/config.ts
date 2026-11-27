@@ -91,7 +91,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
       getPlatformProxy({
         configPath: path.resolve(dirname, 'wrangler.jsonc'),
         environment: process.env.CLOUDFLARE_ENV,
-        experimental: { remoteBindings: cloudflareRemoteBindings },
+        remoteBindings: cloudflareRemoteBindings,
       } satisfies GetPlatformProxyOptions),
   )
 }
