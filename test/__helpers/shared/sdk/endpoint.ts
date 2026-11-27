@@ -41,7 +41,8 @@ export const handler: PayloadHandler = async (req) => {
         user,
       })
 
-      return Response.json(result, {
+      // Some operations, like `sendEmail` with the test adapter, resolve `undefined`, which isn't JSON.
+      return Response.json(result ?? null, {
         status: httpStatus.OK,
       })
     } catch (err) {
