@@ -38,9 +38,11 @@ import {
   useOptionalUploadSessions,
 } from '../../providers/UploadSessions/index.js'
 import { requests } from '../../utilities/api.js'
+import { isSameOriginURL, uploadRequest } from '../../utilities/uploadRequest.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
+import { abandonSaveUploadProgress, trackSaveUploadProgress } from './trackSaveUploadProgress.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
@@ -102,8 +104,15 @@ export const useFormSubmission = ({
     waitForAutocomplete,
   } = props
 
-  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
-    useDocumentInfo()
+  const {
+    id,
+    collectionSlug,
+    docConfig,
+    docPermissions,
+    getDocPreferences,
+    globalSlug,
+    setUploadProgress,
+  } = useDocumentInfo()
   const locale = useLocale()?.code
   const operation = useOperation()
   const { getFormState } = useServerFunctions()
@@ -128,6 +137,10 @@ export const useFormSubmission = ({
   const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false)
 
   const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
+  /** The tracker of the save that is uploading a file, so a form reset can stop it. */
+  const activeSaveUploadRef = useRef<ReturnType<typeof trackSaveUploadProgress> | undefined>(
+    undefined,
+  )
   /**
    * Validates the document on the server without saving it. The `file` field is skipped because
    * its bytes are being uploaded separately and are never part of the form state sent here.
@@ -227,7 +240,21 @@ export const useFormSubmission = ({
     setIsProcessing(false)
     setDisabledBySubmission(false)
     setIsBackgroundProcessing(false)
-  }, [setIsBackgroundProcessing, setDisabledBySubmission])
+    // A reset invalidates the running save, but its upload can still be sending. Its progress is
+    // cleared now rather than when the upload ends, so Save is not held disabled until then.
+    abandonSaveUploadProgress({ setUploadProgress, upload: activeSaveUploadRef.current })
+    activeSaveUploadRef.current = undefined
+  }, [setIsBackgroundProcessing, setDisabledBySubmission, setUploadProgress])
+
+  // Once the form unmounts, its save no longer owns `uploadProgress`, so later reports are ignored.
+  // A save that continues in the background shows its result in the upload session's own toast.
+  useEffect(
+    () => () => {
+      abandonSaveUploadProgress({ setUploadProgress, upload: activeSaveUploadRef.current })
+      activeSaveUploadRef.current = undefined
+    },
+    [setUploadProgress],
+  )
 
   const applyFieldErrors = useCallback(
     ({ errors }: { errors: ValidationFieldError[] }) => {
@@ -273,6 +300,7 @@ export const useFormSubmission = ({
       // create new toast promise which will resolve manually later
       let errorToast, successToast
       let promiseToastID: number | string | undefined
+      let saveUpload: ReturnType<typeof trackSaveUploadProgress> | undefined
       let preservePromiseToast = false
 
       const promise = new Promise((resolve, reject) => {
@@ -468,17 +496,49 @@ export const useFormSubmission = ({
             return
           }
 
+          const uploadFile = contextRef.current.fields?.file?.value
+
+          if (uploadFile instanceof File) {
+            saveUpload = trackSaveUploadProgress({
+              onChange: setUploadProgress,
+              totalBytes: uploadFile.size,
+            })
+            activeSaveUploadRef.current = saveUpload
+          }
+
           const formData = await contextRef.current.createFormData(overrides, {
             action: typeof actionArg === 'string' ? actionArg : undefined,
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+            onUploadProgress: saveUpload?.report,
           })
 
           if (!requestContext.isCurrent()) {
             return
           }
 
-          if (typeof actionArg === 'string') {
+          // Only a URL action has a method; a function action may have none.
+          const uploadMethod =
+            typeof actionArg === 'string' ? methodToUse?.toUpperCase() : undefined
+
+          if (
+            typeof actionArg === 'string' &&
+            formData.get('file') instanceof Blob &&
+            (uploadMethod === 'PATCH' || uploadMethod === 'POST' || uploadMethod === 'PUT') &&
+            isSameOriginURL({ url: actionArg })
+          ) {
+            // The file is in this request, so it reports how much of it is sent.
+            res = await uploadRequest({
+              body: formData,
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              method: uploadMethod,
+              onProgress: saveUpload?.report,
+              url: actionArg,
+              withCredentials: true,
+            })
+          } else if (typeof actionArg === 'string') {
             res = await requests[methodToUse.toLowerCase()](actionArg, {
               body: formData,
               headers: {
@@ -487,6 +547,11 @@ export const useFormSubmission = ({
             })
           } else if (typeof action === 'function') {
             res = await action(formData)
+          }
+
+          if (requestContext.isCurrent()) {
+            // A replaced save leaves the progress to the newer one; `finally` stops it.
+            saveUpload?.settle({ isSuccessful: res?.status < 400 })
           }
 
           onResponse({ res })
@@ -753,12 +818,17 @@ export const useFormSubmission = ({
       } catch (err) {
         // The form unmounted during a large upload; the upload coordinator finishes the save.
         if (err instanceof UploadContinuesInBackgroundError) {
+          saveUpload?.settle({ isSuccessful: true })
           preservePromiseToast = true
           successToast(t('upload:savingInBackground'))
           return
         }
 
         const isCurrentRequest = requestContext.isCurrent()
+
+        if (isCurrentRequest) {
+          saveUpload?.settle({ isSuccessful: false })
+        }
 
         if (!preservePromiseToast && !isCurrentRequest) {
           return
@@ -789,6 +859,14 @@ export const useFormSubmission = ({
         if (!requestContext.isCurrent() && !preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
+
+        // A save that ended without a result, e.g. one replaced by a newer save, must not leave
+        // `uploadStatus` at `uploading`.
+        abandonSaveUploadProgress({ setUploadProgress, upload: saveUpload })
+
+        if (activeSaveUploadRef.current === saveUpload) {
+          activeSaveUploadRef.current = undefined
+        }
       }
     },
     [
@@ -802,6 +880,7 @@ export const useFormSubmission = ({
       operation,
       beforeSubmit,
       setIsBackgroundProcessing,
+      setUploadProgress,
       startRouteTransition,
       action,
       disableSuccessStatus,

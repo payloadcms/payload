@@ -505,6 +505,46 @@ Payload removes versioned upload objects only after their last document or saved
 
 When providing upload instructions, set `uploadInstructions.useInAdmin` to `true` when the Admin panel should use them instead of attaching the whole file to the document request. This is useful for direct-to-storage uploads and for flows such as chunked uploads that still pass through Payload.
 
+### Upload progress for custom handlers#custom-upload-progress
+
+<Banner type="warning">
+  **Experimental:** `onProgress` and `uploadRequest` may change in a minor
+  release.
+</Banner>
+
+The Admin tracks [upload progress](/docs/upload/overview#upload-progress) for every upload. HTTP instructions, like S3 and GCS signed URLs, report it automatically. A handler created with `createClientUploadHandler` receives `onProgress` and should call it with the total bytes sent so far. The values must never go down, so keep the highest value when an SDK reports parallel parts out of order.
+
+Pass an SDK's progress callback through, or send your own requests with `uploadRequest`. It sends one request with `XMLHttpRequest`, which can report upload progress, and resolves to a standard `Response`. It sends cookies only to the same origin, so it is safe for signed storage URLs.
+
+```ts
+'use client'
+import {
+  createClientUploadHandler,
+  uploadRequest,
+} from '@payloadcms/plugin-cloud-storage/client'
+
+export const MyClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToMyStorage',
+  handler: async ({ data, file, onProgress }) => {
+    const { url } = data as { url: string }
+
+    const response = await uploadRequest({
+      body: file,
+      headers: { 'Content-Type': file.type },
+      method: 'PUT',
+      onProgress,
+      url,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Upload failed with status ${response.status}`)
+    }
+  },
+})
+```
+
+A handler that ignores `onProgress` keeps working, but its upload reports no bytes until it finishes.
+
 `staticHandler` receives `params.operation`: `'read'` for an ordinary file request (treat a missing value as `'read'`, for backward compatibility), or `'transform'` when Payload is reading the file's bytes on behalf of a [file transformer](./transformers), which only happens when at least one transformer is configured. For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
 
 `staticHandler` also receives `params.isOriginal`. It is `true` when the request URL includes `?original=true`. A cropped or otherwise processed upload stores its original under its own `_objectKey` with the same filename as the main file, so the filename alone does not identify which file to serve. The flag only chooses between the main file and the original when both have the requested filename. Other filenames, such as image sizes, ignore it. Pass `isOriginal` to `getFilePrefix`, and it returns the folder of the requested file. An adapter that ignores `isOriginal` always serves the main file, so the original of a processed upload cannot be reached by URL.

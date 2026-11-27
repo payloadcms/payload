@@ -12,6 +12,8 @@ import {
   uploadRequiresServerValidation,
 } from 'payload/shared'
 
+import { uploadRequest } from './uploadRequest.js'
+
 const SESSIONS_PATH = '/payload-upload-sessions'
 const BASE_RETRY_DELAY_MS = 500
 const CANCEL_RETRIES = 4
@@ -284,6 +286,16 @@ export const resumeUploadSession = async ({
   const segments = new Map(session.transfer.segments.map((segment) => [segment.number, segment]))
   let concurrency = session.transfer.concurrency
   let stalledWindows = 0
+  // A retried segment starts its bytes again, so the reported total keeps its highest value.
+  let reportedBytes: number | undefined
+  const reportProgress = ({ loaded }: { loaded: number }) => {
+    const nextBytes = Math.min(file.size, Math.max(reportedBytes ?? 0, loaded))
+
+    if (reportedBytes === undefined || nextBytes > reportedBytes) {
+      reportedBytes = nextBytes
+      onProgress?.({ loaded: nextBytes, total: file.size })
+    }
+  }
 
   while (true) {
     const { requests, session: currentSession } = await requestSession<{
@@ -297,15 +309,21 @@ export const resumeUploadSession = async ({
     }, 0)
 
     if (!requests.length) {
-      onProgress?.({
-        loaded: currentSession.isStorageComplete ? file.size : confirmedBytes,
-        total: file.size,
-      })
+      reportProgress({ loaded: currentSession.isStorageComplete ? file.size : confirmedBytes })
       break
     }
 
     let windowBytes = 0
     const queue = [...requests]
+    /** Bytes sent so far of each segment still uploading, so progress moves within a segment. */
+    const inFlightBytes = new Map<number, number>()
+    const reportWindowProgress = () =>
+      reportProgress({
+        loaded:
+          confirmedBytes +
+          windowBytes +
+          [...inFlightBytes.values()].reduce((total, bytes) => total + bytes, 0),
+      })
 
     const sendNext = async (): Promise<void> => {
       const request = queue.shift()
@@ -317,10 +335,14 @@ export const resumeUploadSession = async ({
       const segment = segments.get(request.number)
       const result = await sendSegment({
         body: file.slice(segment.start, segment.end),
+        onBytesSent: (bytes) => {
+          inFlightBytes.set(request.number, bytes)
+          reportWindowProgress()
+        },
         request,
         retries,
         signal,
-      })
+      }).finally(() => inFlightBytes.delete(request.number))
 
       if (result === 'throttled') {
         concurrency = Math.max(1, Math.floor(concurrency / 2))
@@ -328,7 +350,7 @@ export const resumeUploadSession = async ({
 
       if (result === 'sent') {
         windowBytes += segment.end - segment.start
-        onProgress?.({ loaded: confirmedBytes + windowBytes, total: file.size })
+        reportWindowProgress()
       }
 
       // Expired or throttled segments are picked up again by the next instructions request.
@@ -394,14 +416,17 @@ export const cancelUploadSession = async ({
 /**
  * Sends one segment, retrying transient failures with exponential backoff and jitter. Expired
  * instructions and throttling end the attempt early so the caller can request fresh URLs.
+ * `onBytesSent` reports the bytes of this segment sent so far, starting again on a retry.
  */
 const sendSegment = async ({
   body,
+  onBytesSent,
   request,
   retries,
   signal,
 }: {
   body: Blob
+  onBytesSent?: (bytes: number) => void
   request: UploadSegmentRequest
   retries: number
   signal?: AbortSignal
@@ -410,11 +435,13 @@ const sendSegment = async ({
     let response: Response | undefined
 
     try {
-      response = await fetch(request.url, {
+      response = await uploadRequest({
         body,
         headers: request.headers,
         method: request.method,
+        onProgress: onBytesSent ? ({ loadedBytes }) => onBytesSent(loadedBytes) : undefined,
         signal,
+        url: request.url,
       })
     } catch (err) {
       // Network failure: retried below.
