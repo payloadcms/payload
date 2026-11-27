@@ -87,6 +87,13 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.views?.list?.actions)
     addToImportMap(collection.admin?.components?.views?.list?.NoResults)
 
+    // Rendered by the hierarchy field, document header button, list view, table cells and sidebar tree,
+    // independently of whether a sidebar tab is injected
+    if (collection.hierarchy) {
+      addToImportMap(collection.hierarchy.admin?.components?.Icon)
+      addToImportMap(collection.hierarchy.admin?.components?.SmallIcon)
+    }
+
     // Register custom collection view components (any key other than 'edit' and 'list')
     if (collection.admin?.components?.views) {
       for (const [key, view] of Object.entries(collection.admin.components.views)) {
