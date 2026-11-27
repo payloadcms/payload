@@ -452,7 +452,7 @@ export interface AccessJoinNote {
    */
   coordinates?: [number, number] | null;
   tags?: ('allowed-marker' | 'available' | 'not-permitted' | 'unavailable')[] | null;
-  mixedTags?: ('unavailable' | 'not-permitted' | 'available') | null;
+  mixedTags?: ('available' | 'not-permitted' | 'unavailable') | null;
   variantValue?: number | null;
   variantSelect?: ('available' | 'unavailable') | null;
   localizedTags?: ('available' | 'unavailable')[] | null;

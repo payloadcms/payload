@@ -232,8 +232,7 @@ const getOptionSignature = (field: FlattenedField): string => {
       ? field.options.map((option) => (typeof option === 'string' ? option : option.value))
       : []
 
-  // Sorted so two fields with the same option values compare equal regardless of declared order.
-  return `${field.type}:${JSON.stringify(optionValues.sort())}`
+  return `${field.type}:${JSON.stringify(optionValues)}`
 }
 
 const getScalarQueryValueSignature = ({
