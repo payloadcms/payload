@@ -47,6 +47,11 @@ export const sessionsFieldConfig: ArrayField = {
     {
       name: 'metadata',
       type: 'json',
+      jsonSchema: {
+        fileMatch: ['payload://session-metadata'],
+        schema: { type: ['object', 'null'], additionalProperties: true },
+        uri: 'payload://session-metadata',
+      },
     },
   ],
 }
