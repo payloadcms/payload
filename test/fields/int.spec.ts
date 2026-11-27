@@ -4684,6 +4684,73 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         expect(docIDs).not.toContain(bazBar.id)
       })
 
+      test('should query nested properties - contains', async ({ payload }) => {
+        const findIDs = async (value: string) => {
+          const { docs } = await payload.find({
+            collection: 'json-fields',
+            overrideAccess: true,
+            where: { 'json.foo': { contains: value } },
+          })
+
+          return docs.map(({ id }) => id)
+        }
+
+        const substringIDs = await findIDs('oba')
+
+        expect(substringIDs).toContain(fooBar.id)
+        expect(substringIDs).not.toContain(bazBar.id)
+        // A `.` in the value is a literal dot, not "any character".
+        expect(await findIDs('o.b')).not.toContain(fooBar.id)
+      })
+
+      test('should query nested properties by array index', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { items: [{ approved: true }, { approved: false }] },
+          },
+          overrideAccess: true,
+        })
+
+        const findIDs = async (path: string) => {
+          const { docs } = await payload.find({
+            collection: 'json-fields',
+            overrideAccess: true,
+            where: { [path]: { equals: true } },
+          })
+
+          return docs.map(({ id }) => id)
+        }
+
+        expect(await findIDs('json.items.0.approved')).toContain(doc.id)
+        expect(await findIDs('json.items.1.approved')).not.toContain(doc.id)
+      })
+
+      test('should match documents without json in negated nested queries', async ({ payload }) => {
+        const nullJSON = await payload.create({
+          collection: 'json-fields',
+          data: {},
+          overrideAccess: true,
+        })
+
+        const existsFalse = await payload.find({
+          collection: 'json-fields',
+          overrideAccess: true,
+          where: { 'json.foo': { exists: false } },
+        })
+        const notLike = await payload.find({
+          collection: 'json-fields',
+          overrideAccess: true,
+          where: { 'json.baz': { not_like: 'bar' } },
+        })
+
+        const existsFalseIDs = existsFalse.docs.map(({ id }) => id)
+
+        expect(existsFalseIDs).toContain(nullJSON.id)
+        expect(existsFalseIDs).not.toContain(fooBar.id)
+        expect(notLike.docs.map(({ id }) => id)).toContain(nullJSON.id)
+      })
+
       test('should query - exists', async ({ payload }) => {
         const nullJSON = await payload.create({
           collection: 'json-fields',

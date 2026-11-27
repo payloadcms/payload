@@ -6,7 +6,7 @@ import { SAFE_STRING_REGEX } from '../../utilities/escapeSQLValue.js'
 import { parseJSONPathSegment } from '../../utilities/parseJSONPathSegment.js'
 
 const operatorMap: Record<string, string> = {
-  contains: '~',
+  contains: 'like_regex',
   equals: '==',
   in: 'in',
   like: 'like_regex',
@@ -14,6 +14,8 @@ const operatorMap: Record<string, string> = {
   not_in: 'in',
   not_like: '!like_regex',
 }
+
+const regexOperators = new Set(['contains', 'like', 'not_like'])
 
 const sanitizeValue = (value: unknown, operator?: string): string => {
   if (value === null) {
@@ -32,23 +34,30 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
     throw new APIError(`${value} is not allowed as a JSON query value`, 400)
   }
 
-  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  const isRegexOperator = regexOperators.has(operator ?? '')
+  // Regex operators match the value as a substring, so characters like `.` must stay literal.
+  const pattern = isRegexOperator ? value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : value
+  const escaped = pattern.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 
-  const prefix = ['like', 'not_like'].includes(operator ?? '') ? '(?i)' : ''
+  const prefix = isRegexOperator ? '(?i)' : ''
 
   return `"${prefix}${escaped}"`
 }
 
 export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
   const columnName = typeof column === 'object' ? column.name : column
-  const jsonPaths = pathSegments
-    .slice(1)
-    .map((key) => {
-      return `${parseJSONPathSegment(key).value}[*]`
-    })
-    .join('.')
+  const jsonPath = pathSegments.slice(1).reduce((path, segment) => {
+    const parsedSegment = parseJSONPathSegment(segment)
 
-  const fullPath = pathSegments.length === 1 ? '$[*]' : `$.${jsonPaths}`
+    if (parsedSegment.type === 'arrayIndex') {
+      // Index the array the previous segment selected instead of unwrapping every item of it.
+      return `${path.endsWith('[*]') ? path.slice(0, -3) : path}[${parsedSegment.value}]`
+    }
+
+    return `${path}.${parsedSegment.value}[*]`
+  }, '$')
+
+  const fullPath = pathSegments.length === 1 ? '$[*]' : jsonPath
 
   let sql = ''
 
@@ -59,11 +68,15 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     })
     sql = `${sql})`
   } else if (operator === 'exists') {
-    sql = `${value === false ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '${fullPath}')`
+    // `jsonb_path_exists` returns NULL for a NULL column, so negated checks must match it explicitly.
+    sql =
+      value === false
+        ? `(${columnName} IS NULL OR NOT jsonb_path_exists(${columnName}, '${fullPath}'))`
+        : `jsonb_path_exists(${columnName}, '${fullPath}')`
   } else if (['not_like'].includes(operator)) {
     const mappedOperator = operatorMap[operator]
 
-    sql = `NOT jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})')`
+    sql = `(${columnName} IS NULL OR NOT jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})'))`
   } else {
     sql = `jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
   }
