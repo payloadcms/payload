@@ -13,7 +13,8 @@ import {
 /**
  * Shows the progress of the file sent by a save, in the save's toast and in `uploadProgress`.
  * The toast switches from "Submitting…" only once bytes are reported, so a save waiting on an
- * upload session, which shows its own toast, keeps the plain one.
+ * upload session, which shows its own toast, keeps the plain one. So does a save whose client
+ * upload handler never calls `onProgress`.
  */
 export const trackSaveUploadProgress = ({
   fileName,
