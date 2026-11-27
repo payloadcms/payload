@@ -175,6 +175,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const prevFormState = useRef(formState)
 
+  /**
+   * Counts the times the form has set field validation itself: `validateForm`, `beforeSubmit` and the errors of a failed submit.
+   * An `onChange` request compares it before and after, to tell whether its response is older than that validation.
+   * If so, merging the response keeps the current validation, so a response that was not validated cannot clear a failed submit's errors.
+   */
+  const validationCountRef = useRef(0)
+
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
     let isValid = true
@@ -236,6 +243,8 @@ export const Form: React.FC<FormProps> = (props) => {
     )
 
     await Promise.all(validationPromises)
+
+    validationCountRef.current += 1
 
     if (!dequal(contextRef.current.fields, validatedFieldState)) {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
@@ -345,6 +354,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
           setSubmitted(true)
           setDisabled(false)
+          validationCountRef.current += 1
           return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
         }
       }
@@ -506,6 +516,8 @@ export const Form: React.FC<FormProps> = (props) => {
             )
 
             setIsValid(false)
+
+            validationCountRef.current += 1
 
             dispatchFields({
               type: 'ADD_SERVER_ERRORS',
@@ -841,6 +853,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
+        const validationCountAtStart = validationCountRef.current
+
         let serverState: FormState
 
         for (const onChangeFn of onChange) {
@@ -855,6 +869,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
         dispatchFields({
           type: 'MERGE_SERVER_STATE',
+          keepCurrentValidation: validationCountRef.current !== validationCountAtStart,
           prevStateRef: prevFormState,
           serverState,
         })

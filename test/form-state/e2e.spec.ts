@@ -98,6 +98,47 @@ test.describe('Form State', () => {
     await saveDocAndAssert(page, '#action-save', 'error')
   })
 
+  test('should keep the errors of a failed save when an earlier form state request returns after it', async () => {
+    await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
+    let deliverHeldReply: (() => Promise<void>) | undefined
+
+    // Hold the reply to the form state request sent for the changes below
+    await page.route(postsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && !deliverHeldReply) {
+        const response = await route.fetch()
+        deliverHeldReply = () => route.fulfill({ response })
+        return
+      }
+
+      await route.continue()
+    })
+
+    await page.locator('#field-title').fill(title)
+    await page.locator('#field-validateUsingEvent').fill('Not allowed')
+    await expect.poll(() => typeof deliverHeldReply).toBe('function')
+
+    // Save while that request is pending. The server rejects the value.
+    await saveDocAndAssert(page, '#action-save', 'error')
+
+    const fieldError = '.field-type.error:has(#field-validateUsingEvent)'
+    await expect(page.locator(fieldError)).toBeVisible()
+
+    // The held reply was not validated, as the form had not been submitted when it was requested
+    const heldReplyReceived = page.waitForResponse(
+      (response) => response.request().method() === 'POST' && response.url() === postsUrl.create,
+    )
+    await deliverHeldReply?.()
+    await heldReplyReceived
+
+    // Give the reply time to be merged, then check that the error is still shown
+    await wait(500)
+    await expect(page.locator(fieldError)).toBeVisible()
+
+    await page.unroute(postsUrl.create)
+  })
+
   test('should fire a single network request for onChange events when manipulating blocks', async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)

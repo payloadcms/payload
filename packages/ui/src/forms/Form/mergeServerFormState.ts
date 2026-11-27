@@ -22,6 +22,14 @@ type Args = {
   acceptValues?: AcceptValues
   currentState?: FormState
   incomingState: FormState
+  /**
+   * When `true`, keeps the current `valid`, `errorMessage` and `errorPaths` of fields that exist in `currentState`
+   * instead of taking them from `incomingState`.
+   * Use this when the form has set field validation, e.g. the errors of a failed submit, after the request for `incomingState` was sent.
+   * The validation in `incomingState` is then older than the validation in `currentState`.
+   * @default false
+   */
+  keepCurrentValidation?: boolean
 }
 
 /**
@@ -83,6 +91,7 @@ export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
   incomingState,
+  keepCurrentValidation = false,
 }: Args): FormState => {
   const newState = { ...currentState }
 
@@ -140,12 +149,20 @@ export const mergeServerFormState = ({
       sanitizedIncomingField = rest
     }
 
+    const shouldKeepCurrentValidation = keepCurrentValidation && path in currentState
+
+    if (shouldKeepCurrentValidation) {
+      const { errorMessage, errorPaths, valid, ...rest } = sanitizedIncomingField
+      sanitizedIncomingField = rest
+    }
+
     newState[path] = {
       ...currentState[path],
       ...sanitizedIncomingField,
     }
 
     if (
+      !shouldKeepCurrentValidation &&
       currentState[path] &&
       'errorPaths' in currentState[path] &&
       !('errorPaths' in incomingField)
@@ -209,7 +226,7 @@ export const mergeServerFormState = ({
     }
 
     // If `valid` is `undefined`, mark it as `true`
-    if (incomingField.valid !== false) {
+    if (!shouldKeepCurrentValidation && incomingField.valid !== false) {
       newState[path].valid = true
     }
 
