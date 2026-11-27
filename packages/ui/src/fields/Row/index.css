@@ -2,7 +2,8 @@
   .field-type.row {
     --row-gap: var(--spacer-3); /* 16px gap between row items */
 
-    &:has(> .row__fields:empty) {
+    &:empty,
+    &:has(> .row__fields[data-rendered]:empty) {
       margin-block-end: 0;
     }
 

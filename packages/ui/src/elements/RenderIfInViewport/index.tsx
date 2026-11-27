@@ -30,7 +30,7 @@ export const RenderIfInViewport: React.FC<
   }, [shouldRender, hasRendered])
 
   return (
-    <div className={className} ref={intersectionRef}>
+    <div className={className} data-rendered={hasRendered ? '' : undefined} ref={intersectionRef}>
       {hasRendered ? children : null}
     </div>
   )
