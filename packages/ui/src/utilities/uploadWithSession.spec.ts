@@ -18,6 +18,62 @@ const session = {
 const json = ({ body, status = 200 }: { body: unknown; status?: number }) =>
   new Response(JSON.stringify(body), { status })
 
+/** Sends two segments at a time, so a third one waits in the queue. */
+const parallelSession = {
+  ...session,
+  transfer: {
+    concurrency: 2,
+    segments: [
+      { end: 2, number: 1, start: 0 },
+      { end: 3, number: 2, start: 2 },
+      { end: 4, number: 3, start: 3 },
+    ],
+  },
+} as unknown as ClientUploadSession
+
+/**
+ * Storage rejects segment 1 for good. The other segments stay open until the test responds, like
+ * a slow upload that is still sending when segment 1 fails. They ignore aborts, so a test can
+ * respond to one after the failure.
+ */
+const stubFailingSegment = () => {
+  const openSegments = new Map<
+    number,
+    { respond: (response: Response) => void; signal?: AbortSignal | null }
+  >()
+
+  const fetch = vi.fn((url: string, init?: RequestInit) => {
+    if (url.endsWith('/instructions')) {
+      return Promise.resolve(
+        json({
+          body: {
+            requests: parallelSession.transfer.segments.map(({ number }) => ({
+              method: 'PUT',
+              number,
+              url: `https://storage/${number}`,
+            })),
+            session: parallelSession,
+          },
+        }),
+      )
+    }
+
+    const number = Number(url.split('/').pop())
+
+    if (number === 1) {
+      return Promise.resolve(new Response(null, { status: 400 }))
+    }
+
+    return new Promise<Response>((respond) => {
+      openSegments.set(number, { respond, signal: init?.signal })
+    })
+  })
+
+  vi.stubGlobal('fetch', fetch)
+
+  return { fetch, openSegments }
+}
+
 describe('uploadWithSession', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -60,6 +116,43 @@ describe('uploadWithSession', () => {
 
     expect(instructionRequests).toBe(2)
     expect(await result).toMatchObject({ code: 'storageRejectedSegments' })
+  })
+
+  it('should stop reporting progress once a segment fails', async () => {
+    const { openSegments } = stubFailingSegment()
+    const onProgress = vi.fn()
+
+    const result = await resumeUploadSession({
+      ...requestArgs,
+      file,
+      onProgress,
+      session: parallelSession,
+    }).catch((err: unknown) => err)
+
+    openSegments.get(2)?.respond(new Response(null, { status: 200 }))
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(result).toMatchObject({ message: 'Upload failed with status 400' })
+    expect(onProgress).not.toHaveBeenCalled()
+  })
+
+  it('should not send the remaining segments once a segment fails', async () => {
+    const { fetch, openSegments } = stubFailingSegment()
+
+    await resumeUploadSession({ ...requestArgs, file, session: parallelSession }).catch(() => {})
+
+    openSegments.get(2)?.respond(new Response(null, { status: 200 }))
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(fetch).not.toHaveBeenCalledWith('https://storage/3', expect.anything())
+  })
+
+  it('should cancel segments still sending once a segment fails', async () => {
+    const { openSegments } = stubFailingSegment()
+
+    await resumeUploadSession({ ...requestArgs, file, session: parallelSession }).catch(() => {})
+
+    expect(openSegments.get(2)?.signal?.aborted).toBe(true)
   })
 
   it('should retry a cancel while another request holds the session', async () => {
