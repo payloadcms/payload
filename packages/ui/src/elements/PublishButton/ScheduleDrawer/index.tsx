@@ -6,7 +6,7 @@ import type { Column, SchedulePublish } from 'payload'
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { endOfToday, isSameDay, startOfDay } from 'date-fns'
+import { endOfDay, isSameDay, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -63,6 +63,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   const { getUpcomingScheduledPublish, schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
+  const [now, setNow] = React.useState(() => new Date())
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
@@ -176,6 +177,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       }
 
       setDate(undefined)
+      setNow(new Date())
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
     } catch (err) {
@@ -220,6 +222,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
 
   const onChangeDate = useCallback(
     (incomingDate: Date) => {
+      setNow(new Date())
       if (timezone && incomingDate) {
         // Create TZDate instances for the selected timezone
         const tzDateWithUTC = TZDate.tz(timezone)
@@ -248,19 +251,19 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
     }
   }, [upcoming, fetchUpcoming])
 
-  const minTime = useMemo(() => {
-    const now = new Date()
-    // The picker compares browser-local wall times, including the transposed displayed value.
-    const displayedNow = timezone
-      ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone))
-      : now
+  // The picker displays selected-zone wall times in the browser's timezone.
+  const displayedNow = useMemo(
+    () => (timezone ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone)) : now),
+    [now, timezone, userTimezone],
+  )
 
+  const minTime = useMemo(() => {
     if (!displayedValue || isSameDay(displayedValue, displayedNow)) {
       return displayedNow
     }
 
     return startOfDay(displayedNow)
-  }, [displayedValue, timezone, userTimezone])
+  }, [displayedValue, displayedNow])
 
   return (
     <Drawer
@@ -302,10 +305,11 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         <FieldLabel label={t('general:time')} path={'time'} required />
         <DatePickerField
           id="time"
-          maxTime={endOfToday()}
-          minDate={new Date()}
+          maxTime={endOfDay(displayedNow)}
+          minDate={displayedNow}
           minTime={minTime}
           onChange={(e) => onChangeDate(e)}
+          overrides={{ openToDate: displayedNow }}
           pickerAppearance="dayAndTime"
           readOnly={processing}
           timeFormat={schedulePublishConfig?.timeFormat}
@@ -315,7 +319,10 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         {supportedTimezones.length > 0 && (
           <TimezonePicker
             id={`timezone-picker`}
-            onChange={setTimezone}
+            onChange={(newTimezone) => {
+              setTimezone(newTimezone)
+              setNow(new Date())
+            }}
             options={supportedTimezones}
             selectedTimezone={timezone}
           />

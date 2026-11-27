@@ -1,4 +1,10 @@
-import type { PayloadRequest, SchedulePublishTaskInput, ServerFunction, TypeWithID } from 'payload'
+import type {
+  PayloadRequest,
+  SchedulePublishTaskInput,
+  ServerFunction,
+  TypeWithID,
+  Where,
+} from 'payload'
 
 import { canAccessAdmin, docAccessOperation, docAccessOperationGlobal, Forbidden } from 'payload'
 import { hasScheduledPublishEnabled } from 'payload/shared'
@@ -112,16 +118,36 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
     const publishType = type || 'publish'
     const publishLocale = localeToPublish === 'all' ? undefined : localeToPublish
     if (date) {
+      const targetWhere: Where[] = doc
+        ? [{ 'input.doc.relationTo': { equals: doc.relationTo } }]
+        : [{ 'input.global': { equals: global } }]
+
+      // SQL JSON queries restrict text values. For other custom IDs, narrow by collection
+      // and compare the ID below so valid documents can still be scheduled.
+      if (doc && /^[\w @.\-+:]*$/.test(String(doc.value))) {
+        const id = String(doc.value)
+        const ids: (number | string)[] = [id]
+        const numericID = Number(id)
+
+        if (Number.isFinite(numericID) && String(numericID) === id) {
+          ids.push(numericID)
+        }
+
+        targetWhere.push({ 'input.doc.value': { in: ids } })
+      }
+
       const { docs: pendingJobs } = await payload.db.find<ScheduledPublishJob>({
         collection: 'payload-jobs',
         limit: 0,
         req,
+        select: { input: true },
         where: {
           and: [
             { taskSlug: { equals: 'schedulePublish' } },
             { waitUntil: { equals: date.toISOString() } },
             { completedAt: { exists: false } },
             { hasError: { not_equals: true } },
+            ...targetWhere,
           ],
         },
       })
@@ -174,10 +200,10 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
       }
     }
 
-    payload.logger.error({ err }, error)
+    payload.logger.error({ err, msg: error })
 
     return {
-      error,
+      error: i18n.t('error:unspecific'),
     }
   }
 

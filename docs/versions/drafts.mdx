@@ -299,7 +299,7 @@ Payload provides for an ability to schedule publishing / unpublishing events in 
 
 You can enable this functionality on both collections and globals via the `versions.drafts.schedulePublish: true` property.
 
-The scheduling time picker disables past times in the selected timezone.
+The scheduling time picker disables past dates and times in the selected timezone, including when the browser is on a different calendar day.
 
 The Admin Panel rejects duplicate pending events for the same document or global, action, time, and locale. Creating scheduled events requires permission to publish the target document or global.
 
