@@ -13,8 +13,10 @@ export async function uploadFile({
   mimeType,
   storageFilePath,
 }: UploadFileArgs): Promise<void> {
-  // Older Miniflare versions reject Node Buffers, so pass a plain view of the same bytes.
-  const body = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+  // Older Miniflare versions reject Node Buffers and send a view's whole backing buffer, so pass a
+  // plain view that owns exactly these bytes. Only pooled or sliced Buffers need a copy.
+  const ownsWholeBuffer = buffer.byteOffset === 0 && buffer.byteLength === buffer.buffer.byteLength
+  const body = ownsWholeBuffer ? new Uint8Array(buffer.buffer) : new Uint8Array(buffer)
 
   await bucket.put(storageFilePath, body, {
     httpMetadata: { contentType: mimeType },
