@@ -2140,6 +2140,51 @@ describe('Versions', () => {
         createdIDs.length = 0
       })
 
+      test('should reopen the calendar at the selected scheduling month', async ({
+        page: clockPage,
+      }) => {
+        const post = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'selected scheduling month', title: 'selected scheduling month' },
+        })
+
+        createdIDs.push(post.id)
+        await clockPage.goto(
+          formatAdminURL({
+            adminRoute,
+            path: `/collections/${draftCollectionSlug}/${post.id}`,
+            serverURL,
+          }),
+        )
+        await waitForFormReady(clockPage)
+        // Keep TZDate's native prototype by loading it before installing the clock.
+        await clockPage.clock.setSystemTime(new Date('2030-01-15T12:02:00Z'))
+        await clockPage.locator('#schedule-publish-button').click()
+        await clockPage.locator('.timezone-picker .rs__control').click()
+        await getSelectMenu({ page: clockPage })
+          .locator('.rs__option', { hasText: 'Paris' })
+          .click()
+
+        const input = clockPage.locator('.date-time-picker input')
+        const calendar = clockPage.locator('.react-datepicker-popper')
+
+        await input.fill('Feb 20, 2030 2:00 PM')
+        await clockPage.keyboard.press('Enter')
+        await clockPage
+          .getByRole('heading', {
+            name: 'Schedule publish for selected scheduling month',
+            exact: true,
+          })
+          .click()
+        await expect(calendar).toBeHidden()
+        await input.click()
+        await expect(calendar.locator('.react-datepicker__month-select')).toHaveValue('1')
+        await expect(calendar.locator('.react-datepicker__year-select')).toHaveValue('2030')
+        await expect(
+          calendar.locator('.react-datepicker__day--020.react-datepicker__day--selected'),
+        ).toBeVisible()
+      })
+
       for (const { day, futureTime, now, pastTime, timezone } of [
         {
           day: 15,
