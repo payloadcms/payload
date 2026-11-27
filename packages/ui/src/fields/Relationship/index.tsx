@@ -5,8 +5,11 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { Value } from './types.js'
 
-import { useField } from '../../forms/useField/index.js'
+import { useForm } from '../../forms/Form/context.js'
+  import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+  import { useEditDepth } from '../../providers/EditDepth/index.js'
+    import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { RelationshipInput } from './Input.js'
 import './index.css'
@@ -61,7 +64,14 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldClientProps> = (prop
     validate: memoizedValidate,
   })
 
-  const styles = useMemo(() => mergeFieldStyles(field), [field])
+    const { uuid } = useForm()
+        const editDepth = useEditDepth()
+  
+          // The label must point at the select's input, not the wrapper div: a <label>
+  // whose `for` targets a div fails the axe `label` rule, so the input was
+  // left without a name. Same pattern as the date field (see DateTimeField).
+  const inputId = generateFieldID(path, editDepth, uuid, 'relationship-input')
+    const styles = useMemo(() => mergeFieldStyles(field), [field])
   const isPolymorphic = Array.isArray(relationToProp)
   const [relationTo] = React.useState(() =>
     Array.isArray(relationToProp) ? relationToProp : [relationToProp],
@@ -200,6 +210,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldClientProps> = (prop
       formatDisplayedOptions={
         isPolymorphic ? undefined : (options) => options.map((opt) => opt.options).flat()
       }
+      inputId={inputId}
       isSortable={isSortable}
       Label={Label}
       label={label}
