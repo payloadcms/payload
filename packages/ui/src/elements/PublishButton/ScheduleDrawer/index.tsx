@@ -260,12 +260,17 @@ export const ScheduleDrawer: React.FC<Props> = ({
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (!date || isSameDay(date, now)) {
-      return now
+    // The picker compares browser-local wall times, including the transposed displayed value.
+    const displayedNow = timezone
+      ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone))
+      : now
+
+    if (!displayedValue || isSameDay(displayedValue, displayedNow)) {
+      return displayedNow
     }
 
-    return startOfDay(now)
-  }, [date, now])
+    return startOfDay(displayedNow)
+  }, [displayedValue, now, timezone, userTimezone])
 
   return (
     <Drawer className={baseClass} slug={slug} title={modalTitle}>
