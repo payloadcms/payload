@@ -344,6 +344,15 @@ export const traverseFields = ({
           break
         }
 
+        // In include mode, a group/tab that is not part of the select contributes
+        // nothing. Without this guard the recursion below receives
+        // `select: undefined`, which every nested branch reads as "select
+        // everything" - e.g. a version query with `select: { parent: true }`
+        // would select the full body of every version. See #18251
+        if (select && selectMode === 'include' && typeof fieldSelect === 'undefined') {
+          break
+        }
+
         traverseFields({
           _locales,
           adapter,
