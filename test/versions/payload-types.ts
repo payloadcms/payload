@@ -492,15 +492,9 @@ export interface User {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -549,15 +543,9 @@ export interface SecondaryAdminUser {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
