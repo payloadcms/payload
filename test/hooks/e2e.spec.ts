@@ -116,12 +116,6 @@ describe('Hooks', () => {
           { timeout: TEST_TIMEOUT_LONG },
         )
         .toBe(1)
-
-      await payload.delete({
-        id: doc.id,
-        collection: 'before-delete-hooks',
-        overrideAccess: true,
-      })
     })
 
     test('ensure document with erroring beforeDelete hook cannot be deleted from edit view while public 401 error is shown in toast', async () => {
@@ -160,12 +154,6 @@ describe('Hooks', () => {
           { timeout: TEST_TIMEOUT_LONG },
         )
         .toBe(1)
-
-      await payload.delete({
-        id: doc.id,
-        collection: 'before-delete-hooks',
-        overrideAccess: true,
-      })
     })
 
     test('ensure private 500 error is not shown when deleting document with erroring beforeDelete hook from list view', async () => {
@@ -192,12 +180,6 @@ describe('Hooks', () => {
       await expect(page.locator('.payload-toast-container')).not.toContainText(
         `Test error: cannot delete document with ID ${doc.id}`,
       )
-
-      await payload.delete({
-        id: doc.id,
-        collection: 'before-delete-2-hooks',
-        overrideAccess: true,
-      })
     })
 
     test('ensure private 500 error is not shown when deleting document with erroring beforeDelete hook from edit view', async () => {
@@ -220,12 +202,6 @@ describe('Hooks', () => {
       await expect(page.locator('.payload-toast-container')).not.toContainText(
         `Test error: cannot delete document with ID ${doc.id}`,
       )
-
-      await payload.delete({
-        id: doc.id,
-        collection: 'before-delete-2-hooks',
-        overrideAccess: true,
-      })
     })
   })
 })
