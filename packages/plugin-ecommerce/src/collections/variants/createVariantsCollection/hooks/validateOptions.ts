@@ -12,14 +12,14 @@ export const validateOptions: (props?: Props) => Validate =
 
     if (!values || values.length === 0) {
       // @ts-expect-error - TODO: Fix types
-      return t('ecommerce:variantOptionsRequired')
+      return t('plugin-ecommerce:variantOptionsRequired')
     }
 
     const productID = data.product
 
     if (!productID) {
       // @ts-expect-error - TODO: Fix types
-      return t('ecommerce:productRequired')
+      return t('plugin-ecommerce:productRequired')
     }
 
     const product = await req.payload.findByID({
@@ -28,6 +28,10 @@ export const validateOptions: (props?: Props) => Validate =
       depth: 1,
       joins: {
         variants: {
+          // No limit: the duplicate check below must see every sibling variant.
+          // Without this the join falls back to the adapter default of 10, so a
+          // combination already used by an 11th or later variant passes validation.
+          limit: 0,
           where: {
             deletedAt: { exists: false },
             ...(data.id && {
@@ -52,7 +56,7 @@ export const validateOptions: (props?: Props) => Validate =
     // @ts-expect-error - TODO: Fix types
     if (values.length < product?.variantTypes?.length) {
       // @ts-expect-error - TODO: Fix types
-      return t('ecommerce:variantOptionsRequiredAll')
+      return t('plugin-ecommerce:variantOptionsRequiredAll')
     }
 
     if (variants.length > 0) {
@@ -68,7 +72,7 @@ export const validateOptions: (props?: Props) => Validate =
 
       if (exists) {
         // @ts-expect-error - TODO: Fix types
-        return t('ecommerce:variantOptionsAlreadyExists')
+        return t('plugin-ecommerce:variantOptionsAlreadyExists')
       }
     }
 
