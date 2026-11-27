@@ -2,7 +2,7 @@ import type { UploadTransferProgress } from 'payload'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { uploadRequest } from './uploadRequest.js'
+import { isSameOriginURL, uploadRequest } from './uploadRequest.js'
 
 class FakeXMLHttpRequest {
   static instances: FakeXMLHttpRequest[] = []
@@ -292,5 +292,32 @@ describe('uploadRequest', () => {
       expect.objectContaining({ body, credentials: 'same-origin', method: 'PUT' }),
     )
     expect(events).toEqual([{ loadedBytes: 10, totalBytes: 10 }])
+  })
+})
+
+describe('isSameOriginURL', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('should accept relative and absolute URLs on the page origin', () => {
+    vi.stubGlobal('location', new URL('https://cms.example.com/admin/collections/media/create'))
+
+    expect(isSameOriginURL({ url: '/api/media' })).toBe(true)
+    expect(isSameOriginURL({ url: 'https://cms.example.com/api/media?depth=0' })).toBe(true)
+  })
+
+  it('should reject another host, port or protocol', () => {
+    vi.stubGlobal('location', new URL('https://cms.example.com/admin'))
+
+    expect(isSameOriginURL({ url: 'https://api.example.com/api/media' })).toBe(false)
+    expect(isSameOriginURL({ url: 'https://cms.example.com:8443/api/media' })).toBe(false)
+    expect(isSameOriginURL({ url: 'http://cms.example.com/api/media' })).toBe(false)
+  })
+
+  it('should reject every URL where the page has no location', () => {
+    vi.stubGlobal('location', undefined)
+
+    expect(isSameOriginURL({ url: '/api/media' })).toBe(false)
   })
 })

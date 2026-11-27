@@ -34,7 +34,7 @@ import {
   getUploadProgressMessage,
 } from '../../../providers/UploadSessions/browser.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
-import { uploadRequest } from '../../../utilities/uploadRequest.js'
+import { isSameOriginURL, uploadRequest } from '../../../utilities/uploadRequest.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
 import { useBulkUpload } from '../index.js'
@@ -545,7 +545,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           // A file still in the body is sent with this request, which reports its progress.
           const req =
-            body.get('file') instanceof Blob
+            body.get('file') instanceof Blob && isSameOriginURL({ url: actionURLWithParams })
               ? await uploadRequest({
                   body,
                   method: 'POST',
