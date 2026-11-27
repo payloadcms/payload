@@ -293,8 +293,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await context.close()
   })
 
-  // Fails every run: the debounced refresh from filling the title is sent after Publish.
-  test.fixme('should check the published status on Publish without waiting for the upload', async ({
+  test('should check the published status on Publish without waiting for the upload', async ({
     browser,
   }) => {
     const { context, log, page, releaseParts } = await openCreateForm({
@@ -306,9 +305,9 @@ test.describe('storage-s3 upload sessions E2E', () => {
     // Valid as a draft, invalid once published.
     const title = `${draftOnlyTitlePrefix} ${Date.now()}`
 
-    // A background refresh validates the title as a draft, so one sent after Publish would clear
-    // the error. Only the early check sends the `published` status that Publish adds.
-    let refreshCount = 0
+    // Background refreshes validate the title as a draft. Only the early check sends the
+    // `published` status that Publish adds.
+    const refreshResponses: Promise<unknown>[] = []
     const pageURL = page.url()
 
     page.on('request', (request) => {
@@ -316,7 +315,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
         isFormStateRequest({ pageURL, request }) &&
         !(request.postData() ?? '').includes('"published"')
       ) {
-        refreshCount += 1
+        refreshResponses.push(request.response())
       }
     })
 
@@ -330,12 +329,17 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await expect(page.locator('#field-error-title')).toBeVisible()
     expect(log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(false)
 
-    // The onChange refresh starts 250 ms after a change. This counts requests sent, so a slow
-    // reply cannot make the check pass early.
-    const refreshCountWithErrors = refreshCount
-
+    // The onChange refresh starts 250 ms after a change. Publish usually comes sooner than that
+    // after the fill, so the refresh for the title goes out after the error shows. Wait for it.
     await page.waitForTimeout(1000)
-    expect(refreshCount).toBe(refreshCountWithErrors)
+    await Promise.all(refreshResponses)
+
+    // This counts requests sent, so a slow reply cannot make the check pass early.
+    const refreshCountAfterPublish = refreshResponses.length
+
+    await page.waitForTimeout(500)
+    expect(refreshResponses).toHaveLength(refreshCountAfterPublish)
+    // That refresh found the title valid as a draft, and the error from Publish must outlast it.
     await expect(page.locator('#field-error-title')).toBeVisible()
 
     releaseParts()
