@@ -171,7 +171,9 @@ export const AccessJoinNotes: CollectionConfig = {
     {
       name: 'mixedTags',
       type: 'select',
-      options: ['available', 'not-permitted', 'unavailable'],
+      // Listed in a different order than the has-many field in AccessJoinArticles on purpose, so
+      // mixed-select tests cover option sets that match regardless of order.
+      options: ['unavailable', 'not-permitted', 'available'],
     },
     {
       name: 'variantValue',
