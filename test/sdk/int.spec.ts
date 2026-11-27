@@ -114,6 +114,32 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
     )
   })
 
+  test('should execute findByID with fallbackLocale: false', async ({ payload, sdk }) => {
+    const localizedPost = await payload.create({
+      collection: 'posts',
+      data: { localizedText: 'english' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const withFallback = await sdk.findByID({
+      id: localizedPost.id,
+      collection: 'posts',
+      locale: 'es',
+    })
+    const withoutFallback = await sdk.findByID({
+      id: localizedPost.id,
+      collection: 'posts',
+      fallbackLocale: false,
+      locale: 'es',
+    })
+
+    await payload.delete({ id: localizedPost.id, collection: 'posts', overrideAccess: true })
+
+    expect(withFallback.localizedText).toBe('english')
+    expect(withoutFallback.localizedText).toBeUndefined()
+  })
+
   test('should execute findByID with disableErrors: true', async ({ sdk }) => {
     const result = await sdk.findByID({
       id: typeof post.id === 'string' ? randomUUID() : 999,
