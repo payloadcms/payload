@@ -249,6 +249,7 @@ export const ecommercePlugin = definePlugin<EcommercePluginConfig | undefined>({
             handler: confirmOrderHandler({
               cartsSlug: collectionSlugMap.carts,
               currenciesConfig,
+              inventory: sanitizedPluginConfig.inventory,
               ordersSlug: collectionSlugMap.orders,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
