@@ -45,7 +45,7 @@ export const buildSearchParams = (args: OperationArgs): string => {
     search.pagination = String(args.pagination)
   }
 
-  if (args.fallbackLocale) {
+  if (args.fallbackLocale || args.fallbackLocale === false) {
     search['fallback-locale'] = String(args.fallbackLocale)
   }
 

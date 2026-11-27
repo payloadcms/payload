@@ -268,6 +268,7 @@ export interface User {
 export interface Post {
   id: string;
   text?: string | null;
+  localizedText?: string | null;
   number?: number | null;
   number2?: number | null;
   group?: {
@@ -484,6 +485,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
+  localizedText?: T;
   number?: T;
   number2?: T;
   group?:
