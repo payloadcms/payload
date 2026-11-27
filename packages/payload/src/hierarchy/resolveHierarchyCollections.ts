@@ -8,17 +8,13 @@ import type {
   Validate,
 } from '../fields/config/types.js'
 import type { Document } from '../types/index.js'
-import type {
-  HierarchyJoinFieldConfig,
-  SanitizedHierarchyConfig,
-  SanitizedHierarchyRelatedCollection,
-} from './types.js'
+import type { SanitizedHierarchyConfig, SanitizedHierarchyRelatedCollection } from './types.js'
 
 import { sanitizeJoinField } from '../fields/config/sanitizeJoinField.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { extractID } from '../utilities/extractID.js'
 import { flattenAllFields } from '../utilities/flattenAllFields.js'
-import { getHierarchyFieldName } from './constants.js'
+import { getHierarchyFieldName, HIERARCHY_CONTENTS_FIELD } from './constants.js'
 import { hierarchyCollectionAfterDelete } from './hooks/collectionAfterDelete.js'
 import { injectHierarchyButton } from './injectHierarchyButton.js'
 
@@ -38,7 +34,7 @@ import { injectHierarchyButton } from './injectHierarchyButton.js'
  * - Injects `HierarchyButton` component when `custom.hierarchy.injectHeaderButton` is set
  * - Adds `collectionSpecific` validation to ensure hierarchy items accept the document type
  * - Injects the `hierarchyType` select field when `collectionSpecific` is enabled
- * - Injects join field when `joinField` is configured
+ * - Adds the contents join for hierarchies with related collections
  * - Adds `afterDelete` hook to clear hierarchy references when items are deleted
  * - Populates `relatedCollections` in the sanitized hierarchy config
  */
@@ -146,14 +142,14 @@ export const resolveHierarchyCollections = (config: Config): void => {
       })
     }
 
-    // If joinField is configured, add the join field to query children
-    if (hierarchyConfig.joinField) {
+    const relatedSlugs = Object.keys(sanitizedRelatedCollections)
+
+    if (relatedSlugs.length > 0) {
       injectJoinField({
         config,
         hierarchyCollection: hierarchyCollection as SanitizedCollectionConfig,
-        joinFieldConfig: hierarchyConfig.joinField,
         parentFieldName,
-        relatedSlugs: Object.keys(sanitizedRelatedCollections),
+        relatedSlugs,
       })
     }
 
@@ -163,7 +159,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
     }
 
     // Add afterDelete hook to clear folder references from related documents
-    if (Object.keys(sanitizedRelatedCollections).length > 0) {
+    if (relatedSlugs.length > 0) {
       injectAfterDeleteHook({
         hierarchyCollection,
         sanitizedRelatedCollections,
@@ -361,42 +357,38 @@ function injectTypeField({
 function injectJoinField({
   config,
   hierarchyCollection,
-  joinFieldConfig,
   parentFieldName,
   relatedSlugs,
 }: {
   config: Config
   hierarchyCollection: SanitizedCollectionConfig
-  joinFieldConfig: HierarchyJoinFieldConfig
   parentFieldName: string
   relatedSlugs: string[]
 }): void {
-  const { name, admin: userAdmin, ...userConfig } = joinFieldConfig
-
-  const hasJoinField = hierarchyCollection.fields?.some(
-    (field) => 'name' in field && field.name === name,
-  )
-
-  if (hasJoinField) {
+  if (
+    hierarchyCollection.fields.some(
+      (field) => fieldAffectsData(field) && field.name === HIERARCHY_CONTENTS_FIELD,
+    )
+  ) {
     return
   }
 
+  const collection = [hierarchyCollection.slug, ...relatedSlugs]
+  const titleFields = new Set(
+    config.collections
+      ?.filter(({ slug }) => collection.includes(slug))
+      .map(({ admin }) => admin?.useAsTitle || 'id'),
+  )
   const joinField: JoinField = {
-    // User config (spread first so auto-generated values take precedence for required fields)
-    ...userConfig,
-    // Auto-generated values (these cannot be overridden)
-    name,
+    name: HIERARCHY_CONTENTS_FIELD,
     type: 'join',
-    collection: [hierarchyCollection.slug, ...relatedSlugs],
+    admin: { defaultColumns: [...titleFields] },
+    collection,
     hasMany: true,
+    label: ({ t }) => t('general:documents'),
     on: parentFieldName,
-    // Merge admin config
-    admin: {
-      ...userAdmin,
-    },
   }
 
-  hierarchyCollection.fields = hierarchyCollection.fields || []
   hierarchyCollection.fields.push(joinField)
 
   // Sanitize the join field to register it properly

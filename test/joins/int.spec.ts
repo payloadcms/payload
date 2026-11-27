@@ -362,7 +362,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     const result = await payload.find({
       collection: 'folders',
       joins: {
-        children: {
+        _h_contents: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -389,7 +389,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       },
     })
 
-    expect(result.docs[0]?.children.docs).toHaveLength(1)
+    expect(result.docs[0]?._h_contents.docs).toHaveLength(1)
   })
 
   test('should allow join where query on hasMany select fields', async ({ payload }) => {
@@ -415,7 +415,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     const findFolder = await payload.find({
       collection: 'folders',
       joins: {
-        children: {
+        _h_contents: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -442,7 +442,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       },
     })
 
-    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
+    expect(findFolder?.docs[0]?._h_contents?.docs).toHaveLength(1)
   })
 
   test('should query where with exists for hasMany select fields', async ({ payload }) => {
@@ -469,7 +469,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     const findFolder = await payload.find({
       collection: 'folders',
       joins: {
-        children: {
+        _h_contents: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -505,7 +505,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       },
     })
 
-    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
+    expect(findFolder?.docs[0]?._h_contents?.docs).toHaveLength(1)
   })
 
   test('should filter joins using where query', async ({ payload }) => {

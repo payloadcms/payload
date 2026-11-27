@@ -261,7 +261,7 @@ export interface Config {
       children: 'multiple-collections-1' | 'multiple-collections-2';
     };
     folders: {
-      children: 'folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
+      _h_contents: 'folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
     };
   };
   collectionsSelect: {
@@ -1335,7 +1335,7 @@ export interface Folder {
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
   folderType?: ('example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2')[] | null;
-  children?: {
+  _h_contents?: {
     docs?: (
       | {
           relationTo?: 'folders';
@@ -2200,7 +2200,7 @@ export interface FoldersSelect<T extends boolean = true> {
   _h_slugPath?: T;
   _h_titlePath?: T;
   folderType?: T;
-  children?: T;
+  _h_contents?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -40,7 +40,6 @@ export default buildConfigWithDefaults({
             },
           },
           collectionSpecific: { fieldName: 'folderType' },
-          joinField: { name: 'documentsAndFolders' },
           parentFieldName: 'folder',
         },
         versions: false,
