@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { storageMediaSharpOptions } from '../__helpers/shared/storageMediaSharpOptions.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -19,7 +20,8 @@ import { Users } from './collections/Users.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+// TanStack Start bundles this file, so resolve `wrangler.jsonc` and other suite files from the source folder
+const dirname = getTestSuiteDir({ fallbackDir: path.dirname(filename), suitePath: 'storage-r2' })
 
 // Load test env creds
 dotenv.config({
