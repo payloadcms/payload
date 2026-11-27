@@ -4253,6 +4253,67 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(bazBar.id)
       })
 
+      it('should query nested properties - contains', async () => {
+        const findIDs = async (value: string) => {
+          const { docs } = await payload.find({
+            collection: 'json-fields',
+            where: { 'json.foo': { contains: value } },
+          })
+
+          return docs.map(({ id }) => id)
+        }
+
+        const substringIDs = await findIDs('oba')
+
+        expect(substringIDs).toContain(fooBar.id)
+        expect(substringIDs).not.toContain(bazBar.id)
+        // A `.` in the value is a literal dot, not "any character".
+        expect(await findIDs('o.b')).not.toContain(fooBar.id)
+      })
+
+      it('should query nested properties by array index', async () => {
+        const doc = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { items: [{ approved: true }, { approved: false }] },
+          },
+        })
+
+        const findIDs = async (path: string) => {
+          const { docs } = await payload.find({
+            collection: 'json-fields',
+            where: { [path]: { equals: true } },
+          })
+
+          return docs.map(({ id }) => id)
+        }
+
+        expect(await findIDs('json.items.0.approved')).toContain(doc.id)
+        expect(await findIDs('json.items.1.approved')).not.toContain(doc.id)
+      })
+
+      it('should match documents without json in negated nested queries', async () => {
+        const nullJSON = await payload.create({
+          collection: 'json-fields',
+          data: {},
+        })
+
+        const existsFalse = await payload.find({
+          collection: 'json-fields',
+          where: { 'json.foo': { exists: false } },
+        })
+        const notLike = await payload.find({
+          collection: 'json-fields',
+          where: { 'json.baz': { not_like: 'bar' } },
+        })
+
+        const existsFalseIDs = existsFalse.docs.map(({ id }) => id)
+
+        expect(existsFalseIDs).toContain(nullJSON.id)
+        expect(existsFalseIDs).not.toContain(fooBar.id)
+        expect(notLike.docs.map(({ id }) => id)).toContain(nullJSON.id)
+      })
+
       it('should query - exists', async () => {
         const nullJSON = await payload.create({
           collection: 'json-fields',
