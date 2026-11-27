@@ -104,6 +104,12 @@ export type RelationshipInputProps = {
     defaultLabel: string
     doc?: Record<string, unknown>
   }) => string
+  /**
+  * ID of the select's input, used by the label's `htmlFor` and passed to
+  * ReactSelect as `inputId`. The form-aware parent computes it; standalone
+  * uses can omit it.
+  */
+  readonly inputId?: string
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
