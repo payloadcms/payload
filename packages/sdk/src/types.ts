@@ -65,7 +65,7 @@ export type TransformGlobalWithSelect<
     >
   : T['globals'][TSlug]
 
-type SystemFields = 'createdAt' | 'id' | 'sizes' | 'updatedAt'
+type SystemFields = 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
 
 export type RequiredDataFromCollection<TData> = Omit<TData, SystemFields> &
   Partial<Pick<Record<SystemFields, unknown> & TData, SystemFields>>

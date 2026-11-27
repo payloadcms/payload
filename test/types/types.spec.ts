@@ -1018,6 +1018,19 @@ describe('Types testing', () => {
       expect(result).type.toBe<LocalConfig['collections']['posts']>()
     })
 
+    test('SDK create should not require the collection field on auth collections', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      expect(
+        _sdk.create({
+          collection: 'users',
+          data: {
+            email: 'dev@payloadcms.com',
+            password: 'test',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
     test('SDK create data should be typed and reject invalid properties', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       expect(
