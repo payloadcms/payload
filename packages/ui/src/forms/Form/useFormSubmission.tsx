@@ -143,6 +143,10 @@ export const useFormSubmission = ({
   const activeSaveUploadRef = useRef<ReturnType<typeof trackSaveUploadProgress> | undefined>(
     undefined,
   )
+  /** That save's own progress toast, when it has no "Submitting…" toast, so a reset can remove it. */
+  const activeUploadToastRef = useRef<ReturnType<typeof createProgressToast<string>> | undefined>(
+    undefined,
+  )
   /**
    * Validates the document on the server without saving it. The `file` field is skipped because
    * its bytes are being uploaded separately and are never part of the form state sent here.
@@ -246,6 +250,8 @@ export const useFormSubmission = ({
     // cleared now rather than when the upload ends, so Save is not held disabled until then.
     abandonSaveUploadProgress({ setUploadProgress, upload: activeSaveUploadRef.current })
     activeSaveUploadRef.current = undefined
+    dismissLoadingUploadToast({ uploadToast: activeUploadToastRef.current })
+    activeUploadToastRef.current = undefined
   }, [setIsBackgroundProcessing, setDisabledBySubmission, setUploadProgress])
 
   // Once the form unmounts, its save no longer owns `uploadProgress`, so later reports are ignored.
@@ -254,6 +260,8 @@ export const useFormSubmission = ({
     () => () => {
       abandonSaveUploadProgress({ setUploadProgress, upload: activeSaveUploadRef.current })
       activeSaveUploadRef.current = undefined
+      dismissLoadingUploadToast({ uploadToast: activeUploadToastRef.current })
+      activeUploadToastRef.current = undefined
     },
     [setUploadProgress],
   )
@@ -306,6 +314,18 @@ export const useFormSubmission = ({
       // A save's own progress toast when it has no "Submitting…" toast to show progress in.
       let uploadToast: ReturnType<typeof createProgressToast<string>> | undefined
       let preservePromiseToast = false
+      // Only the first result replaces the progress toast. A later one, such as a second error,
+      // gets a toast of its own so it does not replace the first.
+      let hasShownUploadResult = false
+      const getResultToastOptions = () => {
+        if (!uploadToast || hasShownUploadResult) {
+          return undefined
+        }
+
+        hasShownUploadResult = true
+
+        return { id: uploadToast.getResultID() }
+      }
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -318,10 +338,8 @@ export const useFormSubmission = ({
       if (redirect || disableToast || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
-        successToast = (data) =>
-          toast.success(data, uploadToast ? { id: uploadToast.getResultID() } : undefined)
-        errorToast = (data) =>
-          toast.error(data, uploadToast ? { id: uploadToast.getResultID() } : undefined)
+        successToast = (data) => toast.success(data, getResultToastOptions())
+        errorToast = (data) => toast.error(data, getResultToastOptions())
       } else {
         const promiseToast = toast.promise(promise, {
           error: (data) => {
@@ -520,6 +538,7 @@ export const useFormSubmission = ({
               totalBytes: uploadFile.size,
             })
             activeSaveUploadRef.current = saveUpload
+            activeUploadToastRef.current = uploadToast
           }
 
           const formData = await contextRef.current.createFormData(overrides, {
@@ -885,15 +904,10 @@ export const useFormSubmission = ({
         }
 
         // Without a result toast, e.g. a create that redirects, the progress toast is removed.
-        const uploadToastID = uploadToast?.getResultID()
+        dismissLoadingUploadToast({ uploadToast })
 
-        if (
-          uploadToastID !== undefined &&
-          toast
-            .getToasts()
-            .some((item) => item.id === uploadToastID && 'type' in item && item.type === 'loading')
-        ) {
-          toast.dismiss(uploadToastID)
+        if (activeUploadToastRef.current === uploadToast) {
+          activeUploadToastRef.current = undefined
         }
       }
     },
@@ -1084,4 +1098,23 @@ const applyOverridesToFormState = ({
   }
 
   return formStateWithOverrides
+}
+
+/**
+ * Removes a save's own progress toast while it still shows the upload. A result that already
+ * replaced it stays.
+ */
+const dismissLoadingUploadToast = ({
+  uploadToast,
+}: {
+  uploadToast?: ReturnType<typeof createProgressToast<string>>
+}) => {
+  const id = uploadToast?.getResultID()
+
+  if (
+    id !== undefined &&
+    toast.getToasts().some((item) => item.id === id && 'type' in item && item.type === 'loading')
+  ) {
+    toast.dismiss(id)
+  }
 }
