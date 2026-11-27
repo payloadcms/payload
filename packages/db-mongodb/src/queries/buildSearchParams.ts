@@ -9,6 +9,7 @@ import type {
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
+import { getNestedRelationshipReadConstraint } from 'payload/internal'
 import {
   getDateOnlyComparison,
   hasManyRelationshipOperatorSet,
@@ -562,9 +563,27 @@ async function buildHasManyRelationshipSearchParam({
         }
       }
 
+      const readConstraint = getNestedRelationshipReadConstraint(nestedWhere)
+
+      // Related documents the caller cannot read must not affect the result, so they count as
+      // matching. Only the read constraint is inverted; the caller's query is never inverted.
+      const readableRelatedDocumentsQuery = readConstraint
+        ? await RelatedModel.buildQuery({
+            locale: pathLocale ?? locale,
+            payload,
+            where: readConstraint,
+          })
+        : undefined
+
       // MongoDB rejects `$near` and `$text` when they are inverted with `$nor`. Check the parent
       // instead: none of its IDs may fall outside the matching IDs.
-      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(
+        readableRelatedDocumentsQuery
+          ? {
+              $or: [matchingRelatedDocumentsQuery, { $nor: [readableRelatedDocumentsQuery] }],
+            }
+          : matchingRelatedDocumentsQuery,
+      )
 
       return {
         path,

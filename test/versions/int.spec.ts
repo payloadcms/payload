@@ -5462,29 +5462,38 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       const req = await createPayloadRequest({ payload, user: secondaryAdminUser })
       const currentDate = new Date()
 
-      await schedulePublishHandler({
-        type: 'publish',
-        date: new Date(currentDate.getTime() + 3000),
-        doc: {
-          relationTo: draftCollectionSlug,
-          value: draft.id,
-        },
-        localeToPublish: 'en',
-        req,
-        user: secondaryAdminUser,
-      })
-
-      const queuedJob = (
-        await payload.find({
-          collection: 'payload-jobs',
-          overrideAccess: true,
-          where: {
-            'input.doc.value': {
-              equals: draft.id,
-            },
+      await expect(
+        schedulePublishHandler({
+          type: 'publish',
+          date: new Date(currentDate.getTime() + 3000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
           },
-        })
-      ).docs[0]
+          localeToPublish: 'en',
+          req,
+          user: secondaryAdminUser,
+        }),
+      ).rejects.toMatchObject({ status: 403 })
+
+      // Queue directly to verify the job itself also enforces the scheduling user's access
+      const queuedJob = await payload.jobs.queue({
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: String(draft.id),
+          },
+          locale: 'en',
+          user: {
+            relationTo: secondaryAdminUserCollectionSlug,
+            value: secondaryAdminUser.id,
+          },
+        },
+        overrideAccess: true,
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
 
       await wait(4000)
 
@@ -6116,6 +6125,98 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(newJobs).toEqual([])
       })
 
+      test('should not schedule a publish without publish permission', async ({ payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await payload.update({
+          id: draftDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            restrictedToUpdate: true,
+          },
+          overrideAccess: true,
+        })
+
+        await expect(
+          schedulePublishHandler({
+            type: 'publish',
+            date: new Date(Date.now() + 60_000),
+            doc: {
+              relationTo: draftCollectionSlug,
+              value: String(draftDoc.id),
+            },
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const { totalDocs } = await payload.count({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            'input.doc.value': {
+              equals: String(draftDoc.id),
+            },
+          },
+        })
+
+        expect(totalDocs).toBe(0)
+      })
+
+      test('should not cancel a scheduled publish without publish permission', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await schedulePublishHandler({
+          type: 'unpublish',
+          date: new Date(Date.now() + 60_000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: String(draftDoc.id),
+          },
+          req,
+          user,
+        })
+
+        const [scheduledJob] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: {
+              'input.doc.value': {
+                equals: String(draftDoc.id),
+              },
+            },
+          })
+        ).docs
+
+        await payload.update({
+          id: draftDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            restrictedToUpdate: true,
+          },
+          overrideAccess: true,
+        })
+
+        await expect(
+          schedulePublishHandler({
+            deleteID: scheduledJob.id,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const result = await payload.findByID({
+          id: scheduledJob.id,
+          collection: 'payload-jobs',
+          overrideAccess: true,
+        })
+
+        expect(result.id).toBe(scheduledJob.id)
+      })
+
       test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const unrelatedJob = await payload.db.create({
@@ -6126,11 +6227,13 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           },
         })
 
-        await schedulePublishHandler({
-          deleteID: unrelatedJob.id,
-          req,
-          user,
-        })
+        await expect(
+          schedulePublishHandler({
+            deleteID: unrelatedJob.id,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
 
         const result = await payload.findByID({
           id: unrelatedJob.id,

@@ -3,9 +3,9 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AutosavePostsCollection } from './collections/Autosave/index.js'
+import { AutosavePostsCollection, DraftPostsCollection } from './collections/Autosave/index.js'
+import { AutosaveReorderCorruption } from './collections/AutosaveReorderCorruption/index.js'
 import { ConditionsCollection } from './collections/Conditions/index.js'
-import { DraftPostsCollection } from './collections/DraftPosts/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -28,6 +28,7 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
+      AutosaveReorderCorruption,
       PostsCollection,
       AutosavePostsCollection,
       ConditionsCollection,

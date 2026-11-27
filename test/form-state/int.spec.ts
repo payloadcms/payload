@@ -4,27 +4,27 @@ import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { createPayloadRequest, getAccessResults } from 'payload'
 import { getDataByPath, getDataFromFormState } from 'payload/shared'
 import React from 'react'
-import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import { devUser } from '../credentials.js'
-import { autosavePostsSlug } from './collections/Autosave/index.js'
-import { conditionsSlug } from './collections/Conditions/index.js'
-import { postsSlug } from './collections/Posts/index.js'
-
-// eslint-disable-next-line payload/no-relative-monorepo-imports
-import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
-// eslint-disable-next-line payload/no-relative-monorepo-imports
-import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { hasRowPathChanged } from '../../packages/ui/src/forms/Form/rowHelpers.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildNullifyLocaleFieldUpdate } from '../../packages/ui/src/forms/NullifyField/index.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { reduceFieldsToValuesWithValidation } from '../../packages/ui/src/utilities/reduceFieldsToValuesWithValidation.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
 import { test } from '../__helpers/int/vitest.js'
+import { devUser } from '../credentials.js'
+import { DocumentInfoData } from './collections/Autosave/DocumentInfoData.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { NonDirtyFieldUpdater } from './collections/Autosave/NonDirtyFieldUpdater.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
+import { postsSlug } from './collections/Posts/index.js'
 
 let user: User
 
@@ -90,23 +90,32 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     const restrictedValue = 'client supplied'
     const title = 'Access filtered autosave'
     vi.stubGlobal('React', React)
+    const previousImportMap = payload.importMap
+    payload.importMap = {
+      './collections/Autosave/DocumentInfoData.js#DocumentInfoData': DocumentInfoData,
+      './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater': NonDirtyFieldUpdater,
+    }
 
-    await renderDocumentHandler({
-      collectionSlug: autosavePostsSlug,
-      cookies: new Map(),
-      docID: undefined as never,
-      importMap: payload.importMap,
-      initialData: {
-        restrictedValue,
-        title,
-      },
-      locale: undefined,
-      permissions,
-      redirectAfterCreate: false,
-      redirectAfterDelete: false,
-      redirectAfterDuplicate: false,
-      req,
-    })
+    try {
+      await renderDocumentHandler({
+        collectionSlug: autosavePostsSlug,
+        cookies: new Map(),
+        docID: undefined as never,
+        importMap: payload.importMap,
+        initialData: {
+          restrictedValue,
+          title,
+        },
+        locale: undefined,
+        permissions,
+        redirectAfterCreate: false,
+        redirectAfterDelete: false,
+        redirectAfterDuplicate: false,
+        req,
+      })
+    } finally {
+      payload.importMap = previousImportMap
+    }
 
     const { docs } = await payload.find({
       collection: autosavePostsSlug,
@@ -864,7 +873,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState === currentState).toBe(true)
   })
 
-  test('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
+  test('should accept server values and preserve local row components during authoritative merges', () => {
     const title: FieldState = {
       initialValue: 'Test Post',
       passesCondition: true,
@@ -904,10 +913,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         valid: true,
         value: 'Test Post (computed on the client)',
       },
-      title: {
-        ...title,
-        isModified: true, // This is critical, this is what we're testing
-      },
+      title,
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
@@ -960,62 +966,36 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
       },
-      title: {
-        ...incomingStateFromServer.title,
-        isModified: true,
-      },
     })
   })
 
-  test('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
-    const title: FieldState = {
-      initialValue: 'Test Post',
-      passesCondition: true,
-      valid: true,
-      value: 'Test Post (modified on the client 1)',
+  test('should accept current server-computed values after editing multiple fields', () => {
+    const initialState: FormState = {
+      title: { initialValue: 'Before', value: 'Before' },
+      content: { initialValue: 'Before', value: 'Before' },
     }
-
-    const currentState: Record<string, FieldState> = {
-      computedTitle: {
-        initialValue: 'Test Post',
-        passesCondition: true,
-        valid: true,
-        value: 'Test Post',
-      },
-      title: {
-        ...title,
-        isModified: true,
-      },
-    }
-
-    const incomingStateFromServer: Record<string, FieldState> = {
-      computedTitle: {
-        initialValue: 'Test Post',
-        passesCondition: true,
-        valid: true,
-        value: 'Test Post (modified on the server)',
-      },
-      title: {
-        initialValue: 'Test Post',
-        passesCondition: true,
-        valid: true,
-        value: 'Test Post (modified on the server)',
-      },
-    }
-
-    const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+    const titleState = fieldReducer(initialState, {
+      type: 'UPDATE',
+      path: 'title',
+      value: ' client title ',
+    })
+    const currentState = fieldReducer(titleState, {
+      type: 'UPDATE',
+      path: 'content',
+      value: ' client content ',
+    })
+    const state = mergeServerFormState({
+      acceptValues: true,
       currentState,
-      incomingState: incomingStateFromServer,
+      incomingState: {
+        title: { initialValue: 'CLIENT TITLE', value: 'CLIENT TITLE' },
+        content: { initialValue: 'CLIENT CONTENT', value: 'CLIENT CONTENT' },
+      },
     })
 
-    expect(newState).toStrictEqual({
-      ...currentState,
-      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
-      title: {
-        ...currentState.title,
-        isModified: true,
-      },
+    expect(getDataFromFormState(state, true)).toEqual({
+      title: 'CLIENT TITLE',
+      content: 'CLIENT CONTENT',
     })
   })
 
@@ -1159,26 +1139,19 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(Object.keys(state).some((path) => path.startsWith('groups.1.'))).toBe(false)
   })
 
-  test.for([
-    { acceptValues: undefined, mode: 'background' },
-    { acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
-  ])(
-    'should return empty array data for an undefined row field during $mode merges',
-    ({ acceptValues }) => {
-      const currentState: FormState = {
-        // @ts-expect-error - Exercise the undefined runtime entry from the regression.
-        items: undefined,
-      }
+  test('should return empty array data for an undefined row field during metadata merges', () => {
+    const currentState: FormState = {
+      // @ts-expect-error - Exercise the undefined runtime entry from the regression.
+      items: undefined,
+    }
 
-      const state = mergeServerFormState({
-        acceptValues,
-        currentState,
-        incomingState: { items: { rows: [], value: 0 } },
-      })
+    const state = mergeServerFormState({
+      currentState,
+      incomingState: { items: { rows: [], value: 0 } },
+    })
 
-      expect(getDataFromFormState(state, true)).toStrictEqual({ items: [] })
-    },
-  )
+    expect(getDataFromFormState(state, true)).toStrictEqual({ items: [] })
+  })
 
   test.describe('empty row values', () => {
     const rowValueCases = [
@@ -1188,16 +1161,10 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
       { currentValue: 0, incomingValue: 0 },
     ]
 
-    test.for(
-      rowValueCases.flatMap((values) => [
-        { ...values, acceptValues: undefined, mode: 'background' },
-        { ...values, acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
-      ]),
-    )(
-      'should preserve client row value $currentValue during $mode merges receiving $incomingValue',
-      ({ acceptValues, currentValue, incomingValue }) => {
+    test.for(rowValueCases)(
+      'should preserve client row value $currentValue during metadata merges receiving $incomingValue',
+      ({ currentValue, incomingValue }) => {
         const state = mergeServerFormState({
-          acceptValues,
           currentState: { array: { rows: [], value: currentValue } },
           incomingState: { array: { rows: [], value: incomingValue } },
         })
@@ -1207,7 +1174,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     )
 
     test.for(rowValueCases)(
-      'should accept server row value $incomingValue over client value $currentValue on explicit save',
+      'should accept server row value $incomingValue over client value $currentValue during authoritative merges',
       ({ currentValue, incomingValue }) => {
         const state = mergeServerFormState({
           acceptValues: true,
@@ -1220,9 +1187,9 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     )
   })
 
-  test('should preserve a first client row when autosave returns a null array', () => {
+  test('should preserve a first client row when a metadata refresh returns a null array', () => {
     const state = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState: { array: { disableFormData: true, rows: [{ id: 'A' }], value: 1 } },
       incomingState: { array: { rows: [], value: null } },
     })
@@ -1231,10 +1198,10 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(state.array.rows).toEqual([{ id: 'A' }])
   })
 
-  test('should preserve client row data after reorder and delete during autosave', () => {
+  test('should preserve client row data after reorder and delete during metadata refreshes', () => {
     /**
      * Regression test for the "ghost item" bug.
-     * User reorders [A, B, C] → [C, A, B], autosave fires, then user deletes A.
+     * User reorders [A, B, C] → [C, A, B], a metadata refresh starts, then user deletes A.
      * Server responds with stale [C, A, B]. Client should preserve [C, B] and
      * not overwrite array.1 (B's data) with server's array.1 (A's data).
      */
@@ -1258,7 +1225,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1271,9 +1238,9 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState['array.1.text']?.value).toBe('B text')
   })
 
-  test('should preserve client row data after reorder during autosave', () => {
+  test('should preserve client row data after reorder during metadata refreshes', () => {
     /**
-     * User reorders [A, B] → [B, A] during autosave.
+     * User reorders [A, B] → [B, A] during metadata refreshes.
      * Server responds with stale [A, B]. Field values should remain with correct rows.
      */
     const currentState: FormState = {
@@ -1295,7 +1262,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1307,9 +1274,9 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState['array.1.text']?.value).toBe('A text')
   })
 
-  test('should preserve nested array row data after reorder during autosave', () => {
+  test('should preserve nested array row data after reorder during metadata refreshes', () => {
     /**
-     * User reorders nested array blocks[0].items from [A, B] → [B, A] during autosave.
+     * User reorders nested array blocks[0].items from [A, B] → [B, A] during metadata refreshes.
      * Outer block unchanged. Server responds with stale inner array [A, B].
      * Field values should remain with correct rows at nested level.
      */
@@ -1340,7 +1307,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1354,7 +1321,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState['blocks.0.items.1.text']?.value).toBe('A text')
   })
 
-  test('should preserve nested array row data after reorder and delete during autosave', () => {
+  test('should preserve nested array row data after reorder and delete during metadata refreshes', () => {
     /**
      * User reorders nested array blocks[0].items from [A, B, C] → [C, A, B], then deletes A.
      * Outer block unchanged. Server responds with stale inner array [C, A, B].
@@ -1388,7 +1355,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1403,17 +1370,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState['blocks.0.items.1.text']?.value).toBe('B text')
   })
 
-  test('should accept server values on explicit save without row ID guard', () => {
-    /**
-     * On explicit save (acceptValues: true), server values should be accepted
-     * without the row ID guard interfering. This test ensures the guard is
-     * scoped to autosave only.
-     *
-     * Edge case: Client has [B, A], server responds with [A, B] (perhaps due to
-     * server-side re-sorting). Without acceptValues !== true check, the guard
-     * would see mismatched IDs and reject server values. With the check, server
-     * values are accepted because explicit save responses are authoritative.
-     */
+  test('should accept server values and row order during authoritative merges', () => {
     const currentState: FormState = {
       array: {
         rows: [{ id: 'B' }, { id: 'A' }],
@@ -1441,14 +1398,13 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState.array?.rows).toHaveLength(2)
     expect(newState.array?.rows?.[0]).toMatchObject({ id: 'A' })
     expect(newState.array?.rows?.[1]).toMatchObject({ id: 'B' })
-    // Server values should be accepted even though row IDs don't match at same indexes
     expect(newState['array.0.text']?.value).toBe('A text from server')
     expect(newState['array.1.text']?.value).toBe('B text from server')
   })
 
-  test('should preserve client-added row during autosave', () => {
+  test('should preserve client-added row during metadata refreshes', () => {
     /**
-     * Client adds row D during autosave. Server responds with stale [A, B, C].
+     * Client adds row D during metadata refreshes. Server responds with stale [A, B, C].
      * Row D should be preserved with its client value.
      */
     const currentState: FormState = {
@@ -1473,7 +1429,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1487,7 +1443,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should append server-added row with addedByServer flag', () => {
     /**
      * Server adds a new row via hook with addedByServer: true.
-     * Row should be appended and not blocked by row ID guard.
+     * Metadata merges still accept fields and rows explicitly added by the server.
      */
     const currentState: FormState = {
       array: {
@@ -1509,7 +1465,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1524,7 +1480,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
 
   test('should preserve empty client array when server has rows', () => {
     /**
-     * Client deleted all rows during autosave. Server responds with [A, B].
+     * Client deleted all rows during metadata refreshes. Server responds with [A, B].
      * Client should stay empty.
      */
     const currentState: FormState = {
@@ -1545,7 +1501,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1558,10 +1514,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   })
 
   test('should handle 3-level nested array reordering', () => {
-    /**
-     * Verify parseArrayFieldPath works at depth 3+.
-     * blocks.0.items.1.subItems reordered from [X, Y] → [Y, X].
-     */
+    // The nested subItems were reordered from [X, Y] to [Y, X] locally.
     const currentState: FormState = {
       blocks: {
         rows: [{ id: 'block-1' }],
@@ -1597,7 +1550,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: false,
       currentState,
       incomingState: serverState,
     })
@@ -1745,7 +1698,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         {
           items: {
             initialValue: null,
-            isModified: true,
             rows: [],
             value: 0,
           },
@@ -1766,7 +1718,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
             value: 0,
           },
           title: {
-            isModified: true,
             value: 'After',
           },
         },
@@ -1794,29 +1745,22 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
       expect(getDataFromFormState(state, true)).toEqual(data)
     })
 
-    test.for(
-      rowFieldCases.flatMap((testCase) =>
-        [
-          { acceptValues: undefined, mode: 'background' },
-          { acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
-        ].map((mode) => ({ ...testCase, ...mode })),
-      ),
-    )(
-      'should retain client-cleared $path data after a stale $mode response',
-      async ({ acceptValues, path, rows }, { payload }) => {
+    test.for(rowFieldCases)(
+      'should retain client-cleared $path data during metadata merges',
+      async ({ path, rows }, { payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const data = { [path]: [rows[0]] }
         const initialState = await buildRowFormState({ data, path, req })
         const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
         const currentState = fieldReducer(initialState, { type: 'REMOVE_ROW', path, rowIndex: 0 })
-        const state = mergeServerFormState({ acceptValues, currentState, incomingState })
+        const state = mergeServerFormState({ currentState, incomingState })
 
         expect(getDataFromFormState(state, true)).toEqual({ [path]: [] })
       },
     )
 
     test.for(rowFieldCases)(
-      'should retain a client-added $path row after a stale autosave response',
+      'should retain a client-added $path row during metadata merges',
       async ({ path, rows }, { payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const initialState = await buildRowFormState({ data: { [path]: null }, path, req })
@@ -1840,7 +1784,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
           subFieldState,
         })
         const state = mergeServerFormState({
-          acceptValues: { overrideLocalChanges: false },
+          acceptValues: false,
           currentState,
           incomingState,
         })
@@ -1850,7 +1794,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     )
 
     test.for(rowFieldCases)(
-      'should retain client-reordered $path data after a stale autosave response',
+      'should retain client-reordered $path data during metadata merges',
       async ({ path, rows }, { payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const data = { [path]: rows }
@@ -1863,7 +1807,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
           path,
         })
         const state = mergeServerFormState({
-          acceptValues: { overrideLocalChanges: false },
+          acceptValues: false,
           currentState,
           incomingState,
         })
@@ -1880,7 +1824,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         ].map((input) => ({ ...testCase, ...input })),
       ),
     )(
-      'should accept server-cleared $kind $path data on explicit save',
+      'should accept server-cleared $kind $path data during authoritative merges',
       async ({ path, rows, value }, { payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const currentState = await buildRowFormState({ data: { [path]: rows }, path, req })
@@ -1893,7 +1837,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     )
 
     test.for(rowFieldCases)(
-      'should retain a null-to-empty $path change after a sibling edit and stale response',
+      'should retain a null-to-empty $path change and sibling edits during a metadata refresh',
       async ({ path }, { payload }) => {
         const req = await createPayloadRequest({ payload, user })
         const data = { [path]: null, title: 'Before' }
@@ -1909,7 +1853,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
           value: 'After',
         })
         const state = mergeServerFormState({
-          acceptValues: { overrideLocalChanges: false },
           currentState,
           incomingState,
         })
@@ -1930,7 +1873,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
           buildNullifyLocaleFieldUpdate({ fieldValue: 0, path, useFallback: true }),
         )
         const state = mergeServerFormState({
-          acceptValues: { overrideLocalChanges: false },
+          acceptValues: false,
           currentState,
           incomingState,
         })

@@ -1,0 +1,33 @@
+@layer payload-default {
+  [data-payload-modal-slug] {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+  }
+
+  dialog:where(.payload__modal-item) {
+    width: 100%;
+    border: 0;
+    padding: 0;
+    color: inherit;
+  }
+
+  .payload__modal-item {
+    min-height: 100%;
+    background: transparent;
+  }
+
+  .payload__modal-container--enterDone {
+    overflow: auto;
+  }
+
+  .payload__modal-item--enter,
+  .payload__modal-item--enterDone {
+    z-index: var(--z-modal);
+  }
+}

@@ -139,7 +139,7 @@ export async function resolveJoins({
       if (isPolymorphicJoin) {
         const condition = resolveWhereForCollection({
           collectionSlug: joinCollectionSlug,
-          fieldNames: new Set(targetConfig.flattenedFields.map(({ name }) => name)),
+          flattenedFields: targetConfig.flattenedFields,
           usesObjectIDs: !adapter.payload.collections[joinCollectionSlug]?.customIDType,
           where: joinQuery.where || {},
         })
@@ -251,8 +251,6 @@ export async function resolveJoins({
         isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
       ])
 
-      const count = isPolymorphicJoin ? results.length : dbCount
-
       transform({
         adapter,
         data: results,
@@ -265,7 +263,7 @@ export async function resolveJoins({
       // Return results with collection info for grouping
       return {
         collectionSlug: joinCollectionSlug,
-        count,
+        count: dbCount,
         dbFieldName,
         results,
         sort,
@@ -284,7 +282,7 @@ export async function resolveJoins({
       }
     > = {}
 
-    let totalCount = 0
+    let countFromDatabase = 0
     for (const collectionResult of collectionResults) {
       if (!collectionResult) {
         continue
@@ -292,7 +290,7 @@ export async function resolveJoins({
 
       const { collectionSlug, count, dbFieldName, results, sort, useDrafts } = collectionResult
 
-      totalCount += count
+      countFromDatabase += count
 
       for (const result of results) {
         if (useDrafts) {
@@ -375,6 +373,7 @@ export async function resolveJoins({
     const localizedJoinPath = `${joinPath}${localeSuffix}`
 
     return {
+      countFromDatabase,
       grouped,
       isPolymorphicJoin,
       joinQuery,
@@ -382,7 +381,6 @@ export async function resolveJoins({
       localizedJoinPath,
       page,
       skip,
-      totalCount,
     }
   })
 
@@ -395,32 +393,40 @@ export async function resolveJoins({
       continue
     }
 
-    const { grouped, isPolymorphicJoin, joinQuery, limit, localizedJoinPath, skip, totalCount } =
-      joinResult
+    const {
+      countFromDatabase,
+      grouped,
+      isPolymorphicJoin,
+      joinQuery,
+      limit,
+      localizedJoinPath,
+      skip,
+    } = joinResult
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
       const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
-      const all = grouped[id]?.docs || []
+      const children = grouped[id]?.docs || []
+      const totalDocs = isPolymorphicJoin ? children.length : countFromDatabase
 
       // Calculate the slice for pagination
       // When limit is 0, it means unlimited - return all results
       const slice = isPolymorphicJoin
         ? limit === 0
-          ? all
-          : all.slice(skip, skip + limit)
+          ? children
+          : children.slice(skip, skip + limit)
         : // For non-polymorphic joins, we assume that page and limit were applied at the database level
-          all
+          children
 
       // Create the join result object with pagination metadata
       const value: Record<string, unknown> = {
         docs: slice,
-        hasNextPage: limit === 0 ? false : totalCount > skip + slice.length,
+        hasNextPage: limit === 0 ? false : totalDocs > skip + slice.length,
       }
 
       // Include total count if requested
       if (joinQuery.count) {
-        value.totalDocs = totalCount
+        value.totalDocs = totalDocs
       }
 
       // Navigate to the correct nested location in the document and set the join data

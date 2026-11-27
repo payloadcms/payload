@@ -28,7 +28,7 @@ import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
 
-import { deepCopyObjectSimpleWithoutReactComponents, getDataFromFormState } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -42,6 +42,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
@@ -253,17 +254,16 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       })
 
       if (state) {
-        const newFormStateData = getDataFromFormState(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
-        ) as InlineBlockFields
-
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
           () => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isInlineBlockNode(node)) {
-              const newData = newFormStateData
+              const newData = mergeNodeFields({
+                currentFields: node.getFields(),
+                formState: state,
+              })
+
               newData.blockType = formData.blockType
 
               node.setFields(newData, true)

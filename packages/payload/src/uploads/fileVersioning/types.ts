@@ -8,9 +8,24 @@ export type StoredFile = {
 
 export type StoredFileList = StoredFile[]
 
-export type StoredFileReference = {
-  key: string
+/** One file of a saved upload, for one role. Only a stored entry has an object in storage. */
+export type UploadFileEntry =
+  | {
+      /** The object's resolved storage key. */
+      key: string
+      role: StoredFileRole
+      status: 'stored'
+    }
+  | {
+      role: StoredFileRole
+      /** `requestTime`: built when requested (`_stored: false`). `unmanaged`: Payload did not store it. */
+      status: 'requestTime' | 'unmanaged'
+    }
+
+/** The document's own object for one role of a saved upload. */
+export type UploadFileObject = {
   role: StoredFileRole
+  value: Record<string, unknown>
 }
 
 export type StoredFileIdentity = Pick<StoredFile, 'key'>

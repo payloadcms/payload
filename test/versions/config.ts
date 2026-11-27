@@ -39,6 +39,7 @@ import VersionPosts from './collections/Versions.js'
 import { VersionsDisabledCollection } from './collections/VersionsDisabled.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
+import { AutosaveWithoutLocalization } from './globals/AutosaveWithoutLocalization.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
@@ -96,6 +97,7 @@ export default buildConfigWithDefaults({
     ],
     globals: [
       AutosaveGlobal,
+      AutosaveWithoutLocalization,
       AutosaveWithDraftButtonGlobal,
       DraftGlobal,
       DraftWithMaxGlobal,

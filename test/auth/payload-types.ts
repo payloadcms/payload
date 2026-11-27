@@ -62,33 +62,36 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_882C0549".
+ * via the `definition` "LexicalNodes_9AC3E974".
  */
-export type LexicalNodes_882C0549 =
+export type LexicalNodes_9AC3E974 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_882C0549>
+  | SerializedParagraphNode<LexicalNodes_9AC3E974>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_882C0549>
+  | SerializedHeadingNode<LexicalNodes_9AC3E974>
   | {
       type: 'upload';
       /**
+       * @deprecated
        * Lexical's internal serialization version for this node type.
        */
-      version: number;
+      version?: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_882C0549>
-  | SerializedListNode<LexicalNodes_882C0549>
-  | SerializedListItemNode<LexicalNodes_882C0549>
-  | SerializedAutoLinkNode<LexicalNodes_882C0549, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_882C0549, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_9AC3E974>
+  | SerializedListNode<LexicalNodes_9AC3E974>
+  | SerializedListItemNode<LexicalNodes_9AC3E974>
+  | SerializedAutoLinkNode<LexicalNodes_9AC3E974, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_9AC3E974, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
       | 'disable-local-strategy-password'
       | 'api-keys'
+      | 'password-min-length'
+      | 'password-custom-validate'
       | 'public-users'
       | 'rotate-secret'
       | 'rotate-secret-secondary'
@@ -100,6 +103,18 @@ export type LexicalNodes_882C0549 =
       | 'payload-preferences'
       | 'payload-migrations'
     >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3DE324E4".
+ */
+export type LexicalNodes_3DE324E4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3DE324E4>
+  | SerializedListNode<LexicalNodes_3DE324E4>
+  | SerializedListItemNode<LexicalNodes_3DE324E4>
+  | SerializedHeadingNode<LexicalNodes_3DE324E4, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -107,6 +122,8 @@ export interface Config {
     'partial-disable-local-strategies': PartialDisableLocalStrategyAuthOperations;
     'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
+    'password-min-length': PasswordMinLengthAuthOperations;
+    'password-custom-validate': PasswordCustomValidateAuthOperations;
     'public-users': PublicUserAuthOperations;
     'rotate-secret': RotateSecretAuthOperations;
     'rotate-secret-secondary': RotateSecretSecondaryAuthOperations;
@@ -119,6 +136,8 @@ export interface Config {
     'partial-disable-local-strategies': PartialDisableLocalStrategy;
     'disable-local-strategy-password': DisableLocalStrategyPassword;
     'api-keys': ApiKey;
+    'password-min-length': PasswordMinLength;
+    'password-custom-validate': PasswordCustomValidate;
     'public-users': PublicUser;
     'rotate-secret': RotateSecret;
     'rotate-secret-secondary': RotateSecretSecondary;
@@ -129,6 +148,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -136,6 +156,8 @@ export interface Config {
     'partial-disable-local-strategies': PartialDisableLocalStrategiesSelect<false> | PartialDisableLocalStrategiesSelect<true>;
     'disable-local-strategy-password': DisableLocalStrategyPasswordSelect<false> | DisableLocalStrategyPasswordSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
+    'password-min-length': PasswordMinLengthSelect<false> | PasswordMinLengthSelect<true>;
+    'password-custom-validate': PasswordCustomValidateSelect<false> | PasswordCustomValidateSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     'rotate-secret': RotateSecretSelect<false> | RotateSecretSelect<true>;
     'rotate-secret-secondary': RotateSecretSecondarySelect<false> | RotateSecretSecondarySelect<true>;
@@ -146,6 +168,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -155,6 +178,7 @@ export interface Config {
   globalsSelect: {};
   locale: null;
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -164,6 +188,8 @@ export interface Config {
     | PartialDisableLocalStrategy
     | DisableLocalStrategyPassword
     | ApiKey
+    | PasswordMinLength
+    | PasswordCustomValidate
     | PublicUser
     | RotateSecret
     | RotateSecretSecondary
@@ -229,6 +255,42 @@ export interface DisableLocalStrategyPasswordAuthOperations {
   };
 }
 export interface ApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PasswordMinLengthAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PasswordCustomValidateAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -352,7 +414,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_882C0549> | null;
+  richText?: LexicalRichText<LexicalNodes_9AC3E974> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -370,7 +432,7 @@ export interface User {
   unnamedTabSaveToJWTString?: string | null;
   unnamedTabSaveToJWTFalse?: string | null;
   custom?: string | null;
-  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
+  onlyShowInClientConfigWhenAuthenticated?: string | null;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -387,6 +449,14 @@ export interface User {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -424,6 +494,14 @@ export interface User {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -463,6 +541,13 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -490,6 +575,14 @@ export interface PartialDisableLocalStrategy {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -527,6 +620,14 @@ export interface PartialDisableLocalStrategy {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -563,6 +664,13 @@ export interface PartialDisableLocalStrategy {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -591,6 +699,14 @@ export interface DisableLocalStrategyPassword {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -628,6 +744,14 @@ export interface DisableLocalStrategyPassword {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -677,6 +801,14 @@ export interface ApiKey {
         value: string | ApiKey;
       } | null)
     | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
         relationTo: 'public-users';
         value: string | PublicUser;
       } | null)
@@ -712,6 +844,14 @@ export interface ApiKey {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -742,10 +882,11 @@ export interface ApiKey {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "public-users".
+ * via the `definition` "password-min-length".
  */
-export interface PublicUser {
+export interface PasswordMinLength {
   id: string;
+  password?: string | null;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -762,6 +903,14 @@ export interface PublicUser {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -799,6 +948,259 @@ export interface PublicUser {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
+      }[]
+    | null;
+  collection: 'password-min-length';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "password-custom-validate".
+ */
+export interface PasswordCustomValidate {
+  id: string;
+  password?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
+      }[]
+    | null;
+  collection: 'password-custom-validate';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "public-users".
+ */
+export interface PublicUser {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -859,6 +1261,14 @@ export interface RotateSecret {
         value: string | ApiKey;
       } | null)
     | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
         relationTo: 'public-users';
         value: string | PublicUser;
       } | null)
@@ -894,6 +1304,14 @@ export interface RotateSecret {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -946,6 +1364,14 @@ export interface RotateSecretSecondary {
         value: string | ApiKey;
       } | null)
     | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
         relationTo: 'public-users';
         value: string | PublicUser;
       } | null)
@@ -981,6 +1407,14 @@ export interface RotateSecretSecondary {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -1033,6 +1467,14 @@ export interface RotateSecretLogin {
         value: string | ApiKey;
       } | null)
     | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
         relationTo: 'public-users';
         value: string | PublicUser;
       } | null)
@@ -1068,6 +1510,14 @@ export interface RotateSecretLogin {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -1107,6 +1557,13 @@ export interface RotateSecretLogin {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -1134,6 +1591,14 @@ export interface ApiKeysWithFieldReadAccess {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -1171,6 +1636,14 @@ export interface ApiKeysWithFieldReadAccess {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -1225,6 +1698,14 @@ export interface RelationsCollection {
         value: string | ApiKey;
       } | null)
     | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
         relationTo: 'public-users';
         value: string | PublicUser;
       } | null)
@@ -1260,6 +1741,14 @@ export interface RelationsCollection {
     | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       } | null)
     | ({
         relationTo: 'public-users';
@@ -1325,6 +1814,14 @@ export interface PayloadLockedDocument {
         value: string | ApiKey;
       } | null)
     | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
         relationTo: 'public-users';
         value: string | PublicUser;
       } | null)
@@ -1365,6 +1862,14 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'api-keys';
         value: string | ApiKey;
+      }
+    | {
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      }
+    | {
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
       }
     | {
         relationTo: 'public-users';
@@ -1413,6 +1918,14 @@ export interface PayloadPreference {
         value: string | ApiKey;
       }
     | {
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      }
+    | {
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      }
+    | {
         relationTo: 'public-users';
         value: string | PublicUser;
       }
@@ -1458,6 +1971,110 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
+      } | null)
+    | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'password-min-length';
+        value: string | PasswordMinLength;
+      } | null)
+    | ({
+        relationTo: 'password-custom-validate';
+        value: string | PasswordCustomValidate;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret';
+        value: string | RotateSecret;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-secondary';
+        value: string | RotateSecretSecondary;
+      } | null)
+    | ({
+        relationTo: 'rotate-secret-login';
+        value: string | RotateSecretLogin;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1497,7 +2114,7 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
-  shouldNotShowInClientConfigUnlessAuthenticated?: T;
+  onlyShowInClientConfigWhenAuthenticated?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1519,6 +2136,11 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -1544,6 +2166,11 @@ export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -1569,6 +2196,68 @@ export interface ApiKeysSelect<T extends boolean = true> {
   apiKey?: T;
   apiKeyLast4?: T;
   apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "password-min-length_select".
+ */
+export interface PasswordMinLengthSelect<T extends boolean = true> {
+  password?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "password-custom-validate_select".
+ */
+export interface PasswordCustomValidateSelect<T extends boolean = true> {
+  password?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1642,6 +2331,11 @@ export interface RotateSecretLoginSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -1711,6 +2405,32 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -1731,6 +2451,8 @@ export interface CollectionQueryWidget {
       | 'partial-disable-local-strategies'
       | 'disable-local-strategy-password'
       | 'api-keys'
+      | 'password-min-length'
+      | 'password-custom-validate'
       | 'public-users'
       | 'rotate-secret'
       | 'rotate-secret-secondary'
@@ -1764,6 +2486,8 @@ export interface ActivityWidget {
           | 'partial-disable-local-strategies'
           | 'disable-local-strategy-password'
           | 'api-keys'
+          | 'password-min-length'
+          | 'password-custom-validate'
           | 'public-users'
           | 'rotate-secret'
           | 'rotate-secret-secondary'
@@ -1773,7 +2497,7 @@ export interface ActivityWidget {
         )[]
       | null;
   };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1826,6 +2550,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number;
   textFormat?: number;
   textStyle?: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -1838,6 +2563,7 @@ export interface SerializedTextNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -1848,11 +2574,13 @@ export interface SerializedTabNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
 export interface SerializedLineBreakNode {
   type: 'linebreak';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -1865,11 +2593,13 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
 export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
 } : never;
 export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
@@ -1886,6 +2616,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -1936,6 +2667,7 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
 export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -1952,6 +2684,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat;
     indent: number;
     type: 'root';
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
 }

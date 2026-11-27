@@ -1,3 +1,6 @@
+import type { LinkNode } from '@payloadcms/richtext-lexical/client'
+import type { LexicalEditor } from '@payloadcms/richtext-lexical/lexical'
+
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -343,6 +346,116 @@ describe('Lexical Link Feature', () => {
         return tooltipRect.width < editorWidth * 0.5
       })
       .toBe(true)
+  })
+
+  test('should sanitize updated link URLs while preserving supported and relative links', async ({
+    page,
+  }) => {
+    test.setTimeout(TEST_TIMEOUT_LONG)
+
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Protocol test link')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await lexical.save('drawer')
+
+    const link = lexical.editor.getByRole('link', { name: 'Protocol test link' })
+    const originalLink = await link.elementHandle()
+
+    for (const [url, expected] of [
+      ['javascript:alert(1)', 'about:blank'],
+      ['data:text/html,test', 'about:blank'],
+      ['http://[', 'about:blank'],
+      ['https://example.com/updated', 'https://example.com/updated'],
+      ['http://example.com/updated', 'http://example.com/updated'],
+      ['mailto:test@example.com', 'mailto:test@example.com'],
+      ['tel:+15555555555', 'tel:+15555555555'],
+      ['sms:+15555555555', 'sms:+15555555555'],
+      ['/relative/path', '/relative/path'],
+      ['//example.com/path', '//example.com/path'],
+      ['#section', '#section'],
+    ] as const) {
+      await link.dispatchEvent('mouseover')
+      await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+      await drawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(url)
+      await lexical.save('drawer')
+      await expect(link).toHaveAttribute('href', expected)
+      await expect.poll(() => originalLink!.evaluate((element) => element.isConnected)).toBe(true)
+    }
+  })
+
+  test('should remove the previous href when a link URL is omitted', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Link without a URL')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await lexical.save('drawer')
+
+    const anchor = lexical.editor.locator('a')
+    const originalAnchor = await anchor.elementHandle()
+
+    await lexical.editor.evaluate((element) => {
+      const editor = (element as { __lexicalEditor: LexicalEditor } & HTMLElement).__lexicalEditor
+
+      editor.update(() => {
+        const node = [...editor.getEditorState()._nodeMap.values()].find(
+          (node) => node.getType() === 'link',
+        ) as LinkNode
+        const { url: _url, ...fields } = node.getFields()
+
+        node.setFields(fields)
+      })
+    })
+
+    await expect(anchor).not.toHaveAttribute('href')
+    await expect.poll(() => originalAnchor!.evaluate((element) => element.isConnected)).toBe(true)
+  })
+
+  test('should retain link fields omitted by drawer read access', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+    const drawer = page.locator('.lexical-link-edit-drawer')
+
+    await lexical.editor.fill('Restricted link')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.getByRole('button', { name: 'Link', exact: true }).click()
+    await drawer
+      .getByRole('textbox', { name: 'Enter a URL', exact: true })
+      .fill('https://example.com')
+    await drawer.locator('input[name="someText"]').fill('Stored restricted value')
+    await drawer.getByRole('button', { name: 'Add Hyperlink' }).click()
+
+    const blockDrawer = page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('heading', { name: 'Add Hyperlink' }) })
+
+    await blockDrawer.getByRole('button', { name: 'Asset Link Block', exact: true }).click()
+    await blockDrawer.getByRole('button', { name: 'Insert', exact: true }).click()
+    await drawer.getByLabel('Label', { exact: true }).fill('Stored row value')
+    await lexical.save('drawer')
+
+    await page.setExtraHTTPHeaders({ 'x-hide-lexical-fields': 'true' })
+    await lexical.editor.getByRole('link', { name: 'Restricted link' }).dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(drawer.getByRole('textbox', { name: 'Enter a URL', exact: true })).toBeVisible()
+    await expect(drawer.locator('input[name="someText"]')).toHaveValue('')
+    await expect(drawer.getByLabel('Label', { exact: true })).toHaveValue('')
+    await drawer.getByRole('button', { name: 'Close' }).first().click()
+    await page.setExtraHTTPHeaders({})
+
+    await lexical.editor.getByRole('link', { name: 'Restricted link' }).dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(drawer.locator('input[name="someText"]')).toHaveValue('Stored restricted value')
+    await expect(drawer.getByLabel('Label', { exact: true })).toHaveValue('Stored row value')
   })
 
   test('should preserve unsaved link fields when resizing with a nested upload drawer open', async ({

@@ -16,6 +16,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { cloneWhere } from '../../database/cloneWhere.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -27,7 +28,6 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -94,8 +94,10 @@ export const findOperation = async <
     showHiddenFields,
     sort: incomingSort,
     trash = false,
-    where,
+    where: incomingWhere,
   } = args
+
+  const where = cloneWhere(incomingWhere)
 
   const req = args.req!
 
@@ -163,6 +165,13 @@ export const findOperation = async <
     where: fullWhere,
   })
 
+  await validateQueryPaths({
+    collectionConfig,
+    overrideAccess: overrideAccess!,
+    req,
+    where: where ?? {},
+  })
+
   const sort = sanitizeSortQuery({
     fields: collection.config.flattenedFields,
     sort: incomingSort || collectionConfig.defaultSort,
@@ -185,14 +194,6 @@ export const findOperation = async <
   if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
     fullWhere = appendVersionToQueryKey(fullWhere)
 
-    await validateQueryPaths({
-      collectionConfig: collection.config,
-      overrideAccess: overrideAccess!,
-      req,
-      versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
-      where: appendVersionToQueryKey(where),
-    })
-
     result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
@@ -209,13 +210,6 @@ export const findOperation = async <
       where: fullWhere,
     })
   } else {
-    await validateQueryPaths({
-      collectionConfig,
-      overrideAccess: overrideAccess!,
-      req,
-      where: where!,
-    })
-
     result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
       draftsEnabled,

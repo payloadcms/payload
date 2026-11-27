@@ -21,14 +21,14 @@ export type TextInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly errorID?: string
   readonly htmlAttributes?: {
     'aria-label'?: JSX.IntrinsicElements['input']['aria-label']
     autoComplete?: BrowserAutoComplete
     readOnly?: JSX.IntrinsicElements['input']['readOnly']
   }
   /**
-   * Overrides the input `id` and default label `htmlFor`. The generated ID is
-   * scoped to the field path, edit depth, and form UUID.
+   * Overrides the input `id` and default label `htmlFor`. Defaults to 'field-' + path.
    * Use to avoid duplicate IDs when two inputs share a path.
    */
   readonly id?: string

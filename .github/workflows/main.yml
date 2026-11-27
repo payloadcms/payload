@@ -881,7 +881,16 @@ jobs:
           restore-build: true
 
       - name: Generate Payload Types
-        run: pnpm dev:generate-types fields
+        run: pnpm dev:generate-types
+
+      - name: Check Payload Types are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- ':(glob)test/**/payload-types.ts')" ]; then
+            git status --short -- ':(glob)test/**/payload-types.ts'
+            git diff -- ':(glob)test/**/payload-types.ts'
+            echo "::error::Some test/**/payload-types.ts files are out of date. Run 'pnpm dev:generate-types' and commit the result."
+            exit 1
+          fi
 
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen

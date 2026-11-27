@@ -84,13 +84,26 @@ type MenuButtonProps = {
   ariaCurrent?: React.AriaAttributes['aria-current']
   children: React.ReactNode
   className?: string
+  /**
+   * Keeps the item focusable, but prevents activation and popup dismissal.
+   * Native `aria-disabled={true}` or `aria-disabled="true"` has the same effect.
+   * Disabled href items render as buttons without a destination.
+   */
   disabled?: boolean
+  /**
+   * Navigation for href items. `anchor` uses normal browser navigation without router providers.
+   * @default 'link'
+   */
+  el?: 'anchor' | 'link'
   href?: LinkAdapterProps['href']
   icon?: React.ReactNode
   id?: string
   onClick?: (e?: React.MouseEvent) => void
   role?: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio'
-}
+} & Omit<
+  React.AnchorHTMLAttributes<HTMLAnchorElement | HTMLButtonElement>,
+  'href' | 'onClick' | 'role' | 'tabIndex' | 'type'
+>
 
 export const Button: React.FC<MenuButtonProps> = ({
   id,
@@ -100,89 +113,83 @@ export const Button: React.FC<MenuButtonProps> = ({
   children,
   className,
   disabled,
+  el = 'link',
   href,
   icon,
   onClick,
+  onKeyDown,
+  onMouseEnter,
+  onMouseLeave,
   role,
+  ...rest
 }) => {
+  const isDisabled =
+    disabled ||
+    rest['aria-disabled'] === true ||
+    rest['aria-disabled'] === 'true' ||
+    (!href && !onClick)
+
   const classes = [
     `${baseClass}__button`,
-    disabled && `${baseClass}__disabled`,
+    isDisabled && `${baseClass}__disabled`,
     active && `${baseClass}__button--selected`,
     className,
   ]
     .filter(Boolean)
     .join(' ')
 
-  // Always render icon element - CSS hides it outside RadioGroup/MenuItem
-  const iconElement = <span className={`${baseClass}__icon`}>{icon}</span>
+  const itemProps = {
+    ...rest,
+    id,
+    'aria-checked': ariaChecked ?? rest['aria-checked'],
+    'aria-current': ariaCurrent ?? rest['aria-current'],
+    'aria-disabled': isDisabled || undefined,
+    className: classes,
+    onClick: (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      if (isDisabled) {
+        event.preventDefault()
+        return
+      }
 
-  if (!disabled) {
-    if (href) {
-      return (
-        <Link
-          aria-checked={ariaChecked}
-          aria-current={ariaCurrent}
-          className={classes}
-          href={href}
-          id={id}
-          onClick={(e) => {
-            if (onClick) {
-              onClick(e)
-            }
-          }}
-          prefetch={false}
-          role={role ?? 'menuitem'}
-          tabIndex={-1}
-        >
-          {iconElement}
-          <span className={`${baseClass}__label`}>{children}</span>
-        </Link>
-      )
-    }
+      onClick?.(event)
+    },
+    onKeyDown: isDisabled
+      ? (event: React.KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+          }
+        }
+      : onKeyDown,
+    onMouseEnter: isDisabled ? undefined : onMouseEnter,
+    onMouseLeave: isDisabled ? undefined : onMouseLeave,
+    role: role ?? 'menuitem',
+    tabIndex: -1,
+  }
 
-    if (onClick) {
-      return (
-        <button
-          aria-checked={ariaChecked}
-          aria-current={ariaCurrent}
-          className={classes}
-          id={id}
-          onClick={(e) => {
-            if (onClick) {
-              onClick(e)
-            }
-          }}
-          role={role ?? 'menuitem'}
-          tabIndex={-1}
-          type="button"
-        >
-          {iconElement}
-          <span className={`${baseClass}__label`}>{children}</span>
-        </button>
-      )
-    }
+  const content = (
+    <>
+      <span className={`${baseClass}__icon`}>{icon}</span>
+      <span className={`${baseClass}__label`}>{children}</span>
+    </>
+  )
+
+  if (href && !isDisabled) {
+    const LinkElement = el === 'anchor' ? 'a' : Link
+
+    return (
+      <LinkElement {...itemProps} {...(el === 'link' ? { prefetch: false } : {})} href={href}>
+        {content}
+      </LinkElement>
+    )
   }
 
   return (
     <button
-      aria-current={ariaCurrent}
-      aria-disabled="true"
-      className={classes}
-      data-popup-prevent-close
-      id={id}
-      onClick={(event) => event.preventDefault()}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-        }
-      }}
-      role={role ?? 'menuitem'}
-      tabIndex={-1}
+      {...itemProps}
+      {...(isDisabled ? { 'data-popup-prevent-close': true } : {})}
       type="button"
     >
-      {iconElement}
-      <span className={`${baseClass}__label`}>{children}</span>
+      {content}
     </button>
   )
 }
