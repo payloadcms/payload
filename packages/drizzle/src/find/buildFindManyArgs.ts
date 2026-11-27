@@ -5,6 +5,7 @@ import { getSelectMode } from 'payload/shared'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 
+import { hasCompanionRelation } from '../utilities/hasCompanionRelation.js'
 import { traverseFields } from './traverseFields.js'
 
 type BuildFindQueryArgs = {
@@ -97,7 +98,7 @@ export const buildFindManyArgs = ({
     withTabledFields,
   })
 
-  if (adapter.tables[`${tableName}_texts`] && withTabledFields.texts) {
+  if (hasCompanionRelation({ adapter, relation: '_texts', tableName }) && withTabledFields.texts) {
     result.with._texts = {
       columns: {
         id: false,
@@ -107,7 +108,10 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_numbers`] && withTabledFields.numbers) {
+  if (
+    hasCompanionRelation({ adapter, relation: '_numbers', tableName }) &&
+    withTabledFields.numbers
+  ) {
     result.with._numbers = {
       columns: {
         id: false,
@@ -117,7 +121,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`] && withTabledFields.rels) {
+  if (hasCompanionRelation({ adapter, relation: '_rels', tableName }) && withTabledFields.rels) {
     result.with._rels = {
       columns: {
         id: false,
@@ -128,7 +132,7 @@ export const buildFindManyArgs = ({
   }
 
   if (
-    adapter.tables[`${tableName}${adapter.localesSuffix}`] &&
+    hasCompanionRelation({ adapter, relation: '_locales', tableName }) &&
     (!select || Object.keys(_locales.columns).length > 1)
   ) {
     result.with._locales = _locales

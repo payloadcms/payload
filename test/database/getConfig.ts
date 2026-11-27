@@ -1087,6 +1087,99 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
+      slug: 'reserved-field-names',
+      fields: [
+        {
+          name: 'locales',
+          type: 'array',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'numbers',
+          type: 'array',
+          fields: [
+            {
+              name: 'drawPosition',
+              type: 'number',
+            },
+          ],
+        },
+        {
+          name: 'texts',
+          type: 'array',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'rels',
+          type: 'array',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      versions: false,
+    },
+    {
+      // `numbers` clashes with the `_numbers` table of `scores`, and its usual replacement name is
+      // taken by the `numbersField` array, so it needs another one.
+      slug: 'reserved-field-name-clashes',
+      fields: [
+        {
+          name: 'localizedScores',
+          type: 'array',
+          fields: [
+            {
+              name: 'values',
+              type: 'number',
+              hasMany: true,
+              localized: true,
+            },
+          ],
+        },
+        {
+          name: 'numbers',
+          type: 'array',
+          fields: [
+            {
+              name: 'drawPosition',
+              type: 'number',
+            },
+          ],
+        },
+        {
+          name: 'numbersField',
+          type: 'array',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'scores',
+          type: 'number',
+          hasMany: true,
+        },
+      ],
+      versions: {
+        drafts: true,
+      },
+    },
+    {
       slug: 'virtual-linked-tenants',
       fields: [
         {

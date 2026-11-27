@@ -106,6 +106,14 @@ You will be warned if any changes that you make will entail data loss while in d
 
 Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload Config.
 
+## Renamed array and select tables
+
+Payload stores some data in extra tables named after the collection or global: `_locales` for localized fields, `_rels` for relationships, `_texts` for `hasMany` text fields and `_numbers` for `hasMany` number fields. An `array` field or `hasMany` `select` field with the same name, such as an array called `numbers`, gets a `_field` suffix instead. For example, the table is `posts_numbers_field` rather than `posts_numbers`.
+
+This can also happen after a field is added. If a `posts` collection already has a `numbers` array and you add a `hasMany` number field, the array table moves from `posts_numbers` to `posts_numbers_field`. Tables nested in the array move with it, for example `posts_numbers_items` to `posts_numbers_field_items` and `posts_numbers_locales` to `posts_numbers_field_locales`. Payload logs a warning in development that lists each renamed table.
+
+To keep the existing rows, rename the array table and its nested tables in your migration before the new `posts_numbers` table is created. Setting `dbName` on the array chooses its new table name instead of `posts_numbers_field`, but the existing rows still have to be moved there.
+
 ## Migration workflows
 
 In SQLite, migrations are a fundamental aspect of working with Payload and you should become familiar with how they work.

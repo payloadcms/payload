@@ -11,6 +11,7 @@ import type {
   RawIndex,
   RawRelation,
   RawTable,
+  RawTableKind,
   RelationMap,
   SetColumnID,
 } from '../types.js'
@@ -186,10 +187,15 @@ export const buildTable = ({
     indexes,
   }
 
+  // A table built earlier can already use this name, for example the `_locales` table of an array
+  // called `items` next to an array called `itemsLocales`.
+  trackTableName({ adapter, kind: isRoot ? 'root' : 'field', tableName })
+
   adapter.rawTables[tableName] = promoteLongInlineForeignKeys({ adapter, table })
 
   if (hasLocalizedField || localizedRelations.size) {
     const localeTableName = `${tableName}${adapter.localesSuffix}`
+    trackTableName({ adapter, kind: 'companion', tableName: localeTableName })
     adapter.rawTables[localeTableName] = localesTable
 
     localesColumns.id = {
@@ -355,6 +361,7 @@ export const buildTable = ({
   if (isRoot) {
     if (hasManyTextField) {
       const textsTableName = `${rootTableName}_texts`
+      trackTableName({ adapter, kind: 'companion', tableName: textsTableName })
       adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
@@ -461,6 +468,7 @@ export const buildTable = ({
 
     if (hasManyNumberField) {
       const numbersTableName = `${rootTableName}_numbers`
+      trackTableName({ adapter, kind: 'companion', tableName: numbersTableName })
       adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
@@ -591,6 +599,7 @@ export const buildTable = ({
       }
 
       const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
+      trackTableName({ adapter, kind: 'companion', tableName: relationshipsTableName })
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
@@ -810,6 +819,43 @@ export const buildTable = ({
     hasManyTextField,
     relationsToBuild,
   }
+}
+
+/**
+ * Records what a table name is used for before the table is written, since writing a second table
+ * with the same name replaces the first.
+ *
+ * Companion tables (`_locales`, `_texts`, `_numbers`, `_rels`) are named by appending a suffix to
+ * the parent table name, so they can match an array, block or `hasMany` select table. That clash is
+ * recorded, and `buildRawSchema` builds the schema again with a new name for the field table.
+ *
+ * Any other clash keeps the schema it has always had and is only reported. Renaming can't fix two
+ * field tables with the same name, since both would get the same new name.
+ */
+const trackTableName = ({
+  adapter,
+  kind,
+  tableName,
+}: {
+  adapter: DrizzleAdapter
+  kind: RawTableKind
+  tableName: string
+}): void => {
+  const existingKind = adapter.rawTableKinds?.get(tableName)
+
+  if (existingKind) {
+    const isFieldAndCompanion =
+      (existingKind === 'field' && kind === 'companion') ||
+      (existingKind === 'companion' && kind === 'field')
+
+    if (isFieldAndCompanion) {
+      adapter.subTableNameClashes?.add(tableName)
+    } else {
+      adapter.sharedTableNames?.add(tableName)
+    }
+  }
+
+  adapter.rawTableKinds?.set(tableName, kind)
 }
 
 /**
