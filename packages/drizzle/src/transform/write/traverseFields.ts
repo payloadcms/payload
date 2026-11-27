@@ -569,6 +569,15 @@ export const traverseFields = ({
       }
 
       if (
+        insideArrayOrBlock &&
+        fieldData === undefined &&
+        (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany))
+      ) {
+        relationshipsToDelete.push({ path: relationshipPath })
+        return
+      }
+
+      if (
         isLocalized &&
         (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany))
       ) {

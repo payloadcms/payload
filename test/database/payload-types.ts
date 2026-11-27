@@ -271,6 +271,20 @@ export interface UserAuthOperations {
 export interface WriteInput {
   id: string;
   title?: string | null;
+  links?:
+    | {
+        label?: string | null;
+        reference?: {
+          relationTo: 'posts';
+          value: string | Post;
+        } | null;
+        localizedReference?: {
+          relationTo: 'posts';
+          value: string | Post;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
   layout?: Content[] | null;
   createdBy?: {
     relationTo: 'users';
@@ -1369,6 +1383,14 @@ export interface PayloadLlmInstruction {
  */
 export interface WriteInputSelect<T extends boolean = true> {
   title?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        reference?: T;
+        localizedReference?: T;
+        id?: T;
+      };
   layout?:
     | T
     | {
