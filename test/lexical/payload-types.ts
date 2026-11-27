@@ -7,6 +7,83 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadTransforms".
+ */
+export type UploadTransforms = {
+  /**
+   * Time range on the original, in milliseconds. Start inclusive, end exclusive.
+   */
+  clip?: {
+    endMs: number;
+    startMs: number;
+  };
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Encoding settings for the output format. Does not select the format.
+   */
+  encoding?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Mirror the image on one or both axes.
+   */
+  flip?: {
+    horizontal?: boolean;
+    vertical?: boolean;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  /**
+   * Keep or remove metadata embedded in the output file.
+   */
+  metadataPolicy?: {
+    mode: 'preserve' | 'strip';
+  };
+  /**
+   * One-based, inclusive page range on the original document.
+   */
+  pageRange?: {
+    endPage: number;
+    startPage: number;
+  };
+  /**
+   * Video frame to use as the poster, in milliseconds on the original.
+   */
+  posterFrame?: {
+    timestampMs: number;
+  };
+  /**
+   * Target size for visual media.
+   */
+  resize?: {
+    fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+    height?: number;
+    width?: number;
+    withoutEnlargement?: boolean;
+  };
+  /**
+   * Clockwise rotation in degrees.
+   */
+  rotate?: {
+    angle: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -320,19 +397,19 @@ export type LexicalNodes_8BCA914C =
   | SerializedHeadingNode<LexicalNodes_8BCA914C>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_57F47813".
+ * via the `definition` "LexicalNodes_70649ACC".
  */
-export type LexicalNodes_57F47813 =
+export type LexicalNodes_70649ACC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_57F47813>
-  | SerializedAutoLinkNode<LexicalNodes_57F47813, LexicalLinkFields_5D6A193C>
-  | SerializedLinkNode<LexicalNodes_57F47813, LexicalLinkFields_5D6A193C>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNode<'uploads'>
+  | SerializedParagraphNode<LexicalNodes_70649ACC>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_7C90EEAC>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_57F47813>
+  | SerializedAutoLinkNode<LexicalNodes_70649ACC, LexicalLinkFields_5D6A193C>
+  | SerializedLinkNode<LexicalNodes_70649ACC, LexicalLinkFields_5D6A193C>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_70649ACC>
   | SerializedRelationshipNode<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -370,9 +447,9 @@ export type LexicalNodes_57F47813 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_57F47813>
-  | SerializedListItemNode<LexicalNodes_57F47813>
-  | SerializedHeadingNode<LexicalNodes_57F47813>;
+  | SerializedListNode<LexicalNodes_70649ACC>
+  | SerializedListItemNode<LexicalNodes_70649ACC>
+  | SerializedHeadingNode<LexicalNodes_70649ACC>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_0D0FC62B".
@@ -1784,6 +1861,13 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -1838,7 +1922,7 @@ export interface LexicalAutosave {
  */
 export interface LexicalLinkFeature {
   id: string;
-  richText?: LexicalRichText<LexicalNodes_57F47813> | null;
+  richText?: LexicalRichText<LexicalNodes_70649ACC> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1856,7 +1940,7 @@ export interface LexicalLinkFeature {
  */
 export interface LexicalLinkFeatureAutosave {
   id: string;
-  richText?: LexicalRichText<LexicalNodes_57F47813> | null;
+  richText?: LexicalRichText<LexicalNodes_70649ACC> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2386,6 +2470,8 @@ export interface Upload {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -2395,6 +2481,7 @@ export interface Upload {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -2425,6 +2512,8 @@ export interface Uploads2 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -2434,6 +2523,7 @@ export interface Uploads2 {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -3239,6 +3329,8 @@ export interface UploadsSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -3250,6 +3342,7 @@ export interface UploadsSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -3273,6 +3366,8 @@ export interface Uploads2Select<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -3284,6 +3379,7 @@ export interface Uploads2Select<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -3456,6 +3552,11 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -4225,6 +4326,13 @@ export interface TextBlock {
   blockType: 'textBlock';
   blockTitle?: string | null;
   blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

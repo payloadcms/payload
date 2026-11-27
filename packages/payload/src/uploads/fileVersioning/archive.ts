@@ -16,6 +16,7 @@ import { getArchivedFilename } from './naming.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
+  getUploadFileObject,
   withLegacyUploadFileData,
 } from './storedFiles.js'
 
@@ -329,18 +330,7 @@ export const replaceStoredFileReferences = ({
     const archivedFilename = path.posix.basename(archivedKey)
 
     for (const role of file.roles) {
-      let stored: JsonObject | undefined
-      switch (role.type) {
-        case 'default':
-          stored = archived
-          break
-        case 'original':
-          stored = archived.original as JsonObject | undefined
-          break
-        case 'size':
-          stored = (archived.variants as Record<string, JsonObject> | undefined)?.[role.sizeKey]
-          break
-      }
+      const stored = getUploadFileObject({ doc: archived, role })
 
       if (typeof stored?.filename === 'string') {
         const previousFilename = stored.filename

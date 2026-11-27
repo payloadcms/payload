@@ -130,3 +130,5 @@ If you're configuring [cors](../production/preventing-abuse#cross-origin-resourc
   on `http://localhost` or any non-https domain. For local development you
   should conditionally set this to `false` based on the environment.
 </Banner>
+
+If your frontend embeds the Admin Panel in a cross-site iframe, [configure `frame-ancestors` on the admin page](../production/deployment#protect-an-embedded-admin-panel-from-clickjacking) to protect editors from clickjacking.

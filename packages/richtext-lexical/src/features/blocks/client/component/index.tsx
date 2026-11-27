@@ -52,6 +52,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
@@ -276,17 +277,16 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           value: formData.blockName,
         }
 
-        const newFormStateData = getDataFromFormState(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
-        ) as BlockFields
-
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
           () => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              const newData = newFormStateData
+              const newData = mergeNodeFields({
+                currentFields: node.getFields(),
+                formState: state,
+              })
+
               newData.blockType = blockType
 
               node.setFields(newData, true)

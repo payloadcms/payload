@@ -50,12 +50,17 @@ type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
   formRef: RefObject<HTMLFormElement | null>
+  getFormSequence: UseFormStateResult['getFormSequence']
+  isMountedRef: RefObject<boolean>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
+  queueFormStateRefresh: UseFormStateResult['queueFormStateRefresh']
   queueTask: UseQueueResult['queueTask']
   refreshFormState: UseFormStateResult['refreshFormState']
+  resetSequenceRef: RefObject<number>
   setIsValid: UseFormStateResult['setIsValid']
   setModified: UseFormStateResult['setModified']
+  submissionErrorsRef: UseFormStateResult['submissionErrorsRef']
   validateForm: UseFormStateResult['validateForm']
 }
 
@@ -74,12 +79,17 @@ export const useFormSubmission = ({
   contextRef,
   dispatchFields,
   formRef,
+  getFormSequence,
+  isMountedRef,
   prevFormStateRef,
   props,
+  queueFormStateRefresh,
   queueTask,
   refreshFormState,
+  resetSequenceRef,
   setIsValid,
-  setModified,
+  setModified: setIsModified,
+  submissionErrorsRef,
   validateForm,
 }: Args) => {
   const {
@@ -88,6 +98,7 @@ export const useFormSubmission = ({
     disabled: isDisabledFromProps,
     disableSuccessStatus,
     handleResponse,
+    isDocumentForm,
     onSubmit,
     onSuccess,
     redirect,
@@ -125,22 +136,9 @@ export const useFormSubmission = ({
    * Determines whether the form is processing asynchronously in the background, e.g. autosave is running.
    * Useful to determine whether to disable the form or queue other processes while in flight, e.g. disable manual submits while an autosave is running.
    */
-  const [isBackgroundProcessing, _setIsBackgroundProcessing] = useState(false)
+  const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false)
 
-  /**
-   * A ref that can be read within the `setIsModified` interceptor.
-   * Dependents of this state can read it immediately without needing to wait for a render cycle.
-   */
-  const isBackgroundProcessingRef = useRef(false)
-
-  /**
-   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
-   * Useful in order to avoid resetting `isModified` to false wrongfully after a submit.
-   * For example, if the user modifies a field while the a background process (autosave) is running,
-   * we need to ensure that after the submit completes, the `isModified` state remains true.
-   */
-  const isModifiedWhileProcessing = useRef(false)
-
+  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
   /**
    * Validates the document on the server without saving it. The `file` field is skipped because
    * its bytes are being uploaded separately and are never part of the form state sent here.
@@ -217,30 +215,6 @@ export const useFormSubmission = ({
     [contextRef],
   )
 
-  /**
-   * Intercept the `setIsModified` method to track whether the event happened during background processing.
-   * See the `isModifiedWhileProcessing` ref for more details.
-   */
-  const setIsModified = useCallback(
-    (isModified: boolean) => {
-      if (isBackgroundProcessingRef.current) {
-        isModifiedWhileProcessing.current = true
-      }
-
-      setModified(isModified)
-    },
-    [setModified],
-  )
-
-  /**
-   * Intercept the `setIsBackgroundProcessing` method to keep the ref in sync.
-   * See the `isBackgroundProcessingRef` ref for more details.
-   */
-  const setIsBackgroundProcessing = useCallback((isBackgroundProcessing: boolean) => {
-    isBackgroundProcessingRef.current = isBackgroundProcessing
-    _setIsBackgroundProcessing(isBackgroundProcessing)
-  }, [])
-
   useEffect(() => {
     if (isProcessing) {
       return
@@ -282,9 +256,13 @@ export const useFormSubmission = ({
 
   const executeSubmit = useCallback(
     async ({
+      onRefresh,
+      onResponse,
       options,
       requestContext,
     }: {
+      onRefresh: () => void
+      onResponse: (args: { res?: Response }) => void
       options?: SubmitOptions
       requestContext: TaskContext
     }) => {
@@ -295,13 +273,13 @@ export const useFormSubmission = ({
         disableFormWhileProcessing = true,
         disableSuccessStatus: disableSuccessStatusFromArgs,
         method: methodToUse = method,
+        onStaleRequest,
         overrides: overridesFromArgs = {},
         skipValidation,
+        submissionType,
       } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
-
-      isModifiedWhileProcessing.current = false
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
@@ -351,6 +329,15 @@ export const useFormSubmission = ({
 
         if (waitForAutocomplete) {
           await wait(100)
+
+          // Autocomplete updates happen before the data snapshot and belong to this submission.
+          const dispatchedSequence = getFormSequence()
+          const { isQueueReset } = requestContext
+
+          requestContext = {
+            isCurrent: () => !isQueueReset() && getFormSequence() === dispatchedSequence,
+            isQueueReset,
+          }
         }
 
         if (!requestContext.isCurrent()) {
@@ -415,6 +402,9 @@ export const useFormSubmission = ({
           })
 
           didRefreshFormState = validation.didRefreshFormState
+          if (didRefreshFormState) {
+            onRefresh()
+          }
 
           const { data, fields, isValid } = validation
 
@@ -558,13 +548,9 @@ export const useFormSubmission = ({
           if (requestContext.isCurrent()) {
             // A replaced save leaves the progress to the newer one; `finally` stops it.
             saveUpload?.settle({ isSuccessful: res?.status < 400 })
-
-            if (res.status < 400 && !isModifiedWhileProcessing.current) {
-              setIsModified(false)
-            }
-
-            isModifiedWhileProcessing.current = false
           }
+
+          onResponse({ res })
 
           if (typeof handleResponse !== 'function') {
             const contentType = res.headers.get('content-type')
@@ -574,13 +560,28 @@ export const useFormSubmission = ({
               json = await res.json()
             }
           }
+
+          if (
+            res.status < 400 &&
+            (requestContext.isCurrent() ||
+              (isDocumentForm &&
+                collectionSlug &&
+                operation === 'create' &&
+                (json?.doc ?? json?.result)?.id != null))
+          ) {
+            setSuccessfulSubmitCount((count) => count + 1)
+          }
         } finally {
           const isSuccessfulResponse = res?.status < 400
+
+          if (isSuccessfulResponse && requestContext.isCurrent()) {
+            submissionErrorsRef.current = undefined
+          }
 
           if (requestContext.isCurrent() && (hasFormSubmitAction || !didRefreshFormState)) {
             try {
               // Refresh before applying save errors so the refresh cannot erase them.
-              await refreshFormState(
+              const refreshedFields = await refreshFormState(
                 isSuccessfulResponse && typeof handleResponse !== 'function'
                   ? {
                       type: 'afterSave',
@@ -591,10 +592,15 @@ export const useFormSubmission = ({
                     }
                   : { type: 'refresh', isCurrent: requestContext.isCurrent },
               )
+              if (refreshedFields) {
+                onRefresh()
+              }
             } catch (err) {
               if (isSuccessfulResponse) {
                 // Persistence succeeded; a refresh failure must not turn this into a failed save.
-                toast.error(err instanceof Error ? err.message : t('error:unknown'))
+                if (requestContext.isCurrent()) {
+                  toast.error(err instanceof Error ? err.message : t('error:unknown'))
+                }
               } else {
                 console.error('Error refreshing form state', err) // eslint-disable-line no-console
               }
@@ -628,10 +634,18 @@ export const useFormSubmission = ({
                   : []
               }),
             })
+            submissionErrorsRef.current = {
+              fields: contextRef.current.fields,
+              isCurrent: requestContext.isCurrent,
+            }
           }
 
-          if (requestContext.isCurrent()) {
+          if (serverValidationErrors.length && requestContext.isCurrent()) {
             applyFieldErrors({ errors: serverValidationErrors })
+            submissionErrorsRef.current = {
+              fields: contextRef.current.fields,
+              isCurrent: requestContext.isCurrent,
+            }
           }
         }
 
@@ -654,15 +668,40 @@ export const useFormSubmission = ({
 
           preservePromiseToast = true
 
+          if (res.status < 400) {
+            setIsModified(false)
+          }
+
           await handleResponse(res, successToast, errorToast)
 
           return
         }
 
         if (res.status < 400) {
-          if (requestContext.isCurrent()) {
-            setSuccessfulSubmitCount((count) => count + 1)
+          const hasCreatedDocument = Boolean(
+            isDocumentForm &&
+            collectionSlug &&
+            operation === 'create' &&
+            (json?.doc || json?.result)?.id != null,
+          )
+
+          const shouldHandleStaleSuccess =
+            hasCreatedDocument || (isDocumentForm && submissionType !== 'autosave')
+
+          // Document forms still record explicit saves when newer edits make the response values stale.
+          if (
+            !requestContext.isCurrent() &&
+            (!shouldHandleStaleSuccess || requestContext.isQueueReset())
+          ) {
+            // Completed explicit saves still count when newer edits prevent merging their values.
+            // Autosaves reconcile stale submissions through onStaleRequest instead.
+            return submissionType !== 'autosave' && !requestContext.isQueueReset()
+              ? { res }
+              : undefined
           }
+
+          const successSequence = getFormSequence()
+          const successResetSequence = resetSequenceRef.current
 
           if (typeof onSuccess === 'function') {
             try {
@@ -670,21 +709,42 @@ export const useFormSubmission = ({
                 context,
                 formState: serializableFormState,
                 isCurrent: requestContext.isCurrent,
+                isQueueReset: requestContext.isQueueReset,
               })
             } catch (err) {
-              toast.error(err instanceof Error ? err.message : t('error:unknown'))
+              if (requestContext.isCurrent()) {
+                toast.error(err instanceof Error ? err.message : t('error:unknown'))
+              }
             }
           }
 
-          // The save succeeded even if `onSuccess` reset or unmounted the form, so always settle the toast.
-          preservePromiseToast = true
-
-          if (requestContext.isCurrent()) {
-            setIsSubmitted(false)
+          if (!requestContext.isCurrent()) {
+            // A successful drawer callback can unmount the form before its toast resolves.
+            if (
+              !isMountedRef.current &&
+              getFormSequence() === successSequence &&
+              resetSequenceRef.current === successResetSequence + 1
+            ) {
+              preservePromiseToast = true
+              if (!redirect && !disableToast) {
+                successToast(json.message || t('general:submissionSuccessful'))
+              }
+              return { res }
+            }
+            return submissionType !== 'autosave' && !requestContext.isQueueReset()
+              ? { res }
+              : undefined
           }
 
-          if (redirect && requestContext.isCurrent()) {
-            void startRouteTransition(() => router.push(redirect))
+          preservePromiseToast = true
+
+          setIsModified(false)
+          setIsSubmitted(false)
+
+          if (redirect) {
+            if (requestContext.isCurrent()) {
+              void startRouteTransition(() => router.push(redirect))
+            }
           } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
@@ -715,6 +775,10 @@ export const useFormSubmission = ({
             setIsValid(false)
 
             applyFieldErrors({ errors: fieldErrors })
+            submissionErrorsRef.current = {
+              fields: contextRef.current.fields,
+              isCurrent: requestContext.isCurrent,
+            }
 
             nonFieldErrors.forEach((error) => {
               const err = {
@@ -743,7 +807,10 @@ export const useFormSubmission = ({
           errorToast(message)
         }
 
-        return { formState: contextRef.current.fields, res }
+        return {
+          ...(requestContext.isCurrent() ? { formState: contextRef.current.fields } : {}),
+          res,
+        }
       } catch (err) {
         // The form unmounted during a large upload; the upload coordinator finishes the save.
         if (err instanceof UploadContinuesInBackgroundError) {
@@ -771,7 +838,7 @@ export const useFormSubmission = ({
 
         errorToast(err instanceof Error ? err.message : t('error:unknown'))
       } finally {
-        if (requestContext.isCurrent()) {
+        if (!requestContext.isQueueReset()) {
           // Only put back what this submission took: an autosave must not release a queued save's disable.
           if (disableFormWhileProcessing) {
             setIsProcessing(false)
@@ -780,8 +847,12 @@ export const useFormSubmission = ({
 
           if (options?.submissionType === 'autosave') {
             setIsBackgroundProcessing(false)
+            if (!requestContext.isCurrent()) {
+              onStaleRequest?.()
+            }
           }
-        } else if (!preservePromiseToast && promiseToastID !== undefined) {
+        }
+        if (!requestContext.isCurrent() && !preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
 
@@ -808,6 +879,13 @@ export const useFormSubmission = ({
     },
     [
       applyFieldErrors,
+      getFormSequence,
+      isMountedRef,
+      resetSequenceRef,
+      submissionErrorsRef,
+      isDocumentForm,
+      collectionSlug,
+      operation,
       beforeSubmit,
       setIsBackgroundProcessing,
       setUploadProgress,
@@ -864,18 +942,91 @@ export const useFormSubmission = ({
         setDisabledBySubmission(true)
       }
 
-      // While a disabling submission waits, the guard above rejects every other submit, so only a reset can supersede it.
-      // Every reset restores request state, so a superseded submission has nothing to release.
-      const result = await queueTask({
+      const resetSequence = resetSequenceRef.current
+      let didRefreshFormState = false
+      let didReceiveSuccessfulResponse = false
+      const scheduledRequest = queueTask({
         priority: requestPriority[options?.submissionType ?? 'submit'],
-        task: (requestContext) => executeSubmit({ options, requestContext }),
+        task: (requestContext) =>
+          executeSubmit({
+            onRefresh: () => {
+              didRefreshFormState = true
+            },
+            onResponse: ({ res }) => {
+              didReceiveSuccessfulResponse = Boolean(res?.ok)
+            },
+            options,
+            requestContext,
+          }),
       })
 
-      if (result.status === 'completed') {
-        return result.value
+      if (options?.submissionType !== 'autosave') {
+        latestExplicitSubmitRef.current = scheduledRequest.then(
+          () => didReceiveSuccessfulResponse,
+          () => didReceiveSuccessfulResponse,
+        )
       }
+
+      const result = await scheduledRequest
+
+      // A superseded submission never runs, so release the disable it took.
+      // Skip after a reset: it already restored request state, and a newer submission may own the disable.
+      if (
+        result.status === 'superseded' &&
+        shouldDisableForm &&
+        resetSequence === resetSequenceRef.current
+      ) {
+        setIsProcessing(false)
+        setDisabledBySubmission(false)
+      }
+
+      // A failed submit may have displaced a refresh without returning replacement form state.
+      if (
+        result.status === 'completed' &&
+        !didReceiveSuccessfulResponse &&
+        !didRefreshFormState &&
+        isMountedRef.current &&
+        resetSequence === resetSequenceRef.current
+      ) {
+        queueFormStateRefresh({ force: true })
+      }
+
+      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
+        let explicitSubmit = latestExplicitSubmitRef.current
+        let didSubmitSucceed = true
+
+        // A successful publish must finish before deciding whether to recover the draft.
+        while (explicitSubmit !== undefined) {
+          didSubmitSucceed = await explicitSubmit
+
+          if (explicitSubmit === latestExplicitSubmitRef.current) {
+            break
+          }
+
+          explicitSubmit = latestExplicitSubmitRef.current
+        }
+
+        if (
+          !didSubmitSucceed &&
+          isMountedRef.current &&
+          resetSequence === resetSequenceRef.current
+        ) {
+          options.onStaleRequest?.()
+        }
+      }
+
+      return result.status === 'completed' ? result.value : undefined
     },
-    [contextRef, executeSubmit, formRef, queueTask, setDisabledBySubmission],
+    [
+      contextRef,
+      executeSubmit,
+      formRef,
+      queueTask,
+      queueFormStateRefresh,
+      resetSequenceRef,
+      isMountedRef,
+      setDisabledBySubmission,
+    ],
   )
 
   useEffect(() => {
@@ -891,7 +1042,6 @@ export const useFormSubmission = ({
     restoreRequestState,
     setBackgroundProcessing: setIsBackgroundProcessing,
     setDisabled: setDisabledBySubmission,
-    setModified: setIsModified,
     setProcessing: setIsProcessing,
     setSubmitted: setIsSubmitted,
     submit,

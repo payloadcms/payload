@@ -87,6 +87,27 @@ describe('Date', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test('should select and clear a date range', async () => {
+    await page.goto(url.create)
+    const dateInput = page.getByLabel('Date range', { exact: true })
+
+    await dateInput.click()
+    const calendar = page.locator('.react-datepicker')
+    const disabledDay = calendar.locator('.react-datepicker__day--015')
+    const disabledColor = await disabledDay.evaluate((day) => getComputedStyle(day).color)
+    const textColor = await page.locator('body').evaluate((body) => getComputedStyle(body).color)
+
+    await calendar.locator('.react-datepicker__day--010').click()
+    await expect(dateInput).toHaveValue('11/10/2026 - ')
+    await calendar.locator('.react-datepicker__day--020').hover()
+    await expect(calendar.locator('.react-datepicker__day--016')).toHaveCSS('color', textColor)
+    await expect(disabledDay).toHaveCSS('color', disabledColor)
+    await calendar.locator('.react-datepicker__day--020').click()
+    await expect(dateInput).toHaveValue('11/10/2026 - 11/20/2026')
+    await dateInput.clear()
+    await expect(dateInput).toHaveValue('')
+  })
+
   test('should display formatted date in list view table cell', async () => {
     await goToListView(page)
     const formattedDateCell = page.locator('.row-1 .cell-timeOnly')

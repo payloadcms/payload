@@ -6,10 +6,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextInputProps } from './types.js'
 
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
 import { TextInput } from './Input.js'
@@ -112,6 +115,11 @@ const TextFieldComponent: React.FC<TextFieldClientProps> = (props) => {
     }
   }, [value, hasMany])
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
+  const inputID = generateFieldID(path, editDepth, uuid)
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
@@ -122,10 +130,12 @@ const TextFieldComponent: React.FC<TextFieldClientProps> = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      errorID={errorID}
       hasMany={hasMany}
       htmlAttributes={{
         autoComplete: autoComplete || undefined,
       }}
+      id={inputID}
       inputRef={inputRef}
       Label={Label}
       label={label}

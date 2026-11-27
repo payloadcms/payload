@@ -16,16 +16,25 @@
     --spacing-field: var(--spacer-4);
     --spacing-view-bottom: var(--gutter-h);
 
-    /* Sidebar widths */
+    /* Layout widths */
     --nav-width: 275px;
     --doc-sidebar-width: 325px;
     --edit-upload-sidebar-width: 240px;
+    --drawer-width: clamp(600px, 40vw, 1080px);
+    --drawer-max-width: calc(100vw - var(--spacer-3));
 
     /* Breakpoints */
     --breakpoint-xs-width: 400px;
     --breakpoint-s-width: 768px;
     --breakpoint-m-width: 1024px;
     --breakpoint-l-width: 1440px;
+  }
+
+  @media (min-width: 768px) {
+    :root,
+    :host {
+      --drawer-max-width: 100vw;
+    }
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */

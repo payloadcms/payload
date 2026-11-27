@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import type { FetchRegistry, RegistryPackument } from './types.js'
+import type { FetchRegistry, RegistryPackage } from '../upgrade-shared/index.js'
 
-import { resolveVersions } from './resolveVersions.js'
+import { resolveVersions } from '../upgrade-shared/toolchain.js'
 
-const packuments: Record<string, RegistryPackument> = {
+const packuments: Record<string, RegistryPackage> = {
   '@payloadcms/next': {
     'dist-tags': { canary: '4.0.0-canary.20' },
     versions: {

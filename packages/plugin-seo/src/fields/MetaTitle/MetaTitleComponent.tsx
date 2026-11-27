@@ -9,12 +9,13 @@ import {
   useConfig,
   useDocumentInfo,
   useDocumentTitle,
+  useEditDepth,
   useField,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { generateFieldID, reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
@@ -63,7 +64,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   }: FieldType<string> = useField()
 
   const locale = useLocale()
-  const { getData } = useForm()
+  const { getData, uuid } = useForm()
+  const editDepth = useEditDepth()
+  const inputID = generateFieldID(path, editDepth, uuid)
   const docInfo = useDocumentInfo()
   const { title } = useDocumentTitle()
 
@@ -138,7 +141,13 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       >
         <div className="plugin-seo__field">
           {Label ?? (
-            <FieldLabel label={label} localized={localized} path={path} required={required} />
+            <FieldLabel
+              htmlFor={inputID}
+              label={label}
+              localized={localized}
+              path={path}
+              required={required}
+            />
           )}
           {hasGenerateTitleFn && (
             <React.Fragment>
@@ -190,6 +199,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
           AfterInput={AfterInput}
           BeforeInput={BeforeInput}
           Error={errorMessage}
+          id={inputID}
           onChange={setValue}
           path={path}
           readOnly={readOnly}

@@ -2769,11 +2769,11 @@ describe('Uploads', () => {
     await page.goto(listViewPreviewURL.list)
     const firstRow = page.locator('.row-1')
 
-    const imageUploadCell = firstRow.locator('.cell-imageUpload .relationship-cell')
-    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+    const imageUploadCell = firstRow.locator('.cell-imageUpload')
+    await expect(imageUploadCell).toHaveAccessibleName('No Image Upload')
 
-    const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
-    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+    const imageRelationshipCell = firstRow.locator('.cell-imageRelationship')
+    await expect(imageRelationshipCell).toHaveAccessibleName('No Image Relationship')
 
     // Navigate to page 2 using the right arrow
     const nextPageButton = page.locator('.clickable-arrow--right')
@@ -2789,8 +2789,8 @@ describe('Uploads', () => {
     await expect(prevPageButton).toBeVisible()
     await prevPageButton.click()
 
-    await expect(imageUploadCell).toHaveText('<No Image Upload>')
-    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+    await expect(imageUploadCell).toHaveAccessibleName('No Image Upload')
+    await expect(imageRelationshipCell).toHaveAccessibleName('No Image Relationship')
   })
 
   test('should respect Sharp constructorOptions', async () => {

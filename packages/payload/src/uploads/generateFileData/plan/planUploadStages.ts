@@ -55,7 +55,9 @@ export async function planUploadStages({
       earlierPlan?.plan.mimeType === mimeType
         ? earlierPlan.plan
         : await planUploadPipeline({
+            canApplyAtRequest,
             collectionSlug,
+            documentID,
             mimeType,
             pipelineDoc,
             pipelineOriginalDoc,

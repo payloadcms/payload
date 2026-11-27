@@ -5,9 +5,9 @@ import type { ResolvedUploadDocument } from '../transformers/resolveUploadDocume
 import { NotFound } from '../../errors/NotFound.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
-import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import {
-  collectStoredFiles,
+  getUploadFileEntries,
+  getUploadFileObjects,
   hasStoredOriginal,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
@@ -54,11 +54,18 @@ export const resolveHistoricalFile = async ({
     where: { id: { equals: versionID } },
   })
   const matched = docs[0]
-  const historical = matched
-    ? await resolveVersionFile({ collection, filename, isOriginal, prefix, req, row: matched })
-    : undefined
+  let historical: HistoricalFile | undefined
+  let resolveFailure: { err: unknown } | undefined
 
-  // Check both policies before exposing a missing version or a filename mismatch.
+  try {
+    historical = matched
+      ? await resolveVersionFile({ collection, filename, isOriginal, prefix, req, row: matched })
+      : undefined
+  } catch (err) {
+    resolveFailure = { err }
+  }
+
+  // Check both policies before exposing a missing version, a filename mismatch or a damaged entry.
   if (!historical?.isBuiltAtRequest) {
     await checkFileAccess({ collection, documentID: matched?.parent, filename, req })
   }
@@ -70,6 +77,10 @@ export const resolveHistoricalFile = async ({
     req,
     showHiddenFields: true,
   })
+
+  if (resolveFailure) {
+    throw resolveFailure.err
+  }
 
   if (!historical) {
     throw new NotFound(req.t)
@@ -98,51 +109,40 @@ const resolveVersionFile = async ({
     doc: row.version,
     req,
   })
-  const entry = getHistoricalEntry({ doc: saved, filename, isOriginal })
+  // A shared filename means the main file unless the request asks for the original.
+  const values = getUploadFileObjects({ doc: saved })
+  const match = isOriginalFileRequest({ doc: saved, filename, isOriginal })
+    ? values.find(({ role }) => role.type === 'original')
+    : values.find(({ role, value }) => role.type !== 'original' && value.filename === filename)
 
-  if (!entry || (prefix !== undefined && (entry.value.prefix ?? '') !== prefix)) {
+  // Find the requested file, then read only the entries it needs. Reading an entry throws for an
+  // unsafe storage key, so a damaged entry elsewhere in the version must not fail this request.
+  if (!match || (prefix !== undefined && (match.value.prefix ?? '') !== prefix)) {
     return
   }
 
-  const storedFiles = collectStoredFiles({ collection: collection.config, doc: saved, req })
-  const isBuiltAtRequest = entry.type !== 'original' && isRequestTimeFile({ entry: entry.value })
+  const [entry] = getUploadFileEntries({
+    collection: collection.config,
+    doc: saved,
+    req,
+    roles: [match.role],
+  })
+  const isBuiltAtRequest = entry?.status === 'requestTime'
+  // A file built on request is built from the original, so only then is the original read too.
   const hasFile = isBuiltAtRequest
-    ? hasStoredOriginal({ storedFiles })
-    : storedFiles.some((file) =>
-        file.roles.some((role) =>
-          entry.type === 'size'
-            ? role.type === 'size' && role.sizeKey === entry.sizeKey
-            : role.type === entry.type,
-        ),
-      )
+    ? hasStoredOriginal({
+        entries: getUploadFileEntries({
+          collection: collection.config,
+          doc: saved,
+          req,
+          roles: [{ type: 'original' }],
+        }),
+      })
+    : entry?.status === 'stored'
 
   if (!hasFile) {
     return
   }
 
   return { document: { ...saved, id: row.parent } as ResolvedUploadDocument, isBuiltAtRequest }
-}
-
-function getHistoricalEntry({
-  doc,
-  filename,
-  isOriginal,
-}: {
-  doc: JsonObject
-  filename: string
-  isOriginal?: boolean
-}): { sizeKey?: string; type: 'default' | 'original' | 'size'; value: JsonObject } | undefined {
-  if (isOriginalFileRequest({ doc, filename, isOriginal })) {
-    return { type: 'original', value: doc.original as JsonObject }
-  }
-  if (doc.filename === filename) {
-    return { type: 'default', value: doc }
-  }
-  for (const [sizeKey, value] of Object.entries(
-    (doc.variants ?? {}) as Record<string, JsonObject>,
-  )) {
-    if (value?.filename === filename) {
-      return { type: 'size', sizeKey, value }
-    }
-  }
 }

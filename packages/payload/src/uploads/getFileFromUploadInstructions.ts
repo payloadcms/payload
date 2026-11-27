@@ -20,6 +20,7 @@ import { normalizeStorageKey } from './fileVersioning/naming.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
+import { holdUploadSessionObject } from './sessions/holdUploadSessionObject.js'
 import { getStagedFile } from './stagedUpload.js'
 import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
@@ -105,6 +106,10 @@ export const getFileFromUploadInstructions = async ({
         file.uploadReference._objectKey !== receipt._objectKey)
     ) {
       throw new APIError('Invalid upload reference.', 400)
+    }
+
+    if (receipt.uploadSessionID !== undefined) {
+      await holdUploadSessionObject({ id: receipt.uploadSessionID, req })
     }
 
     providerFilename = file.filename

@@ -1006,6 +1006,55 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
     })
+
+    test.options(
+      'should not return related documents used for sorting even with allowAdditionalKeys true',
+      { db: 'mongo' },
+      async ({ payload }) => {
+        const simple = await payload.create({
+          collection: 'simple',
+          data: { text: 'sorted simple' },
+          overrideAccess: true,
+        })
+
+        const category = await payload.create({
+          collection: 'categories',
+          data: { simple: simple.id, title: 'sorted category' },
+          overrideAccess: true,
+        })
+
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { category: category.id, title: 'sorted post' },
+          overrideAccess: true,
+        })
+
+        const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
+
+        payload.db.allowAdditionalKeys = true
+
+        try {
+          for (const sort of ['category.title', 'category.simple.text']) {
+            const result = await payload.find({
+              collection: postsSlug,
+              depth: 0,
+              overrideAccess: true,
+              sort,
+              where: { id: { equals: post.id } },
+            })
+
+            expect(result.docs).toHaveLength(1)
+            expect(result.docs[0]).not.toHaveProperty('__category')
+            expect(result.docs[0]).not.toHaveProperty('____category')
+          }
+        } finally {
+          payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
+          await payload.delete({ id: post.id, collection: postsSlug, overrideAccess: true })
+          await payload.delete({ id: category.id, collection: 'categories', overrideAccess: true })
+          await payload.delete({ id: simple.id, collection: 'simple', overrideAccess: true })
+        }
+      },
+    )
   })
 
   test('should query hasMany select field with contains operator', async ({ payload }) => {
@@ -2611,6 +2660,50 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
     })
 
+    test('should preserve omitted arrays when updating a hasMany relationship', async ({
+      payload,
+    }) => {
+      const relation = await payload.create({
+        collection: relationASlug,
+        data: { title: 'Related document' },
+        overrideAccess: true,
+      })
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: { array: [{ text: 'array row' }] },
+        overrideAccess: true,
+      })
+
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: customSchemaSlug,
+        data: { relationship: [relation.id] },
+        returning: false,
+        select: {},
+      })
+
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: customSchemaSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(updated.array).toStrictEqual(doc.array)
+      expect(updated.relationship).toStrictEqual([relation.id])
+
+      await payload.delete({
+        id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
+      })
+      await payload.delete({
+        id: relation.id,
+        collection: relationASlug,
+        overrideAccess: true,
+      })
+    })
+
     test('should preserve omitted hasMany selects when updating an array with db.updateOne', async ({
       payload,
     }) => {
@@ -3974,6 +4067,24 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       for (const enumName in payload.db.enums) {
         expect(module).toHaveProperty(enumName)
       }
+    })
+
+    test('should not duplicate explicitly defined draft status options', async ({ payload }) => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
+        return
+      }
+
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+      await payload.db.generateSchema({
+        outputFile,
+      })
+
+      const module = await import(outputFile)
+
+      expect(module.enum_categories_status?.enumValues).toEqual(['draft', 'published'])
+      expect(module.enum__categories_v_version_status?.enumValues).toEqual(['draft', 'published'])
     })
 
     test('should generate Drizzle SQLite schema', async ({ payload }) => {
@@ -6986,6 +7097,42 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(res.blocks).toHaveLength(1)
     expect(res.blocks[0]?.nested).toHaveLength(1)
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
+  })
+
+  test('should delete nested block rows when their parent block is removed', async ({
+    payload,
+  }) => {
+    if (payload.db.name === 'mongoose') {
+      return
+    }
+
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        blocks: [{ blockType: 'block-third', nested: [{ blockType: 'block-fourth', nested: [] }] }],
+        title: 'title',
+      },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: 'posts',
+      data: { blocks: [] },
+      overrideAccess: true,
+    })
+
+    // Nested block rows reference the document, not their parent block, so they are not
+    // removed by a cascade. Left behind, they get merged into any block that later takes
+    // the same `_path`.
+    const db = payload.db as unknown as PostgresAdapter
+    const nestedTable = db.tables[db.tableNameMap.get('posts_blocks_block_fourth')!]!
+    const rows = await db.drizzle
+      .select()
+      .from(nestedTable)
+      .where(sql`${nestedTable._parentID} = ${post.id}`)
+
+    expect(rows).toHaveLength(0)
   })
 
   test('should ignore blocks that exist in the db but not in the config', async ({ payload }) => {

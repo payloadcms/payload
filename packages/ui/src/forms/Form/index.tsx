@@ -21,7 +21,6 @@ import type {
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -67,7 +66,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const { refreshCookie } = useAuth()
-  const { queueTask, resetQueue } = useQueue()
+  const resetSequenceRef = useRef(0)
+  const isMountedRef = useRef(false)
 
   const { getUploadHandler } = useUploadHandlers()
 
@@ -75,30 +75,37 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const isFirstRenderRef = useRef(true)
+  const lastQueuedFormSequenceRef = useRef<number | undefined>(undefined)
 
   const {
     dispatchFields,
+    dispatchFieldsWithoutIncrementingFormSequence,
     formState,
+    getFormSequence,
     isInitializing,
     isModified,
     isValid,
     prevFormStateRef,
     queueFormStateRefresh,
+    queueTask,
     refreshFormState,
     resetFormState,
+    resetQueue,
     setIsValid,
-    setModified: setFormStateModified,
+    setModified,
+    setModifiedWithoutTracking,
+    submissionErrorsRef,
     validateForm,
   } = useFormState({
     contextRef,
     onApplied: (appliedFormState, isSubmitted) => notifyOnChange(appliedFormState, isSubmitted),
     onReset: () => {
+      resetSequenceRef.current += 1
       resetQueue()
       restoreRequestState()
     },
     props,
-    queueTask,
+    resetSequenceRef,
   })
 
   const {
@@ -108,7 +115,6 @@ export const Form: React.FC<FormProps> = (props) => {
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
-    setModified,
     setProcessing,
     setSubmitted,
     submit,
@@ -116,14 +122,19 @@ export const Form: React.FC<FormProps> = (props) => {
     successfulSubmitCount,
   } = useFormSubmission({
     contextRef,
-    dispatchFields,
+    dispatchFields: dispatchFieldsWithoutIncrementingFormSequence,
     formRef,
+    getFormSequence,
+    isMountedRef,
     prevFormStateRef,
     props,
+    queueFormStateRefresh,
     queueTask,
     refreshFormState,
+    resetSequenceRef,
     setIsValid,
-    setModified: setFormStateModified,
+    setModified: setModifiedWithoutTracking,
+    submissionErrorsRef,
     validateForm,
   })
 
@@ -225,6 +236,7 @@ export const Form: React.FC<FormProps> = (props) => {
         disabled: contextRef.current.disabled,
         submitted: contextRef.current.submitted,
       }
+      resetSequenceRef.current += 1
       resetQueue()
       restoreRequestState()
       setModified(false)
@@ -295,7 +307,12 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   useEffect(() => {
-    return () => resetQueue()
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      resetSequenceRef.current += 1
+      resetQueue()
+    }
   }, [resetQueue])
 
   contextRef.current.submit = submit
@@ -338,6 +355,7 @@ export const Form: React.FC<FormProps> = (props) => {
         disabled: contextRef.current.disabled,
         submitted: contextRef.current.submitted,
       }
+      resetSequenceRef.current += 1
       resetQueue()
       restoreRequestState()
       dispatchFields({
@@ -379,15 +397,19 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
+      const formSequence = getFormSequence()
+
+      // Reverted edits still invalidate requests, even when their final values match.
       if (
-        (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
+        (formSequence !== lastQueuedFormSequenceRef.current ||
+          !dequal(formState, prevFormStateRef.current)) &&
         isModified
       ) {
+        lastQueuedFormSequenceRef.current = formSequence
         queueFormStateRefresh()
       }
 
       prevFormStateRef.current = formState
-      isFirstRenderRef.current = false
     },
     [isModified, submitted, formState],
     250,
