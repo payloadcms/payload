@@ -523,6 +523,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     selectValue: 'Избери стойност',
     settings: 'Настройки',
     showAllLabel: 'Покажи всички {{label}}',
+    showingCurrentOfTotal: 'Показани {{current}} от {{total}}',
     shownInTable: 'Показано в таблица',
     showSidebar: 'Показване на страничната лента',
     skipToContent: 'Към съдържанието',

@@ -529,6 +529,7 @@ export const roTranslations: DefaultTranslationsObject = {
     selectValue: 'Selectați o valoare',
     settings: 'Setări',
     showAllLabel: 'Afișează toate {{eticheta}}',
+    showingCurrentOfTotal: 'Se afișează {{current}} din {{total}}',
     shownInTable: 'Afișat în tabel',
     showSidebar: 'Afișați bara laterală',
     skipToContent: 'Sari la conținut',

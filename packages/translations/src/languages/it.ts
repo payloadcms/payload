@@ -530,6 +530,7 @@ export const itTranslations: DefaultTranslationsObject = {
     selectValue: 'Seleziona un valore',
     settings: 'Impostazioni',
     showAllLabel: 'Mostra tutti {{label}}',
+    showingCurrentOfTotal: 'Visualizzati {{current}} di {{total}}',
     shownInTable: 'Visualizzato in tabella',
     showSidebar: 'Mostra barra laterale',
     skipToContent: 'Vai al contenuto',

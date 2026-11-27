@@ -450,6 +450,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:settings',
   'general:showAllLabel',
   'general:showSidebar',
+  'general:showingCurrentOfTotal',
   'general:shownInTable',
   'general:skipToContent',
   'general:sorryNotFound',

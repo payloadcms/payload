@@ -523,6 +523,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     selectValue: 'একটি মান নির্বাচন করুন',
     settings: 'সেটিংস',
     showAllLabel: 'সমস্ত {{label}} দেখান',
+    showingCurrentOfTotal: '{{total}}টির মধ্যে {{current}}টি দেখানো হচ্ছে',
     shownInTable: 'সারণিতে প্রদর্শিত',
     showSidebar: 'সাইডবার দেখান',
     skipToContent: 'বিষয়বস্তুতে যান',

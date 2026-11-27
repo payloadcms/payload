@@ -518,6 +518,7 @@ export const etTranslations: DefaultTranslationsObject = {
     selectValue: 'Vali väärtus',
     settings: 'Seaded',
     showAllLabel: 'Näita kõiki {{label}}',
+    showingCurrentOfTotal: 'Kuvatakse {{current}} / {{total}}',
     shownInTable: 'Kuvatud tabelis',
     showSidebar: 'Kuva külgriba',
     skipToContent: 'Liigu sisu juurde',
