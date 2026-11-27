@@ -1,7 +1,5 @@
 import type { R2Bucket } from './types.js'
 
-const isMiniflare = process.env.NODE_ENV === 'development'
-
 interface UploadFileArgs {
   bucket: R2Bucket
   buffer: Buffer
@@ -15,8 +13,8 @@ export async function uploadFile({
   mimeType,
   storageFilePath,
 }: UploadFileArgs): Promise<void> {
-  // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
-  const body = isMiniflare ? new Blob([buffer]) : buffer
+  // Older Miniflare versions reject Node Buffers, so pass a plain view of the same bytes.
+  const body = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
 
   await bucket.put(storageFilePath, body, {
     httpMetadata: { contentType: mimeType },
