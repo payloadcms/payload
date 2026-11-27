@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { UploadProgress } from '../../providers/DocumentInfo/types.js'
 
 import { createProgressToast } from '../../providers/UploadSessions/browser.js'
-import { trackSaveUploadProgress } from './trackSaveUploadProgress.js'
+import { abandonSaveUploadProgress, trackSaveUploadProgress } from './trackSaveUploadProgress.js'
 
 const t = ((key: string, vars?: Record<string, unknown>) =>
   `${key} ${JSON.stringify(vars ?? {})}`) as unknown as TFunction
@@ -124,5 +124,79 @@ describe('trackSaveUploadProgress', () => {
     upload.settle({ isSuccessful: true })
 
     expect(upload.stop()).toBeUndefined()
+  })
+})
+
+describe('abandonSaveUploadProgress', () => {
+  /** Holds `uploadProgress` like `useState`, so updates can depend on the current value. */
+  const createProgressState = () => {
+    let current: undefined | UploadProgress
+
+    return {
+      get: () => current,
+      set: (
+        update:
+          | ((value: undefined | UploadProgress) => undefined | UploadProgress)
+          | UploadProgress,
+      ) => {
+        current = typeof update === 'function' ? update(current) : update
+      },
+    }
+  }
+
+  it('should clear the progress of a save reset while uploading and ignore its later reports', () => {
+    const state = createProgressState()
+    const upload = trackSaveUploadProgress({
+      fileName: 'video.mp4',
+      onChange: state.set,
+      t,
+      totalBytes: 100,
+    })
+
+    upload.report({ loadedBytes: 40, totalBytes: 100 })
+    abandonSaveUploadProgress({ setUploadProgress: state.set, upload })
+
+    expect(state.get()).toBeUndefined()
+
+    upload.report({ loadedBytes: 90, totalBytes: 100 })
+    upload.settle({ isSuccessful: true })
+
+    expect(state.get()).toBeUndefined()
+  })
+
+  it('should keep the progress a newer save has reported', () => {
+    const state = createProgressState()
+    const staleUpload = trackSaveUploadProgress({
+      fileName: 'video.mp4',
+      onChange: state.set,
+      t,
+      totalBytes: 100,
+    })
+    const newerUpload = trackSaveUploadProgress({
+      fileName: 'other.mp4',
+      onChange: state.set,
+      t,
+      totalBytes: 200,
+    })
+
+    newerUpload.report({ loadedBytes: 50, totalBytes: 200 })
+    abandonSaveUploadProgress({ setUploadProgress: state.set, upload: staleUpload })
+
+    expect(state.get()).toEqual({ loadedBytes: 50, status: 'uploading', totalBytes: 200 })
+  })
+
+  it('should keep the result of a save that already settled', () => {
+    const state = createProgressState()
+    const upload = trackSaveUploadProgress({
+      fileName: 'video.mp4',
+      onChange: state.set,
+      t,
+      totalBytes: 100,
+    })
+
+    upload.settle({ isSuccessful: true })
+    abandonSaveUploadProgress({ setUploadProgress: state.set, upload })
+
+    expect(state.get()).toEqual({ loadedBytes: 100, status: 'success', totalBytes: 100 })
   })
 })

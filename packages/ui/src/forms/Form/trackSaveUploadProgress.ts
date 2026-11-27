@@ -88,3 +88,24 @@ export const trackSaveUploadProgress = ({
     },
   }
 }
+
+/**
+ * Stops the tracker of a save that ended without a result, or was invalidated by a form reset
+ * while its file was still uploading, and clears its progress so `uploadStatus` does not stay at
+ * `uploading`. Progress a newer save has reported since is left alone.
+ */
+export const abandonSaveUploadProgress = ({
+  setUploadProgress,
+  upload,
+}: {
+  setUploadProgress?: (
+    update: (current: undefined | UploadProgress) => undefined | UploadProgress,
+  ) => void
+  upload?: ReturnType<typeof trackSaveUploadProgress>
+}): void => {
+  const abandonedProgress = upload?.stop()
+
+  if (abandonedProgress) {
+    setUploadProgress?.((current) => (current === abandonedProgress ? undefined : current))
+  }
+}
