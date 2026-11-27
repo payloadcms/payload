@@ -1384,23 +1384,31 @@ describe('Fields', () => {
     })
 
     it('should query hasMany localized values across all locales', { db: 'drizzle' }, async () => {
-      await payload.update({
-        id: doc.id,
-        collection: 'select-fields',
-        data: {
-          selectHasManyLocalized: ['two'],
-        },
-        locale: 'es',
-      })
+      // Give each locale a value the other lacks, so searching only one locale fails.
+      for (const [locale, values] of [
+        ['en', ['one']],
+        ['es', ['two']],
+      ] as const) {
+        await payload.update({
+          id: doc.id,
+          collection: 'select-fields',
+          data: {
+            selectHasManyLocalized: [...values],
+          },
+          locale,
+        })
+      }
 
-      const { docs } = await payload.find({
-        collection: 'select-fields',
-        depth: 0,
-        locale: 'all',
-        where: { selectHasManyLocalized: { equals: 'one' } },
-      })
+      for (const value of ['one', 'two']) {
+        const { docs } = await payload.find({
+          collection: 'select-fields',
+          depth: 0,
+          locale: 'all',
+          where: { selectHasManyLocalized: { equals: value } },
+        })
 
-      expect(docs.map(({ id }) => id)).toContain(doc.id)
+        expect(docs.map(({ id }) => id)).toContain(doc.id)
+      }
     })
 
     it('retains hasMany updates', async () => {
