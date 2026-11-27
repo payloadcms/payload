@@ -533,24 +533,26 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
       overrideAccess: true,
     })
 
-    // maxLoginAttempts is 2 for this collection
-    for (let i = 0; i < 2; i++) {
-      await expect(
-        sdk.login({ collection: 'users', data: { ...credentials, password: 'wrong' } }),
-      ).rejects.toBeInstanceOf(PayloadSDKError)
+    try {
+      // maxLoginAttempts is 2 for this collection
+      for (let i = 0; i < 2; i++) {
+        await expect(
+          sdk.login({ collection: 'users', data: { ...credentials, password: 'wrong' } }),
+        ).rejects.toBeInstanceOf(PayloadSDKError)
+      }
+      await expect(sdk.login({ collection: 'users', data: credentials })).rejects.toBeInstanceOf(
+        PayloadSDKError,
+      )
+
+      const res = await sdk.unlock({ collection: 'users', data: { email: credentials.email } })
+
+      expect(res.message).toBeTruthy()
+      expect((await sdk.login({ collection: 'users', data: credentials })).user.email).toBe(
+        credentials.email,
+      )
+    } finally {
+      await payload.delete({ id: user.id, collection: 'users', overrideAccess: true })
     }
-    await expect(sdk.login({ collection: 'users', data: credentials })).rejects.toBeInstanceOf(
-      PayloadSDKError,
-    )
-
-    const res = await sdk.unlock({ collection: 'users', data: { email: credentials.email } })
-
-    expect(res.message).toBeTruthy()
-    expect((await sdk.login({ collection: 'users', data: credentials })).user.email).toBe(
-      credentials.email,
-    )
-
-    await payload.delete({ id: user.id, collection: 'users', overrideAccess: true })
   })
 
   test('should execute access', async ({ sdk }) => {
@@ -626,11 +628,13 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
   test('should execute duplicate', async ({ payload, sdk }) => {
     const copy = await sdk.duplicate({ id: post.id, collection: 'posts', data: { text: 'copy' } })
 
-    expect(copy.id).not.toBe(post.id)
-    expect(copy.number).toBe(post.number)
-    expect(copy.text).toBe('copy')
-
-    await payload.delete({ id: copy.id, collection: 'posts', overrideAccess: true })
+    try {
+      expect(copy.id).not.toBe(post.id)
+      expect(copy.number).toBe(post.number)
+      expect(copy.text).toBe('copy')
+    } finally {
+      await payload.delete({ id: copy.id, collection: 'posts', overrideAccess: true })
+    }
   })
 
   test('should execute renameFile', async ({ payload, sdk }) => {
@@ -639,30 +643,34 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
     })
     const media = await sdk.create({ collection: 'media', data: {}, file })
 
-    const renamed = await sdk.renameFile({
-      id: media.id,
-      collection: 'media',
-      filename: 'renamed.jpg',
-    })
+    try {
+      const renamed = await sdk.renameFile({
+        id: media.id,
+        collection: 'media',
+        filename: 'renamed.jpg',
+      })
 
-    expect(renamed.filename).toBe('renamed.jpg')
-    expect((await payload.findByID({ id: media.id, collection: 'media' })).filename).toBe(
-      'renamed.jpg',
-    )
-
-    await payload.delete({ id: media.id, collection: 'media', overrideAccess: true })
+      expect(renamed.filename).toBe('renamed.jpg')
+      expect((await payload.findByID({ id: media.id, collection: 'media' })).filename).toBe(
+        'renamed.jpg',
+      )
+    } finally {
+      await payload.delete({ id: media.id, collection: 'media', overrideAccess: true })
+    }
   })
 
   test('should encode text IDs as one path segment', async ({ payload, sdk }) => {
     const id = 'chapter/intro#1'
     await payload.create({ collection: 'text-ids', data: { id }, overrideAccess: true })
 
-    expect((await sdk.docAccess({ id, collection: 'text-ids' })).update).toBe(true)
-    expect(
-      (await sdk.validate({ id, collection: 'text-ids', data: { shortText: 'too long' } })).valid,
-    ).toBe(false)
-
-    await payload.delete({ id, collection: 'text-ids', overrideAccess: true })
+    try {
+      expect((await sdk.docAccess({ id, collection: 'text-ids' })).update).toBe(true)
+      expect(
+        (await sdk.validate({ id, collection: 'text-ids', data: { shortText: 'too long' } })).valid,
+      ).toBe(false)
+    } finally {
+      await payload.delete({ id, collection: 'text-ids', overrideAccess: true })
+    }
   })
 
   test.describe('Error Handling', () => {
