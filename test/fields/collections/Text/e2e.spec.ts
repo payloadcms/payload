@@ -1,4 +1,3 @@
-import type { PayloadSDK } from '@payloadcms/sdk'
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -23,6 +22,7 @@ import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitial
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
+import { devUser } from '../../../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textFieldsSlug } from '../../slugs.js'
 import { textDoc } from './shared.js'
@@ -34,7 +34,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let sdk: PayloadSDK<Config>
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -43,7 +42,7 @@ let url: AdminUrlUtil
 describe('Text', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -148,7 +147,11 @@ describe('Text', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    const { user } = await sdk.me({ collection: 'users' })
+    const { user } = await payload.login({
+      collection: 'users',
+      data: { email: devUser.email, password: devUser.password },
+      overrideAccess: true,
+    })
 
     await upsertPreferences({
       key: 'text-fields-list',

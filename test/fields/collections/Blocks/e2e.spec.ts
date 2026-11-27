@@ -1,4 +1,3 @@
-import type { PayloadSDK } from '@payloadcms/sdk'
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
@@ -18,6 +17,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
@@ -39,7 +39,7 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-let sdk: PayloadSDK<Config>
+let payload: PayloadTestSDK<Config>
 let page: Page
 let serverURL: string
 let context: BrowserContext
@@ -49,7 +49,7 @@ let context: BrowserContext
 describe('Block fields', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ sdk, serverURL } = await initPayloadE2ENoConfig<Config>({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -934,7 +934,7 @@ describe('Block fields', () => {
 
     test.afterEach(async () => {
       for (const id of createdIDs) {
-        await sdk.delete({ collection: 'block-fields', id })
+        await payload.delete({ collection: 'block-fields', id, overrideAccess: true })
       }
       createdIDs.length = 0
     })
@@ -958,7 +958,7 @@ describe('Block fields', () => {
       const id = page.url().split('/').pop()!
       createdIDs.push(id)
 
-      const doc = await sdk.findByID({ collection: 'block-fields', id })
+      const doc = await payload.findByID({ collection: 'block-fields', id, overrideAccess: true })
 
       expect(doc.configuration).toMatchObject([
         { blockType: 'conditionalReference', testBlocks: [{ blockType: 'testBlock' }] },
@@ -984,7 +984,7 @@ describe('Block fields', () => {
       const id = page.url().split('/').pop()!
       createdIDs.push(id)
 
-      const doc = await sdk.findByID({ collection: 'block-fields', id })
+      const doc = await payload.findByID({ collection: 'block-fields', id, overrideAccess: true })
 
       expect(doc.conditionalGroup?.conditionalConfiguration).toMatchObject([
         { blockType: 'conditionalReference' },
@@ -1009,7 +1009,7 @@ describe('Block fields', () => {
       const id = page.url().split('/').pop()!
       createdIDs.push(id)
 
-      const doc = await sdk.findByID({ collection: 'block-fields', id })
+      const doc = await payload.findByID({ collection: 'block-fields', id, overrideAccess: true })
 
       expect(doc.testBlocks).toMatchObject([{ blockType: 'testBlock' }])
     })

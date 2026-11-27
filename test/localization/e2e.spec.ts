@@ -1,4 +1,3 @@
-import type { PayloadSDK } from '@payloadcms/sdk'
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -34,6 +33,7 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { blocksCollectionSlug } from './collections/Blocks/index.js'
@@ -86,7 +86,6 @@ const description = 'description'
 
 let page: Page
 let payload: PayloadTestSDK<Config>
-let sdk: PayloadSDK<Config>
 let serverURL: string
 let richTextURL: AdminUrlUtil
 let urlLocaleRestricted: AdminUrlUtil
@@ -95,7 +94,7 @@ let context: BrowserContext
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, sdk, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
     urlRelationshipLocalized = new AdminUrlUtil(serverURL, relationshipLocalizedSlug)
@@ -557,7 +556,11 @@ describe('Localization', () => {
     )
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
-      const { user } = await sdk.me({ collection: 'users' })
+      const { user } = await payload.login({
+        collection: 'users',
+        data: { email: devUser.email, password: devUser.password },
+        overrideAccess: true,
+      })
 
       await upsertPreferences({
         key: 'locale',

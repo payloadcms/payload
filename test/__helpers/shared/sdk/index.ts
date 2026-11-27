@@ -4,6 +4,7 @@ import type {
   DataFromCollectionSlug,
   DeleteByIDOptions,
   DeleteManyOptions,
+  FindByIDOptions,
   FindOptions,
   FindVersionsOptions,
   LoginOptions,
@@ -17,6 +18,7 @@ import type {
   UpdateManyOptions,
 } from '@payloadcms/sdk'
 import type {
+  ApplyDisableErrors,
   AuthCollectionSlug,
   CollectionSlug,
   GlobalSlug,
@@ -57,6 +59,7 @@ type LocalAPIOperation =
   | 'create'
   | 'delete'
   | 'find'
+  | 'findByID'
   | 'findVersions'
   | 'login'
   | 'sendEmail'
@@ -65,7 +68,8 @@ type LocalAPIOperation =
 
 /**
  * Calls the Local API of the running e2e server through the test-only `/api/local-api` endpoint, for
- * seeding and inspecting data. Use the `sdk` from `initPayloadE2ENoConfig` to go through REST instead.
+ * seeding and inspecting data. Requests carry no token, so the endpoint runs as the config's
+ * `admin.autoLogin` user. Pass `overrideAccess: true` to skip access control.
  */
 export class PayloadTestSDK<T extends PayloadTypesShape> {
   serverURL: string
@@ -88,7 +92,15 @@ export class PayloadTestSDK<T extends PayloadTypesShape> {
       },
     )
 
-    return response.json()
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(`Local API ${operation} failed: ${result?.message ?? response.status}`, {
+        cause: result,
+      })
+    }
+
+    return result
   }
 
   create<TSlug extends CollectionSlug<T>, TSelect extends SelectType>(
@@ -116,6 +128,16 @@ export class PayloadTestSDK<T extends PayloadTypesShape> {
     args: FindOptions<T, TSlug, TSelect> & LocalOnlyOptions,
   ): Promise<PaginatedDocs<TransformCollectionWithSelect<T, TSlug, TSelect>>> {
     return this.call({ args, operation: 'find' })
+  }
+
+  findByID<
+    TSlug extends CollectionSlug<T>,
+    TDisableErrors extends boolean,
+    TSelect extends SelectFromCollectionSlug<T, TSlug>,
+  >(
+    args: FindByIDOptions<T, TSlug, TDisableErrors, TSelect> & LocalOnlyOptions,
+  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<T, TSlug, TSelect>, TDisableErrors>> {
+    return this.call({ args, operation: 'findByID' })
   }
 
   findVersions<TSlug extends CollectionSlug<T>>(
