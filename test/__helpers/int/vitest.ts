@@ -57,7 +57,12 @@ type IntegrationFixtures = {
 
 // Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
 const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
-  cli: async ({ configPath, payload, testDir }, use) => {
+  cli: async ({ configPath, payload, skip, testDir }, use) => {
+    // The child CLI process can't reach the in-memory D1 database, which only exists in this process.
+    if (process.env.PAYLOAD_DATABASE === 'd1') {
+      skip('CLI commands run in a child process without access to the D1 binding')
+    }
+
     // Resolving this dependency initializes Payload and resets and seeds the database first.
     void payload
 

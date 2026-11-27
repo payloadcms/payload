@@ -4077,7 +4077,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     // lexical's `{root: {children: [...]}}` shape
     test.options(
       'should query based on richtext data within a block',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
+      { db: (adapter) => !adapter.startsWith('sqlite') && adapter !== 'd1' },
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -4108,7 +4108,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     // TODO: re-enable on sqlite — see note above.
     test.options(
       'should query based on richtext data within a localized block, specifying locale',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
+      { db: (adapter) => !adapter.startsWith('sqlite') && adapter !== 'd1' },
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -4139,7 +4139,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     // TODO: re-enable on sqlite — see note above.
     test.options(
       'should query based on richtext data within a localized block, without specifying locale',
-      { db: (adapter) => adapter.startsWith('sqlite') === false },
+      { db: (adapter) => !adapter.startsWith('sqlite') && adapter !== 'd1' },
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',

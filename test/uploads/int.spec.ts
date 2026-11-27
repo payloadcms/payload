@@ -59,7 +59,14 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: false }, () => {
+// D1 limits tables to 100 columns, and this config's media collection has more image size columns
+const suiteOptions: Parameters<typeof test.suite>[1] = {
+  config: './config.ts',
+  db: (adapter) => adapter !== 'd1',
+  resetBetweenTests: false,
+}
+
+test.suite('Collections - Uploads', suiteOptions, () => {
   let token: string
 
   test.beforeAll(async ({ restClientInstance: restClient }) => {

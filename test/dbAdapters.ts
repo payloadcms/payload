@@ -273,7 +273,7 @@ export const databaseAdapter = contentAPIAdapter({
     source: `
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 
-export const databaseAdapter = sqliteD1Adapter({ binding: global.d1 })
+export const databaseAdapter = sqliteD1Adapter({ binding: global.d1, autoIncrement: true })
   `,
   },
 } as const satisfies Record<string, DbAdapter>
