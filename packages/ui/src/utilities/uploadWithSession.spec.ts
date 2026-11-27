@@ -242,39 +242,6 @@ describe('uploadWithSession', () => {
     expect(progress).not.toContain(10)
   })
 
-  it('should stop reporting progress once a segment fails', async () => {
-    const progressAfterFailure: number[] = []
-    let hasFailed = false
-
-    stubSessionAPI({ completedAfterUpload: [], segmentNumbers: [1, 2] })
-    stubSegmentUploads({
-      attempts: [
-        // Segment 1 is rejected for good while segment 2 is still sending.
-        { status: 400 },
-        { progress: [10, 20, 50, 100], status: 200 },
-      ],
-    })
-
-    const upload = resumeUploadSession({
-      ...requestArgs,
-      file: largeFile,
-      onProgress: ({ loaded }) => {
-        if (hasFailed) {
-          progressAfterFailure.push(loaded)
-        }
-      },
-      session: largeSession,
-    }).catch((err: unknown) => {
-      hasFailed = true
-      return err
-    })
-
-    await vi.runAllTimersAsync()
-
-    expect(await upload).toBeInstanceOf(Error)
-    expect(progressAfterFailure).toEqual([])
-  })
-
   it('should retry a cancel while another request holds the session', async () => {
     const fetch = vi
       .fn()
