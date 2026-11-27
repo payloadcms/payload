@@ -31,6 +31,8 @@ const cloudflare =
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
+export const r2Bucket = cloudflare.env.R2
+
 export default buildConfigWithDefaults({
   suite: 'storage-r2',
   config: {
@@ -42,7 +44,7 @@ export default buildConfigWithDefaults({
     collections: [Media, MediaWithPrefix, MediaClient, Users],
     storage: [
       r2Storage({
-        bucket: cloudflare.env.R2,
+        bucket: r2Bucket,
         collections: {
           'media-with-prefix': {
             prefix: 'test-prefix',
@@ -51,7 +53,7 @@ export default buildConfigWithDefaults({
         },
       }),
       r2Storage({
-        bucket: cloudflare.env.R2,
+        bucket: r2Bucket,
         clientUploads: true,
         collections: {
           'media-client': true,
