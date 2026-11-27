@@ -42,7 +42,7 @@ import { isSameOriginURL, uploadRequest } from '../../utilities/uploadRequest.js
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
-import { trackSaveUploadProgress } from './trackSaveUploadProgress.js'
+import { abandonSaveUploadProgress, trackSaveUploadProgress } from './trackSaveUploadProgress.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
@@ -137,6 +137,10 @@ export const useFormSubmission = ({
   const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false)
 
   const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
+  /** The tracker of the save that is uploading a file, so a form reset can stop it. */
+  const activeSaveUploadRef = useRef<ReturnType<typeof trackSaveUploadProgress> | undefined>(
+    undefined,
+  )
   /**
    * Validates the document on the server without saving it. The `file` field is skipped because
    * its bytes are being uploaded separately and are never part of the form state sent here.
@@ -236,7 +240,11 @@ export const useFormSubmission = ({
     setIsProcessing(false)
     setDisabledBySubmission(false)
     setIsBackgroundProcessing(false)
-  }, [setIsBackgroundProcessing, setDisabledBySubmission])
+    // A reset invalidates the running save, but its upload can still be sending. Its progress is
+    // cleared now rather than when the upload ends, so Save is not held disabled until then.
+    abandonSaveUploadProgress({ setUploadProgress, upload: activeSaveUploadRef.current })
+    activeSaveUploadRef.current = undefined
+  }, [setIsBackgroundProcessing, setDisabledBySubmission, setUploadProgress])
 
   const applyFieldErrors = useCallback(
     ({ errors }: { errors: ValidationFieldError[] }) => {
@@ -485,6 +493,7 @@ export const useFormSubmission = ({
               onChange: setUploadProgress,
               totalBytes: uploadFile.size,
             })
+            activeSaveUploadRef.current = saveUpload
           }
 
           const formData = await contextRef.current.createFormData(overrides, {
@@ -842,11 +851,11 @@ export const useFormSubmission = ({
         }
 
         // A save that ended without a result, e.g. one replaced by a newer save, must not leave
-        // `uploadStatus` at `uploading`. A newer save's progress is left alone.
-        const abandonedProgress = saveUpload?.stop()
+        // `uploadStatus` at `uploading`.
+        abandonSaveUploadProgress({ setUploadProgress, upload: saveUpload })
 
-        if (abandonedProgress) {
-          setUploadProgress?.((current) => (current === abandonedProgress ? undefined : current))
+        if (activeSaveUploadRef.current === saveUpload) {
+          activeSaveUploadRef.current = undefined
         }
       }
     },
