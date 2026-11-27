@@ -2140,11 +2140,37 @@ describe('Versions', () => {
         createdIDs.length = 0
       })
 
-      for (const { futureTime, pastTime, timezone } of [
-        { futureTime: '07:05', pastTime: '07:00', timezone: 'Eastern Time' },
-        { futureTime: '13:05', pastTime: '13:00', timezone: 'Paris' },
+      for (const { day, futureTime, now, pastTime, timezone } of [
+        {
+          day: 15,
+          futureTime: '07:05',
+          now: '2030-01-15T12:02:00Z',
+          pastTime: '07:00',
+          timezone: 'Eastern Time',
+        },
+        {
+          day: 15,
+          futureTime: '13:05',
+          now: '2030-01-15T12:02:00Z',
+          pastTime: '13:00',
+          timezone: 'Paris',
+        },
+        {
+          day: 15,
+          futureTime: '19:05',
+          now: '2030-01-16T00:02:00Z',
+          pastTime: '19:00',
+          timezone: 'Eastern Time',
+        },
+        {
+          day: 16,
+          futureTime: '05:05',
+          now: '2030-01-15T20:02:00Z',
+          pastTime: '05:00',
+          timezone: 'Tokyo',
+        },
       ]) {
-        test(`should use ${timezone} for empty and selected-date time bounds`, async ({
+        test(`should use ${timezone} at ${now} for empty and selected-date time bounds`, async ({
           page: clockPage,
         }) => {
           const post = await payload.create({
@@ -2162,7 +2188,7 @@ describe('Versions', () => {
           )
           await waitForFormReady(clockPage)
           // Load the date library before replacing Date so TZDate keeps its native prototype.
-          await clockPage.clock.setSystemTime(new Date('2030-01-15T12:02:00.000Z'))
+          await clockPage.clock.setSystemTime(new Date(now))
           await clockPage.locator('#schedule-publish-button').click()
           await clockPage.locator('.timezone-picker .rs__control').click()
           await getSelectMenu({ page: clockPage })
@@ -2179,13 +2205,31 @@ describe('Versions', () => {
 
           await input.click()
           await expect(input).toHaveValue('')
+          const selectedDay = clockPage.locator(
+            `.react-datepicker__day--${String(day).padStart(3, '0')}:not(.react-datepicker__day--outside-month)`,
+          )
+          const previousDay = clockPage.locator(
+            `.react-datepicker__day--${String(day - 1).padStart(3, '0')}:not(.react-datepicker__day--outside-month)`,
+          )
+
+          await expect(selectedDay).toHaveClass(/react-datepicker__day--keyboard-selected/)
+          await expect(previousDay).toHaveClass(/react-datepicker__day--disabled/)
           await expect(pastSlot).toHaveClass(/react-datepicker__time-list-item--disabled/)
           await expect(futureSlot).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
-          await clockPage.locator('.react-datepicker__day--today').click()
+          await selectedDay.click()
           await expect(input).not.toHaveValue('')
           await input.click()
           await expect(pastSlot).toHaveClass(/react-datepicker__time-list-item--disabled/)
           await expect(futureSlot).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
+          await clockPage
+            .locator(
+              `.react-datepicker__day--${String(day + 1).padStart(3, '0')}:not(.react-datepicker__day--outside-month)`,
+            )
+            .click()
+          await input.click()
+          await expect(
+            clockPage.locator('.react-datepicker__time-list-item').filter({ hasText: /^08:00$/ }),
+          ).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
         })
       }
     })

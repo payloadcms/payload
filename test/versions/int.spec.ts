@@ -5916,6 +5916,80 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       test.for(['collection', 'global'] as const)(
+        'should only load pending scheduled events for the requested %s',
+        async (target, { payload }) => {
+          const req = await createPayloadRequest({ payload, user })
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            ...(target === 'collection'
+              ? { doc: { relationTo: draftCollectionSlug, value: draftDoc.id } }
+              : { global: draftGlobalSlug }),
+            req,
+          }
+
+          await schedulePublishHandler(args)
+          await payload.jobs.queue({
+            overrideAccess: true,
+            task: 'schedulePublish',
+            waitUntil: date,
+            input: {
+              type: 'publish',
+              doc: { relationTo: draftCollectionSlug, value: 'unrelated' },
+            },
+          })
+          await payload.jobs.queue({
+            overrideAccess: true,
+            task: 'schedulePublish',
+            waitUntil: date,
+            input:
+              target === 'collection'
+                ? { type: 'publish', global: draftGlobalSlug }
+                : {
+                    type: 'publish',
+                    doc: { relationTo: draftCollectionSlug, value: String(draftDoc.id) },
+                  },
+          })
+          const find = vi.spyOn(payload.db, 'find')
+
+          try {
+            await expect(schedulePublishHandler(args)).resolves.toHaveProperty(
+              'error',
+              req.i18n.t('version:duplicateScheduledEvent'),
+            )
+            const index = find.mock.calls.findIndex(([args]) => args.collection === 'payload-jobs')
+            const result = await find.mock.results[index].value
+
+            expect(result.docs).toHaveLength(1)
+            expect(result.docs[0]).not.toHaveProperty('waitUntil', date.toISOString())
+          } finally {
+            find.mockRestore()
+          }
+        },
+      )
+
+      test('should return a translated error when scheduling fails', async ({ payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const queue = vi
+          .spyOn(payload.jobs, 'queue')
+          .mockRejectedValueOnce(new Error('queue unavailable'))
+
+        try {
+          await expect(
+            schedulePublishHandler({
+              type: 'publish',
+              date: new Date(Date.now() + 60_000),
+              doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+              req,
+            }),
+          ).resolves.toHaveProperty('error', req.i18n.t('error:unspecific'))
+        } finally {
+          queue.mockRestore()
+        }
+      })
+
+      test.for(['collection', 'global'] as const)(
         'should reject duplicate scheduled events for a %s',
         async (target, { payload }) => {
           const req = await createPayloadRequest({ payload, user })

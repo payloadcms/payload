@@ -259,18 +259,19 @@ export const ScheduleDrawer: React.FC<Props> = ({
     }
   }, [upcoming, fetchUpcoming])
 
-  const minTime = useMemo(() => {
-    // The picker compares browser-local wall times, including the transposed displayed value.
-    const displayedNow = timezone
-      ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone))
-      : now
+  // The picker displays selected-zone wall times in the browser's timezone.
+  const displayedNow = useMemo(
+    () => (timezone ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone)) : now),
+    [now, timezone, userTimezone],
+  )
 
+  const minTime = useMemo(() => {
     if (!displayedValue || isSameDay(displayedValue, displayedNow)) {
       return displayedNow
     }
 
     return startOfDay(displayedNow)
-  }, [displayedValue, now, timezone, userTimezone])
+  }, [displayedValue, displayedNow])
 
   return (
     <Drawer className={baseClass} slug={slug} title={modalTitle}>
@@ -304,10 +305,11 @@ export const ScheduleDrawer: React.FC<Props> = ({
           <FieldLabel label={t('general:time')} path={'time'} required />
           <DatePickerField
             id="time"
-            maxTime={endOfDay(now)}
-            minDate={now}
+            maxTime={endOfDay(displayedNow)}
+            minDate={displayedNow}
             minTime={minTime}
             onChange={(e) => onChangeDate(e)}
+            overrides={{ openToDate: displayedNow }}
             pickerAppearance="dayAndTime"
             readOnly={processing}
             timeFormat={schedulePublishConfig?.timeFormat}
