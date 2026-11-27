@@ -37,14 +37,14 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions,
       },
     })
 
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: true,
       create: true,
       read: true,
@@ -83,13 +83,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       create: {
         permission: true,
         where: {
@@ -189,13 +189,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       create: true,
       delete: true,
       fields: true,
@@ -281,13 +281,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       create: true,
       delete: true,
       read: true,
@@ -368,13 +368,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions as CollectionPermission,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: {
         arrayOfText: {
           create: true,
@@ -455,13 +455,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: true,
       create: true,
       read: true,
@@ -498,13 +498,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions as CollectionPermission,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: true,
     })
   })
@@ -867,13 +867,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions as CollectionPermission,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: {
         GR: {
           fields: {
@@ -1279,13 +1279,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions as CollectionPermission,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: {
         GR: true,
         tab1: true,
@@ -1541,13 +1541,13 @@ describe('recursivelySanitizePermissions', () => {
       },
     }
 
-    sanitizePermissions({
+    const sanitizedPermissions = sanitizePermissions({
       canAccessAdmin: true,
       collections: {
         test: permissions as CollectionPermission,
       },
     })
-    expect(permissions).toStrictEqual({
+    expect(sanitizedPermissions.collections?.test).toStrictEqual({
       fields: true,
       create: true,
       read: true,
@@ -1558,6 +1558,24 @@ describe('recursivelySanitizePermissions', () => {
 })
 
 describe('sanitizePermissions', () => {
+  it('should not mutate the where returned by an access function', () => {
+    const nobody = { id: { in: [] } }
+    const anyPost = { or: [{ title: { equals: null } }, { title: { exists: true } }] }
+
+    sanitizePermissions({
+      canAccessAdmin: true,
+      collections: {
+        notes: { fields: {}, read: { permission: true, where: nobody } },
+        posts: { fields: {}, read: { permission: true, where: anyPost } },
+      },
+    })
+
+    expect(nobody).toStrictEqual({ id: { in: [] } })
+    expect(anyPost).toStrictEqual({
+      or: [{ title: { equals: null } }, { title: { exists: true } }],
+    })
+  })
+
   it('should return nothing for unauthenticated user', () => {
     const permissions: Permissions = {
       canAccessAdmin: false,
