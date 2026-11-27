@@ -1,4 +1,4 @@
-import type { FormState } from 'payload'
+import type { FormState, OnUploadProgress } from 'payload'
 
 import { serialize } from 'object-to-formdata'
 import { getDataFromFormState, uploadRequiresServerValidation } from 'payload/shared'
@@ -10,6 +10,7 @@ export async function createFormData(
   overrides: Record<string, any> = {},
   uploadHandler: ReturnType<UploadHandlersContext['getUploadHandler']>,
   allowRestrictedFileTypes?: boolean,
+  onUploadProgress?: OnUploadProgress,
 ) {
   const data = getDataFromFormState(formState, true)
   let file = data?.file
@@ -31,6 +32,7 @@ export async function createFormData(
       await uploadHandler({
         docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
         file,
+        onProgress: onUploadProgress,
       }),
     )
   }

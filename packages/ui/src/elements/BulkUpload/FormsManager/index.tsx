@@ -16,9 +16,11 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
+import type { UploadProgress } from '../../../providers/DocumentInfo/types.js'
 import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
+import { trackSaveUploadProgress } from '../../../forms/Form/trackSaveUploadProgress.js'
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
@@ -26,6 +28,7 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
+import { uploadRequest } from '../../../utilities/uploadRequest.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
@@ -143,6 +146,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     setInitialFiles,
     setInitialForms,
     setSuccessfullyUploaded,
+    setUploadProgress,
   } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
@@ -476,12 +480,34 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       setIsUploading(true)
 
+      const total = currentForms.length
+      let completed = 0
+
       for (let i = 0; i < currentForms.length; i++) {
+        let wasSuccessful = false
+        let fileUpload: ReturnType<typeof trackSaveUploadProgress> | undefined
+
         try {
           const form = currentForms[i]
           const fileValue = form.formState?.file?.value
+          const fileName = fileValue instanceof File ? fileValue.name : ''
+          const showCurrent = (progress: UploadProgress) =>
+            setUploadProgress({
+              completed,
+              current: { ...progress, fileName, formID: form.formID, index: i + 1 },
+              total,
+            })
 
-          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
+          setLoadingText(t('general:uploadingBulk', { current: i + 1, total }))
+
+          if (fileValue instanceof File) {
+            fileUpload = trackSaveUploadProgress({
+              onChange: showCurrent,
+              totalBytes: fileValue.size,
+            })
+          } else {
+            showCurrent({ loadedBytes: 0, status: 'uploading', totalBytes: 0 })
+          }
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
@@ -493,23 +519,37 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             },
           )}`
 
-          const req = await fetch(actionURLWithParams, {
-            body: await createFormData(
-              form.formState,
-              overrides,
-              getUploadHandler({ collectionSlug }),
-              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
-                ?.allowRestrictedFileTypes,
-            ),
-            credentials: 'include',
-            method: 'POST',
-          })
+          const body = await createFormData(
+            form.formState,
+            overrides,
+            getUploadHandler({ collectionSlug }),
+            config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+              ?.allowRestrictedFileTypes,
+            fileUpload?.report,
+          )
+
+          // A file still in the body is sent with this request, which reports its progress.
+          const req =
+            body.get('file') instanceof Blob
+              ? await uploadRequest({
+                  body,
+                  method: 'POST',
+                  onProgress: fileUpload?.report,
+                  url: actionURLWithParams,
+                  withCredentials: true,
+                })
+              : await fetch(actionURLWithParams, {
+                  body,
+                  credentials: 'include',
+                  method: 'POST',
+                })
 
           const json = await req.json()
 
-          const wasSuccessful = req.status === 201 && json?.doc
+          wasSuccessful = Boolean(req.status === 201 && json?.doc)
 
           if (wasSuccessful) {
+            completed += 1
             newDocs.push({
               collectionSlug,
               doc: json.doc,
@@ -580,6 +620,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           }
         } catch (_) {
           // swallow
+        } finally {
+          fileUpload?.settle({ isSuccessful: wasSuccessful })
         }
       }
 
@@ -644,6 +686,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       getFormState,
       docPermissions,
       setSuccessfullyUploaded,
+      setUploadProgress,
       onSuccess,
       closeModal,
       drawerSlug,

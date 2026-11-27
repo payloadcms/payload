@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadCollectionSlug } from 'payload'
+import type { OnUploadProgress, UploadCollectionSlug } from 'payload'
 
 import { useConfig, useEffectEvent } from '@payloadcms/ui'
 import { Fragment, type ReactNode, useEffect } from 'react'
@@ -24,6 +24,12 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     docPrefix?: string
     endpointPath?: `/${string}`
     file: File
+    /**
+     * Report bytes sent to storage so the Admin shows upload progress. Optional to call: without
+     * it, the Admin shows the upload without a percentage.
+     * @experimental
+     */
+    onProgress: OnUploadProgress
     prefix?: string
     props: T
     serverURL: string
@@ -52,6 +58,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
           data?: unknown
           docPrefix?: string
           file: File
+          onProgress?: OnUploadProgress
           reject: (reason?: unknown) => void
           resolve: (value: unknown) => void
           updateFilename: (value: string) => void
@@ -69,6 +76,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
           docPrefix: customEvent.detail.docPrefix,
           endpointPath,
           file: customEvent.detail.file,
+          onProgress: customEvent.detail.onProgress ?? (() => {}),
           prefix,
           props,
           serverURL,

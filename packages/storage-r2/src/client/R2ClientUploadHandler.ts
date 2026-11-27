@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { createClientUploadHandler, uploadRequest } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 import type {
@@ -19,6 +19,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     docPrefix,
     endpointPath,
     file,
+    onProgress,
     props: { chunkSize = 5 * 1024 * 1024 },
     serverURL,
     updateFilename,
@@ -63,6 +64,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     params.signedReceipt = uploadReference.signedReceipt
 
     const partTotal = Math.ceil(file.size / chunkSize)
+    let completedBytes = 0
 
     for (let part = 1; part <= partTotal; part++) {
       const bytesEnd = Math.min(part * chunkSize, file.size)
@@ -71,14 +73,22 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
       params.multipartNumber = String(part)
 
       const body = file.slice(bytesStart, bytesEnd)
-      const headers = {
-        'Content-Length': String(body.size),
-        'Content-Type': 'application/octet-stream',
-      }
-      const uploaded = await fetch(getEndpoint(), { body, headers, method: 'POST' })
+      // The browser sets Content-Length from the body.
+      const headers = { 'Content-Type': 'application/octet-stream' }
+      // Parts upload one after another, so progress is the finished parts plus the current one.
+      const uploaded = await uploadRequest({
+        body,
+        headers,
+        method: 'POST',
+        onProgress: ({ loadedBytes }) =>
+          onProgress({ loadedBytes: completedBytes + loadedBytes, totalBytes: file.size }),
+        url: getEndpoint(),
+      })
       if (!uploaded.ok) {
         throw new Error(`Failed to upload part ${part} / ${partTotal}`)
       }
+
+      completedBytes += body.size
 
       multipartUploadedParts.push((await uploaded.json()) as R2UploadedPart)
 

@@ -1,5 +1,13 @@
 'use client'
+import type { UploadTransferProgress } from 'payload'
+
 import { toast } from 'sonner'
+
+/** Whole percent sent, below 100 until every byte is sent. */
+export const getUploadPercent = ({ progress }: { progress: UploadTransferProgress }): number =>
+  progress.totalBytes > 0
+    ? Math.min(100, Math.floor((progress.loadedBytes / progress.totalBytes) * 100))
+    : 100
 
 /**
  * An auto-updating progress toast the user can hide (WCAG 2.2.2). Once closed it stays hidden

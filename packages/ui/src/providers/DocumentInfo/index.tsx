@@ -5,7 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
+import type { DocumentInfoContext, DocumentInfoProps, UploadProgress } from './types.js'
 
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -113,6 +113,7 @@ const DocumentInfo: React.FC<
   const [uploadStatus, setUploadStatus] = useControllableState<'failed' | 'idle' | 'uploading'>(
     'idle',
   )
+  const [uploadProgress, setUploadProgress] = useState<undefined | UploadProgress>(undefined)
 
   const documentLockState = useRef<{
     hasShownLockedModal: boolean
@@ -399,11 +400,13 @@ const DocumentInfo: React.FC<
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
+    setUploadProgress,
     setUploadStatus: updateUploadStatus,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
-    uploadStatus,
+    uploadProgress,
+    uploadStatus: uploadProgress?.status === 'uploading' ? 'uploading' : uploadStatus,
     versionCount,
   }
 
