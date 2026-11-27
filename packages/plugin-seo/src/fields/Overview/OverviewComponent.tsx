@@ -3,7 +3,7 @@
 import type { UIField } from 'payload'
 
 import { useAllFormFields, useForm, useTranslation } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 
@@ -47,24 +47,22 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   const metaTitle = fields[titlePath]?.value
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
-  const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>()
-  const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
-  const [imageIsValid, setImageIsValid] = useState<boolean | undefined>()
-
   const minDesc = descriptionOverrides?.minLength || minDescDefault
   const maxDesc = descriptionOverrides?.maxLength || maxDescDefault
   const minTitle = titleOverrides?.minLength || minTitleDefault
   const maxTitle = titleOverrides?.maxLength || maxTitleDefault
 
-  useEffect(() => {
-    if (typeof metaTitle === 'string') {
-      setTitleIsValid(metaTitle.length >= minTitle && metaTitle.length <= maxTitle)
-    }
-    if (typeof metaDesc === 'string') {
-      setDescIsValid(metaDesc.length >= minDesc && metaDesc.length <= maxDesc)
-    }
-    setImageIsValid(Boolean(metaImage))
-  }, [metaTitle, metaDesc, metaImage])
+  const titleIsValid =
+    typeof metaTitle === 'string'
+      ? metaTitle.length >= minTitle && metaTitle.length <= maxTitle
+      : undefined
+
+  const descIsValid =
+    typeof metaDesc === 'string'
+      ? metaDesc.length >= minDesc && metaDesc.length <= maxDesc
+      : undefined
+
+  const imageIsValid = Boolean(metaImage)
 
   const testResults = [titleIsValid, descIsValid, imageIsValid]
 
