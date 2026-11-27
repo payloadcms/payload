@@ -1,6 +1,4 @@
 'use client'
-import type { ChangeEvent } from 'react'
-
 import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
 
@@ -10,11 +8,8 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useForm } from '../../forms/Form/context.js'
 import { EyeIcon } from '../../icons/Eye/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -22,6 +17,7 @@ const baseClass = 'password'
 
 export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
   const {
+    id: idFromProps,
     AfterInput,
     autoComplete = 'off',
     BeforeInput,
@@ -29,6 +25,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     description,
     Description,
     Error,
+    errorID: errorIDFromProps,
     inputRef,
     Label,
     label,
@@ -47,10 +44,11 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     width,
   } = props
 
-  const { uuid } = useForm()
-  const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
-  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+  const inputID = idFromProps ?? `field-${path.replace(/\./g, '__')}`
+  const errorID = showError
+    ? (errorIDFromProps ?? `field-error-${path.replace(/\./g, '__')}`)
+    : undefined
 
   const [showPassword, setShowPassword] = useState(false)
 
@@ -76,6 +74,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
         Fallback={
           <FieldLabel
             hasRequiredAccessibleState
+            htmlFor={inputID}
             label={label}
             localized={localized}
             path={path}
@@ -86,7 +85,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
+          Fallback={<FieldError id={errorID} path={path} showError={showError} />}
         />
         <div className="password__input-wrap">
           {BeforeInput}
@@ -99,7 +98,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
-            id={`field-${path.replace(/\./g, '__')}`}
+            id={inputID}
             name={path}
             onChange={onChange}
             onKeyDown={onKeyDown}

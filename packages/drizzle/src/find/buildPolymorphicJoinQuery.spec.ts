@@ -5,6 +5,8 @@ import type { Field, FlattenedJoinField, Where } from 'payload'
 import { createClient } from '@libsql/client'
 import { getTableName, like, notLike } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
+import { drizzle as pgDrizzle } from 'drizzle-orm/node-postgres'
+import { alias, integer as pgInteger, pgSchema, serial } from 'drizzle-orm/pg-core'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { flattenAllFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -59,7 +61,9 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
     { config: { fields: Field[]; flattenedFields: ReturnType<typeof flattenAllFields> } }
   > = {}
   const tableNameMap = new Map<string, string>()
-  const tables: Record<string, GenericTable> = {}
+  const tables: Record<string, GenericTable> = {
+    [getTableName(parentsTable)]: parentsTable,
+  }
 
   for (const [slug, fixture] of Object.entries(fixtures)) {
     const tableName = getTableName(fixture.table)
@@ -86,7 +90,7 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
       like,
       not_like: notLike,
     },
-    payload: { collections },
+    payload: { collections, config: { localization: false } },
     tableNameMap,
     tables,
   } as unknown as DrizzleAdapter
@@ -246,6 +250,57 @@ describe('buildPolymorphicJoinQuery', () => {
     expect(query.sql).toContain('"join_parents"."id" = "children_subquery"."parent"')
   })
 
+  it('uses the parent alias and mapped ID column in a custom-schema count', () => {
+    const customSchema = pgSchema('custom')
+    const pgParentsTable = customSchema.table('join_parents', {
+      id: serial('custom_id').primaryKey(),
+    })
+    const pgArticlesTable = customSchema.table('join_articles', {
+      id: serial('id').primaryKey(),
+      parent: pgInteger('parent_id'),
+    })
+    const parentTableName = getTableName(pgParentsTable)
+    const articleTableName = getTableName(pgArticlesTable)
+    const fields: Field[] = [{ name: 'parent', relationTo: 'join-parents', type: 'relationship' }]
+    const pgDB = pgDrizzle.mock()
+    const pgAdapter = {
+      drizzle: pgDB,
+      name: 'postgres',
+      payload: {
+        config: { localization: false },
+        collections: {
+          articles: { config: { fields, flattenedFields: flattenAllFields({ fields }) } },
+        },
+      },
+      tableNameMap: new Map([['articles', articleTableName]]),
+      tables: {
+        [articleTableName]: pgArticlesTable,
+        [parentTableName]: pgParentsTable,
+      },
+    } as unknown as DrizzleAdapter
+    const result = buildPolymorphicJoinQuery({
+      adapter: pgAdapter,
+      currentTableName: parentTableName,
+      field: {
+        collection: ['articles'],
+        name: 'children',
+        on: 'parent',
+        type: 'join',
+      } as FlattenedJoinField,
+      limit: 0,
+      path: '',
+      shouldCount: true,
+    })
+    const query = pgDB
+      .select({ count: result.count!, documents: result.documents })
+      .from(alias(pgParentsTable, parentTableName))
+      .toSQL()
+
+    expect(query.sql).toContain('from "custom"."join_parents" "join_parents"')
+    expect(query.sql).toContain('"join_parents"."custom_id" = "children_subquery"."parent"')
+    expect(query.sql).not.toContain('"custom"."join_parents"."custom_id"')
+  })
+
   it('adds limit and page offset to the document query', () => {
     const query = renderQuery(buildQuery({ limit: 11, page: 3 }))
 
@@ -315,6 +370,32 @@ describe('buildPolymorphicJoinQuery', () => {
     expect(() =>
       buildQuery({ adapter: adapterWithoutTable, field: singleCollectionField }),
     ).toThrow('Polymorphic join collection "articles" has no database table')
+  })
+
+  it('rejects a hasMany relationship with a relationTo array explicitly', () => {
+    const adapterWithPolymorphicRelationship = createAdapter({
+      articles: {
+        fields: [
+          {
+            name: 'parent',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: ['join-parents', 'other'],
+          },
+        ],
+        table: tableWithoutParent,
+      },
+    })
+    const singleCollectionField = {
+      ...joinField,
+      collection: ['articles'],
+    } as unknown as FlattenedJoinField
+
+    expect(() =>
+      buildQuery({ adapter: adapterWithPolymorphicRelationship, field: singleCollectionField }),
+    ).toThrow(
+      'Polymorphic join collection "articles" does not support relationTo arrays at "parent"',
+    )
   })
 
   it.each([

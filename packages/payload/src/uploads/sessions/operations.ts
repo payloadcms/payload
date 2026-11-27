@@ -1062,6 +1062,7 @@ const createFileReference = ({
         filePrefix: object.prefix,
         req,
         storageFilePath: object.storageFilePath,
+        uploadSessionID: session.id,
       }),
     },
   }
@@ -1255,15 +1256,74 @@ const cleanupSessionStorage = async ({
   const segmented =
     req.payload.collections[session.collectionSlug]?.config.upload?.uploadInstructions?.segmented
 
+  let cleanupSession = session
+
   if (segmented && session.storage.object && session.storage.providerState) {
-    await segmented.abort({ ...getInitiatedStorage({ session }), req })
+    const claimedSession = await tryClaimCleanup({ req, session })
+
+    // A save holds the object, or another cleanup is running. A later sweep tries again.
+    if (!claimedSession) {
+      return session
+    }
+
+    cleanupSession = claimedSession
+
+    await segmented.abort({ ...getInitiatedStorage({ session: cleanupSession }), req })
   }
 
   return updateSession({
-    data: { cleanupCompletedAt: new Date().toISOString() },
+    data: { cleanupCompletedAt: new Date().toISOString(), finalizingUntil: null },
     req,
-    session,
+    session: cleanupSession,
   })
+}
+
+/**
+ * Claims a cancelled or failed session before its stored object is deleted. Fails while file
+ * references are valid, which a save renews with `holdUploadSessionObject` when it checks one, so
+ * the two never both succeed. A claim left by a failed cleanup expires like any other lease.
+ */
+const tryClaimCleanup = async ({
+  req,
+  session,
+}: {
+  req: PayloadRequest
+  session: UploadSessionDoc
+}): Promise<null | UploadSessionDoc> => {
+  const now = new Date()
+
+  const claimedSession = await req.payload.db.updateOne({
+    collection: slug,
+    data: {
+      finalizingUntil: new Date(now.getTime() + LEASE_MS).toISOString(),
+      updatedAt: now.toISOString(),
+    },
+    options: { atomic: true },
+    req,
+    where: {
+      and: [
+        { id: { equals: session.id } },
+        { status: { in: ['cancelled', 'failed'] } },
+        { cleanupCompletedAt: { exists: false } },
+        {
+          or: [
+            { fileReferencesValidUntil: { exists: false } },
+            { fileReferencesValidUntil: { equals: null } },
+            { fileReferencesValidUntil: { less_than: now.toISOString() } },
+          ],
+        },
+        {
+          or: [
+            { finalizingUntil: { exists: false } },
+            { finalizingUntil: { equals: null } },
+            { finalizingUntil: { less_than: now.toISOString() } },
+          ],
+        },
+      ],
+    },
+  })
+
+  return (claimedSession as null | UploadSessionDoc) ?? null
 }
 
 const hasValidFileReferences = ({ session }: { session: UploadSessionDoc }): boolean =>
