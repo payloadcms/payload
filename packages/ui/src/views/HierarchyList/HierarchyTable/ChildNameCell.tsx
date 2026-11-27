@@ -45,16 +45,14 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
   const DefaultIcon = isFolder ? <FolderIcon /> : <TagIcon />
 
   return (
-    <div className={`${baseClass}__name-cell`}>
-      <Link className={`${baseClass}__name-link cell-link`} href={hierarchyURL}>
-        <span className={`${baseClass}__name-icon`}>{row._hierarchyIcon || DefaultIcon}</span>
-        <span className={`${baseClass}__name-text`}>{title}</span>
-        {row._hasChildren && (
-          <span className={`${baseClass}__chevron`}>
-            <ChevronIcon direction="right" />
-          </span>
-        )}
-      </Link>
-    </div>
+    <Link className={`${baseClass}__name-link cell-link`} href={hierarchyURL}>
+      <span className={`${baseClass}__name-icon`}>{row._hierarchyIcon || DefaultIcon}</span>
+      <span className={`${baseClass}__name-text`}>{title}</span>
+      {row._hasChildren && (
+        <span className={`${baseClass}__chevron`}>
+          <ChevronIcon direction="right" />
+        </span>
+      )}
+    </Link>
   )
 }

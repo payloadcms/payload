@@ -1,8 +1,18 @@
-import type { HierarchyViewData, PayloadRequest, SanitizedCollectionConfig, Where } from 'payload'
+import type {
+  HierarchyViewData,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  ServerFunction,
+  Where,
+} from 'payload'
 
 import { executeAccess } from 'payload'
 import { HIERARCHY_CONTENTS_FIELD } from 'payload/internal'
-import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
+import {
+  canAccessAdmin,
+  combineWhereConstraints,
+  DEFAULT_HIERARCHY_LIST_LIMIT,
+} from 'payload/shared'
 
 import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
 import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
@@ -246,6 +256,28 @@ export async function getJoinedHierarchyDocuments({
   }
 
   return { docs, hasNextPage: Boolean(joined.hasNextPage), page, totalDocs: joined.totalDocs }
+}
+
+export const getJoinedHierarchyDocumentsHandler: ServerFunction<
+  JoinedHierarchyDocumentsArgs,
+  Promise<JoinedDocuments | undefined>
+> = async ({ collectionSlug, page, parentID, req, search, typeFilter }) => {
+  await canAccessAdmin({ req })
+
+  if (
+    typeof collectionSlug !== 'string' ||
+    !Number.isSafeInteger(page) ||
+    page < 1 ||
+    page > 10_000 ||
+    (typeof parentID !== 'string' && !Number.isSafeInteger(parentID)) ||
+    (search !== undefined && (typeof search !== 'string' || search.length > 200)) ||
+    (typeFilter !== undefined &&
+      (!Array.isArray(typeFilter) || typeFilter.some((slug) => typeof slug !== 'string')))
+  ) {
+    return undefined
+  }
+
+  return getJoinedHierarchyDocuments({ collectionSlug, page, parentID, req, search, typeFilter })
 }
 
 function hasCompatibleMongoFields({

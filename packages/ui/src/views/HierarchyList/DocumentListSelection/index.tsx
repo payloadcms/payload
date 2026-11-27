@@ -77,6 +77,13 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   const hierarchyCollectionConfig = hierarchySlug
     ? config.collections.find((collection) => collection.slug === hierarchySlug)
     : null
+  const hierarchyConfig =
+    hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
+      ? hierarchyCollectionConfig.hierarchy
+      : undefined
+  const hasManyRelatedSelection = Object.keys(groupedSelections).some(
+    (slug) => slug !== hierarchySlug && hierarchyConfig?.relatedCollections?.[slug]?.hasMany,
+  )
 
   const { relatedCollectionSlugs } = useMemo(
     () =>
@@ -186,7 +193,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             selections={groupedSelections}
           />
         ),
-        hierarchySlug && (
+        hierarchySlug && !hasManyRelatedSelection && (
           <MoveMany
             currentParentID={parent?.id || null}
             hierarchySlug={hierarchySlug}
