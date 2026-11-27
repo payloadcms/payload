@@ -543,7 +543,7 @@ export const MyClientUploadHandler = createClientUploadHandler({
 })
 ```
 
-A handler that ignores `onProgress` keeps working. Until it finishes, a save's toast stays on "Submitting…" and a bulk upload shows only the file name.
+A handler that ignores `onProgress` keeps working. Until it finishes, a save's toast stays on "Submitting…" (a save without one, such as one that redirects, shows nothing until its result) and a bulk upload shows only the file name.
 
 `staticHandler` receives `params.operation`: `'read'` for an ordinary file request (treat a missing value as `'read'`, for backward compatibility), or `'transform'` when Payload is reading the file's bytes on behalf of a [file transformer](./transformers), which only happens when at least one transformer is configured. For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
 
