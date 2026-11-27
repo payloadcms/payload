@@ -545,15 +545,9 @@ export interface User {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -674,15 +668,9 @@ export interface PartialDisableLocalStrategy {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -1008,15 +996,9 @@ export interface PasswordMinLength {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   collection: 'password-min-length';
@@ -1137,15 +1119,9 @@ export interface PasswordCustomValidate {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   collection: 'password-custom-validate';
@@ -1585,15 +1561,9 @@ export interface RotateSecretLogin {
         refreshedAt?: string | null;
         label?: string | null;
         type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
