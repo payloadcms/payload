@@ -11,7 +11,7 @@ export const getMigrationTemplate = ({
   imports,
   packageName,
   upSQL,
-}: MigrationTemplateArgs): string => `import { MigrateUpArgs, MigrateDownArgs, sql } from '${packageName}'
+}: MigrationTemplateArgs): string => `import { type MigrateUpArgs, type MigrateDownArgs, sql } from '${packageName}'
 ${imports ? `${imports}\n` : ''}
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 ${indent(upSQL)}
