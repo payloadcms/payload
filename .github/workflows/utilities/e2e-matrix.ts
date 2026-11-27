@@ -28,6 +28,8 @@ export interface TestConfig {
 
 interface MatrixEntry {
   suite: string
+  /** `suite` with `/` replaced, since `upload-artifact` rejects it in artifact names */
+  artifactSuite: string
   framework: 'next' | 'tanstack-start'
   shard: number
   'total-shards': number
@@ -60,6 +62,7 @@ function generateMatrix(testConfigs: TestConfig[]): Matrix {
     for (let shard = 1; shard <= shards; shard++) {
       include.push({
         suite: file,
+        artifactSuite: file.replaceAll('/', '-'),
         framework,
         shard,
         'total-shards': shards,
