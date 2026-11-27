@@ -54,6 +54,25 @@ const FORBIDDEN_REQUEST_HEADERS = new Set([
 export const uploadRequest = (args: UploadRequestArgs): Promise<Response> =>
   typeof XMLHttpRequest === 'undefined' ? uploadWithFetch(args) : uploadWithXHR(args)
 
+/**
+ * Whether `url` is on the page's origin. An XHR that reports upload progress always needs a CORS
+ * preflight, which a `fetch` POST of form data does not. A save to another origin keeps `fetch`, so
+ * an endpoint that never answered preflights keeps working.
+ */
+export const isSameOriginURL = ({ url }: { url: string }): boolean => {
+  const pageURL = globalThis.location?.href
+
+  if (!pageURL) {
+    return false
+  }
+
+  try {
+    return new URL(url, pageURL).origin === new URL(pageURL).origin
+  } catch {
+    return false
+  }
+}
+
 const uploadWithFetch = async ({
   body,
   headers,

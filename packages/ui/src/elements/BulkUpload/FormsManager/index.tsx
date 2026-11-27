@@ -28,7 +28,7 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
-import { uploadRequest } from '../../../utilities/uploadRequest.js'
+import { isSameOriginURL, uploadRequest } from '../../../utilities/uploadRequest.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
@@ -530,7 +530,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           // A file still in the body is sent with this request, which reports its progress.
           const req =
-            body.get('file') instanceof Blob
+            body.get('file') instanceof Blob && isSameOriginURL({ url: actionURLWithParams })
               ? await uploadRequest({
                   body,
                   method: 'POST',
