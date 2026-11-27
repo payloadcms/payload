@@ -22,12 +22,28 @@ const secondImagePath = path.resolve(dirname, '../uploads/test-image.png')
 const FILE_SIZE_THRESHOLD = Math.min(statSync(imagePath).size, statSync(secondImagePath).size)
 
 /**
- * Records the files whose parts go to the R2 multipart endpoint, and any other large request,
- * which would mean file bytes were sent some other way.
+ * Records the files whose parts go to the R2 multipart endpoint, the documents created for them,
+ * and any other large request, which would mean file bytes were sent some other way.
  */
 const trackUploadRequests = ({ page }: { page: Page }) => {
+  const createdDocIDs: (number | string)[] = []
   const otherLargeRequests: string[] = []
   const uploadedParts: string[] = []
+
+  page.on('response', async (response) => {
+    const isCreate =
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname === `/api/${mediaClientSlug}` &&
+      response.status() === 201
+
+    if (isCreate) {
+      const { doc } = (await response.json()) as { doc?: { id?: number | string } }
+
+      if (doc?.id) {
+        createdDocIDs.push(doc.id)
+      }
+    }
+  })
 
   page.on('request', (request) => {
     const url = new URL(request.url())
@@ -47,7 +63,7 @@ const trackUploadRequests = ({ page }: { page: Page }) => {
     }
   })
 
-  return { otherLargeRequests, uploadedParts }
+  return { createdDocIDs, otherLargeRequests, uploadedParts }
 }
 
 test.describe('storage-r2 client uploads E2E', () => {
@@ -134,7 +150,9 @@ test.describe('storage-r2 client uploads E2E', () => {
   }) => {
     const context = await browser.newContext()
     const testPage = await context.newPage()
-    const { otherLargeRequests, uploadedParts } = trackUploadRequests({ page: testPage })
+    const { createdDocIDs, otherLargeRequests, uploadedParts } = trackUploadRequests({
+      page: testPage,
+    })
 
     await testPage.goto(mediaClientURL.list)
     await expect(testPage.locator('.list-header__title')).toBeVisible()
@@ -159,6 +177,8 @@ test.describe('storage-r2 client uploads E2E', () => {
     await saveButton.click()
     await expect(bulkUploadModal).toBeHidden({ timeout: 30_000 })
 
+    // The modal can close even when uploads fail, so require both documents to exist
+    await expect.poll(() => createdDocIDs.length).toBe(2)
     expect([...uploadedParts].sort()).toEqual(['image.png', 'test-image.png'])
     expect(
       otherLargeRequests,
