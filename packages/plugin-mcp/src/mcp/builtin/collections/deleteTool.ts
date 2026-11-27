@@ -83,6 +83,7 @@ export const deleteDocumentsTool = defineCollectionTool({
     return {
       content: [{ type: 'text', text: responseText }],
       doc: { docs, errors } as unknown as Record<string, unknown>,
+      ...(errors.length > 0 && { isError: true }),
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -94,6 +95,7 @@ export const deleteDocumentsTool = defineCollectionTool({
           text: `Error deleting document from collection "${slug}": ${errorMessage}`,
         },
       ],
+      isError: true,
     }
   }
 })
