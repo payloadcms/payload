@@ -12,6 +12,7 @@ import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
+import { hasHierarchyContents } from '../../elements/Hierarchy/hasHierarchyContents.js'
 import { LayoutToggle } from '../../elements/LayoutToggle/index.js'
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
@@ -125,6 +126,8 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
+  const showSearchResultsInTable =
+    Boolean(searchFromURL) && !isInDrawer && hasHierarchyContents({ collection: collectionConfig })
 
   // Update URL when search changes (debouncing is handled by ListSearchFilter)
   // This triggers a server refetch via Next.js router
@@ -490,7 +493,9 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
-              {!isInDrawer && <LayoutToggle layout={layout} onChange={handleLayoutChange} />}
+              {!isInDrawer && !showSearchResultsInTable && (
+                <LayoutToggle layout={layout} onChange={handleLayoutChange} />
+              )}
             </ListControlsBar>
 
             <HierarchyTable
@@ -507,7 +512,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               )
                 .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
                 .join(',')}`}
-              layout={layout}
+              layout={showSearchResultsInTable ? 'table' : layout}
               onLoadMoreDocuments={loadMoreDocuments}
               parentId={parentId}
               relatedGroups={filteredRelatedGroups}

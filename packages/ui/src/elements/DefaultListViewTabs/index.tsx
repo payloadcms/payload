@@ -15,6 +15,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
+import { hasHierarchyContents } from '../Hierarchy/hasHierarchyContents.js'
 import './index.css'
 
 const baseClass = 'default-list-view-tabs'
@@ -36,9 +37,12 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const { setPreference } = usePreferences()
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
-  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy)
+  const hasSingleHierarchyView =
+    viewType !== 'list' && hasHierarchyContents({ collection: collectionConfig })
+  const showHierarchyTab = Boolean(collectionConfig.hierarchy) && !hasSingleHierarchyView
+  const isListActive = viewType === 'list' || (hasSingleHierarchyView && viewType === 'hierarchy')
 
-  if (!isTrashEnabled && !isHierarchyEnabled) {
+  if (!isTrashEnabled && !showHierarchyTab) {
     return null
   }
 
@@ -79,25 +83,27 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   }
 
   const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)
-  const allButtonLabel = `${t('general:all')} ${collectionLabel}`
+  const allButtonLabel = hasSingleHierarchyView
+    ? collectionLabel
+    : `${t('general:all')} ${collectionLabel}`
   const allButtonId = allButtonLabel.toLowerCase().replace(/\s+/g, '-')
 
   return (
     <div className={baseClass}>
       <Button
-        buttonStyle={viewType === 'list' ? 'pill' : 'ghost'}
-        className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
+        buttonStyle={isListActive ? 'pill' : 'ghost'}
+        className={[`${baseClass}__button`, isListActive && `${baseClass}__button--active`]
           .filter(Boolean)
           .join(' ')}
-        disabled={viewType === 'list'}
+        disabled={isListActive}
         el="button"
         id={allButtonId}
         onClick={() => handleViewChange('list')}
       >
-        {`${t('general:all')} ${collectionLabel}`}
+        {allButtonLabel}
       </Button>
 
-      {isHierarchyEnabled && (
+      {showHierarchyTab && (
         <Button
           buttonStyle={viewType === 'hierarchy' ? 'pill' : 'ghost'}
           className={[
