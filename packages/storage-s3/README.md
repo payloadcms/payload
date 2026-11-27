@@ -28,8 +28,8 @@ export default buildConfig({
   plugins: [
     s3Storage({
       collections: {
-        media: true,
-        'media-with-prefix': {
+        [Media.slug]: true,
+        [MediaWithPrefix.slug]: {
           prefix,
         },
         'media-with-presigned-downloads': {
