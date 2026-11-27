@@ -270,6 +270,7 @@ export interface Post {
   text?: string | null;
   number?: number | null;
   number2?: number | null;
+  shortText?: string | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -486,6 +487,7 @@ export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
   number2?: T;
+  shortText?: T;
   group?:
     | T
     | {
@@ -607,6 +609,7 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 export interface Global {
   id: string;
   text?: string | null;
+  shortText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -624,6 +627,7 @@ export interface Global {
  */
 export interface GlobalSelect<T extends boolean = true> {
   text?: T;
+  shortText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

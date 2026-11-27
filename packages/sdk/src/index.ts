@@ -7,31 +7,45 @@ import type {
   PaginatedDocs,
   PayloadTypes,
   PayloadTypesShape,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
+  SanitizedPermissions,
   SelectType,
   TypeWithVersion,
+  UploadCollectionSlug,
+  ValidationResult,
 } from 'payload'
 
+export type { AccessOptions } from './auth/access.js'
 export type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 export type { LoginOptions, LoginResult } from './auth/login.js'
+export type { LogoutOptions } from './auth/logout.js'
 export type { MeOptions, MeResult } from './auth/me.js'
 export type { RefreshOptions, RefreshResult } from './auth/refreshToken.js'
 export type { ResetPasswordOptions, ResetPasswordResult } from './auth/resetPassword.js'
+export type { UnlockOptions } from './auth/unlock.js'
 export type { VerifyEmailOptions } from './auth/verifyEmail.js'
 export type { CountOptions } from './collections/count.js'
 export type { CreateOptions } from './collections/create.js'
 export type { DeleteByIDOptions, DeleteManyOptions, DeleteOptions } from './collections/delete.js'
+export type { DocAccessOptions } from './collections/docAccess.js'
+export type { DuplicateOptions } from './collections/duplicate.js'
 export type { FindOptions } from './collections/find.js'
 export type { FindByIDOptions } from './collections/findByID.js'
 export type { FindVersionByIDOptions } from './collections/findVersionByID.js'
 export type { FindVersionsOptions } from './collections/findVersions.js'
+export type { RenameFileOptions } from './collections/renameFile.js'
 export type { RestoreVersionByIDOptions } from './collections/restoreVersion.js'
 export type { UpdateByIDOptions, UpdateManyOptions, UpdateOptions } from './collections/update.js'
+export type { ValidateOptions, ValidationLocaleOption } from './collections/validate.js'
 export { PayloadSDKError } from './errors/PayloadSDKError.js'
+export type { DocAccessGlobalOptions } from './globals/docAccess.js'
 export type { FindGlobalOptions } from './globals/findOne.js'
 export type { FindGlobalVersionByIDOptions } from './globals/findVersionByID.js'
 export type { FindGlobalVersionsOptions } from './globals/findVersions.js'
 export type { RestoreGlobalVersionByIDOptions } from './globals/restoreVersion.js'
 export type { UpdateGlobalOptions } from './globals/update.js'
+export type { ValidateGlobalOptions } from './globals/validate.js'
 export type {
   BulkOperationResult,
   DataFromAuthSlug,
@@ -47,22 +61,31 @@ export type {
   TransformGlobalWithSelect,
 } from './types.js'
 
+import type { AccessOptions } from './auth/access.js'
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
+import type { LogoutOptions } from './auth/logout.js'
 import type { MeOptions, MeResult } from './auth/me.js'
 import type { ResetPasswordOptions, ResetPasswordResult } from './auth/resetPassword.js'
+import type { UnlockOptions } from './auth/unlock.js'
 import type { CountOptions } from './collections/count.js'
 import type { CreateOptions } from './collections/create.js'
 import type { DeleteByIDOptions, DeleteManyOptions, DeleteOptions } from './collections/delete.js'
+import type { DocAccessOptions } from './collections/docAccess.js'
+import type { DuplicateOptions } from './collections/duplicate.js'
 import type { FindOptions } from './collections/find.js'
 import type { FindByIDOptions } from './collections/findByID.js'
 import type { FindVersionByIDOptions } from './collections/findVersionByID.js'
 import type { FindVersionsOptions } from './collections/findVersions.js'
+import type { RenameFileOptions } from './collections/renameFile.js'
 import type { RestoreVersionByIDOptions } from './collections/restoreVersion.js'
+import type { ValidateOptions } from './collections/validate.js'
+import type { DocAccessGlobalOptions } from './globals/docAccess.js'
 import type { FindGlobalVersionByIDOptions } from './globals/findVersionByID.js'
 import type { FindGlobalVersionsOptions } from './globals/findVersions.js'
 import type { RestoreGlobalVersionByIDOptions } from './globals/restoreVersion.js'
 import type { UpdateGlobalOptions } from './globals/update.js'
+import type { ValidateGlobalOptions } from './globals/validate.js'
 import type {
   BulkOperationResult,
   DataFromCollectionSlug,
@@ -74,19 +97,25 @@ import type {
 } from './types.js'
 import type { OperationArgs } from './utilities/buildSearchParams.js'
 
+import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { login } from './auth/login.js'
+import { logout } from './auth/logout.js'
 import { me } from './auth/me.js'
 import { type RefreshOptions, type RefreshResult, refreshToken } from './auth/refreshToken.js'
 import { resetPassword } from './auth/resetPassword.js'
+import { unlock } from './auth/unlock.js'
 import { verifyEmail, type VerifyEmailOptions } from './auth/verifyEmail.js'
 import { count } from './collections/count.js'
 import { create } from './collections/create.js'
 import { deleteOperation } from './collections/delete.js'
+import { docAccess } from './collections/docAccess.js'
+import { duplicate } from './collections/duplicate.js'
 import { find } from './collections/find.js'
 import { findByID } from './collections/findByID.js'
 import { findVersionByID } from './collections/findVersionByID.js'
 import { findVersions } from './collections/findVersions.js'
+import { renameFile } from './collections/renameFile.js'
 import { restoreVersion } from './collections/restoreVersion.js'
 import {
   update,
@@ -94,12 +123,15 @@ import {
   type UpdateManyOptions,
   type UpdateOptions,
 } from './collections/update.js'
+import { validate } from './collections/validate.js'
 import { PayloadSDKError } from './errors/PayloadSDKError.js'
+import { docAccessGlobal } from './globals/docAccess.js'
 import { findGlobal, type FindGlobalOptions } from './globals/findOne.js'
 import { findGlobalVersionByID } from './globals/findVersionByID.js'
 import { findGlobalVersions } from './globals/findVersions.js'
 import { restoreGlobalVersion } from './globals/restoreVersion.js'
 import { updateGlobal } from './globals/update.js'
+import { validateGlobal } from './globals/validate.js'
 import { buildSearchParams } from './utilities/buildSearchParams.js'
 
 type Args = {
@@ -179,6 +211,15 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
   }
 
   /**
+   * @description Gets the current user's permissions for every collection and global
+   * @param options
+   * @returns permissions
+   */
+  access(options: AccessOptions = {}, init?: RequestInit): Promise<SanitizedPermissions> {
+    return access(this, options, init)
+  }
+
+  /**
    * @description Performs count operation
    * @param options
    * @returns count of documents satisfying query
@@ -223,6 +264,42 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     BulkOperationResult<T, TSlug, TSelect> | TransformCollectionWithSelect<T, TSlug, TSelect>
   > {
     return deleteOperation(this, options, init)
+  }
+
+  /**
+   * @description Gets the current user's permissions for one document, or for a new one when `id` is omitted
+   * @param options
+   * @returns document permissions
+   */
+  docAccess<TSlug extends CollectionSlug<T>>(
+    options: DocAccessOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<SanitizedCollectionPermission> {
+    return docAccess(this, options, init)
+  }
+
+  /**
+   * @description Gets the current user's permissions for a global
+   * @param options
+   * @returns global permissions
+   */
+  docAccessGlobal<TSlug extends GlobalSlug<T>>(
+    options: DocAccessGlobalOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<SanitizedGlobalPermission> {
+    return docAccessGlobal(this, options, init)
+  }
+
+  /**
+   * @description Duplicates a document
+   * @param options
+   * @returns the new document
+   */
+  duplicate<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
+    options: DuplicateOptions<T, TSlug, TSelect>,
+    init?: RequestInit,
+  ): Promise<TransformCollectionWithSelect<T, TSlug, TSelect>> {
+    return duplicate(this, options, init)
   }
 
   /**
@@ -302,6 +379,18 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     return login(this, options, init)
   }
 
+  /**
+   * @description Logs out the user that sends the request, or ends all of their sessions with `allSessions`
+   * @param options
+   * @returns message
+   */
+  logout<TSlug extends AuthCollectionSlug<T>>(
+    options: LogoutOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<{ message: string }> {
+    return logout(this, options, init)
+  }
+
   me<TSlug extends AuthCollectionSlug<T>>(
     options: MeOptions<T, TSlug>,
     init?: RequestInit,
@@ -314,6 +403,18 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     init?: RequestInit,
   ): Promise<RefreshResult<T, TSlug>> {
     return refreshToken(this, options, init)
+  }
+
+  /**
+   * @description Renames the stored file of an upload document
+   * @param options
+   * @returns the updated document
+   */
+  renameFile<TSlug extends UploadCollectionSlug<T>>(
+    options: RenameFileOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<DataFromCollectionSlug<T, TSlug>> {
+    return renameFile(this, options, init)
   }
 
   async request({
@@ -403,6 +504,18 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     return restoreVersion(this, options, init)
   }
 
+  /**
+   * @description Unlocks a user locked out by too many failed logins
+   * @param options
+   * @returns message
+   */
+  unlock<TSlug extends AuthCollectionSlug<T>>(
+    options: UnlockOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<{ message: string }> {
+    return unlock(this, options, init)
+  }
+
   update<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
     options: UpdateManyOptions<T, TSlug, TSelect>,
     init?: RequestInit,
@@ -432,6 +545,30 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     init?: RequestInit,
   ): Promise<TransformGlobalWithSelect<T, TSlug, TSelect>> {
     return updateGlobal(this, options, init)
+  }
+
+  /**
+   * @description Validates document data without saving it
+   * @param options
+   * @returns whether the data is valid, and the field errors when it isn't
+   */
+  validate<TSlug extends CollectionSlug<T>>(
+    options: ValidateOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<ValidationResult> {
+    return validate(this, options, init)
+  }
+
+  /**
+   * @description Validates global data without saving it
+   * @param options
+   * @returns whether the data is valid, and the field errors when it isn't
+   */
+  validateGlobal<TSlug extends GlobalSlug<T>>(
+    options: ValidateGlobalOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<ValidationResult> {
+    return validateGlobal(this, options, init)
   }
 
   verifyEmail<TSlug extends AuthCollectionSlug<T>>(
