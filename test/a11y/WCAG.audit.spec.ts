@@ -321,7 +321,13 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
     }
 
-    test('should expose the existing document main page title as a level-one heading', async () => {
+      test('should expose a single main landmark on the dashboard', async () => {
+    await page.goto(formatAdminURL({ adminRoute: '/admin', path: '', serverURL }))
+
+    await expect(page.getByRole('main')).toHaveCount(1)
+  })
+
+  test('should expose the existing document main page title as a level-one heading', async () => {
       // Additional coverage for PYLD-3640.
       await gotoFirstPost({ page, postsURL, serverURL })
 
