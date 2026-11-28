@@ -117,6 +117,7 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "graphql-http": "1.22.4",
+    "graphql-playground-html": "1.6.30",
     "qs-esm": "^7.0.2"
   },
   "devDependencies": {

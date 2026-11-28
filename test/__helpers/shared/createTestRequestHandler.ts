@@ -22,14 +22,8 @@ export function createTestRequestHandler({
   config: SanitizedConfig
 }): TestRequestHandler {
   if (process.env.PAYLOAD_FRAMEWORK === 'tanstack-start') {
-    return async ({ isGraphQL, request }) => {
-      if (isGraphQL) {
-        const { handleGraphQL } =
-          await import('../../../packages/tanstack-start/src/routes/graphql/handler.server.js')
-
-        return handleGraphQL({ config, request })
-      }
-
+    // The app's single API route dispatches GraphQL and REST by path, so send both through it.
+    return async ({ request }) => {
       const { handleAPIRoute } =
         await import('../../../packages/tanstack-start/src/routes/rest/handler.server.js')
 
