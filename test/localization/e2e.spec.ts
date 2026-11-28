@@ -6,7 +6,6 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
-import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 import type { Config, LocalizedPost } from './payload-types.js'
 
 import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
@@ -33,8 +32,8 @@ import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { blocksCollectionSlug } from './collections/Blocks/index.js'
@@ -87,7 +86,6 @@ const description = 'description'
 
 let page: Page
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let serverURL: string
 let richTextURL: AdminUrlUtil
 let urlLocaleRestricted: AdminUrlUtil
@@ -113,9 +111,6 @@ describe('Localization', () => {
 
     context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
-
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
   })
 
   beforeEach(async () => {
@@ -561,10 +556,16 @@ describe('Localization', () => {
     )
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
-      await upsertPreferences<Config, GeneratedTypes<any>>({
+      const { user } = await payload.login({
+        collection: 'users',
+        data: { email: devUser.email, password: devUser.password },
+        overrideAccess: true,
+      })
+
+      await upsertPreferences({
         key: 'locale',
         payload,
-        user: client.user,
+        user,
         value: 'es',
       })
 

@@ -19,7 +19,6 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -36,7 +35,6 @@ const dirname = path.dirname(filename)
 
 let payload: PayloadTestSDK<Config>
 let serverURL: string
-let client: RESTClient
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -74,12 +72,6 @@ describe('Join Field', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: postsSlug, serverURL })
-    await client.login()
 
     const { docs } = await payload.find({
       collection: categoriesSlug,
