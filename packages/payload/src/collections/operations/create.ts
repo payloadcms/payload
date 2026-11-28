@@ -47,6 +47,7 @@ import {
 } from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { assertDataIsObject } from '../../utilities/assertDataIsObject.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import {
@@ -109,6 +110,13 @@ export const createOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.data === undefined && Boolean(args.collection.config.upload && args.req.file)) {
+      args = {
+        ...args,
+        data: {} as typeof args.data,
+      }
+    }
+
     // Keep a remote URL only as an ephemeral file source, then strip all submitted generated
     // identity before untrusted create hooks run. The fetched file receives new server-owned
     // identity before persistence.
@@ -120,7 +128,9 @@ export const createOperation = async <
       args = {
         ...args,
         data:
-          typeof sanitizedData === 'object' && sanitizedData !== null
+          typeof sanitizedData === 'object' &&
+          sanitizedData !== null &&
+          !Array.isArray(sanitizedData)
             ? {
                 ...sanitizedData,
                 ...(prefix !== undefined ? { prefix } : {}),
@@ -217,7 +227,7 @@ export const createOperation = async <
     }
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
-    if (isSavingDraft) {
+    if (isSavingDraft && data && typeof data === 'object' && !Array.isArray(data)) {
       data._status = 'draft'
     }
 
@@ -257,6 +267,8 @@ export const createOperation = async <
         collectionConfig.access.create,
       )
     }
+
+    assertDataIsObject(data, req, Boolean(collectionConfig.upload))
 
     // /////////////////////////////////////
     // Generate data for all files and sizes

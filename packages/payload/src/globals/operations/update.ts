@@ -24,6 +24,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertDataIsObject } from '../../utilities/assertDataIsObject.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -176,18 +177,19 @@ export const updateOperation = async <
       unpublishAllLocales = false
     }
 
+    const hasObjectData = Boolean(data && typeof data === 'object' && !Array.isArray(data))
+
     const isSavingDraft =
       Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
-      data._status !== 'published' &&
+      (!hasObjectData || data._status !== 'published') &&
       !publishAllLocales
 
-    if (isSavingDraft) {
+    if (isSavingDraft && hasObjectData) {
       data._status = 'draft'
     }
 
-    const submittedTopLevelFieldNames = unpublishAllLocales
-      ? getTopLevelFieldNames(data)
-      : undefined
+    const submittedTopLevelFieldNames =
+      unpublishAllLocales && hasObjectData ? getTopLevelFieldNames(data) : undefined
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -203,6 +205,12 @@ export const updateOperation = async <
           globalConfig.access.update,
         )
       : true
+
+    const hasWherePolicy = hasWhereAccessResult(accessResults)
+
+    if (!hasWherePolicy) {
+      assertDataIsObject(data, req, false)
+    }
 
     // /////////////////////////////////////
     // Retrieve document
@@ -223,12 +231,12 @@ export const updateOperation = async <
     })
     const { global, globalExists } = globalVersionResult || {}
 
-    if (
-      hasWhereAccessResult(accessResults) &&
-      globalExists &&
-      (!global || Object.keys(global).length === 0)
-    ) {
+    if (hasWherePolicy && globalExists && (!global || Object.keys(global).length === 0)) {
       throw new Forbidden(req.t)
+    }
+
+    if (hasWherePolicy) {
+      assertDataIsObject(data, req, false)
     }
 
     let globalJSON: JsonObject = {}
