@@ -21,6 +21,7 @@
 
   .blocks-drawer__block .thumbnail-card__thumbnail {
     min-width: 0;
+    aspect-ratio: 3 / 2;
   }
 
   .blocks-drawer__default-image {
