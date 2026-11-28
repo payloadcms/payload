@@ -63,6 +63,8 @@ const customEditorConfig = await editorConfigFactory.fromFeatures({
 })
 ```
 
+Re-declaring a default feature here overrides it, as the last feature with a given key wins. This is how you configure conversion behavior that lives on a feature rather than on a converter - for example passing `internalDocToHref` to `LinkFeature` for the [Markdown converter](/docs/rich-text/converting-markdown#internal-links).
+
 ### Option 4: Extract from an Instantiated Editor
 
 If you've created a global or reusable Lexical editor instance, you can access its configuration. This method is typically less efficient and not recommended:
