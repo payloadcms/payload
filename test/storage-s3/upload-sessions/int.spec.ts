@@ -1,15 +1,12 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
-import type {
-  ClientUploadSession,
-  Payload,
-  UploadInstructions,
-  UploadSegmentRequest,
-} from 'payload'
+import type { ClientUploadSession, Payload, UploadInstructions } from 'payload'
 
 import {
   AbortMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
   ListMultipartUploadsCommand,
   ListObjectsV2Command,
+  ListPartsCommand,
 } from '@aws-sdk/client-s3'
 import { randomBytes } from 'node:crypto'
 import { uploadSessionsCollectionSlug } from 'payload/internal'
@@ -24,6 +21,7 @@ import {
   uploadWithSession,
 } from '../../../packages/ui/src/utilities/uploadWithSession.js'
 /* eslint-enable payload/no-relative-monorepo-imports */
+import { createUploadSessionHelpers, withBrowserFetch } from '../../__helpers/int/uploadSessions.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { RESTClient as RESTClientClass } from '../../__helpers/shared/RESTClient.js'
 import { regularUser } from '../../credentials.js'
@@ -47,6 +45,18 @@ const sessionsPath = `/${uploadSessionsCollectionSlug}` as const
 
 // Three S3 parts at the 5 MiB minimum: 5 + 5 + 1.
 const fileBytes = randomBytes(MB(11))
+
+const {
+  complete,
+  completeStorage,
+  createBody,
+  createSession,
+  createWithFileReference,
+  getInstructions,
+  getSession,
+  putSegment,
+  uploadAllSegments,
+} = createUploadSessionHelpers({ collectionSlug: videosSlug, fileBytes })
 
 test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
@@ -125,6 +135,33 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
 
     expect(second.doc.id).toBe(first.doc.id)
     expect((await payload.count({ collection: videosSlug })).totalDocs).toBe(1)
+  })
+
+  test('should finish a completion retried after S3 completed the multipart upload', async ({
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+    await completeMultipartUploads()
+
+    const { doc } = await complete({ data: { title: 'Completed earlier' }, restClient, session })
+
+    expect(doc.filesize).toBe(fileBytes.length)
+  })
+
+  test('should report every segment once S3 completed the multipart upload', async ({
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+    await completeMultipartUploads()
+
+    const { requests, session: resumed } = await getInstructions({ restClient, session })
+
+    expect(requests).toEqual([])
+    expect(resumed.completedSegments).toEqual([1, 2, 3])
   })
 
   test('should let only one of two concurrent completions finalize', async ({
@@ -1279,53 +1316,6 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
   })
 })
 
-/**
- * Runs browser upload code with `fetch` routed like a browser would: session API calls go to the
- * in-process Payload handler and segment uploads go straight to storage. Restores `fetch` after.
- */
-const withBrowserFetch = async <T>({
-  onStoragePut,
-  restClient,
-  run,
-}: {
-  onStoragePut: (url: string) => void
-  restClient: RESTClient
-  run: () => Promise<T>
-}): Promise<T> => {
-  const originalFetch = globalThis.fetch
-
-  globalThis.fetch = async (input, init = {}) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-
-    if (url.startsWith('/api/')) {
-      const path = url.slice('/api'.length) as `/${string}`
-      const { body, method = 'GET', signal } = init
-
-      signal?.throwIfAborted()
-
-      return method === 'DELETE'
-        ? restClient.DELETE(path)
-        : method === 'GET'
-          ? restClient.GET(path)
-          : restClient.POST(path, { body: body ?? undefined })
-    }
-
-    const response = await originalFetch(input, init)
-
-    if (init.method === 'PUT' && response.ok) {
-      onStoragePut(url)
-    }
-
-    return response
-  }
-
-  try {
-    return await run()
-  } finally {
-    globalThis.fetch = originalFetch
-  }
-}
-
 /** Simulates a completion in progress on another request. */
 const holdLease = ({ payload, session }: { payload: Payload; session: ClientUploadSession }) =>
   payload.db.updateOne({
@@ -1333,6 +1323,26 @@ const holdLease = ({ payload, session }: { payload: Payload; session: ClientUplo
     collection: uploadSessionsCollectionSlug,
     data: { finalizingUntil: new Date(Date.now() + 60_000).toISOString(), status: 'active' },
   })
+
+/** Completes open multipart uploads in S3 directly, like a completion whose response was lost. */
+const completeMultipartUploads = async () => {
+  const client = getAWSClient()
+  const Bucket = getTestBucketName()
+  const { Uploads = [] } = await client.send(new ListMultipartUploadsCommand({ Bucket }))
+
+  for (const { Key, UploadId } of Uploads) {
+    const { Parts = [] } = await client.send(new ListPartsCommand({ Bucket, Key, UploadId }))
+
+    await client.send(
+      new CompleteMultipartUploadCommand({
+        Bucket,
+        Key,
+        MultipartUpload: { Parts: Parts.map(({ ETag, PartNumber }) => ({ ETag, PartNumber })) },
+        UploadId,
+      }),
+    )
+  }
+}
 
 /** Interrupted uploads leave multipart state that clearing objects does not remove. */
 const abortMultipartUploads = async () => {
@@ -1346,118 +1356,6 @@ const abortMultipartUploads = async () => {
       new AbortMultipartUploadCommand({ Bucket: getTestBucketName(), Key, UploadId }),
     )
   }
-}
-
-const createBody = ({
-  collectionSlug = videosSlug,
-  filename = 'video.mp4',
-  mimeType = 'video/mp4',
-  operation = 'create',
-  targetID,
-}: {
-  collectionSlug?: string
-  filename?: string
-  mimeType?: string
-  operation?: 'create' | 'update'
-  targetID?: string
-}) => ({
-  collectionSlug,
-  file: { filename, lastModified: 1_700_000_000_000, mimeType, size: fileBytes.length },
-  operation,
-  targetID,
-})
-
-const createSession = async ({
-  collectionSlug,
-  operation,
-  restClient,
-  targetID,
-}: {
-  collectionSlug?: string
-  operation?: 'create' | 'update'
-  restClient: RESTClient
-  targetID?: string
-}): Promise<ClientUploadSession> => {
-  const response = await restClient.POST(sessionsPath, {
-    body: JSON.stringify(createBody({ collectionSlug, operation, targetID })),
-  })
-
-  expect(response.status).toBe(201)
-
-  return response.json<ClientUploadSession>()
-}
-
-const getSession = ({
-  restClient,
-  session,
-}: {
-  restClient: RESTClient
-  session: ClientUploadSession
-}): Promise<ClientUploadSession> =>
-  restClient.GET(`${sessionsPath}/${session.id}`).then((res) => res.json<ClientUploadSession>())
-
-const getInstructions = async ({
-  restClient,
-  session,
-}: {
-  restClient: RESTClient
-  session: ClientUploadSession
-}): Promise<{ requests: UploadSegmentRequest[]; session: ClientUploadSession }> => {
-  const response = await restClient.POST(`${sessionsPath}/${session.id}/instructions`)
-
-  expect(response.status).toBe(200)
-
-  return response.json()
-}
-
-const putSegment = async ({
-  request,
-  session,
-}: {
-  request: UploadSegmentRequest
-  session: ClientUploadSession
-}) => {
-  const segment = session.transfer.segments.find(({ number }) => number === request.number)!
-  const response = await fetch(request.url, {
-    body: fileBytes.subarray(segment.start, segment.end),
-    headers: request.headers,
-    method: request.method,
-  })
-
-  expect(response.status).toBe(200)
-}
-
-const uploadAllSegments = async ({
-  restClient,
-  session,
-}: {
-  restClient: RESTClient
-  session: ClientUploadSession
-}) => {
-  let { requests } = await getInstructions({ restClient, session })
-
-  while (requests.length) {
-    await Promise.all(requests.map((request) => putSegment({ request, session })))
-    ;({ requests } = await getInstructions({ restClient, session }))
-  }
-}
-
-const complete = async ({
-  data,
-  restClient,
-  session,
-}: {
-  data: Record<string, unknown>
-  restClient: RESTClient
-  session: ClientUploadSession
-}): Promise<{ doc: Record<string, any>; session: ClientUploadSession }> => {
-  const response = await restClient.POST(`${sessionsPath}/${session.id}/complete`, {
-    body: JSON.stringify({ data }),
-  })
-
-  expect(response.status).toBe(200)
-
-  return response.json()
 }
 
 const setIntent = ({
@@ -1492,37 +1390,6 @@ const expireFileReferences = ({
     collection: uploadSessionsCollectionSlug,
     data: { fileReferencesValidUntil: new Date(Date.now() - 1000).toISOString() },
   })
-
-const completeStorage = async ({
-  restClient,
-  session,
-}: {
-  restClient: RESTClient
-  session: ClientUploadSession
-}): Promise<{ file: UploadInstructions['file']; session: ClientUploadSession }> => {
-  const response = await restClient.POST(`${sessionsPath}/${session.id}/storage`)
-
-  expect(response.status).toBe(200)
-
-  return response.json()
-}
-
-const createWithFileReference = ({
-  file,
-  restClient,
-  title,
-}: {
-  file: UploadInstructions['file']
-  restClient: RESTClient
-  title: string
-}) => {
-  const formData = new FormData()
-
-  formData.append('_payload', JSON.stringify({ title }))
-  formData.append('file', JSON.stringify(file))
-
-  return restClient.POST(`/${videosSlug}`, { body: formData })
-}
 
 /** A PNG of noise, which does not compress, so it is well above the 6 MiB session threshold. */
 const createLargePNG = (): Promise<Buffer> =>

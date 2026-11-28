@@ -3,8 +3,8 @@ import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'paylo
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
-import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { APIError } from 'payload'
+import { assertClientUploadAllowed, assertUploadInstructionsAccess } from 'payload/internal'
 
 import { isClientUploadAllowed } from './isClientUploadAllowed.js'
 
@@ -32,8 +32,8 @@ export const generateUploadInstructions = ({
     overrideAccess,
     req,
   }) => {
-    if (!overrideAccess && (access ? !(await access({ collectionSlug, req })) : !req.user)) {
-      throw new Forbidden(req.t)
+    if (!overrideAccess) {
+      await assertUploadInstructionsAccess({ access, collectionSlug, req })
     }
 
     const collection = req.payload.collections[collectionSlug]?.config

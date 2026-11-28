@@ -13,7 +13,12 @@ import type {
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
-import { APIError, Forbidden } from 'payload'
+import { APIError } from 'payload'
+import {
+  assertUploadInstructionsAccess,
+  getUploadStagingPath,
+  toReservedObject,
+} from 'payload/internal'
 
 const MiB = 1024 * 1024
 const TiB = 1024 * 1024 * MiB
@@ -31,19 +36,14 @@ type Args = {
 
 type AzureProviderState = { contentType: string }
 
-/**
- * Blocks are staged on a separate blob under this prefix and copied to the final path at
- * completion. Staging blocks needs a Write SAS, which also allows replacing the blob it names;
- * keeping that blob apart means an unexpired block URL can never replace the stored file.
- */
-export const UPLOAD_STAGING_PREFIX = 'payload-upload-sessions/'
-
 const SOURCE_SAS_LIFETIME_MS = 60 * 60 * 1000
 
 /**
  * Azure block blob uploads for durable upload sessions. The browser stages blocks on a staging
- * blob with a short-lived SAS per block. The server reads progress with Get Block List, commits
- * the staging blob, then copies it to the final path with a create-only condition.
+ * blob under `UPLOAD_STAGING_PREFIX` with a short-lived SAS per block. Staging blocks needs a
+ * Write SAS, which also allows replacing the blob it names, so it never names the final path.
+ * The server reads progress with Get Block List, commits the staging blob, then copies it to the
+ * final path with a create-only condition.
  */
 export const createSegmentedUpload = ({
   access,
@@ -56,7 +56,7 @@ export const createSegmentedUpload = ({
     getStorageClient().getBlockBlobClient(object.storageFilePath)
 
   const getStagingBlob = ({ object }: { object: ReservedObject }) =>
-    getStorageClient().getBlockBlobClient(getStagingPath({ object }))
+    getStorageClient().getBlockBlobClient(getUploadStagingPath({ object }))
 
   const signBlob = ({
     blobName,
@@ -94,11 +94,8 @@ export const createSegmentedUpload = ({
       await getFinalBlob({ object }).deleteIfExists()
     },
 
-    authorize: async ({ collectionSlug, req }) => {
-      if (access ? !(await access({ collectionSlug, req })) : !req.user) {
-        throw new Forbidden(req.t)
-      }
-    },
+    authorize: ({ collectionSlug, req }) =>
+      assertUploadInstructionsAccess({ access, collectionSlug, req }),
 
     complete: async ({ object, providerState, segments }) => {
       const finalBlob = getFinalBlob({ object })
@@ -186,28 +183,18 @@ export const createSegmentedUpload = ({
         throw new APIError('Storage rejected the upload (ContainerNotFound).', 404)
       }
 
-      const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
-        collectionPrefix,
-        collectionSlug,
-        docPrefix,
-        filename,
-        req,
-        useCompositePrefixes,
-      })
+      const object = toReservedObject(
+        await resolveSignedURLKey({
+          collectionPrefix,
+          collectionSlug,
+          docPrefix,
+          filename,
+          req,
+          useCompositePrefixes,
+        }),
+      )
 
-      if (!uploadReference._objectKey) {
-        throw new Error('Azure block upload could not be initiated.')
-      }
-
-      return {
-        object: {
-          _objectKey: uploadReference._objectKey,
-          filename: sanitizedFilename,
-          prefix: uploadReference.prefix,
-          storageFilePath,
-        },
-        providerState: { contentType: mimeType } satisfies AzureProviderState,
-      }
+      return { object, providerState: { contentType: mimeType } satisfies AzureProviderState }
     },
 
     limits: {
@@ -234,9 +221,6 @@ export const createSegmentedUpload = ({
     },
   }
 }
-
-const getStagingPath = ({ object }: { object: ReservedObject }): string =>
-  `${UPLOAD_STAGING_PREFIX}${object.storageFilePath}`
 
 /** The blob's blocks, or `null` when the blob has no blocks at all yet. */
 const getBlocks = async ({

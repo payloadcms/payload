@@ -2,9 +2,10 @@ import type { ContainerClient } from '@azure/storage-blob'
 import type { PayloadRequest, ReservedObject } from 'payload'
 
 import { StorageSharedKeyCredential } from '@azure/storage-blob'
+import { UPLOAD_STAGING_PREFIX } from 'payload/internal'
 import { describe, expect, it, vi } from 'vitest'
 
-import { createSegmentedUpload, UPLOAD_STAGING_PREFIX } from './segmentedUpload.js'
+import { createSegmentedUpload } from './segmentedUpload.js'
 
 const object: ReservedObject = {
   _objectKey: 'key',

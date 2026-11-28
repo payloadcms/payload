@@ -1,21 +1,19 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
 import type { ContainerClient } from '@azure/storage-blob'
-import type { ClientUploadSession, UploadInstructions, UploadSegmentRequest } from 'payload'
+import type { ClientUploadSession, UploadInstructions } from 'payload'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 import { randomBytes } from 'node:crypto'
-import { uploadSessionsCollectionSlug } from 'payload/internal'
+import { UPLOAD_STAGING_PREFIX, uploadSessionsCollectionSlug } from 'payload/internal'
 import { expect } from 'vitest'
 
-import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
-
-import { UPLOAD_STAGING_PREFIX } from '../../../packages/storage-azure/src/segmentedUpload.js'
 /* eslint-disable payload/no-relative-monorepo-imports -- Exercise the real browser uploader, which is not exported. */
 import {
   resumeUploadSession,
   uploadWithSession,
 } from '../../../packages/ui/src/utilities/uploadWithSession.js'
 /* eslint-enable payload/no-relative-monorepo-imports */
+import { createUploadSessionHelpers, withBrowserFetch } from '../../__helpers/int/uploadSessions.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { videosMissingContainerSlug, videosSlug } from '../shared.js'
 import { uploadSessionsContainerName } from './config.js'
@@ -24,6 +22,21 @@ const sessionsPath = `/${uploadSessionsCollectionSlug}` as const
 
 // Three 5 MiB blocks: 5 + 5 + 1.
 const fileBytes = randomBytes(11 * 1024 * 1024)
+
+const {
+  complete,
+  createBody,
+  createSession,
+  createWithFileReference,
+  getInstructions,
+  putSegment,
+  uploadAllSegments,
+} = createUploadSessionHelpers({
+  collectionSlug: videosSlug,
+  fileBytes,
+  // Put Block answers 201 Created.
+  segmentUploadStatus: 201,
+})
 
 let containerClient: ContainerClient
 
@@ -311,171 +324,4 @@ const listBlobs = async ({ includeUncommitted = false }: { includeUncommitted?: 
   }
 
   return blobs
-}
-
-const createBody = ({
-  collectionSlug = videosSlug,
-  operation = 'create',
-  targetID,
-}: {
-  collectionSlug?: string
-  operation?: 'create' | 'update'
-  targetID?: string
-}) => ({
-  collectionSlug,
-  file: {
-    filename: 'video.mp4',
-    lastModified: 1_700_000_000_000,
-    mimeType: 'video/mp4',
-    size: fileBytes.length,
-  },
-  operation,
-  targetID,
-})
-
-const createSession = async ({
-  operation,
-  restClient,
-  targetID,
-}: {
-  operation?: 'create' | 'update'
-  restClient: RESTClient
-  targetID?: string
-}): Promise<ClientUploadSession> => {
-  const response = await restClient.POST(sessionsPath, {
-    body: JSON.stringify(createBody({ operation, targetID })),
-  })
-
-  expect(response.status).toBe(201)
-
-  return response.json<ClientUploadSession>()
-}
-
-const getInstructions = async ({
-  restClient,
-  session,
-}: {
-  restClient: RESTClient
-  session: ClientUploadSession
-}): Promise<{ requests: UploadSegmentRequest[]; session: ClientUploadSession }> => {
-  const response = await restClient.POST(`${sessionsPath}/${session.id}/instructions`)
-
-  expect(response.status).toBe(200)
-
-  return response.json()
-}
-
-const putSegment = async ({
-  request,
-  session,
-}: {
-  request: UploadSegmentRequest
-  session: ClientUploadSession
-}) => {
-  const segment = session.transfer.segments.find(({ number }) => number === request.number)!
-  const response = await fetch(request.url, {
-    body: fileBytes.subarray(segment.start, segment.end),
-    headers: request.headers,
-    method: request.method,
-  })
-
-  // Put Block answers 201 Created.
-  expect(response.status).toBe(201)
-}
-
-const uploadAllSegments = async ({
-  restClient,
-  session,
-}: {
-  restClient: RESTClient
-  session: ClientUploadSession
-}) => {
-  let { requests } = await getInstructions({ restClient, session })
-
-  while (requests.length) {
-    await Promise.all(requests.map((request) => putSegment({ request, session })))
-    ;({ requests } = await getInstructions({ restClient, session }))
-  }
-}
-
-const complete = async ({
-  data,
-  restClient,
-  session,
-}: {
-  data: Record<string, unknown>
-  restClient: RESTClient
-  session: ClientUploadSession
-}): Promise<{ doc: Record<string, any>; session: ClientUploadSession }> => {
-  const response = await restClient.POST(`${sessionsPath}/${session.id}/complete`, {
-    body: JSON.stringify({ data }),
-  })
-
-  expect(response.status).toBe(200)
-
-  return response.json()
-}
-
-const createWithFileReference = ({
-  file,
-  restClient,
-  title,
-}: {
-  file: UploadInstructions['file']
-  restClient: RESTClient
-  title: string
-}) => {
-  const formData = new FormData()
-
-  formData.append('_payload', JSON.stringify({ title }))
-  formData.append('file', JSON.stringify(file))
-
-  return restClient.POST(`/${videosSlug}`, { body: formData })
-}
-
-/**
- * Runs the browser uploader against the test server: requests to `/api` go to the in-process
- * Payload handler and block uploads go straight to Azure. Restores `fetch` after.
- */
-const withBrowserFetch = async <T>({
-  onStoragePut,
-  restClient,
-  run,
-}: {
-  onStoragePut: (url: string) => void
-  restClient: RESTClient
-  run: () => Promise<T>
-}): Promise<T> => {
-  const originalFetch = globalThis.fetch
-
-  globalThis.fetch = async (input, init = {}) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-
-    if (url.startsWith('/api/')) {
-      const path = url.slice('/api'.length) as `/${string}`
-      const { body, method = 'GET', signal } = init
-
-      signal?.throwIfAborted()
-
-      return method === 'DELETE'
-        ? restClient.DELETE(path)
-        : method === 'GET'
-          ? restClient.GET(path)
-          : restClient.POST(path, { body: body ?? undefined })
-    }
-
-    const response = await originalFetch(input, init)
-
-    if (init.method === 'PUT' && response.ok) {
-      onStoragePut(url)
-    }
-
-    return response
-  }
-
-  try {
-    return await run()
-  } finally {
-    globalThis.fetch = originalFetch
-  }
 }
