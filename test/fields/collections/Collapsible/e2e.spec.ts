@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
 import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -20,7 +21,7 @@ import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2E
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { collapsibleFieldsSlug } from '../../slugs.js'
+import { collapsibleFieldsSlug, relationshipFieldsSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -107,6 +108,35 @@ describe('Collapsibles', () => {
 
     await expect(customCollapsibleLabel).toBeVisible()
     await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
+  })
+
+  test('should render fields of collapsibles below the fold in a document drawer', async () => {
+    const {
+      docs: [relatedDoc],
+    } = await payload.find({ collection: collapsibleFieldsSlug, limit: 1 })
+    const {
+      docs: [relationshipDoc],
+    } = await payload.find({ collection: relationshipFieldsSlug, limit: 1 })
+    await payload.update({
+      collection: relationshipFieldsSlug,
+      id: relationshipDoc!.id,
+      data: { relationToCollapsible: relatedDoc!.id },
+    })
+
+    await page.goto(new AdminUrlUtil(serverURL, relationshipFieldsSlug).edit(relationshipDoc!.id))
+    await openDocDrawer({
+      page,
+      selector: '#field-relationToCollapsible button.relationship--single-value__drawer-toggler',
+    })
+
+    // The nested collapsible sits below the visible area of the drawer, which is not scrolled
+    const nestedTitleField = page.locator(
+      '[id^=doc-drawer_collapsible-fields_1_] input[name="nestedTitle"]',
+    )
+    await expect(nestedTitleField).toBeVisible()
+
+    await nestedTitleField.fill('nested title in drawer')
+    await expect(nestedTitleField).toHaveValue('nested title in drawer')
   })
 
   describe('A11y', () => {

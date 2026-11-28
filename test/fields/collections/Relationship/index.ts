@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { relationshipFieldsSlug } from '../../slugs.js'
+import { collapsibleFieldsSlug, groupFieldsSlug, relationshipFieldsSlug } from '../../slugs.js'
 
 const RelationshipFields: CollectionConfig = {
   fields: [
@@ -190,6 +190,16 @@ const RelationshipFields: CollectionConfig = {
           return true
         }
       },
+    },
+    {
+      name: 'relationToCollapsible',
+      type: 'relationship',
+      relationTo: collapsibleFieldsSlug,
+    },
+    {
+      name: 'relationToGroup',
+      type: 'relationship',
+      relationTo: groupFieldsSlug,
     },
   ],
   slug: relationshipFieldsSlug,
