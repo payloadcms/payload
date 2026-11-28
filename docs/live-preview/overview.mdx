@@ -88,13 +88,11 @@ const config = buildConfig({
     // ...
     livePreview: {
       // highlight-start
-      url: ({ data, collectionConfig, locale }) =>
-        `${data.tenant.url}${
-          collectionConfig.slug === 'posts'
-            ? `/posts/${data.slug}`
-            : `${data.slug !== 'home' ? `/${data.slug}` : ''}`
-        }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
-      collections: ['pages'],
+      url: ({ data, frontendPath, req }) =>
+        frontendPath
+          ? `${data.tenant.url}${frontendPath}?locale=${req.locale}`
+          : null,
+      collections: ['pages', 'posts'],
     },
     // highlight-end
   },
@@ -103,13 +101,14 @@ const config = buildConfig({
 
 The following arguments are provided to the `url` function:
 
-| Path                   | Description                                                                                                           |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **`data`**             | The data of the Document being edited. This includes changes that have not yet been saved.                            |
-| **`locale`**           | The locale currently being edited (if applicable). [More details](../configuration/localization).                     |
-| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../configuration/collections#admin-options). |
-| **`globalConfig`**     | The Global Admin Config of the Document being edited. [More details](../configuration/globals#admin-options).         |
-| **`req`**              | The Payload Request object.                                                                                           |
+| Path                   | Description                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`data`**             | The data of the Document being edited. This includes changes that have not yet been saved.                                                             |
+| **`frontendPath`**     | The path returned by the [`generateFrontendPath`](../configuration/collections#frontend-path) of the Collection or Global, or `null` if there is none. |
+| **`req`**              | The Payload Request object.                                                                                                                            |
+| **`locale`**           | Deprecated, use `req.locale` instead. Will be removed in v5.                                                                                           |
+| **`collectionConfig`** | Deprecated, use `frontendPath` instead. Will be removed in v5.                                                                                         |
+| **`globalConfig`**     | Deprecated, use `frontendPath` instead. Will be removed in v5.                                                                                         |
 
 You can return either an absolute URL or relative URL from this function. If you don't know the URL of your frontend at build-time, you can return a relative URL, and in that case, Payload will automatically construct an absolute URL by injecting the protocol, domain, and port from your browser window. Returning a relative URL is helpful for platforms like Vercel where you may have preview deployment URLs that are unknown at build time.
 
