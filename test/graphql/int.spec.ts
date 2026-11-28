@@ -7,6 +7,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
+import { devUser } from '../credentials.js'
 
 test.suite('graphql', { config: './config.ts' }, () => {
   test.describe('graphql', () => {
@@ -327,6 +328,111 @@ query {
         .then((res) => res.json())
 
       expect(afterDelete.errors).toBeUndefined()
+    })
+
+    test.describe('access queries', () => {
+      test('should return collection and field permissions in the Access query', async ({
+        restClient,
+      }) => {
+        await restClient.login({ slug: 'users', credentials: devUser })
+
+        const { data, errors } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `query {
+                Access {
+                  canAccessAdmin
+                  posts {
+                    create { permission }
+                    read { permission }
+                    fields {
+                      title { read { permission } }
+                      hyphenated_name { update { permission } }
+                    }
+                  }
+                }
+              }`,
+            }),
+          })
+          .then((res) => res.json())
+
+        expect(errors).toBeUndefined()
+        expect(data.Access).toEqual({
+          canAccessAdmin: true,
+          posts: {
+            create: { permission: true },
+            read: { permission: true },
+            fields: {
+              title: { read: { permission: true } },
+              hyphenated_name: { update: { permission: true } },
+            },
+          },
+        })
+      })
+
+      test('should return denied permissions in the Access query when not logged in', async ({
+        restClient,
+      }) => {
+        const { data, errors } = await restClient
+          .GRAPHQL_POST({
+            auth: false,
+            body: JSON.stringify({
+              query: `query {
+                Access {
+                  canAccessAdmin
+                  posts {
+                    read { permission }
+                    fields { title { read { permission } } }
+                  }
+                }
+              }`,
+            }),
+          })
+          .then((res) => res.json())
+
+        expect(errors).toBeUndefined()
+        expect(data.Access).toEqual({
+          canAccessAdmin: false,
+          posts: {
+            read: { permission: false },
+            fields: { title: { read: { permission: false } } },
+          },
+        })
+      })
+
+      test('should return document permissions in the docAccess query', async ({
+        payload,
+        restClient,
+      }) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: { title: 'doc access' },
+          overrideAccess: true,
+        })
+
+        await restClient.login({ slug: 'users', credentials: devUser })
+
+        const { data, errors } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `query {
+                docAccessPost(id: ${idToString(post.id, payload)}) {
+                  update { permission }
+                  delete { permission }
+                  fields { title { update { permission } } }
+                }
+              }`,
+            }),
+          })
+          .then((res) => res.json())
+
+        expect(errors).toBeUndefined()
+        expect(data.docAccessPost).toEqual({
+          update: { permission: true },
+          delete: { permission: true },
+          fields: { title: { update: { permission: true } } },
+        })
+      })
     })
 
     test.describe('nullable schema types', () => {

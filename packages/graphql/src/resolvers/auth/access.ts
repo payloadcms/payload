@@ -27,6 +27,8 @@ export function accessResolver(config: SanitizedConfig) {
 
     return {
       ...accessResults,
+      // Sanitized permissions omit `canAccessAdmin` when it is false, but the field is non-nullable
+      canAccessAdmin: accessResults.canAccessAdmin ?? false,
       ...formatConfigNames(accessResults.collections, config.collections),
       ...formatConfigNames(accessResults.globals, config.globals),
     }
