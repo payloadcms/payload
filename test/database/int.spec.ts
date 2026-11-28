@@ -4558,6 +4558,51 @@ describe('database', () => {
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 
+  it('should set createdAt when upsert inserts and keep it on later upserts', async () => {
+    const upsertTitle = `upsert-created-at-${randomUUID()}`
+
+    const inserted = await payload.db.upsert({
+      collection: postsSlug,
+      data: { title: upsertTitle },
+      req: {},
+      where: { title: { equals: upsertTitle } },
+    })
+
+    expect(inserted.createdAt).toBeTruthy()
+
+    // Make sure a second write would get a different timestamp
+    await new Promise((resolve) => setTimeout(resolve, 2))
+
+    const updated = await payload.db.upsert({
+      collection: postsSlug,
+      data: { title: upsertTitle },
+      req: {},
+      where: { title: { equals: upsertTitle } },
+    })
+
+    expect(updated.id).toBe(inserted.id)
+    expect(updated.createdAt).toBe(inserted.createdAt)
+    expect(updated.updatedAt).not.toBe(inserted.updatedAt)
+
+    const insertedWithoutReturning = `upsert-created-at-no-returning-${randomUUID()}`
+
+    await payload.db.upsert({
+      collection: postsSlug,
+      data: { title: insertedWithoutReturning },
+      req: {},
+      returning: false,
+      where: { title: { equals: insertedWithoutReturning } },
+    })
+
+    const found = await payload.db.findOne<Post>({
+      collection: postsSlug,
+      req: {},
+      where: { title: { equals: insertedWithoutReturning } },
+    })
+
+    expect(found?.createdAt).toBeTruthy()
+  })
+
   it('should apply default values on upsert insert but not on update', async () => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {
