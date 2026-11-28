@@ -1,7 +1,10 @@
 'use client'
 import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
 
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import {
+  createClientUploadHandler,
+  getClientUploadErrorMessage,
+} from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
@@ -34,11 +37,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     })
 
     if (!response.ok) {
-      const { errors } = (await response.json()) as {
-        errors: { message: string }[]
-      }
-
-      throw new Error(errors.reduce((acc, err) => `${acc ? `${acc}, ` : ''}${err.message}`, ''))
+      throw new Error(await getClientUploadErrorMessage(response, 'Failed to retrieve signed URL'))
     }
 
     const {
