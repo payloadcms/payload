@@ -4630,6 +4630,31 @@ describe('database', () => {
     },
   )
 
+  it('should keep a createdAt written by a raw operator on upsert', { db: 'mongo' }, async () => {
+    const upsertTitle = `upsert-raw-created-at-${randomUUID()}`
+    const createdAt = '2020-01-01T00:00:00.000Z'
+
+    // The first upsert inserts the document and the second one matches it
+    for (const returning of [false, true]) {
+      await payload.db.upsert({
+        collection: postsSlug,
+        data: { $set: { createdAt, title: upsertTitle } },
+        req: {},
+        returning,
+        where: { title: { equals: upsertTitle } },
+      })
+    }
+
+    const { docs } = await payload.find({
+      collection: postsSlug,
+      overrideAccess: true,
+      where: { title: { equals: upsertTitle } },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.createdAt).toBe(createdAt)
+  })
+
   it('should apply default values on upsert insert but not on update', async () => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {
