@@ -169,6 +169,7 @@ export interface Config {
     'variant-media': VariantMedia;
     'converted-variant-media': ConvertedVariantMedia;
     'request-variants-media': RequestVariantsMedia;
+    'several-owners-media': SeveralOwnersMedia;
     'contract-media': ContractMedia;
     'payload-kv': PayloadKv;
     users: User;
@@ -185,6 +186,7 @@ export interface Config {
     'variant-media': VariantMediaSelect<false> | VariantMediaSelect<true>;
     'converted-variant-media': ConvertedVariantMediaSelect<false> | ConvertedVariantMediaSelect<true>;
     'request-variants-media': RequestVariantsMediaSelect<false> | RequestVariantsMediaSelect<true>;
+    'several-owners-media': SeveralOwnersMediaSelect<false> | SeveralOwnersMediaSelect<true>;
     'contract-media': ContractMediaSelect<false> | ContractMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -548,6 +550,69 @@ export interface RequestVariantsMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "several-owners-media".
+ */
+export interface SeveralOwnersMedia {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+    preview?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+      _stored?: boolean | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contract-media".
  */
 export interface ContractMedia {
@@ -637,6 +702,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'request-variants-media';
         value: string | RequestVariantsMedia;
+      } | null)
+    | ({
+        relationTo: 'several-owners-media';
+        value: string | SeveralOwnersMedia;
       } | null)
     | ({
         relationTo: 'contract-media';
@@ -968,6 +1037,70 @@ export interface RequestVariantsMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "several-owners-media_select".
+ */
+export interface SeveralOwnersMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+        preview?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+              _stored?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contract-media_select".
  */
 export interface ContractMediaSelect<T extends boolean = true> {
@@ -1127,6 +1260,7 @@ export interface CollectionQueryWidget {
       | 'variant-media'
       | 'converted-variant-media'
       | 'request-variants-media'
+      | 'several-owners-media'
       | 'contract-media'
       | 'users';
     where?:
@@ -1158,6 +1292,7 @@ export interface ActivityWidget {
           | 'variant-media'
           | 'converted-variant-media'
           | 'request-variants-media'
+          | 'several-owners-media'
           | 'contract-media'
           | 'users'
         )[]
@@ -1179,6 +1314,7 @@ export interface UploadDropzoneWidget {
           | 'variant-media'
           | 'converted-variant-media'
           | 'request-variants-media'
+          | 'several-owners-media'
           | 'contract-media'
         )[]
       | null;

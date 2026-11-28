@@ -237,7 +237,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     payload,
   }) => {
     const upload = payload.collections[versionedDynamicMediaSlug].config.upload
-    const { variants, variantsTransformerSlug } = upload
+    const { variantOwners, variants } = upload
 
     removedVariants.set(versionedDynamicMediaSlug, variants)
     upload.variants = []
@@ -247,7 +247,10 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(selected.version.variants?.card?.filename).toBeFalsy()
 
     upload.variants = variants
-    upload.variantsTransformerSlug = 'unavailable-variants'
+    upload.variantOwners = variantOwners?.map((owner) => ({
+      ...owner,
+      slug: 'unavailable-variants',
+    }))
 
     try {
       const restored = await payload.restoreVersion({
@@ -261,7 +264,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
       expect(restored.variants?.card?.filename).toBeFalsy()
       expect(sourceReadCalls).toHaveLength(0)
     } finally {
-      upload.variantsTransformerSlug = variantsTransformerSlug
+      upload.variantOwners = variantOwners
     }
   })
 

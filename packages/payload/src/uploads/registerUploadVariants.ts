@@ -1,5 +1,9 @@
 import type { Config } from '../config/types.js'
-import type { ImageSize, SanitizedUploadConfig } from './types.js'
+import type { UploadTransformer } from './transformers/types.js'
+import type { ImageSize, SanitizedUploadConfig, VariantsOwner } from './types.js'
+
+import { mimePatternsOverlap } from './mimePatternsOverlap.js'
+import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 const RESERVED_VARIANT_NAMES = [
   'filename',
@@ -15,10 +19,11 @@ const RESERVED_VARIANT_NAMES = [
 ]
 
 /**
- * Registers a transformer's image sizes on upload collections. Call it from a transformer's
- * `init`. It checks each collection and size name, then writes the sizes (name and admin options
- * only) to the collection's sanitized `upload.variants`. Only one transformer can register sizes
- * on a collection. It writes onto copies and never changes the given config.
+ * Registers a transformer's variants on upload collections. Call it from a transformer's `init`.
+ * Several transformers can register variants on one collection. A variant name can have only one
+ * owner for each MIME type, and a MIME type that has an upload-bridge owner can have no other
+ * owner. Two owners of one name must give it the same `admin` and `generateImageName` options. It
+ * writes onto copies and never changes the given config.
  *
  * @param transformerSlug The registering transformer's `slug`, saved as the owner of the sizes and
  *   used in error messages. It must match a transformer in `upload.transformers`. Payload writes
@@ -35,7 +40,10 @@ export function registerUploadVariants({
 }): Config {
   const errors: string[] = []
 
-  if (!config.upload?.transformers?.some((transformer) => transformer.slug === transformerSlug)) {
+  const transformers = config.upload?.transformers ?? []
+  const transformer = transformers.find((candidate) => candidate.slug === transformerSlug)
+
+  if (!transformer) {
     errors.push(
       `no transformer in \`upload.transformers\` has the slug "${transformerSlug}". Pass the slug of the transformer that registers the variants.`,
     )
@@ -60,16 +68,16 @@ export function registerUploadVariants({
       continue
     }
 
-    // One owner per collection: an upload transformer such as Sharp builds only its own sizes, so
-    // a size another transformer registers would get a field but no entry when Sharp runs.
-    if (
-      registration.variants?.length &&
-      (collection.upload as Partial<SanitizedUploadConfig>).variants?.length
-    ) {
+    if (registration.variants?.length && transformer) {
       errors.push(
-        `collections."${slug}" registers variants, but another transformer already registered variants on "${slug}". Only one transformer can register variants on a collection.`,
+        ...getOwnerErrors({
+          collectionSlug: slug,
+          existingUpload: collection.upload as Partial<SanitizedUploadConfig>,
+          transformer,
+          transformers,
+          variants: registration.variants,
+        }),
       )
-      continue
     }
 
     const seenNames = new Set<string>()
@@ -120,18 +128,123 @@ export function registerUploadVariants({
         typeof collection.upload === 'object' ? collection.upload : {}
       ) as Partial<SanitizedUploadConfig>
 
+      const existingNames = new Set((upload.variants ?? []).map(({ name }) => name))
+      const owner: VariantsOwner = {
+        slug: transformerSlug,
+        mimeTypes: transformer!.mimeTypes,
+        variantNames: variants.map(({ name }) => name),
+      }
+
       return {
         ...collection,
         upload: {
           ...upload,
-          variants: variants.map(({ name, admin, generateImageName }) => ({
-            name,
-            admin,
-            generateImageName,
-          })),
-          variantsTransformerSlug: transformerSlug,
+          variantOwners: [...(upload.variantOwners ?? []), owner],
+          variants: [
+            ...(upload.variants ?? []),
+            ...variants
+              .filter(({ name }) => !existingNames.has(name))
+              .map(({ name, admin, generateImageName }) => ({ name, admin, generateImageName })),
+          ],
         },
       }
     }),
   }
+}
+
+/** The errors for a new owner that joins the owners already on a collection. */
+function getOwnerErrors({
+  collectionSlug,
+  existingUpload,
+  transformer,
+  transformers,
+  variants,
+}: {
+  collectionSlug: string
+  existingUpload: Partial<SanitizedUploadConfig>
+  transformer: UploadTransformer
+  transformers: UploadTransformer[]
+  variants: ImageSize[]
+}): string[] {
+  const errors: string[] = []
+
+  for (const owner of existingUpload.variantOwners ?? []) {
+    if (owner.slug === transformer.slug) {
+      errors.push(
+        `collections."${collectionSlug}": "${transformer.slug}" already registered variants on "${collectionSlug}".`,
+      )
+      continue
+    }
+
+    const sharedPattern = getSharedPattern({ a: transformer.mimeTypes, b: owner.mimeTypes })
+    const ownerTransformer = transformers.find((candidate) => candidate.slug === owner.slug)
+    const bridgeSlug = [transformer, ownerTransformer].find((candidate) =>
+      Boolean(candidate && getUploadTransformerInternal(candidate)?.transformUpload),
+    )?.slug
+
+    if (sharedPattern && bridgeSlug) {
+      errors.push(
+        `collections."${collectionSlug}": "${transformer.slug}" and "${owner.slug}" both make variants for "${sharedPattern}", and "${bridgeSlug}" uses the upload bridge. A MIME type with a bridge owner can have no other owner.`,
+      )
+      continue
+    }
+
+    for (const variant of variants) {
+      if (!owner.variantNames.includes(variant.name)) {
+        continue
+      }
+
+      if (sharedPattern) {
+        errors.push(
+          `collections."${collectionSlug}".variants."${variant.name}": "${transformer.slug}" and "${owner.slug}" both make it for "${sharedPattern}". A variant name can have only one owner for each MIME type.`,
+        )
+      }
+
+      const existing = existingUpload.variants?.find(({ name }) => name === variant.name)
+
+      if (
+        existing &&
+        (!areSameAdminOptions({ a: existing.admin, b: variant.admin }) ||
+          existing.generateImageName !== variant.generateImageName)
+      ) {
+        errors.push(
+          `collections."${collectionSlug}".variants."${variant.name}" has different \`admin\` or \`generateImageName\` options in "${owner.slug}" and "${transformer.slug}". Give the shared name the same options.`,
+        )
+      }
+    }
+  }
+
+  return errors
+}
+
+/**
+ * Whether two `admin` options are the same, whatever the order of their keys. A missing value and
+ * an empty object are the same, as are a key set to `undefined` and a missing key.
+ */
+function areSameAdminOptions({ a, b }: { a: unknown; b: unknown }): boolean {
+  const isAObject = isPlainObject(a)
+  const isBObject = isPlainObject(b)
+
+  if (!isAObject && !isBObject) {
+    return a === b
+  }
+
+  if ((!isAObject && a !== undefined) || (!isBObject && b !== undefined)) {
+    return false
+  }
+
+  const aObject = isAObject ? a : {}
+  const bObject = isBObject ? b : {}
+  const keys = new Set([...Object.keys(aObject), ...Object.keys(bObject)])
+
+  return [...keys].every((key) => areSameAdminOptions({ a: aObject[key], b: bObject[key] }))
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/** The first pattern in `a` that one MIME type can match together with a pattern in `b`. */
+function getSharedPattern({ a, b }: { a: string[]; b: string[] }): string | undefined {
+  return a.find((pattern) => b.some((other) => mimePatternsOverlap({ a: pattern, b: other })))
 }

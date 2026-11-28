@@ -13,3 +13,4 @@ export const contractMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'contract-media',
 )
+export const severalOwnersMediaSlug = 'several-owners-media'

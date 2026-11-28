@@ -8,6 +8,7 @@ import { ValidationError } from '../../errors/ValidationError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
+import { getVariantOwner } from '../getVariantOwners.js'
 import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../requestTimeFileData.js'
@@ -88,15 +89,17 @@ export async function runRequestTimeFileRestore<T>({
       status === 'stored' && role.type === 'size' ? [role.sizeKey] : [],
     ),
   )
-  const configuredVariantNames = (collection.upload.variants ?? []).map(({ name }) => name)
-  const unstoredVariantNames = configuredVariantNames.filter(
-    (name) => !storedVariantNames.has(name),
-  )
+  const getOwnerSlug = (variantName: string) =>
+    getVariantOwner({ mimeType: original.mimeType, upload: collection.upload, variantName })?.slug
+  // A variant with no owner for this file's MIME type is not made for it, as at upload.
+  const unstoredVariantNames = (collection.upload.variants ?? [])
+    .map(({ name }) => name)
+    .filter((name) => !storedVariantNames.has(name) && getOwnerSlug(name) !== undefined)
   const hasRequestTimeVariant = entries.some(
     ({ role, status }) =>
       status === 'requestTime' &&
       role.type === 'size' &&
-      configuredVariantNames.includes(role.sizeKey),
+      unstoredVariantNames.includes(role.sizeKey),
   )
 
   // The checks below use one plan, so the stages are planned at most once.
@@ -110,12 +113,15 @@ export async function runRequestTimeFileRestore<T>({
     throw new APIError('No compatible transformer can restore the file at request time.', 400)
   }
 
+  const restoreBuild = unstoredVariantNames.length > 0 ? await getRequestTimeBuild() : undefined
   const canBuildVariants =
-    unstoredVariantNames.length > 0 &&
-    areVariantsBuildableAtRequest({
-      requestTimeBuild: await getRequestTimeBuild(),
-      variantsTransformerSlug: collection.upload.variantsTransformerSlug,
-    })
+    restoreBuild !== undefined &&
+    unstoredVariantNames.every((variantName) =>
+      areVariantsBuildableAtRequest({
+        requestTimeBuild: restoreBuild,
+        variantsOwnerSlug: getOwnerSlug(variantName),
+      }),
+    )
 
   // A size that this version built at request time must still be buildable. A size that the version
   // did not have is left out when it cannot be built, as an upload leaves it out.

@@ -22,6 +22,8 @@ export type UploadTransformerOutput = {
   bridgeDimensions?: { height?: number; width?: number }
   /** The upload bridge that ran, if one did. */
   bridgeTransformer?: UploadTransformer
+  /** The owners whose `transformVariant` made this upload's variants. */
+  hookOwnerSlugs: string[]
   /** The incoming file, as the stages received it. */
   originalFile: File
   /** The sizes that the upload bridge built. */
@@ -127,6 +129,7 @@ export async function runUploadTransformers({
   return {
     bridgeDimensions,
     bridgeTransformer,
+    hookOwnerSlugs: [],
     originalFile,
     sizeResults,
     transformedMainFile: mainFile !== originalFile ? mainFile : undefined,

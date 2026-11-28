@@ -15,6 +15,7 @@ import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { fileSelectionParams } from '../fileSelectionParams.js'
+import { getVariantOwner } from '../getVariantOwners.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
@@ -368,7 +369,11 @@ async function planRequestPipeline({
         ) ||
           !areVariantsBuildableAtRequest({
             requestTimeBuild: persistedDefaultBuild,
-            variantsTransformerSlug: collection.config.upload.variantsTransformerSlug,
+            variantsOwnerSlug: getVariantOwner({
+              mimeType: requestedFile.mimeType,
+              upload: collection.config.upload,
+              variantName: requestedFile.variantName,
+            })?.slug,
           }))
       ) {
         throw new APIError(

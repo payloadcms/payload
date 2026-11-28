@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { UploadTransformer } from '../transformers/types.js'
 
 import { uploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
-import { planUploadPipeline, planUploadRebuild } from './planUpload.js'
+import { planUploadPipeline, planUploadRebuild, resolveTransformKeyCoverage } from './planUpload.js'
 
 const stage = (handledTransformKeys?: string[], isBridge = false): UploadTransformer => ({
   slug: 'stage',
@@ -139,7 +139,7 @@ describe('planUploadPipeline', () => {
     {
       name: 'keep the bridge when it registered the variants',
       expected: ['sharp'],
-      variantsTransformerSlug: 'sharp',
+      variantOwnerSlug: 'sharp',
     },
     {
       name: 'keep the bridge when the collection has no variants',
@@ -154,9 +154,10 @@ describe('planUploadPipeline', () => {
       isOwnCollection = false,
       mimeType = 'image/png',
       variants = [{ name: 'card' }],
-      variantsTransformerSlug = 'owner',
+      variantOwnerSlug = 'owner',
     }) => {
       const doc = { _transforms: { crop } }
+      const transformers = [sharpBridge({ isOwnCollection }), variantsOwner]
 
       const plan = await planUploadPipeline({
         canApplyAtRequest,
@@ -166,9 +167,25 @@ describe('planUploadPipeline', () => {
         pipelineOriginalDoc: Object.freeze(doc),
         req: {
           payload: {
-            collections: { media: { config: { upload: { variants, variantsTransformerSlug } } } },
+            collections: {
+              media: {
+                config: {
+                  upload: {
+                    variantOwners: [
+                      {
+                        slug: variantOwnerSlug,
+                        mimeTypes: transformers.find(({ slug }) => slug === variantOwnerSlug)!
+                          .mimeTypes,
+                        variantNames: ['card'],
+                      },
+                    ],
+                    variants,
+                  },
+                },
+              },
+            },
             config: {
-              upload: { transformers: [sharpBridge({ isOwnCollection }), variantsOwner] },
+              upload: { transformers },
             },
           },
         } as unknown as PayloadRequest,
@@ -180,4 +197,57 @@ describe('planUploadPipeline', () => {
       }).toEqual({ claims: expected, pipeline: expected })
     },
   )
+})
+
+describe('resolveTransformKeyCoverage', () => {
+  const crop = { height: 20, width: 30, x: 0, y: 0 }
+
+  const pdfRequestStage: UploadTransformer = {
+    slug: 'pdf-request',
+    canTransform: ({ operation, purpose }) =>
+      operation === 'request' && purpose === 'persisted-default'
+        ? { canTransform: true, handledTransformKeys: ['crop'] }
+        : false,
+    handleRequest: vi.fn(),
+    mimeTypes: ['application/pdf'],
+  }
+
+  const sharpBridge: UploadTransformer = {
+    slug: 'sharp',
+    mimeTypes: ['image/*'],
+    transformFile: vi.fn(),
+    [uploadTransformerInternal]: { handlesCollection: () => true, transformUpload: vi.fn() },
+  }
+
+  it('should not require the Sharp variants owner at request time for a PDF', async () => {
+    const doc = { _transforms: { crop } }
+
+    const result = await resolveTransformKeyCoverage({
+      canApplyAtRequest: true,
+      collectionSlug: 'media',
+      mimeType: 'application/pdf',
+      pipelineDoc: doc,
+      pipelineOriginalDoc: Object.freeze(doc),
+      plan: { claims: new Map(), options: new Map(), pipeline: [] },
+      req: {
+        payload: {
+          collections: {
+            media: {
+              config: {
+                upload: {
+                  variantOwners: [
+                    { slug: 'sharp', mimeTypes: sharpBridge.mimeTypes, variantNames: ['card'] },
+                  ],
+                  variants: [{ name: 'card' }],
+                },
+              },
+            },
+          },
+          config: { upload: { transformers: [sharpBridge, pdfRequestStage] } },
+        },
+      } as unknown as PayloadRequest,
+    })
+
+    expect(result).toEqual({ isAppliedAtRequest: true })
+  })
 })

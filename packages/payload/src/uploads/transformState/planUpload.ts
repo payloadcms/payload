@@ -3,6 +3,7 @@ import type { PlannedTransformerPipeline } from '../transformers/planTransformer
 import type { UploadTransformer } from '../transformers/types.js'
 
 import { ValidationError } from '../../errors/ValidationError.js'
+import { getVariantOwners } from '../getVariantOwners.js'
 import { planTransformerPipeline } from '../transformers/planTransformerPipeline.js'
 import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 import { getChangedTransformKeys } from './getChangedTransformKeys.js'
@@ -185,7 +186,7 @@ export async function planUploadPipeline({
 }
 
 /**
- * The slug of the transformer that registered the collection's sizes, when it can build the
+ * The slug of the first transformer that makes variants for this MIME type, when it can build the
  * default file and the sizes from the original at request time. Otherwise `undefined`.
  */
 async function getVariantsOwnerThatBuildsAtRequest({
@@ -194,26 +195,32 @@ async function getVariantsOwnerThatBuildsAtRequest({
   ...planArgs
 }: { documentID?: number | string; mimeType: string } & PlanArgs): Promise<string | undefined> {
   const upload = planArgs.req.payload.collections?.[planArgs.collectionSlug]?.config.upload
-  const variantsTransformerSlug = upload?.variantsTransformerSlug
 
-  if (!upload?.variants?.length || !variantsTransformerSlug) {
+  if (!upload?.variants?.length) {
     return undefined
   }
 
-  const canOwnerBuild = await canBuildAtRequest({
-    ...planArgs,
-    documentID,
-    mimeType,
-    requiredTransformerSlug: variantsTransformerSlug,
-  })
+  for (const { slug } of getVariantOwners({ mimeType, upload })) {
+    const canOwnerBuild = await canBuildAtRequest({
+      ...planArgs,
+      documentID,
+      mimeType,
+      requiredTransformerSlug: slug,
+    })
 
-  return canOwnerBuild ? variantsTransformerSlug : undefined
+    if (canOwnerBuild) {
+      return slug
+    }
+  }
+
+  return undefined
 }
 
 /**
- * The plan without the upload bridges that do not own the collection. The transformer that
- * registered the sizes owns the collection's files, so a bridge must not build a main file that
- * differs from those sizes. A bridge that the collection is configured on still runs.
+ * The plan without the upload bridges that are not the variants owner for this file. The owner
+ * that builds this MIME type's variants at request time also builds the main file, so a bridge
+ * must not build a main file that differs from those variants. The owner and a bridge that the
+ * collection is configured on still run.
  */
 function withoutBridgesThatDoNotOwnCollection({
   collectionSlug,
@@ -316,25 +323,29 @@ export async function resolveTransformKeyCoverage({
     ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
   )
   // Every output must apply the saved keys. Sizes are stored at upload unless their owner builds
-  // them at request time, so with sizes the owner must be a request-time stage too.
+  // them at request time, so each owner of this MIME type must be a request-time stage too.
   const upload = req.payload.collections?.[collectionSlug]?.config.upload
-  const hasVariants = Boolean(upload?.variants?.length)
-  const canBuildVariantsAtRequest = !hasVariants || Boolean(upload?.variantsTransformerSlug)
+  const owners = getVariantOwners({ mimeType, upload })
+  // A file with no variants owner for its MIME type gets no variants, so only the main file must
+  // apply the saved keys.
+  const requiredSlugs = owners.length > 0 ? owners.map(({ slug }) => slug) : [undefined]
+  let canBuildEveryOutputAtRequest = canApplyAtRequest && hasOnlyUnclaimedKeys
 
-  if (
-    canApplyAtRequest &&
-    hasOnlyUnclaimedKeys &&
-    canBuildVariantsAtRequest &&
-    (await canBuildAtRequest({
-      collectionSlug,
-      documentID,
-      mimeType,
-      pipelineDoc,
-      pipelineOriginalDoc,
-      req,
-      requiredTransformerSlug: hasVariants ? upload?.variantsTransformerSlug : undefined,
-    }))
-  ) {
+  for (const requiredTransformerSlug of requiredSlugs) {
+    canBuildEveryOutputAtRequest =
+      canBuildEveryOutputAtRequest &&
+      (await canBuildAtRequest({
+        collectionSlug,
+        documentID,
+        mimeType,
+        pipelineDoc,
+        pipelineOriginalDoc,
+        req,
+        requiredTransformerSlug,
+      }))
+  }
+
+  if (canBuildEveryOutputAtRequest) {
     return { isAppliedAtRequest: true }
   }
 
@@ -426,18 +437,18 @@ export function isBuildableAtRequest({
 }
 
 /**
- * Whether a planned request-time build can build the collection's sizes. The transformer that
- * registered the sizes (`variantsTransformerSlug`) must be one of the stages.
+ * Whether a planned request-time build can build a variant. The variant's owner for the file's
+ * MIME type (`getVariantOwner`) must be one of the stages.
  */
 export function areVariantsBuildableAtRequest({
   requestTimeBuild,
-  variantsTransformerSlug,
+  variantsOwnerSlug,
 }: {
   requestTimeBuild: RequestTimeBuildPlan
-  variantsTransformerSlug?: string
+  variantsOwnerSlug?: string
 }): boolean {
   return (
-    Boolean(variantsTransformerSlug) &&
-    isBuildableAtRequest({ requestTimeBuild, requiredTransformerSlug: variantsTransformerSlug })
+    Boolean(variantsOwnerSlug) &&
+    isBuildableAtRequest({ requestTimeBuild, requiredTransformerSlug: variantsOwnerSlug })
   )
 }
