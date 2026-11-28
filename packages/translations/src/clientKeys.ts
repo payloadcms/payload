@@ -212,6 +212,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'hierarchy:searchLabel',
   'hierarchy:searchResults',
 
+  'general:accessibilitySettings',
   'general:all',
   'general:aboutToDeleteCount',
   'general:aboutToDelete',
@@ -338,6 +339,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:goBack',
   'general:groupByLabel',
   'general:enhancedContrastMode',
+  'general:showHelpTooltips',
   'general:hideSidebar',
   'general:increment',
   'general:isEditing',

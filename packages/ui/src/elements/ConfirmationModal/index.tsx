@@ -20,6 +20,7 @@ export type ConfirmationModalProps = {
   body: React.ReactNode
   cancelLabel?: string
   className?: string
+  closeOnEsc?: boolean
   confirmingLabel?: string
   confirmLabel?: string
   focusTrapOptions?: ComponentProps<typeof DialogModal>['focusTrapOptions']
@@ -36,6 +37,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     body,
     cancelLabel,
     className,
+    closeOnEsc,
     confirmingLabel,
     confirmLabel,
     focusTrapOptions,
@@ -50,6 +52,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     <DialogModal
       aria-describedby={ariaDescribedBy}
       className={className}
+      closeOnEsc={closeOnEsc}
       focusTrapOptions={focusTrapOptions}
       role={role}
       slug={modalSlug}

@@ -8,6 +8,7 @@ import {
   FieldLabel,
   AccountLanguageSelector as LanguageSelector,
   AccountResetPreferences as ResetPreferences,
+  AccountToggleHelpTooltips as ToggleHelpTooltips,
   AccountToggleHighContrast as ToggleHighContrast,
   AccountToggleTheme as ToggleTheme,
 } from '../../../exports/client/index.js'
@@ -34,7 +35,11 @@ export const Settings: React.FC<{
         <LanguageSelector languageOptions={languageOptions} />
       </div>
       {theme === 'all' && <ToggleTheme />}
-      <ToggleHighContrast />
+      <div className={`${baseClass}__accessibility`}>
+        <h4>{i18n.t('general:accessibilitySettings')}</h4>
+        <ToggleHighContrast />
+        <ToggleHelpTooltips />
+      </div>
       <ResetPreferences user={user} />
     </div>
   )

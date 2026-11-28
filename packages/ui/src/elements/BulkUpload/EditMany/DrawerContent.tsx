@@ -21,6 +21,7 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { RequiredFieldsInfo } from '../../DocumentFields/RequiredFieldsInfo/index.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass } from './index.js'
@@ -126,6 +127,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
             </div>
             {selectedFields.length === 0 ? null : (
               <div className={`${baseClass}__edit`}>
+                <RequiredFieldsInfo />
                 <div className="render-fields">
                   <FieldPathContext value={undefined}>
                     {selectedFields.map((option, i) => {

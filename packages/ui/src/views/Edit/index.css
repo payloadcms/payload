@@ -111,6 +111,10 @@
     flex-direction: column-reverse;
     gap: var(--spacer-5);
 
+    &:has(> .collection-edit__main .required-fields-info) {
+      gap: 0;
+    }
+
     .collection-edit__main {
       flex: 1;
     }

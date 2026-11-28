@@ -3,12 +3,13 @@ import type { User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import { Fragment, useCallback } from 'react'
+import { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
+import { useAccessibility } from '../../../providers/Accessibility/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -18,6 +19,8 @@ export const ResetPreferences: React.FC<{
   readonly user?: User
 }> = ({ user }) => {
   const { openModal } = useModal()
+  const { flushHelpTooltips, resetHelpTooltips } = useAccessibility()
+  const [isResetting, setIsResetting] = useState(false)
   const { t } = useTranslation()
   const {
     config: {
@@ -43,6 +46,8 @@ export const ResetPreferences: React.FC<{
     )
 
     try {
+      setIsResetting(true)
+      await flushHelpTooltips()
       const res = await fetch(
         formatAdminURL({
           apiRoute,
@@ -61,14 +66,17 @@ export const ResetPreferences: React.FC<{
       const message = json.message
 
       if (res.ok) {
+        resetHelpTooltips()
         toast.success(message)
       } else {
         toast.error(message)
       }
     } catch (_err) {
       // swallow error
+    } finally {
+      setIsResetting(false)
     }
-  }, [apiRoute, user])
+  }, [apiRoute, flushHelpTooltips, resetHelpTooltips, user])
 
   return (
     <Fragment>
@@ -79,6 +87,7 @@ export const ResetPreferences: React.FC<{
       </div>
       <ConfirmationModal
         body={t('general:resetPreferencesDescription')}
+        closeOnEsc={!isResetting}
         confirmingLabel={t('general:resettingPreferences')}
         heading={t('general:resetPreferences')}
         modalSlug={confirmResetModalSlug}

@@ -192,7 +192,7 @@
       width: 100%;
     }
 
-    .document-fields__edit {
+    .document-fields__edit:where(:not(:has(> .required-fields-info))) {
       padding-top: var(--spacer-2);
     }
   }

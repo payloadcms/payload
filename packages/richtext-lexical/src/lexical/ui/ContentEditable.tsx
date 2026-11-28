@@ -14,6 +14,7 @@ import * as React from 'react'
 import type { SanitizedClientEditorConfig } from '../config/types.js'
 
 import { useEditorConfigContext } from '../config/client/EditorConfigProvider.js'
+import { registerRootDescription } from '../utils/registerRootDescription.js'
 
 export function LexicalContentEditable({
   className,
@@ -26,12 +27,16 @@ export function LexicalContentEditable({
 }): JSX.Element {
   const { fieldProps } = useEditorConfigContext()
   const { i18n, t } = useTranslation<{}, string>()
-  const [_, { getTheme }] = useLexicalComposerContext()
+  const [editor, { getTheme }] = useLexicalComposerContext()
+  React.useEffect(
+    () => registerRootDescription({ descriptionID: instructionsID, editor }),
+    [editor, instructionsID],
+  )
+
   const isEditable = useLexicalEditable()
   const theme = getTheme()
   return (
     <ContentEditable
-      aria-describedby={instructionsID}
       aria-label={getTranslation(fieldProps.field.label || '', i18n)}
       aria-required={fieldProps.field.required || undefined}
       className={className ?? 'ContentEditable__root'}
