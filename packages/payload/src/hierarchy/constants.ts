@@ -2,6 +2,7 @@
  * Default field names and constants for hierarchy feature
  */
 
+export const HIERARCHY_CONTENTS_FIELD = '_h_contents'
 export const HIERARCHY_SLUG_PATH_FIELD = '_h_slugPath'
 export const HIERARCHY_TITLE_PATH_FIELD = '_h_titlePath'
 export const HIERARCHY_DEFAULT_LOCALE = 'en'

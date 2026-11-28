@@ -35,11 +35,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type {
-  HierarchyConfig,
-  HierarchyJoinFieldConfig,
-  SanitizedHierarchyConfig,
-} from '../../hierarchy/types.js'
+import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
@@ -381,7 +377,6 @@ export type FoldersConfig = {
         fieldName?: string
       }
     | boolean
-  joinField?: HierarchyJoinFieldConfig
   parentFieldName?: string
   slugField?: string
   slugify?: (text: string) => string

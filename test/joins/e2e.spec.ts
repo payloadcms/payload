@@ -842,8 +842,9 @@ describe('Join Field', () => {
 
   test('should render join field with array of collections', async () => {
     await page.goto(foldersURL.edit(rootParentID))
-    const joinField = page.locator('#field-children.field-type.join')
+    const joinField = page.locator('#field-_h_contents.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.getByRole('heading', { name: 'Documents', exact: true })).toBeVisible()
 
     await expect(
       joinField.locator('.relationship-table tbody .row-1 .cell-collection .pill__label'),
@@ -860,7 +861,7 @@ describe('Join Field', () => {
 
   test('should create a new document from join field with array of collections', async () => {
     await page.goto(foldersURL.edit(rootParentID))
-    const joinField = page.locator('#field-children.field-type.join')
+    const joinField = page.locator('#field-_h_contents.field-type.join')
     await expect(joinField).toBeVisible()
     await expect(joinField.locator('.relationship-table table')).toBeVisible()
 
@@ -879,9 +880,9 @@ describe('Join Field', () => {
       joinField.locator('.relationship-table tbody .row-1 .cell-collection .pill__label'),
     ).toHaveText('Example Page')
 
-    await expect(
-      joinField.locator('.relationship-table tbody .row-1 .cell-title .drawer-link__cell'),
-    ).toHaveText('Some new page')
+    const createdRow = joinField.getByRole('row', { name: /Example Page.*Some new page/ })
+    await expect(createdRow.getByRole('cell', { name: 'Some new page', exact: true })).toBeVisible()
+    await expect(createdRow.getByRole('button', { name: 'Edit', exact: true })).toBeVisible()
   })
 
   test('should render create-first-user with when users collection has a join field and hide it', async () => {
