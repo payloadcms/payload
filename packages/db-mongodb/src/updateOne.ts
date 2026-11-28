@@ -70,8 +70,37 @@ export const updateOne: UpdateOne = async function updateOne(
   if (Object.keys($pull).length) {
     updateOps.$pull = $pull
   }
+  // Raw operators can write createdAt too (e.g. `$set: { createdAt }`), and MongoDB rejects
+  // an update that writes the same path twice
+  const writesCreatedAt =
+    typeof data.createdAt !== 'undefined' ||
+    Object.entries(data).some(
+      ([key, value]) =>
+        key.startsWith('$') && typeof value === 'object' && value !== null && 'createdAt' in value,
+    )
+
+  // Mongoose timestamps are disabled below, so an upsert that inserts would get no createdAt.
+  // $setOnInsert only applies on insert, so a matched document keeps its createdAt.
+  if (optionsArgs.upsert && collectionConfig.timestamps !== false && !writesCreatedAt) {
+    updateOps.$setOnInsert = { createdAt: new Date().toISOString() }
+  }
   if (Object.keys(updateOps).length) {
-    updateOps.$set = updateData
+    // Raw operators passed in data (e.g. `$inc`, `$unset`) must stay at the top level,
+    // Mongoose drops them when they're nested in `$set`
+    const $set: Record<string, unknown> = {}
+
+    for (const [key, value] of Object.entries(updateData)) {
+      if (key.startsWith('$')) {
+        updateOps[key] = { ...updateOps[key], ...value }
+      } else {
+        $set[key] = value
+      }
+    }
+
+    if (Object.keys($set).length) {
+      updateOps.$set = { ...updateOps.$set, ...$set }
+    }
+
     updateData = updateOps
   }
 
