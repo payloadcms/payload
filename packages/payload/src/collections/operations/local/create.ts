@@ -116,7 +116,7 @@ export type Options<
         /**
          * The data for the document to create.
          */
-        data: DataFromCollectionSlug<TSlug>
+        data: RequiredDataFromCollectionSlug<TSlug>
         /**
          * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
          */
