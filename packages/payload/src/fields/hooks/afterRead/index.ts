@@ -27,6 +27,8 @@ export type AfterReadArgs<T extends JsonObject> = {
   overrideAccess: boolean
   populate?: PopulateType
   req: PayloadRequest
+  /** Set to false to project stored values without running user hooks, default functions, or population. */
+  runReadHooksAndPopulation?: boolean
   select?: SelectType
   showHiddenFields: boolean
 }
@@ -57,6 +59,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     overrideAccess,
     populate,
     req,
+    runReadHooksAndPopulation,
     select,
     showHiddenFields,
   } = args
@@ -97,6 +100,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     populate,
     populationPromises,
     req,
+    runReadHooksAndPopulation,
     select,
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,

@@ -1201,6 +1201,91 @@ describe('Versions', () => {
       expect(restoredVersion.id).toStrictEqual(originalPost.id)
     })
 
+    describe('Restore localized versions', () => {
+      const createdPosts: {
+        collection: typeof draftCollectionSlug | typeof versionCollectionSlug
+        id: number | string
+      }[] = []
+
+      afterEach(async () => {
+        for (const { id, collection } of createdPosts) {
+          await payload.delete({ id, collection })
+        }
+        createdPosts.length = 0
+      })
+
+      it('should restore a version with a required localized field missing from the default locale', async () => {
+        const post = await payload.create({
+          collection: versionCollectionSlug,
+          data: {
+            description: 'original description',
+            title: 'Original German title',
+          },
+          fallbackLocale: false,
+          locale: 'de',
+        })
+
+        createdPosts.push({ id: post.id, collection: versionCollectionSlug })
+
+        const [version] = (
+          await payload.findVersions({
+            collection: versionCollectionSlug,
+            where: { parent: { equals: post.id } },
+          })
+        ).docs
+
+        await payload.update({
+          id: post.id,
+          collection: versionCollectionSlug,
+          data: { description: 'updated description', title: 'Updated German title' },
+          fallbackLocale: false,
+          locale: 'de',
+        })
+
+        const response = await restClient.POST(
+          `/${versionCollectionSlug}/versions/${version!.id}`,
+          {
+            query: { draft: false },
+          },
+        )
+
+        expect(response.status).toBe(200)
+
+        const restored = await payload.findByID({
+          id: post.id,
+          collection: versionCollectionSlug,
+          locale: 'all',
+        })
+
+        expect(restored.description).toBe('original description')
+        expect(restored.title).toMatchObject({ de: 'Original German title' })
+        expect(restored.title).not.toHaveProperty('en', expect.anything())
+        expect(restored.title).not.toHaveProperty('es', expect.anything())
+      })
+
+      it('should reject a validated restore when a required localized field is missing in every locale', async () => {
+        const post = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'draft without a title' },
+          draft: true,
+          locale: 'de',
+        })
+
+        createdPosts.push({ id: post.id, collection: draftCollectionSlug })
+
+        const [version] = (
+          await payload.findVersions({
+            collection: draftCollectionSlug,
+            where: { parent: { equals: post.id } },
+          })
+        ).docs
+
+        await expect(
+          payload.restoreVersion({ id: version!.id, collection: draftCollectionSlug }),
+        ).rejects.toMatchObject({ data: { errors: [{ path: 'title' }] } })
+      })
+    })
+
     it('findVersions - pagination should work correctly', async () => {
       const post = await payload.create({
         collection: draftCollectionSlug,

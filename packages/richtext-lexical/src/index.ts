@@ -24,6 +24,7 @@ import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { getDefaultSanitizedEditorConfig } from './utilities/getDefaultSanitizedEditorConfig.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
+import { hasText } from './validate/hasText.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
@@ -433,6 +434,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
               previousValue,
               req,
               schemaPath,
+              shouldValidateLocalizedContainers,
               siblingData,
               siblingDocWithLocales,
               skipValidation,
@@ -568,6 +570,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,
+                    shouldValidateLocalizedContainers,
                     siblingData: nodeSiblingData,
                     siblingDoc: nodePreviousSiblingDoc,
                     siblingDocWithLocales: nodeSiblingDocWithLocales ?? {},
@@ -776,6 +779,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
           },
         ],
       },
+      isEmpty: (value) => !hasText(value),
       outputSchema: ({
         collectionIDFieldTypes,
         config,

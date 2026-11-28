@@ -52,12 +52,12 @@ type Args = {
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
+  runReadHooksAndPopulation?: boolean
   select?: SelectType
   selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
-  triggerHooks?: boolean
 }
 
 export const traverseFields = ({
@@ -84,12 +84,12 @@ export const traverseFields = ({
   populate,
   populationPromises,
   req,
+  runReadHooksAndPopulation = true,
   select,
   selectMode,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
-  triggerHooks = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
@@ -118,13 +118,13 @@ export const traverseFields = ({
         populate,
         populationPromises,
         req,
+        runReadHooksAndPopulation,
         select,
         selectMode,
         showHiddenFields,
         siblingDoc,
         siblingFields: fields,
         triggerAccessControl,
-        triggerHooks,
       }),
     )
   })

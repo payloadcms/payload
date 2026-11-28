@@ -158,8 +158,16 @@ const result = await payload.findVersionByID({
 
 ### Restore
 
+When restoring a collection version that requires validation, Payload prefers the default locale. If a required localized field is empty in the default locale, Payload can validate an existing translation from the version. The restore preserves the version's stored values for each locale.
+
+This also applies to required fields inside localized groups and named tabs. An empty Lexical paragraph counts as an empty translation.
+
+Payload evaluates field conditions against stored translations using the field formats applied during reads. An empty required field only affects locale selection when the conditions on the field and its containing fields allow validation, including conditions on non-localized containers. Payload checks every stored row in arrays and blocks. Optional arrays and blocks with no rows add no row validation requirements.
+
+Field `afterRead` hooks that prepare data for validation receive the validation locale in `req.locale`. The restored document is returned in the requested locale using the requested fallback locale.
+
 ```js
-// Result will be the restored global document.
+// Result will be the restored document.
 const result = await payload.restoreVersion({
   collection: 'posts', // required
   id: '507f1f77bcf86cd799439013', // required

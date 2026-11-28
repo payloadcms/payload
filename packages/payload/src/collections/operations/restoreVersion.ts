@@ -33,6 +33,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { getRestoreValidationLocale } from '../../versions/getRestoreValidationLocale.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -180,9 +181,20 @@ export const restoreVersionOperation = async <
     })
 
     // originalDoc with hoisted localized data
-    const validationLocale = payload.config.localization
-      ? payload.config.localization.defaultLocale
-      : locale!
+    const skipValidation = draftArg && !hasDraftValidationEnabled(collectionConfig)
+    const validationLocale = await getRestoreValidationLocale({
+      id: parentDocID,
+      collection: collectionConfig,
+      draft: draftArg,
+      locale: locale!,
+      req,
+      skipValidation,
+      version: versionToRestoreWithLocales,
+    })
+
+    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+    reqWithValidationLocale.fallbackLocale = null
+    reqWithValidationLocale.locale = validationLocale
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
@@ -194,7 +206,7 @@ export const restoreVersionOperation = async <
       global: null,
       locale: validationLocale,
       overrideAccess: true,
-      req,
+      req: reqWithValidationLocale,
       showHiddenFields: true,
     })
 
@@ -216,7 +228,7 @@ export const restoreVersionOperation = async <
       global: null,
       locale: validationLocale,
       overrideAccess: true,
-      req,
+      req: reqWithValidationLocale,
       showHiddenFields: true,
     })
 
@@ -236,10 +248,6 @@ export const restoreVersionOperation = async <
     // /////////////////////////////////////
 
     req.context.isRestoringVersion = true
-
-    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
-    reqWithValidationLocale.fallbackLocale = null
-    reqWithValidationLocale.locale = validationLocale
 
     let data = await beforeValidate({
       id: parentDocID,
@@ -304,7 +312,8 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req: reqWithValidationLocale,
-      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
+      shouldValidateLocalizedContainers: true,
+      skipValidation,
     })
 
     // /////////////////////////////////////
