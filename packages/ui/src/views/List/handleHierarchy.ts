@@ -10,7 +10,11 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import { getAncestors } from 'payload'
-import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  DEFAULT_HIERARCHY_LIST_LIMIT,
+  mergeListSearchAndWhere,
+} from 'payload/shared'
 
 /**
  * Fetches hierarchy data for a collection with a selected parent.
@@ -48,8 +52,6 @@ export const handleHierarchy = async ({
   }
 
   const parentFieldName = hierarchyConfig.parentFieldName
-
-  const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
   // Fetch the parent item and breadcrumbs (skip for root level)
   let parent: null | (Record<string, unknown> & TypeWithID) = null
@@ -116,18 +118,19 @@ export const handleHierarchy = async ({
     }
   }
 
-  // Combine conditions: parent + search + typeFilter
+  // Apply list search to the parent and type constraints.
   const conditions: Record<string, unknown>[] = [parentCondition]
-
-  if (search) {
-    conditions.push({ [useAsTitle]: { like: search } })
-  }
 
   if (typeCondition) {
     conditions.push(typeCondition)
   }
 
-  const childrenWhere = conditions.length > 1 ? { and: conditions } : parentCondition
+  const childrenWhere = mergeListSearchAndWhere({
+    collectionConfig,
+    i18n: req.i18n,
+    search,
+    where: conditions.length > 1 ? { and: conditions } : parentCondition,
+  })
 
   // Fetch children (hierarchy items with this parent, or root items if parentId is null)
   const childrenData = await req.payload.find({
@@ -208,10 +211,12 @@ export const handleHierarchy = async ({
     }
 
     // Add search filter if provided
-    const relatedUseAsTitle = relatedCollectionConfig.admin?.useAsTitle || 'id'
-    const whereWithSearch = search
-      ? { and: [relationshipWhere, { [relatedUseAsTitle]: { like: search } }] }
-      : relationshipWhere
+    const whereWithSearch = mergeListSearchAndWhere({
+      collectionConfig: relatedCollectionConfig,
+      i18n: req.i18n,
+      search,
+      where: relationshipWhere,
+    })
 
     // Combine relationship where with related collection's baseFilter
     const where = combineWhereConstraints([whereWithSearch, relatedBaseFilter])
