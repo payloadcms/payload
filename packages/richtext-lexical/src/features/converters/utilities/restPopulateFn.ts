@@ -1,6 +1,6 @@
 import { stringify } from 'qs-esm'
 
-import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
+import type { HTMLPopulateArguments, HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 
 export const getRestPopulateFn: (args: {
   /**
@@ -11,7 +11,11 @@ export const getRestPopulateFn: (args: {
   draft?: boolean
   locale?: string
 }) => HTMLPopulateFn = ({ apiURL, depth, draft, locale }) => {
-  const populateFn: HTMLPopulateFn = async ({ id, collectionSlug, select }) => {
+  const populateFn: HTMLPopulateFn = async <TData extends object>({
+    id,
+    collectionSlug,
+    select,
+  }: HTMLPopulateArguments) => {
     const query = stringify(
       { depth: depth ?? 0, draft: draft ?? false, locale, select },
       { addQueryPrefix: true },
@@ -24,9 +28,14 @@ export const getRestPopulateFn: (args: {
         'Content-Type': 'application/json',
       },
       method: 'GET',
-    }).then((res) => res.json())
+    })
 
-    return res
+    // A missing or unreadable document answers with an error body, not the document
+    if (!res.ok) {
+      return undefined
+    }
+
+    return (await res.json()) as TData
   }
 
   return populateFn

@@ -1,6 +1,6 @@
 import { createPayloadRequest, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
 
-import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
+import type { HTMLPopulateArguments, HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 
@@ -55,9 +55,13 @@ export const getPayloadPopulateFn: (
     throw new Error('No req or payload provided')
   }
 
-  const populateFn: HTMLPopulateFn = async ({ id, collectionSlug, select }) => {
+  const populateFn: HTMLPopulateFn = async <TData extends object>({
+    id,
+    collectionSlug,
+    select,
+  }: HTMLPopulateArguments) => {
     const dataContainer: {
-      value?: any
+      value?: null | TData
     } = {}
 
     await populate({
@@ -74,7 +78,8 @@ export const getPayloadPopulateFn: (
       showHiddenFields: showHiddenFields ?? false,
     })
 
-    return dataContainer.value
+    // populate() sets null when the document is missing or not readable with the current access
+    return dataContainer.value ?? undefined
   }
 
   return populateFn
