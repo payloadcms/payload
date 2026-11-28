@@ -34,6 +34,7 @@ export function LexicalContentEditable({
       aria-describedby={instructionsID}
       aria-label={getTranslation(fieldProps.field.label || '', i18n)}
       aria-required={fieldProps.field.required || undefined}
+      ariaMultiline={true}
       className={className ?? 'ContentEditable__root'}
       {...(isEditable
         ? {
