@@ -1,3 +1,5 @@
+import { createHash } from 'crypto'
+
 type RecordValue = Record<string, unknown>
 
 type SettlementPaymentIntent = {
@@ -24,7 +26,7 @@ type SettlementTransaction = {
 
 type SettlementValidationArgs = {
   canonicalCartID: unknown
-  cartItemsSnapshot: unknown
+  cartItemsSnapshot?: unknown
   customerEmail: unknown
   paymentIntent: SettlementPaymentIntent
   paymentIntentID: string
@@ -100,6 +102,25 @@ export const normalizeCartItems = (items: unknown): unknown[] => {
   })
 }
 
+/**
+ * Hashes the product, variant and quantity of each cart item, so a PaymentIntent can be bound
+ * to the items it was created for without storing them in Stripe metadata, which caps values
+ * at 500 characters. Custom item properties are left out because the transactions collection
+ * may not store them.
+ */
+export const hashCartItems = (items: unknown): string =>
+  createHash('sha256')
+    .update(
+      stableSerialize(
+        normalizeCartItems(items).map((item) => {
+          const { product, quantity, variant } = item as RecordValue
+
+          return variant === undefined ? { product, quantity } : { product, quantity, variant }
+        }),
+      ),
+    )
+    .digest('hex')
+
 export const validateSettlement = ({
   canonicalCartID,
   cartItemsSnapshot,
@@ -173,11 +194,27 @@ export const validateSettlement = ({
     throw new Error('Stripe currency does not match the transaction currency')
   }
 
-  const normalizedSnapshot = normalizeCartItems(cartItemsSnapshot)
   const normalizedTransactionItems = normalizeCartItems(transaction.items)
 
-  if (stableSerialize(normalizedSnapshot) !== stableSerialize(normalizedTransactionItems)) {
-    throw new Error('Stripe cart items do not match the transaction items')
+  if (cartItemsSnapshot !== undefined) {
+    // PaymentIntents created by older versions carry the full item snapshot.
+    const normalizedSnapshot = normalizeCartItems(cartItemsSnapshot)
+
+    if (stableSerialize(normalizedSnapshot) !== stableSerialize(normalizedTransactionItems)) {
+      throw new Error('Stripe cart items do not match the transaction items')
+    }
+  } else {
+    // Newer PaymentIntents carry a hash of the items instead, so the transaction items
+    // can't be changed between payment initiation and settlement.
+    const cartItemsHash = metadata?.cartItemsHash
+
+    if (typeof cartItemsHash !== 'string' || !cartItemsHash) {
+      throw new Error('Stripe cart items metadata is missing')
+    }
+
+    if (cartItemsHash !== hashCartItems(transaction.items)) {
+      throw new Error('Stripe cart items do not match the transaction items')
+    }
   }
 
   if (paymentIntent.status !== 'succeeded') {
