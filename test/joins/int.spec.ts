@@ -328,185 +328,198 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
   })
 
-  test('should not throw a path validation error when querying joins with polymorphic relationships', async ({
-    payload,
-  }) => {
-    const folderDoc = await payload.create({
-      collection: 'folders',
-      data: {
-        name: 'sharedFolder',
-      },
-      overrideAccess: true,
-    })
-
-    await payload.create({
-      collection: 'folderPoly1',
-      data: {
-        _h_folders: folderDoc.id,
-        folderPoly1Title: 'Poly 1 title',
-      },
-      depth: 0,
-      overrideAccess: true,
-    })
-
-    await payload.create({
-      collection: 'folderPoly2',
-      data: {
-        _h_folders: folderDoc.id,
-        folderPoly2Title: 'Poly 2 Title',
-      },
-      depth: 0,
-      overrideAccess: true,
-    })
-
-    const result = await payload.find({
-      collection: 'folders',
-      joins: {
-        children: {
-          limit: 100_000,
-          sort: 'name',
-          where: {
-            and: [
-              {
-                relationTo: {
-                  in: ['folderPoly1', 'folderPoly2'],
-                },
-              },
-              {
-                folderPoly2Title: {
-                  equals: 'Poly 2 Title',
-                },
-              },
-            ],
-          },
+  // D1 allows 100 bound parameters per query, and polymorphic joins bind their values once per collection
+  test.options(
+    'should not throw a path validation error when querying joins with polymorphic relationships',
+    { db: (adapter) => adapter !== 'd1' },
+    async ({ payload }) => {
+      const folderDoc = await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'sharedFolder',
         },
-      },
-      overrideAccess: true,
-      where: {
-        id: {
-          equals: folderDoc.id,
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'folderPoly1',
+        data: {
+          _h_folders: folderDoc.id,
+          folderPoly1Title: 'Poly 1 title',
         },
-      },
-    })
+        depth: 0,
+        overrideAccess: true,
+      })
 
-    expect(result.docs[0]?.children.docs).toHaveLength(1)
-  })
-
-  test('should allow join where query on hasMany select fields', async ({ payload }) => {
-    const folderDoc = await payload.create({
-      collection: 'folders',
-      data: {
-        name: 'scopedFolder',
-        folderType: ['folderPoly1', 'folderPoly2'],
-      },
-      overrideAccess: true,
-    })
-
-    await payload.create({
-      collection: 'folders',
-      data: {
-        name: 'childFolder',
-        _h_folders: folderDoc.id,
-        folderType: ['folderPoly1'],
-      },
-      overrideAccess: true,
-    })
-
-    const findFolder = await payload.find({
-      collection: 'folders',
-      joins: {
-        children: {
-          limit: 100_000,
-          sort: 'name',
-          where: {
-            and: [
-              {
-                relationTo: {
-                  equals: 'folders',
-                },
-              },
-              {
-                folderType: {
-                  in: ['folderPoly1'],
-                },
-              },
-            ],
-          },
+      await payload.create({
+        collection: 'folderPoly2',
+        data: {
+          _h_folders: folderDoc.id,
+          folderPoly2Title: 'Poly 2 Title',
         },
-      },
-      overrideAccess: true,
-      where: {
-        id: {
-          equals: folderDoc.id,
-        },
-      },
-    })
+        depth: 0,
+        overrideAccess: true,
+      })
 
-    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
-  })
-
-  test('should query where with exists for hasMany select fields', async ({ payload }) => {
-    await payload.delete({ collection: 'folders', overrideAccess: true, where: {} })
-    const folderDoc = await payload.create({
-      collection: 'folders',
-      data: {
-        name: 'scopedFolder',
-        folderType: ['folderPoly1', 'folderPoly2'],
-      },
-      overrideAccess: true,
-    })
-
-    await payload.create({
-      collection: 'folders',
-      data: {
-        name: 'childFolder',
-        _h_folders: folderDoc.id,
-        folderType: ['folderPoly1'],
-      },
-      overrideAccess: true,
-    })
-
-    const findFolder = await payload.find({
-      collection: 'folders',
-      joins: {
-        children: {
-          limit: 100_000,
-          sort: 'name',
-          where: {
-            and: [
-              {
-                relationTo: {
-                  equals: 'folders',
-                },
-              },
-              {
-                or: [
-                  {
-                    folderType: {
-                      in: ['folderPoly1'],
-                    },
+      const result = await payload.find({
+        collection: 'folders',
+        joins: {
+          children: {
+            limit: 100_000,
+            sort: 'name',
+            where: {
+              and: [
+                {
+                  relationTo: {
+                    in: ['folderPoly1', 'folderPoly2'],
                   },
-                  {
-                    folderType: {
-                      exists: false,
-                    },
+                },
+                {
+                  folderPoly2Title: {
+                    equals: 'Poly 2 Title',
                   },
-                ],
-              },
-            ],
+                },
+              ],
+            },
           },
         },
-      },
-      overrideAccess: true,
-      where: {
-        id: {
-          equals: folderDoc.id,
+        overrideAccess: true,
+        where: {
+          id: {
+            equals: folderDoc.id,
+          },
         },
-      },
-    })
+      })
 
-    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
-  })
+      expect(result.docs[0]?.children.docs).toHaveLength(1)
+    },
+  )
+
+  // D1 allows 100 bound parameters per query, and polymorphic joins bind their values once per collection
+  test.options(
+    'should allow join where query on hasMany select fields',
+    { db: (adapter) => adapter !== 'd1' },
+    async ({ payload }) => {
+      const folderDoc = await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'scopedFolder',
+          folderType: ['folderPoly1', 'folderPoly2'],
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'childFolder',
+          _h_folders: folderDoc.id,
+          folderType: ['folderPoly1'],
+        },
+        overrideAccess: true,
+      })
+
+      const findFolder = await payload.find({
+        collection: 'folders',
+        joins: {
+          children: {
+            limit: 100_000,
+            sort: 'name',
+            where: {
+              and: [
+                {
+                  relationTo: {
+                    equals: 'folders',
+                  },
+                },
+                {
+                  folderType: {
+                    in: ['folderPoly1'],
+                  },
+                },
+              ],
+            },
+          },
+        },
+        overrideAccess: true,
+        where: {
+          id: {
+            equals: folderDoc.id,
+          },
+        },
+      })
+
+      expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
+    },
+  )
+
+  // D1 allows 100 bound parameters per query, and polymorphic joins bind their values once per collection
+  test.options(
+    'should query where with exists for hasMany select fields',
+    { db: (adapter) => adapter !== 'd1' },
+    async ({ payload }) => {
+      await payload.delete({ collection: 'folders', overrideAccess: true, where: {} })
+      const folderDoc = await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'scopedFolder',
+          folderType: ['folderPoly1', 'folderPoly2'],
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'folders',
+        data: {
+          name: 'childFolder',
+          _h_folders: folderDoc.id,
+          folderType: ['folderPoly1'],
+        },
+        overrideAccess: true,
+      })
+
+      const findFolder = await payload.find({
+        collection: 'folders',
+        joins: {
+          children: {
+            limit: 100_000,
+            sort: 'name',
+            where: {
+              and: [
+                {
+                  relationTo: {
+                    equals: 'folders',
+                  },
+                },
+                {
+                  or: [
+                    {
+                      folderType: {
+                        in: ['folderPoly1'],
+                      },
+                    },
+                    {
+                      folderType: {
+                        exists: false,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        overrideAccess: true,
+        where: {
+          id: {
+            equals: folderDoc.id,
+          },
+        },
+      })
+
+      expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
+    },
+  )
 
   test('should filter joins using where query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({

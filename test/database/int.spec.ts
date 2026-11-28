@@ -2921,7 +2921,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     test.describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+        !['cosmosdb', 'd1', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
           process.env.PAYLOAD_DATABASE || '',
         )
       ) {

@@ -1,6 +1,6 @@
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { isMongo, test } from '../__helpers/int/vitest.js'
 import {
   articlesSlug,
   draftArticlesSlug,
@@ -505,9 +505,10 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
     },
   )
 
+  // D1 allows 100 bound parameters per query, and polymorphic joins bind their values once per collection
   test.options(
     'should filter draft members by the document createdAt timestamp',
-    { db: 'drizzle' },
+    { db: (adapter) => !isMongo && adapter !== 'd1' },
     async ({ payload }) => {
       const topic = await payload.create({
         collection: topicsSlug,
@@ -551,9 +552,10 @@ test.suite('Joins through relationships and uploads', { config: './config.ts' },
     },
   )
 
+  // D1 allows 100 bound parameters per query, and polymorphic joins bind their values once per collection
   test.options(
     'should count and page members once for the requested parent and field',
-    { db: 'drizzle' },
+    { db: (adapter) => !isMongo && adapter !== 'd1' },
     async ({ payload }) => {
       const featured = await payload.create({
         collection: topicsSlug,

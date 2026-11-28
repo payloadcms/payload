@@ -16,6 +16,7 @@ import type {
 } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { databaseAdapterSupportsGeospatialQueries } from '../__helpers/shared/databaseAdapterCapabilities.js'
 import { devUser } from '../credentials.js'
 import {
   chainedRelSlug,
@@ -810,10 +811,9 @@ test.suite('Relationships', { config: './config.ts' }, () => {
             expect(foundBlockIDs).toContain(blockWithoutDirectors.id)
           })
 
-          // `near` on a point field is not implemented by the drizzle sqlite adapter
           test.options(
             'should support equals with a geospatial nested query',
-            { db: (adapter) => !adapter.startsWith('sqlite') },
+            { db: (adapter) => databaseAdapterSupportsGeospatialQueries({ adapter }) },
             async ({ payload }) => {
               const nearbyMovie = await payload.create({
                 collection: 'movies',
