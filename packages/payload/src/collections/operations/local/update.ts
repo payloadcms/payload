@@ -249,7 +249,13 @@ async function updateLocal<
     ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
     payload,
   })
-  req.file = file ?? (await getFileByPath(filePath!))
+
+  // `req.file` belongs to this operation only. A hook may pass an outer operation's `req`
+  // to a nested Local API call, so restore the outer file once this operation finishes.
+  // See https://github.com/payloadcms/payload/issues/15975
+  const outerFile = req.file
+  const operationFile = file ?? (await getFileByPath(filePath!))
+  req.file = operationFile
 
   const args = {
     id,
@@ -275,12 +281,19 @@ async function updateLocal<
     where,
   }
 
-  if (options.id) {
+  try {
+    if (options.id) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      return await updateByIDOperation<TSlug, TSelect>(args)
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return updateByIDOperation<TSlug, TSelect>(args)
+    return await updateOperation<TSlug, TSelect>(args)
+  } finally {
+    // Parallel nested calls may share `req`; only restore if no other call replaced the file.
+    if (req.file === operationFile) {
+      req.file = outerFile
+    }
   }
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  return updateOperation<TSlug, TSelect>(args)
 }
 
 export { updateLocal }
