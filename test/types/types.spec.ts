@@ -1883,10 +1883,13 @@ describe('Types testing', () => {
       })
 
       test('SerializedRelationshipNode: generated <-> runtime', () => {
-        // The relationship node excludes upload collections, so compare against the
-        // relationship member as it actually appears in the generated union.
+        // The generated union leaves out upload collections and collections with
+        // `enableRichTextRelationship: false`, which the runtime default can't know about, so
+        // compare against the slugs the generated union actually contains.
         type GenRelationshipInUnion = Extract<GenNodeUnion, { type: 'relationship' }>
-        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<SerializedRelationshipNode>()
+        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<
+          SerializedRelationshipNode<GenRelationshipInUnion['relationTo']>
+        >()
         expect<SerializedRelationshipNode>().type.toBeAssignableFrom<GenRelationshipInUnion>()
       })
 
