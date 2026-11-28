@@ -114,7 +114,7 @@ export default buildConfigWithDefaults({
       {
         slug: 'users',
         admin: {
-          listSearchableFields: 'name',
+          listSearchableFields: ['name'],
         },
         auth: true,
         fields: [
