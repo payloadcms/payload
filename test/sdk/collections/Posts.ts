@@ -14,12 +14,22 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'localizedText',
+      type: 'text',
+      localized: true,
+    },
+    {
       name: 'number',
       type: 'number',
     },
     {
       name: 'number2',
       type: 'number',
+    },
+    {
+      name: 'shortText',
+      type: 'text',
+      maxLength: 5,
     },
     {
       name: 'group',
