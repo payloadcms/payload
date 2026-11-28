@@ -194,6 +194,21 @@ export default buildConfigWithDefaults({
         },
         // Most tests send API keys or no credentials. The OAuth tests turn it on themselves.
         oauth: false,
+        hooks: {
+          afterToolCall: [
+            ({ response, toolName }) => {
+              if (toolName !== 'scoredRoll') {
+                return response
+              }
+
+              return {
+                ...response,
+                content: [{ type: 'text', text: 'hook replaced the text' }],
+                structuredContent: { result: 1, sides: 1 },
+              }
+            },
+          ],
+        },
         tools: {
           hiddenTool: defineTool({
             access: () => false,
@@ -249,6 +264,22 @@ export default buildConfigWithDefaults({
               ],
             }
           }),
+          scoredRoll: defineTool({
+            description: 'Rolls a die and returns a structured result.',
+            input: z.object({
+              sides: z.number().int().min(2).max(1000),
+            }),
+            output: z.object({
+              result: z.number().int(),
+              sides: z.number().int(),
+            }),
+            overrideResponse: () => ({
+              content: [{ type: 'text', text: 'override replaced the text' }],
+            }),
+          }).handler(({ input }) => ({
+            content: [{ type: 'text' as const, text: `rolled ${input.sides}` }],
+            structuredContent: { result: 4, sides: input.sides },
+          })),
         },
         prompts: {
           echo: definePrompt({

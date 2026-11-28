@@ -611,7 +611,11 @@ Set the URL to `http://127.0.0.1:3000/api/mcp` and add
 The plugin ships four helpers - `defineTool`, `defineCollectionTool`, `defineGlobalTool`, `definePrompt` - that give you full inference of the `input` schema in the handler's argument type. Each helper is a two-stage builder: pass the schema and metadata first, then chain `.handler(fn)`.
 
 Tool inputs and prompt arguments accept Standard Schema libraries such as Zod, or raw
-JSON Schema 2020-12.
+JSON Schema 2020-12. A custom tool can also set `output` in those same forms. The
+plugin advertises it as the MCP `outputSchema`. Return the matching value on
+`structuredContent`. When `output` is set, that `structuredContent` stays as the
+handler returned it. `overrideResponse` and `hooks.afterToolCall` can still change
+the rest of the response.
 
 ### Top-level tools
 
@@ -628,6 +632,10 @@ mcpPlugin({
       input: z.object({
         sides: z.number().int().min(2).max(1000).default(6),
       }),
+      output: z.object({
+        result: z.number().int(),
+        sides: z.number().int(),
+      }),
     }).handler(async ({ authorizedMCP, input, req }) => {
       const result = Math.floor(Math.random() * input.sides) + 1
 
@@ -640,6 +648,7 @@ mcpPlugin({
 
       return {
         content: [{ type: 'text', text: `You rolled a ${result}.` }],
+        structuredContent: { result, sides: input.sides },
       }
     }),
   },

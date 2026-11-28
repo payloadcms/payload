@@ -31,7 +31,7 @@ export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuil
 export type { JsonSchemaType, StandardSchemaWithJSON, ToolAnnotations }
 
 /**
- * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
+ * What a tool's `input` or `output` (or a prompt's `argsSchema`) can be — either a raw
  * JSON Schema 2020-12 literal, or a Standard Schema instance (Zod, Valibot, …).
  * Raw schemas may omit `$schema`; when present it must declare the 2020-12 dialect.
  */
@@ -109,6 +109,12 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
   description: string
   handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
+  /**
+   * Schema for the handler's `structuredContent`, advertised as the MCP `outputSchema`.
+   * Accepts the same values as `input`. When set, that `structuredContent` is kept
+   * through `overrideResponse` and `hooks.afterToolCall`.
+   */
+  output?: ToolInputSchema
   /**
    * Override the return value of the tool handler
    */
