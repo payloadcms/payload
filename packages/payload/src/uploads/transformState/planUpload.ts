@@ -1,17 +1,33 @@
 import type { Document, PayloadRequest } from '../../types/index.js'
+import type { HookVariantOwner } from '../getVariantOwners.js'
 import type { PlannedTransformerPipeline } from '../transformers/planTransformerPipeline.js'
-import type { UploadTransformer } from '../transformers/types.js'
+import type { CanTransformArgs, UploadTransformer } from '../transformers/types.js'
 
 import { ValidationError } from '../../errors/ValidationError.js'
-import { getVariantOwners } from '../getVariantOwners.js'
-import { planTransformerPipeline } from '../transformers/planTransformerPipeline.js'
+import { getHookVariantOwners, getVariantOwners } from '../getVariantOwners.js'
+import {
+  getCandidateTransformers,
+  getCanTransformResult,
+  isEligible,
+  planTransformerPipeline,
+} from '../transformers/planTransformerPipeline.js'
 import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 import { getChangedTransformKeys } from './getChangedTransformKeys.js'
 import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.js'
 import { planPersistedDefaultStages } from './planPersistedDefaultStages.js'
 import { isClaimRequired, isFocalPointKey } from './transformKeyClaims.js'
 
-export type UploadPlan = { mimeType: string } & PlannedTransformerPipeline
+/** A variants owner whose `transformVariant` makes its stored variants for this upload. */
+export type PlannedHookOwner = {
+  /** The `options` from the transformer's own `canTransform` result, or `undefined`. */
+  options: unknown
+} & HookVariantOwner
+
+export type UploadPlan = {
+  /** The variants owners whose `transformVariant` runs, in the order they registered. */
+  hookOwners: PlannedHookOwner[]
+  mimeType: string
+} & PlannedTransformerPipeline
 
 /**
  * What an upload with no new file does with its stored file.
@@ -160,18 +176,21 @@ export async function planUploadPipeline({
   mimeType: string
 } & PlanArgs): Promise<UploadPlan> {
   const { collectionSlug, pipelineOriginalDoc, req } = planArgs
+  const canTransformArgs: CanTransformArgs = {
+    collectionSlug,
+    doc: pipelineOriginalDoc,
+    mimeType,
+    operation: 'upload',
+    originalDoc: pipelineOriginalDoc,
+    req,
+  }
+  const transformers = req.payload.config.upload?.transformers ?? []
   const plan = await planTransformerPipeline({
-    args: {
-      collectionSlug,
-      doc: pipelineOriginalDoc,
-      mimeType,
-      operation: 'upload',
-      originalDoc: pipelineOriginalDoc,
-      req,
-    },
+    args: canTransformArgs,
     capability: 'transformFile',
-    transformers: req.payload.config.upload?.transformers ?? [],
+    transformers,
   })
+  const hookOwners = await planHookOwners({ args: canTransformArgs, stagePlan: plan, transformers })
 
   const variantsOwnerSlug = canApplyAtRequest
     ? await getVariantsOwnerThatBuildsAtRequest({ ...planArgs, documentID, mimeType })
@@ -181,8 +200,57 @@ export async function planUploadPipeline({
     ...(variantsOwnerSlug
       ? withoutBridgesThatDoNotOwnCollection({ collectionSlug, plan, variantsOwnerSlug })
       : plan),
+    hookOwners,
     mimeType,
   }
+}
+
+/**
+ * The variants owners for this MIME type whose `transformVariant` runs. Each one runs only when
+ * its own `canTransform` passes. A transformer that is also an upload stage was already asked by
+ * the stage plan, so its result and options are reused and `canTransform` is not called again.
+ */
+async function planHookOwners({
+  args,
+  stagePlan,
+  transformers,
+}: {
+  args: CanTransformArgs
+  stagePlan: PlannedTransformerPipeline
+  transformers: UploadTransformer[]
+}): Promise<PlannedHookOwner[]> {
+  const upload = args.req.payload.collections?.[args.collectionSlug]?.config.upload
+  const stageCandidates = getCandidateTransformers({
+    capability: 'transformFile',
+    mimeType: args.mimeType,
+    transformers,
+  })
+  const plannedHookOwners: PlannedHookOwner[] = []
+
+  for (const hookOwner of getHookVariantOwners({ mimeType: args.mimeType, transformers, upload })) {
+    const { transformer } = hookOwner
+
+    if (stagePlan.pipeline.includes(transformer)) {
+      plannedHookOwners.push({ ...hookOwner, options: stagePlan.options.get(transformer) })
+      continue
+    }
+
+    // A stage candidate that is not in the plan already returned false.
+    if (stageCandidates.includes(transformer)) {
+      continue
+    }
+
+    const result = await getCanTransformResult({ args, transformer })
+
+    if (isEligible({ result })) {
+      plannedHookOwners.push({
+        ...hookOwner,
+        options: typeof result === 'object' ? result.options : undefined,
+      })
+    }
+  }
+
+  return plannedHookOwners
 }
 
 /**

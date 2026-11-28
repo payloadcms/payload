@@ -1,6 +1,6 @@
 import type { Document, PayloadRequest } from '../../../types/index.js'
 import type { UploadTransformer } from '../../transformers/types.js'
-import type { UploadPlan } from '../../transformState/planUpload.js'
+import type { PlannedHookOwner, UploadPlan } from '../../transformState/planUpload.js'
 
 import {
   getStagesThatRun,
@@ -14,6 +14,11 @@ export type UploadStages = {
   /** The one upload bridge that drives the upload, if the plan has any. */
   bridgeTransformer?: UploadTransformer
   claimsOfStagesThatRun: Map<UploadTransformer, string[]>
+  /**
+   * The variants owners whose `transformVariant` builds stored variants. Empty when
+   * `isAppliedAtRequest`.
+   */
+  hookOwners: PlannedHookOwner[]
   /** Request-time stages apply the saved keys, so the default file is not stored. */
   isAppliedAtRequest: boolean
   /** The upload stages that build stored files. Empty when `isAppliedAtRequest`. */
@@ -85,6 +90,8 @@ export async function planUploadStages({
         })
 
   return {
+    // Like upload stages, hook owners build stored files, so they do not run either.
+    hookOwners: isAppliedAtRequest ? [] : plan.hookOwners,
     isAppliedAtRequest,
     // Upload stages build stored files. A default file built at request time has none to build.
     pipeline: isAppliedAtRequest ? [] : plan.pipeline,

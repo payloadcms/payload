@@ -13,6 +13,7 @@ import {
   setUploadFilePath,
 } from '../transformers/uploadTransformerBridge.js'
 import { assertTransformKeysCovered } from '../transformState/planUpload.js'
+import { runVariantHooks } from './runVariantHooks.js'
 
 export type UploadTransformerOutput = {
   /**
@@ -36,7 +37,8 @@ export type UploadTransformerOutput = {
 
 /**
  * Runs the upload stages on the incoming file. With an upload bridge, the bridge drives the stages
- * once for the main file and once for each size. Otherwise the stages run once for the main file.
+ * once for the main file and once for each size. Otherwise the stages run once for the main file,
+ * and each planned hook owner makes its variants.
  *
  * The stages can change `pipelineDoc._transforms`. Only the main task's changes are kept: size
  * tasks share a read-only copy of the main task's result.
@@ -48,7 +50,7 @@ export async function runUploadTransformers({
   pipelineDoc,
   pipelineOriginalDoc,
   req,
-  stages: { bridgeTransformer, claimsOfStagesThatRun, pipeline, plan, stagesThatRun },
+  stages: { bridgeTransformer, claimsOfStagesThatRun, hookOwners, pipeline, plan, stagesThatRun },
 }: {
   collectionSlug: string
   /** The pixel size of a crop that the request sent, for the upload bridge. */
@@ -60,14 +62,21 @@ export async function runUploadTransformers({
   req: PayloadRequest
   stages: Pick<
     UploadStages,
-    'bridgeTransformer' | 'claimsOfStagesThatRun' | 'pipeline' | 'plan' | 'stagesThatRun'
+    | 'bridgeTransformer'
+    | 'claimsOfStagesThatRun'
+    | 'hookOwners'
+    | 'pipeline'
+    | 'plan'
+    | 'stagesThatRun'
   >
 }): Promise<UploadTransformerOutput> {
   const originalFile = await toWebFile({ file })
   let mainFile: File
   let bridgeDimensions: UploadTransformerOutput['bridgeDimensions']
   let sizeResults: UploadTransformation[] = []
+  let hookOwnerSlugs: string[] = []
 
+  // Hook owners do not run on the bridge path until Sharp moves onto the hook.
   if (bridgeTransformer) {
     const bridge = getUploadTransformerInternal(bridgeTransformer)!
     let sizeTaskDoc: Readonly<Document> | undefined
@@ -120,6 +129,33 @@ export async function runUploadTransformers({
       pipeline,
       req,
     })
+
+    if (hookOwners.length > 0) {
+      // Variants share a read-only copy of the main file's result, as the bridge's size tasks do.
+      const variantDoc = deepFreeze(deepCopyObject(pipelineDoc))
+      // Nothing aborts an upload request yet. A background job will pass its own signal.
+      const { signal } = new AbortController()
+
+      for (const hookOwner of hookOwners) {
+        sizeResults.push(
+          ...(await runVariantHooks({
+            claims: claimsOfStagesThatRun,
+            collectionSlug,
+            doc: variantDoc,
+            getOptions: (transformer) => plan.options.get(transformer),
+            hookOwner,
+            mainFile,
+            originalFile,
+            pipelineOriginalDoc,
+            req,
+            signal,
+            stagesThatRun,
+          })),
+        )
+      }
+
+      hookOwnerSlugs = hookOwners.map(({ owner }) => owner.slug)
+    }
   }
 
   // Planning checked `_transforms` before the stages ran. A stage can add or change a key, so
@@ -129,7 +165,7 @@ export async function runUploadTransformers({
   return {
     bridgeDimensions,
     bridgeTransformer,
-    hookOwnerSlugs: [],
+    hookOwnerSlugs,
     originalFile,
     sizeResults,
     transformedMainFile: mainFile !== originalFile ? mainFile : undefined,

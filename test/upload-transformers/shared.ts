@@ -9,6 +9,7 @@ export const variantMediaSlug = 'variant-media'
 export const requestVariantsMediaSlug = 'request-variants-media'
 export const convertedVariantMediaSlug = 'converted-variant-media'
 export const contractMediaSlug = 'contract-media'
+export const hookVariantMediaSlug = 'hook-variant-media'
 export const contractMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'contract-media',

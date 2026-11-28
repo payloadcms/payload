@@ -26,7 +26,7 @@ describe('validateTransformers', () => {
     },
   )
 
-  it.each(['init', 'canTransform', 'transformFile', 'handleRequest'] as const)(
+  it.each(['init', 'canTransform', 'transformFile', 'handleRequest', 'transformVariant'] as const)(
     'should throw when %s is present but not a function',
     (capability) => {
       const transformer = makeTransformer({

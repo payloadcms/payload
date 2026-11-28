@@ -105,6 +105,51 @@ export type TransformFileResult =
       status: 'continue'
     }
 
+/**
+ * @experimental This API can change in a minor release until `transformer-sharp` uses it.
+ */
+export type TransformVariantArgs<TOptions = unknown> = {
+  collectionSlug: string
+  /** Read-only. The crop and focal point are in `doc._transforms`. */
+  doc: Readonly<Document>
+  /** The options from this transformer's `canTransform` result, or `undefined`. */
+  options: TOptions
+  /** The retained original file, before any transformer changed it. */
+  originalSource: FileSource
+  req: PayloadRequest
+  /** Stop the work when this is aborted. */
+  signal: AbortSignal
+  /** The main file after the pipeline. */
+  source: FileSource
+  /** The variant to make. Core calls the hook once for each variant this transformer owns. */
+  variantName: string
+}
+
+/**
+ * @experimental This API can change in a minor release until `transformer-sharp` uses it.
+ *
+ * - `complete`: core runs the other eligible stages on `file`, then stores it as the variant.
+ * - `skip`: the variant is saved as `null`, and the upload still succeeds. Use it for an expected
+ *   failure, such as a codec the transformer cannot read. Throw for an unexpected failure: the
+ *   upload then fails.
+ */
+export type TransformVariantResult =
+  | {
+      file: File
+      /**
+       * The file's height. Core measures common image types itself. Pass it for a file type core
+       * cannot measure, or the variant is saved with no size.
+       */
+      height?: number
+      status: 'complete'
+      /**
+       * The file's width. Core measures common image types itself. Pass it for a file type core
+       * cannot measure, or the variant is saved with no size.
+       */
+      width?: number
+    }
+  | { status: 'skip' }
+
 export type HandleTransformRequestArgs<TOptions = unknown> = {
   collectionSlug: string
   /** The requested document. Read-only: a request does not save changes. */
@@ -207,4 +252,9 @@ export type UploadTransformer = {
    * One-file-in, one-file-out upload processing primitive. Never writes to storage.
    */
   transformFile?: (args: TransformFileArgs) => Promise<TransformFileResult>
+  /**
+   * @experimental Makes one stored variant. Core calls it once for each variant this transformer
+   * registered with `registerUploadVariants` for the file's MIME type. Never writes to storage.
+   */
+  transformVariant?: (args: TransformVariantArgs) => Promise<TransformVariantResult>
 }

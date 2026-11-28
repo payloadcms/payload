@@ -39,7 +39,7 @@ export default buildConfig({
 
 `upload.transformers` is the only transformer configuration surface — there is no per-collection or per-field transformer list. Each transformer decides, per request or per upload, which collections and MIME types it applies to.
 
-Every transformer must declare a unique, non-empty `slug`. Payload throws a startup error if two transformers share a slug, if a transformer's `mimeTypes` array is empty or contains a malformed pattern, or if a declared capability (`init`, `canTransform`, `transformFile`, `handleRequest`) isn't a function.
+Every transformer must declare a unique, non-empty `slug`. Payload throws a startup error if two transformers share a slug, if a transformer's `mimeTypes` array is empty or contains a malformed pattern, or if a declared capability (`init`, `canTransform`, `transformFile`, `handleRequest`, `transformVariant`) isn't a function.
 
 ### Registering a transformer changes the file endpoint
 
@@ -293,7 +293,7 @@ There is no whole-file read. A transformer that needs the whole file in memory m
   combined with Sharp for image uploads.
 </Banner>
 
-Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload first reads only what it needs: the whole file when `upload.mimeTypes` restricts the allowed types, the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on); otherwise only a header or nothing. Payload then plans the pipeline with the real `doc`. If a transformer other than `sharpTransformer` accepts the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true` or an object), Payload downloads the whole file before that transformer runs. Payload also downloads the whole file when `sharpTransformer` claims a saved built-in `_transforms` key that changes the file, such as a crop. A saved `focalPoint` alone does not cause a download, because Sharp uses it only for sizes. A transformer that declines never causes a download, and a built-in key that neither upload nor request-time stages can apply fails validation. When request-time stages cover the saved keys, Payload retains the original and skips upload-time transformation; it does not download the whole file just to apply those keys.
+Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload first reads only what it needs: the whole file when `upload.mimeTypes` restricts the allowed types, the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on); otherwise only a header or nothing. Payload then plans the pipeline with the real `doc`. If a transformer other than `sharpTransformer` accepts the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true` or an object), Payload downloads the whole file before that transformer runs. Payload also downloads the whole file when a transformer with [`transformVariant`](#the-transformvariant-capability-uploads-experimental) will run. Payload also downloads the whole file when `sharpTransformer` claims a saved built-in `_transforms` key that changes the file, such as a crop. A saved `focalPoint` alone does not cause a download, because Sharp uses it only for sizes. A transformer that declines never causes a download, and a built-in key that neither upload nor request-time stages can apply fails validation. When request-time stages cover the saved keys, Payload retains the original and skips upload-time transformation; it does not download the whole file just to apply those keys.
 
 The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
 
@@ -417,7 +417,7 @@ More than one transformer can register variants on a collection. For example, Sh
 - Two owners of one name must give it the same `admin` and `generateImageName` options.
 - A transformer registers variants on a collection once.
 
-Payload throws a startup error when a rule is broken.
+Payload throws a startup error when a rule is broken. On a collection with more than one variants owner, when Sharp or a `transformVariant` owner takes part in an upload, Payload saves every variant that no owner made for that upload as `null`.
 
 #### Handing off to an image service
 
@@ -468,6 +468,87 @@ const externalResizeTransformer: UploadTransformer = {
         302,
       ),
       status: 'complete',
+    }
+  },
+}
+```
+
+## The `transformVariant` capability (uploads, experimental)
+
+<Banner type="warning">
+  This API can change in a minor release until `@payloadcms/transformer-sharp`
+  uses it.
+</Banner>
+
+```ts
+transformVariant: (args: {
+  collectionSlug: string
+  doc: Readonly<Document>
+  options: TOptions
+  originalSource: FileSource
+  req: PayloadRequest
+  signal: AbortSignal
+  source: FileSource
+  variantName: string
+}) =>
+  Promise<
+    | { file: File; height?: number; status: 'complete'; width?: number }
+    | { status: 'skip' }
+  >
+```
+
+Payload calls `transformVariant` once for each variant your transformer registered with [`registerUploadVariants`](#sizes-with-no-stored-file) for the file's MIME type. Return the variant's file. Payload then stores it. Never write to storage.
+
+| Result                                          | What Payload does                                |
+| ----------------------------------------------- | ------------------------------------------------ |
+| `{ status: 'complete', file, width?, height? }` | Stores the variant                               |
+| `{ status: 'skip' }`                            | Saves the variant as `null`. The upload succeeds |
+| An error is thrown                              | The upload fails with the generic upload error   |
+
+Payload measures common image types, such as PNG, JPEG and WebP, itself. Pass `width` and `height` when the file is a type that Payload cannot measure. Otherwise Payload saves the variant with no size and names its file without one, for example `video-thumbnail.pdf`. Payload does not use `generateImageName` for a variant with no size, as for [sizes with no stored file](#sizes-with-no-stored-file). The file name is `<name>-<variantName>.<ext>`.
+
+How the hook runs:
+
+- The transformer takes part in an upload only when its `canTransform` passes. A transformer with no `canTransform` always passes. Payload calls `canTransform` once for each upload, and passes its `options` to every `transformVariant` call.
+- The hook runs even when no `transformFile` stage matches the file. A transformer can have only `transformVariant`.
+- `source` is the main file after the pipeline. `originalSource` is the retained original. Read the saved crop and focal point from `doc._transforms`.
+- After the hook returns a file, Payload runs the other planned `transformFile` stages whose `mimeTypes` match the returned file's type. Set `type` on the `File` you return.
+- A thrown error is logged on the server and fails the upload. Use `skip` for an expected failure, such as a codec the transformer cannot read.
+- On a collection with more than one variants owner, Payload saves `null` for every variant that no owner made for the upload, so an entry from an earlier file does not stay.
+- For a client upload (`clientUploads`), Payload downloads the whole file when a transformer with this hook will run, because the hook reads the file.
+
+```ts
+import type { UploadTransformer } from 'payload'
+
+import { registerUploadVariants } from 'payload'
+
+const posterTransformer: UploadTransformer = {
+  slug: 'poster',
+  mimeTypes: ['video/mp4'],
+  init: (config) =>
+    registerUploadVariants({
+      collections: { media: { variants: [{ name: 'poster' }] } },
+      config,
+      transformerSlug: 'poster',
+    }),
+  transformVariant: async ({ signal, source, variantName }) => {
+    // extractFrame is your own code. It reads the stream and returns the frame as bytes.
+    const frame = await extractFrame({
+      signal,
+      stream: await source.streamFile(),
+    })
+
+    if (!frame) {
+      return { status: 'skip' }
+    }
+
+    return {
+      file: new File([frame.bytes], `${variantName}.jpg`, {
+        type: 'image/jpeg',
+      }),
+      height: frame.height,
+      status: 'complete',
+      width: frame.width,
     }
   },
 }

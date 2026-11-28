@@ -8,7 +8,13 @@ import { builtInTransformKeys } from '../transformState/transformStateSchema.js'
 
 const MIME_TOKEN_PATTERN = /^[\w!#$&^.+-]+$/
 
-const CAPABILITY_KEYS = ['init', 'canTransform', 'transformFile', 'handleRequest'] as const
+const CAPABILITY_KEYS = [
+  'init',
+  'canTransform',
+  'transformFile',
+  'handleRequest',
+  'transformVariant',
+] as const
 
 function isValidMimeTypePattern(pattern: unknown): boolean {
   if (typeof pattern !== 'string' || pattern.length === 0) {

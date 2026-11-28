@@ -576,5 +576,24 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
       })
       expect(restored.variants.thumbnail?.filename ?? null).toBeNull()
     })
+
+    test('should clear the request-time marker of a variant that a new image saves as null', async () => {
+      const pdf = await uploadFixture({
+        collection: severalOwnersMediaSlug,
+        fixture: 'test-pdf.pdf',
+      })
+
+      const image = (await payload.update({
+        id: pdf.id,
+        collection: severalOwnersMediaSlug,
+        data: {},
+        file: await getFileByPath(path.resolve(dirname, 'image.png')),
+        overrideAccess: true,
+      })) as unknown as SeveralOwnersDoc
+
+      expect(image.variants.thumbnail).toMatchObject({ filename: 'image-100x100.png' })
+      expect(image.variants.preview).toMatchObject({ filename: null, url: null })
+      expect(image.variants.preview?._stored ?? null).toBeNull()
+    })
   })
 })

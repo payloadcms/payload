@@ -4,6 +4,8 @@ import { randomUUID } from 'node:crypto'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../../types/index.js'
+import type { UploadTransformer } from '../../transformers/types.js'
+import type { UploadTransformation } from '../../transformers/uploadTransformerBridge.js'
 import type { FileData, FileToSave, FocalPoint, OriginalFileData } from '../../types.js'
 import type { UploadTransformerOutput } from '../runUploadTransformers.js'
 import type { UploadStorage } from '../utils/getUploadStorage.js'
@@ -14,7 +16,7 @@ import { canResizeImage } from '../../canResizeImage.js'
 import { getFileExtension, getSanitizedUploadFilename } from '../../getFileTypeIdentity.js'
 import { getImageSize } from '../../getImageSize.js'
 import { getSafeFileName, getUnplannedSafeFileName } from '../../getSafeFilename.js'
-import { getVariantOwners } from '../../getVariantOwners.js'
+import { getHookVariantOwners, getVariantOwner, getVariantOwners } from '../../getVariantOwners.js'
 import { isProcessableImage } from '../../isProcessableImage.js'
 import { isRequestTimeFile } from '../../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../../requestTimeFileData.js'
@@ -30,7 +32,7 @@ type IncomingFile = NonNullable<PayloadRequest['file']>
  * 1. The main file: its name, type, size and dimensions.
  * 2. The original, when it can be stored.
  * 3. The main file to store. This also updates `req.file` or the temp file to the stored bytes.
- * 4. The sizes that the upload bridge built.
+ * 4. The variants that the upload bridge or the hook owners built.
  * 5. The fields for files that request-time stages build.
  *
  * A crop reset that no stage changed reuses the retained original as the main file, and stores
@@ -235,7 +237,18 @@ export async function buildUploadOutput({
     }
   }
 
-  if (sizeResults.length > 0) {
+  const variantResults = [
+    ...sizeResults,
+    ...getUnmadeVariantResults({
+      bridgeSlug: transformed?.bridgeTransformer?.slug,
+      mimeType: file.mimetype,
+      sizeResults,
+      transformers: req.payload.config.upload?.transformers ?? [],
+      upload: collection.upload,
+    }),
+  ]
+
+  if (variantResults.length > 0) {
     const sizes = await buildVariantOutputs({
       collection,
       currentFileData,
@@ -247,7 +260,7 @@ export async function buildUploadOutput({
       prefix,
       req,
       shouldStageCloudFiles,
-      sizeResults,
+      sizeResults: variantResults,
       storedPrefix: providerOriginal?.prefix ?? currentFileData?.prefix,
     })
 
@@ -318,6 +331,43 @@ export async function buildUploadOutput({
   }
 
   return { fileData, files }
+}
+
+/**
+ * A result with no file for each collection variant that no owner made for this upload, so each
+ * one is saved as null and no variant from an earlier file stays. A bridge saves the sizes it
+ * builds:
+ * - Without a bridge, every variant that was not made is null when the file's type has a hook
+ *   owner.
+ * - With a bridge, on a collection with several owners, every variant whose owner for this file
+ *   is not the bridge is null. A collection with one owner keeps its other entries.
+ */
+function getUnmadeVariantResults({
+  bridgeSlug,
+  mimeType,
+  sizeResults,
+  transformers,
+  upload,
+}: {
+  /** The slug of the upload bridge that ran, if one did. */
+  bridgeSlug?: string
+  mimeType: string
+  sizeResults: UploadTransformation[]
+  transformers: UploadTransformer[]
+  upload: SanitizedCollectionConfig['upload']
+}): UploadTransformation[] {
+  const madePaths = new Set(sizeResults.map(({ fieldPath }) => fieldPath))
+  const hasHookOwner = getHookVariantOwners({ mimeType, transformers, upload }).length > 0
+  const hasSeveralOwners = (upload.variantOwners?.length ?? 0) > 1
+  const isSavedAsNull = (variantName: string): boolean =>
+    bridgeSlug
+      ? hasSeveralOwners && getVariantOwner({ mimeType, upload, variantName })?.slug !== bridgeSlug
+      : hasHookOwner
+  const nullNames = (upload.variants ?? [])
+    .map(({ name }) => name)
+    .filter((name) => !madePaths.has(`variants.${name}`) && isSavedAsNull(name))
+
+  return nullNames.map((name) => ({ fieldPath: `variants.${name}` as const }))
 }
 
 /** The saved fields when the retained original becomes the main file again, as on a crop reset. */
