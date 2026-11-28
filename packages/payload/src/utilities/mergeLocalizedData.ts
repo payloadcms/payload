@@ -98,13 +98,13 @@ export function mergeLocalizedData({
               result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
-              result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
-                const existingItem = existingValue?.[index] || {}
+              const existingRows = existingRowsByID(existingValue)
 
+              result[field.name] = newValue.map((newItem: JsonObject) => {
                 return mergeLocalizedData({
                   configBlockReferences,
                   dataWithLocales: newItem,
-                  docWithLocales: existingItem,
+                  docWithLocales: existingRows.get(newItem.id) ?? {},
                   fields: field.fields,
                   localesToUpdate,
                   parentIsLocalized,
@@ -140,7 +140,9 @@ export function mergeLocalizedData({
               result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
-              result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
+              const existingRows = existingRowsByID(existingValue)
+
+              result[field.name] = newValue.map((newBlockData: JsonObject) => {
                 let block: Block | FlattenedBlock | undefined
                 if (configBlockReferences && field.blockReferences) {
                   for (const blockOrReference of field.blockReferences) {
@@ -155,9 +157,10 @@ export function mergeLocalizedData({
                 }
 
                 if (block) {
+                  const existingBlock = existingRows.get(newBlockData.id)
                   const blockData =
-                    Array.isArray(existingValue) && existingValue[index]
-                      ? (existingValue[index] as JsonObject)
+                    existingBlock && existingBlock.blockType === newBlockData.blockType
+                      ? existingBlock
                       : {}
 
                   const merged = mergeLocalizedData({
@@ -348,4 +351,21 @@ export function mergeLocalizedData({
   }
 
   return result
+}
+
+/**
+ * Index persisted rows by ID so their localized values follow them when they move.
+ */
+function existingRowsByID(existingRows: unknown): Map<number | string, JsonObject> {
+  const rows = new Map<number | string, JsonObject>()
+
+  if (Array.isArray(existingRows)) {
+    for (const row of existingRows) {
+      if (typeof row?.id === 'number' || typeof row?.id === 'string') {
+        rows.set(row.id, row)
+      }
+    }
+  }
+
+  return rows
 }

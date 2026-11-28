@@ -293,12 +293,14 @@ describe('mergeLocalizedData', () => {
       const docWithLocales = {
         items: [
           {
+            id: 'item-1',
             name: {
               en: 'EN Item 1',
               es: 'ES Item 1',
             },
           },
           {
+            id: 'item-2',
             name: {
               en: 'EN Item 2',
               es: 'ES Item 2',
@@ -310,11 +312,13 @@ describe('mergeLocalizedData', () => {
       const dataWithLocales = {
         items: [
           {
+            id: 'item-1',
             name: {
               en: 'Updated EN Item 1',
             },
           },
           {
+            id: 'item-2',
             name: {
               en: 'Updated EN Item 2',
             },
@@ -332,12 +336,14 @@ describe('mergeLocalizedData', () => {
 
       expect(result.items).toEqual([
         {
+          id: 'item-1',
           name: {
             en: 'Updated EN Item 1',
             es: 'ES Item 1',
           },
         },
         {
+          id: 'item-2',
           name: {
             en: 'Updated EN Item 2',
             es: 'ES Item 2',
@@ -1121,4 +1127,122 @@ describe('clearing non-localized rows', () => {
       expect(result.rows).toBeNull()
     },
   )
+})
+
+describe('matching non-localized rows by identity', () => {
+  const rowFields: Field[] = [
+    { name: 'label', type: 'text', localized: true },
+    { name: 'note', type: 'text' },
+  ]
+  const blockTypes = [
+    { slug: 'card', fields: rowFields },
+    { slug: 'banner', fields: rowFields },
+  ]
+
+  describe.each(['array', 'blocks'] as const)('%s', (type) => {
+    const fields: Field[] =
+      type === 'array'
+        ? [{ name: 'rows', type: 'array', fields: [{ name: 'id', type: 'text' }, ...rowFields] }]
+        : [{ name: 'rows', type: 'blocks', blocks: blockTypes }]
+    const metadata = type === 'blocks' ? { blockType: 'card' } : {}
+
+    const zero = { ...metadata, id: 0, label: { en: 'Zero', de: 'Null' }, note: 'zero note' }
+    const one = { ...metadata, id: 1, label: { en: 'One', de: 'Eins' }, note: 'one note' }
+    const updatedZero = { ...zero, label: { en: 'Updated 0', de: 'Null' } }
+    const updatedOne = { ...one, label: { en: 'Updated 1', de: 'Eins' } }
+    const inserted = { ...metadata, id: 2, label: { en: 'Updated 2' } }
+
+    it.each([
+      { operation: 'reordering rows', ids: [1, 0], expected: [updatedOne, updatedZero] },
+      {
+        operation: 'inserting a row',
+        ids: [0, 2, 1],
+        expected: [updatedZero, inserted, updatedOne],
+      },
+      { operation: 'deleting a row', ids: [1], expected: [updatedOne] },
+    ])('should retain translations and omitted fields after $operation', ({ ids, expected }) => {
+      const docWithLocales = { rows: [zero, one] }
+      const original = structuredClone(docWithLocales)
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: {
+          rows: ids.map((id) => ({ ...metadata, id, label: { en: `Updated ${id}` } })),
+        },
+        docWithLocales,
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.rows).toEqual(expected)
+      expect(docWithLocales).toEqual(original)
+    })
+
+    it('should treat missing and unmatched IDs as new rows', () => {
+      const newRow = { ...metadata, label: { en: 'New without ID' } }
+      const anotherRow = { ...metadata, id: 'new', label: { en: 'New with ID' } }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: { rows: [newRow, anotherRow] },
+        docWithLocales: {
+          rows: [
+            { ...metadata, label: { en: 'Old', de: 'Alt' }, note: 'old note' },
+            { ...metadata, id: 'old', label: { en: 'Old', de: 'Alt' }, note: 'old note' },
+          ],
+        },
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.rows).toEqual([newRow, anotherRow])
+    })
+  })
+
+  it('should preserve translations when an array field named blockType changes', () => {
+    const result = mergeLocalizedData({
+      configBlockReferences: [],
+      dataWithLocales: {
+        rows: [{ id: 'same', blockType: 'banner', label: { en: 'New' } }],
+      },
+      docWithLocales: {
+        rows: [{ id: 'same', blockType: 'card', label: { en: 'Old', de: 'Alt' } }],
+      },
+      fields: [
+        {
+          name: 'rows',
+          type: 'array',
+          fields: [{ name: 'id', type: 'text' }, { name: 'blockType', type: 'text' }, ...rowFields],
+        },
+      ],
+      localesToUpdate: ['en'],
+    })
+
+    expect(result.rows).toEqual([
+      { id: 'same', blockType: 'banner', label: { en: 'New', de: 'Alt' } },
+    ])
+  })
+
+  it('should treat a different block type with the same ID as a new block', () => {
+    const row = { id: 'shared', blockType: 'banner', label: { en: 'New banner' } }
+
+    const result = mergeLocalizedData({
+      configBlockReferences: [],
+      dataWithLocales: { rows: [row] },
+      docWithLocales: {
+        rows: [
+          {
+            id: 'shared',
+            blockType: 'card',
+            label: { en: 'Old card', de: 'Alte Karte' },
+            note: 'old',
+          },
+        ],
+      },
+      fields: [{ name: 'rows', type: 'blocks', blocks: blockTypes }],
+      localesToUpdate: ['en'],
+    })
+
+    expect(result.rows).toEqual([row])
+  })
 })
