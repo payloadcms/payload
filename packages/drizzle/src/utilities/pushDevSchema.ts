@@ -4,6 +4,8 @@ import prompts from 'prompts'
 import type { BasePostgresAdapter } from '../postgres/types.js'
 import type { DrizzleAdapter, PostgresDB, RawTable } from '../types.js'
 
+import { getSchemaNames } from './getSchemaNames.js'
+
 const previousSchema: {
   localeCodes: null | string[]
   rawTables: null | Record<string, RawTable>
@@ -48,7 +50,12 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   const { apply, hasDataLoss, warnings } = await pushSchema(
     adapter.schema,
     adapter.drizzle,
-    adapter.schemaName ? [adapter.schemaName] : undefined,
+    // With `tableSchema`, every schema in use is pushed
+    (adapter as BasePostgresAdapter).tableSchema
+      ? getSchemaNames({ adapter: adapter as BasePostgresAdapter })
+      : adapter.schemaName
+        ? [adapter.schemaName]
+        : undefined,
     tablesFilter,
     // Drizzle extensionsFilter supports only postgis for now
     // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26

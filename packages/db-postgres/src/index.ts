@@ -173,6 +173,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      tableSchema: args.tableSchema,
       tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',

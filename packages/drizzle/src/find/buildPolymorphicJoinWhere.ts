@@ -1,6 +1,6 @@
 import type { Column, SQL } from 'drizzle-orm'
 
-import { and, getTableName, isNotNull, isNull, or, sql } from 'drizzle-orm'
+import { and, getTableName, getTableUniqueName, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { type FlattenedField, type Operator, QueryError, type Where } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
@@ -390,9 +390,25 @@ const getHasManySelectExpression = ({
   let qualifiedValuesTableName = valuesTableName
   let parentTableName = getTableName(table)
 
-  if (adapter.schemaName) {
-    qualifiedValuesTableName = `"${adapter.schemaName}"."${valuesTableName}"`
-    parentTableName = `"${adapter.schemaName}"."${parentTableName}"`
+  // Each table carries its own schema, which differs from `schemaName` when `tableSchema` is set
+  const getSchemaName = (drizzleTable: GenericTable) => {
+    const schemaName = getTableUniqueName(drizzleTable).slice(
+      0,
+      -getTableName(drizzleTable).length - 1,
+    )
+
+    return schemaName === 'public' ? undefined : schemaName
+  }
+  const valuesTable = adapter.tables[valuesTableName]
+  const valuesTableSchema = valuesTable ? getSchemaName(valuesTable) : adapter.schemaName
+  const parentTableSchema = getSchemaName(table)
+
+  if (valuesTableSchema) {
+    qualifiedValuesTableName = `"${valuesTableSchema}"."${valuesTableName}"`
+  }
+
+  if (parentTableSchema) {
+    parentTableName = `"${parentTableSchema}"."${parentTableName}"`
   }
 
   if (adapter.name === 'postgres') {

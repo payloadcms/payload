@@ -72,6 +72,7 @@ export default buildConfig({
 | `query.operatorHandlers`         | Customize how Payload's `contains`, `like`, `not_like`, and `not_equals` query operators are built, for example to make text matching accent-insensitive. [More details](#custom-query-operators).                                                                                                                                                        |
 | `migrationDir`                   | Customize the directory that migrations are stored.                                                                                                                                                                                                                                                                                                       |
 | `schemaName` (experimental)      | A string for the postgres schema to use, defaults to 'public'.                                                                                                                                                                                                                                                                                            |
+| `tableSchema` (experimental)     | A function that returns the postgres schema for a table or enum, based on its name. Return `undefined` to use `schemaName`. [More Details](#schemas-per-table)                                                                                                                                                                                            |
 | `idType`                         | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                                                                                                                                                                                                       |
 | `transactionOptions`             | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                                                                                                                                                                                                |
 | `disableCreateDatabase`          | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                                                                                                                                                                                                   |
@@ -217,6 +218,57 @@ const result = await payload.db.drizzle
     and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`),
   )
 ```
+
+## Schemas per table
+
+By default, all tables and enums that Payload creates live in a single Postgres schema, which is `public` unless you set `schemaName`. If you want to spread them over several schemas, for example to give each part of a larger application its own schema, pass a `tableSchema` function. It is called for every table and enum that Payload builds from your configuration, and returns the name of the schema to use. The `payload_migrations` table is the exception: it always stays in the default schema. Returning `undefined` (or the name of the default schema) keeps the item in the default schema.
+
+`tableSchema` is available in `@payloadcms/db-postgres`.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    tableSchema: ({ name, type }) => {
+      // `type` is either 'table' or 'enum'
+      // Remove the `enum_` and `_` prefixes of enums and versions tables, so that they follow their collection
+      const baseName = name.replace(/^(enum)?_+/, '')
+
+      if (baseName.startsWith('inventory_')) {
+        return 'inventory'
+      }
+
+      return undefined
+    },
+  }),
+})
+```
+
+The function receives the final database name of the table or enum, for example `posts`, `posts_locales`, `_posts_v` or `enum_posts_status`. These names are derived from your collection and field slugs (or their [`dbName`](/docs/configuration/collections#config-options)), so a naming convention such as a prefix per module is the easiest way to map them. Versions tables start with `_` and enums with `enum_`, so strip those prefixes first, as in the example above, to keep a collection and its versions and enums together.
+
+Things to know:
+
+- Schemas other than the default one are created by the migration that [`migrate:create`](/docs/database/migrations) generates (`CREATE SCHEMA`), or by [`push`](#prototyping-in-development-mode) in development. The default schema (`schemaName`, or `public`) has to exist already, as before.
+- If you create a schema yourself, for example to grant roles on it, change `CREATE SCHEMA` to `CREATE SCHEMA IF NOT EXISTS` in the generated migration. Otherwise `migrate` fails because the schema already exists. Also remove the matching `DROP SCHEMA` from `down`, or `migrate down` drops your schema together with its grants.
+- `migrate:fresh` drops every schema that `tableSchema` returns, including everything in it, and runs your migrations again. It never drops `public` unless `public` is the default schema; the tables and enums that Payload built in `public` are dropped one by one instead.
+- In development, restart the server after changing `tableSchema`: the automatic push does not notice the change.
+- If `schemaName` is set and `tableSchema` returns `public`, the automatic push in development manages `public` as well. Protect other tables that live there with the `tablesFilter` option, for example `tablesFilter: ['!my_table']`. `tablesFilter` protects tables, not enums or sequences.
+- Schemas returned by `tableSchema` should contain only objects that Payload owns. In development, the automatic push can drop other enums, views and empty tables in those schemas without a warning.
+- The `payload_migrations` table always stays in the default schema; `tableSchema` is not asked about it.
+- Relationships, versions and localized fields can point across schemas. Foreign keys are created as usual.
+- When you add `tableSchema` to an existing project, or change its result, tables move to a different schema. Drizzle can't tell a moved table or enum from a new one, so it may ask you how to proceed when you run `migrate:create` (answer that it was renamed), and creating a new table instead of moving the existing one would drop its data. Review the generated migration before you run it: a moved table should be changed with `ALTER TABLE ... SET SCHEMA` (an enum with `ALTER TYPE ... SET SCHEMA`), not dropped and created again.
+- A table or enum name should only exist in one schema, as with `schemaName`.
+- Without `tableSchema`, nothing changes.
+- Not supported yet: `payload generate:db-schema` and the predefined migrations (`localize-status`, `sizes-to-variants`, `v2-v3`) only know the default schema.
+
+<Banner type="warning">
+  **Note:** `tableSchema` is experimental, like `schemaName`. Its signature may
+  change.
+</Banner>
 
 ## Tables, relations, and enums
 

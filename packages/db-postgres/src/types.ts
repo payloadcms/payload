@@ -6,6 +6,7 @@ import type {
   MigrateUpArgs,
   PostgresQueryConfig,
   PostgresSchemaHook,
+  TableSchemaResolver,
 } from '@payloadcms/drizzle/postgres'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -80,6 +81,17 @@ export type Args = {
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
+  /**
+   * Resolves the Postgres schema of each table and enum by its name, to spread them over
+   * several schemas. Return `undefined` to use `schemaName` (or `public`).
+   * The `payload_migrations` table always stays in the default schema.
+   *
+   * @experimental Subject to the same restriction as `schemaName`: a table or enum name should only exist in one schema.
+   * @example
+   * // `_` and `enum_` prefixes mark versions tables and enums, so strip them to follow the collection
+   * tableSchema: ({ name }) => (name.replace(/^(enum)?_+/, '').startsWith('inventory_') ? 'inventory' : undefined)
+   */
+  tableSchema?: TableSchemaResolver
   tablesFilter?: string[]
   transactionOptions?: false | PgTransactionConfig
   versionsSuffix?: string
@@ -144,6 +156,7 @@ declare module 'payload' {
     schemaName?: Args['schemaName']
     sessions: DrizzleAdapter['sessions']
     tableNameMap: Map<string, string>
+    tableSchema?: Args['tableSchema']
     tablesFilter?: string[]
     transactionOptions: PgTransactionConfig | undefined
     versionsSuffix?: string

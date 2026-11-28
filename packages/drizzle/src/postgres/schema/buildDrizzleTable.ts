@@ -24,6 +24,7 @@ import type { RawColumn, RawTable } from '../../types.js'
 import type { BasePostgresAdapter } from '../types.js'
 
 import { geometryColumn } from './geometryColumn.js'
+import { resolveSchema } from './resolveSchema.js'
 
 const rawColumnBuilderMap: Partial<Record<RawColumn['type'], any>> = {
   boolean,
@@ -60,10 +61,11 @@ export const buildDrizzleTable = ({
         if ('locale' in column) {
           columns[key] = adapter.enums.enum__locales(column.name)
         } else {
-          adapter.enums[column.enumName] = adapter.pgSchema.enum(
-            column.enumName,
-            column.options as [string, ...string[]],
-          )
+          adapter.enums[column.enumName] = resolveSchema({
+            name: column.enumName,
+            type: 'enum',
+            adapter,
+          }).enum(column.enumName, column.options as [string, ...string[]])
           columns[key] = adapter.enums[column.enumName](column.name)
         }
         break
@@ -206,9 +208,9 @@ export const buildDrizzleTable = ({
     return config
   }
 
-  adapter.tables[rawTable.name] = adapter.pgSchema.table(
-    rawTable.name,
-    columns as any,
-    extraConfig as any,
-  )
+  adapter.tables[rawTable.name] = resolveSchema({
+    name: rawTable.name,
+    type: 'table',
+    adapter,
+  }).table(rawTable.name, columns as any, extraConfig as any)
 }
