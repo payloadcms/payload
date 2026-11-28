@@ -75,22 +75,34 @@ type ColumnItemProps = {
   readonly id: string
   readonly labelText: string
   readonly onToggle: () => void
+  readonly shownCount: number
 }
 
-const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle }) => {
+const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle, shownCount }) => {
   const { t } = useTranslation()
   const {
+    activeIndex,
     attributes,
+    index,
     isDragging,
     isOver,
     isSorting,
     listeners,
     setActivatorNodeRef,
     setNodeRef,
-    transform,
   } = useDraggableSortable({
     id,
   })
+
+  const isSameSection =
+    activeIndex !== undefined &&
+    activeIndex >= 0 &&
+    index !== undefined &&
+    index >= 0 &&
+    activeIndex < shownCount === index < shownCount
+
+  const isOverItem = isOver && isSorting && !isDragging && isSameSection
+  const isOverBelow = isOverItem && activeIndex < index
 
   return (
     <div
@@ -98,14 +110,13 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
         `${baseClass}__item`,
         !active && `${baseClass}__item--inactive`,
         isDragging && `${baseClass}__item--dragging`,
-        isOver && isSorting && !isDragging && `${baseClass}__item--over`,
+        isOverItem && `${baseClass}__item--over`,
+        isOverBelow && `${baseClass}__item--over-bottom`,
       ]
         .filter(Boolean)
         .join(' ')}
       ref={setNodeRef}
       style={{
-        // Keep item in place while dragging - don't apply transform
-        transform: isDragging ? undefined : transform,
         ...attributes.style,
       }}
     >
@@ -311,7 +322,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
         </div>
       </div>
       <div className={`${baseClass}__content`}>
-        <DraggableSortable ids={allIds} onDragEnd={handleDragEnd}>
+        <DraggableSortable ids={allIds} onDragEnd={handleDragEnd} sortingStrategy={() => null}>
           {columnItems.shown.length === 0 && columnItems.hidden.length === 0 && searchQuery && (
             <div className={`${baseClass}__no-results`}>{t('general:noMatchesFound')}</div>
           )}
@@ -327,6 +338,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
                   onToggle={() => {
                     void toggleColumn(item.accessor)
                   }}
+                  shownCount={columnItems.shown.length}
                 />
               ))}
             </div>
@@ -343,6 +355,7 @@ export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
                   onToggle={() => {
                     void toggleColumn(item.accessor)
                   }}
+                  shownCount={columnItems.shown.length}
                 />
               ))}
             </div>
