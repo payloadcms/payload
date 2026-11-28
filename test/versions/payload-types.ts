@@ -637,24 +637,6 @@ export interface VersionPost {
   id: string;
   title: string;
   description: string;
-  createdBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'secondary-admin-users';
-        value: string | SecondaryAdminUser;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'secondary-admin-users';
-        value: string | SecondaryAdminUser;
-      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -2297,8 +2279,6 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
 export interface VersionPostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
-  createdBy?: T;
-  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
