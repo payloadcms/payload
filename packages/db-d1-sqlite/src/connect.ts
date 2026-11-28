@@ -1,3 +1,4 @@
+import type { D1DatabaseSession } from '@cloudflare/workers-types'
 import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
@@ -23,17 +24,18 @@ export const connect: Connect = async function connect(
     const logger = this.logger || false
     const readReplicas = this.readReplicas
 
-    let binding = this.binding
+    let binding: D1DatabaseSession | SQLiteD1Adapter['binding'] = this.binding
 
     if (readReplicas && readReplicas === 'first-primary') {
-      // @ts-expect-error - need to have types that support withSession binding from D1
       binding = this.binding.withSession('first-primary')
     }
 
+    // A read replica session only has `prepare` and `batch`, which is all drizzle calls. Keep
+    // `drizzle.$client` and `client` typed as the binding so their public types don't change.
     this.drizzle = drizzle(binding, {
       logger,
       schema: this.schema,
-    })
+    }) as SQLiteD1Adapter['drizzle']
 
     this.client = this.drizzle.$client as any
 
