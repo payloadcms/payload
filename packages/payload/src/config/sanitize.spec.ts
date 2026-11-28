@@ -1,6 +1,7 @@
-import type { Config } from './types.js'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Config, SanitizedConfig } from './types.js'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { InvalidConfiguration } from '../errors/InvalidConfiguration.js'
 import { sanitizeConfig } from './sanitize.js'
@@ -149,6 +150,88 @@ describe('sanitizeConfig', () => {
       fallback: true,
       localeCodes: [],
       locales: [],
+    })
+  })
+
+  // Dev reloads with server fast refresh re-sanitize collection configs from modules that didn't change
+  it('should not duplicate the orderable field or hook when the same collection config is sanitized again', () => {
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      fields: [{ name: 'title', type: 'text' }],
+      orderable: true,
+    }
+    const sanitize = () => sanitizeConfig({ ...configDefaults, collections: [collection] })
+    const getPosts = (config: SanitizedConfig) =>
+      config.collections.find(({ slug }) => slug === 'posts')
+
+    const firstPosts = getPosts(sanitize())
+    const firstHookCount = firstPosts?.hooks.beforeChange.length
+
+    const secondPosts = getPosts(sanitize())
+
+    expect(
+      secondPosts?.fields.filter((field) => 'name' in field && field.name === '_order'),
+    ).toHaveLength(1)
+    expect(secondPosts?.hooks.beforeChange).toHaveLength(firstHookCount ?? 0)
+    expect(() => sanitize()).not.toThrow()
+  })
+
+  describe('re-sanitizing orderable joins', () => {
+    const getCategories = (): CollectionConfig => ({
+      slug: 'categories',
+      fields: [
+        { name: 'posts', type: 'join', collection: 'posts', on: 'category', orderable: true },
+      ],
+    })
+    const getPosts = (): CollectionConfig => ({
+      slug: 'posts',
+      fields: [{ name: 'category', type: 'relationship', relationTo: 'categories' }],
+      orderable: true,
+    })
+
+    const getOrderKeys = async (config: SanitizedConfig) => {
+      const posts = config.collections.find(({ slug }) => slug === 'posts')!
+      const data: Record<string, unknown> = { category: 'category-1' }
+      const req = { payload: { find: vi.fn(() => Promise.resolve({ docs: [] })) } }
+
+      for (const hook of posts.hooks.beforeChange) {
+        // @ts-expect-error partial hook args
+        await hook({ collection: posts, context: {}, data, operation: 'create', req })
+      }
+
+      return {
+        fields: posts.fields
+          .flatMap((field) =>
+            'name' in field && field.name.endsWith('_order') ? [field.name] : [],
+          )
+          .sort(),
+        setByHooks: Object.keys(data)
+          .filter((key) => key.endsWith('_order'))
+          .sort(),
+      }
+    }
+
+    const expectedKeys = {
+      fields: ['_order', '_posts_posts_order'],
+      setByHooks: ['_order', '_posts_posts_order'],
+    }
+
+    it('should keep join order fields in the ordering hook when both collection configs are sanitized again', async () => {
+      const categories = getCategories()
+      const posts = getPosts()
+      const sanitize = () => sanitizeConfig({ ...configDefaults, collections: [categories, posts] })
+
+      expect(await getOrderKeys(sanitize())).toEqual(expectedKeys)
+      expect(await getOrderKeys(sanitize())).toEqual(expectedKeys)
+    })
+
+    it('should add join order fields to a new target collection config when the join collection config is sanitized again', async () => {
+      const categories = getCategories()
+      const sanitize = () =>
+        sanitizeConfig({ ...configDefaults, collections: [categories, getPosts()] })
+
+      expect(await getOrderKeys(sanitize())).toEqual(expectedKeys)
+      expect(await getOrderKeys(sanitize())).toEqual(expectedKeys)
     })
   })
 })
