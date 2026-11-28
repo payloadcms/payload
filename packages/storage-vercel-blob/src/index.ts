@@ -40,6 +40,10 @@ export type VercelBlobStorageOptions = {
 
   /**
    * Upload directly to Vercel Blob instead of through Payload.
+   *
+   * Files at or above the upload session threshold (64MB by default) use resumable upload
+   * sessions instead: each segment is uploaded to a temporary blob, and an interrupted upload
+   * continues from the segments Vercel Blob already has.
    */
   clientUploads?: ClientUploadsConfig
 

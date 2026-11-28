@@ -228,7 +228,7 @@ services:
   # ── Vercel Blob (vercel-blob-emulator) ──────────────────────
   vercel-blob:
     profiles: [all, storage]
-    image: ghcr.io/payloadcms/vercel-blob-emulator:latest
+    image: ghcr.io/payloadcms/vercel-blob-emulator:1.0.2
     container_name: vercel-blob-payload-test
     restart: always
     ports:
