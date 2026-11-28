@@ -8,7 +8,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
     // TO-DO (v4): SerializedUploadNode should use UploadData_P4
     const uploadNode = node as UploadDataImproved
-    if (typeof uploadNode.value !== 'object') {
+    if (!uploadNode.value || typeof uploadNode.value !== 'object') {
       return null
     }
 
@@ -21,7 +21,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     /**
      * If the upload is not an image, return a link to the upload
      */
-    if (!uploadDoc.mimeType.startsWith('image')) {
+    if (!uploadDoc.mimeType?.startsWith('image')) {
       return (
         <a href={url} rel="noopener noreferrer">
           {uploadDoc.filename}
