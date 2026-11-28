@@ -344,6 +344,7 @@ export const itTranslations: DefaultTranslationsObject = {
     export: 'Esportazione',
     fallbackToDefaultLocale: 'Fallback al locale predefinito',
     false: 'Falso',
+    field: 'Field',
     filter: 'Filtro',
     filters: 'Filtri',
     filterWhere: 'Filtra {{label}} se',
