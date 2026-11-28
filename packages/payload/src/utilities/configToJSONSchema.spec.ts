@@ -934,4 +934,173 @@ describe('configToJSONSchema', () => {
     // Doesn't pull in unrelated collections.
     expect(schema.$defs?.other).toBeUndefined()
   })
+
+  it('should reference the shared JsonValue definition for plain json fields', () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [{ slug: 'posts', fields: [{ name: 'metadata', type: 'json' }] }],
+    }
+
+    const { jsonSchema: schema } = configToJSONSchema(sanitizeConfig(config), 'text')
+
+    // A plain json field is a JSON value — it references the shared recursive
+    // definition instead of inlining `type: [...]` (which compiled to
+    // `{ [k: string]: unknown }` and broke TanStack Start, fixes #19783).
+    expect((schema?.$defs?.posts as JSONSchema4).properties!.metadata).toStrictEqual({
+      $ref: '#/$defs/payload.JsonValue',
+    })
+    expect(schema?.$defs?.['payload.JsonValue']).toStrictEqual({
+      title: 'JsonValue',
+      anyOf: [
+        { type: 'string' },
+        { type: 'number' },
+        { type: 'boolean' },
+        { type: 'null' },
+        { type: 'array', items: { $ref: '#/$defs/payload.JsonValue' } },
+        { type: 'object', additionalProperties: { $ref: '#/$defs/payload.JsonValue' } },
+      ],
+    })
+  })
+
+  it('should compile json fields to a serialisable JsonValue type, not unknown', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        { slug: 'posts', fields: [{ name: 'metadata', type: 'json' }] },
+        { slug: 'media', fields: [], upload: true },
+      ],
+    }
+
+    const { jsonSchema: schema } = configToJSONSchema(sanitizeConfig(config), 'text')
+    const compiled = await compile(schema, 'Config', {
+      bannerComment: '',
+      style: { singleQuote: true },
+      unreachableDefinitions: true,
+      cwd: process.cwd(),
+    })
+
+    // The generated types must not type JSON fields as `unknown`: TanStack
+    // Start's createServerFn serialisability check rejects it (fixes #19783).
+    // (The `Auth` interface still contains a pre-existing
+    // `[k: string]: unknown` from the auth-operations schema — out of scope
+    // here, it is not part of any document type a server function returns.)
+    expect(compiled).toContain('JsonValue')
+    expect(compiled).toMatch(/metadata\?: JsonValue/)
+    expect(compiled).toMatch(/encoding\?: \{\s*\[k: string\]: JsonValue;?\s*\}/)
+    expect(compiled).not.toMatch(/metadata\?: \{[^}]*unknown/)
+  })
+
+  it('should bundle JsonValue into the standalone schema for a json field', () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [{ slug: 'posts', fields: [{ name: 'metadata', type: 'json' }] }],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const entity = sanitizedConfig.collections.find((collection) => collection.slug === 'posts')!
+
+    const schema = entityToStandaloneJSONSchema({
+      config: sanitizedConfig,
+      defaultIDType: 'text',
+      entity,
+    })
+
+    // The standalone schema must resolve its own `$ref`s: a dangling
+    // `#/$defs/payload.JsonValue` would break consumers of the standalone schema.
+    expect(schema.$defs?.['payload.JsonValue']).toBeDefined()
+  })
+
+  it('should keep a user interfaceName of JsonValue separate from the shared JSON definition', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            { name: 'metadata', type: 'json' },
+            {
+              name: 'customJson',
+              type: 'group',
+              interfaceName: 'JsonValue',
+              fields: [{ name: 'title', type: 'text' }],
+            },
+          ],
+        },
+      ],
+    }
+
+    const { jsonSchema: schema } = configToJSONSchema(sanitizeConfig(config), 'text')
+
+    // The shared JSON union lives under a reserved `$defs` key, so a group with
+    // `interfaceName: 'JsonValue'` cannot replace it (and the shared definition
+    // cannot replace the user group).
+    expect(schema?.$defs?.['payload.JsonValue']).toStrictEqual({
+      title: 'JsonValue',
+      anyOf: [
+        { type: 'string' },
+        { type: 'number' },
+        { type: 'boolean' },
+        { type: 'null' },
+        { type: 'array', items: { $ref: '#/$defs/payload.JsonValue' } },
+        { type: 'object', additionalProperties: { $ref: '#/$defs/payload.JsonValue' } },
+      ],
+    })
+    expect((schema?.$defs?.posts as JSONSchema4).properties!.metadata).toStrictEqual({
+      $ref: '#/$defs/payload.JsonValue',
+    })
+    // The user group keeps its own definition and reference.
+    expect((schema?.$defs?.posts as JSONSchema4).properties!.customJson).toStrictEqual({
+      $ref: '#/$defs/JsonValue',
+    })
+    expect((schema?.$defs?.JsonValue as JSONSchema4).properties!.title).toStrictEqual({
+      type: ['string', 'null'],
+    })
+
+    const compiled = await compile(schema, 'Config', {
+      bannerComment: '',
+      style: { singleQuote: true },
+      unreachableDefinitions: true,
+      cwd: process.cwd(),
+    })
+
+    // Plain JSON fields keep the shared union type; the user group gets the
+    // compiler's de-duplicated name for its own shape.
+    expect(compiled).toMatch(/metadata\?: JsonValue;/)
+    expect(compiled).toMatch(/customJson\?: JsonValue1;/)
+  })
+
+  it('should keep a user JsonValue interface in the standalone schema', () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            { name: 'metadata', type: 'json' },
+            {
+              name: 'customJson',
+              type: 'group',
+              interfaceName: 'JsonValue',
+              fields: [{ name: 'title', type: 'text' }],
+            },
+          ],
+        },
+      ],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const entity = sanitizedConfig.collections.find((collection) => collection.slug === 'posts')!
+
+    const schema = entityToStandaloneJSONSchema({
+      config: sanitizedConfig,
+      defaultIDType: 'text',
+      entity,
+    })
+
+    // The shared definition must not overwrite the user group (and vice versa).
+    expect(schema.$defs?.['payload.JsonValue']).toBeDefined()
+    expect((schema.$defs?.JsonValue as JSONSchema4).properties!.title).toStrictEqual({
+      type: ['string', 'null'],
+    })
+  })
 })
