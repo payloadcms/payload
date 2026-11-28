@@ -29,6 +29,7 @@ import type {
   FieldOperation,
   FieldPermissions,
   FieldServerProps,
+  GenerateCollectionFrontendPath,
   GeneratedTypes,
   GlobalAfterChangeHook,
   GlobalBeforeChangeHook,
@@ -965,6 +966,33 @@ describe('Types testing', () => {
           overrideAccess: true,
         }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
+    })
+  })
+
+  describe('generateFrontendPath', () => {
+    test('should type doc from the collection slug', () => {
+      expect(payload.generateFrontendPath).type.toBeCallableWith({
+        collection: 'posts',
+        doc: { title: 'Title' },
+      })
+      expect(payload.generateFrontendPath).type.not.toBeCallableWith({
+        collection: 'posts',
+        doc: { title: 1 },
+      })
+    })
+
+    test('should type doc from the global slug', () => {
+      expect(payload.generateFrontendPath).type.toBeCallableWith({ doc: {}, global: 'menu' })
+      expect(payload.generateFrontendPath).type.not.toBeCallableWith({
+        doc: { text: 1 },
+        global: 'menu',
+      })
+    })
+
+    test('should pass a partial doc to the config function', () => {
+      expect<Parameters<GenerateCollectionFrontendPath<'posts'>>[0]['doc']>().type.toBe<
+        Partial<Post>
+      >()
     })
   })
 

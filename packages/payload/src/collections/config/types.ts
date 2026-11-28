@@ -75,6 +75,16 @@ import type {
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedCollection[string extends CollectionSlug ? CollectionSlug : TSlug]
 
+export type GenerateCollectionFrontendPath<TSlug extends CollectionSlug = any> = (args: {
+  collection: SanitizedCollectionConfig
+  /**
+   * Partial because it may not include every field: populated docs only have the fields selected
+   * by `defaultPopulate`, and previews pass the unsaved form state.
+   */
+  doc: IsAny<TSlug> extends true ? any : Partial<DataFromCollectionSlug<TSlug>>
+  req: PayloadRequest
+}) => null | Promise<null | string | undefined> | string | undefined
+
 /**
  * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.
  * Use this instead of the project-wide {@link DefaultDocumentIDType} when the collection slug is
@@ -670,6 +680,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Cannot be used together with `tags` or `hierarchy`.
    */
   folders?: boolean | FoldersConfig
+  /**
+   * Returns the frontend path of a document, such as `/posts/hello`. Payload uses it for rich text links,
+   * previews and plugins, and you can call it yourself with `payload.generateFrontendPath`.
+   *
+   * Return `null` or `undefined` when the document has no frontend page.
+   * @see https://payloadcms.com/docs/configuration/collections#frontend-path
+   */
+  generateFrontendPath?: GenerateCollectionFrontendPath<TSlug>
   /**
    * GraphQL configuration
    */

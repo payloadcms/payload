@@ -38,6 +38,13 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
+export type GenerateGlobalFrontendPath<TSlug extends GlobalSlug = any> = (args: {
+  /** Partial because previews pass the unsaved form state. */
+  doc: IsAny<TSlug> extends true ? any : Partial<DataFromGlobalSlug<TSlug>>
+  global: SanitizedGlobalConfig
+  req: PayloadRequest
+}) => null | Promise<null | string | undefined> | string | undefined
+
 export type GlobalAccess<TData = any> = {
   read?: Access<TData>
   readVersions?: Access<TData>
@@ -249,6 +256,14 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Returns the frontend path of the global, such as `/` for a home page global. Payload uses it for
+   * previews and plugins, and you can call it yourself with `payload.generateFrontendPath`.
+   *
+   * Return `null` or `undefined` when the global has no frontend page.
+   * @see https://payloadcms.com/docs/configuration/globals#frontend-path
+   */
+  generateFrontendPath?: GenerateGlobalFrontendPath<TSlug>
   graphQL?:
     | {
         disableMutations?: true

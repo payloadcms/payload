@@ -19,6 +19,7 @@ export type ServerOnlyGlobalProperties = keyof Pick<
   | 'endpoints'
   | 'fields'
   | 'flattenedFields'
+  | 'generateFrontendPath'
   | 'hooks'
   | 'llmInstructions'
   | 'select'
@@ -48,6 +49,7 @@ const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
   'endpoints',
   'custom',
   'flattenedFields',
+  'generateFrontendPath',
   'select',
   // `admin` is handled separately
 ]

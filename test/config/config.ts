@@ -40,6 +40,7 @@ export default buildConfigWithDefaults({
             path: '/hello',
           },
         ],
+        generateFrontendPath: ({ doc }) => (doc.title ? `/pages/${doc.title}` : null),
         fields: [
           {
             name: 'title',
@@ -111,6 +112,7 @@ export default buildConfigWithDefaults({
             path: '/greet',
           },
         ],
+        generateFrontendPath: () => '/',
         fields: [
           {
             name: 'title',
