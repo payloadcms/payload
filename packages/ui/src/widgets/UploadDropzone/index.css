@@ -24,7 +24,7 @@
 
     &.dragging {
       border-color: var(--color-border-selected);
-      background: var(--color-bg-selected);
+      background: var(--color-bg-secondary);
     }
   }
 
@@ -47,7 +47,6 @@
   }
 
   .upload-dropzone-widget__description,
-  .upload-dropzone-widget__drag-message,
   .upload-dropzone-widget__message {
     margin: 0;
     font-family: var(--text-body-medium-font-family);
@@ -55,26 +54,11 @@
     line-height: var(--text-body-medium-line-height);
   }
 
-  .upload-dropzone-widget__description,
-  .upload-dropzone-widget__drag-message {
+  .upload-dropzone-widget__description {
     color: color-mix(in srgb, var(--color-text-secondary) 91%, var(--color-text) 9%);
   }
 
   .upload-dropzone-widget__message {
     color: var(--color-text);
-  }
-
-  .upload-dropzone-widget__drag-message {
-    display: none;
-  }
-
-  .upload-dropzone-widget__dropzone.dragging {
-    .upload-dropzone-widget__content {
-      display: none;
-    }
-
-    .upload-dropzone-widget__drag-message {
-      display: block;
-    }
   }
 }

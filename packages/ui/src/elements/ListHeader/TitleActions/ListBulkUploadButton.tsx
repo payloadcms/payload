@@ -1,13 +1,10 @@
 'use client'
 import type { CollectionSlug } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
-import { useHierarchy } from '../../../providers/Hierarchy/index.js'
-import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { useOpenListBulkUpload } from '../../BulkUpload/useOpenListBulkUpload.js'
 import { Button } from '../../Button/index.js'
 
 export function ListBulkUploadButton({
@@ -21,39 +18,8 @@ export function ListBulkUploadButton({
   isBulkUploadEnabled: boolean
   onBulkUploadSuccess?: () => void
 }) {
-  const {
-    modalSlug: bulkUploadModalSlug,
-    setCollectionSlug,
-    setOnSuccess,
-    setParentID,
-  } = useBulkUpload()
-  const { parent } = useHierarchy()
   const { t } = useTranslation()
-  const { openModal } = useModal()
-  const router = useRouter()
-
-  const openBulkUpload = React.useCallback(() => {
-    setCollectionSlug(collectionSlug)
-    setParentID(parent?.id)
-    openModal(bulkUploadModalSlug)
-    setOnSuccess(() => {
-      if (typeof onBulkUploadSuccess === 'function') {
-        onBulkUploadSuccess()
-      } else {
-        router.refresh()
-      }
-    })
-  }, [
-    router,
-    collectionSlug,
-    bulkUploadModalSlug,
-    parent,
-    openModal,
-    setCollectionSlug,
-    setParentID,
-    setOnSuccess,
-    onBulkUploadSuccess,
-  ])
+  const openBulkUpload = useOpenListBulkUpload({ collectionSlug, onBulkUploadSuccess })
 
   if (!hasCreatePermission || !isBulkUploadEnabled) {
     return null
@@ -64,7 +30,7 @@ export function ListBulkUploadButton({
       aria-label={t('upload:bulkUpload')}
       buttonStyle="pill"
       key="bulk-upload-button"
-      onClick={openBulkUpload}
+      onClick={() => openBulkUpload()}
       size="medium"
     >
       {t('upload:bulkUpload')}

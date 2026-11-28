@@ -1,6 +1,5 @@
 'use client'
 
-import { validateMimeType } from 'payload/shared'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -10,6 +9,7 @@ import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { ImageStackIcon } from '../../icons/ImageStack/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isFileTypeAccepted } from '../../utilities/isFileTypeAccepted.js'
 
 type Props = {
   collections: Array<{ mimeTypes?: string[]; slug: string }>
@@ -47,9 +47,7 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
   const onDrop = React.useCallback(
     (files: FileList) => {
       const compatibleCollections = collections.filter(({ mimeTypes }) =>
-        Array.from(files).every(
-          (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
-        ),
+        Array.from(files).every((file) => isFileTypeAccepted({ file, mimeTypes })),
       )
 
       if (!compatibleCollections.length) {
@@ -80,9 +78,6 @@ export function UploadDropzoneWidgetClient({ collections }: Props) {
           {t('dashboard:widgetUploadFiles')}
         </Button>
       </div>
-      <p className="upload-dropzone-widget__drag-message">
-        {t('dashboard:widgetDropFilesToUpload')}
-      </p>
     </Dropzone>
   )
 }

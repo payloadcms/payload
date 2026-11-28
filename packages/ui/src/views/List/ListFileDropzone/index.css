@@ -1,0 +1,43 @@
+@layer payload-default {
+  /* Higher specificity than `.dropzone.dropzone--style-outline`, which unsets all styles */
+  .dropzone.dropzone--style-outline.list-file-dropzone {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    border-radius: var(--radius-medium);
+  }
+
+  .dropzone.dropzone--style-outline.list-file-dropzone.dragging {
+    background: var(--color-bg-secondary);
+  }
+
+  .list-file-dropzone__message-anchor {
+    display: none;
+  }
+
+  /* Keeps the message above the page controls while a long list scrolls */
+  .list-file-dropzone.dragging .list-file-dropzone__message-anchor {
+    position: sticky;
+    inset-block-end: var(--page-controls-height, var(--spacer-0));
+    display: block;
+    height: 0;
+    margin-block-start: auto;
+  }
+
+  .list-file-dropzone__message {
+    position: absolute;
+    inset-block-end: var(--spacer-2);
+    inset-inline: 0;
+    width: fit-content;
+    margin: 0 auto;
+    padding: var(--spacer-1) var(--spacer-2);
+    border-radius: var(--radius-small);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+}

@@ -16,6 +16,15 @@
     height: min(720px, var(--dialog-max-height));
   }
 
+  /* Higher specificity than `.dropzone.dropzone--style-outline`, which unsets all styles */
+  .dropzone.dropzone--style-outline.bulk-upload--file-manager__dropzone {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: inherit;
+  }
+
   /* The body is the two-column row (file tree + edit view) that fills the space between the header
      and the actions footer. */
   .bulk-upload--file-manager__body {

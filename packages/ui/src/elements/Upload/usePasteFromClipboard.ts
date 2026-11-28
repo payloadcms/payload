@@ -2,13 +2,13 @@
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { validateMimeType } from 'payload/shared'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { getFileOrUrlFromClipboard } from '../../utilities/getFilesFromClipboard.js'
+import { isFileTypeAccepted } from '../../utilities/isFileTypeAccepted.js'
 import { pasteURLDrawerSlug } from './UploadFromURLModal/index.js'
 
 type UsePasteFromClipboardArgs = {
@@ -52,10 +52,7 @@ export const usePasteFromClipboard = ({
 
     if (result?.type === 'file') {
       const [pastedFile] = result.files
-      if (
-        uploadConfig?.mimeTypes?.length &&
-        !validateMimeType(pastedFile.type, uploadConfig.mimeTypes)
-      ) {
+      if (!isFileTypeAccepted({ file: pastedFile, mimeTypes: uploadConfig?.mimeTypes })) {
         toast.error(t('error:invalidFileType'))
         return
       }

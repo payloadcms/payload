@@ -3,20 +3,45 @@ import React from 'react'
 
 import './index.css'
 
+const baseClass = 'dropzone'
+
+/**
+ * Dropzones handle only file drags, so other drags, such as a rich text block, reach the page.
+ */
+const isFileDrag = (e: DragEvent) => Boolean(e.dataTransfer?.types.includes('Files'))
+
 const handleDragOver = (e: DragEvent) => {
+  if (!isFileDrag(e)) {
+    return
+  }
+
   e.preventDefault()
   e.stopPropagation()
 }
-
-const baseClass = 'dropzone'
 
 export type Props = {
   readonly children?: React.ReactNode
   readonly className?: string
   readonly disabled?: boolean
-  readonly dropzoneStyle?: 'default' | 'none'
+  /**
+   * - `default`: a dashed box with a background
+   * - `none`: no styles
+   * - `outline`: no styles until files are dragged over it, then a dashed outline. Dropzones nested
+   *   inside it still get the drag.
+   * @default 'default'
+   */
+  readonly dropzoneStyle?: 'default' | 'none' | 'outline'
   readonly hasError?: boolean
+  /**
+   * Only a `default` style dropzone can take focus.
+   * @default true
+   */
   readonly isFocusable?: boolean
+  /**
+   * When false, the dropzone does not take files pasted into it, so paste works as normal in inputs inside it.
+   * @default true
+   */
+  readonly isPasteEnabled?: boolean
   readonly multipleFiles?: boolean
   readonly onChange: (e: FileList) => void
 }
@@ -28,6 +53,7 @@ export function Dropzone({
   dropzoneStyle = 'default',
   hasError = false,
   isFocusable = true,
+  isPasteEnabled = true,
   multipleFiles,
   onChange,
 }: Props) {
@@ -59,27 +85,61 @@ export function Dropzone({
     [addFiles],
   )
 
+  /**
+   * The elements the current drag has entered. The browser fires `dragleave` on a child when the
+   * drag moves to its parent or a sibling, so `dragging` turns off only when no entered element is left.
+   */
+  const enteredTargetsRef = React.useRef<EventTarget[]>([])
+
   const handleDragEnter = React.useCallback((e: DragEvent) => {
+    if (!isFileDrag(e)) {
+      return
+    }
+
     e.preventDefault()
     e.stopPropagation()
+    enteredTargetsRef.current = [...enteredTargetsRef.current, e.target]
     setDragging(true)
   }, [])
 
   const handleDragLeave = React.useCallback((e: DragEvent) => {
+    if (!isFileDrag(e)) {
+      return
+    }
+
     e.preventDefault()
     e.stopPropagation()
+
+    const div = dropRef.current
+    enteredTargetsRef.current = enteredTargetsRef.current.filter(
+      (target) => target !== e.target && target instanceof Node && div?.contains(target),
+    )
+
+    if (enteredTargetsRef.current.length === 0) {
+      setDragging(false)
+    }
+  }, [])
+
+  /**
+   * Runs in the capture phase, before an element inside the dropzone can stop the drop. The browser
+   * sends no `dragleave` after a drop, so without this the drag state would stay on.
+   */
+  const resetDragState = React.useCallback(() => {
+    enteredTargetsRef.current = []
     setDragging(false)
   }, [])
 
   const handleDrop = React.useCallback(
     (e: DragEvent) => {
+      if (!isFileDrag(e)) {
+        return
+      }
+
       e.preventDefault()
       e.stopPropagation()
-      setDragging(false)
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         addFiles(e.dataTransfer.files)
-        setDragging(false)
 
         try {
           e.dataTransfer.clearData()
@@ -99,20 +159,32 @@ export function Dropzone({
       div.addEventListener('dragenter', handleDragEnter)
       div.addEventListener('dragleave', handleDragLeave)
       div.addEventListener('dragover', handleDragOver)
+      div.addEventListener('drop', resetDragState, { capture: true })
       div.addEventListener('drop', handleDrop)
-      div.addEventListener('paste', handlePaste)
+      if (isPasteEnabled) {
+        div.addEventListener('paste', handlePaste)
+      }
 
       return () => {
         div.removeEventListener('dragenter', handleDragEnter)
         div.removeEventListener('dragleave', handleDragLeave)
         div.removeEventListener('dragover', handleDragOver)
+        div.removeEventListener('drop', resetDragState, { capture: true })
         div.removeEventListener('drop', handleDrop)
         div.removeEventListener('paste', handlePaste)
       }
     }
 
     return () => null
-  }, [disabled, handleDragEnter, handleDragLeave, handleDrop, handlePaste])
+  }, [
+    disabled,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop,
+    handlePaste,
+    isPasteEnabled,
+    resetDragState,
+  ])
 
   const classes = [
     baseClass,
@@ -129,7 +201,7 @@ export function Dropzone({
     <div
       className={classes}
       ref={dropRef}
-      tabIndex={isFocusable && dropzoneStyle !== 'none' ? 0 : undefined}
+      tabIndex={isFocusable && dropzoneStyle === 'default' ? 0 : undefined}
     >
       {children}
     </div>

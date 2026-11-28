@@ -1458,9 +1458,18 @@ describe('Dashboard', () => {
         ]),
       )
 
-      await dropzone.dispatchEvent('dragenter')
+      await dropzone.evaluate((element) => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(['pdf'], 'dashboard.pdf', { type: 'application/pdf' }))
+        element.dispatchEvent(new DragEvent('dragenter', { bubbles: true, dataTransfer: transfer }))
+      })
       await expect(dropzone).toHaveClass(/dragging/)
-      await expect(dropzone.getByText('Drop files to upload')).toBeVisible()
+      await expect(icon).toBeVisible()
+      await expect(widget.getByRole('button', { name: 'Upload files' })).toBeVisible()
+      await expect(
+        dropzone.getByText('Upload from your computer via drag-and-drop', { exact: false }),
+      ).toBeVisible()
+      await expect(dropzone.getByText('Drop files to upload')).toHaveCount(0)
 
       await dropzone.evaluate((element) => {
         const transfer = new DataTransfer()

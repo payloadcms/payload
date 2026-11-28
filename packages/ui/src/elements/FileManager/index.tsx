@@ -2,7 +2,7 @@
 import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatFilesize, isImage, validateMimeType } from 'payload/shared'
+import { formatFilesize, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -17,6 +17,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { useFileFieldUploadSession } from '../../providers/UploadSessions/useFileFieldUploadSession.js'
+import { isFileTypeAccepted } from '../../utilities/isFileTypeAccepted.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -86,8 +87,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       }
       if (
         file instanceof File &&
-        uploadConfig.mimeTypes?.length &&
-        !validateMimeType(file.type, uploadConfig.mimeTypes)
+        !isFileTypeAccepted({ file, mimeTypes: uploadConfig.mimeTypes })
       ) {
         return t('error:invalidFileType')
       }
@@ -156,8 +156,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
     ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
       if (
         file instanceof File &&
-        uploadConfig.mimeTypes?.length &&
-        !validateMimeType(file.type, uploadConfig.mimeTypes)
+        !isFileTypeAccepted({ file, mimeTypes: uploadConfig.mimeTypes })
       ) {
         toast.error(t('error:invalidFileType'))
         return
