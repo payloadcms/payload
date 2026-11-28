@@ -9,7 +9,12 @@ import {
   type ServerFunction,
   traverseFields,
 } from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  hasLocalizeStatusEnabled,
+  tabHasName,
+} from 'payload/shared'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
@@ -309,6 +314,14 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     : mergeData(fromLocaleDataWithoutID, toLocaleDataWithoutID, fields, req, false)
 
   const data = removeIdIfParentIsLocalized(dataWithID, fields)
+
+  // With localized status, the copy is a draft of the target locale. Otherwise the copied data carries the
+  // source locale's `_status` into a target that has none of its own, and the update publishes it.
+  const entityConfig = globalSlug ? globals[globalSlug].config : collections[collectionSlug].config
+
+  if (hasLocalizeStatusEnabled(entityConfig) && data && typeof data === 'object') {
+    data._status = 'draft'
+  }
 
   return globalSlug
     ? await payload.updateGlobal({

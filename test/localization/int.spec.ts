@@ -34,6 +34,7 @@ import {
 } from './helpers/publishLocales.js'
 import {
   allFieldsLocalizedSlug,
+  copyLocalizedStatusSlug,
   defaultLocale,
   defaultLocale as englishLocale,
   englishTitle,
@@ -6222,6 +6223,89 @@ describe('Localization', () => {
 
       expect(inEnglish.totalDocs).toBeGreaterThan(0)
       expect(inSpanish.totalDocs).toBe(0)
+    })
+  })
+
+  describe('copy to locale with localized status', () => {
+    let user: User
+
+    beforeAll(async () => {
+      user = (
+        await payload.find({
+          collection: 'users',
+          where: { email: { equals: devUser.email } },
+        })
+      ).docs[0] as unknown as User
+
+      user['collection'] = 'users'
+    })
+
+    afterEach(async () => {
+      await payload.delete({ collection: copyLocalizedStatusSlug, where: {} })
+    })
+
+    const createPublishedInEnglish = () =>
+      payload.create({
+        collection: copyLocalizedStatusSlug,
+        data: { _status: 'published', title: 'English title' },
+        locale: defaultLocale,
+      })
+
+    const copyEnglishToSpanish = async (id: number | string, overrideData = false) =>
+      copyDataFromLocaleHandler({
+        collectionSlug: copyLocalizedStatusSlug,
+        docID: id,
+        fromLocale: defaultLocale,
+        overrideData,
+        req: await createLocalReq({ user }, payload),
+        toLocale: spanishLocale,
+      })
+
+    const readSpanish = (id: number | string, draft: boolean) =>
+      payload.findByID({
+        id,
+        collection: copyLocalizedStatusSlug,
+        draft,
+        fallbackLocale: false,
+        locale: spanishLocale,
+      })
+
+    it('should keep the copy a draft in a locale that was never saved', async () => {
+      const doc = await createPublishedInEnglish()
+
+      expect((await readSpanish(doc.id, false))._status).toBe('draft')
+
+      await copyEnglishToSpanish(doc.id)
+
+      expect((await readSpanish(doc.id, false))._status).toBe('draft')
+    })
+
+    it('should put the copied text in the target locale draft', async () => {
+      const doc = await createPublishedInEnglish()
+
+      await copyEnglishToSpanish(doc.id)
+
+      expect((await readSpanish(doc.id, true)).title).toBe('English title')
+    })
+
+    it('should leave the published version of the target locale as it was when overwriting', async () => {
+      const doc = await createPublishedInEnglish()
+
+      await payload.update({
+        id: doc.id,
+        collection: copyLocalizedStatusSlug,
+        data: { _status: 'published', title: 'Spanish title' },
+        locale: spanishLocale,
+        publishSpecificLocale: spanishLocale,
+      })
+
+      await copyEnglishToSpanish(doc.id, true)
+
+      const published = await readSpanish(doc.id, false)
+
+      expect(published._status).toBe('published')
+      expect(published.title).toBe('Spanish title')
+      expect((await readSpanish(doc.id, true)).title).toBe('English title')
     })
   })
 })
