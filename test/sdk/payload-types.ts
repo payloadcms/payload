@@ -160,6 +160,7 @@ export interface Config {
     posts: Post;
     emails: Email;
     media: Media;
+    'text-ids': TextId;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -172,6 +173,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     emails: EmailsSelect<false> | EmailsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'text-ids': TextIdsSelect<false> | TextIdsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -271,6 +273,7 @@ export interface Post {
   localizedText?: string | null;
   number?: number | null;
   number2?: number | null;
+  shortText?: string | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -347,6 +350,24 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-ids".
+ */
+export interface TextId {
+  id: string;
+  shortText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -384,6 +405,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'text-ids';
+        value: string | TextId;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -488,6 +513,7 @@ export interface PostsSelect<T extends boolean = true> {
   localizedText?: T;
   number?: T;
   number2?: T;
+  shortText?: T;
   group?:
     | T
     | {
@@ -545,6 +571,18 @@ export interface MediaSelect<T extends boolean = true> {
       };
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-ids_select".
+ */
+export interface TextIdsSelect<T extends boolean = true> {
+  id?: T;
+  shortText?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -609,6 +647,7 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 export interface Global {
   id: string;
   text?: string | null;
+  shortText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -626,6 +665,7 @@ export interface Global {
  */
 export interface GlobalSelect<T extends boolean = true> {
   text?: T;
+  shortText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -659,7 +699,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'posts' | 'emails' | 'media';
+    relatedCollection: 'users' | 'posts' | 'emails' | 'media' | 'text-ids';
     where?:
       | {
           [k: string]: unknown;
@@ -681,7 +721,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'posts' | 'emails' | 'media')[] | null;
+    excludedCollections?: ('users' | 'posts' | 'emails' | 'media' | 'text-ids')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
