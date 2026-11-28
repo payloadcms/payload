@@ -15,6 +15,8 @@ import { AccessJoinNotes } from './collections/AccessJoinNotes.js'
 import { AccessJoinParents } from './collections/AccessJoinParents.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
+import { DraftAccessJoinDocs } from './collections/DraftAccessJoinDocs.js'
+import { DraftAccessJoinParents } from './collections/DraftAccessJoinParents.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import {
   OperatorHandlerJoinArticles,
@@ -121,6 +123,8 @@ export default buildConfigWithDefaults({
       AccessJoinArticles,
       AccessJoinNotes,
       AccessJoinParents,
+      DraftAccessJoinDocs,
+      DraftAccessJoinParents,
       OperatorHandlerJoinArticles,
       OperatorHandlerJoinNotes,
       OperatorHandlerJoinParents,
