@@ -19,6 +19,25 @@ export type LoadAdminPageArgs = {
   splat?: string
 }
 
+/**
+ * `dynamic` Open Graph images point at an `/og` endpoint that only `@payloadcms/next` registers.
+ * Without one, use the bundled static image instead of advertising a URL that 404s.
+ */
+const withOGImageFallback = (config: SanitizedConfig): SanitizedConfig => {
+  const hasOGImageEndpoint = config.endpoints?.some(
+    (endpoint) => endpoint.path === '/og' && endpoint.method === 'get',
+  )
+
+  if (config.admin.meta.defaultOGImageType !== 'dynamic' || hasOGImageEndpoint) {
+    return config
+  }
+
+  return {
+    ...config,
+    admin: { ...config.admin, meta: { ...config.admin.meta, defaultOGImageType: 'static' } },
+  }
+}
+
 type RSCPayload = RenderableServerComponentBuilder<{
   page: React.ReactElement
   routeKey: string
@@ -201,7 +220,7 @@ export async function loadAdminPage({
     const i18n = await getRequestI18n({ config })
     const meta = await generatePageMetadata({
       adminViews: defaultAdminViews as Parameters<typeof generatePageMetadata>[0]['adminViews'],
-      config,
+      config: withOGImageFallback(config),
       i18n,
       params: { segments },
     })

@@ -263,7 +263,8 @@ describe('General', () => {
         )
       })
 
-      test('should render og:image with dynamic URL', async () => {
+      // Only the Next.js adapter registers the `/og` endpoint that serves dynamic images.
+      test('should render og:image with dynamic URL', { framework: 'next' }, async () => {
         await page.goto(postsUrl.admin)
         const encodedOGDescription = encodeURIComponent('This is a custom OG description')
         const encodedOGTitle = encodeURIComponent('This is a custom OG title')
@@ -274,7 +275,43 @@ describe('General', () => {
         )
       })
 
-      test('should render twitter:image with dynamic URL', async () => {
+      test(
+        'should fall back to the static og:image without an og endpoint',
+        { framework: 'tanstack-start' },
+        async () => {
+          await page.goto(postsUrl.admin)
+          const staticOGImage = /^https?:\/\/[^/]+\/.*static-og-image.*\.png/
+
+          await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+            'content',
+            staticOGImage,
+          )
+          await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+            'content',
+            staticOGImage,
+          )
+        },
+      )
+
+      test('should serve the og:image', async () => {
+        await page.goto(postsUrl.admin)
+        const ogImage = page.locator('meta[property="og:image"]')
+        await expect(ogImage).toHaveAttribute('content', /.+/)
+
+        // The URL's origin comes from `metadataBase`, which may not match the test server's port.
+        const { pathname, search } = new URL(
+          (await ogImage.getAttribute('content')) ?? '',
+          serverURL,
+        )
+        const response = await page.request.get(
+          new URL(`${pathname}${search}`, serverURL).toString(),
+        )
+
+        expect(response.status()).toBe(200)
+        expect(response.headers()['content-type']).toMatch(/^image\//)
+      })
+
+      test('should render twitter:image with dynamic URL', { framework: 'next' }, async () => {
         await page.goto(postsUrl.admin)
 
         const encodedOGDescription = encodeURIComponent('This is a custom OG description')
