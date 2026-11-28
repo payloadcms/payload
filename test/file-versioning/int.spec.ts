@@ -2591,6 +2591,155 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     await expect(stat(path.join(trashMediaDir, filename))).rejects.toMatchObject({ code: 'ENOENT' })
   })
 
+  test('should keep the published file when trashing a draft upload with a pending file replacement', async ({
+    payload,
+  }) => {
+    const publishedBytes = await sharp({
+      create: { background: '#112233', channels: 3, height: 32, width: 32 },
+    })
+      .png()
+      .toBuffer()
+    const draftBytes = await sharp({
+      create: { background: '#445566', channels: 3, height: 32, width: 32 },
+    })
+      .png()
+      .toBuffer()
+
+    const published = await payload.create({
+      collection: draftMediaSlug,
+      data: {
+        _status: 'published',
+        alt: 'published file',
+      },
+      file: {
+        name: 'published-trash.png',
+        data: publishedBytes,
+        mimetype: 'image/png',
+        size: publishedBytes.length,
+      },
+    })
+
+    await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { alt: 'draft file' },
+      draft: true,
+      file: {
+        name: 'draft-trash.png',
+        data: draftBytes,
+        mimetype: 'image/png',
+        size: draftBytes.length,
+      },
+    })
+
+    const draftBeforeTrash = await payload.findByID({
+      id: published.id,
+      collection: draftMediaSlug,
+      draft: true,
+    })
+
+    expect(draftBeforeTrash.filename).not.toBe(published.filename)
+
+    const trashed = await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { deletedAt: new Date().toISOString() },
+    })
+
+    expect(trashed.deletedAt).toBeTruthy()
+    expect(trashed.alt).toBe('published file')
+    expect(trashed.filename).toBe(published.filename)
+    expect(trashed.original?.filename).toBe(published.original?.filename)
+
+    const trashedMain = await payload.findByID({
+      id: published.id,
+      collection: draftMediaSlug,
+      trash: true,
+    })
+
+    expect(trashedMain.filename).toBe(published.filename)
+    expect(trashedMain.original?.filename).toBe(published.original?.filename)
+    expect(await readFile(path.join(draftMediaDir, trashedMain.filename!))).toEqual(publishedBytes)
+
+    const trashedDraft = await payload.findByID({
+      id: published.id,
+      collection: draftMediaSlug,
+      draft: true,
+      trash: true,
+    })
+
+    expect(trashedDraft.filename).toBe(draftBeforeTrash.filename)
+    expect(trashedDraft.alt).toBe('draft file')
+  })
+
+  test('should keep a replacement file uploaded while trashing a published draft upload', async ({
+    payload,
+  }) => {
+    const publishedBytes = await sharp({
+      create: { background: '#112233', channels: 3, height: 32, width: 32 },
+    })
+      .png()
+      .toBuffer()
+    const draftBytes = await sharp({
+      create: { background: '#445566', channels: 3, height: 32, width: 32 },
+    })
+      .png()
+      .toBuffer()
+    const replacementBytes = await sharp({
+      create: { background: '#778899', channels: 3, height: 32, width: 32 },
+    })
+      .png()
+      .toBuffer()
+
+    const published = await payload.create({
+      collection: draftMediaSlug,
+      data: {
+        _status: 'published',
+        alt: 'published file',
+      },
+      file: {
+        name: 'published-replace-trash.png',
+        data: publishedBytes,
+        mimetype: 'image/png',
+        size: publishedBytes.length,
+      },
+    })
+
+    await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { alt: 'draft file' },
+      draft: true,
+      file: {
+        name: 'draft-replace-trash.png',
+        data: draftBytes,
+        mimetype: 'image/png',
+        size: draftBytes.length,
+      },
+    })
+
+    const trashed = await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: {
+        alt: 'replacement during trash',
+        deletedAt: new Date().toISOString(),
+      },
+      file: {
+        name: 'replacement-during-trash.png',
+        data: replacementBytes,
+        mimetype: 'image/png',
+        size: replacementBytes.length,
+      },
+    })
+
+    expect(trashed.deletedAt).toBeTruthy()
+    expect(trashed.filename).toBe('replacement-during-trash.png')
+    expect(trashed.alt).toBe('replacement during trash')
+    expect(trashed.filename).not.toBe(published.filename)
+    expect(await readFile(path.join(draftMediaDir, trashed.filename!))).toEqual(replacementBytes)
+  })
+
   test.options(
     'should keep files when an outer transaction rolls back a nested delete',
     { db: isTransactionalMongoAdapter },
