@@ -5675,6 +5675,62 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       })
     })
 
+    test('should unpublish all locales with a collection scheduled unpublish without a locale', async ({
+      payload,
+    }) => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc to unpublish in every locale',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await seedDraftCollectionSiblingLocales({
+        id: draft.id,
+        payload,
+        title: 'my doc to unpublish in every locale',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        data: { _status: 'published' },
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      await payload.jobs.queue({
+        input: {
+          type: 'unpublish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+        overrideAccess: true,
+        task: 'schedulePublish',
+      })
+
+      await payload.jobs.run({ overrideAccess: true })
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(retrieved._status).toStrictEqual({ de: 'draft', en: 'draft', es: 'draft' })
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
+    })
+
     test('should delete scheduled jobs after a document is deleted', async ({ payload }) => {
       const draft = await payload.create({
         collection: draftCollectionSlug,
@@ -5859,6 +5915,50 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       expect(retrieved._status).toStrictEqual('draft')
       expect(retrieved.title).toStrictEqual('i will be a draft')
+    })
+
+    test('should unpublish all locales with a global scheduled unpublish without a locale', async ({
+      payload,
+    }) => {
+      await seedGlobalSiblingLocales({
+        slug: draftGlobalSlug,
+        payload,
+        title: 'i will be a draft in every locale',
+      })
+
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'i will be a draft in every locale',
+        },
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      await payload.jobs.queue({
+        input: {
+          type: 'unpublish',
+          global: draftGlobalSlug,
+        },
+        overrideAccess: true,
+        task: 'schedulePublish',
+      })
+
+      await payload.jobs.run({ overrideAccess: true })
+
+      const retrieved = await payload.findGlobal({
+        slug: draftGlobalSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(retrieved._status).toStrictEqual({ de: 'draft', en: 'draft', es: 'draft' })
+
+      await cleanupDocuments({
+        collectionSlugs: ['payload-jobs'],
+        payload,
+      })
     })
 
     test('should not return _status field when access control denies read', async ({ payload }) => {
