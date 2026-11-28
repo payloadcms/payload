@@ -11,7 +11,41 @@ import type {
   TypeWithVersion,
 } from 'payload'
 
+export type { ForgotPasswordOptions } from './auth/forgotPassword.js'
+export type { LoginOptions, LoginResult } from './auth/login.js'
+export type { MeOptions, MeResult } from './auth/me.js'
+export type { RefreshOptions, RefreshResult } from './auth/refreshToken.js'
+export type { ResetPasswordOptions, ResetPasswordResult } from './auth/resetPassword.js'
+export type { VerifyEmailOptions } from './auth/verifyEmail.js'
+export type { CountOptions } from './collections/count.js'
+export type { CreateOptions } from './collections/create.js'
+export type { DeleteByIDOptions, DeleteManyOptions, DeleteOptions } from './collections/delete.js'
+export type { FindOptions } from './collections/find.js'
+export type { FindByIDOptions } from './collections/findByID.js'
+export type { FindVersionByIDOptions } from './collections/findVersionByID.js'
+export type { FindVersionsOptions } from './collections/findVersions.js'
+export type { RestoreVersionByIDOptions } from './collections/restoreVersion.js'
+export type { UpdateByIDOptions, UpdateManyOptions, UpdateOptions } from './collections/update.js'
 export { PayloadSDKError } from './errors/PayloadSDKError.js'
+export type { FindGlobalOptions } from './globals/findOne.js'
+export type { FindGlobalVersionByIDOptions } from './globals/findVersionByID.js'
+export type { FindGlobalVersionsOptions } from './globals/findVersions.js'
+export type { RestoreGlobalVersionByIDOptions } from './globals/restoreVersion.js'
+export type { UpdateGlobalOptions } from './globals/update.js'
+export type {
+  BulkOperationResult,
+  DataFromAuthSlug,
+  DataFromCollectionSlug,
+  DataFromGlobalSlug,
+  IDType,
+  JoinQuery,
+  PopulateType,
+  RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
+  SelectFromGlobalSlug,
+  TransformCollectionWithSelect,
+  TransformGlobalWithSelect,
+} from './types.js'
 
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
