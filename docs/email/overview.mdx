@@ -128,9 +128,10 @@ export default buildConfig({
 
 The Resend adapter requires an API key to be passed in the options. This can be found in the Resend dashboard. This is the preferred package if you are deploying on Vercel because this is much more lightweight than the Nodemailer adapter.
 
-| Option | Description                         |
-| ------ | ----------------------------------- |
-| apiKey | The API key for the Resend service. |
+| Option            | Description                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| apiKey            | The API key for the Resend service.                                                                                            |
+| getIdempotencyKey | Optional. Returns the `Idempotency-Key` to send with an email, so a retry can't send it twice. Resend keeps keys for 24 hours. |
 
 ```ts
 import { buildConfig } from 'payload'
