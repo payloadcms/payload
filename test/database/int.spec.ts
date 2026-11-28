@@ -5317,6 +5317,69 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 
+  test.options(
+    'should create a document when upserting empty data and nothing matches',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      await payload.delete({ collection: 'simple', overrideAccess: true, where: {} })
+
+      try {
+        const created = await payload.db.upsert({
+          collection: 'simple',
+          data: {},
+          req: {},
+          where: {
+            text: {
+              equals: 'upsert-empty-data',
+            },
+          },
+        })
+
+        expect(created?.id).toBeTruthy()
+        expect(created.createdAt).toBeTruthy()
+        expect(created.updatedAt).toBeTruthy()
+
+        const { totalDocs } = await payload.count({ collection: 'simple', overrideAccess: true })
+
+        expect(totalDocs).toBe(1)
+      } finally {
+        await payload.delete({ collection: 'simple', overrideAccess: true, where: {} })
+      }
+    },
+  )
+
+  test.options(
+    'should create a document when upserting empty data without timestamps and nothing matches',
+    { db: 'drizzle' },
+    async ({ payload }) => {
+      await payload.delete({ collection: 'noTimeStamps', overrideAccess: true, where: {} })
+
+      try {
+        const created = await payload.db.upsert({
+          collection: 'noTimeStamps',
+          data: {},
+          req: {},
+          where: {
+            title: {
+              equals: 'upsert-empty-data',
+            },
+          },
+        })
+
+        expect(created?.id).toBeTruthy()
+
+        const { totalDocs } = await payload.count({
+          collection: 'noTimeStamps',
+          overrideAccess: true,
+        })
+
+        expect(totalDocs).toBe(1)
+      } finally {
+        await payload.delete({ collection: 'noTimeStamps', overrideAccess: true, where: {} })
+      }
+    },
+  )
+
   test('should apply default values on upsert insert but not on update', async ({ payload }) => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {

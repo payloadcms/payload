@@ -233,7 +233,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         rowKeys.length > 0 &&
         (hasLocalizedData || !rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt'))
 
-      if (hasMainRowData) {
+      // Without an id nothing matched (e.g. an upsert), so the parent row must be inserted even
+      // when the data has no main row fields
+      if (hasMainRowData || !id) {
         if (id) {
           rowToInsert.row.id = id
           ;[insertedRow] = await adapter.insert({
@@ -247,7 +249,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         } else {
           ;[insertedRow] = await adapter.insert({
             db,
-            onConflictDoUpdate: { set: rowToInsert.row, target, where },
+            // Drizzle throws on an empty update set, e.g. `data: {}` on a collection without timestamps
+            onConflictDoUpdate: rowKeys.length
+              ? { set: rowToInsert.row, target, where }
+              : undefined,
             tableName,
             values: rowToInsert.row,
           })
