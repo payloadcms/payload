@@ -1994,6 +1994,78 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect([...versionedCloudFiles.keys()]).toEqual(originalKeys)
   })
 
+  test('should upload every file of an upload in parallel', async ({ payload }) => {
+    let inFlightUploads = 0
+    let maxInFlightUploads = 0
+
+    versionedCloudFailure.beforeUpload = async () => {
+      inFlightUploads += 1
+      maxInFlightUploads = Math.max(maxInFlightUploads, inFlightUploads)
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      inFlightUploads -= 1
+    }
+
+    const created = await payload.create({
+      collection: versionedPublicVariantCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+
+    expect(created.variants?.small?.filename).toBeTruthy()
+    expect(versionedCloudCalls.uploads).toBeGreaterThan(1)
+    expect(maxInFlightUploads).toBe(versionedCloudCalls.uploads)
+  })
+
+  test('should remove sibling uploads only after they finish when one upload fails', async ({
+    payload,
+  }) => {
+    let releaseSiblingUploads!: () => void
+    const siblingUploadsReleased = new Promise<void>((resolve) => {
+      releaseSiblingUploads = resolve
+    })
+    let heldSiblingUploads = 0
+    let hasFailingUploadRun = false
+
+    versionedCloudFailure.uploadNumber = 1
+    versionedCloudFailure.beforeUpload = async ({ uploadNumber }) => {
+      if (uploadNumber === versionedCloudFailure.uploadNumber) {
+        hasFailingUploadRun = true
+        return
+      }
+      heldSiblingUploads += 1
+      await siblingUploadsReleased
+    }
+
+    let isCreateSettled = false
+    const creation = payload
+      .create({
+        collection: versionedPublicVariantCloudMediaSlug,
+        data: {},
+        filePath: firstFile,
+      })
+      .finally(() => {
+        isCreateSettled = true
+      })
+
+    creation.catch(() => {})
+
+    await vi.waitFor(() => {
+      expect(hasFailingUploadRun).toBe(true)
+      expect(heldSiblingUploads).toBeGreaterThan(0)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 20))
+
+    expect(isCreateSettled).toBe(false)
+    expect(versionedCloudCalls.deletes).toEqual([])
+
+    releaseSiblingUploads()
+
+    await expect(creation).rejects.toThrow('Cloud test upload failed')
+
+    expect(heldSiblingUploads).toBe(versionedCloudCalls.uploads - 1)
+    expect([...versionedCloudFiles.keys()]).toEqual([])
+  })
+
   test.options(
     'should remove staged cloud bytes when a later hook fails with a transaction',
     { db: isTransactionalMongoAdapter },

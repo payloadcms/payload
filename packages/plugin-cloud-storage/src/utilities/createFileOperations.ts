@@ -153,6 +153,11 @@ export const createFileOperations = ({
     stage: async ({ data, files, req, trackStagedObject }) => {
       const uploadedKeys = new Set<string>()
       const metadata: Record<string, unknown> = {}
+      const pendingUploads: Array<{
+        dataForUpload: Record<string, unknown>
+        storageFilePath: string
+        uploadFile: Parameters<GeneratedAdapter['handleUpload']>[0]['file']
+      }> = []
       const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
         | { filename: string }
         | undefined
@@ -233,6 +238,12 @@ export const createFileOperations = ({
           },
         })
 
+        pendingUploads.push({ dataForUpload, storageFilePath, uploadFile })
+      }
+
+      // Every location is resolved and tracked before any write starts, so an invalid file
+      // fails without provider writes in flight and each upload sees the final document data.
+      const uploads = pendingUploads.map(async ({ dataForUpload, storageFilePath, uploadFile }) => {
         const dataBeforeUpload = deepCopyObjectSimple(dataForUpload as JsonObject)
         const result = await adapter.handleUpload({
           collection,
@@ -241,6 +252,17 @@ export const createFileOperations = ({
           req,
           storageFilePath,
         })
+
+        return { dataBeforeUpload, result }
+      })
+      // Wait for every write to settle so rollback never deletes while another write is running.
+      const settledUploads = await Promise.allSettled(uploads)
+
+      for (const settled of settledUploads) {
+        if (settled.status === 'rejected') {
+          throw settled.reason
+        }
+        const { dataBeforeUpload, result } = settled.value
 
         if (result && typeof result === 'object') {
           // Adapters may return the entire input document, including fields made stale by this upload.
