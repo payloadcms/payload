@@ -63,6 +63,8 @@ import {
   relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
+  scheduledLocalizedStatusGlobalSlug,
+  scheduledLocalizedStatusSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -6222,6 +6224,168 @@ describe('Localization', () => {
 
       expect(inEnglish.totalDocs).toBeGreaterThan(0)
       expect(inSpanish.totalDocs).toBe(0)
+    })
+  })
+
+  describe('scheduled publish with localized status', () => {
+    const runDueJobs = () => payload.jobs.run({ overrideAccess: true })
+
+    const createDraftInBothLocales = async () => {
+      const doc = await payload.create({
+        collection: scheduledLocalizedStatusSlug,
+        data: { title: 'English draft' },
+        draft: true,
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: scheduledLocalizedStatusSlug,
+        data: { title: 'Spanish draft' },
+        draft: true,
+        locale: spanishLocale,
+      })
+
+      return doc
+    }
+
+    const statusByLocale = async (id: number | string) => {
+      const doc = await payload.findByID({
+        id,
+        collection: scheduledLocalizedStatusSlug,
+        locale: 'all',
+      })
+
+      return {
+        [defaultLocale]: (doc._status as unknown as Record<string, string>)[defaultLocale],
+        [spanishLocale]: (doc._status as unknown as Record<string, string>)[spanishLocale],
+      }
+    }
+
+    const queue = (input: Record<string, unknown>) =>
+      payload.jobs.queue({ input: input as any, task: 'schedulePublish' })
+
+    afterEach(async () => {
+      await payload.delete({ collection: scheduledLocalizedStatusSlug, where: {} })
+      await payload.delete({ collection: 'payload-jobs', where: {} })
+    })
+
+    it('should publish only the requested locale', async () => {
+      const doc = await createDraftInBothLocales()
+
+      await queue({
+        type: 'publish',
+        doc: { relationTo: scheduledLocalizedStatusSlug, value: String(doc.id) },
+        locale: spanishLocale,
+      })
+      await runDueJobs()
+
+      expect(await statusByLocale(doc.id)).toStrictEqual({
+        [defaultLocale]: 'draft',
+        [spanishLocale]: 'published',
+      })
+    })
+
+    it('should publish every locale when no locale is given', async () => {
+      const doc = await createDraftInBothLocales()
+
+      await queue({
+        type: 'publish',
+        doc: { relationTo: scheduledLocalizedStatusSlug, value: String(doc.id) },
+      })
+      await runDueJobs()
+
+      expect(await statusByLocale(doc.id)).toStrictEqual({
+        [defaultLocale]: 'published',
+        [spanishLocale]: 'published',
+      })
+    })
+
+    it('should unpublish every locale when no locale is given', async () => {
+      const doc = await createDraftInBothLocales()
+
+      await payload.update({
+        id: doc.id,
+        collection: scheduledLocalizedStatusSlug,
+        data: { _status: 'published' },
+        publishAllLocales: true,
+      })
+
+      await queue({
+        type: 'unpublish',
+        doc: { relationTo: scheduledLocalizedStatusSlug, value: String(doc.id) },
+      })
+      await runDueJobs()
+
+      expect(await statusByLocale(doc.id)).toStrictEqual({
+        [defaultLocale]: 'draft',
+        [spanishLocale]: 'draft',
+      })
+    })
+
+    it('should unpublish only the requested locale', async () => {
+      const doc = await createDraftInBothLocales()
+
+      await payload.update({
+        id: doc.id,
+        collection: scheduledLocalizedStatusSlug,
+        data: { _status: 'published' },
+        publishAllLocales: true,
+      })
+
+      await queue({
+        type: 'unpublish',
+        doc: { relationTo: scheduledLocalizedStatusSlug, value: String(doc.id) },
+        locale: spanishLocale,
+      })
+      await runDueJobs()
+
+      expect(await statusByLocale(doc.id)).toStrictEqual({
+        [defaultLocale]: 'published',
+        [spanishLocale]: 'draft',
+      })
+    })
+
+    it('should publish and unpublish every locale of a global when no locale is given', async () => {
+      await payload.updateGlobal({
+        slug: scheduledLocalizedStatusGlobalSlug,
+        data: { title: 'English draft' },
+        draft: true,
+        locale: defaultLocale,
+      })
+
+      await payload.updateGlobal({
+        slug: scheduledLocalizedStatusGlobalSlug,
+        data: { title: 'Spanish draft' },
+        draft: true,
+        locale: spanishLocale,
+      })
+
+      const globalStatus = async () => {
+        const doc = await payload.findGlobal({
+          slug: scheduledLocalizedStatusGlobalSlug,
+          locale: 'all',
+        })
+        const status = doc._status as unknown as Record<string, string>
+
+        return { [defaultLocale]: status[defaultLocale], [spanishLocale]: status[spanishLocale] }
+      }
+
+      await queue({ type: 'publish', global: scheduledLocalizedStatusGlobalSlug })
+      await runDueJobs()
+
+      expect(await globalStatus()).toStrictEqual({
+        [defaultLocale]: 'published',
+        [spanishLocale]: 'published',
+      })
+
+      await queue({ type: 'unpublish', global: scheduledLocalizedStatusGlobalSlug })
+      await runDueJobs()
+
+      expect(await globalStatus()).toStrictEqual({
+        [defaultLocale]: 'draft',
+        [spanishLocale]: 'draft',
+      })
     })
   })
 })

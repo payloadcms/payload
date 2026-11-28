@@ -56,6 +56,8 @@ import {
   relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
+  scheduledLocalizedStatusGlobalSlug,
+  scheduledLocalizedStatusSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -594,9 +596,29 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    {
+      slug: scheduledLocalizedStatusSlug,
+      fields: [{ name: 'title', type: 'text', localized: true }],
+      versions: {
+        drafts: {
+          localizeStatus: true,
+          schedulePublish: true,
+        },
+      },
+    },
   ],
   globals: [
     { slug: localeValidationGlobalSlug, fields: getLocaleValidationFields(), versions: false },
+    {
+      slug: scheduledLocalizedStatusGlobalSlug,
+      fields: [{ name: 'title', type: 'text', localized: true }],
+      versions: {
+        drafts: {
+          localizeStatus: true,
+          schedulePublish: true,
+        },
+      },
+    },
     {
       fields: [
         {
