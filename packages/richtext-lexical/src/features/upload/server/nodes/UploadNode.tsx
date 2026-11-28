@@ -10,8 +10,8 @@ import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import { addClassNamesToElement } from '@lexical/utils'
-import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 
 import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../schema.js'
 
@@ -125,7 +125,7 @@ export function $createUploadServerNode({
   data: Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>
 }): UploadServerNode {
   if (!data?.id) {
-    data.id = new ObjectID.default().toHexString()
+    data.id = generateObjectIdHex()
   }
   return $applyNodeReplacement(new UploadServerNode({ data: data as UploadData }))
 }
