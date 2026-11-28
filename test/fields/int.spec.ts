@@ -4881,6 +4881,43 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         expect(docValues).not.toContain(2)
       })
 
+      test('should query top-level values - in and not_in', async ({ payload }) => {
+        const isTrue = await payload.create({
+          collection: 'json-fields',
+          data: { customJSON: true },
+          overrideAccess: true,
+        })
+        const isFalse = await payload.create({
+          collection: 'json-fields',
+          data: { customJSON: false },
+          overrideAccess: true,
+        })
+        const isNumber = await payload.create({
+          collection: 'json-fields',
+          data: { customJSON: 7 },
+          overrideAccess: true,
+        })
+
+        const inResult = await payload.find({
+          collection: 'json-fields',
+          overrideAccess: true,
+          where: { customJSON: { in: [true, 7] } },
+        })
+
+        expect(inResult.docs.map(({ id }) => id).sort()).toEqual([isTrue.id, isNumber.id].sort())
+
+        const notInResult = await payload.find({
+          collection: 'json-fields',
+          overrideAccess: true,
+          where: { customJSON: { not_in: [true, 7] } },
+        })
+        const notInIDs = notInResult.docs.map(({ id }) => id)
+
+        expect(notInIDs).toContain(isFalse.id)
+        expect(notInIDs).not.toContain(isTrue.id)
+        expect(notInIDs).not.toContain(isNumber.id)
+      })
+
       test('should query nested numbers with multiple clauses - equals_and_in', async ({
         payload,
       }) => {
