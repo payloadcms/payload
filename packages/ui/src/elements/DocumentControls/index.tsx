@@ -229,6 +229,12 @@ export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
 
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
+  const showLivePreviewToggler = isLivePreviewEnabled && !isInDrawer
+  const showPreviewButton = Boolean(collectionConfig?.admin.preview || globalConfig?.admin.preview)
+  const showSchedulePublishButton =
+    hasScheduledPublishEnabled(collectionConfig || globalConfig) && !isTrashed
+  const hasIconButtons = showLivePreviewToggler || showPreviewButton || showSchedulePublishButton
+
   return (
     <div
       className={[baseClass, variant !== 'default' && `${baseClass}--${variant}`]
@@ -303,18 +309,20 @@ export const DocumentControls: React.FC<DocumentControlsProps> = (props) => {
       <div className={`${baseClass}__controls-wrapper`}>
         <div className={`${baseClass}__controls`}>
           {BeforeDocumentControls}
-          <div className={`${baseClass}__icon-buttons`}>
-            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
-            {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
-              <RenderCustomComponent
-                CustomComponent={CustomPreviewButton}
-                Fallback={<PreviewButton />}
-              />
-            )}
-            {hasScheduledPublishEnabled(collectionConfig || globalConfig) && !isTrashed && (
-              <SchedulePublishButton disabled={readOnlyForIncomingUser} />
-            )}
-          </div>
+          {hasIconButtons && (
+            <div className={`${baseClass}__icon-buttons`}>
+              {showLivePreviewToggler && <LivePreviewToggler />}
+              {showPreviewButton && (
+                <RenderCustomComponent
+                  CustomComponent={CustomPreviewButton}
+                  Fallback={<PreviewButton />}
+                />
+              )}
+              {showSchedulePublishButton && (
+                <SchedulePublishButton disabled={readOnlyForIncomingUser} />
+              )}
+            </div>
+          )}
           {hasSavePermission && !isTrashed && !readOnlyForIncomingUser && (
             <Fragment>
               {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
