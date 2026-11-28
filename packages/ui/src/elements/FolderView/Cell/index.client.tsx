@@ -41,7 +41,7 @@ export const FolderTableCellClient = ({
   const onConfirm = React.useCallback(
     async ({ id, name }) => {
       try {
-        await fetch(
+        const res = await fetch(
           formatAdminURL({
             apiRoute: config.routes.api,
             path: `/${collectionSlug}/${docID}`,
@@ -58,11 +58,19 @@ export const FolderTableCellClient = ({
           },
         )
 
+        if (!res.ok) {
+          const json = await res.json().catch(() => undefined)
+          throw new Error(
+            json?.errors?.[0]?.message || json?.message || t('error:unknown'),
+          )
+        }
+
         setFromFolderID(id)
         setFromFolderName(name || t('folder:noFolder'))
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error moving document to folder', error)
+        throw error
       }
     },
     [config.routes.api, collectionSlug, docID, folderFieldName, t],
