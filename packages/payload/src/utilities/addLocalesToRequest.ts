@@ -77,7 +77,9 @@ export const sanitizeLocales = ({
 
   if (['*', 'all'].includes(locale)) {
     locale = 'all'
-  } else if (localization && !localization.localeCodes.includes(locale) && localization.fallback) {
+  } else if (localization && !localization.localeCodes.includes(locale)) {
+    // `localization.fallback` decides whether a field value falls back to another locale, not which
+    // locale a request runs in. A request without a resolvable locale always runs in `defaultLocale`.
     locale = localization.defaultLocale
   }
 
