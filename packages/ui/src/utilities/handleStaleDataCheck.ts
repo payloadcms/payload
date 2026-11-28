@@ -37,10 +37,10 @@ export const handleStaleDataCheck = async ({
         draft: collectionHasDrafts,
         locale: req.locale,
         overrideAccess: false,
+        req,
         select: {
           updatedAt: true,
         },
-        user: req.user,
       })
 
       currentUpdatedAt = currentDoc?.updatedAt as string
@@ -55,10 +55,10 @@ export const handleStaleDataCheck = async ({
         draft: globalHasDrafts,
         locale: req.locale,
         overrideAccess: false,
+        req,
         select: {
           updatedAt: true,
         },
-        user: req.user,
       })
 
       currentUpdatedAt = currentGlobal?.updatedAt as string

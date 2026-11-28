@@ -189,6 +189,66 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
   })
 
+  test('should pass the incoming request to access control when checking for stale data', async ({
+    payload,
+  }) => {
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Stale Post',
+      },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: postData.id,
+      collection: postsSlug,
+      data: {
+        title: 'Stale Post (edited)',
+      },
+      overrideAccess: true,
+    })
+
+    const req = await createPayloadRequest({ payload, user })
+    req.headers.set('cookie', 'mark=1')
+
+    const collectionAccess = payload.collections[postsSlug].config.access
+    const previousReadAccess = collectionAccess.read
+    collectionAccess.read = ({ req: { headers, user } }) =>
+      Boolean(user) && Boolean(headers.get('cookie')?.includes('mark=1'))
+
+    try {
+      const { staleDataState } = await buildFormState({
+        id: postData.id,
+        checkForStaleData: true,
+        collectionSlug: postsSlug,
+        data: postData,
+        docPermissions: {
+          create: true,
+          delete: true,
+          fields: true,
+          read: true,
+          readVersions: true,
+          update: true,
+        },
+        docPreferences: {
+          fields: {},
+        },
+        documentFormState: undefined,
+        mockRSCs: true,
+        operation: 'update',
+        originalUpdatedAt: postData.updatedAt,
+        renderAllFields: false,
+        req,
+        schemaPath: postsSlug,
+      })
+
+      expect(staleDataState?.isStale).toBe(true)
+    } finally {
+      collectionAccess.read = previousReadAccess
+    }
+  })
+
   test('should use `select` to build partial form state with only specified fields', async ({
     payload,
   }) => {
