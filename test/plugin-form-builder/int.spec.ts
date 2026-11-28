@@ -481,6 +481,33 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
           )
           expect(serializedEmail).not.toContain('unknown node')
         })
+
+        test('should link internal links to their frontend URL', async () => {
+          const internalLink = (doc: Record<string, unknown>) => ({
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'link',
+                  children: [{ type: 'text', text: 'Read more', version: 1 }],
+                  fields: { doc, linkType: 'internal', newTab: false },
+                  version: 2,
+                },
+              ],
+            },
+          })
+
+          expect(
+            await serializeLexical(
+              internalLink({ frontendPath: '/posts/hello', relationTo: 'posts', value: { id: 1 } }),
+              [],
+              'https://example.com',
+            ),
+          ).toBe('<a href="https://example.com/posts/hello">Read more</a>')
+          expect(
+            await serializeLexical(internalLink({ relationTo: 'posts', value: { id: 1 } }), []),
+          ).toBe('<a href="">Read more</a>')
+        })
       })
     })
   })

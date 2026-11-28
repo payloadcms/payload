@@ -62,7 +62,11 @@ export const sendEmail = async (
             const from = replaceDoubleCurlys(emailFrom, submissionData)
             const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData)
 
-            const serializedMessage = await serializeLexical(message, submissionData)
+            const serializedMessage = await serializeLexical(
+              message,
+              submissionData,
+              payload.config.serverURL,
+            )
 
             return {
               bcc,
