@@ -95,20 +95,35 @@ export async function getFile({
     }
 
     // Manually create a ReadableStream for the web from a Node.js stream.
+    let nodeStream: ReturnType<typeof file.createReadStream> | undefined
+    let cancelled = false
     const readableStream = new ReadableStream({
+      cancel() {
+        cancelled = true
+        nodeStream?.destroy()
+      },
       start(controller) {
         const streamOptions =
           rangeResult.type === 'partial'
             ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
             : {}
-        const nodeStream = file.createReadStream(streamOptions)
+        nodeStream = file.createReadStream(streamOptions)
         nodeStream.on('data', (chunk) => {
+          if (cancelled) {
+            return
+          }
           controller.enqueue(new Uint8Array(chunk))
         })
         nodeStream.on('end', () => {
+          if (cancelled) {
+            return
+          }
           controller.close()
         })
         nodeStream.on('error', (err) => {
+          if (cancelled) {
+            return
+          }
           controller.error(err)
         })
       },
