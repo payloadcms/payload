@@ -9,7 +9,11 @@ import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
-import { orderableSlug } from './collections/Orderable/index.js'
+import {
+  orderableReadRequests,
+  orderableSlug,
+  readRequestHeader,
+} from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
 test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
@@ -626,6 +630,46 @@ test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
 
         expect(res.status).toBe(400)
         expect(storedDoc.title).toBe('Original title')
+      })
+
+      test('should pass the request to every query when reordering', async ({
+        payload,
+        restClient,
+      }) => {
+        const movingDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Request-scoped move' },
+          overrideAccess: true,
+        })
+        createdOrderableIDs.push(movingDoc.id)
+
+        orderableReadRequests.isTracking = true
+
+        let res: Response
+
+        try {
+          res = await restClient.POST('/reorder', {
+            body: JSON.stringify({
+              collectionSlug: orderableSlug,
+              docsToMove: [movingDoc.id],
+              newKeyWillBe: 'less',
+              orderableFieldName: '_order',
+              target: {
+                id: orderable1.id,
+                key: orderable1._order,
+              },
+            }),
+            headers: { [readRequestHeader]: 'reorder' },
+          })
+        } finally {
+          orderableReadRequests.isTracking = false
+        }
+
+        const readRequests = orderableReadRequests.values.splice(0)
+
+        expect(res.status).toBe(200)
+        expect(readRequests.length).toBeGreaterThan(0)
+        expect(readRequests).not.toContain(null)
       })
 
       test('should reorder multiple documents in one request', async ({ payload, restClient }) => {

@@ -316,6 +316,7 @@ export const addOrderableEndpoint = (
       limit: 1,
       overrideAccess: true,
       pagination: false,
+      req,
       select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
       where: combineWhereConstraints([
