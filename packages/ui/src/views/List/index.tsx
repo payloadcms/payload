@@ -600,8 +600,12 @@ export const renderListView = async (
       collectionSlug,
       columnState,
       currentHierarchyItem,
-      disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
-      disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
+      disableBulkDelete: isHierarchyView
+        ? disableBulkDelete
+        : (collectionConfig.disableBulkDelete ?? disableBulkDelete),
+      disableBulkEdit: isHierarchyView
+        ? disableBulkEdit
+        : (collectionConfig.disableBulkEdit ?? disableBulkEdit),
       disableQueryPresets,
       documentLayout: collectionPreferences?.documentLayout,
       documentURLs,

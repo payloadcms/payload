@@ -50,6 +50,11 @@ const SingleHierarchyEdit: React.FC<{
   )
 }
 
+/**
+ * Renders the selection toolbar and bulk actions (Edit, Publish, Unpublish, Delete, Move)
+ * for selected documents in the hierarchy list view, respecting both caller-level and
+ * per-collection `disableBulkEdit` and `disableBulkDelete` restrictions.
+ */
 export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
@@ -88,11 +93,48 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
 
   const ids = singleCollectionSelected ? groupedSelections[singleCollectionSlug]?.ids || [] : []
 
+  const effectiveDisableBulkEdit = Boolean(disableBulkEdit || collectionConfig?.disableBulkEdit)
+
+  const editSelections = useMemo(
+    () =>
+      disableBulkEdit
+        ? {}
+        : Object.fromEntries(
+            Object.entries(groupedSelections).filter(([slug]) => {
+              const selectedCollectionConfig = config.collections.find(
+                (collection) => collection.slug === slug,
+              )
+              return !selectedCollectionConfig?.disableBulkEdit
+            }),
+          ),
+    [config.collections, disableBulkEdit, groupedSelections],
+  )
+  const canBulkMove = Object.keys(editSelections).length > 0
+
+  const deleteSelections = useMemo(
+    () =>
+      disableBulkDelete
+        ? {}
+        : Object.fromEntries(
+            Object.entries(groupedSelections).filter(([slug]) => {
+              const selectedCollectionConfig = config.collections.find(
+                (collection) => collection.slug === slug,
+              )
+              return !selectedCollectionConfig?.disableBulkDelete
+            }),
+          ),
+    [config.collections, disableBulkDelete, groupedSelections],
+  )
+  const canBulkDelete = Object.keys(deleteSelections).length > 0
+
   const requiredCollections = useMemo(() => {
     const selectionsWithMetadata = getSelectionsWithMetadata()
     const required = new Set<string>()
 
     for (const [collectionSlug, { selections }] of Object.entries(selectionsWithMetadata)) {
+      if (!editSelections[collectionSlug]) {
+        continue
+      }
       if (collectionSlug === hierarchySlug) {
         for (const { metadata } of selections) {
           for (const slug of getEffectiveHierarchyCollections({
@@ -108,7 +150,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
     }
 
     return required.size > 0 ? Array.from(required) : undefined
-  }, [getSelectionsWithMetadata, hierarchySlug, relatedCollectionSlugs])
+  }, [editSelections, getSelectionsWithMetadata, hierarchySlug, relatedCollectionSlugs])
 
   // Check if single hierarchy item is selected (for direct edit)
   // Only available when hierarchySlug is provided
@@ -146,7 +188,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
           />
         ),
         // Multiple items or non-hierarchy items - show bulk actions
-        !disableBulkEdit &&
+        !effectiveDisableBulkEdit &&
           !singleHierarchySelected &&
           singleCollectionSelected &&
           collectionConfig &&
@@ -178,15 +220,15 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
               />
             </Fragment>
           ),
-        !disableBulkDelete && (
+        canBulkDelete && (
           <DeleteMany
             afterDelete={handleActionSuccess}
             key="bulk-delete"
             modalPrefix="hierarchy-list"
-            selections={groupedSelections}
+            selections={deleteSelections}
           />
         ),
-        hierarchySlug && (
+        hierarchySlug && canBulkMove && (
           <MoveMany
             currentParentID={parent?.id || null}
             hierarchySlug={hierarchySlug}
@@ -194,7 +236,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             key="bulk-move"
             onSuccess={handleActionSuccess}
             requiredCollections={requiredCollections}
-            selections={groupedSelections}
+            selections={editSelections}
           />
         ),
       ].filter(Boolean)}

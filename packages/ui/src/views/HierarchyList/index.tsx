@@ -34,6 +34,10 @@ import './index.css'
 
 const baseClass = 'hierarchy-list'
 
+/**
+ * Renders the hierarchy list view for a collection, including breadcrumbs,
+ * search and collection-type filters, bulk selection actions, and the hierarchy table.
+ */
 export function HierarchyListView(props: ListViewClientProps) {
   const {
     AfterList,
@@ -42,6 +46,8 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     currentHierarchyItem,
     Description,
+    disableBulkDelete,
+    disableBulkEdit,
     documentLayout,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
@@ -364,6 +370,8 @@ export function HierarchyListView(props: ListViewClientProps) {
                   ) : null}
                 </React.Fragment>
               }
+              disableBulkDelete={disableBulkDelete}
+              disableBulkEdit={disableBulkEdit}
               hasUpdatePermission={currentHierarchyItem?.hasUpdatePermission}
               HierarchyIcon={HierarchyIcon}
               i18n={i18n}
