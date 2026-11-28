@@ -1,5 +1,10 @@
 'use client'
-import type { DOMConversionOutput, LexicalNode, SerializedLexicalNode } from 'lexical'
+import type {
+  DOMConversionMap,
+  DOMConversionOutput,
+  LexicalNode,
+  SerializedLexicalNode,
+} from 'lexical'
 
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
@@ -15,6 +20,17 @@ export class HorizontalRuleNode extends HorizontalRuleServerNode {
 
   static override getType(): string {
     return super.getType()
+  }
+
+  // The registered client class must be the one created from pasted HTML — inheriting the
+  // server's importDOM creates a HorizontalRuleServerNode and trips Lexical's type/class guard.
+  static override importDOM(): DOMConversionMap | null {
+    return {
+      hr: () => ({
+        conversion: $convertHorizontalRuleElement,
+        priority: 0,
+      }),
+    }
   }
 
   /**
