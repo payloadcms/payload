@@ -478,6 +478,20 @@ export function HierarchyTable({
     [combinedRows, handleCheckboxChange, isLocked, isSelected],
   )
 
+  const getRowSelectionLabel = useCallback(
+    (row: TableRow) => {
+      const titleField = getEntityConfig({ collectionSlug: row._collectionSlug })?.admin?.useAsTitle
+      const rawTitle = titleField ? row[titleField] : row.id
+      const title =
+        typeof rawTitle === 'string' || typeof rawTitle === 'number'
+          ? String(rawTitle)
+          : String(row.id)
+
+      return t('general:selectLabel', { label: `${row._collectionLabel}: ${title}` })
+    },
+    [getEntityConfig, t],
+  )
+
   const hierarchyConfig = getEntityConfig({ collectionSlug })?.hierarchy
   const hierarchyParentFieldName =
     hierarchyConfig && typeof hierarchyConfig === 'object'
@@ -626,6 +640,7 @@ export function HierarchyTable({
               enableSelectAll={true}
               getRowId={(row) => `${row._collectionSlug}:${row.id}`}
               getRowLockedUser={getRowLockedUser}
+              getRowSelectionLabel={getRowSelectionLabel}
               mergeCheckboxHeader={false}
               onCheckboxChange={handleCheckboxChange}
               onSelectAllChange={handleSelectAllChange}

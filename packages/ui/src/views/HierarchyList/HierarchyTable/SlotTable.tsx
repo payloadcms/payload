@@ -81,6 +81,8 @@ export type SlotTableProps<TRow = Record<string, unknown>> = {
    * When a user is returned, a lock icon replaces the checkbox for that row.
    */
   getRowLockedUser?: (row: TRow, index: number) => undefined | User
+  /** Accessible name for the selection checkbox in a row */
+  getRowSelectionLabel?: (row: TRow, index: number) => string
   /**
    * Merge checkbox header with first column header using colspan (default: false)
    * The first column header will span both checkbox and content cells
@@ -120,6 +122,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
   enableSelectAll = true,
   getRowId = (row, index) => (row.id as number | string) ?? index,
   getRowLockedUser,
+  getRowSelectionLabel,
   mergeCheckboxHeader = false,
   onCheckboxChange,
   onRowClick,
@@ -237,7 +240,10 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
 
                       return (
                         <CheckboxInput
-                          aria-label={t('general:selectLabel', { label: t('general:document') })}
+                          aria-label={
+                            getRowSelectionLabel?.(row, rowIndex) ??
+                            t('general:selectLabel', { label: t('general:document') })
+                          }
                           checked={isSelected}
                           className={selectRowClass}
                           onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
