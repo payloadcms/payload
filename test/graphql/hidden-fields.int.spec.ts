@@ -277,4 +277,13 @@ test.suite('GraphQL hidden mutation fields', { config: './config.ts' }, () => {
 
     expect(global.secret).toBe('internal')
   })
+
+  test('should use global graphQL name for policy types in schema', ({ payload }) => {
+    const { schema } = configToSchema(payload.config)
+
+    expect(schema.getType('HiddenGlobalAccess')).toBeDefined()
+    expect(schema.getType('HiddenGlobalDocAccess')).toBeDefined()
+    expect(schema.getType('hidden_globalAccess')).toBeUndefined()
+    expect(schema.getType('hidden_globalDocAccess')).toBeUndefined()
+  })
 })
