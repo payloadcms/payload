@@ -11,6 +11,7 @@ import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { filterDataToSelectedLocales } from '../utilities/filterDataToSelectedLocales.js'
+import { hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
@@ -83,6 +84,17 @@ export const getDuplicateDocumentData = async ({
   // remove the id and rely on the db to set it
   if ('id' in duplicatedFromDocWithLocales) {
     delete duplicatedFromDocWithLocales.id
+  }
+
+  if (
+    draftArg &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    typeof duplicatedFromDocWithLocales._status === 'object' &&
+    duplicatedFromDocWithLocales._status !== null
+  ) {
+    duplicatedFromDocWithLocales._status = Object.fromEntries(
+      Object.keys(duplicatedFromDocWithLocales._status).map((locale) => [locale, 'draft']),
+    )
   }
 
   duplicatedFromDocWithLocales = await beforeDuplicate({
