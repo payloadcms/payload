@@ -110,7 +110,8 @@ export function parseParams({
         } else {
           // It's a path - and there can be multiple comparisons on a single path.
           // For example - title like 'test' and title not equal to 'tester'
-          // So we need to loop on keys again here to handle each operator independently
+          // So we need to loop on keys again here to handle each operator independently.
+          // A handled operator moves on with `continue`: a `break` would drop the operators after it.
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
             for (let operator of Object.keys(pathOperators)) {
@@ -216,7 +217,7 @@ export function parseParams({
 
                 if (val === DistinctSymbol) {
                   selectFields['_selected'] = resolvedColumn
-                  break
+                  continue
                 }
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
@@ -242,7 +243,7 @@ export function parseParams({
                     })
 
                     constraints.push(sql.raw(constraint))
-                    break
+                    continue
                   }
 
                   const segments = pathSegments.slice(1)
@@ -266,7 +267,7 @@ export function parseParams({
                     })
 
                     constraints.push(sql.raw(jsonQuery))
-                    break
+                    continue
                   }
 
                   const jsonQuery = adapter.convertPathToJSONTraversal(pathSegments)
@@ -312,7 +313,7 @@ export function parseParams({
 
                   constraints.push(sql.raw(rawSQLQuery))
 
-                  break
+                  continue
                 }
 
                 if (getNotNullColumnByValue) {
@@ -322,7 +323,7 @@ export function parseParams({
                   } else {
                     throw new QueryError([{ path: relationOrPath }])
                   }
-                  break
+                  continue
                 }
 
                 if (
@@ -352,7 +353,7 @@ export function parseParams({
                       ),
                     ),
                   )
-                  break
+                  continue
                 }
 
                 const sanitizedQueryValue = sanitizeQueryValue({
@@ -366,7 +367,7 @@ export function parseParams({
                 })
 
                 if (sanitizedQueryValue === null) {
-                  break
+                  continue
                 }
 
                 const {
@@ -378,7 +379,7 @@ export function parseParams({
                 // Handle polymorphic relationships by value
                 if (queryColumns) {
                   if (!queryColumns.length) {
-                    break
+                    continue
                   }
 
                   let wrapOperator = or
@@ -395,7 +396,7 @@ export function parseParams({
                         ),
                       ),
                     )
-                    break
+                    continue
                   }
 
                   if (['not_equals', 'not_in'].includes(operator)) {
@@ -419,7 +420,7 @@ export function parseParams({
                     ),
                   )
 
-                  break
+                  continue
                 }
 
                 if (queryOperator === 'not_equals' && queryValue !== null) {
@@ -438,7 +439,7 @@ export function parseParams({
                       }),
                     ),
                   )
-                  break
+                  continue
                 }
 
                 if (
@@ -453,17 +454,17 @@ export function parseParams({
                     NULL)`,
                   )
 
-                  break
+                  continue
                 }
 
                 if (operator === 'equals' && queryValue === null) {
                   constraints.push(isNull(resolvedColumn))
-                  break
+                  continue
                 }
 
                 if (operator === 'not_equals' && queryValue === null) {
                   constraints.push(isNotNull(resolvedColumn))
-                  break
+                  continue
                 }
 
                 if (field.type === 'point' && adapter.name === 'postgres') {
@@ -508,7 +509,7 @@ export function parseParams({
                     default:
                       break
                   }
-                  break
+                  continue
                 }
 
                 const orConditions: SQL<unknown>[] = []
@@ -549,7 +550,7 @@ export function parseParams({
                   if (constraint) {
                     constraints.push(constraint)
                   }
-                  break
+                  continue
                 }
 
                 let constraint = buildOperatorConstraint({
@@ -607,7 +608,7 @@ export function parseParams({
                         .join(',')})`,
                     ),
                   )
-                  break
+                  continue
                 }
 
                 if (orConditions.length) {
