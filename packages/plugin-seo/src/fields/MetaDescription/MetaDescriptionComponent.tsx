@@ -18,7 +18,7 @@ import {
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateDescription } from '../../types.js'
@@ -52,6 +52,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   } = useConfig()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
 
   const locale = useLocale()
   const { getData } = useForm()
@@ -124,6 +125,15 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     setValue,
     title,
   ])
+  const handleRegenerateDescription = useCallback(async () => {
+    setIsGeneratingDescription(true)
+
+    try {
+      await regenerateDescription()
+    } finally {
+      setIsGeneratingDescription(false)
+    }
+  }, [regenerateDescription])
 
   return (
     <div
@@ -145,9 +155,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                disabled={readOnly}
+                disabled={readOnly || isGeneratingDescription}
                 onClick={() => {
-                  void regenerateDescription()
+                  void handleRegenerateDescription()
                 }}
                 style={{
                   background: 'none',
@@ -160,7 +170,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
                 }}
                 type="button"
               >
-                {t('plugin-seo:autoGenerate')}
+                {isGeneratingDescription
+                  ? `${t('plugin-seo:autoGenerate')}...`
+                  : t('plugin-seo:autoGenerate')}
               </button>
             </React.Fragment>
           )}
