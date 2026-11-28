@@ -831,6 +831,25 @@ export const traverseFields = ({
             versionsCustomName: versions,
           })
 
+          let selectEnumName = createTableName({
+            adapter,
+            config: field,
+            parentTableName: newTableName,
+            prefix: `enum_${newTableName}_`,
+            target: 'enumName',
+            throwValidationError,
+          })
+
+          // Without an `enumName`, the enum would take the `dbName` of the select table. Postgres
+          // enums share the namespace with tables, so the enum needs a name of its own.
+          if (!field.enumName && field.dbName) {
+            selectEnumName = fitIdentifierLength({
+              name: `enum_${selectTableName}`,
+              adapter,
+              suffix: '',
+            })
+          }
+
           const baseColumns: Record<string, RawColumn> = {
             order: {
               name: 'order',
@@ -845,14 +864,7 @@ export const traverseFields = ({
             value: {
               name: 'value',
               type: 'enum',
-              enumName: createTableName({
-                adapter,
-                config: field,
-                parentTableName: newTableName,
-                prefix: `enum_${newTableName}_`,
-                target: 'enumName',
-                throwValidationError,
-              }),
+              enumName: selectEnumName,
               options,
             },
           }

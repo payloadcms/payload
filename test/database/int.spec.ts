@@ -4038,6 +4038,194 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test.describe('reserved field names', () => {
+    test('should query a collection with an array field named `numbers`, `texts`, or `rels`', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection: 'reserved-field-names',
+        overrideAccess: true,
+        data: {
+          locales: [{ value: 'en' }],
+          numbers: [{ drawPosition: 1 }],
+          texts: [{ value: 'hello' }],
+          rels: [{ value: 'world' }],
+        },
+      })
+
+      const found = await payload.findByID({
+        collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      expect(found.locales?.[0]?.value).toStrictEqual('en')
+      expect(found.numbers?.[0]?.drawPosition).toStrictEqual(1)
+      expect(found.texts?.[0]?.value).toStrictEqual('hello')
+      expect(found.rels?.[0]?.value).toStrictEqual('world')
+
+      await payload.delete({
+        collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+      })
+    })
+
+    test('should update a collection with array fields named `numbers`, `texts`, or `rels`', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection: 'reserved-field-names',
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 1 }, { drawPosition: 2 }],
+          texts: [{ value: 'first' }, { value: 'second' }],
+          rels: [{ value: 'first' }, { value: 'second' }],
+        },
+      })
+
+      // Shortening the arrays makes the update clear rows at the indexes they no longer use.
+      const updated = await payload.update({
+        collection: 'reserved-field-names',
+        id: created.id,
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 3 }],
+          texts: [{ value: 'third' }],
+          rels: [{ value: 'third' }],
+        },
+      })
+
+      expect(updated.numbers?.map((row) => row.drawPosition)).toStrictEqual([3])
+      expect(updated.texts?.map((row) => row.value)).toStrictEqual(['third'])
+      expect(updated.rels?.map((row) => row.value)).toStrictEqual(['third'])
+    })
+
+    test('should keep arrays apart when the renamed table name is taken by another array', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 1 }, { drawPosition: 2 }],
+          numbersField: [{ label: 'first' }],
+          scores: [10, 20, 30],
+        },
+      })
+
+      const found = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      expect(found.numbers?.map((row) => row.drawPosition)).toStrictEqual([1, 2])
+      expect(found.numbersField?.map((row) => row.label)).toStrictEqual(['first'])
+      expect(found.scores).toStrictEqual([10, 20, 30])
+
+      await payload.delete({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+    })
+
+    test('should save drafts and publish an array renamed for the numbers table', async ({
+      payload,
+    }) => {
+      // The main `numbers` array table is renamed, but its versions table keeps its name.
+      const created = await payload.create({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        data: {
+          _status: 'published',
+          numbers: [{ drawPosition: 1 }],
+          scores: [10],
+        },
+      })
+
+      await payload.update({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        draft: true,
+        overrideAccess: true,
+        data: {
+          numbers: [{ drawPosition: 2 }],
+          scores: [20],
+        },
+      })
+
+      const published = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      const draft = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      expect(published.numbers?.map((row) => row.drawPosition)).toStrictEqual([1])
+      expect(published.scores).toStrictEqual([10])
+      expect(draft.numbers?.map((row) => row.drawPosition)).toStrictEqual([2])
+      expect(draft.scores).toStrictEqual([20])
+
+      await payload.update({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+        data: {
+          _status: 'published',
+          numbers: [{ drawPosition: 2 }],
+          scores: [20],
+        },
+      })
+
+      const republished = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      const { docs: versions } = await payload.findVersions({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        sort: 'createdAt',
+        where: { parent: { equals: created.id } },
+      })
+
+      expect(republished.numbers?.map((row) => row.drawPosition)).toStrictEqual([2])
+      expect(republished.scores).toStrictEqual([20])
+      expect(
+        versions.map((version) => version.version.numbers?.map((row) => row.drawPosition)),
+      ).toStrictEqual([[1], [2], [2]])
+    })
+
+    test('should read an array whose only localized field is a hasMany number', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection: 'reserved-field-name-clashes',
+        overrideAccess: true,
+        data: {
+          localizedScores: [{ values: [1, 2] }],
+        },
+      })
+
+      const found = await payload.findByID({
+        collection: 'reserved-field-name-clashes',
+        id: created.id,
+        overrideAccess: true,
+      })
+
+      expect(found.localizedScores?.map((row) => row.values)).toStrictEqual([[1, 2]])
+    })
+  })
+
   test.options.describe('Schema generation', { db: 'drizzle' }, () => {
     test('should generate Drizzle Postgres schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
