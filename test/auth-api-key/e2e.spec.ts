@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { Config } from './payload-types.js'
 
 import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -26,35 +27,14 @@ let apiURL: string
 let context: BrowserContext
 let existingAPIKey: string
 let page: Page
-let payload: PayloadTestSDK<TestConfig>
+let payload: PayloadTestSDK<Config>
 let serverURL: string
 let url: AdminUrlUtil
 let user: { id: number | string }
 
-type TestConfig = {
-  collections: {
-    'api-keys': {
-      apiKey?: null | string
-      id: number | string
-    }
-    revealableKeys: {
-      apiKey?: null | string
-      email?: string
-      id: number | string
-      password?: string
-    }
-    users: {
-      email?: string
-      id: number | string
-      password?: string
-    }
-  }
-  globals: Record<string, { id: number | string }>
-}
-
 test.beforeAll(async ({ browser }, testInfo) => {
   testInfo.setTimeout(TEST_TIMEOUT_LONG)
-  ;({ payload, serverURL } = await initPayloadE2ENoConfig<TestConfig>({ dirname }))
+  ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
   apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
   url = new AdminUrlUtil(serverURL, apiKeysSlug)
 

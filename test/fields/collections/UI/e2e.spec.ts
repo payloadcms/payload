@@ -11,7 +11,6 @@ import type { Config } from '../../payload-types.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -24,7 +23,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let serverURL: string
 let url: AdminUrlUtil
@@ -47,11 +45,6 @@ describe('Radio', () => {
     await reInitializeDB({
       serverURL,
     })
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
 
