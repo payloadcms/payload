@@ -8,7 +8,7 @@ import { $getSelection, $isRangeSelection } from 'lexical'
 import type { ToolbarGroup } from '../../toolbars/types.js'
 import type { ClientFeature } from '../../typesClient.js'
 import type { LinkFields } from '../nodes/types.js'
-import type { ExclusiveLinkCollectionsProps } from '../server/index.js'
+import type { AutoLinkFields, ExclusiveLinkCollectionsProps } from '../server/index.js'
 
 import { LinkIcon } from '../../../lexical/ui/icons/Link/index.js'
 import { getSelectedNode } from '../../../lexical/utils/getSelectedNode.js'
@@ -24,6 +24,9 @@ import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/Lin
 import { LinkPlugin } from './plugins/link/index.js'
 
 export type ClientProps = {
+  autoLinks?: {
+    fields?: AutoLinkFields
+  }
   defaultLinkType?: string
   defaultLinkURL?: string
   disableAutoLinks?: 'creationOnly' | true
