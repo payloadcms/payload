@@ -4,6 +4,9 @@ import { ValidationError } from 'payload'
 
 import type { DrizzleAdapter } from '../types.js'
 
+// The field part stops before D1's trailing ": SQLITE_CONSTRAINT"
+const sqliteUniqueErrorMessage = /UNIQUE constraint failed: ([^.]+)\.([^.,:\s]+)/
+
 type HandleUpsertErrorArgs = {
   adapter: DrizzleAdapter
   collectionSlug?: string
@@ -33,8 +36,15 @@ export const handleUpsertError = ({
     error = caughtError.cause
   }
 
+  // D1 doesn't set libSQL's error codes, so its unique violations can only be told apart by message
+  const isSQLiteUniqueError =
+    error?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
+    (!error?.code &&
+      typeof error?.message === 'string' &&
+      sqliteUniqueErrorMessage.test(error.message))
+
   // PostgreSQL: 23505, SQLite: SQLITE_CONSTRAINT_UNIQUE
-  if (error?.code === '23505' || error?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+  if (error?.code === '23505' || isSQLiteUniqueError) {
     let fieldName: null | string = null
 
     if (error.code === '23505') {
@@ -59,10 +69,9 @@ export const handleUpsertError = ({
           fieldName = match[1]
         }
       }
-    } else if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    } else if (isSQLiteUniqueError) {
       // SQLite - extract from message: "UNIQUE constraint failed: table.field[, table.field2, ...]"
-      const regex = /UNIQUE constraint failed: ([^.]+)\.([^.,]+)/
-      const match: string[] = error.message?.match(regex)
+      const match: string[] = error.message?.match(sqliteUniqueErrorMessage)
       if (match && match[2]) {
         if (adapter.fieldConstraints[tableName]) {
           fieldName = adapter.fieldConstraints[tableName][`${match[2]}_idx`]
