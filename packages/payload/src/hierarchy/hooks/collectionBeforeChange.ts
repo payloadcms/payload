@@ -15,7 +15,7 @@ import type {
   PayloadRequest,
 } from '../../index.js'
 
-import { promoteHierarchyChildren } from '../promoteHierarchyChildren.js'
+import { applyHierarchyDeleteStrategy } from '../applyHierarchyDeleteStrategy.js'
 
 type Args = {
   /**
@@ -28,7 +28,13 @@ export const hierarchyCollectionBeforeChange =
   ({ parentFieldName }: Args): CollectionBeforeChangeHook =>
   async ({ collection, data, operation, originalDoc, req }) => {
     if (collection.trash && operation === 'update' && data.deletedAt && !originalDoc?.deletedAt) {
-      await promoteHierarchyChildren({ id: originalDoc.id, collection, parentFieldName, req })
+      await applyHierarchyDeleteStrategy({
+        id: originalDoc.id,
+        collection,
+        deletedAt: data.deletedAt,
+        parentFieldName,
+        req,
+      })
     }
 
     // Determine the new parent ID

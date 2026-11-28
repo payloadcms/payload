@@ -730,6 +730,20 @@ Deleting or trashing a hierarchy document preserves its children. Published and 
 
 This structural update maintains hierarchy links even when the caller cannot edit a child's parent field. Access to delete or trash the selected parent is still required. Collections using localized draft status reject parent deletion when children need reparenting.
 
+Pass `hierarchyDeleteStrategy: 'cascade'` in operation context to delete or trash the hierarchy descendants too:
+
+```ts
+await payload.delete({
+  collection: 'pages',
+  id: 'page-id',
+  overrideAccess: false,
+  user,
+  context: { hierarchyDeleteStrategy: 'cascade' },
+})
+```
+
+Cascade checks delete or update access for each descendant and runs its hooks. A denied descendant or failing hook aborts the operation; database rollback requires an adapter with transactions enabled. Documents assigned to a folder or tag are preserved: cascade follows only that collection's hierarchy parent field.
+
 **Example:**
 
 ```ts
