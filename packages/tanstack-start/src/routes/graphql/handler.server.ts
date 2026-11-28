@@ -1,5 +1,7 @@
 import type { Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
+import { configToSchema } from '@payloadcms/graphql'
+import { createHandler } from 'graphql-http/lib/use/fetch'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
@@ -69,8 +71,6 @@ const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) =>
 
   if (!cached.promise) {
     const resolvedConfig = await config
-    const graphqlPackage = '@payloadcms/graphql'
-    const { configToSchema } = await import(/* @vite-ignore */ graphqlPackage)
     cached.promise = new Promise((resolve) => {
       const schema = configToSchema(resolvedConfig)
       resolve(cached.graphql || schema)
@@ -118,9 +118,6 @@ export const handleGraphQL = async ({
   addLocalesToRequestFromData(req)
 
   const { schema, validationRules } = await getGraphql(config)
-
-  const graphqlHttpHandlerPath = 'graphql-http/lib/use/fetch'
-  const { createHandler } = await import(/* @vite-ignore */ graphqlHttpHandlerPath)
 
   const headers: Record<string, string> = {}
   const apiResponse = await createHandler({

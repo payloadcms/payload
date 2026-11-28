@@ -1560,6 +1560,9 @@ importers:
       graphql-http:
         specifier: 1.22.4
         version: 1.22.4(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
       qs-esm:
         specifier: ^7.0.2
         version: 7.0.3

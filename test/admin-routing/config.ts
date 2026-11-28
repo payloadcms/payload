@@ -17,6 +17,10 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [Posts],
+    graphQL: {
+      // E2E runs against a production build; keep the playground route reachable there.
+      disablePlaygroundInProduction: false,
+    },
   },
   seed: async (payload) => {
     const { totalDocs } = await payload.count({

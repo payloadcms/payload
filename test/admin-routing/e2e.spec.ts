@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { formatAdminURL } from 'payload/shared'
 
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -204,5 +205,27 @@ describe('Admin routing', () => {
         await expect(page.locator('.progress-bar')).toBeHidden()
       },
     )
+  })
+
+  describe('API routes', () => {
+    test('should serve GraphQL queries', async () => {
+      const response = await page.request.post(
+        formatAdminURL({ apiRoute: '/api', path: '/graphql', serverURL }),
+        { data: { query: '{ __typename }' } },
+      )
+
+      expect(response.status()).toBe(200)
+      await expect(response.json()).resolves.toEqual({ data: { __typename: 'Query' } })
+    })
+
+    test('should serve the GraphQL Playground', async () => {
+      const response = await page.request.get(
+        formatAdminURL({ apiRoute: '/api', path: '/graphql-playground', serverURL }),
+      )
+
+      expect(response.status()).toBe(200)
+      expect(response.headers()['content-type']).toContain('text/html')
+      await expect(response.text()).resolves.toContain('GraphQL Playground')
+    })
   })
 })
