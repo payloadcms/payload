@@ -2,6 +2,7 @@ import type { SanitizedConfig, SanitizedLocalizationConfig } from '../config/typ
 import type { Field } from '../fields/config/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
+import { fieldAffectsData } from '../fields/config/types.js'
 import { mergeLocalizedData } from '../utilities/mergeLocalizedData.js'
 import { hasNonLocalizedDataChanged } from './drafts/hasNonLocalizedDataChanged.js'
 import { mergeLocalizedStatus } from './mergeLocalizedStatus.js'
@@ -73,7 +74,8 @@ export const resolveLocalizedStatus = async ({
       }),
       before: existingDoc,
       configBlockReferences,
-      fields,
+      // `updatedBy` is stamped with the saving user, so it is not a shared content change.
+      fields: fields.filter((field) => !fieldAffectsData(field) || field.name !== 'updatedBy'),
     })
 
   if (shouldApplyAllLocalesStatusChange) {
