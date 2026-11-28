@@ -14,7 +14,12 @@ import {
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, restrictedRevealableKeysSlug, revealableKeysSlug } from './shared.js'
+import {
+  apiKeysSlug,
+  readableAPIKeysSlug,
+  restrictedRevealableKeysSlug,
+  revealableKeysSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -243,6 +248,44 @@ test.describe('API key fields', () => {
     await page.reload()
     await expect(page.locator('#generate-api-key')).toBeVisible()
   })
+
+  for (const collectionSlug of [apiKeysSlug, readableAPIKeysSlug]) {
+    test(`should not render stray API key fields after generating, regenerating or revoking a key in ${collectionSlug}`, async () => {
+      const strayFieldsUser = await payload.create({
+        collection: collectionSlug,
+        data: { name: 'Stray fields user' },
+      })
+
+      const apiKeyLocator = page.locator('#apiKey')
+      const enableAPIKeyInputs = page.locator('input[name="enableAPIKey"]')
+      const apiKeyInputs = page.locator('input[name="apiKey"]')
+
+      await page.goto(new AdminUrlUtil(serverURL, collectionSlug).edit(strayFieldsUser.id))
+      await expect(page.locator('#generate-api-key')).toBeVisible()
+      await expect(enableAPIKeyInputs).toHaveCount(0)
+      await expect(apiKeyInputs).toHaveCount(1)
+
+      await page.locator('#generate-api-key').click()
+      await page.locator('#confirm-action').click()
+      await expect(apiKeyLocator).toHaveValue(/[0-9a-f-]{36}/)
+      await expect(enableAPIKeyInputs).toHaveCount(0)
+      await expect(apiKeyInputs).toHaveCount(1)
+
+      const generatedAPIKey = await apiKeyLocator.inputValue()
+
+      await page.locator('.api-key__toggle-button-wrap #regenerate-api-key').click()
+      await page.locator('#confirm-action').click()
+      await expect(apiKeyLocator).not.toHaveValue(generatedAPIKey)
+      await expect(enableAPIKeyInputs).toHaveCount(0)
+      await expect(apiKeyInputs).toHaveCount(1)
+
+      await page.locator('#revoke-api-key').click()
+      await page.locator('#confirm-action').click()
+      await expect(apiKeyLocator).toHaveValue('')
+      await expect(enableAPIKeyInputs).toHaveCount(0)
+      await expect(apiKeyInputs).toHaveCount(1)
+    })
+  }
 
   test('should apply and remove the field highlight when regenerating and revoking a key', async () => {
     const apiKeyUser = await payload.create({
