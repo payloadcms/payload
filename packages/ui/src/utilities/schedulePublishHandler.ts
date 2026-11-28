@@ -177,7 +177,7 @@ async function assertCanSchedulePublish({
   const hasValidTarget = Boolean(
     entityConfig &&
     hasScheduledPublishEnabled(entityConfig) &&
-    ((collectionConfig && id !== undefined && !globalSlug) || (globalConfig && !collectionSlug)),
+    ((collectionConfig && id != null && !globalSlug) || (globalConfig && !collectionSlug)),
   )
 
   if (!hasValidTarget) {

@@ -40,6 +40,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
+  postCollectionSlug,
   restoreAccessCollectionSlug,
   restoreAccessGlobalSlug,
   restoreAccessLocalizedCollectionSlug,
@@ -6242,6 +6243,143 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
 
         expect(result.id).toBe(unrelatedJob.id)
+      })
+
+      test('should not schedule publish for a collection without scheduled publish enabled', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        const post = await payload.create({
+          collection: postCollectionSlug,
+          data: {},
+          overrideAccess: true,
+        })
+
+        await expect(
+          schedulePublishHandler({
+            type: 'publish',
+            date: new Date(Date.now() + 60_000),
+            doc: {
+              relationTo: postCollectionSlug,
+              value: post.id,
+            },
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        await cleanupDocuments({
+          collectionSlugs: [postCollectionSlug],
+          payload,
+        })
+      })
+
+      test('should not schedule publish without a target', async ({ payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await expect(
+          schedulePublishHandler({
+            type: 'publish',
+            date: new Date(Date.now() + 60_000),
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      test('should not schedule global publish without publish permission', async ({ payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        req.context.denyDraftGlobalUpdate = true
+
+        await expect(
+          schedulePublishHandler({
+            type: 'publish',
+            date: new Date(Date.now() + 60_000),
+            global: draftGlobalSlug,
+            req,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const { totalDocs } = await payload.count({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            'input.global': {
+              equals: draftGlobalSlug,
+            },
+          },
+        })
+
+        expect(totalDocs).toBe(0)
+      })
+
+      test('should not delete a scheduled global publish event without publish permission', async ({
+        payload,
+      }) => {
+        const allowedReq = await createPayloadRequest({ payload, user })
+
+        await schedulePublishHandler({
+          type: 'publish',
+          date: new Date(Date.now() + 60_000),
+          global: draftGlobalSlug,
+          req: allowedReq,
+          user,
+        })
+
+        const [scheduledJob] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: {
+              'input.global': {
+                equals: draftGlobalSlug,
+              },
+            },
+          })
+        ).docs
+
+        expect(scheduledJob).toBeDefined()
+
+        const deniedReq = await createPayloadRequest({ payload, user })
+
+        deniedReq.context.denyDraftGlobalUpdate = true
+
+        await expect(
+          schedulePublishHandler({
+            deleteID: scheduledJob!.id,
+            req: deniedReq,
+            user,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+
+        const result = await payload.findByID({
+          id: scheduledJob!.id,
+          collection: 'payload-jobs',
+          overrideAccess: true,
+        })
+
+        expect(result.id).toBe(scheduledJob!.id)
+
+        await schedulePublishHandler({
+          deleteID: scheduledJob!.id,
+          req: allowedReq,
+          user,
+        })
+
+        const { totalDocs } = await payload.count({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            id: {
+              equals: scheduledJob!.id,
+            },
+          },
+        })
+
+        expect(totalDocs).toBe(0)
       })
     })
   })
