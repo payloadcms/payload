@@ -135,7 +135,7 @@ export function RelationshipContent(props: Props) {
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
             <Button
-              aria-label={t('general:edit')}
+              aria-label={`${t('general:edit')}: ${filename}`}
               buttonStyle="ghost"
               className={`${baseClass}__action-btn`}
               icon={<WriteIcon />}
@@ -145,7 +145,7 @@ export function RelationshipContent(props: Props) {
           ) : null}
           {allowRemove !== false ? (
             <Button
-              aria-label={t('general:remove')}
+              aria-label={`${t('general:remove')}: ${filename}`}
               buttonStyle="ghost"
               className={`${baseClass}__action-btn`}
               icon={<XIcon size={24} />}
