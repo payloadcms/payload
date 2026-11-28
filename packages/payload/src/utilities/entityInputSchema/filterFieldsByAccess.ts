@@ -112,10 +112,12 @@ export const filterFieldsByAccess = ({
     return accessibleFields
   }
 
+  // Sanitized permissions remove denied operations. An operation whose access returned a query
+  // stays as `{ permission: true, where }`, which means it is allowed on some documents.
   return filterFields(fields, permissions.fields, {
-    create: 'create' in permissions && permissions.create === true,
-    read: permissions.read === true,
-    update: permissions.update === true,
-    validate: permissions.validate === true,
+    create: 'create' in permissions && Boolean(permissions.create),
+    read: Boolean(permissions.read),
+    update: Boolean(permissions.update),
+    validate: Boolean(permissions.validate),
   })
 }
