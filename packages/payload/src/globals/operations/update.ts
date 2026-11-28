@@ -221,14 +221,33 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = globalVersionResult || {}
+    const { global, globalExists, latestVersionExists } = globalVersionResult || {}
 
     if (
       hasWhereAccessResult(accessResults) &&
-      globalExists &&
+      (globalExists || latestVersionExists) &&
       (!global || Object.keys(global).length === 0)
     ) {
       throw new Forbidden(req.t)
+    }
+
+    if (
+      !isSavingDraft &&
+      hasDraftsEnabled(globalConfig) &&
+      globalExists &&
+      hasWhereAccessResult(accessResults)
+    ) {
+      // Draft access does not authorize overwriting an inaccessible main document.
+      const existingGlobal = await payload.db.findGlobal({
+        slug,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        req,
+        where: accessResults,
+      })
+
+      if (!existingGlobal || Object.keys(existingGlobal).length === 0) {
+        throw new Forbidden(req.t)
+      }
     }
 
     let globalJSON: JsonObject = {}
