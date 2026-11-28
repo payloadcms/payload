@@ -11,16 +11,8 @@ import { useNav } from '../context.js'
 export const NavSidebarToggle: React.FC<{
   baseClass?: string
 }> = ({ baseClass }) => {
-  const { navOpen, navToggleRef, setNavOpen } = useNav()
+  const { navOpen, setNavOpen } = useNav()
   const { t } = useTranslation()
-  const shouldReturnFocus = React.useRef(false)
-
-  React.useEffect(() => {
-    if (!navOpen && shouldReturnFocus.current) {
-      shouldReturnFocus.current = false
-      navToggleRef?.current?.focus({ preventScroll: true })
-    }
-  }, [navOpen, navToggleRef])
 
   return (
     <button
@@ -28,7 +20,6 @@ export const NavSidebarToggle: React.FC<{
       aria-label={t('general:hideSidebar')}
       className={`${baseClass}__close`}
       onClick={() => {
-        shouldReturnFocus.current = true
         setNavOpen(false, true)
       }}
       tabIndex={!navOpen ? -1 : undefined}
