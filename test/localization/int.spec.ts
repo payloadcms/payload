@@ -4001,6 +4001,82 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
 
         expect(enPublishedAfter.title).toBe('Published EN')
       })
+
+      test.describe('with localized status', () => {
+        const createPublishedInEnglish = (payload: Payload) =>
+          payload.create({
+            collection: localizedDraftsSlug,
+            data: { _status: 'published', title: 'English title' },
+            locale: defaultLocale,
+            overrideAccess: true,
+          })
+
+        const copyEnglishToSpanish = async (
+          payload: Payload,
+          id: number | string,
+          overrideData = false,
+        ) =>
+          copyDataFromLocaleHandler({
+            collectionSlug: localizedDraftsSlug,
+            docID: id,
+            fromLocale: defaultLocale,
+            overrideData,
+            req: await createPayloadRequest({ payload, user }),
+            toLocale: spanishLocale,
+          })
+
+        const readSpanish = (payload: Payload, id: number | string, draft: boolean) =>
+          payload.findByID({
+            id,
+            collection: localizedDraftsSlug,
+            draft,
+            fallbackLocale: false,
+            locale: spanishLocale,
+            overrideAccess: true,
+          })
+
+        test('should keep the copy a draft in a locale that was never saved', async ({
+          payload,
+        }) => {
+          const doc = await createPublishedInEnglish(payload)
+
+          expect((await readSpanish(payload, doc.id, false))._status).toBe('draft')
+
+          await copyEnglishToSpanish(payload, doc.id)
+
+          expect((await readSpanish(payload, doc.id, false))._status).toBe('draft')
+        })
+
+        test('should put the copied text in the target locale draft', async ({ payload }) => {
+          const doc = await createPublishedInEnglish(payload)
+
+          await copyEnglishToSpanish(payload, doc.id)
+
+          expect((await readSpanish(payload, doc.id, true)).title).toBe('English title')
+        })
+
+        test('should leave the published version of the target locale as it was when overwriting', async ({
+          payload,
+        }) => {
+          const doc = await createPublishedInEnglish(payload)
+
+          await payload.update({
+            id: doc.id,
+            collection: localizedDraftsSlug,
+            data: { _status: 'published', title: 'Spanish title' },
+            locale: spanishLocale,
+            overrideAccess: true,
+          })
+
+          await copyEnglishToSpanish(payload, doc.id, true)
+
+          const published = await readSpanish(payload, doc.id, false)
+
+          expect(published._status).toBe('published')
+          expect(published.title).toBe('Spanish title')
+          expect((await readSpanish(payload, doc.id, true)).title).toBe('English title')
+        })
+      })
     })
 
     test.describe('Multiple fallback locales', () => {
