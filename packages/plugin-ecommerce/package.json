@@ -41,6 +41,11 @@
       "types": "./src/exports/types.ts",
       "default": "./src/exports/types.ts"
     },
+    "./payments/nano": {
+      "import": "./src/exports/payments/nano.ts",
+      "types": "./src/exports/payments/nano.ts",
+      "default": "./src/exports/payments/nano.ts"
+    },
     "./payments/stripe": {
       "import": "./src/exports/payments/stripe.ts",
       "types": "./src/exports/payments/stripe.ts",
@@ -85,6 +90,11 @@
         "import": "./dist/exports/types.js",
         "types": "./dist/exports/types.d.ts",
         "default": "./dist/exports/types.js"
+      },
+      "./payments/nano": {
+        "import": "./dist/exports/payments/nano.js",
+        "types": "./dist/exports/payments/nano.d.ts",
+        "default": "./dist/exports/payments/nano.js"
       },
       "./payments/stripe": {
         "import": "./dist/exports/payments/stripe.js",
