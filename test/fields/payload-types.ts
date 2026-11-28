@@ -607,6 +607,15 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  collapsedGroupWithCondition?:
+    | {
+        group?: {
+          toggle?: boolean | null;
+          text?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   localized: {
     text: string;
     id?: string | null;
@@ -3080,6 +3089,17 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        id?: T;
+      };
+  collapsedGroupWithCondition?:
+    | T
+    | {
+        group?:
+          | T
+          | {
+              toggle?: T;
+              text?: T;
+            };
         id?: T;
       };
   localized?:
