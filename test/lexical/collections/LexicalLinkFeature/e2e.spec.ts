@@ -54,6 +54,17 @@ describe('Lexical Link Feature', () => {
     createdAutosaveDocIDs.length = 0
   })
 
+  test('should keep hidden editor controls from widening an RTL page', async ({ page }) => {
+    await page.setViewportSize({ height: 720, width: 1280 })
+    await page.locator('html').evaluate((element) => {
+      element.dir = 'rtl'
+    })
+
+    await expect(page.locator('.draggable-block-menu')).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(1280)
+    await expect(page.locator('.link-editor')).toBeHidden()
+  })
+
   test('can add new custom fields in link feature modal', async ({ page }) => {
     const lexical = new LexicalHelpers(page)
 
@@ -125,9 +136,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -193,9 +204,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -258,9 +269,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -327,9 +338,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
