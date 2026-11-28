@@ -403,6 +403,31 @@ export interface Condition {
   conditionalRowField?: string | null;
   conditionalCollapsibleField?: string | null;
   clientValidatedValue?: string | null;
+  address?: {
+    country?: string | null;
+    city?: string | null;
+  };
+  enabledByDefault?: boolean | null;
+  shipping?: {
+    region?: string | null;
+    zip?: string | null;
+  };
+  rows?:
+    | {
+        title?: string | null;
+        rowIdField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  layout?:
+    | {
+        country?: string | null;
+        city?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'conditionBlock';
+      }[]
+    | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -716,6 +741,38 @@ export interface ConditionsSelect<T extends boolean = true> {
   conditionalRowField?: T;
   conditionalCollapsibleField?: T;
   clientValidatedValue?: T;
+  address?:
+    | T
+    | {
+        country?: T;
+        city?: T;
+      };
+  enabledByDefault?: T;
+  shipping?:
+    | T
+    | {
+        region?: T;
+        zip?: T;
+      };
+  rows?:
+    | T
+    | {
+        title?: T;
+        rowIdField?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        conditionBlock?:
+          | T
+          | {
+              country?: T;
+              city?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

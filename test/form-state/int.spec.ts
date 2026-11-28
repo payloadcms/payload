@@ -322,6 +322,113 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
+  // https://github.com/payloadcms/payload/issues/19604
+  test('should evaluate `admin.condition` against unselected fields when using `select`', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        address: { city: 'Austin', country: 'US' },
+        conditionalCustomField: 'value',
+        showField: true,
+      },
+      overrideAccess: true,
+    })
+
+    const buildSelectedState = (select: Record<string, unknown>, data: Data) =>
+      buildFormState({
+        id: data.id,
+        collectionSlug: conditionsSlug,
+        data,
+        docPermissions: undefined,
+        docPreferences: {
+          fields: {},
+        },
+        documentFormState: undefined,
+        mockRSCs: true,
+        operation: 'update',
+        renderAllFields: false,
+        req,
+        schemaPath: conditionsSlug,
+        select,
+      })
+
+    const { state: topLevelState } = await buildSelectedState(
+      { conditionalCustomField: true },
+      structuredClone(doc),
+    )
+
+    expect(topLevelState.conditionalCustomField).toBeDefined()
+    expect(topLevelState.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(topLevelState.showField).toBeUndefined()
+
+    const groupInput = structuredClone(doc)
+    const { state: groupState } = await buildSelectedState({ address: { city: true } }, groupInput)
+
+    expect(groupState['address.city']).toBeDefined()
+    expect(groupState['address.city']?.passesCondition).not.toBe(false)
+    expect(groupState['address.country']).toBeUndefined()
+    // The caller's data is not mutated
+    expect(groupInput.address?.country).toBe('US')
+
+    // Conditions see the default values of selected fields
+    const { state: defaultsState } = await buildSelectedState(
+      { enabledByDefault: true, shipping: { region: true, zip: true } },
+      {},
+    )
+
+    expect(defaultsState['shipping.zip']).toBeDefined()
+    expect(defaultsState['shipping.zip']?.passesCondition).not.toBe(false)
+
+    // Conditions see the IDs generated for new rows
+    const { state: rowsState } = await buildSelectedState(
+      { rows: { rowIdField: true } },
+      { rows: [{ title: 'A' }] },
+    )
+
+    expect(rowsState['rows.0.rowIdField']).toBeDefined()
+    expect(rowsState['rows.0.rowIdField']?.passesCondition).not.toBe(false)
+
+    // Rows keep their ID when `select` strips it
+    const rowId = '6745a1b2c3d4e5f6a7b8c9d0'
+    const { state: rowsWithIdState } = await buildSelectedState(
+      { rows: { rowIdField: true } },
+      { rows: [{ id: rowId, title: 'A' }] },
+    )
+
+    expect(rowsWithIdState['rows.0.id']?.value).toBe(rowId)
+
+    // Block conditions see unselected fields in `blockData`
+    const { state: blockState } = await buildSelectedState(
+      { layout: { conditionBlock: { city: true } } },
+      { layout: [{ blockType: 'conditionBlock', city: 'Austin', country: 'US' }] },
+    )
+
+    expect(blockState['layout.0.city']).toBeDefined()
+    expect(blockState['layout.0.city']?.passesCondition).not.toBe(false)
+
+    // A hidden group still only carries its selected fields
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        address: { city: 'Austin', country: 'US' },
+        showField: false,
+      },
+      overrideAccess: true,
+    })
+
+    const { state: hiddenGroupState } = await buildSelectedState(
+      { address: { city: true } },
+      structuredClone(hiddenDoc),
+    )
+
+    expect(hiddenGroupState.address?.passesCondition).toBe(false)
+    expect(hiddenGroupState.address?.value).toStrictEqual({ city: 'Austin' })
+  })
+
   test('should not render custom Field components for fields hidden by admin.condition', async ({
     payload,
   }) => {

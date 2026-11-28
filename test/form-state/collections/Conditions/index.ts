@@ -48,6 +48,89 @@ export const ConditionsCollection: CollectionConfig = {
       name: 'clientValidatedValue',
       type: 'text',
     },
+    {
+      name: 'address',
+      type: 'group',
+      admin: {
+        condition: (data) => data?.showField === true,
+      },
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+          admin: {
+            condition: (_, siblingData) => siblingData?.country === 'US',
+          },
+        },
+      ],
+    },
+    {
+      name: 'enabledByDefault',
+      type: 'checkbox',
+      defaultValue: true,
+    },
+    {
+      name: 'shipping',
+      type: 'group',
+      fields: [
+        {
+          name: 'region',
+          type: 'text',
+          defaultValue: 'US',
+        },
+        {
+          name: 'zip',
+          type: 'text',
+          admin: {
+            condition: (data, siblingData) =>
+              data?.enabledByDefault === true && siblingData?.region === 'US',
+          },
+        },
+      ],
+    },
+    {
+      name: 'rows',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'rowIdField',
+          type: 'text',
+          admin: {
+            condition: (_, siblingData) => Boolean(siblingData?.id),
+          },
+        },
+      ],
+    },
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'conditionBlock',
+          fields: [
+            {
+              name: 'country',
+              type: 'text',
+            },
+            {
+              name: 'city',
+              type: 'text',
+              admin: {
+                condition: (_, __, { blockData }) => blockData?.country === 'US',
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
   versions: false,
 }
