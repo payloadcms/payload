@@ -3,6 +3,7 @@ import type { Sort, Where } from 'payload'
 import { stringify } from 'qs-esm'
 
 export type OperationArgs = {
+  allSessions?: boolean
   depth?: number
   draft?: boolean
   fallbackLocale?: unknown
@@ -45,7 +46,11 @@ export const buildSearchParams = (args: OperationArgs): string => {
     search.pagination = String(args.pagination)
   }
 
-  if (args.fallbackLocale) {
+  if (typeof args.allSessions === 'boolean') {
+    search.allSessions = String(args.allSessions)
+  }
+
+  if (args.fallbackLocale || args.fallbackLocale === false) {
     search['fallback-locale'] = String(args.fallbackLocale)
   }
 

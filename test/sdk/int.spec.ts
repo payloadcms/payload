@@ -1,5 +1,6 @@
 import { PayloadSDKError } from '@payloadcms/sdk'
 import { randomUUID } from 'crypto'
+import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
@@ -112,6 +113,32 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
     expect((await sdk.findByID({ id: postTrash.id, collection: 'posts', trash: true })).id).toEqual(
       postTrash.id,
     )
+  })
+
+  test('should execute findByID with fallbackLocale: false', async ({ payload, sdk }) => {
+    const localizedPost = await payload.create({
+      collection: 'posts',
+      data: { localizedText: 'english' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    const withFallback = await sdk.findByID({
+      id: localizedPost.id,
+      collection: 'posts',
+      locale: 'es',
+    })
+    const withoutFallback = await sdk.findByID({
+      id: localizedPost.id,
+      collection: 'posts',
+      fallbackLocale: false,
+      locale: 'es',
+    })
+
+    await payload.delete({ id: localizedPost.id, collection: 'posts', overrideAccess: true })
+
+    expect(withFallback.localizedText).toBe('english')
+    expect(withoutFallback.localizedText).toBeUndefined()
   })
 
   test('should execute findByID with disableErrors: true', async ({ sdk }) => {
@@ -488,6 +515,188 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
     })
 
     expect(email).toBe(user.email)
+  })
+
+  test('should execute logout', async ({ sdk }) => {
+    const { token } = await sdk.login({
+      collection: 'users',
+      data: { email: testUserCredentials.email, password: testUserCredentials.password },
+    })
+    const withToken = { headers: { Authorization: `JWT ${token}`, DisableAutologin: 'true' } }
+
+    expect((await sdk.me({ collection: 'users' }, withToken)).user.email).toBe(
+      testUserCredentials.email,
+    )
+
+    const res = await sdk.logout({ collection: 'users' }, withToken)
+
+    expect(res.message).toBeTruthy()
+    expect((await sdk.me({ collection: 'users' }, withToken)).user).toBeNull()
+  })
+
+  test('should execute logout with allSessions', async ({ sdk }) => {
+    const login = () =>
+      sdk.login({
+        collection: 'users',
+        data: { email: testUserCredentials.email, password: testUserCredentials.password },
+      })
+    const first = await login()
+    const second = await login()
+    const withToken = (token?: string) => ({
+      headers: { Authorization: `JWT ${token}`, DisableAutologin: 'true' },
+    })
+
+    await sdk.logout({ allSessions: true, collection: 'users' }, withToken(first.token))
+
+    expect((await sdk.me({ collection: 'users' }, withToken(second.token))).user).toBeNull()
+  })
+
+  test('should execute unlock', async ({ payload, sdk }) => {
+    const credentials = { email: 'locked@payloadcms.com', password: 'correct-password' }
+    const user = await payload.create({
+      collection: 'users',
+      data: credentials,
+      overrideAccess: true,
+    })
+
+    try {
+      // maxLoginAttempts is 2 for this collection
+      for (let i = 0; i < 2; i++) {
+        await expect(
+          sdk.login({ collection: 'users', data: { ...credentials, password: 'wrong' } }),
+        ).rejects.toBeInstanceOf(PayloadSDKError)
+      }
+      await expect(sdk.login({ collection: 'users', data: credentials })).rejects.toBeInstanceOf(
+        PayloadSDKError,
+      )
+
+      const res = await sdk.unlock({ collection: 'users', data: { email: credentials.email } })
+
+      expect(res.message).toBeTruthy()
+      expect((await sdk.login({ collection: 'users', data: credentials })).user.email).toBe(
+        credentials.email,
+      )
+    } finally {
+      await payload.delete({ id: user.id, collection: 'users', overrideAccess: true })
+    }
+  })
+
+  test('should execute access', async ({ sdk }) => {
+    const res = await sdk.access()
+
+    expect(res.canAccessAdmin).toBe(true)
+    expect(res.collections?.posts?.read).toBe(true)
+    expect(res.globals?.global?.update).toBe(true)
+  })
+
+  test('should execute docAccess', async ({ sdk }) => {
+    const byID = await sdk.docAccess({ id: post.id, collection: 'posts' })
+
+    expect(byID.update).toBe(true)
+    expect(byID.delete).toBe(true)
+
+    const forCreate = await sdk.docAccess({ collection: 'posts' })
+
+    expect(forCreate.create).toBe(true)
+  })
+
+  test('should execute docAccessGlobal', async ({ sdk }) => {
+    const res = await sdk.docAccessGlobal({ slug: 'global' })
+
+    expect(res.read).toBe(true)
+    expect(res.update).toBe(true)
+  })
+
+  test('should execute validate', async ({ sdk }) => {
+    expect(await sdk.validate({ collection: 'posts', data: { shortText: 'ok' } })).toStrictEqual({
+      errors: [],
+      valid: true,
+    })
+
+    const invalid = await sdk.validate({ collection: 'posts', data: { shortText: 'too long' } })
+
+    expect(invalid.valid).toBe(false)
+    expect(invalid.errors.map((error) => error.path)).toStrictEqual(['shortText'])
+  })
+
+  test('should execute validate (by ID)', async ({ sdk }) => {
+    const res = await sdk.validate({
+      id: post.id,
+      collection: 'posts',
+      data: { shortText: 'too long' },
+    })
+
+    expect(res.valid).toBe(false)
+    expect(res.errors.map((error) => error.path)).toStrictEqual(['shortText'])
+  })
+
+  test('should execute validate with several locales', async ({ sdk }) => {
+    const res = await sdk.validate({
+      collection: 'posts',
+      data: { shortText: 'ok' },
+      locale: ['en', 'es'],
+    })
+
+    expect(res.valid).toBe(true)
+  })
+
+  test('should execute validateGlobal', async ({ sdk }) => {
+    expect((await sdk.validateGlobal({ slug: 'global', data: { shortText: 'ok' } })).valid).toBe(
+      true,
+    )
+
+    const invalid = await sdk.validateGlobal({ slug: 'global', data: { shortText: 'too long' } })
+
+    expect(invalid.valid).toBe(false)
+    expect(invalid.errors.map((error) => error.path)).toStrictEqual(['shortText'])
+  })
+
+  test('should execute duplicate', async ({ payload, sdk }) => {
+    const copy = await sdk.duplicate({ id: post.id, collection: 'posts', data: { text: 'copy' } })
+
+    try {
+      expect(copy.id).not.toBe(post.id)
+      expect(copy.number).toBe(post.number)
+      expect(copy.text).toBe('copy')
+    } finally {
+      await payload.delete({ id: copy.id, collection: 'posts', overrideAccess: true })
+    }
+  })
+
+  test('should execute renameFile', async ({ payload, sdk }) => {
+    const file = new File([await readFile(path.join(dirname, './image.jpg'))], 'to-rename.jpg', {
+      type: 'image/jpeg',
+    })
+    const media = await sdk.create({ collection: 'media', data: {}, file })
+
+    try {
+      const renamed = await sdk.renameFile({
+        id: media.id,
+        collection: 'media',
+        filename: 'renamed.jpg',
+      })
+
+      expect(renamed.filename).toBe('renamed.jpg')
+      expect((await payload.findByID({ id: media.id, collection: 'media' })).filename).toBe(
+        'renamed.jpg',
+      )
+    } finally {
+      await payload.delete({ id: media.id, collection: 'media', overrideAccess: true })
+    }
+  })
+
+  test('should encode text IDs as one path segment', async ({ payload, sdk }) => {
+    const id = 'chapter/intro#1'
+    await payload.create({ collection: 'text-ids', data: { id }, overrideAccess: true })
+
+    try {
+      expect((await sdk.docAccess({ id, collection: 'text-ids' })).update).toBe(true)
+      expect(
+        (await sdk.validate({ id, collection: 'text-ids', data: { shortText: 'too long' } })).valid,
+      ).toBe(false)
+    } finally {
+      await payload.delete({ id, collection: 'text-ids', overrideAccess: true })
+    }
   })
 
   test.describe('Error Handling', () => {

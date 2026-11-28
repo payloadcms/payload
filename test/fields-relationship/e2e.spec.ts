@@ -1059,7 +1059,7 @@ describe('Relationship Field', () => {
         overrideAccess: true,
       })
 
-      await payload.create({
+      const doc = await payload.create({
         collection: slug,
         data: {
           relationship: relatedDoc.id,
@@ -1080,7 +1080,7 @@ describe('Relationship Field', () => {
 
       const cleanup = async () => {
         await payload.delete({
-          id: relatedDoc.id,
+          id: doc.id,
           collection: slug,
           overrideAccess: true,
         })
@@ -1233,7 +1233,7 @@ async function clearAllDocs(): Promise<void> {
   await clearCollectionDocs(versionedRelationshipFieldSlug)
 }
 
-async function clearCollectionDocs(collectionSlug: CollectionSlug): Promise<void> {
+async function clearCollectionDocs(collectionSlug: CollectionSlug<Config>): Promise<void> {
   await payload.delete({
     collection: collectionSlug,
     where: {
