@@ -54,7 +54,9 @@ export const generateSlug =
           valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
 
-        data[slugFieldName] = isPromise(slug) ? await slug : slug
+        const slugified = isPromise(slug) ? await slug : slug
+
+        data[slugFieldName] = slugified || undefined
       }
 
       return Boolean(!data?.[slugFieldName])
