@@ -5,6 +5,8 @@ import type { UploadCollectionSlug } from 'payload'
 import { useConfig, useEffectEvent, useUploadHandlers } from '@payloadcms/ui'
 import { Fragment, type ReactNode, useEffect } from 'react'
 
+import { resolveClientUploadFile } from './resolveClientUploadFile.js'
+
 type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
   children: ReactNode
   collectionSlug: UploadCollectionSlug
@@ -55,7 +57,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
               collectionSlug,
               docPrefix,
               extra,
-              file,
+              file: resolveClientUploadFile(file),
               prefix,
               serverHandlerPath,
               serverURL,
