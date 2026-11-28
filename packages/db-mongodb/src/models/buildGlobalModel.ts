@@ -27,6 +27,7 @@ export const buildGlobalModel = ({
       globalsSchema,
       'globals',
     ) as unknown as GlobalModel
+    const statusIndexPaths = new Set<string>()
 
     Object.values(adapter.payload.config.globals).forEach((globalConfig) => {
       const globalSchema = buildSchema({
@@ -40,8 +41,38 @@ export const buildGlobalModel = ({
         schemaBuildContext,
         schemaPath: `global:${globalConfig.slug}`,
       })
+
+      if (globalConfig.versions && globalConfig.versions.drafts) {
+        for (const [fields, options] of globalSchema.indexes()) {
+          const [statusPath] = Object.keys(fields)
+
+          if (
+            Object.keys(fields).length === 1 &&
+            statusPath &&
+            (statusPath === '_status' || statusPath.startsWith('_status.')) &&
+            fields[statusPath] === 1 &&
+            !options.unique &&
+            !options.sparse &&
+            !options.partialFilterExpression
+          ) {
+            const statusField = globalSchema.path(statusPath)
+
+            if (statusField) {
+              statusField.index(false)
+              statusIndexPaths.add(statusPath)
+            }
+          }
+        }
+      }
+
       Globals.discriminator(globalConfig.slug, globalSchema)
     })
+
+    // Add shared indexes after compiling discriminators so they do not inherit
+    // global-specific partial filters for these collection-wide definitions.
+    for (const statusPath of statusIndexPaths) {
+      globalsSchema.index({ globalType: 1, [statusPath]: 1 })
+    }
 
     return Globals
   }
