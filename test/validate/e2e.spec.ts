@@ -1,13 +1,15 @@
 import type { Page } from '@playwright/test'
+import type { UntypedPayloadTypes } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+
 import { changeLocale, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import {
   validationCustomButtonsCollectionSlug,
@@ -20,31 +22,27 @@ const dirname = path.dirname(filename)
 
 test.describe('Publish all locales', () => {
   const createdIDs: string[] = []
-  let client: RESTClient
+  let payload: PayloadTestSDK<UntypedPayloadTypes>
   let publishAllLocalesURL: AdminUrlUtil
   let page: Page
   let serverURL: string
 
   test.beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<UntypedPayloadTypes>({ dirname }))
     publishAllLocalesURL = new AdminUrlUtil(serverURL, validationCustomButtonsCollectionSlug)
-    client = new RESTClient({
-      defaultSlug: validationCustomButtonsCollectionSlug,
-      serverURL,
-    })
 
     const context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
-    await client.login()
   })
 
   test.afterEach(async () => {
     await page.goto(publishAllLocalesURL.admin)
 
     for (const id of createdIDs) {
-      await client.delete(id, {
+      await payload.delete({
+        collection: validationCustomButtonsCollectionSlug,
         id,
-        slug: validationCustomButtonsCollectionSlug,
+        overrideAccess: true,
       })
     }
     createdIDs.length = 0
@@ -61,9 +59,10 @@ test.describe('Publish all locales', () => {
 
     await expect
       .poll(async () => {
-        const { doc } = await client.findByID({
+        const doc = await payload.findByID({
+          collection: validationCustomButtonsCollectionSlug,
           id,
-          slug: validationCustomButtonsCollectionSlug,
+          overrideAccess: true,
         })
 
         return doc._status
@@ -121,16 +120,18 @@ test.describe('Publish all locales', () => {
     germanTitle?: string
     spanishTitle?: string
   }): Promise<string> {
-    const response = await client.endpointWithAuth<{ doc: { id: number | string } }>(
-      `/api/${validationCustomButtonsCollectionSlug}?draft=true&locale=en`,
-      'POST',
-      {
+    const doc = await payload.create({
+      collection: validationCustomButtonsCollectionSlug,
+      data: {
         _status: 'draft',
         summary: 'Shared summary',
         title: englishTitle,
       },
-    )
-    const id = String(response.data.doc.id)
+      draft: true,
+      locale: 'en',
+      overrideAccess: true,
+    })
+    const id = String(doc.id)
 
     createdIDs.push(id)
 
@@ -140,14 +141,17 @@ test.describe('Publish all locales', () => {
       ['fr', frenchTitle],
     ]) {
       if (title) {
-        await client.endpointWithAuth(
-          `/api/${validationCustomButtonsCollectionSlug}/${id}?draft=true&locale=${locale}`,
-          'PATCH',
-          {
+        await payload.update({
+          collection: validationCustomButtonsCollectionSlug,
+          data: {
             _status: 'draft',
             title,
           },
-        )
+          draft: true,
+          id,
+          locale,
+          overrideAccess: true,
+        })
       }
     }
 
@@ -160,11 +164,15 @@ test.describe('Publish all locales', () => {
     await waitForFormReady(page)
   }
 
-  async function getLocaleStatus({ id, locale }: { id: string; locale: string }): Promise<string> {
-    const { data } = await client.endpointWithAuth<{ _status: string }>(
-      `/api/${validationCustomButtonsCollectionSlug}/${id}?draft=true&locale=${locale}`,
-    )
+  async function getLocaleStatus({ id, locale }: { id: string; locale: string }): Promise<unknown> {
+    const doc = await payload.findByID({
+      collection: validationCustomButtonsCollectionSlug,
+      draft: true,
+      id,
+      locale,
+      overrideAccess: true,
+    })
 
-    return data._status
+    return doc._status
   }
 })

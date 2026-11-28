@@ -1,8 +1,8 @@
+import type { PayloadTypesShape } from 'payload'
+
 import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-
-import type { GeneratedTypes } from './sdk/types.js'
 
 import { getNextRootDir } from './getNextRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
@@ -15,12 +15,12 @@ type Args = {
   prebuild?: boolean
 }
 
-type Result<T extends GeneratedTypes<T>> = {
+type Result<T extends PayloadTypesShape> = {
   payload: PayloadTestSDK<T>
   serverURL: string
 }
 
-export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
+export async function initPayloadE2ENoConfig<T extends PayloadTypesShape>({
   dirname,
   prebuild,
 }: Args): Promise<Result<T>> {
