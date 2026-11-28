@@ -157,6 +157,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const initializedStateCollectionSlugRef = React.useRef<string | undefined>(undefined)
   const initializedPermissionsCollectionSlugRef = React.useRef<string | undefined>(undefined)
+  const initializingCollectionRef = React.useRef<{
+    promise: Promise<FormState | null>
+    slug: string
+  }>(null)
   const currentCollectionSlugRef = React.useRef(collectionSlug)
   currentCollectionSlugRef.current = collectionSlug
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
@@ -232,7 +236,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       method: 'POST',
     })
 
-    const json: SanitizedDocumentPermissions = await res.json()
+    const json: SanitizedDocumentPermissions = await readAccessResponse({ response: res })
     const publishedAccessJSON = await fetch(
       formatAdminURL({ apiRoute: api, path: docAccessPath }),
       {
@@ -246,10 +250,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         },
         method: 'POST',
       },
-    ).then((res) => res.json())
+    ).then((response) => readAccessResponse({ response }))
 
     if (currentCollectionSlugRef.current !== collectionSlug) {
-      return
+      return null
     }
 
     setDocPermissions(json)
@@ -265,24 +269,26 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     setHasPublishPermission(publishedAccessJSON?.update)
     initializedPermissionsCollectionSlugRef.current = collectionSlug
     setHasInitializedDocPermissions(true)
+    return json
   }, [api, code, collectionSlug, i18n.language])
 
+  /**
+   * Builds the shared form state template. It requires the loaded document permissions,
+   * because the server renders custom field components (e.g. tag fields) here, and fixes
+   * their `readOnly` prop from these permissions.
+   */
   const initializeSharedFormState = React.useCallback(
-    async (abortController?: AbortController) => {
-      if (abortController?.signal) {
-        abortController.abort('aborting previous fetch for initial form state without files')
-      }
-
-      // FETCH AND SET THE DOCUMENT SLOTS HERE!
-      const documentSlots = await getDocumentSlots({ collectionSlug })
-
+    async ({
+      docPermissions,
+      documentSlots,
+    }: {
+      docPermissions: SanitizedDocumentPermissions
+      documentSlots: DocumentSlots
+    }) => {
       try {
         const { state: formStateWithoutFiles } = await getFormState({
           collectionSlug,
-          docPermissions:
-            initializedPermissionsCollectionSlugRef.current === collectionSlug
-              ? docPermissions
-              : undefined,
+          docPermissions,
           docPreferences: { fields: {} },
           locale: code,
           operation: 'create',
@@ -315,8 +321,58 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         return null
       }
     },
-    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
+    [collectionSlug, getFormState, code, folderFieldName],
   )
+
+  /**
+   * Loads the document permissions and document slots, then builds the shared form state
+   * with them. Callers for the same collection share one request, so files added during
+   * initialization do not start a second one.
+   */
+  const initializeCollection = React.useCallback((): Promise<FormState | null> => {
+    // Both must belong to this collection. Switching collections can replace the
+    // permissions while the previous collection's template is still stored.
+    if (
+      initializedStateCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsCollectionSlugRef.current === collectionSlug
+    ) {
+      return Promise.resolve(initialStateRef.current)
+    }
+
+    if (initializingCollectionRef.current?.slug === collectionSlug) {
+      return initializingCollectionRef.current.promise
+    }
+
+    const promise = (async () => {
+      try {
+        const [docPermissions, documentSlots] = await Promise.all([
+          initializeSharedDocPermissions(),
+          getDocumentSlots({ collectionSlug }),
+        ])
+
+        if (!docPermissions) {
+          return null
+        }
+
+        return await initializeSharedFormState({ docPermissions, documentSlots })
+      } catch (_err) {
+        // Callers treat `null` as a failed start-up: they hide their loading overlay and can try again.
+        return null
+      }
+    })()
+
+    initializingCollectionRef.current = { slug: collectionSlug, promise }
+
+    // Forget a failed attempt so the next caller can try again.
+    const forgetIfFailed = (formState?: FormState | null) => {
+      if (!formState && initializingCollectionRef.current?.promise === promise) {
+        initializingCollectionRef.current = null
+      }
+    }
+    void promise.then(forgetIfFailed)
+
+    return promise
+  }, [collectionSlug, getDocumentSlots, initializeSharedDocPermissions, initializeSharedFormState])
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
     (index: number) => {
@@ -384,10 +440,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
-      let initialFormState = initialStateRef.current
-      if (initializedStateCollectionSlugRef.current !== collectionSlug) {
-        initialFormState = await initializeSharedFormState()
-      }
+      const initialFormState = await initializeCollection()
       if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
         toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
         return false
@@ -403,7 +456,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       return true
     },
     [
-      initializeSharedFormState,
+      initializeCollection,
       collectionSlug,
       toggleLoadingOverlay,
       activeIndex,
@@ -419,10 +472,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const addInitialForms = useEffectEvent(async (initialForms: InitialForms) => {
     toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
 
-    let initialFormState = initialStateRef.current
-    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
-      initialFormState = await initializeSharedFormState()
-    }
+    const initialFormState = await initializeCollection()
     if (currentCollectionSlugRef.current !== collectionSlug || !initialFormState) {
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
       return
@@ -728,13 +778,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     if (!collectionSlug) {
       return
     }
-    if (initializedStateCollectionSlugRef.current !== collectionSlug) {
-      void initializeSharedFormState()
-    }
-
-    if (initializedPermissionsCollectionSlugRef.current !== collectionSlug) {
-      void initializeSharedDocPermissions()
-    }
+    void initializeCollection()
 
     if (initialFiles || initialForms) {
       if (
@@ -802,8 +846,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     return
   }, [
     initialFiles,
-    initializeSharedFormState,
-    initializeSharedDocPermissions,
+    initializeCollection,
     collectionSlug,
     hasInitializedState,
     hasInitializedDocPermissions,
@@ -851,4 +894,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
 export function useFormsManager() {
   return React.use(Context)
+}
+
+/** Reads an access response, and throws on an HTTP error so the caller can try again. */
+async function readAccessResponse({ response }: { response: Response }) {
+  if (!response.ok) {
+    throw new Error(`Access request failed with status ${response.status}`)
+  }
+
+  return response.json()
 }
