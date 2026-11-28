@@ -48,4 +48,10 @@ process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
 await assertDbReachable(process.env.PAYLOAD_DATABASE as Parameters<typeof assertDbReachable>[0])
 
+// Started before test files import their configs, which read the binding. The int fixtures stop it.
+if (process.env.PAYLOAD_DATABASE === 'd1') {
+  const { startD1 } = await import('./__helpers/shared/db/d1/startD1.js')
+  await startD1()
+}
+
 generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)

@@ -33,6 +33,8 @@ type IntegrationFixtures = {
   $file: {
     config: SanitizedConfig
     configPath: null | string
+    /** Stops the D1 database from `test/vitest.setup.ts` once the file's Payload instance is gone. */
+    d1Lifecycle: void
     /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
     payloadInstance: Payload
     resetBetweenTests: boolean
@@ -104,6 +106,18 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     },
     { scope: 'file' },
   ],
+  d1Lifecycle: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(undefined)
+
+      if (process.env.PAYLOAD_DATABASE === 'd1') {
+        const { stopD1 } = await import('../shared/db/d1/startD1.js')
+        await stopD1()
+      }
+    },
+    { auto: true, scope: 'file' },
+  ],
   payload: async ({ payloadInstance, resetBetweenTests }, use) => {
     if (resetBetweenTests) {
       const testDataConfig = getTestDataConfig(payloadInstance.config)
@@ -117,7 +131,10 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     await use(payloadInstance)
   },
   payloadInstance: [
-    async ({ config, testCron }, use) => {
+    async ({ config, d1Lifecycle, testCron }, use) => {
+      // Depending on it tears D1 down after Payload, whose shutdown and crons still query it
+      void d1Lifecycle
+
       const payload = await getPayload({ config, cron: testCron })
 
       try {

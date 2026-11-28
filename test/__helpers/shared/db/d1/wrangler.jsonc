@@ -1,0 +1,11 @@
+// Local D1 binding for `PAYLOAD_DATABASE=d1`. See ./startD1.ts.
+{
+  "compatibility_date": "2025-08-15",
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_id": "local",
+      "database_name": "payload-test",
+    },
+  ],
+}
