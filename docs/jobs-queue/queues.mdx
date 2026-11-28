@@ -81,13 +81,15 @@ This makes it easy to run multiple workers for different queues, scale them inde
 The `jobs.autoRun` property allows you to configure cron jobs that automatically **execute** jobs from your queue at specified intervals. This runs within your app's process.
 
 <Banner type="warning">
-  **Important Distinction:** `autoRun` does NOT queue new jobs—it only **runs**
-  jobs that are already in the queue.
+  By default, `autoRun` handles recurring schedules for its queue before running
+  queued jobs. It can therefore both **queue** jobs from task/workflow schedules
+  and **run** them.
 
 - To manually queue jobs: Use `payload.jobs.queue()` in your code
-- To automatically queue recurring jobs: Use the `schedule` property on
-  tasks/workflows (see [Job Schedules](/docs/jobs-queue/schedules))
-- To execute queued jobs: Use `autoRun` (this section)
+- To queue recurring jobs: Define the `schedule` property on tasks/workflows and
+  configure `autoRun` for the same queue (see [Job Schedules](/docs/jobs-queue/schedules))
+- To execute queued jobs without handling schedules: Set `disableScheduling: true`
+  on the `autoRun` entry
 
 </Banner>
 
@@ -96,7 +98,21 @@ Think of it this way:
 - **Queuing** = Adding jobs to the database to be run later
 - **Running** = Actually executing the job handler functions
 
-`autoRun` only handles the **running** part.
+`autoRun` handles both parts by default. It does not create jobs for tasks or workflows
+that have no `schedule`; queue those manually with `payload.jobs.queue()`.
+
+If another process already handles schedules for the same queue, disable scheduling
+in `autoRun` so the two processes do not both attempt to queue scheduled jobs:
+
+```ts
+autoRun: [
+  {
+    cron: '* * * * *',
+    queue: 'nightly',
+    disableScheduling: true,
+  },
+]
+```
 
 **Example**:
 
