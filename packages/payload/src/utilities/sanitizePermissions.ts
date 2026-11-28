@@ -12,6 +12,8 @@ import type {
   SanitizedPermissions,
 } from '../auth/types.js'
 
+import { deepCopyObject } from './deepCopyObject.js'
+
 // Field names cannot contain a period. Keep this false value through sanitization,
 // then remove it after empty-object cleanup so a recursive boundary retains `fields: {}`.
 const recursiveBlockBoundaryKey = '\u0000payload.recursive-block-boundary'
@@ -245,8 +247,10 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
  * @internal
  */
 export function sanitizePermissions(
-  data: MarkOptional<Permissions, 'canAccessAdmin'>,
+  permissions: MarkOptional<Permissions, 'canAccessAdmin'>,
 ): SanitizedPermissions {
+  const data = deepCopyObject(permissions)
+
   if (data.canAccessAdmin === false) {
     delete data.canAccessAdmin
   }
