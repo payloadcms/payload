@@ -8,4 +8,5 @@ export const generateLogoutMetadata: GenerateViewMetadata = async ({ config, i18
     keywords: `${t('authentication:logout')}`,
     serverURL: config.serverURL,
     title: t('authentication:logout'),
+    ...(config.admin.meta || {}),
   })
