@@ -48,7 +48,6 @@ import {
   createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
-  dropDatabase,
   init,
   insert,
 } from '@payloadcms/drizzle/sqlite'
@@ -59,6 +58,7 @@ import { fileURLToPath } from 'url'
 import type { Args, SQLiteD1Adapter } from './types.js'
 
 import { connect } from './connect.js'
+import { dropDatabase } from './dropDatabase.js'
 import { execute } from './execute.js'
 
 const filename = fileURLToPath(import.meta.url)
