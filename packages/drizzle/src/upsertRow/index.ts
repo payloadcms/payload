@@ -249,7 +249,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         } else {
           ;[insertedRow] = await adapter.insert({
             db,
-            onConflictDoUpdate: { set: rowToInsert.row, target, where },
+            // Drizzle throws on an empty update set, e.g. `data: {}` on a collection without timestamps
+            onConflictDoUpdate: rowKeys.length
+              ? { set: rowToInsert.row, target, where }
+              : undefined,
             tableName,
             values: rowToInsert.row,
           })
