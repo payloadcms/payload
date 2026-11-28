@@ -1,7 +1,47 @@
+import type { AsyncLocalStorage } from 'node:async_hooks'
+
 import { expect } from 'vitest'
 
 import { payloadAdminSplatRoute } from '../../packages/tanstack-start/src/adapters/views/index.js'
 import { test } from '../__helpers/int/vitest.js'
+
+test.suite('Admin route search params', {}, () => {
+  test('should read repeated query keys from the server router history', async () => {
+    const indexedSearchStr = '?operation%5B0%5D=update&operation%5B1%5D=delete'
+    const router = {
+      history: { location: { search: '?operation=update&operation=delete' } },
+      options: { parseSearch: () => ({}), stringifySearch: () => indexedSearchStr },
+    }
+
+    const search = await runInServerStartContext({
+      getRouter: () => Promise.resolve(router),
+      run: () => loadSearchParams({ searchStr: indexedSearchStr }),
+    })
+
+    expect(search).toEqual({ operation: ['update', 'delete'] })
+  })
+
+  test('should use the location search for a preload, not the current history entry', async () => {
+    const indexedSearchStr = '?operation%5B0%5D=update&operation%5B1%5D=delete'
+    const router = {
+      history: { location: { search: '?operation=update&operation=delete' } },
+      options: { parseSearch: () => ({}), stringifySearch: () => indexedSearchStr },
+    }
+
+    const search = await runInServerStartContext({
+      getRouter: () => Promise.resolve(router),
+      run: () => loadSearchParams({ isPreload: true, searchStr: indexedSearchStr }),
+    })
+
+    expect(search).toEqual({ 'operation[0]': 'update', 'operation[1]': 'delete' })
+  })
+
+  test('should fall back to the location search without a router instance', async () => {
+    const search = await loadSearchParams({ searchStr: '?operation%5B0%5D=update' })
+
+    expect(search).toEqual({ 'operation[0]': 'update' })
+  })
+})
 
 test.suite('Admin route cancellation', {}, () => {
   test('should forward router cancellation to a pending page load', async () => {
@@ -68,4 +108,48 @@ function startNavigation() {
   })
 
   return { abortController, loadSignal, navigation, reject, resolve }
+}
+
+async function loadSearchParams({
+  isPreload = false,
+  searchStr,
+}: {
+  isPreload?: boolean
+  searchStr: string
+}) {
+  let search: unknown
+  const { loader } = payloadAdminSplatRoute({
+    load: ({ data }) => {
+      search = data.search
+      return Promise.resolve({})
+    },
+  })
+
+  await loader.handler({
+    abortController: new AbortController(),
+    location: { searchStr },
+    params: { _splat: 'collections/posts' },
+    preload: isPreload,
+  })
+
+  return search
+}
+
+/**
+ * Runs `run` the way a Start server request does. Every copy of Start shares
+ * this AsyncLocalStorage through a global symbol, so the context reaches the
+ * copy `@payloadcms/tanstack-start` resolves.
+ */
+function runInServerStartContext<T>({
+  getRouter,
+  run,
+}: {
+  getRouter: () => Promise<unknown>
+  run: () => T
+}): T {
+  const startStorage = (globalThis as Record<symbol, AsyncLocalStorage<unknown>>)[
+    Symbol.for('tanstack-start:start-storage-context')
+  ]
+
+  return startStorage.run({ getRouter }, run)
 }

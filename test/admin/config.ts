@@ -59,6 +59,7 @@ import {
   customViewPath,
   protectedCustomNestedViewPath,
   publicCustomViewPath,
+  searchParamsViewPath,
 } from './shared.js'
 import { editMenuItemsSlug, reorderTabsSlug, uploadCollectionSlug } from './slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
@@ -181,6 +182,10 @@ export default buildConfigWithDefaults({
             exact: true,
             path: publicCustomViewPath,
             strict: true,
+          },
+          SearchParamsView: {
+            Component: '/components/views/SearchParamsView/index.js#SearchParamsView',
+            path: searchParamsViewPath,
           },
           TooltipShowcase: {
             Component: '/components/views/TooltipShowcase/index.js#TooltipShowcase',
