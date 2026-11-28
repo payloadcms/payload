@@ -9,6 +9,7 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
+import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
 import { openCreateDocDrawer } from '../../../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
 import {
@@ -25,6 +26,7 @@ import {
   selectInput,
 } from '../../../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -76,6 +78,59 @@ describe('relationship', () => {
 
   beforeAll(() => {
     url = new AdminUrlUtil(serverURL, 'relationship-fields')
+  })
+
+  visual('should render the create document drawer', async () => {
+    await loadCreatePage()
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
+    await page
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
+      .click()
+
+    const documentDrawer = page.locator('[id^=doc-drawer_text-fields_1_]')
+
+    await expect(documentDrawer).toBeVisible()
+    await expect(documentDrawer.locator('.doc-drawer__header-text')).toContainText('Creating new')
+    await expectScreenshot({ name: 'relationship-create-document-drawer.png', page })
+  })
+
+  visual('should render the edit document drawer', async () => {
+    await loadCreatePage()
+    await page.locator('#field-relationship').click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
+    await openDocDrawer({
+      page,
+      selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+    })
+
+    const documentDrawer = page.locator('[id^=doc-drawer_text-fields_1_]')
+
+    await expect(documentDrawer).toBeVisible()
+    await expect(documentDrawer.locator('.doc-drawer__header-text')).toContainText('Editing')
+    await expectScreenshot({
+      name: 'relationship-edit-document-drawer.png',
+      mask: [documentDrawer.locator('.doc-drawer__updated-at')],
+      page,
+    })
+  })
+
+  visual('should render the relationship list drawer', async () => {
+    await loadCreatePage()
+    await page.locator('#field-relationshipDrawer').click()
+
+    const listDrawer = page.locator('.list-drawer.drawer--is-open')
+
+    await expect(listDrawer).toBeVisible()
+    await expect(listDrawer.locator('tbody tr').first()).toBeVisible()
+    await expectScreenshot({
+      name: 'relationship-list-drawer.png',
+      mask: [
+        listDrawer.locator('.cell-createdAt'),
+        listDrawer.locator('.cell-id'),
+        listDrawer.locator('.cell-updatedAt'),
+      ],
+      page,
+    })
   })
 
   test('should create inline relationship within field with many relations', async () => {
