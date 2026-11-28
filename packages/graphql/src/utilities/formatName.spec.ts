@@ -15,6 +15,17 @@ describe('formatName', () => {
     expect(formatName(char)).toEqual(expected)
   })
 
+  it.each`
+    value       | expected
+    ${'2c:1lg'} | ${'_2c_1lg'}
+    ${'2c:2sm'} | ${'_2c_2sm'}
+    ${'a:b:c'}  | ${'a_b_c'}
+    ${'ns:key'} | ${'ns_key'}
+  `('should replace colons in $value', ({ value, expected }) => {
+    expect(formatName(value)).toEqual(expected)
+    expect(formatName(value)).toMatch(/^[_a-z][_0-9a-z]*$/i)
+  })
+
   describe('UTC offset handling', () => {
     it.each`
       offset      | expected
@@ -54,7 +65,7 @@ describe('formatName', () => {
       expect(formatName('+05')).toEqual('_05')
       expect(formatName('+0530')).toEqual('_0530')
       // 05:30 without sign is not a UTC offset, starts with number so gets _ prefix
-      expect(formatName('05:30')).toEqual('_05:30')
+      expect(formatName('05:30')).toEqual('_05_30')
     })
   })
 })
