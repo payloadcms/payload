@@ -183,11 +183,11 @@ export const sanitizeClientFeatures = (
 
   // Sort sanitized.toolbarInline.groups by order property
   sanitized.toolbarInline.groups.sort((a, b) => {
-    if (a.order && b.order) {
+    if (a.order != null && b.order != null) {
       return a.order - b.order
-    } else if (a.order) {
+    } else if (a.order != null) {
       return -1
-    } else if (b.order) {
+    } else if (b.order != null) {
       return 1
     } else {
       return 0
@@ -195,11 +195,11 @@ export const sanitizeClientFeatures = (
   })
   // Sort sanitized.toolbarFixed.groups by order property
   sanitized.toolbarFixed.groups.sort((a, b) => {
-    if (a.order && b.order) {
+    if (a.order != null && b.order != null) {
       return a.order - b.order
-    } else if (a.order) {
+    } else if (a.order != null) {
       return -1
-    } else if (b.order) {
+    } else if (b.order != null) {
       return 1
     } else {
       return 0
@@ -209,11 +209,11 @@ export const sanitizeClientFeatures = (
   // Sort sanitized.toolbarInline.groups.[group].entries by order property
   for (const group of sanitized.toolbarInline.groups) {
     group.items.sort((a, b) => {
-      if (a.order && b.order) {
+      if (a.order != null && b.order != null) {
         return a.order - b.order
-      } else if (a.order) {
+      } else if (a.order != null) {
         return -1
-      } else if (b.order) {
+      } else if (b.order != null) {
         return 1
       } else {
         return 0
@@ -224,11 +224,11 @@ export const sanitizeClientFeatures = (
   // Sort sanitized.toolbarFixed.groups.[group].entries by order property
   for (const group of sanitized.toolbarFixed.groups) {
     group.items.sort((a, b) => {
-      if (a.order && b.order) {
+      if (a.order != null && b.order != null) {
         return a.order - b.order
-      } else if (a.order) {
+      } else if (a.order != null) {
         return -1
-      } else if (b.order) {
+      } else if (b.order != null) {
         return 1
       } else {
         return 0
