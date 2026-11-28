@@ -21,7 +21,6 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
@@ -57,11 +56,9 @@ export function DefaultListView(props: ListViewClientProps) {
     queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
-    Table: InitialTable,
+    Table,
     viewType,
   } = props
-
-  const [Table] = useControllableState(InitialTable)
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 

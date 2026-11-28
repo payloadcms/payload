@@ -78,7 +78,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
           queryByGroup: JSON.stringify(newQuery.queryByGroup),
         })}`
         if (window.location.search !== search) {
-          startRouteTransition(() => router.replace(search))
+          startRouteTransition(() => router.replace(search, { scroll: false }))
         }
       } else if (typeof onQueryChange === 'function') {
         onQueryChange(newQuery)

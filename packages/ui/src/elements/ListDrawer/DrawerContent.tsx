@@ -3,7 +3,7 @@ import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { startTransition, useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type {
@@ -110,11 +110,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             } satisfies RenderListServerFnArgs,
           })) as RenderListServerFnReturnType
 
-          setListView(result?.List || null)
+          // Keep the current drawer visible while server-rendered cells stream.
+          startTransition(() => {
+            setListView(result?.List || null)
+            setIsLoading(false)
+          })
         } else {
           setListView(null)
+          setIsLoading(false)
         }
-        setIsLoading(false)
       } catch (_err) {
         console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
 
