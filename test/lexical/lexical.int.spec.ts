@@ -46,6 +46,7 @@ import type { LexicalField, LexicalListsFeature, RichTextField } from './payload
 
 // Sync converters
 import {
+  convertLexicalToHTML,
   HeadingHTMLConverter,
   LinkHTMLConverter,
   ListHTMLConverter,
@@ -506,6 +507,107 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       expect(linkNode.fields.doc.value.text).toStrictEqual(textDoc.text)
     })
 
+    test('should render populated internal links with their frontend path', async ({ payload }) => {
+      const richTextDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 1,
+        overrideAccess: true,
+      })
+
+      const frontendPath = `/${textFieldsSlug}/${createdTextDocID}`
+      const linkNode = (richTextDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode)
+        .children[3] as SerializedLinkNode
+
+      expect(linkNode.fields.doc?.frontendPath).toBe(frontendPath)
+      expect(convertLexicalToHTML({ data: richTextDoc.lexicalCustomFields })).toContain(
+        `href="${frontendPath}"`,
+      )
+    })
+
+    test('should add the frontend path to internal links in GraphQL', async ({ restClient }) => {
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              RichTextField(id: ${JSON.stringify(createdRichTextDocID)}) {
+                lexicalCustomFields(depth: 1)
+              }
+            }`,
+          }),
+        })
+        .then((res) => res.json())
+
+      const linkNode = data.RichTextField.lexicalCustomFields.root.children[1].children[3]
+
+      expect(linkNode.fields.doc.frontendPath).toBe(`/${textFieldsSlug}/${createdTextDocID}`)
+    })
+
+    test('should not save the frontend path of internal links', async ({ payload }) => {
+      const richTextDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNodeToSave = (
+        richTextDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode
+      ).children[3] as SerializedLinkNode
+
+      linkNodeToSave.fields.doc!.frontendPath = '/stale-path'
+
+      await payload.update({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        data: { lexicalCustomFields: richTextDoc.lexicalCustomFields },
+        overrideAccess: true,
+      })
+
+      const savedDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNode = (savedDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode)
+        .children[3] as SerializedLinkNode
+
+      expect(linkNode.fields.doc).not.toHaveProperty('frontendPath')
+    })
+
+    test('should not save the frontend path of internal links when creating a document', async ({
+      payload,
+    }) => {
+      const richTextDoc = await payload.findByID({
+        id: createdRichTextDocID,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNodeToSave = (
+        richTextDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode
+      ).children[3] as SerializedLinkNode
+
+      linkNodeToSave.fields.doc!.frontendPath = '/stale-path'
+
+      const createdDoc = await payload.create({
+        collection: richTextFieldsSlug,
+        data: { lexicalCustomFields: richTextDoc.lexicalCustomFields, title: 'copy' },
+        overrideAccess: true,
+      })
+
+      const savedDoc = await payload.findByID({
+        id: createdDoc.id,
+        collection: richTextFieldsSlug,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const linkNode = (savedDoc.lexicalCustomFields.root.children[1] as SerializedParagraphNode)
+        .children[3] as SerializedLinkNode
+
+      expect(linkNode.fields.doc).not.toHaveProperty('frontendPath')
+    })
+
     test('should populate relationship node', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
@@ -757,6 +859,63 @@ test.suite('Lexical', { config: './config.ts' }, () => {
 
     expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
       '[link to payload](https://payloadcms.com)',
+    )
+  })
+
+  test('should encode parentheses in markdown link URLs', async ({ payload }) => {
+    const newLexicalDoc = await payload.create({
+      collection: lexicalFieldsSlug,
+      data: {
+        lexicalWithBlocks: {
+          root: {
+            type: 'root',
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  {
+                    type: 'link',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'wiki',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    fields: {
+                      linkType: 'custom',
+                      url: 'https://example.com/wiki/Foo_(bar)',
+                    },
+                    format: '',
+                    indent: 0,
+                    version: 3,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+        },
+        title: 'Lexical Markdown Parentheses Test',
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
+      '[wiki](https://example.com/wiki/Foo_%28bar%29)',
     )
   })
 

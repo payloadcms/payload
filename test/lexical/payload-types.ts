@@ -4304,6 +4304,7 @@ export interface LinkBlock {
 export interface LexicalLinkFields_25C180CC {
   linkBlocks?: LinkBlock[] | null;
   doc?: {
+    frontendPath?: string | null;
     relationTo: string;
     value:
       | string
@@ -4353,6 +4354,7 @@ export interface LexicalLinkFields_5D6A193C {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
+    frontendPath?: string | null;
     relationTo: string;
     value:
       | string
@@ -4388,6 +4390,7 @@ export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
+    frontendPath?: string | null;
     relationTo: string;
     value:
       | string
@@ -4751,6 +4754,7 @@ export interface LexicalLinkFields_652F3B98 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
+    frontendPath?: string | null;
     relationTo: string;
     value:
       | string
@@ -4897,6 +4901,7 @@ export interface LexicalLinkFields_6636B5FF {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
+    frontendPath?: string | null;
     relationTo: string;
     value:
       | string
@@ -5049,6 +5054,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
+    frontendPath?: null | string;
     relationTo: string;
     value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
   } | null;

@@ -12,6 +12,8 @@ export type LinkFields = {
   /** Custom fields added via `LinkFeature`'s `fields` prop. */
   [k: string]: unknown
   doc?: {
+    /** Set when the doc is populated and its collection has `generateFrontendPath`. */
+    frontendPath?: null | string
     relationTo: string
     /** Document ID, or the full doc when populated by the afterRead hook. */
     value: { [k: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
@@ -46,6 +48,7 @@ export interface SerializedAutoLinkNode<
 const LINK_NODES_TS = `export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
+    frontendPath?: null | string;
     relationTo: string;
     value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
   } | null;
@@ -99,6 +102,7 @@ const buildLinkFieldsJSONSchema = (
             type: 'object',
             additionalProperties: false,
             properties: {
+              frontendPath: { type: ['string', 'null'] },
               relationTo: { type: 'string' },
               value: {
                 oneOf: [

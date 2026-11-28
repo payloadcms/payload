@@ -26,6 +26,7 @@ export const sanitizeServerFeatures = (
     markdownTransformers: [],
     nodeHooks: {
       afterChange: new Map(),
+      afterPopulate: new Map(),
       afterRead: new Map(),
       beforeChange: new Map(),
       beforeValidate: new Map(),
@@ -92,6 +93,9 @@ export const sanitizeServerFeatures = (
         }
         if (node?.hooks?.afterChange) {
           sanitized.nodeHooks?.afterChange?.set(nodeType, node.hooks.afterChange)
+        }
+        if (node?.hooks?.afterPopulate) {
+          sanitized.nodeHooks?.afterPopulate?.set(nodeType, node.hooks.afterPopulate)
         }
         if (node?.hooks?.afterRead) {
           sanitized.nodeHooks?.afterRead?.set(nodeType, node.hooks.afterRead)

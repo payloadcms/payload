@@ -24,9 +24,14 @@ export type CreatePayloadLinkTransformerArgs = {
    * internal links store a doc reference rather than a URL.
    *
    * Without this, internal links will export as `[text]()` with an empty href.
+   *
+   * @deprecated Add `generateFrontendPath` to the linked collections instead. Internal links then
+   * use `fields.doc.frontendPath`, and this is only used for links without one. Will be removed in v5.
    */
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
 }
+
+let hasWarnedAboutInternalDocToHref = false
 
 const $replaceTransformer: TextMatchTransformer['replace'] = (textNode, match) => {
   const [, linkText, linkUrl] = match
@@ -61,12 +66,23 @@ export const createPayloadLinkTransformer = (
     let url: string
 
     if (fields.linkType === 'internal') {
-      if (args?.internalDocToHref) {
+      const frontendPath = fields.doc?.frontendPath
+
+      if (frontendPath !== undefined) {
+        if (args?.internalDocToHref && !hasWarnedAboutInternalDocToHref) {
+          hasWarnedAboutInternalDocToHref = true
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Lexical → Markdown converter: internalDocToHref is ignored for links that have a frontend path from generateFrontendPath, and only used for the rest. internalDocToHref is deprecated and will be removed in v5',
+          )
+        }
+        url = sanitizeUrl(frontendPath ?? '')
+      } else if (args?.internalDocToHref) {
         url = sanitizeUrl(args.internalDocToHref({ linkNode: node.exportJSON() }))
       } else {
         // eslint-disable-next-line no-console
         console.warn(
-          'Lexical → Markdown converter: found internal link but internalDocToHref is not provided — link will have an empty href',
+          'Lexical → Markdown converter: found internal link without a frontend path, so the link will have an empty href. Add generateFrontendPath to the linked collection and fetch the document with a depth of at least 1 (the default)',
         )
         url = ''
       }
@@ -75,7 +91,7 @@ export const createPayloadLinkTransformer = (
     }
 
     const textContent = exportChildren(node)
-    return `[${textContent}](${url})`
+    return `[${textContent}](${url.replaceAll('(', '%28').replaceAll(')', '%29')})`
   },
   importRegExp: /(?<!!)\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)/,
   regExp: /(?<!!)\[([^[]+)\]\(([^()\s]+)(?:\s"((?:[^"]*\\")*[^"]*)"\s*)?\)$/,

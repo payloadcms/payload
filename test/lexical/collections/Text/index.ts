@@ -8,6 +8,7 @@ const TextFields: CollectionConfig = {
     useAsTitle: 'text',
   },
   defaultSort: 'id',
+  generateFrontendPath: ({ doc }) => `/${textFieldsSlug}/${doc.id}`,
   fields: [
     {
       name: 'text',
