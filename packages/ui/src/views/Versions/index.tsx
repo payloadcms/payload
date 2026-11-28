@@ -1,5 +1,6 @@
 import type { DocumentViewServerProps, PaginatedDocs } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
@@ -28,7 +29,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
       req: {
         i18n,
         payload: { config },
-        t,
         user,
       },
     },
@@ -136,10 +136,9 @@ export async function VersionsView(props: DocumentViewServerProps) {
     latestDraftVersion,
   })
 
+  const rawPluralLabel = collectionConfig?.labels?.plural ?? globalConfig?.label
   const pluralLabel =
-    typeof collectionConfig?.labels?.plural === 'function'
-      ? collectionConfig.labels.plural({ i18n, t })
-      : (collectionConfig?.labels?.plural ?? globalConfig?.label)
+    rawPluralLabel != null ? getTranslation(rawPluralLabel, i18n) : undefined
 
   return (
     <React.Fragment>
