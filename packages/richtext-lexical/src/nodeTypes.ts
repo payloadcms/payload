@@ -2,9 +2,10 @@ import type {
   SerializedLineBreakNode as _SerializedLineBreakNode,
   SerializedTabNode as _SerializedTabNode,
   SerializedTextNode as _SerializedTextNode,
-  SerializedEditorState,
   SerializedElementNode,
   SerializedLexicalNode,
+  SerializedRootNode,
+  Spread,
 } from 'lexical'
 
 import type { SerializedQuoteNode } from './features/blockquote/server/index.js'
@@ -111,7 +112,9 @@ type DecrementDepth<N extends number> = [0, 0, 1, 2, 3, 4][N]
  */
 export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   [k: string]: unknown
-} & SerializedEditorState<RecursiveNodes<T>>
+  // Lexical's SerializedEditorState no longer accepts a node type argument, so type the root's children here.
+  root: Spread<{ children: RecursiveNodes<T>[] }, SerializedRootNode>
+}
 
 /**
  * All node types included by default in a lexical editor without configuration.
