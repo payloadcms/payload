@@ -10,6 +10,10 @@ interface EmailVariable {
 type EmailVariables = EmailVariable[]
 
 export const replaceDoubleCurlys = (str: string, variables?: EmailVariables): string => {
+  if (typeof str !== 'string') {
+    str = str != null ? String(str) : ''
+  }
+
   const regex = /\{\{(.+?)\}\}/g
   if (str && variables) {
     return str.replace(regex, (_, variable: string) => {
