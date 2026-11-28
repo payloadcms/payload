@@ -11,6 +11,7 @@ import { createHandleRequest } from './handleRequest.js'
 import { initSharpCollections } from './initSharpCollections.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
 import { createTransformFile } from './transformFile.js'
+import { DEFAULT_MAX_INPUT_PIXELS } from './types.js'
 
 const DEFAULT_MIME_TYPES = [
   'image/jpeg',
@@ -57,6 +58,7 @@ export function sharpTransformer(
 ): TransformerWithInternalBridge & UploadTransformer {
   const dynamicOptions = resolveSharpDynamicOptions(options.dynamic)
   const dynamicDefaults = resolveSharpDynamicDefaults(dynamicOptions || undefined)
+  const maxInputPixels = options.maxInputPixels ?? DEFAULT_MAX_INPUT_PIXELS
   const sharpDependency = options.sharp ?? bundledSharp
   const collections = options.collections ?? {}
   const handlesCollection = ({ collectionSlug }: { collectionSlug: string }) =>
@@ -87,7 +89,12 @@ export function sharpTransformer(
 
       return result.isRouted
     },
-    handleRequest: createHandleRequest({ dynamicDefaults, sharpDependency }),
+    handleRequest: createHandleRequest({
+      collections,
+      dynamicDefaults,
+      maxInputPixels,
+      sharpDependency,
+    }),
     init: (config) => {
       assertDynamicCollectionsExist({ config, dynamicOptions })
       assertCollectionsOwnedOnce({ collections, config, transformer })
@@ -97,7 +104,7 @@ export function sharpTransformer(
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {
       handlesCollection,
-      transformUpload: createTransformUpload({ collections, sharpDependency }),
+      transformUpload: createTransformUpload({ collections, maxInputPixels, sharpDependency }),
     },
     // `options` here is always what this transformer computed via `transformUpload`'s
     // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.

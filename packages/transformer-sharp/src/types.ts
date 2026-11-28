@@ -2,6 +2,14 @@ import type { ImageSize, PayloadRequest, ProbedImageSize, UploadCollectionSlug }
 import type { FitEnum, ResizeOptions, Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 /**
+ * Default cap on the decoded source pixels (`width × height × frame count`) an
+ * upload may have. Sharp's own default is 268,435,456 pixels; a flat-colour
+ * AVIF of a few kilobytes can decode to gigabytes at that size, so the default
+ * here is far lower while still accepting 48 MP phone sensors.
+ */
+export const DEFAULT_MAX_INPUT_PIXELS = 50_000_000
+
+/**
  * Params sent to the sharp `toFormat()` function
  * @link https://sharp.pixelplumbing.com/api-output#toformat
  */
@@ -62,6 +70,14 @@ export type SharpCollectionConfig = {
   crop?: boolean
   focalPoint?: boolean
   formatOptions?: ImageUploadFormatOptions
+  /**
+   * Maximum decoded source pixels (`width × height × frame count`) accepted for
+   * this collection's uploads. A source above it is refused with a 400 before
+   * any pixel is decoded, and Sharp is also told via `limitInputPixels`, so a
+   * decode can never exceed it. Overrides the transformer's `maxInputPixels`.
+   * @default 50_000_000
+   */
+  maxInputPixels?: number
   resizeOptions?: ResizeOptions
   trimOptions?: ImageUploadTrimOptions
   /** Image sizes generated for each upload, stored under the document's `variants`. */
@@ -149,6 +165,14 @@ export type SharpTransformerOptions = {
    * @default false
    */
   dynamic?: boolean | SharpDynamicOptions
+  /**
+   * Maximum decoded source pixels (`width × height × frame count`) accepted for
+   * uploads and dynamic resizes. A source above it is refused with a 400 before
+   * any pixel is decoded, and Sharp is also told via `limitInputPixels`, so a
+   * decode can never exceed it. A collection's own `maxInputPixels` overrides it.
+   * @default 50_000_000
+   */
+  maxInputPixels?: number
   /** Inject a compatible custom Sharp build or version. Defaults to the bundled dependency. */
   sharp?: SharpDependency
   /** @default 'sharp' */
