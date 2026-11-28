@@ -11,11 +11,13 @@ type ResolvedCollectionCondition =
 export function resolveWhereForCollection({
   collectionSlug,
   flattenedFields,
+  isQueryablePath,
   usesObjectIDs,
   where,
 }: {
   collectionSlug: string
   flattenedFields: FlattenedField[]
+  isQueryablePath?: (path: string) => boolean
   usesObjectIDs: boolean
   where: Where
 }): ResolvedCollectionCondition {
@@ -32,6 +34,7 @@ export function resolveWhereForCollection({
             resolveWhereForCollection({
               collectionSlug,
               flattenedFields,
+              isQueryablePath,
               usesObjectIDs,
               where: nestedWhere,
             }),
@@ -55,12 +58,15 @@ export function resolveWhereForCollection({
       continue
     }
 
-    // Missing fields remain nonmatching; valid nested fields keep their original constraints.
-    if (
-      key !== 'id' &&
-      !hasConfiguredFieldPath({ flattenedFields, path: key.replace(/__/g, '.') })
-    ) {
-      return { matches: 'no-documents' }
+    if (key !== 'id') {
+      const path = key.replace(/__/g, '.')
+      const isConfiguredPath =
+        isQueryablePath?.(path) ?? hasConfiguredFieldPath({ flattenedFields, path })
+
+      // Missing fields remain nonmatching; valid nested fields keep their original constraints.
+      if (!isConfiguredPath) {
+        return { matches: 'no-documents' }
+      }
     }
 
     let constraint = value

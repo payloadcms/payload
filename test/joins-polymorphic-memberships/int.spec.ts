@@ -1,3 +1,5 @@
+import type { Where } from 'payload'
+
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -13,6 +15,99 @@ import {
 } from './collections/index.js'
 
 test.suite('Joins through relationships and uploads', { config: './config.ts' }, () => {
+  test.options(
+    'should apply each MongoDB target schema before counting and paging members',
+    { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
+    async ({ payload }) => {
+      const topic = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Featured' },
+        overrideAccess: true,
+      })
+      const other = await payload.create({
+        collection: topicsSlug,
+        data: { title: 'Other' },
+        overrideAccess: true,
+      })
+      const articleData = {
+        published: true,
+        settings: { approved: true },
+        topics: [topic.id, other.id],
+        variant: ['pub'],
+      }
+      const article = await payload.create({
+        collection: articlesSlug,
+        data: { ...articleData, title: 'B article' },
+        overrideAccess: true,
+      })
+      const note = await payload.create({
+        collection: notesSlug,
+        data: { title: 'C note', topics: topic.id, variant: 'public' },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: articlesSlug,
+        data: { ...articleData, published: false, title: 'A unreadable' },
+        overrideAccess: true,
+      })
+      await payload.create({
+        collection: articlesSlug,
+        data: { ...articleData, settings: { approved: false }, title: 'A unapproved' },
+        overrideAccess: true,
+      })
+      await payload.create({
+        collection: articlesSlug,
+        data: { ...articleData, title: 'A featured only', topics: [topic.id] },
+        overrideAccess: true,
+      })
+      await payload.create({
+        collection: articlesSlug,
+        data: { ...articleData, title: 'A different variant', variant: ['public'] },
+        overrideAccess: true,
+      })
+
+      const where: Where = {
+        or: [
+          {
+            'settings.approved': { equals: true },
+            'topics.id': { equals: other.id },
+            relationTo: { equals: articlesSlug },
+          },
+          { relationTo: { equals: notesSlug }, topics: { equals: topic.id } },
+        ],
+        variant: { contains: 'pub' },
+      }
+      const readPage = async ({ page, where }: { page: number; where: Where }) => {
+        const result = await payload.findByID({
+          collection: topicsSlug,
+          id: topic.id,
+          depth: 0,
+          joins: { members: { count: true, limit: 1, page, sort: 'title', where } },
+          overrideAccess: false,
+        })
+
+        return result.members
+      }
+
+      expect(await readPage({ page: 1, where })).toMatchObject({
+        docs: [{ relationTo: articlesSlug, value: article.id }],
+        hasNextPage: true,
+        totalDocs: 2,
+      })
+      expect(await readPage({ page: 2, where })).toMatchObject({
+        docs: [{ relationTo: notesSlug, value: note.id }],
+        hasNextPage: false,
+        totalDocs: 2,
+      })
+      expect(await readPage({ page: 1, where: { relationTo: { in: [] } } })).toMatchObject({
+        docs: [],
+        hasNextPage: false,
+        totalDocs: 0,
+      })
+    },
+  )
+
   test.options(
     'should respect read access for a regular join when reading a draft',
     { db: 'drizzle' },

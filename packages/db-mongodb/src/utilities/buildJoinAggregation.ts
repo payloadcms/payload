@@ -7,9 +7,11 @@ import {
   type CollectionSlug,
   combineQueries,
   type FlattenedField,
+  getLocalizedPaths,
   getQueryDraftsSort,
   type JoinQuery,
   type SanitizedCollectionConfig,
+  type Where,
 } from 'payload'
 import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
@@ -19,6 +21,7 @@ import type { CollectionModel } from '../types.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
 import { getCollection } from './getEntity.js'
+import { resolveWhereForCollection } from './resolveWhereForCollection.js'
 
 type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
@@ -86,6 +89,7 @@ export const buildJoinAggregation = async ({
     } = joins?.[join.joinPath] || {}
 
     const pageEnd = (page || 1) * limitJoin
+    const matchWhere = omitEmptyConditions({ where: whereJoin })
     const aggregatedFields: FlattenedField[] = []
     for (const collectionSlug of join.field.collection) {
       const { collectionConfig } = getCollection({ adapter, collectionSlug })
@@ -106,13 +110,6 @@ export const buildJoinAggregation = async ({
       timestamps: true,
     })
 
-    const $match = await buildQuery({
-      adapter,
-      fields: aggregatedFields,
-      locale,
-      where: whereJoin,
-    })
-
     const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
     const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
@@ -123,10 +120,47 @@ export const buildJoinAggregation = async ({
     const as = join.joinPath
 
     for (const collectionSlug of join.field.collection) {
+      const { collectionConfig: targetConfig, Model: JoinModel } = getCollection({
+        adapter,
+        collectionSlug,
+      })
+      const condition = resolveWhereForCollection({
+        collectionSlug,
+        flattenedFields: targetConfig.flattenedFields,
+        // Access filters may query hidden fields. Caller paths were validated before reaching the adapter.
+        isQueryablePath: (path) => {
+          const paths = getLocalizedPaths({
+            collectionSlug,
+            fields: targetConfig.flattenedFields,
+            incomingPath: path,
+            locale,
+            overrideAccess: true,
+            parentIsLocalized: false,
+            payload: adapter.payload,
+          })
+
+          return paths.length > 0 && paths.every(({ complete, invalid }) => complete && !invalid)
+        },
+        usesObjectIDs: !adapter.payload.collections[collectionSlug]?.customIDType,
+        where: matchWhere,
+      })
+
+      if (condition.matches === 'no-documents') {
+        continue
+      }
+
+      const $match = await buildQuery({
+        adapter,
+        collectionSlug,
+        fields: targetConfig.flattenedFields,
+        locale,
+        where: condition.matches === 'documents-matching-where' ? condition.where : {},
+      })
       const alias = `${as}.docs.${collectionSlug}`
       aliases.push(alias)
 
       const basePipeline = [
+        { $match },
         {
           $addFields: {
             relationTo: {
@@ -134,12 +168,7 @@ export const buildJoinAggregation = async ({
             },
           },
         },
-        {
-          $match,
-        },
       ]
-
-      const { Model: JoinModel } = getCollection({ adapter, collectionSlug })
 
       aggregate.push({
         $lookup: {
@@ -196,25 +225,27 @@ export const buildJoinAggregation = async ({
 
     aggregate.push({
       $addFields: {
-        [`${as}.docs`]: {
-          $concatArrays: aliases.map((alias) => `$${alias}`),
-        },
+        [`${as}.docs`]: aliases.length
+          ? { $concatArrays: aliases.map((alias) => `$${alias}`) }
+          : [],
       },
     })
 
     if (count) {
       aggregate.push({
         $addFields: {
-          [`${as}.totalDocs`]: {
-            $add: aliases.map((alias) => ({
-              $ifNull: [
-                {
-                  $first: `$${as}.totalDocs.${alias}.result`,
-                },
-                0,
-              ],
-            })),
-          },
+          [`${as}.totalDocs`]: aliases.length
+            ? {
+                $add: aliases.map((alias) => ({
+                  $ifNull: [
+                    {
+                      $first: `$${as}.totalDocs.${alias}.result`,
+                    },
+                    0,
+                  ],
+                })),
+              }
+            : 0,
         },
       })
     }
@@ -503,4 +534,21 @@ export const buildJoinAggregation = async ({
   }
 
   return aggregate
+}
+
+// MongoDB's query builder ignores empty clauses. Keep them from making an OR match all documents.
+function omitEmptyConditions({ where }: { where: Where }): Where {
+  return Object.fromEntries(
+    Object.entries(where).flatMap<[string, Where[string]]>(([key, value]) => {
+      if (Array.isArray(value) && ['and', 'or'].includes(key.toLowerCase())) {
+        const conditions = value
+          .map((condition) => omitEmptyConditions({ where: condition }))
+          .filter((condition) => Object.keys(condition).length > 0)
+
+        return conditions.length ? [[key, conditions]] : []
+      }
+
+      return value && Object.keys(value).length === 0 ? [] : [[key, value]]
+    }),
+  )
 }
