@@ -30,7 +30,7 @@ test.describe('Field Paths', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     fieldPathsUrl = new AdminUrlUtil(serverURL, fieldPathsSlug)
 
     context = await browser.newContext()

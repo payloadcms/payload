@@ -6,7 +6,7 @@ import {
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
-import type { R2Bucket } from './types.js'
+import type { R2Bucket, R2Object } from './types.js'
 
 interface GetFileArgs {
   bucket: R2Bucket
@@ -21,8 +21,6 @@ interface GetFileArgs {
   uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
-
-const isMiniflare = process.env.NODE_ENV === 'development'
 
 export async function getFile({
   bucket,
@@ -82,10 +80,8 @@ export async function getFile({
       })
     }
 
-    // Due to https://github.com/cloudflare/workers-sdk/issues/6047
-    // We cannot send a Headers instance to Miniflare
     const obj =
-      rangeResult.type === 'partial' && !isMiniflare
+      rangeResult.type === 'partial'
         ? await bucket?.get(storageFilePath, {
             range: {
               length: rangeResult.rangeEnd - rangeResult.rangeStart + 1,
@@ -104,26 +100,7 @@ export async function getFile({
       headers.append(headerKey, value)
     }
 
-    if (isMiniflare) {
-      const metadata = obj.httpMetadata
-      if (metadata?.cacheControl) {
-        headers.set('Cache-Control', metadata.cacheControl)
-      }
-      if (metadata?.contentDisposition) {
-        headers.set('Content-Disposition', metadata.contentDisposition)
-      }
-      if (metadata?.contentEncoding) {
-        headers.set('Content-Encoding', metadata.contentEncoding)
-      }
-      if (metadata?.contentLanguage) {
-        headers.set('Content-Language', metadata.contentLanguage)
-      }
-      if (metadata?.contentType) {
-        headers.set('Content-Type', metadata.contentType)
-      }
-    } else {
-      obj.writeHttpMetadata(headers)
-    }
+    setHTTPMetadataHeaders({ headers, httpMetadata: obj.httpMetadata })
 
     const contentType = headers.get('Content-Type')
 
@@ -157,4 +134,33 @@ export async function getFile({
   } catch (_err: unknown) {
     return new Response('Internal Server Error', { status: 500 })
   }
+}
+
+/**
+ * Sets the headers `R2Object.writeHttpMetadata()` would. Older Miniflare versions can't pass a
+ * `Headers` instance through their proxy, so this reads the plain `httpMetadata` object instead.
+ */
+function setHTTPMetadataHeaders({
+  headers,
+  httpMetadata,
+}: {
+  headers: Headers
+  httpMetadata: R2Object['httpMetadata']
+}): Headers {
+  const values: Record<string, string | undefined> = {
+    'Cache-Control': httpMetadata?.cacheControl,
+    'Content-Disposition': httpMetadata?.contentDisposition,
+    'Content-Encoding': httpMetadata?.contentEncoding,
+    'Content-Language': httpMetadata?.contentLanguage,
+    'Content-Type': httpMetadata?.contentType,
+    Expires: httpMetadata?.cacheExpiry?.toUTCString(),
+  }
+
+  for (const [name, value] of Object.entries(values)) {
+    if (value) {
+      headers.set(name, value)
+    }
+  }
+
+  return headers
 }

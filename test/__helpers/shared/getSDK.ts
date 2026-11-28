@@ -26,7 +26,11 @@ export const getSDK = (config: SanitizedConfig) => {
       }
       const request = new Request(url, init)
 
-      return handleRequest({ request, slug: slugs.split('/') })
+      // Next.js passes catch-all route segments decoded, and the REST route re-encodes them.
+      return handleRequest({
+        request,
+        slug: slugs.split('/').map((segment) => decodeURIComponent(segment)),
+      })
     },
   })
 }
