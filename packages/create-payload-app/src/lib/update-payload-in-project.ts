@@ -90,10 +90,7 @@ export async function updatePayloadInNextProject({
 
   info(`Updating Payload Next.js files...`)
 
-  const templateFilesPath =
-    process.env.JEST_WORKER_ID !== undefined
-      ? path.resolve(dirname, '../../../../templates/blank')
-      : path.resolve(dirname, '../..', 'dist/template')
+  const templateFilesPath = resolveNextTemplateRoot()
 
   const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')
   const payloadDirPath = path.resolve(
@@ -324,6 +321,12 @@ async function performPayloadPackageUpdate({
 function canRefreshWrappers({ version }: { version: string }): boolean {
   const ownVersion = fse.readJsonSync(path.resolve(dirname, '../../package.json')).version as string
   return semver.major(version) === semver.major(ownVersion)
+}
+
+function resolveNextTemplateRoot(): string {
+  return path.basename(path.dirname(dirname)) === 'dist'
+    ? path.resolve(dirname, '../template')
+    : path.resolve(dirname, '../../../../templates/blank')
 }
 
 function resolveTanStackTemplateRoot(): string {
