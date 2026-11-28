@@ -28,6 +28,8 @@ export type Args<T extends JsonObject> = {
   operation: FieldOperation
   overrideAccess?: boolean
   req: PayloadRequest
+  /** Validate empty localized arrays and blocks when restoring a version. */
+  shouldValidateLocalizedContainers?: boolean
   skipHooks?: boolean
   skipValidation?: boolean
 }
@@ -55,6 +57,7 @@ export const beforeChange = async <T extends JsonObject>({
   operation,
   overrideAccess,
   req,
+  shouldValidateLocalizedContainers = false,
   skipHooks,
   skipValidation,
 }: Args<T>): Promise<T> => {
@@ -86,6 +89,7 @@ export const beforeChange = async <T extends JsonObject>({
     parentPath: '',
     parentSchemaPath: '',
     req,
+    shouldValidateLocalizedContainers,
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
