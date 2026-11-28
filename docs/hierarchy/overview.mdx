@@ -723,7 +723,7 @@ If the title field (from `admin.useAsTitle`) is localized, path fields are autom
 Hierarchy maintains parent-child relationships through a simple `parent` field:
 
 1. Validates there are no circular references when parent changes
-2. Cleans up orphaned children when a parent is deleted (sets their parent to null)
+2. Promotes direct children to the removed document's parent when it is deleted
 3. No cascade updates needed - paths are always computed fresh
 
 **Example:**
@@ -1007,3 +1007,40 @@ If types aren't generated, regenerate them:
 ```bash
 payload generate:types
 ```
+
+## Deleting hierarchy items
+
+Hierarchy collections, including folder and tag presets, reparent direct children by default when an item is deleted or moved to trash. Children inherit the removed item's parent; removing a root promotes its direct children to the root level. Grandchildren stay attached to their own parent. Restoring a trashed item does not move promoted children back.
+
+Choose an action for an individual Local API operation through `context.hierarchyDeleteStrategy`. This is an operation choice, not a collection configuration option:
+
+```ts
+await payload.delete({
+  collection: 'folders',
+  id: folderID,
+  context: { hierarchyDeleteStrategy: 'cascade' },
+  overrideAccess: false,
+  user,
+})
+```
+
+`'reparent'` preserves descendants and is the default. `'cascade'` removes hierarchy descendants recursively. Cascading a trash update moves descendants to trash rather than permanently deleting them:
+
+```ts
+await payload.update({
+  collection: 'folders',
+  id: folderID,
+  data: { deletedAt: new Date().toISOString() },
+  context: { hierarchyDeleteStrategy: 'cascade' },
+  overrideAccess: false,
+  user,
+})
+```
+
+Cascade always checks descendant delete access, including when the caller bypasses access for the selected parent. Internal reparenting bypasses child write restrictions to maintain hierarchy integrity; access for the initiating delete or trash operation still applies.
+
+These actions affect hierarchy items only. Documents assigned to a folder or tag are not deleted, and membership relationships are not automatically redirected or cleared.
+
+Structural updates run field and collection change hooks and preserve ordinary published content and pending drafts separately. Operation-level update hooks do not run for the internal draft/published repair. Reparenting non-leaf items with localized publication status (`versions.drafts.localizeStatus`) is not yet supported and fails before modifying children. Explicit cascade remains available. Use database transactions to roll back all child changes if a later hook fails.
+
+Existing applications that relied on recursive folder or tag deletion should explicitly choose `'cascade'` for those operations. This changes the default behavior of the v4 prerelease hierarchy API.
