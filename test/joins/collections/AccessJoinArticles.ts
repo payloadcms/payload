@@ -10,6 +10,14 @@ export const AccessJoinArticles: CollectionConfig = {
         return { coordinates: { near: [0, 0, 1000] } }
       }
 
+      if (req.context.useMixedFieldShapeContainsAccessConstraint) {
+        return { mixedTags: { contains: 'available' } }
+      }
+
+      if (req.context.useMixedFieldShapeLikeAccessConstraint) {
+        return { mixedTags: { like: 'available' } }
+      }
+
       if (req.context.useMixedFieldShapeAccessConstraint) {
         return { mixedTags: { equals: 'available' } }
       }
@@ -164,7 +172,7 @@ export const AccessJoinArticles: CollectionConfig = {
       name: 'mixedTags',
       type: 'select',
       hasMany: true,
-      options: ['available', 'not-permitted'],
+      options: ['available', 'not-permitted', 'unavailable'],
     },
     {
       name: 'variantValue',
