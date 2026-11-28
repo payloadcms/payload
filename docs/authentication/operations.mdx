@@ -16,6 +16,8 @@ The Access operation returns what a logged in user can and can't do with the col
 
 `GET http://localhost:3000/api/access`
 
+Set `?includeFields=false` to skip field access checks and omit `fields` from collection and global permissions.
+
 Example response:
 
 ```ts

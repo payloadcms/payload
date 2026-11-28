@@ -6,9 +6,11 @@ import { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 
 type GetAccessResultsArgs = {
   req: PayloadRequest
+  skipFieldPermissions?: boolean
 }
 export async function getAccessResults({
   req,
+  skipFieldPermissions,
 }: GetAccessResultsArgs): Promise<SanitizedPermissions> {
   const results = {
     collections: {},
@@ -58,6 +60,7 @@ export async function getAccessResults({
         fetchData: false,
         operations: collectionOperations,
         req,
+        skipFieldPermissions,
       })
       results.collections![collection.slug] = collectionPermissions
     }),
@@ -78,6 +81,7 @@ export async function getAccessResults({
         fetchData: false,
         operations: globalOperations,
         req,
+        skipFieldPermissions,
       })
       results.globals![global.slug] = globalPermissions
     }),
