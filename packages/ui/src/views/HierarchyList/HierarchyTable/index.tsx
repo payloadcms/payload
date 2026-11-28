@@ -27,8 +27,6 @@ import { NoListResults } from '../../../elements/NoListResults/index.js'
 import { SimplePagination } from '../../../elements/Pagination/SimplePagination/index.js'
 import { TableSection } from '../../../elements/TableSection/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
-import { FolderIcon } from '../../../icons/Folder/index.js'
-import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
@@ -145,7 +143,7 @@ export function HierarchyTable({
   })
 
   // Get selection functions from context
-  const { isLocked, isSelected, toggleAllInCollection, toggleSelection } = useDocumentSelection()
+  const { isLocked, isSelected, toggleSelection } = useDocumentSelection()
 
   // Get the user who is locking a row (for SlotTable to show lock icon instead of checkbox)
   const getRowLockedUser = useCallback(
@@ -369,13 +367,8 @@ export function HierarchyTable({
   // Unified groups array
   type GroupState = {
     docs: TableRow[]
-    isChildren: boolean
-    isHierarchyEnabled: boolean
-    isLoading: boolean
     label: string
-    onCheckboxChange: (row: TableRow) => void
     onPageChange: (page: number) => void
-    onSelectAllChange: () => void
     paginationData: PaginatedDocs
     slug: string
   }
@@ -388,20 +381,8 @@ export function HierarchyTable({
       groups.push({
         slug: collectionSlug,
         docs: childTableData,
-        isChildren: true,
-        isHierarchyEnabled: true,
-        isLoading: childLoading,
         label: childrenLabel,
-        onCheckboxChange: (row: TableRow) =>
-          toggleSelection({
-            id: row.id,
-            collectionSlug,
-            metadata: {
-              allowedCollections: row._allowedCollections as string[] | undefined,
-            },
-          }),
         onPageChange: (page: number) => void handlePageChangeChildren(page),
-        onSelectAllChange: () => toggleAllInCollection({ collectionSlug }),
         paginationData: {
           docs: childDocs,
           hasNextPage: childPaginationData.hasNextPage || false,
@@ -435,18 +416,8 @@ export function HierarchyTable({
       groups.push({
         slug: group.collectionSlug,
         docs: relatedTableData,
-        isChildren: false,
-        isHierarchyEnabled: false,
-        isLoading: state.isLoading,
         label: relatedLabel,
-        onCheckboxChange: (row: TableRow) =>
-          toggleSelection({
-            id: row.id,
-            collectionSlug: group.collectionSlug,
-            metadata: {}, // Related items don't have allowedCollections - their collection slug is the constraint
-          }),
         onPageChange: (page: number) => void handlePageChangeRelated(group.collectionSlug, page),
-        onSelectAllChange: () => toggleAllInCollection({ collectionSlug: group.collectionSlug }),
         paginationData: {
           docs: state.docs || [],
           hasNextPage: state.hasNextPage || false,
@@ -463,7 +434,6 @@ export function HierarchyTable({
     return groups
   }, [
     childDocs,
-    childLoading,
     childPaginationData,
     childrenLabel,
     childTableData,
@@ -475,13 +445,40 @@ export function HierarchyTable({
     i18n,
     relatedGroups,
     relatedState,
-    toggleAllInCollection,
-    toggleSelection,
   ])
 
+  const combinedRows = useMemo(() => allGroups.flatMap((group) => group.docs), [allGroups])
+  const documentRows = useMemo(
+    () => combinedRows.filter((row) => row._collectionSlug !== collectionSlug),
+    [collectionSlug, combinedRows],
+  )
+
+  const handleCheckboxChange = useCallback(
+    (row: TableRow) => {
+      toggleSelection({
+        id: row.id,
+        collectionSlug: row._collectionSlug,
+        metadata: { allowedCollections: row._allowedCollections as string[] | undefined },
+      })
+    },
+    [toggleSelection],
+  )
+
+  const handleSelectAllChange = useCallback(
+    (checked: boolean) => {
+      for (const row of combinedRows) {
+        if (
+          !isLocked({ id: row.id, collectionSlug: row._collectionSlug }) &&
+          isSelected({ id: row.id, collectionSlug: row._collectionSlug }) !== checked
+        ) {
+          handleCheckboxChange(row)
+        }
+      }
+    },
+    [combinedRows, handleCheckboxChange, isLocked, isSelected],
+  )
+
   const hierarchyConfig = getEntityConfig({ collectionSlug })?.hierarchy
-  const isFolder =
-    hierarchyConfig && typeof hierarchyConfig === 'object' && hierarchyConfig.allowHasMany === false
   const hierarchyParentFieldName =
     hierarchyConfig && typeof hierarchyConfig === 'object'
       ? hierarchyConfig.parentFieldName || 'parent'
@@ -513,6 +510,66 @@ export function HierarchyTable({
     [t],
   )
 
+  const getGridItemClassName = (row: TableRow) =>
+    isSelected({ id: row.id, collectionSlug: row._collectionSlug })
+      ? 'card-grid__item--selected'
+      : undefined
+
+  const getGridItemKey = (row: TableRow) => `${row._collectionSlug}:${row.id}`
+
+  const renderGridCard = (row: TableRow) => {
+    const isHierarchyItem = row._collectionSlug === collectionSlug
+    const config = getEntityConfig({ collectionSlug: row._collectionSlug })
+    const titleField = config?.admin?.useAsTitle || 'id'
+    const rawTitle = row[titleField]
+    const title =
+      typeof rawTitle === 'string' || typeof rawTitle === 'number'
+        ? String(rawTitle)
+        : String(row.id)
+    const editURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${row._collectionSlug}/${encodeURIComponent(String(row.id))}`,
+    })
+    const hierarchyURL = getHierarchyListURL({
+      adminRoute,
+      collectionSlug,
+      parentFieldName: hierarchyParentFieldName,
+      parentID: row.id,
+    })
+    const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
+    const thumbnailSrc =
+      !isHierarchyItem && mimeType && isImage(mimeType)
+        ? getBestFitFromSizes({
+            sizes: row.sizes as Record<string, { url?: string; width?: number }>,
+            thumbnailURL: row.thumbnailURL as string,
+            url: row.url as string,
+            width: row.width as number,
+          })
+        : !isHierarchyItem && typeof row.thumbnailURL === 'string'
+          ? row.thumbnailURL
+          : undefined
+    const isRowLocked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+
+    return (
+      <DocumentCard
+        href={isHierarchyItem ? hierarchyURL : editURL}
+        isSelected={isSelected({ id: row.id, collectionSlug: row._collectionSlug })}
+        onSelect={isRowLocked ? undefined : () => handleCheckboxChange(row)}
+        placeholder={isHierarchyItem ? (row._hierarchyIcon ?? <DocumentIcon />) : <DocumentIcon />}
+        thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
+        title={title}
+      >
+        {isHierarchyItem ? (
+          <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
+            {t('general:edit')}
+          </Link>
+        ) : (
+          row._collectionLabel
+        )}
+      </DocumentCard>
+    )
+  }
+
   if (!hasChildren && !hasRelated) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
 
@@ -538,108 +595,79 @@ export function HierarchyTable({
     )
   }
 
+  const pagination = (
+    <div className={`${baseClass}__plane-pagination`}>
+      {allGroups.map((group) => (
+        <div
+          aria-label={group.label}
+          className={`${baseClass}__plane-pagination-group`}
+          key={group.slug}
+          role="group"
+        >
+          <span className={`${baseClass}__plane-pagination-label`}>{group.label}</span>
+          <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
+        </div>
+      ))}
+    </div>
+  )
+
   return (
     <div className={baseClass}>
-      {allGroups.map((group) => (
-        <TableSection key={group.slug}>
-          <TableSection.Header heading={group.label}>
-            <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
-          </TableSection.Header>
+      {layout === 'table' ? (
+        <TableSection>
           <TableSection.Content>
-            {layout === 'grid' ? (
-              <CardGrid
-                ariaLabel={group.label}
-                getItemClassName={(row) =>
-                  isSelected({ id: row.id, collectionSlug: group.slug })
-                    ? 'card-grid__item--selected'
-                    : undefined
-                }
-                getKey={(row) => row.id}
-                items={group.docs}
-                renderItem={(row) => {
-                  const config = getEntityConfig({ collectionSlug: group.slug })
-                  const titleField = config?.admin?.useAsTitle || 'id'
-                  const rawTitle = row[titleField]
-                  const title =
-                    typeof rawTitle === 'string' || typeof rawTitle === 'number'
-                      ? String(rawTitle)
-                      : String(row.id)
-                  const editURL = formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${group.slug}/${encodeURIComponent(String(row.id))}`,
-                  })
-                  const hierarchyURL = getHierarchyListURL({
-                    adminRoute,
-                    collectionSlug: group.slug,
-                    parentFieldName: hierarchyParentFieldName,
-                    parentID: row.id,
-                  })
-                  const mimeType = typeof row.mimeType === 'string' ? row.mimeType : undefined
-                  const thumbnailSrc =
-                    !group.isChildren && mimeType && isImage(mimeType)
-                      ? getBestFitFromSizes({
-                          sizes: row.sizes as Record<string, { url?: string; width?: number }>,
-                          thumbnailURL: row.thumbnailURL as string,
-                          url: row.url as string,
-                          width: row.width as number,
-                        })
-                      : !group.isChildren && typeof row.thumbnailURL === 'string'
-                        ? row.thumbnailURL
-                        : undefined
-                  const isRowLocked = isLocked({ id: row.id, collectionSlug: group.slug })
-
-                  return (
-                    <DocumentCard
-                      href={group.isChildren ? hierarchyURL : editURL}
-                      isSelected={isSelected({ id: row.id, collectionSlug: group.slug })}
-                      onSelect={isRowLocked ? undefined : () => group.onCheckboxChange(row)}
-                      placeholder={
-                        group.isChildren ? (
-                          (row._hierarchyIcon ?? (isFolder ? <FolderIcon /> : <TagIcon />))
-                        ) : (
-                          <DocumentIcon />
-                        )
-                      }
-                      thumbnail={thumbnailSrc ? { alt: '', src: thumbnailSrc } : undefined}
-                      title={title}
-                    >
-                      {group.isChildren ? (
-                        <Link aria-label={t('general:editLabel', { label: title })} href={editURL}>
-                          {t('general:edit')}
-                        </Link>
-                      ) : (
-                        group.label
-                      )}
-                    </DocumentCard>
-                  )
-                }}
-              />
-            ) : (
-              <SlotTable
-                collectionSlug={group.slug}
-                columns={columns}
-                data={group.docs}
-                enableCheckbox={true}
-                enableDragHandle={false}
-                enableHeader={true}
-                enableSelectAll={true}
-                getRowLockedUser={getRowLockedUser}
-                mergeCheckboxHeader={false}
-                onCheckboxChange={group.onCheckboxChange}
-                onSelectAllChange={group.onSelectAllChange}
-                parentId={parentId}
-                selectedIds={
-                  new Set(
-                    group.docs
-                      .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
-                      .map((row) => row.id),
-                  )
-                }
-              />
-            )}
+            <SlotTable
+              collectionSlug={collectionSlug}
+              columns={columns}
+              data={combinedRows}
+              enableCheckbox={true}
+              enableDragHandle={false}
+              enableHeader={true}
+              enableSelectAll={true}
+              getRowId={(row) => `${row._collectionSlug}:${row.id}`}
+              getRowLockedUser={getRowLockedUser}
+              mergeCheckboxHeader={false}
+              onCheckboxChange={handleCheckboxChange}
+              onSelectAllChange={handleSelectAllChange}
+              parentId={parentId}
+              selectedIds={
+                new Set(
+                  combinedRows
+                    .filter((row) =>
+                      isSelected({ id: row.id, collectionSlug: row._collectionSlug }),
+                    )
+                    .map((row) => `${row._collectionSlug}:${row.id}`),
+                )
+              }
+            />
+            {pagination}
           </TableSection.Content>
         </TableSection>
-      ))}
+      ) : (
+        <TableSection>
+          <TableSection.Content>
+            {hasChildren && (
+              <CardGrid
+                ariaLabel={childrenLabel}
+                getItemClassName={getGridItemClassName}
+                getKey={getGridItemKey}
+                items={childTableData}
+                renderItem={renderGridCard}
+              />
+            )}
+            {hasRelated && (
+              <CardGrid
+                ariaLabel={t('general:documents')}
+                getItemClassName={getGridItemClassName}
+                getKey={getGridItemKey}
+                items={documentRows}
+                renderItem={renderGridCard}
+              />
+            )}
+            {pagination}
+          </TableSection.Content>
+        </TableSection>
+      )}
     </div>
   )
 }

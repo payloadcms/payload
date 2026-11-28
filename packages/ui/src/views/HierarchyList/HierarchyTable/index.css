@@ -15,13 +15,6 @@
     flex-grow: 1;
   }
 
-  .hierarchy-tables__name-cell {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-1);
-    min-width: 0;
-  }
-
   .hierarchy-tables__name-link {
     display: flex;
     align-items: center;
@@ -71,12 +64,6 @@
   .hierarchy-tables__col-type {
     width: 120px;
     min-width: 100px;
-  }
-
-  .hierarchy-tables__section-title {
-    margin: 0;
-    font-weight: var(--text-body-medium-bold-font-weight);
-    color: var(--color-text);
   }
 
   .hierarchy-tables__group-label {
