@@ -341,6 +341,84 @@ query {
         expect(fields.virtualComputed!.type instanceof GraphQLNonNull).toBe(false)
         expect(fields.virtualFromRelation!.type instanceof GraphQLNonNull).toBe(false)
       })
+
+      test('should mark named tabs with required fields as non-null in create mutation and nullable in update mutation', ({
+        payload,
+      }) => {
+        const { schema } = configToSchema(payload.config)
+        const createInput = schema.getType('mutationNamedTabsTestInput') as GraphQLInputObjectType
+        const createFields = createInput.getFields()
+
+        // Required field makes the named tab input non-null in create mutation
+        expect(createFields.tabWithRequiredField!.type instanceof GraphQLNonNull).toBe(true)
+
+        // Hidden, virtual, conditional, read-access, and optional array fields leave the named tab nullable
+        expect(createFields.tabWithHiddenRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(createFields.tabWithVirtualRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(createFields.tabWithConditionalRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(createFields.tabWithReadAccessRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(createFields.tabWithOptionalArray!.type instanceof GraphQLNonNull).toBe(false)
+
+        // In update mutations, all inputs are nullable
+        const updateInput = schema.getType(
+          'mutationNamedTabsTestUpdateInput',
+        ) as GraphQLInputObjectType
+        const updateFields = updateInput.getFields()
+
+        expect(updateFields.tabWithRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(updateFields.tabWithHiddenRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(updateFields.tabWithVirtualRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(updateFields.tabWithConditionalRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(updateFields.tabWithReadAccessRequiredField!.type instanceof GraphQLNonNull).toBe(false)
+        expect(updateFields.tabWithOptionalArray!.type instanceof GraphQLNonNull).toBe(false)
+      })
+
+      test('should allow creating a document with named tabs omitting nullable child tabs', async ({
+        restClient,
+      }) => {
+        const query = `mutation {
+          createNamedTabsTest(data: {
+            tabWithRequiredField: {
+              title: "Testing"
+            }
+          }) {
+            id
+            tabWithRequiredField {
+              title
+            }
+          }
+        }`
+
+        const response = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+          })
+          .then((res) => res.json())
+
+        expect(response.errors).toBeUndefined()
+        expect(response.data?.createNamedTabsTest?.tabWithRequiredField?.title).toBe('Testing')
+      })
+
+      test('should fail validation when required named tab is omitted in create mutation', async ({
+        restClient,
+      }) => {
+        const query = `mutation {
+          createNamedTabsTest(data: {}) {
+            id
+          }
+        }`
+
+        const response = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+          })
+          .then((res) => res.json())
+
+        expect(response.errors).toBeDefined()
+        expect(response.errors?.[0]?.message).toMatch(
+          /Field "tabWithRequiredField" of required type "NamedTabsTest_TabWithRequiredFieldInput!" was not provided/,
+        )
+      })
     })
   })
 })
