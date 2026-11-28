@@ -48,7 +48,10 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const [hasRequested, setHasRequested] = useState(false)
   const { i18n, t } = useTranslation()
 
-  const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
+  const isAboveViewport =
+    canUseDOM && entry
+      ? entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight
+      : false
 
   useEffect(() => {
     if ((cellData || typeof cellData === 'number') && isAboveViewport && !hasRequested) {
