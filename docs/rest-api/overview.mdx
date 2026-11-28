@@ -1066,6 +1066,18 @@ const result = await sdk.resetPassword({
   data: { password: '1234567', token: resetPasswordToken },
 })
 
+// Auth Logout operation. Pass `allSessions: true` to end every session of the user.
+const result = await sdk.logout(
+  { collection: 'users' },
+  { headers: { Authorization: `JWT ${user.token}` } },
+)
+
+// Auth Unlock operation, for users locked out by `maxLoginAttempts`
+const result = await sdk.unlock({
+  collection: 'users',
+  data: { email: user.email },
+})
+
 // Find Versions operation
 const result = await sdk.findVersions({
   collection: 'posts',
@@ -1099,6 +1111,47 @@ const result = await sdk.findGlobalVersionByID({
 const result = await sdk.restoreGlobalVersion({
   slug: 'global',
   id,
+})
+
+// Duplicate operation, with optional data to override on the copy
+const result = await sdk.duplicate({
+  collection: 'posts',
+  id: post.id,
+  data: { title: 'Copy' },
+})
+
+// Validate operation. Nothing is saved. Pass `id` to validate changes to a stored document.
+const result = await sdk.validate({
+  collection: 'posts',
+  data: { title: 'Draft title' },
+  locale: ['en', 'es'],
+})
+
+// Validate Global operation
+const result = await sdk.validateGlobal({
+  slug: 'global',
+  data: { title: 'Draft title' },
+})
+
+// Access operation: the current user's permissions for every collection and global
+const result = await sdk.access()
+
+// Doc Access operation: permissions for one document. Omit `id` to check a new document.
+const result = await sdk.docAccess({
+  collection: 'posts',
+  id: post.id,
+})
+
+// Doc Access Global operation
+const result = await sdk.docAccessGlobal({
+  slug: 'global',
+})
+
+// Rename File operation, for upload collections
+const result = await sdk.renameFile({
+  collection: 'media',
+  id: media.id,
+  filename: 'new-name.jpg',
 })
 ```
 
