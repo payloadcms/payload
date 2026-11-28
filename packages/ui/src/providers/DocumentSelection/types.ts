@@ -125,4 +125,5 @@ export type DocumentSelectionProviderProps<TDoc extends SelectableDocument = Sel
   readonly collectionData: CollectionData<TDoc>
   /** Current user ID for determining document lock status */
   readonly currentUserId?: string
+  readonly preserveSelectionWithinScope?: string
 }

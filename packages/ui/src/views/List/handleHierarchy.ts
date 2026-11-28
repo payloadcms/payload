@@ -12,6 +12,8 @@ import { getTranslation } from '@payloadcms/translations'
 import { getAncestors } from 'payload'
 import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 
+import { getJoinedHierarchyDocuments } from './getJoinedHierarchyDocuments.js'
+
 /**
  * Fetches hierarchy data for a collection with a selected parent.
  * Returns data that can be rendered client-side by HierarchyTable.
@@ -24,6 +26,7 @@ export const handleHierarchy = async ({
   permissions,
   req,
   search,
+  shouldLoadJoinedDocuments = true,
   typeFilter,
   user,
 }: {
@@ -34,6 +37,7 @@ export const handleHierarchy = async ({
   permissions?: SanitizedPermissions
   req: PayloadRequest
   search?: string
+  shouldLoadJoinedDocuments?: boolean
   /** Filter hierarchy items by their collectionSpecific type field */
   typeFilter?: string[]
   user: PayloadRequest['user']
@@ -62,6 +66,7 @@ export const handleHierarchy = async ({
           id: parentId,
           collection: collectionSlug,
           depth: 0,
+          joins: false,
           overrideAccess: false,
           req,
           user,
@@ -110,7 +115,8 @@ export const handleHierarchy = async ({
       typeCondition = {
         or: [
           { [typeFieldName]: { in: filteredTypes } },
-          { [typeFieldName]: { exists: false } }, // Include unrestricted folders
+          { [typeFieldName]: { exists: false } },
+          ...(req.payload.db.name === 'mongoose' ? [{ [typeFieldName]: { equals: [] } }] : []),
         ],
       }
     }
@@ -129,6 +135,8 @@ export const handleHierarchy = async ({
 
   const childrenWhere = conditions.length > 1 ? { and: conditions } : parentCondition
 
+  const childWhere = combineWhereConstraints([childrenWhere, baseFilter])
+
   // Fetch children (hierarchy items with this parent, or root items if parentId is null)
   const childrenData = await req.payload.find({
     collection: collectionSlug,
@@ -136,13 +144,14 @@ export const handleHierarchy = async ({
     draft: true,
     fallbackLocale: false,
     includeLockStatus: true,
+    joins: false,
     limit: DEFAULT_HIERARCHY_LIST_LIMIT,
     locale: req.locale,
     overrideAccess: false,
     page: 1,
     req,
     user,
-    where: combineWhereConstraints([childrenWhere, baseFilter]),
+    where: childWhere,
   })
 
   // Fetch related documents from other collections
@@ -151,8 +160,22 @@ export const handleHierarchy = async ({
   const relatedDocumentsByCollection: RelatedDocumentsGrouped = {}
   const relatedBaseFilters: Record<string, Where> = {}
 
-  // Use pre-computed relatedCollections from sanitized hierarchy config
-  const relatedCollectionsConfig = hierarchyConfig.relatedCollections || {}
+  let joinedDocuments: HierarchyViewData['joinedDocuments']
+  if (parent && parentId !== null && shouldLoadJoinedDocuments) {
+    try {
+      joinedDocuments = await getJoinedHierarchyDocuments({
+        collectionSlug,
+        parentID: parentId,
+        req,
+        search,
+        typeFilter,
+      })
+    } catch (error) {
+      req.payload.logger.debug({ err: error, msg: 'Joined hierarchy documents unavailable' })
+    }
+  }
+
+  const relatedCollectionsConfig = joinedDocuments ? {} : hierarchyConfig.relatedCollections
 
   for (const [relatedSlug, fieldInfo] of Object.entries(relatedCollectionsConfig)) {
     if (relatedSlug === collectionSlug) {
@@ -274,6 +297,8 @@ export const handleHierarchy = async ({
     allowedCollections,
     breadcrumbs,
     childrenData,
+    childrenWhere: childWhere,
+    joinedDocuments,
     parent,
     parentFieldName,
     parentId,

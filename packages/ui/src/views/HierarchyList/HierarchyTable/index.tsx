@@ -1,6 +1,6 @@
 'use client'
 
-import type { PaginatedDocs, Where } from 'payload'
+import type { HierarchyViewData, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -19,6 +19,7 @@ import type { DocumentLayout } from '../../../elements/LayoutToggle/index.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { CardGrid } from '../../../elements/CardGrid/index.js'
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { DocumentCard } from '../../../elements/DocumentCard/index.js'
@@ -55,6 +56,7 @@ export type HierarchyTableProps = {
   /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
   baseFilter?: Where
   childrenData?: PaginatedDocs<HierarchyDocument>
+  childrenWhere?: Where
   /** Collections available for creation (for empty state) */
   collections?: CollectionOption[]
   collectionSlug: string
@@ -62,7 +64,10 @@ export type HierarchyTableProps = {
   /** Resolved hierarchy icon component */
   HierarchyIcon?: React.ReactNode
   hierarchyLabel: string
+  isLoadingDocuments?: boolean
+  joinedDocuments?: HierarchyViewData['joinedDocuments']
   layout?: DocumentLayout
+  onLoadMoreDocuments?: () => void
   parentFieldName?: string
   parentId: null | number | string
   /** Base filters for related collections (keyed by collection slug) */
@@ -75,12 +80,16 @@ export type HierarchyTableProps = {
 export function HierarchyTable({
   baseFilter,
   childrenData,
+  childrenWhere,
   collections,
   collectionSlug,
   hasCreatePermission,
   HierarchyIcon,
   hierarchyLabel,
+  isLoadingDocuments,
+  joinedDocuments,
   layout = 'table',
+  onLoadMoreDocuments,
   parentFieldName,
   parentId,
   relatedBaseFilters,
@@ -174,10 +183,11 @@ export function HierarchyTable({
             }
 
         const searchCondition = search ? { [useAsTitle]: { like: search } } : undefined
-        const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
+        const where =
+          childrenWhere ?? combineWhereConstraints([parentCondition, searchCondition, baseFilter])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where: JSON.stringify(where) },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -214,6 +224,7 @@ export function HierarchyTable({
       apiRoute,
       baseFilter,
       childLoading,
+      childrenWhere,
       collectionSlug,
       parentFieldName,
       parentId,
@@ -362,7 +373,9 @@ export function HierarchyTable({
   )
 
   const hasChildren = (childPaginationData.totalDocs || 0) > 0
-  const hasRelated = relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
+  const hasRelated = joinedDocuments
+    ? joinedDocuments.docs.length > 0
+    : relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
 
   // Unified groups array
   type GroupState = {
@@ -447,7 +460,21 @@ export function HierarchyTable({
     relatedState,
   ])
 
-  const combinedRows = useMemo(() => allGroups.flatMap((group) => group.docs), [allGroups])
+  const combinedRows = useMemo(
+    () => [
+      ...allGroups.flatMap((group) => group.docs),
+      ...(joinedDocuments?.docs ?? []).map((doc): TableRow => ({
+        ...doc,
+        _collectionLabel:
+          getTranslation(
+            getEntityConfig({ collectionSlug: doc._collectionSlug })?.labels?.plural,
+            i18n,
+          ) || doc._collectionSlug,
+        _userEditing: doc._userEditing as TableRow['_userEditing'],
+      })),
+    ],
+    [allGroups, getEntityConfig, i18n, joinedDocuments],
+  )
   const documentRows = useMemo(
     () => combinedRows.filter((row) => row._collectionSlug !== collectionSlug),
     [collectionSlug, combinedRows],
@@ -622,6 +649,31 @@ export function HierarchyTable({
           <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
         </div>
       ))}
+      {joinedDocuments && joinedDocuments.totalDocs > 0 && (
+        <div
+          aria-label={t('general:documents')}
+          className={`${baseClass}__plane-pagination-group`}
+          role="group"
+        >
+          <span className={`${baseClass}__plane-pagination-label`}>{t('general:documents')}</span>
+          <span role="status">
+            {joinedDocuments.docs.length} {t('general:of')} {joinedDocuments.totalDocs}
+          </span>
+          {(joinedDocuments.hasNextPage || joinedDocuments.page > 1) && (
+            <Button
+              buttonStyle="ghost"
+              extraButtonProps={{
+                'aria-busy': isLoadingDocuments,
+                'aria-disabled': isLoadingDocuments || !joinedDocuments.hasNextPage,
+              }}
+              margin={false}
+              onClick={onLoadMoreDocuments}
+            >
+              {t(isLoadingDocuments ? 'general:loading' : 'general:loadMore')}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 
