@@ -45,7 +45,7 @@ function topologicallySortFeatures(
     }
   }
 
-  return stack.reverse()
+  return stack
 }
 
 function visit(
