@@ -473,6 +473,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     pageNumberRange: 'Skriv inn et sidetall fra 1 til {{totalPages}}.',
+    parentDocument: 'Overordnet dokument',
     password: 'Passord',
     pasteBelow: 'Lim inn nedenfor',
     pasteField: 'Lim inn felt',

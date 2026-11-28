@@ -468,6 +468,7 @@ export const isTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Yfirskrifa skráð gögn í reit',
     pageNotFound: 'Síða fannst ekki',
     pageNumberRange: 'Sláðu inn síðunúmer frá 1 til {{totalPages}}.',
+    parentDocument: 'Yfirskjal',
     password: 'Lykilorð',
     pasteBelow: 'Límdu hér að neðan',
     pasteField: 'Líma svæði',
