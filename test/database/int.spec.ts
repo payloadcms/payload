@@ -4558,6 +4558,103 @@ describe('database', () => {
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 
+  it('should set createdAt when upsert inserts and keep it on later upserts', async () => {
+    const upsertTitle = `upsert-created-at-${randomUUID()}`
+
+    const inserted = await payload.db.upsert({
+      collection: postsSlug,
+      data: { title: upsertTitle },
+      req: {},
+      where: { title: { equals: upsertTitle } },
+    })
+
+    expect(inserted.createdAt).toBeTruthy()
+
+    // Make sure a second write would get a different timestamp
+    await new Promise((resolve) => setTimeout(resolve, 2))
+
+    const updated = await payload.db.upsert({
+      collection: postsSlug,
+      data: { title: upsertTitle },
+      req: {},
+      where: { title: { equals: upsertTitle } },
+    })
+
+    expect(updated.id).toBe(inserted.id)
+    expect(updated.createdAt).toBe(inserted.createdAt)
+    expect(updated.updatedAt).not.toBe(inserted.updatedAt)
+
+    const insertedWithoutReturning = `upsert-created-at-no-returning-${randomUUID()}`
+
+    await payload.db.upsert({
+      collection: postsSlug,
+      data: { title: insertedWithoutReturning },
+      req: {},
+      returning: false,
+      where: { title: { equals: insertedWithoutReturning } },
+    })
+
+    const found = await payload.db.findOne<Post>({
+      collection: postsSlug,
+      req: {},
+      where: { title: { equals: insertedWithoutReturning } },
+    })
+
+    expect(found?.createdAt).toBeTruthy()
+  })
+
+  it(
+    'should keep raw update operators when upsert matches a document',
+    { db: 'mongo' },
+    async () => {
+      const upsertTitle = `upsert-raw-operators-${randomUUID()}`
+
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { number: 1, title: upsertTitle },
+      })
+
+      for (const returning of [false, true]) {
+        await payload.db.upsert({
+          collection: postsSlug,
+          data: { $inc: { number: 1 } },
+          req: {},
+          returning,
+          where: { title: { equals: upsertTitle } },
+        })
+      }
+
+      const found = await payload.findByID({ id: post.id, collection: postsSlug })
+
+      expect(found.number).toBe(3)
+    },
+  )
+
+  it('should keep a createdAt written by a raw operator on upsert', { db: 'mongo' }, async () => {
+    const upsertTitle = `upsert-raw-created-at-${randomUUID()}`
+    const createdAt = '2020-01-01T00:00:00.000Z'
+
+    // The first upsert inserts the document and the second one matches it
+    for (const returning of [false, true]) {
+      await payload.db.upsert({
+        collection: postsSlug,
+        data: { $set: { createdAt, title: upsertTitle } },
+        req: {},
+        returning,
+        where: { title: { equals: upsertTitle } },
+      })
+    }
+
+    const { docs } = await payload.find({
+      collection: postsSlug,
+      overrideAccess: true,
+      where: { title: { equals: upsertTitle } },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]?.createdAt).toBe(createdAt)
+  })
+
   it('should apply default values on upsert insert but not on update', async () => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {
