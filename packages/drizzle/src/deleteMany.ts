@@ -1,6 +1,5 @@
 import type { DeleteMany } from 'payload'
 
-import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -49,7 +48,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
       where: whereArg,
     })
 
-    whereToUse = inArray(
+    whereToUse = this.operators.in(
       table.id,
       result.docs.map((doc) => doc.id),
     )

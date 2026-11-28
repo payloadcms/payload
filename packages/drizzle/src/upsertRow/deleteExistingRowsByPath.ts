@@ -1,4 +1,4 @@
-import { and, eq, inArray, or, sql } from 'drizzle-orm'
+import { and, eq, or, sql } from 'drizzle-orm'
 
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
 
@@ -76,7 +76,9 @@ export const deleteExistingRowsByPath = async ({
     const whereConstraints = [eq(table[parentColumnName], parentID)]
 
     if (pathColumnName) {
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)))
+      whereConstraints.push(
+        adapter.operators.in(table[pathColumnName], Array.from(localizedPathsToDelete)),
+      )
     }
 
     await adapter.deleteWhere({
@@ -90,7 +92,7 @@ export const deleteExistingRowsByPath = async ({
     const whereConstraints = [eq(table[parentColumnName], parentID)]
 
     if (pathColumnName) {
-      whereConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)))
+      whereConstraints.push(adapter.operators.in(table[pathColumnName], Array.from(pathsToDelete)))
     }
 
     await adapter.deleteWhere({
