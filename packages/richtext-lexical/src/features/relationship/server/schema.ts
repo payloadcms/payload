@@ -118,6 +118,8 @@ export const createRelationshipNodeJSONSchema =
           version: versionSchema,
         },
         required: ['type'],
+        tsType:
+          "{ type: 'relationship'; /** @deprecated */ version: number; [k: string]: unknown }",
       }
     } else {
       const slugUnion = enabledCollectionSlugs.map((slug) => `'${slug}'`).join(' | ')
