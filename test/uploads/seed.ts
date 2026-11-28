@@ -19,6 +19,7 @@ import {
   relationPreviewSlug,
   relationSlug,
   versionSlug,
+  wideFilePreviewSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -508,6 +509,16 @@ export const seed = async (payload: Payload) => {
     file: {
       ...audioFile,
       name: `file-preview-audio-${audioFile?.name}`,
+    } as File,
+    overrideAccess: true,
+  })
+
+  await payload.create({
+    collection: wideFilePreviewSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `wide-preview-image-${imageFile?.name}`,
     } as File,
     overrideAccess: true,
   })

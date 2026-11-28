@@ -27,6 +27,7 @@ import { RelationToNoFilesRequired } from './collections/RelationToNoFilesRequir
 import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
+import { WideFilePreviewCollection } from './collections/WideFilePreview/index.js'
 import { seed } from './seed.js'
 import {
   adminThumbnailSizeSlug,
@@ -778,6 +779,7 @@ export default buildConfigWithDefaults({
       AdminUploadFilePreviewSingle,
       AdminUploadFilePreviewMap,
       FilePreviewCollection,
+      WideFilePreviewCollection,
       NoFilesRequired,
       RelationToNoFilesRequired,
       {

@@ -188,6 +188,8 @@
 
       .file-manager {
         flex: 2;
+        /* Keep the panel at its flex share when a custom preview is wider than it. */
+        min-width: 0;
         border-inline-start: var(--stroke-width-small) solid var(--color-border);
       }
 

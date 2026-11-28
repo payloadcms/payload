@@ -185,6 +185,7 @@ export type LexicalNodes_7CBEE868 =
   | SerializedUploadNode<'admin-upload-file-preview-single'>
   | SerializedUploadNode<'admin-upload-file-preview-map'>
   | SerializedUploadNode<'file-preview'>
+  | SerializedUploadNode<'wide-file-preview'>
   | SerializedUploadNode<'no-files-required'>
   | SerializedUploadNode<'optional-file'>
   | SerializedUploadNode<'required-file'>
@@ -286,6 +287,7 @@ export interface Config {
     'admin-upload-file-preview-single': AdminUploadFilePreviewSingle;
     'admin-upload-file-preview-map': AdminUploadFilePreviewMap;
     'file-preview': FilePreview;
+    'wide-file-preview': WideFilePreview;
     'no-files-required': NoFilesRequired;
     'relation-to-no-files-required': RelationToNoFilesRequired;
     'optional-file': OptionalFile;
@@ -363,6 +365,7 @@ export interface Config {
     'admin-upload-file-preview-single': AdminUploadFilePreviewSingleSelect<false> | AdminUploadFilePreviewSingleSelect<true>;
     'admin-upload-file-preview-map': AdminUploadFilePreviewMapSelect<false> | AdminUploadFilePreviewMapSelect<true>;
     'file-preview': FilePreviewSelect<false> | FilePreviewSelect<true>;
+    'wide-file-preview': WideFilePreviewSelect<false> | WideFilePreviewSelect<true>;
     'no-files-required': NoFilesRequiredSelect<false> | NoFilesRequiredSelect<true>;
     'relation-to-no-files-required': RelationToNoFilesRequiredSelect<false> | RelationToNoFilesRequiredSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
@@ -2805,6 +2808,33 @@ export interface FilePreview {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wide-file-preview".
+ */
+export interface WideFilePreview {
+  id: string;
+  alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-files-required".
  */
 export interface NoFilesRequired {
@@ -4248,6 +4278,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'file-preview';
         value: string | FilePreview;
+      } | null)
+    | ({
+        relationTo: 'wide-file-preview';
+        value: string | WideFilePreview;
       } | null)
     | ({
         relationTo: 'no-files-required';
@@ -6594,6 +6628,26 @@ export interface FilePreviewSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wide-file-preview_select".
+ */
+export interface WideFilePreviewSelect<T extends boolean = true> {
+  alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-files-required_select".
  */
 export interface NoFilesRequiredSelect<T extends boolean = true> {
@@ -8010,6 +8064,7 @@ export interface CollectionQueryWidget {
       | 'admin-upload-file-preview-single'
       | 'admin-upload-file-preview-map'
       | 'file-preview'
+      | 'wide-file-preview'
       | 'no-files-required'
       | 'relation-to-no-files-required'
       | 'optional-file'
@@ -8102,6 +8157,7 @@ export interface ActivityWidget {
           | 'admin-upload-file-preview-single'
           | 'admin-upload-file-preview-map'
           | 'file-preview'
+          | 'wide-file-preview'
           | 'no-files-required'
           | 'relation-to-no-files-required'
           | 'optional-file'
