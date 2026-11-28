@@ -248,6 +248,7 @@ export interface DefaultSort {
   id: string;
   text?: string | null;
   number?: number | null;
+  virtualText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -526,6 +527,7 @@ export interface DraftsSelect<T extends boolean = true> {
 export interface DefaultSortSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  virtualText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
