@@ -39,7 +39,7 @@ const DatePicker: React.FC<Props> = (props) => {
   } = props
 
   // Use the user's AdminUI language preference for the locale
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   let dateFormat = customDisplayFormat
 
@@ -128,6 +128,7 @@ const DatePicker: React.FC<Props> = (props) => {
       <div className={`${baseClass}__icon-wrap`}>
         {dateTimePickerProps.selected && (
           <button
+            aria-label={t('general:clear')}
             className={`${baseClass}__clear-button`}
             onClick={() => onChange(null)}
             type="button"
