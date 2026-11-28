@@ -92,6 +92,30 @@ export default buildConfig({
 })
 ```
 
+**Example email options using Mailtrap SMTP:**
+
+[Mailtrap Email API/SMTP](https://docs.mailtrap.io/email-api-smtp/setup/smtp-integration) uses the host `live.smtp.mailtrap.io` on port `587`, the username `api`, and your API token as the password. Mailtrap only sends from a [verified sending domain](https://docs.mailtrap.io/email-api-smtp/setup/sending-domain), so `defaultFromAddress` must use that domain.
+
+```ts
+import { buildConfig } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+
+export default buildConfig({
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@your-verified-domain.com',
+    defaultFromName: 'Payload',
+    transportOptions: {
+      host: 'live.smtp.mailtrap.io',
+      port: 587,
+      auth: {
+        user: 'api',
+        pass: process.env.MAILTRAP_API_TOKEN,
+      },
+    },
+  }),
+})
+```
+
 **Custom Transport:**
 
 You also have the ability to bring your own nodemailer transport. This is an example of using the SendGrid nodemailer transport.
