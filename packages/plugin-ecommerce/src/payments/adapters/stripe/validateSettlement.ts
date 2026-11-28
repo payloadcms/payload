@@ -24,7 +24,12 @@ type SettlementTransaction = {
 
 type SettlementValidationArgs = {
   canonicalCartID: unknown
-  cartItemsSnapshot: unknown
+  /**
+   * SHA-256 hex digest of the normalised cart items recorded at initiatePayment time.
+   * When absent (PaymentIntents created before this field was introduced) the hash
+   * comparison is skipped so upgrades remain safe.
+   */
+  cartItemsHash: string | undefined
   customerEmail: unknown
   paymentIntent: SettlementPaymentIntent
   paymentIntentID: string
@@ -102,7 +107,7 @@ export const normalizeCartItems = (items: unknown): unknown[] => {
 
 export const validateSettlement = ({
   canonicalCartID,
-  cartItemsSnapshot,
+  cartItemsHash,
   customerEmail,
   paymentIntent,
   paymentIntentID,
@@ -173,16 +178,47 @@ export const validateSettlement = ({
     throw new Error('Stripe currency does not match the transaction currency')
   }
 
-  const normalizedSnapshot = normalizeCartItems(cartItemsSnapshot)
-  const normalizedTransactionItems = normalizeCartItems(transaction.items)
+  // cartItemsHash is present on PaymentIntents created after the hash-based approach
+  // was introduced. PaymentIntents without it (from the previous version) skip the
+  // comparison so that upgrades remain safe.
+  if (cartItemsHash !== undefined) {
+    const transactionItemsHash = hashCartItems(transaction.items)
 
-  if (stableSerialize(normalizedSnapshot) !== stableSerialize(normalizedTransactionItems)) {
-    throw new Error('Stripe cart items do not match the transaction items')
+    if (cartItemsHash !== transactionItemsHash) {
+      throw new Error('Stripe cart items do not match the transaction items')
+    }
   }
 
   if (paymentIntent.status !== 'succeeded') {
     throw new Error('Payment not completed.')
   }
+}
+
+/**
+ * Compute a SHA-256 hex digest of the stable-serialised, normalised cart items.
+ * The result is 64 hex characters, well within Stripe's 500-character metadata limit.
+ *
+ * Uses Node's built-in `crypto.createHash` (available in every Payload runtime —
+ * Node.js, Vercel Edge Functions via the `node:crypto` polyfill, and Cloudflare Workers
+ * via their `node:crypto` compatibility layer). Keeping it synchronous lets
+ * validateSettlement remain a pure, synchronous guard with no async surface area.
+ */
+export const hashCartItems = (items: unknown): string => {
+  const normalizedItems = normalizeCartItems(items)
+  const serialized = stableSerialize(normalizedItems)
+  return sha256Hex(serialized)
+}
+
+/**
+ * Thin wrapper around Node's built-in `crypto.createHash('sha256')`.
+ * We use a dynamic `require` so the module stays importable in ESM bundles
+ * that do not statically analyse CommonJS requires, and to keep the import
+ * side-effect-free when crypto is not needed (e.g. in browser test harnesses).
+ */
+const sha256Hex = (message: string): string => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createHash } = require('node:crypto') as typeof import('crypto')
+  return createHash('sha256').update(message, 'utf8').digest('hex')
 }
 
 const getNestedString = (

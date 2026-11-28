@@ -52,14 +52,32 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         value: transaction.id,
       })
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
-      const cartItemsSnapshot = parseRequiredMetadata({
-        fieldName: 'cartItemsSnapshot',
-        value: paymentIntent.metadata.cartItemsSnapshot,
-      })
-      const shippingAddress = parseOptionalMetadata({
-        fieldName: 'shippingAddress',
-        value: paymentIntent.metadata.shippingAddress,
-      })
+
+      // cartItemsHash is present on PaymentIntents created by the current version.
+      // PaymentIntents without it (from the previous version) pass undefined so that
+      // validateSettlement skips the hash comparison and upgrading stays safe.
+      const cartItemsHash =
+        typeof paymentIntent.metadata.cartItemsHash === 'string' &&
+        paymentIntent.metadata.cartItemsHash
+          ? paymentIntent.metadata.cartItemsHash
+          : undefined
+
+      // shippingAddress is now persisted in the transaction, not in Stripe metadata.
+      // Fall back to metadata for PaymentIntents created by older versions.
+      //
+      // Guard: SQL adapters can return an empty group object `{}` when no address was
+      // saved, which is still truthy for isRecord(). We therefore require at least one
+      // own key before treating the transaction field as a valid address. Without this
+      // check an empty `{}` would shadow the metadata fallback and swallow the address
+      // for anyone upgrading from the previous version that stored it in Stripe metadata.
+      const transactionShipping = transaction.shippingAddress
+      const shippingAddress =
+        isRecord(transactionShipping) && Object.keys(transactionShipping).length > 0
+          ? transactionShipping
+          : parseOptionalMetadata({
+              fieldName: 'shippingAddress',
+              value: paymentIntent.metadata.shippingAddress,
+            })
       const purchaser =
         req.user === null || req.user === undefined
           ? { customerEmail: normalizeEmail(data.customerEmail) }
@@ -72,7 +90,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       validateSettlement({
         canonicalCartID: data.cartID,
-        cartItemsSnapshot,
+        cartItemsHash,
         customerEmail: data.customerEmail,
         paymentIntent,
         paymentIntentID,
@@ -85,7 +103,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           amount: transaction.amount,
           currency: transaction.currency,
           ...purchaser,
-          items: cartItemsSnapshot,
+          items: transaction.items,
           shippingAddress,
           status: 'processing',
         },
