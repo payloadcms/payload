@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { APIError } from '../../errors/APIError.js'
 import { FileUploadError } from '../../errors/index.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { getRangeRequestInfo } from '../getRangeRequestInfo.js'
 import { generateFileData } from './index.js'
 import { uploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 
@@ -496,6 +497,269 @@ describe('generateFileData - client uploads without full contents', () => {
         transformFile: vi.fn(),
       }),
     ).rejects.toMatchObject({ message: error.message, status: 400 })
+  })
+})
+
+describe('generateFileData - client uploads read by byte ranges', () => {
+  const MINIMAL_MP4 = Buffer.concat([
+    Buffer.from([0, 0, 0, 24]),
+    Buffer.from('ftypisom'),
+    Buffer.alloc(4),
+    Buffer.from('isomiso2'),
+    Buffer.from([0, 0, 0x27, 0x10]),
+    Buffer.from('mdat'),
+    Buffer.alloc(10_000 - 8),
+  ])
+
+  /** Serves `stored` with HTTP Range, as the storage adapters do on a client-upload read. */
+  const createRangeHandler = ({ contentType, stored }: { contentType?: string; stored: Buffer }) =>
+    vi.fn(async (req: PayloadRequest) => {
+      const info = getRangeRequestInfo({
+        fileSize: stored.length,
+        rangeHeader: req.headers.get('range'),
+      })
+      const body =
+        info.type === 'partial' ? stored.subarray(info.rangeStart, info.rangeEnd + 1) : stored
+
+      return new Response(body, {
+        headers: { ...info.headers, ...(contentType && { 'Content-Type': contentType }) },
+        status: info.status,
+      })
+    })
+
+  const posterOwner = { slug: 'poster', mimeTypes: ['video/mp4'], variantNames: ['thumbnail'] }
+
+  /** Starts from the file that `getFileFromUploadInstructions` returns for a 'none' requirement. */
+  const runRangedClientUpload = ({
+    contentType,
+    mimeTypes,
+    stored = MINIMAL_MP4,
+    transformers,
+    variantOwners = [posterOwner],
+  }: {
+    /** The `Content-Type` that storage sends for the object. */
+    contentType?: string
+    mimeTypes?: string[]
+    stored?: Buffer
+    transformers: UploadTransformer[]
+    variantOwners?: (typeof posterOwner)[]
+  }) => {
+    const fetchFullClientUpload = vi.fn(
+      async ({ file }: { file: NonNullable<PayloadRequest['file']> }) => ({
+        ...file,
+        data: stored,
+      }),
+    )
+    const handler = createRangeHandler({ contentType, stored })
+    const logger = { error: vi.fn(), warn: vi.fn() }
+    const upload = {
+      disableLocalStorage: true,
+      focalPoint: false,
+      handlers: [handler],
+      staticDir: os.tmpdir(),
+      variantOwners,
+      variants: [{ name: 'thumbnail' }],
+      ...(mimeTypes && { mimeTypes }),
+    }
+    const result = generateFileData({
+      collection: { config: { slug: 'media', upload } } as unknown as Collection,
+      config: {} as SanitizedConfig,
+      data: {},
+      fetchFullClientUpload,
+      operation: 'create',
+      req: {
+        context: {},
+        file: {
+          data: Buffer.alloc(0),
+          mimetype: 'video/mp4',
+          name: 'clip.mp4',
+          size: stored.length,
+          uploadReference: { prefix: '' },
+        },
+        headers: new Headers(),
+        payload: {
+          collections: { media: { config: { fields: [], upload } } },
+          config: { routes: { api: '/api' }, upload: { transformers } },
+          db: { findOne: vi.fn(async () => null) },
+          logger,
+        },
+      } as unknown as PayloadRequest,
+    })
+
+    return { fetchFullClientUpload, handler, logger, result }
+  }
+
+  const getRangeHeaders = (handler: ReturnType<typeof createRangeHandler>) =>
+    handler.mock.calls.map(([req]) => req.headers.get('range'))
+
+  it('should give a hook owner a ranged source instead of downloading the client upload', async () => {
+    let read: Uint8Array | undefined
+    const transformVariant = vi.fn<NonNullable<UploadTransformer['transformVariant']>>(
+      async ({ source }) => {
+        read = await source.readFileBytes({ numberOfBytes: 8, startByte: 0 })
+        return { status: 'skip' }
+      },
+    )
+
+    const { fetchFullClientUpload, handler, result } = runRangedClientUpload({
+      transformers: [{ slug: 'poster', mimeTypes: ['video/mp4'], transformVariant }],
+    })
+    await result
+
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+    expect(getRangeHeaders(handler)).not.toContain(null)
+    expect(Buffer.from(read!)).toEqual(MINIMAL_MP4.subarray(0, 8))
+    expect(transformVariant.mock.calls[0]![0].source.sizeInBytes).toBe(MINIMAL_MP4.length)
+    expect(transformVariant.mock.calls[0]![0].originalSource.sizeInBytes).toBe(MINIMAL_MP4.length)
+  })
+
+  it('should save the provider content type of a ranged client upload', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      contentType: 'video/mp4',
+      transformers: [
+        {
+          slug: 'poster',
+          mimeTypes: ['video/mp4'],
+          transformVariant: async () => ({ status: 'skip' }),
+        },
+      ],
+    })
+
+    expect((await result).data).toMatchObject({ mimeType: 'video/mp4' })
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+  })
+
+  it('should download the client upload when the provider content type is not the claimed type', async () => {
+    const transformVariant = vi.fn(async () => ({ status: 'skip' as const }))
+
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      contentType: 'video/quicktime',
+      transformers: [{ slug: 'poster', mimeTypes: ['video/mp4'], transformVariant }],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
+  it('should download a video in a collection with MIME types when the provider content type is not the claimed type', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      contentType: 'video/quicktime',
+      mimeTypes: ['video/*'],
+      transformers: [],
+      variantOwners: [],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
+  it('should download the client upload when a main-file stage also runs', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      transformers: [
+        {
+          slug: 'poster',
+          mimeTypes: ['video/mp4'],
+          transformVariant: async () => ({ status: 'skip' }),
+        },
+        {
+          slug: 'stage',
+          mimeTypes: ['video/mp4'],
+          transformFile: async () => ({ status: 'continue' }),
+        },
+      ],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
+  it('should download the client upload when its box check needs too many reads', async () => {
+    const freeBoxes = Array.from({ length: 600 }, () =>
+      Buffer.concat([Buffer.from([0, 0, 0, 8]), Buffer.from('free')]),
+    )
+    const transformVariant = vi.fn(async () => ({ status: 'skip' as const }))
+
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      stored: Buffer.concat([MINIMAL_MP4.subarray(0, 24), ...freeBoxes]),
+      transformers: [{ slug: 'poster', mimeTypes: ['video/mp4'], transformVariant }],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+    expect(transformVariant).toHaveBeenCalledOnce()
+  })
+
+  it('should check a video in a collection with MIME types over ranges without downloading it', async () => {
+    const { fetchFullClientUpload, handler, logger, result } = runRangedClientUpload({
+      mimeTypes: ['video/*'],
+      transformers: [],
+      variantOwners: [],
+    })
+    await result
+
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+    expect(handler).toHaveBeenCalled()
+    expect(getRangeHeaders(handler)).not.toContain(null)
+    // The check of the empty probe would warn that it found no type.
+    expect(logger.warn).not.toHaveBeenCalled()
+  })
+
+  it('should reject a video in a collection with MIME types when its boxes do not fill the file', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      mimeTypes: ['video/*'],
+      stored: Buffer.concat([MINIMAL_MP4.subarray(0, 24), Buffer.alloc(64, 0xff)]),
+      transformers: [],
+      variantOwners: [],
+    })
+
+    await expect(result).rejects.toMatchObject({
+      data: { errors: [{ message: 'Invalid or corrupted ISO base media file.' }] },
+    })
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+  })
+
+  it('should download and check a video in a collection with MIME types when its bytes are another type', async () => {
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      mimeTypes: ['video/*'],
+      stored: PNG_SIGNATURE,
+      transformers: [],
+      variantOwners: [],
+    })
+
+    await expect(result).rejects.toMatchObject({
+      data: { errors: [{ message: 'Invalid MIME type: image/png.' }] },
+    })
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
+  it('should download a video in a collection with MIME types when its box check needs too many reads', async () => {
+    const freeBoxes = Array.from({ length: 600 }, () =>
+      Buffer.concat([Buffer.from([0, 0, 0, 8]), Buffer.from('free')]),
+    )
+
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      mimeTypes: ['video/*'],
+      stored: Buffer.concat([MINIMAL_MP4.subarray(0, 24), ...freeBoxes]),
+      transformers: [],
+      variantOwners: [],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+  })
+
+  it('should download a video in a collection with MIME types when a main-file stage runs', async () => {
+    const transformFile = vi.fn(async () => ({ status: 'continue' as const }))
+
+    const { fetchFullClientUpload, result } = runRangedClientUpload({
+      mimeTypes: ['video/*'],
+      transformers: [{ slug: 'stage', mimeTypes: ['video/mp4'], transformFile }],
+      variantOwners: [],
+    })
+    await result
+
+    expect(fetchFullClientUpload).toHaveBeenCalledOnce()
+    expect(transformFile).toHaveBeenCalledOnce()
   })
 })
 

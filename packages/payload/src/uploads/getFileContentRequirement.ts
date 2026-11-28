@@ -1,5 +1,6 @@
 import type { SanitizedUploadConfig } from './types.js'
 
+import { canCheckContentsByRanges } from './canCheckContentsByRanges.js'
 import { canResizeImage } from './canResizeImage.js'
 import { isSvgUpload } from './getFileTypeIdentity.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
@@ -22,7 +23,8 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * - `full`: local storage needs the real bytes, or a registered file transformer will adjust
  *   the image (`upload.hasImageAdjustments`), or the file is animated, or additional image
  *   sizes will be generated from it, or the collection restricts mime types (which also runs
- *   SVG/PDF content-safety checks that must see the whole file), or the file is an SVG (its
+ *   SVG/PDF content-safety checks that must see the whole file) and the file is not a video or
+ *   other non-image ISO base media (see `canCheckContentsByRanges`), or the file is an SVG (its
  *   safety check always runs and rejects a cut-off document), or the request itself carries
  *   a crop/resize edit (`uploadEdits`) that will be applied to the fetched bytes.
  * - `header`: the file is an image and only its dimensions are needed.
@@ -55,10 +57,13 @@ export function getFileContentRequirement({
     return 'full'
   }
 
-  const hasMimeTypeAllowList =
-    Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
+  if (isSvgUpload({ filename, mimeType })) {
+    return 'full'
+  }
 
-  if (hasMimeTypeAllowList || isSvgUpload({ filename, mimeType })) {
+  // The allow-list check of a video runs over byte ranges in generateFileData/, or after a full
+  // download when a stage needs one (see source/readClientUploadByRanges.ts).
+  if (hasMimeTypeAllowList({ uploadConfig }) && !canCheckContentsByRanges({ filename, mimeType })) {
     return 'full'
   }
 
@@ -83,4 +88,13 @@ export function getFileContentRequirement({
   }
 
   return 'none'
+}
+
+/** Whether the collection accepts only the MIME types that `upload.mimeTypes` lists. */
+export function hasMimeTypeAllowList({
+  uploadConfig,
+}: {
+  uploadConfig: Pick<SanitizedUploadConfig, 'mimeTypes'>
+}): boolean {
+  return Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
 }

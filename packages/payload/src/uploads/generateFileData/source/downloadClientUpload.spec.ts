@@ -1,3 +1,4 @@
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { UploadTransformer } from '../../transformers/types.js'
 import type { PlannedHookOwner } from '../../transformState/planUpload.js'
@@ -35,10 +36,16 @@ const getStages = ({ hookOwners }: { hookOwners: PlannedHookOwner[] }) =>
     },
   }) as Pick<UploadStages, 'bridgeTransformer' | 'hookOwners' | 'pipeline' | 'plan'>
 
+const collection = {
+  slug: 'media',
+  upload: { disableLocalStorage: true },
+} as unknown as SanitizedCollectionConfig
+
 describe('needsFullClientUpload', () => {
   it('should not download a client upload when nothing reads its bytes', () => {
     expect(
       needsFullClientUpload({
+        collection,
         file: probedClientUpload,
         pipelineDoc: {},
         stages: getStages({ hookOwners: [] }),
@@ -49,6 +56,7 @@ describe('needsFullClientUpload', () => {
   it('should download a client upload when a hook owner is planned for it', () => {
     expect(
       needsFullClientUpload({
+        collection,
         file: probedClientUpload,
         pipelineDoc: {},
         stages: getStages({

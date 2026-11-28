@@ -28,9 +28,10 @@ const MINIMAL_PNG = Buffer.from(
   'base64',
 )
 
+// Local storage needs the whole file, so a video upload is downloaded by default.
 const createReq = (
   handlers: Array<(...args: any[]) => any>,
-  uploadConfigOverrides: Record<string, unknown> = { mimeTypes: ['video/*'] },
+  uploadConfigOverrides: Record<string, unknown> = { disableLocalStorage: false },
 ): PayloadRequest =>
   ({
     payload: {
@@ -393,7 +394,7 @@ describe('getFileFromUploadInstructions', () => {
 
   it('should pass extra uploadReference fields to the handler as clientData when receipts are off', async () => {
     const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
-    const req = createReq([handler], { mimeTypes: ['video/*'], uploadInstructions: undefined })
+    const req = createReq([handler], { disableLocalStorage: false, uploadInstructions: undefined })
 
     const result = await getFileFromUploadInstructions({
       collectionSlug: 'media',
@@ -443,7 +444,7 @@ describe('getFileFromUploadInstructions', () => {
 
   it('should not add clientData or unset keys when there are no extra fields', async () => {
     const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
-    const req = createReq([handler], { mimeTypes: ['video/*'], uploadInstructions: undefined })
+    const req = createReq([handler], { disableLocalStorage: false, uploadInstructions: undefined })
 
     const result = await getFileFromUploadInstructions({
       collectionSlug: 'media',
@@ -458,6 +459,48 @@ describe('getFileFromUploadInstructions', () => {
 
     tempFilesToClean.push(result.tempFilePath!)
     expect(result.uploadReference).toStrictEqual({ prefix: '' })
+  })
+
+  it('should verify a video in a collection with MIME types with a one-byte read', async () => {
+    // Its type and content checks run later over byte ranges (see readClientUploadByRanges.ts).
+    const handler = vi.fn(
+      async () =>
+        new Response(Buffer.alloc(1), {
+          headers: { 'Content-Range': 'bytes 0-0/18' },
+          status: 206,
+        }),
+    )
+    const req = createReq([handler], { mimeTypes: ['video/*'] })
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile(),
+      req,
+    })
+
+    expect(handler).toHaveBeenCalledOnce()
+    expect((handler.mock.calls[0] as unknown as [PayloadRequest])[0].headers.get('range')).toBe(
+      'bytes=0-0',
+    )
+    expect(file).toMatchObject({ data: Buffer.alloc(0), mimetype: 'video/mp4', size: 18 })
+    expect(file.tempFilePath).toBeUndefined()
+  })
+
+  it('should download a PDF in a collection with MIME types in full', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler], { mimeTypes: ['application/pdf'] })
+
+    const file = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: createUploadReferenceFile({ filename: 'document.pdf', mimeType: 'application/pdf' }),
+      req,
+    })
+
+    tempFilesToClean.push(file.tempFilePath!)
+    expect((handler.mock.calls[0] as unknown as [PayloadRequest])[0].headers.get('range')).toBe(
+      null,
+    )
+    expect(file.tempFilePath).toBeTruthy()
   })
 
   it('should reject a receipt signed for the beta -original filename', async () => {

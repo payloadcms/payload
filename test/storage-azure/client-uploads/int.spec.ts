@@ -18,8 +18,13 @@ import { getStoredUploadKeys } from '../../__helpers/int/storedUploadKeys.js'
 import { test } from '../../__helpers/int/vitest.js'
 import { mediaSlug } from '../shared.js'
 import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
+import {
+  mediaHeaderOnlyVideoSlug,
+  mediaVideoAllowListSlug,
+} from './collections/MediaHeaderOnlyVideo.js'
 import { mediaHeaderOnlyWithSizesSlug } from './collections/MediaHeaderOnlyWithSizes.js'
 import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
+import { posterPNGPath, posterRecords, resetPosterRecords } from './rangedPosterTransformer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -628,6 +633,104 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
 
       expect(doc).toMatchObject({ _transforms: { crop }, height: 100, width: 100 })
     })
+  })
+
+  test.describe('ranged reads for variant hooks (real Azure handler)', () => {
+    const createdDocs: { collection: string; id: number | string }[] = []
+    const videoPath = path.resolve(dirname, '../../uploads/christmas-mariachi-in-guadalajara.mp4')
+    // The test video's `moov` box, which holds the frame index, is at the end of the file.
+    const MOOV_START = 9_009_519
+
+    test.afterEach(async ({ payload }) => {
+      for (const { collection, id } of createdDocs) {
+        await payload.delete({ id, collection, overrideAccess: true })
+      }
+      createdDocs.length = 0
+      resetPosterRecords()
+    })
+
+    test.for([
+      { name: 'without MIME types', collectionSlug: mediaHeaderOnlyVideoSlug },
+      { name: 'with MIME types', collectionSlug: mediaVideoAllowListSlug },
+    ])(
+      'should read only byte ranges of a client-uploaded video for its variant hook, $name',
+      async ({ collectionSlug }, { restClient }) => {
+        const video = readFileSync(videoPath)
+        const form = await stageAzureClientUpload({
+          collectionSlug,
+          file: video,
+          filename: 'ranged-poster.mp4',
+          mimeType: 'video/mp4',
+          restClient,
+        })
+        const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+        let doc: {
+          filesize: number
+          id: number | string
+          variants: { thumbnail: { filename: string; mimeType: string } }
+        }
+
+        try {
+          const createRes = await restClient.POST(`/${collectionSlug}`, { body: form })
+          expect(createRes.status).toBe(201)
+
+          doc = (await createRes.json()).doc
+          createdDocs.push({ collection: collectionSlug, id: doc.id })
+
+          const byteCounts = downloadSpy.mock.calls.map((call) => call[1])
+
+          // A whole-file download has no byte count.
+          expect(byteCounts).not.toContain(undefined)
+          // The size check, the type check, the `moov` header for the box check (the other box
+          // headers are inside the type check's bytes), then the hook's 4 box headers and `moov`.
+          expect(byteCounts).toEqual([1, 4100, 16, 16, 16, 16, 16, 8201])
+          expect(byteCounts.reduce<number>((total, count) => total + (count ?? 0), 0)).toBeLessThan(
+            64 * 1024,
+          )
+        } finally {
+          downloadSpy.mockRestore()
+        }
+
+        expect(posterRecords.boxTypes).toEqual(['ftyp', 'free', 'mdat', 'moov'])
+        expect(posterRecords.moov).toEqual(video.subarray(MOOV_START))
+        expect(doc.filesize).toBe(video.length)
+        expect(doc.variants.thumbnail.mimeType).toBe('image/png')
+
+        const thumbnail = await restClient.GET(
+          `/${collectionSlug}/file/${doc.variants.thumbnail.filename}`,
+        )
+
+        expect(Buffer.from(await thumbnail.arrayBuffer())).toEqual(await readFile(posterPNGPath))
+      },
+    )
+
+    test.for([
+      { name: 'without MIME types', collectionSlug: mediaHeaderOnlyVideoSlug },
+      { name: 'with MIME types', collectionSlug: mediaVideoAllowListSlug },
+    ])(
+      'should reject a client-uploaded video whose boxes do not fill the file, $name',
+      async ({ collectionSlug }, { restClient }) => {
+        // A valid `ftyp` box, then 64 bytes that are not a box.
+        const fileTypeBox = Buffer.concat([
+          Buffer.from([0, 0, 0, 24]),
+          Buffer.from('ftypisom'),
+          Buffer.alloc(4),
+          Buffer.from('isomiso2'),
+        ])
+        const form = await stageAzureClientUpload({
+          collectionSlug,
+          file: Buffer.concat([fileTypeBox, Buffer.alloc(64, 0xff)]),
+          filename: 'broken.mp4',
+          mimeType: 'video/mp4',
+          restClient,
+        })
+
+        const createRes = await restClient.POST(`/${collectionSlug}`, { body: form })
+
+        expect(createRes.status).toBe(400)
+        expect(posterRecords.boxTypes).toEqual([])
+      },
+    )
   })
 
   /**

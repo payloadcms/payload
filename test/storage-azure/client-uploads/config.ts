@@ -15,10 +15,17 @@ import { Users } from '../collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
 import { MediaHeaderOnly, mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
 import {
+  MediaHeaderOnlyVideo,
+  mediaHeaderOnlyVideoSlug,
+  MediaVideoAllowList,
+  mediaVideoAllowListSlug,
+} from './collections/MediaHeaderOnlyVideo.js'
+import {
   MediaHeaderOnlyWithSizes,
   mediaHeaderOnlyWithSizesSlug,
 } from './collections/MediaHeaderOnlyWithSizes.js'
 import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
+import { rangedPosterTransformer } from './rangedPosterTransformer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -50,6 +57,8 @@ export default buildConfigWithDefaults({
       enableAzureClientUploads(MediaWithDocPrefix),
       enableAzureClientUploads(MediaHeaderOnly),
       enableAzureClientUploads(MediaHeaderOnlyWithSizes),
+      enableAzureClientUploads(MediaHeaderOnlyVideo),
+      enableAzureClientUploads(MediaVideoAllowList),
       Users,
     ],
     storage: [
@@ -59,7 +68,9 @@ export default buildConfigWithDefaults({
         clientUploads: true,
         collections: {
           [mediaHeaderOnlySlug]: true,
+          [mediaHeaderOnlyVideoSlug]: true,
           [mediaHeaderOnlyWithSizesSlug]: true,
+          [mediaVideoAllowListSlug]: true,
           [mediaSlug]: true,
           // Configure a collection-level prefix on this slug to test that
           // a custom `prefix.defaultValue` is contained beneath the static prefix
@@ -118,6 +129,8 @@ export default buildConfigWithDefaults({
             status: 'complete',
           }),
         },
+        // Makes a video poster from byte ranges of a client upload.
+        rangedPosterTransformer,
       ],
     },
   },

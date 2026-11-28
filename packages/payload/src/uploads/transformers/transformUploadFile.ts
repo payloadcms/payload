@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from 'node:util'
 
 import type { Document, PayloadRequest } from '../../types/index.js'
-import type { UploadTransformer } from './types.js'
+import type { FileSource, UploadTransformer } from './types.js'
 
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
@@ -30,7 +30,7 @@ export async function transformUploadFile({
   file,
   getOptions,
   originalDoc,
-  originalFile,
+  originalSource,
   pipeline,
   req,
 }: {
@@ -42,11 +42,11 @@ export async function transformUploadFile({
   /** The `options` a stage gets. */
   getOptions: (transformer: UploadTransformer) => unknown
   originalDoc: Readonly<Document>
-  originalFile: File
+  /** The incoming file, before any stage ran. */
+  originalSource: FileSource
   pipeline: UploadTransformer[]
   req: PayloadRequest
 }): Promise<File> {
-  const originalSource = createFileSource({ file: originalFile })
   let currentFile = file
 
   for (const transformer of pipeline) {

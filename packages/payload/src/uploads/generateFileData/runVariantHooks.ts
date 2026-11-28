@@ -1,9 +1,8 @@
 import type { Document, PayloadRequest } from '../../types/index.js'
-import type { UploadTransformer } from '../transformers/types.js'
+import type { FileSource, UploadTransformer } from '../transformers/types.js'
 import type { UploadTransformation } from '../transformers/uploadTransformerBridge.js'
 import type { PlannedHookOwner } from '../transformState/planUpload.js'
 
-import { createFileSource } from '../transformers/createFileSource.js'
 import { matchesMimeType } from '../transformers/matchesMimeType.js'
 import { transformUploadFile } from '../transformers/transformUploadFile.js'
 import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
@@ -20,11 +19,11 @@ export async function runVariantHooks({
   doc,
   getOptions,
   hookOwner: { options, owner, transformer: ownerTransformer },
-  mainFile,
-  originalFile,
+  originalSource,
   pipelineOriginalDoc,
   req,
   signal,
+  source,
   stagesThatRun,
 }: {
   claims: ReadonlyMap<UploadTransformer, string[]>
@@ -34,12 +33,13 @@ export async function runVariantHooks({
   /** The `options` each later stage gets. */
   getOptions: (transformer: UploadTransformer) => unknown
   hookOwner: PlannedHookOwner
-  /** The main file after the pipeline. */
-  mainFile: File
-  originalFile: File
+  /** The incoming file, before any stage ran. */
+  originalSource: FileSource
   pipelineOriginalDoc: Readonly<Document>
   req: PayloadRequest
   signal: AbortSignal
+  /** The main file after the pipeline. */
+  source: FileSource
   stagesThatRun: UploadTransformer[]
 }): Promise<UploadTransformation[]> {
   const results: UploadTransformation[] = []
@@ -50,10 +50,10 @@ export async function runVariantHooks({
       collectionSlug,
       doc,
       options,
-      originalSource: createFileSource({ file: originalFile }),
+      originalSource,
       req,
       signal,
-      source: createFileSource({ file: mainFile }),
+      source,
       variantName,
     })
 
@@ -69,7 +69,7 @@ export async function runVariantHooks({
       file: result.file,
       getOptions,
       originalDoc: pipelineOriginalDoc,
-      originalFile,
+      originalSource,
       pipeline: getLaterStages({ mimeType: result.file.type, ownerTransformer, stagesThatRun }),
       req,
     })

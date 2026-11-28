@@ -7,21 +7,28 @@ import { hasFullFileContents } from '../../hasFullFileContents.js'
 import { getUploadTransformerInternal } from '../../transformers/uploadTransformerBridge.js'
 import { isClaimRequired } from '../../transformState/transformKeyClaims.js'
 import { checkFileAndUseDetectedType } from '../utils/checkFileAndUseDetectedType.js'
+import { hasDeferredContentChecks } from './readClientUploadByRanges.js'
 
 type IncomingFile = NonNullable<PayloadRequest['file']>
 
 /**
- * Whether a stage needs the bytes of a client upload that arrived with only a header probe or no
- * contents (see getFileContentRequirement.ts). The content requirement covers what the upload
- * bridge needs for its configuration, but not saved keys that it claims. A focal point only
- * guides sizes, which the content requirement already covers, so it needs no download. A planned
- * hook owner reads the file to make its variants.
+ * Whether a stage or a check needs the bytes of a client upload that arrived with only a header
+ * probe or no contents (see getFileContentRequirement.ts). The content requirement covers what
+ * the upload bridge needs for its configuration, but not saved keys that it claims. A focal point
+ * only guides sizes, which the content requirement already covers, so it needs no download.
+ *
+ * A planned hook owner reads the file to make its variants, and a deferred content check reads it
+ * too. Both read by byte ranges instead when `shouldReadClientUploadByRanges` allows it, so this is
+ * their fallback: when a main-file stage or the bridge also runs, or the ranged checks need the
+ * whole file.
  */
 export function needsFullClientUpload({
+  collection,
   file,
   pipelineDoc,
   stages: { bridgeTransformer, hookOwners, pipeline, plan },
 }: {
+  collection: SanitizedCollectionConfig
   file: IncomingFile
   pipelineDoc: Document
   stages: Pick<UploadStages, 'bridgeTransformer' | 'hookOwners' | 'pipeline' | 'plan'>
@@ -40,6 +47,7 @@ export function needsFullClientUpload({
   return (
     isBridgeApplyingSavedKey ||
     hookOwners.length > 0 ||
+    hasDeferredContentChecks({ collection, file }) ||
     pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.transformUpload)
   )
 }

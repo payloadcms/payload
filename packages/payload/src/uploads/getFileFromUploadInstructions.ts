@@ -223,7 +223,7 @@ export const getFileFromUploadInstructions = async ({
       uploadConfig,
     })
     assertProviderFileSize({ expectedSize: file.size, response })
-    const prefix = await readBoundedPrefix(response, 1)
+    const prefix = await readBoundedPrefix({ maxBytes: 1, response })
     if (file.size > 0 && prefix.length === 0) {
       throw new APIError('Uploaded source is not readable.', 400)
     }
@@ -402,7 +402,7 @@ const fetchHeaderOnly = async ({
   })
   assertProviderFileSize({ expectedSize: file.size, response })
 
-  const headerBuffer = await readBoundedPrefix(response, HEADER_PROBE_BYTE_LENGTH)
+  const headerBuffer = await readBoundedPrefix({ maxBytes: HEADER_PROBE_BYTE_LENGTH, response })
 
   try {
     await getImageSize({
@@ -451,22 +451,25 @@ const assertProviderFileSize = ({
 /**
  * Runs the collection's upload handlers, following a single redirect if one is returned.
  * `rangeHeader`, when passed, is a best-effort hint - handlers that ignore it simply return the
- * full file, which callers must still bound their own reads against.
+ * full file, which callers must still bound their own reads against. `signal`, when passed,
+ * replaces the request signal that the handlers see and also aborts the redirect fetch.
  */
-const fetchUploadResponse = async ({
+export const fetchUploadResponse = async ({
   collectionSlug,
   file,
   rangeHeader,
   req,
+  signal,
   uploadConfig,
 }: {
   collectionSlug: string
   file: UploadInstructions['file']
   rangeHeader?: string
   req: PayloadRequest
+  signal?: AbortSignal
   uploadConfig: SanitizedUploadConfig
 }): Promise<Response> => {
-  const scopedReq = rangeHeader ? withRangeHeader(req, rangeHeader) : req
+  const scopedReq = rangeHeader || signal ? withReadOptions({ rangeHeader, req, signal }) : req
 
   let response: null | Response = null
   let error: unknown
@@ -509,6 +512,7 @@ const fetchUploadResponse = async ({
     if (redirectUrl) {
       response = await fetch(redirectUrl, {
         ...(rangeHeader && { headers: { Range: rangeHeader } }),
+        ...(signal && { signal }),
       })
     }
   }
@@ -521,20 +525,43 @@ const fetchUploadResponse = async ({
 }
 
 /**
- * Overrides `req.headers` with a `Range` header while leaving the real incoming request
- * untouched. Uses a Proxy, rather than cloning `req`, because `req` is a native `Request`
- * instance at runtime - accessors like `.signal` are brand-checked against `req`'s internal
- * slots, so a plain clone (e.g. `Object.create(req)`) throws once a handler reads one of them.
- * Forwarding reads through `Reflect.get(req, prop, req)` keeps `this` bound to the real `req`
- * so those accessors keep working.
+ * Overrides `req.headers` with a `Range` header, and `req.signal` with a signal that also aborts
+ * with `signal`, while leaving the real incoming request untouched. Uses a Proxy, rather than
+ * cloning `req`, because `req` is a native `Request` instance at runtime - accessors like
+ * `.signal` are brand-checked against `req`'s internal slots, so a plain clone (e.g.
+ * `Object.create(req)`) throws once a handler reads one of them. Forwarding reads through
+ * `Reflect.get(req, prop, req)` keeps `this` bound to the real `req` so those accessors keep
+ * working.
  */
-const withRangeHeader = (req: PayloadRequest, rangeHeader: string): PayloadRequest => {
+const withReadOptions = ({
+  rangeHeader,
+  req,
+  signal,
+}: {
+  rangeHeader?: string
+  req: PayloadRequest
+  signal?: AbortSignal
+}): PayloadRequest => {
   const headers = new Headers(req.headers)
-  headers.set('range', rangeHeader)
+
+  if (rangeHeader) {
+    headers.set('range', rangeHeader)
+  }
+
+  const scopedSignal =
+    signal && req.signal ? AbortSignal.any([req.signal, signal]) : (signal ?? req.signal)
 
   return new Proxy(req, {
     get(target, prop) {
-      return prop === 'headers' ? headers : Reflect.get(target, prop, target)
+      if (prop === 'headers') {
+        return headers
+      }
+
+      if (prop === 'signal') {
+        return scopedSignal
+      }
+
+      return Reflect.get(target, prop, target)
     },
   })
 }
@@ -543,7 +570,13 @@ const withRangeHeader = (req: PayloadRequest, rangeHeader: string): PayloadReque
  * Reads at most `maxBytes` from the response body, then cancels the reader - so a handler that
  * ignores the range hint and starts streaming the whole file is still cut short on our end.
  */
-const readBoundedPrefix = async (response: Response, maxBytes: number): Promise<Buffer> => {
+const readBoundedPrefix = async ({
+  maxBytes,
+  response,
+}: {
+  maxBytes: number
+  response: Response
+}): Promise<Buffer> => {
   if (!response.body) {
     return Buffer.alloc(0)
   }

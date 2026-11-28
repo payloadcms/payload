@@ -2,12 +2,14 @@ import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { createFileSource } from './transformers/createFileSource.js'
 import {
   isISOBaseMediaMimeType,
   validateISOBaseMediaBuffer,
   validateISOBaseMediaFile,
+  validateISOBaseMediaSource,
 } from './validateISOBaseMediaFile.js'
 
 const tempFiles: string[] = []
@@ -105,5 +107,69 @@ describe('ISO base media file validation', () => {
     await fs.writeFile(filePath, validFile('mif1'))
 
     await expect(validateISOBaseMediaFile(filePath)).resolves.toBe(true)
+  })
+})
+
+describe('validateISOBaseMediaSource', () => {
+  const toSource = (content: Buffer) =>
+    createFileSource({ file: new File([content], 'clip.mp4', { type: 'video/mp4' }) })
+
+  it('should accept the boxes of a valid MP4', async () => {
+    const content = Buffer.concat([
+      box('ftyp', fileTypeContent('isom')),
+      box('mdat', Buffer.alloc(100)),
+      box('moov', Buffer.alloc(20)),
+    ])
+
+    await expect(
+      validateISOBaseMediaSource({ fileSource: toSource(content), maxReads: 32 }),
+    ).resolves.toBe('valid')
+  })
+
+  it('should reject boxes that run past the end of the file', async () => {
+    const content = box('ftyp', fileTypeContent('isom'), 128)
+
+    await expect(
+      validateISOBaseMediaSource({ fileSource: toSource(content), maxReads: 32 }),
+    ).resolves.toBe('invalid')
+  })
+
+  it('should stop after the maximum number of reads', async () => {
+    const content = Buffer.concat([
+      box('ftyp', fileTypeContent('isom')),
+      ...Array.from({ length: 200 }, () => box('free')),
+    ])
+
+    await expect(
+      validateISOBaseMediaSource({ fileSource: toSource(content), maxReads: 32 }),
+    ).resolves.toBe('tooManyReads')
+  })
+
+  it('should not read a box header that the first bytes hold', async () => {
+    const content = Buffer.concat([
+      box('ftyp', fileTypeContent('isom')),
+      box('free'),
+      box('mdat', Buffer.alloc(100)),
+      box('moov', Buffer.alloc(20)),
+    ])
+    const fileSource = toSource(content)
+    const readFileBytes = vi.spyOn(fileSource, 'readFileBytes')
+
+    // The `ftyp` header at 0 and the `free` header at 20 end inside the first 36 bytes.
+    await expect(
+      validateISOBaseMediaSource({ fileSource, fileStart: content.subarray(0, 36), maxReads: 2 }),
+    ).resolves.toBe('valid')
+    expect(readFileBytes.mock.calls.map(([{ startByte }]) => startByte)).toEqual([28, 136])
+  })
+
+  it('should read only the box headers', async () => {
+    const fileSource = toSource(
+      Buffer.concat([box('ftyp', fileTypeContent('isom')), box('mdat', Buffer.alloc(100_000))]),
+    )
+    const readFileBytes = vi.spyOn(fileSource, 'readFileBytes')
+
+    await validateISOBaseMediaSource({ fileSource, maxReads: 32 })
+
+    expect(readFileBytes.mock.calls.map(([{ numberOfBytes }]) => numberOfBytes)).toEqual([16, 16])
   })
 })

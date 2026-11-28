@@ -1,12 +1,13 @@
 import { openAsBlob } from 'node:fs'
 
 import type { Document, PayloadRequest } from '../../types/index.js'
-import type { UploadTransformer } from '../transformers/types.js'
+import type { FileSource, UploadTransformer } from '../transformers/types.js'
 import type { UploadTransformation } from '../transformers/uploadTransformerBridge.js'
 import type { UploadStages } from './plan/planUploadStages.js'
 
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { deepFreeze } from '../../utilities/deepFreeze.js'
+import { createFileSource } from '../transformers/createFileSource.js'
 import { transformUploadFile } from '../transformers/transformUploadFile.js'
 import {
   getUploadTransformerInternal,
@@ -25,8 +26,11 @@ export type UploadTransformerOutput = {
   bridgeTransformer?: UploadTransformer
   /** The owners whose `transformVariant` made this upload's variants. */
   hookOwnerSlugs: string[]
-  /** The incoming file, as the stages received it. */
-  originalFile: File
+  /**
+   * The incoming file, as the stages received it. Unset when the hook owners read a client upload
+   * by byte ranges. Always set when `transformedMainFile` is set.
+   */
+  originalFile?: File
   /** The sizes that the upload bridge built. */
   sizeResults: UploadTransformation[]
   /** The main file that the stages returned, when it is not the incoming file. */
@@ -71,6 +75,7 @@ export async function runUploadTransformers({
   >
 }): Promise<UploadTransformerOutput> {
   const originalFile = await toWebFile({ file })
+  const originalSource = createFileSource({ file: originalFile })
   let mainFile: File
   let bridgeDimensions: UploadTransformerOutput['bridgeDimensions']
   let sizeResults: UploadTransformation[] = []
@@ -105,7 +110,7 @@ export async function runUploadTransformers({
               ? task.options
               : plan.options.get(transformer),
           originalDoc: pipelineOriginalDoc,
-          originalFile,
+          originalSource,
           pipeline: stagesThatRun,
           req,
         })
@@ -125,35 +130,21 @@ export async function runUploadTransformers({
       file: originalFile,
       getOptions: (transformer) => plan.options.get(transformer),
       originalDoc: pipelineOriginalDoc,
-      originalFile,
+      originalSource,
       pipeline,
       req,
     })
 
     if (hookOwners.length > 0) {
-      // Variants share a read-only copy of the main file's result, as the bridge's size tasks do.
-      const variantDoc = deepFreeze(deepCopyObject(pipelineDoc))
-      // Nothing aborts an upload request yet. A background job will pass its own signal.
-      const { signal } = new AbortController()
-
-      for (const hookOwner of hookOwners) {
-        sizeResults.push(
-          ...(await runVariantHooks({
-            claims: claimsOfStagesThatRun,
-            collectionSlug,
-            doc: variantDoc,
-            getOptions: (transformer) => plan.options.get(transformer),
-            hookOwner,
-            mainFile,
-            originalFile,
-            pipelineOriginalDoc,
-            req,
-            signal,
-            stagesThatRun,
-          })),
-        )
-      }
-
+      sizeResults = await runHookOwners({
+        collectionSlug,
+        originalSource,
+        pipelineDoc,
+        pipelineOriginalDoc,
+        req,
+        source: mainFile === originalFile ? originalSource : createFileSource({ file: mainFile }),
+        stages: { claimsOfStagesThatRun, hookOwners, plan, stagesThatRun },
+      })
       hookOwnerSlugs = hookOwners.map(({ owner }) => owner.slug)
     }
   }
@@ -171,6 +162,91 @@ export async function runUploadTransformers({
     transformedMainFile: mainFile !== originalFile ? mainFile : undefined,
     transforms: pipelineDoc._transforms,
   }
+}
+
+/**
+ * Runs only the planned hook owners on a source, with no main-file stage and no upload bridge.
+ * Used for a client upload that the owners read by byte ranges from storage, so the main file and
+ * the original are the stored object.
+ */
+export async function runHookOwnersOnSource({
+  collectionSlug,
+  fileSource,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  req,
+  stages,
+}: {
+  collectionSlug: string
+  fileSource: FileSource
+  pipelineDoc: Document
+  pipelineOriginalDoc: Readonly<Document>
+  req: PayloadRequest
+  stages: Pick<UploadStages, 'claimsOfStagesThatRun' | 'hookOwners' | 'plan' | 'stagesThatRun'>
+}): Promise<UploadTransformerOutput> {
+  const sizeResults = await runHookOwners({
+    collectionSlug,
+    originalSource: fileSource,
+    pipelineDoc,
+    pipelineOriginalDoc,
+    req,
+    source: fileSource,
+    stages,
+  })
+
+  assertTransformKeysCovered({ collectionSlug, pipelineDoc, plan: stages.plan, req })
+
+  return {
+    hookOwnerSlugs: stages.hookOwners.map(({ owner }) => owner.slug),
+    sizeResults,
+    transforms: pipelineDoc._transforms,
+  }
+}
+
+/** Each planned hook owner makes its variants from the main file. */
+async function runHookOwners({
+  collectionSlug,
+  originalSource,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  req,
+  source,
+  stages: { claimsOfStagesThatRun, hookOwners, plan, stagesThatRun },
+}: {
+  collectionSlug: string
+  originalSource: FileSource
+  pipelineDoc: Document
+  pipelineOriginalDoc: Readonly<Document>
+  req: PayloadRequest
+  /** The main file after the pipeline. */
+  source: FileSource
+  stages: Pick<UploadStages, 'claimsOfStagesThatRun' | 'hookOwners' | 'plan' | 'stagesThatRun'>
+}): Promise<UploadTransformation[]> {
+  // Variants share a read-only copy of the main file's result, as the bridge's size tasks do.
+  const variantDoc = deepFreeze(deepCopyObject(pipelineDoc))
+  // Nothing aborts an upload request yet. A background job will pass its own signal.
+  const { signal } = new AbortController()
+  const sizeResults: UploadTransformation[] = []
+
+  for (const hookOwner of hookOwners) {
+    sizeResults.push(
+      ...(await runVariantHooks({
+        claims: claimsOfStagesThatRun,
+        collectionSlug,
+        doc: variantDoc,
+        getOptions: (transformer) => plan.options.get(transformer),
+        hookOwner,
+        originalSource,
+        pipelineOriginalDoc,
+        req,
+        signal,
+        source,
+        stagesThatRun,
+      })),
+    )
+  }
+
+  return sizeResults
 }
 
 /** The upload as a web `File`. A temp file is read lazily, and its path is kept for Sharp. */

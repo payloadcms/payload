@@ -439,6 +439,11 @@ export type checkFileRestrictionsParams = {
   checkFileContents?: boolean
   collection: CollectionConfig
   file: File
+  /**
+   * The result of an ISO base media box check that the caller ran over byte ranges, for a client
+   * upload whose `file.data` holds only its first bytes. Set, it replaces the check of `file.data`.
+   */
+  hasValidISOBaseMediaBoxes?: boolean
   req: PayloadRequest
 }
 

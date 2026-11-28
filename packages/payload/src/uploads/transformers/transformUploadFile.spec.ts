@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { FileSource, UploadTransformer } from './types.js'
 
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
+import { createFileSource } from './createFileSource.js'
 import { transformUploadFile } from './transformUploadFile.js'
 
 const readAllText = async (source: FileSource): Promise<string> =>
@@ -33,7 +34,7 @@ const runPipeline = (
     file: new File(['original'], 'logo.png'),
     ...makeDocs(),
     getOptions: () => undefined,
-    originalFile: new File(['original'], 'logo.png'),
+    originalSource: createFileSource({ file: new File(['original'], 'logo.png') }),
     req: { payload: { config: { upload: { transformers: [] } } } } as unknown as PayloadRequest,
     ...args,
   })
