@@ -373,6 +373,15 @@ export interface AccessJoinArticle {
     | number
     | boolean
     | null;
+  extras?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   items?:
     | {
         tags?: ('available' | 'unavailable')[] | null;
@@ -1678,6 +1687,7 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
   articleTags?: T;
   owner?: T;
   settings?: T;
+  extras?: T;
   items?:
     | T
     | {

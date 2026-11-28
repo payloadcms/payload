@@ -83,6 +83,7 @@ export const DraftArticles: CollectionConfig = {
     { name: 'title', type: 'text', required: true },
     { name: 'visible', type: 'checkbox' },
     { name: 'tags', type: 'select', hasMany: true, options: ['featured', 'other'] },
+    { name: 'settings', type: 'json' },
     { name: 'topics', type: 'relationship', hasMany: true, relationTo: topicsSlug },
   ],
 }
