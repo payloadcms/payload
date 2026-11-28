@@ -70,6 +70,15 @@ export const updateOne: UpdateOne = async function updateOne(
   if (Object.keys($pull).length) {
     updateOps.$pull = $pull
   }
+  // Mongoose timestamps are disabled below, so an upsert that inserts would get no createdAt.
+  // $setOnInsert only applies on insert, so a matched document keeps its createdAt.
+  if (
+    optionsArgs.upsert &&
+    collectionConfig.timestamps !== false &&
+    typeof data.createdAt === 'undefined'
+  ) {
+    updateOps.$setOnInsert = { createdAt: new Date().toISOString() }
+  }
   if (Object.keys(updateOps).length) {
     updateOps.$set = updateData
     updateData = updateOps
