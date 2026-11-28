@@ -1,6 +1,4 @@
-import type { ExportDefaultExpression, ModuleItem } from '@swc/core'
-
-import { parse } from '@swc/core'
+import { parseSync } from '@swc-next/parser'
 import chalk from 'chalk'
 import { parseModule, Syntax } from 'esprima-next'
 import fs from 'fs'
@@ -130,29 +128,21 @@ export async function parseAndModifyConfigContent(
       }
     }
   } else if (configType === 'ts') {
-    const { moduleItems, parseOffset } = await compileTypeScriptFileToAST(content)
+    const parsed = parseSync(content, { errorRecovery: true, lang: 'ts' })
+    const [diagnostic] = parsed.diagnostics
+    if (diagnostic) {
+      throw new Error(diagnostic.message, { cause: diagnostic })
+    }
 
-    const exportDefaultDeclaration = moduleItems.find(
-      (m) =>
-        m.type === 'ExportDefaultExpression' &&
-        (m.expression.type === 'Identifier' || m.expression.type === 'CallExpression'),
-    ) as ExportDefaultExpression | undefined
+    const exportDefault = parsed.program.body.find(
+      (node) => node.type === 'ExportDefaultDeclaration',
+    )
+    const declaration = exportDefault?.declaration
 
-    if (exportDefaultDeclaration) {
-      if (!('span' in exportDefaultDeclaration.expression)) {
-        warning('Could not automatically wrap Next config with withPayload.')
-        warnUserWrapNotSuccessful(configType)
-        return Promise.resolve({
-          modifiedConfigContent: content,
-          success: false,
-        })
-      }
-
-      const modifiedConfigContent = insertBeforeAndAfterSWC(
-        content,
-        exportDefaultDeclaration.expression.span,
-        parseOffset,
-      )
+    if (declaration?.type === 'Identifier' || declaration?.type === 'CallExpression') {
+      const { end, start } = declaration
+      const expression = content.slice(start, end)
+      const modifiedConfigContent = `${content.slice(0, start)}withPayload(${expression})${content.slice(end)}`
       return { modifiedConfigContent, success: true }
     }
   }
@@ -233,58 +223,4 @@ function insertBeforeAndAfter(content: string, loc: Loc): string {
   }
 
   return lines.join('\n')
-}
-
-function insertBeforeAndAfterSWC(
-  content: string,
-  span: ModuleItem['span'],
-  /**
-   * WARNING: This is ONLY for unit tests. Defaults to 0 otherwise.
-   *
-   * @see compileTypeScriptFileToAST
-   */
-  parseOffset: number,
-): string {
-  const { end: preOffsetEnd, start: preOffsetStart } = span
-
-  const start = preOffsetStart - parseOffset
-  const end = preOffsetEnd - parseOffset
-
-  const insert = (pos: number, text: string): string => {
-    return content.slice(0, pos) + text + content.slice(pos)
-  }
-
-  // insert ) after end
-  content = insert(end - 1, ')')
-  // insert withPayload before start
-  content = insert(start - 1, 'withPayload(')
-
-  return content
-}
-
-/**
- * Compile typescript to AST using the swc compiler
- */
-async function compileTypeScriptFileToAST(
-  fileContent: string,
-): Promise<{ moduleItems: ModuleItem[]; parseOffset: number }> {
-  let parseOffset = 0
-
-  /**
-   * WARNING: This is ONLY for unit tests.
-   *
-   * Multiple instances of swc DO NOT reset the .span.end value.
-   * During unit tests, the .spawn.end value is read and accounted for.
-   *
-   * https://github.com/swc-project/swc/issues/1366
-   */
-  if (process.env.NODE_ENV === 'test') {
-    parseOffset = (await parse('')).span.end
-  }
-
-  const module = await parse(fileContent, {
-    syntax: 'typescript',
-  })
-
-  return { moduleItems: module.body, parseOffset }
 }
