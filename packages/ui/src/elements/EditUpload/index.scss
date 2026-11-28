@@ -195,6 +195,27 @@ $header-height: base(5);
       }
     }
 
+    &__aspectRatio {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.25);
+
+      & select,
+      & input {
+        @include formInput;
+      }
+
+      // formInput removes the native appearance, which would hide the dropdown arrow
+      & select {
+        -webkit-appearance: auto;
+        appearance: auto;
+      }
+    }
+
+    &__aspectRatioError {
+      color: var(--theme-error-500);
+    }
+
     @include mid-break {
       --edit-upload-cell-spacing: var(--gutter-h);
       &__sidebar {
@@ -223,6 +244,18 @@ $header-height: base(5);
       &__sidebar {
         min-width: 0;
       }
+    }
+  }
+
+  html[data-theme='light'] {
+    .edit-upload__aspectRatio--error input {
+      @include lightInputError;
+    }
+  }
+
+  html[data-theme='dark'] {
+    .edit-upload__aspectRatio--error input {
+      @include darkInputError;
     }
   }
 }

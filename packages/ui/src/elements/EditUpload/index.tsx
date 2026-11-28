@@ -3,7 +3,7 @@
 import type { UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useRef, useState } from 'react'
+import React, { useId, useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
@@ -11,6 +11,8 @@ import { editDrawerSlug } from '../../elements/Upload/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
+import { getCenteredAspectCrop } from '../../utilities/getCenteredAspectCrop.js'
+import { parseAspectRatio } from '../../utilities/parseAspectRatio.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
@@ -44,6 +46,14 @@ type FocalPosition = {
   x: number
   y: number
 }
+
+/**
+ * Controls how the crop selection is constrained while editing. This is UI state only and is not saved.
+ * - `freeform`: no constraint
+ * - `original`: locked to the aspect ratio of the uploaded image
+ * - `custom`: locked to a user-entered `W:H` ratio
+ */
+type AspectRatioMode = 'custom' | 'freeform' | 'original'
 
 export type EditUploadProps = {
   fileName: string
@@ -105,6 +115,30 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const [imageLoaded, setImageLoaded] = useState<boolean>(false)
 
+  const [aspectRatioMode, setAspectRatioMode] = useState<AspectRatioMode>('freeform')
+  const [customAspectRatio, setCustomAspectRatio] = useState<string>('16:9')
+  const [hasCustomAspectRatioBlurred, setHasCustomAspectRatioBlurred] = useState<boolean>(false)
+
+  const aspectRatioSelectId = useId()
+  const customAspectRatioInputId = useId()
+  const customAspectRatioErrorId = useId()
+
+  const lockedAspectRatio = getLockedAspectRatio({
+    customAspectRatio,
+    imageHeight: uncroppedPixelHeight,
+    imageWidth: uncroppedPixelWidth,
+    mode: aspectRatioMode,
+  })
+
+  const shouldShowCustomAspectRatioError =
+    hasCustomAspectRatioBlurred && parseAspectRatio({ value: customAspectRatio }) === undefined
+
+  const aspectRatioModeOptions: { label: string; value: AspectRatioMode }[] = [
+    { label: t('upload:aspectRatioFreeform'), value: 'freeform' },
+    { label: t('upload:aspectRatioOriginal'), value: 'original' },
+    { label: t('upload:aspectRatioCustom'), value: 'custom' },
+  ]
+
   const onImageLoad = (e) => {
     // set the default image height/width on load
     setUncroppedPixelHeight(e.currentTarget.naturalHeight)
@@ -112,8 +146,87 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     setImageLoaded(true)
   }
 
+  /**
+   * Replaces the crop with the largest centered selection at the given ratio.
+   * ReactCrop's `aspect` prop only constrains future drags, so an existing selection must be refit manually.
+   */
+  const fitCropToAspectRatio = ({ aspectRatio }: { aspectRatio: number | undefined }) => {
+    if (!aspectRatio || !uncroppedPixelWidth || !uncroppedPixelHeight) {
+      return
+    }
+
+    setCrop(
+      getCenteredAspectCrop({
+        aspectRatio,
+        imageHeight: uncroppedPixelHeight,
+        imageWidth: uncroppedPixelWidth,
+      }),
+    )
+    // the selection moved without a drag, so re-clamp the focal point into it
+    setCheckBounds(true)
+  }
+
+  const changeAspectRatioMode = ({ mode }: { mode: AspectRatioMode }) => {
+    setAspectRatioMode(mode)
+    fitCropToAspectRatio({
+      aspectRatio: getLockedAspectRatio({
+        customAspectRatio,
+        imageHeight: uncroppedPixelHeight,
+        imageWidth: uncroppedPixelWidth,
+        mode,
+      }),
+    })
+  }
+
+  const changeCustomAspectRatio = ({ value }: { value: string }) => {
+    setCustomAspectRatio(value)
+    fitCropToAspectRatio({ aspectRatio: parseAspectRatio({ value }) })
+  }
+
+  const resetCrop = () => {
+    if (lockedAspectRatio) {
+      fitCropToAspectRatio({ aspectRatio: lockedAspectRatio })
+      return
+    }
+
+    setCrop(defaultCrop)
+  }
+
+  const fineTuneLockedCrop = ({
+    dimension,
+    pixelValue,
+  }: {
+    dimension: 'height' | 'width'
+    pixelValue: number
+  }) => {
+    if (!Number.isFinite(pixelValue) || pixelValue <= 0) {
+      return null
+    }
+
+    const pixelWidth = dimension === 'width' ? pixelValue : pixelValue * lockedAspectRatio
+    const pixelHeight = dimension === 'height' ? pixelValue : pixelValue / lockedAspectRatio
+    const width = 100 * (pixelWidth / uncroppedPixelWidth)
+    const height = 100 * (pixelHeight / uncroppedPixelHeight)
+
+    if (width > 100 || height > 100) {
+      return null
+    }
+
+    setCrop((prevCrop) => ({
+      ...prevCrop,
+      height,
+      width,
+      x: Math.min(prevCrop.x, 100 - width),
+      y: Math.min(prevCrop.y, 100 - height),
+    }))
+  }
+
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
+
+    if (lockedAspectRatio) {
+      return fineTuneLockedCrop({ dimension, pixelValue: intValue })
+    }
 
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
@@ -209,6 +322,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
           >
             {showCrop ? (
               <ReactCrop
+                aspect={lockedAspectRatio}
                 className={`${baseClass}__reactCrop`}
                 crop={crop}
                 onChange={(_, c) => setCrop(c)}
@@ -257,15 +371,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__reset`}
-                      onClick={() =>
-                        setCrop({
-                          height: 100,
-                          unit: '%',
-                          width: 100,
-                          x: 0,
-                          y: 0,
-                        })
-                      }
+                      onClick={resetCrop}
                     >
                       {t('general:reset')}
                     </Button>
@@ -274,6 +380,58 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 <span className={`${baseClass}__description`}>
                   {t('upload:cropToolDescription')}
                 </span>
+                <div className={`${baseClass}__aspectRatio`}>
+                  <label htmlFor={aspectRatioSelectId}>{t('upload:aspectRatio')}</label>
+                  <select
+                    disabled={!imageLoaded}
+                    id={aspectRatioSelectId}
+                    onChange={(e) =>
+                      changeAspectRatioMode({ mode: e.target.value as AspectRatioMode })
+                    }
+                    value={aspectRatioMode}
+                  >
+                    {aspectRatioModeOptions.map(({ label, value }) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {aspectRatioMode === 'custom' && (
+                  <div
+                    className={[
+                      `${baseClass}__aspectRatio`,
+                      shouldShowCustomAspectRatioError && `${baseClass}__aspectRatio--error`,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <label htmlFor={customAspectRatioInputId}>
+                      {t('upload:customAspectRatio')}
+                    </label>
+                    <input
+                      aria-describedby={
+                        shouldShowCustomAspectRatioError ? customAspectRatioErrorId : undefined
+                      }
+                      aria-invalid={shouldShowCustomAspectRatioError}
+                      id={customAspectRatioInputId}
+                      onBlur={() => setHasCustomAspectRatioBlurred(true)}
+                      onChange={(e) => changeCustomAspectRatio({ value: e.target.value })}
+                      placeholder="16:9"
+                      type="text"
+                      value={customAspectRatio}
+                    />
+                    {shouldShowCustomAspectRatioError && (
+                      <span
+                        className={`${baseClass}__aspectRatioError`}
+                        id={customAspectRatioErrorId}
+                        role="alert"
+                      >
+                        {t('upload:invalidAspectRatio')}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name={`${t('upload:width')} (px)`}
@@ -327,6 +485,28 @@ export const EditUpload: React.FC<EditUploadProps> = ({
       </div>
     </div>
   )
+}
+
+const getLockedAspectRatio = ({
+  customAspectRatio,
+  imageHeight,
+  imageWidth,
+  mode,
+}: {
+  customAspectRatio: string
+  imageHeight: number
+  imageWidth: number
+  mode: AspectRatioMode
+}): number | undefined => {
+  if (mode === 'original') {
+    return imageWidth && imageHeight ? imageWidth / imageHeight : undefined
+  }
+
+  if (mode === 'custom') {
+    return parseAspectRatio({ value: customAspectRatio })
+  }
+
+  return undefined
 }
 
 const DraggableElement = ({

@@ -512,10 +512,15 @@ export const svTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Lägg till fil',
     addFiles: 'Lägg till filer',
+    aspectRatio: 'Bildförhållande',
+    aspectRatioCustom: 'Anpassat',
+    aspectRatioFreeform: 'Fritt',
+    aspectRatioOriginal: 'Originalbild',
     bulkUpload: 'Massuppladdning',
     crop: 'Beskär',
     cropToolDescription:
       'Dra i hörnen på det valda området, rita ett nytt område eller justera värdena nedan.',
+    customAspectRatio: 'Anpassat förhållande',
     download: 'Ladda ner',
     dragAndDrop: 'Dra och släpp en fil',
     dragAndDropHere: 'eller dra och släpp en fil här',
@@ -528,6 +533,7 @@ export const svTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Dra fokuspunkten direkt på förhandsgranskningen eller justera värdena nedan.',
     height: 'Höjd',
+    invalidAspectRatio: 'Ange ett förhållande som bredd:höjd, till exempel 16:9.',
     lessInfo: 'Mindre info',
     moreInfo: 'Mer info',
     noFile: 'Ingen fil',

@@ -521,10 +521,15 @@ export const deTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
+    aspectRatio: 'Seitenverhältnis',
+    aspectRatioCustom: 'Benutzerdefiniert',
+    aspectRatioFreeform: 'Frei',
+    aspectRatioOriginal: 'Originalbild',
     bulkUpload: 'Mehrere Dateien hochladen',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehe die Ecken des ausgewählten Bereichs, zeichne einen neuen Bereich oder passe die Werte unten an.',
+    customAspectRatio: 'Benutzerdefiniertes Verhältnis',
     download: 'Herunterladen',
     dragAndDrop: 'Datei per Drag & Drop verschieben',
     dragAndDropHere: 'oder Datei hier ablegen',
@@ -537,6 +542,7 @@ export const deTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Setze den Fokuspunkt direkt auf der Vorschau oder passe die Werte unten an.',
     height: 'Höhe',
+    invalidAspectRatio: 'Gib ein Verhältnis als Breite:Höhe ein, z. B. 16:9.',
     lessInfo: 'Weniger Info',
     moreInfo: 'Mehr Info',
     noFile: 'Keine Datei',
