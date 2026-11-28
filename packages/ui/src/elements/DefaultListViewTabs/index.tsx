@@ -81,6 +81,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
         disabled={viewType === 'list'}
         el="button"
         id={allButtonId}
+        key="all-tab"
         onClick={() => handleViewChange('list')}
       >
         {t('general:all')} {getTranslation(collectionConfig?.labels?.plural, i18n)}
@@ -97,6 +98,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
             .join(' ')}
           disabled={viewType === 'folders'}
           el="button"
+          key="folders-tab"
           onClick={() => handleViewChange('folders')}
         >
           {t('folder:byFolder')}
@@ -115,6 +117,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
           disabled={viewType === 'trash'}
           el="button"
           id="trash-view-pill"
+          key="trash-tab"
           onClick={() => handleViewChange('trash')}
         >
           {t('general:trash')}
