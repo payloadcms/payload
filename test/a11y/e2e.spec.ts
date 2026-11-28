@@ -283,6 +283,40 @@ test.describe('A11y', () => {
     })
   })
 
+  test.describe('WCAG 2.1 - Document Controls (narrow viewport)', () => {
+    test('Posts edit view - doc controls should wrap instead of creating an unfocusable scroll region', async ({}, testInfo) => {
+      const newDoc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post for Doc Controls Overflow',
+        },
+      })
+
+      await page.setViewportSize({ width: 375, height: 720 })
+      await page.goto(postsUrl.edit(newDoc.id))
+      await expect(page.locator('.doc-controls__content')).toBeVisible()
+
+      // The date metadata must wrap within the viewport instead of overflowing
+      const content = page.locator('.doc-controls__content')
+      const overflow = await content.evaluate((el) => ({
+        clientWidth: el.clientWidth,
+        scrollWidth: el.scrollWidth,
+      }))
+      expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth)
+
+      // A scrollable region must be keyboard reachable (WCAG 2.1.1)
+      const accessibilityScanResults = await runAxeScan({
+        include: ['.doc-controls'],
+        page,
+        testInfo,
+      })
+      const focusableViolations = accessibilityScanResults.violations.filter(
+        (violation) => violation.id === 'scrollable-region-focusable',
+      )
+      expect(focusableViolations).toEqual([])
+    })
+  })
+
   test.describe('WCAG 2.1 - Resize Text (Zoom Levels)', () => {
     const zoomLevels = [
       { level: 100, scale: 1 },
