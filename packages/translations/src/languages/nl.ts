@@ -779,6 +779,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     draft: 'Concept',
     draftHasPublishedVersion: 'Concept (heeft gepubliceerde versie)',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
+    duplicateScheduledEvent:
+      'Deze gebeurtenis is al gepland voor dit tijdstip. Kies een ander tijdstip of verwijder de bestaande gebeurtenis.',
     lastSavedAgo: 'Opgeslagen {{distance}} geleden',
     modifiedOnly: 'Alleen gewijzigd',
     moreVersions: 'Meer versies...',

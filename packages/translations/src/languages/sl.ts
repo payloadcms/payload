@@ -764,6 +764,8 @@ export const slTranslations: DefaultTranslationsObject = {
     draft: 'Osnutek',
     draftHasPublishedVersion: 'Osnutek (ima objavljeno različico)',
     draftSavedSuccessfully: 'Osnutek uspešno shranjen.',
+    duplicateScheduledEvent:
+      'Ta dogodek je že načrtovan za ta čas. Izberite drug čas ali izbrišite obstoječi dogodek.',
     lastSavedAgo: 'Shranjeno pred {{distance}}',
     modifiedOnly: 'Samo spremenjeno',
     moreVersions: 'Več različic...',

@@ -777,6 +777,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     draft: 'Սևագիր',
     draftHasPublishedVersion: 'Սրաց (ունի հրատարակված տարբերակ)',
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',
+    duplicateScheduledEvent:
+      'Այս իրադարձությունն արդեն նախատեսված է այս ժամին։ Ընտրեք այլ ժամ կամ ջնջեք առկա իրադարձությունը։',
     lastSavedAgo: 'Պահպանվել է {{distance}} առաջ',
     modifiedOnly: 'Միայն փոփոխված',
     moreVersions: 'Ավելի շատ տարբերակներ...',

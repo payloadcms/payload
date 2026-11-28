@@ -762,6 +762,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     draft: 'Чернетка',
     draftHasPublishedVersion: 'Чернетка (має опубліковану версію)',
     draftSavedSuccessfully: 'Чернетку успішно збережено.',
+    duplicateScheduledEvent:
+      'Цю подію вже заплановано на цей час. Виберіть інший час або видаліть наявну подію.',
     lastSavedAgo: 'Збережено {{distance}} тому',
     modifiedOnly: 'Модифіковано тільки',
     moreVersions: 'Більше версій...',

@@ -2128,6 +2128,192 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
+    describe('scheduling time bounds in the selected timezone', () => {
+      test.use({ timezoneId: 'UTC' })
+
+      const createdIDs: Config['collections'][typeof draftCollectionSlug]['id'][] = []
+
+      test.afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ id, collection: draftCollectionSlug })
+        }
+        createdIDs.length = 0
+      })
+
+      test('should reopen the calendar at the selected scheduling month', async ({
+        page: clockPage,
+      }) => {
+        const post = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'selected scheduling month', title: 'selected scheduling month' },
+        })
+
+        createdIDs.push(post.id)
+        await clockPage.goto(
+          formatAdminURL({
+            adminRoute,
+            path: `/collections/${draftCollectionSlug}/${post.id}`,
+            serverURL,
+          }),
+        )
+        await waitForFormReady(clockPage)
+        // Keep TZDate's native prototype by loading it before installing the clock.
+        await clockPage.clock.setSystemTime(new Date('2030-01-15T12:02:00Z'))
+        await clockPage.locator('#schedule-publish-button').click()
+        await clockPage.locator('.timezone-picker .rs__control').click()
+        await getSelectMenu({ page: clockPage })
+          .locator('.rs__option', { hasText: 'Paris' })
+          .click()
+
+        const input = clockPage.locator('.date-time-picker input')
+        const calendar = clockPage.locator('.react-datepicker-popper')
+
+        await input.fill('Feb 20, 2030 2:00 PM')
+        await clockPage.keyboard.press('Enter')
+        await clockPage
+          .getByRole('heading', {
+            name: 'Schedule publish for selected scheduling month',
+            exact: true,
+          })
+          .click()
+        await expect(calendar).toBeHidden()
+        await input.click()
+        await expect(calendar.locator('.react-datepicker__month-select')).toHaveValue('1')
+        await expect(calendar.locator('.react-datepicker__year-select')).toHaveValue('2030')
+        await expect(
+          calendar.locator('.react-datepicker__day--020.react-datepicker__day--selected'),
+        ).toBeVisible()
+      })
+
+      for (const { day, futureTime, now, pastTime, timezone } of [
+        {
+          day: 15,
+          futureTime: '07:05',
+          now: '2030-01-15T12:02:00Z',
+          pastTime: '07:00',
+          timezone: 'Eastern Time',
+        },
+        {
+          day: 15,
+          futureTime: '13:05',
+          now: '2030-01-15T12:02:00Z',
+          pastTime: '13:00',
+          timezone: 'Paris',
+        },
+        {
+          day: 15,
+          futureTime: '19:05',
+          now: '2030-01-16T00:02:00Z',
+          pastTime: '19:00',
+          timezone: 'Eastern Time',
+        },
+        {
+          day: 16,
+          futureTime: '05:05',
+          now: '2030-01-15T20:02:00Z',
+          pastTime: '05:00',
+          timezone: 'Tokyo',
+        },
+      ]) {
+        test(`should use ${timezone} at ${now} for empty and selected-date time bounds`, async ({
+          page: clockPage,
+        }) => {
+          const post = await payload.create({
+            collection: draftCollectionSlug,
+            data: { description: 'timezone time bounds', title: 'timezone time bounds' },
+          })
+
+          createdIDs.push(post.id)
+          await clockPage.goto(
+            formatAdminURL({
+              adminRoute,
+              path: `/collections/${draftCollectionSlug}/${post.id}`,
+              serverURL,
+            }),
+          )
+          await waitForFormReady(clockPage)
+          // Load the date library before replacing Date so TZDate keeps its native prototype.
+          await clockPage.clock.setSystemTime(new Date(now))
+          await clockPage.locator('#schedule-publish-button').click()
+          await clockPage.locator('.timezone-picker .rs__control').click()
+          await getSelectMenu({ page: clockPage })
+            .locator('.rs__option', { hasText: timezone })
+            .click()
+
+          const input = clockPage.locator('.date-time-picker input')
+          const pastSlot = clockPage
+            .locator('.react-datepicker__time-list-item')
+            .filter({ hasText: new RegExp(`^${pastTime}$`) })
+          const futureSlot = clockPage
+            .locator('.react-datepicker__time-list-item')
+            .filter({ hasText: new RegExp(`^${futureTime}$`) })
+
+          await input.click()
+          await expect(input).toHaveValue('')
+          const selectedDay = clockPage.locator(
+            `.react-datepicker__day--${String(day).padStart(3, '0')}:not(.react-datepicker__day--outside-month)`,
+          )
+          const previousDay = clockPage.locator(
+            `.react-datepicker__day--${String(day - 1).padStart(3, '0')}:not(.react-datepicker__day--outside-month)`,
+          )
+
+          await expect(selectedDay).toHaveClass(/react-datepicker__day--keyboard-selected/)
+          await expect(previousDay).toHaveClass(/react-datepicker__day--disabled/)
+          await expect(pastSlot).toHaveClass(/react-datepicker__time-list-item--disabled/)
+          await expect(futureSlot).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
+          await selectedDay.click()
+          await expect(input).not.toHaveValue('')
+          await input.click()
+          await expect(pastSlot).toHaveClass(/react-datepicker__time-list-item--disabled/)
+          await expect(futureSlot).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
+          await clockPage
+            .locator(
+              `.react-datepicker__day--${String(day + 1).padStart(3, '0')}:not(.react-datepicker__day--outside-month)`,
+            )
+            .click()
+          await input.click()
+          await expect(
+            clockPage.locator('.react-datepicker__time-list-item').filter({ hasText: /^08:00$/ }),
+          ).not.toHaveClass(/react-datepicker__time-list-item--disabled/)
+        })
+      }
+    })
+
+    test('should keep a duplicate scheduled event as an error without clearing the date', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('duplicate scheduled event')
+      await page.locator('#field-description').fill('duplicate scheduled event description')
+      await saveDocAndAssert(page)
+      await page.locator('#schedule-publish-button').click()
+
+      const input = page.locator('.date-time-picker input')
+      const rows = page.locator('.schedule-publish__upcoming tbody tr')
+      const saveButton = page.locator('#scheduled-publish-save')
+
+      await input.fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+      await saveButton.click()
+      await expect(rows).toHaveCount(1)
+      await expect(input).toHaveValue('')
+      await input.fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+      const selectedDate = await input.inputValue()
+
+      await saveButton.click()
+      await expect(
+        page.getByText(
+          'This event is already scheduled for this time. Choose a different time or delete the existing event.',
+          { exact: true },
+        ),
+      ).toBeVisible()
+      await expect(input).toHaveValue(selectedDate)
+      await expect(saveButton).toBeEnabled()
+      await expect(rows).toHaveCount(1)
+
+      await page.locator('.cell-delete .btn').click()
+      await expect(rows).toHaveCount(0)
+    })
+
     test('should schedule publish', async () => {
       await page.goto(url.create)
       await page.locator('#field-title').fill('scheduled publish')

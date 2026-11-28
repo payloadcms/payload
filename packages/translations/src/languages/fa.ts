@@ -756,6 +756,8 @@ export const faTranslations: DefaultTranslationsObject = {
     draft: 'پیش‌نویس',
     draftHasPublishedVersion: 'پیش‌نویس (نسخه منتشر شده دارد)',
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
+    duplicateScheduledEvent:
+      'این رویداد قبلاً برای این زمان برنامه‌ریزی شده است. زمان دیگری انتخاب کنید یا رویداد موجود را حذف کنید.',
     lastSavedAgo: 'ذخیره شده {{distance}} پیش',
     modifiedOnly: 'فقط موارد تغییر کرده',
     moreVersions: 'نسخه‌های بیشتر...',

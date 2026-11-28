@@ -762,6 +762,8 @@ export const skTranslations: DefaultTranslationsObject = {
     draft: 'Návrh',
     draftHasPublishedVersion: 'Koncept (má publikovanú verziu)',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
+    duplicateScheduledEvent:
+      'Táto udalosť je už naplánovaná na tento čas. Vyberte iný čas alebo odstráňte existujúcu udalosť.',
     lastSavedAgo: 'Uložené pred {{distance}}',
     modifiedOnly: 'Iba upravené',
     moreVersions: 'Viac verzií...',

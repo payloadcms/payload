@@ -777,6 +777,8 @@ export const esTranslations: DefaultTranslationsObject = {
     draft: 'Borrador',
     draftHasPublishedVersion: 'Borrador (tiene versión publicada)',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',
+    duplicateScheduledEvent:
+      'Este evento ya está programado para esta hora. Elija otra hora o elimine el evento existente.',
     lastSavedAgo: 'Guardado hace {{distance}}',
     modifiedOnly: 'Modificado solamente',
     moreVersions: 'Más versiones...',

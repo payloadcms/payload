@@ -780,6 +780,8 @@ export const huTranslations: DefaultTranslationsObject = {
     draft: 'Piszkozat',
     draftHasPublishedVersion: 'Piszkozat (van közzétett verziója)',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
+    duplicateScheduledEvent:
+      'Ez az esemény már ütemezve van erre az időpontra. Válasszon másik időpontot, vagy törölje a meglévő eseményt.',
     lastSavedAgo: 'Mentve {{distance}}',
     modifiedOnly: 'Módosítva csak',
     moreVersions: 'További verziók...',

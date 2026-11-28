@@ -767,6 +767,8 @@ export const daTranslations: DefaultTranslationsObject = {
     draft: 'Kladde',
     draftHasPublishedVersion: 'Udkast (har offentliggjort version)',
     draftSavedSuccessfully: 'Kladde gemt.',
+    duplicateScheduledEvent:
+      'Denne begivenhed er allerede planlagt til dette tidspunkt. Vælg et andet tidspunkt, eller slet den eksisterende begivenhed.',
     lastSavedAgo: 'Gemt for {{distance}} siden',
     modifiedOnly: 'Kun ændret',
     moreVersions: 'Flere versioner...',

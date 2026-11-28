@@ -159,7 +159,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
     }
 
     try {
-      await schedulePublish({
+      const result = await schedulePublish({
         type,
         date,
         doc: collectionSlug
@@ -173,6 +173,16 @@ export const ScheduleDrawer: React.FC<Props> = ({
         timezone,
       })
 
+      if (
+        typeof result === 'object' &&
+        result !== null &&
+        'error' in result &&
+        typeof result.error === 'string'
+      ) {
+        toast.error(result.error)
+        return
+      }
+
       setDate(undefined)
       setNow(new Date())
       toast.success(t('version:scheduledSuccessfully'))
@@ -180,9 +190,9 @@ export const ScheduleDrawer: React.FC<Props> = ({
     } catch (err) {
       console.error(err)
       toast.error(err.message)
+    } finally {
+      setProcessing(false)
     }
-
-    setProcessing(false)
   }, [
     date,
     locale,
@@ -249,13 +259,19 @@ export const ScheduleDrawer: React.FC<Props> = ({
     }
   }, [upcoming, fetchUpcoming])
 
+  // The picker displays selected-zone wall times in the browser's timezone.
+  const displayedNow = useMemo(
+    () => (timezone ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone)) : now),
+    [now, timezone, userTimezone],
+  )
+
   const minTime = useMemo(() => {
-    if (!date || isSameDay(date, now)) {
-      return now
+    if (!displayedValue || isSameDay(displayedValue, displayedNow)) {
+      return displayedNow
     }
 
-    return startOfDay(now)
-  }, [date, now])
+    return startOfDay(displayedNow)
+  }, [displayedValue, displayedNow])
 
   return (
     <Drawer className={baseClass} slug={slug} title={modalTitle}>
@@ -289,10 +305,11 @@ export const ScheduleDrawer: React.FC<Props> = ({
           <FieldLabel label={t('general:time')} path={'time'} required />
           <DatePickerField
             id="time"
-            maxTime={endOfDay(now)}
-            minDate={now}
+            maxTime={endOfDay(displayedNow)}
+            minDate={displayedNow}
             minTime={minTime}
             onChange={(e) => onChangeDate(e)}
+            overrides={{ openToDate: displayedValue ? undefined : displayedNow }}
             pickerAppearance="dayAndTime"
             readOnly={processing}
             timeFormat={schedulePublishConfig?.timeFormat}

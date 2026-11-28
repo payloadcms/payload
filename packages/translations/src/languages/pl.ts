@@ -766,6 +766,8 @@ export const plTranslations: DefaultTranslationsObject = {
     draft: 'Szkic',
     draftHasPublishedVersion: 'Szkic (ma opublikowaną wersję)',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
+    duplicateScheduledEvent:
+      'To zdarzenie jest już zaplanowane na ten termin. Wybierz inny termin lub usuń istniejące zdarzenie.',
     lastSavedAgo: 'Zapisane {{distance}} temu',
     modifiedOnly: 'Tylko zmodyfikowany',
     moreVersions: 'Więcej wersji...',

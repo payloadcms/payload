@@ -766,6 +766,8 @@ export const enTranslations = {
     draft: 'Draft',
     draftHasPublishedVersion: 'Draft (has published version)',
     draftSavedSuccessfully: 'Draft saved successfully.',
+    duplicateScheduledEvent:
+      'This event is already scheduled for this time. Choose a different time or delete the existing event.',
     lastSavedAgo: 'Saved {{distance}} ago',
     modifiedOnly: 'Modified only',
     moreVersions: 'More versions...',

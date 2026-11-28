@@ -757,6 +757,8 @@ export const taTranslations: DefaultTranslationsObject = {
     draft: 'வரைவு',
     draftHasPublishedVersion: 'வரைவு (வெளியிடப்பட்ட பதிப்பு உள்ளது)',
     draftSavedSuccessfully: 'வரைவு வெற்றிகரமாக சேமிக்கப்பட்டது.',
+    duplicateScheduledEvent:
+      'இந்த நிகழ்வு ஏற்கனவே இந்த நேரத்திற்குத் திட்டமிடப்பட்டுள்ளது. வேறு நேரத்தைத் தேர்ந்தெடுக்கவும் அல்லது ஏற்கனவே உள்ள நிகழ்வை நீக்கவும்.',
     lastSavedAgo: '{{distance}} முன்பு சேமிக்கப்பட்டது',
     modifiedOnly: 'மாற்றப்பட்டவை மட்டும்',
     moreVersions: 'மேலும் பதிப்புகள்...',

@@ -745,6 +745,8 @@ export const myTranslations: DefaultTranslationsObject = {
     draft: 'မူကြမ်း',
     draftHasPublishedVersion: 'မူကြမ်း (ထုတ်ဝေထားသော ဗားရှင်း ရှိသည်)',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
+    duplicateScheduledEvent:
+      'ဤအစီအစဉ်ကို ဤအချိန်အတွက် စီစဉ်ထားပြီးဖြစ်သည်။ အခြားအချိန်ကို ရွေးချယ်ပါ သို့မဟုတ် ရှိပြီးသားအစီအစဉ်ကို ဖျက်ပါ။',
     lastSavedAgo: 'သိမ်းချက် {{distance}} ကြာပြီး',
     modifiedOnly: 'ပြောင်းလဲထားသော အရာများသာ',
     moreVersions: 'ပိုမိုများသော ဗားရှင်းများ...',

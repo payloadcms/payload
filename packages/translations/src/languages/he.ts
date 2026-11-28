@@ -739,6 +739,8 @@ export const heTranslations: DefaultTranslationsObject = {
     draft: 'טיוטה',
     draftHasPublishedVersion: 'טיוטה (יש גרסה שפורסמה)',
     draftSavedSuccessfully: 'טיוטה נשמרה בהצלחה.',
+    duplicateScheduledEvent:
+      'האירוע הזה כבר מתוזמן למועד זה. יש לבחור מועד אחר או למחוק את האירוע הקיים.',
     lastSavedAgo: 'נשמר לפני {{distance}}',
     modifiedOnly: 'מותאם בלבד',
     moreVersions: 'עוד גרסאות...',

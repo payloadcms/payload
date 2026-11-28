@@ -771,6 +771,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     draft: 'Черновик',
     draftHasPublishedVersion: 'Черновик (имеет опубликованную версию)',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
+    duplicateScheduledEvent:
+      'Это событие уже запланировано на это время. Выберите другое время или удалите существующее событие.',
     lastSavedAgo: 'Сохранено {{distance}} назад',
     modifiedOnly: 'Модифицирован только',
     moreVersions: 'Больше версий...',
