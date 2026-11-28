@@ -51,6 +51,8 @@ export const OPTIONS = handlerBuilder
 
 export const GET = handlerBuilder
 
+export const HEAD = GET
+
 export const POST = handlerBuilder
 
 export const DELETE = handlerBuilder
