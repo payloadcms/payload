@@ -365,20 +365,24 @@ export async function resolveJoins({
     }
 
     for (const results of Object.values(grouped)) {
-      results.docs.sort((a, b) => {
-        for (const [fieldName, sortOrder] of Object.entries(results.sort)) {
-          const sort = sortOrder === 'asc' ? 1 : -1
-          const aValue = getByPathWithArrays(a, fieldName)[0] as Date | number | string
-          const bValue = getByPathWithArrays(b, fieldName)[0] as Date | number | string
-          if (aValue < bValue) {
-            return -1 * sort
+      // Results from one collection are already in database order. Sorting them again here would
+      // disagree with MongoDB on arrays (sorted by their min or max value) and pick the wrong page.
+      if (isPolymorphicJoin) {
+        results.docs.sort((a, b) => {
+          for (const [fieldName, sortOrder] of Object.entries(results.sort)) {
+            const sort = sortOrder === 'asc' ? 1 : -1
+            const aValue = getByPathWithArrays(a, fieldName)[0] as Date | number | string
+            const bValue = getByPathWithArrays(b, fieldName)[0] as Date | number | string
+            if (aValue < bValue) {
+              return -1 * sort
+            }
+            if (aValue > bValue) {
+              return 1 * sort
+            }
           }
-          if (aValue > bValue) {
-            return 1 * sort
-          }
-        }
-        return 0
-      })
+          return 0
+        })
+      }
       results.docs = results.docs.map(
         (doc) => (isPolymorphicJoin ? doc.__joinData : doc.id) as Record<string, unknown>,
       )

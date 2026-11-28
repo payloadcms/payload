@@ -136,6 +136,41 @@ test.suite('Polymorphic join pagination', { config: './config.ts', db: 'mongo' }
           expect(largerArticles?.totalDocs).toBe(count ? 3 : undefined)
         })
 
+        test('should keep the database order when paging a regular join by an array', async ({
+          payload,
+        }) => {
+          const { parentID: emptyParentID } = await createJoinedDocuments({ payload })
+          const { parentID } = await createJoinedDocuments({ payload })
+
+          // MongoDB sorts an array ascending by its lowest value, so this article comes first
+          // even though its first tag sorts last
+          const first = await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: parentID, tags: ['unavailable', 'allowed-marker'], title: 'First' },
+            depth: 0,
+            overrideAccess: true,
+          })
+          await payload.create({
+            collection: accessJoinArticlesSlug,
+            data: { parent: parentID, tags: ['available'], title: 'Second' },
+            depth: 0,
+            overrideAccess: true,
+          })
+
+          const { docs } = await payload.find({
+            collection: accessJoinParentsSlug,
+            depth: 0,
+            joins: { articles: { count, limit: 1, sort: 'tags' } },
+            overrideAccess: true,
+            where: { id: { in: [emptyParentID, parentID] } },
+          })
+
+          expect(docs.find(({ id }) => id === parentID)?.articles).toMatchObject({
+            docs: [first.id],
+            hasNextPage: true,
+          })
+        })
+
         test('should return an empty page past the mixed results', async ({ payload }) => {
           const { parentID } = await createJoinedDocuments({
             payload,
