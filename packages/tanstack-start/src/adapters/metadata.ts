@@ -162,14 +162,29 @@ export const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
       }
     | undefined
 
+  // Next.js resolves relative Open Graph image URLs against `metadataBase`. Crawlers ignore relative
+  // `og:image` URLs, so do the same here.
+  const metadataBase = meta.metadataBase ? String(meta.metadataBase) : undefined
+  const toAbsoluteURL = (url: string): string => {
+    if (!metadataBase || !URL.canParse(url, metadataBase)) {
+      return url
+    }
+    return new URL(url, metadataBase).toString()
+  }
+
   const rawImages = og?.images
   const imagesArray = rawImages ? (Array.isArray(rawImages) ? rawImages : [rawImages]) : []
   const images = imagesArray
     .map((image: any) =>
       typeof image === 'string'
-        ? { url: image }
+        ? { url: toAbsoluteURL(image) }
         : image?.url
-          ? { alt: image.alt, height: image.height, url: String(image.url), width: image.width }
+          ? {
+              alt: image.alt,
+              height: image.height,
+              url: toAbsoluteURL(String(image.url)),
+              width: image.width,
+            }
           : undefined,
     )
     .filter(Boolean) as NonNullable<AdminPageMetadata['openGraph']>['images']
