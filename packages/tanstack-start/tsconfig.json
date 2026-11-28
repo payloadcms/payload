@@ -6,6 +6,7 @@
   "references": [
     { "path": "../payload" },
     { "path": "../ui" },
-    { "path": "../translations" }
+    { "path": "../translations" },
+    { "path": "../graphql" }
   ]
 }
