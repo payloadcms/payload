@@ -1,5 +1,5 @@
 @layer payload-default {
-  .doc-tab {
+  .doc-tab:not(.doc-tab--active):not(.btn--disabled) {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -7,7 +7,7 @@
     color: var(--color-text-secondary);
   }
 
-  .doc-tab:hover {
+  .doc-tab:not(.doc-tab--active):not(.btn--disabled):hover {
     color: var(--color-text);
   }
 
