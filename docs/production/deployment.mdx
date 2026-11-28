@@ -85,6 +85,16 @@ For implementation guidance, see the official [Next.js headers](https://nextjs.o
 
 CSP and framing restrictions can affect custom Admin components and applications that embed the Admin Panel. If your frontend is displayed inside the Admin Panel, also review the [Live Preview CSP guidance](/docs/live-preview/client#iframe-refuses-to-connect). HSTS applies to the entire hostname and is commonly configured by your production host, proxy, or CDN.
 
+#### Protect an embedded Admin Panel from clickjacking
+
+If your frontend embeds the Admin Panel in an iframe, set `frame-ancestors` in the `Content-Security-Policy` response header on the **admin page**. For example, if `https://preview.vercel.app` embeds `https://cms.example.com/admin`, include this directive in the policy served by `cms.example.com`:
+
+```http
+Content-Security-Policy: frame-ancestors 'self' https://preview.vercel.app
+```
+
+Here, `'self'` allows the CMS origin and `https://preview.vercel.app` allows the preview. The browser checks every ancestor before displaying the admin page. If an untrusted site embeds the trusted preview, the browser blocks the nested admin page even though the preview is listed in `csrf`.
+
 ### Preventing API Abuse
 
 Payload comes with a robust set of built-in anti-abuse measures, such as locking out users after X amount of failed
@@ -211,7 +221,7 @@ Dockerfile
 # Dockerfile
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-FROM node:24.22.1-alpine AS base
+FROM node:24.22.3-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -288,7 +298,7 @@ TanStack Start builds with Vite, so there's no `next.config` or `standalone` out
 # Dockerfile
 # From https://github.com/payloadcms/payload/blob/main/templates/blank-tanstack/Dockerfile
 
-FROM node:24.22.1-alpine AS base
+FROM node:24.22.3-alpine AS base
 
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
@@ -345,7 +355,7 @@ version: '3'
 
 services:
   payload:
-    image: node:24.22.1-alpine
+    image: node:24.22.3-alpine
     ports:
       - '3000:3000'
     volumes:

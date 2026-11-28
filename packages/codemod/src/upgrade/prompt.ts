@@ -1,17 +1,35 @@
-/**
- * Render the overarching agent prompt for a full Payload v3 -> v4 upgrade,
- * Next.js 16 included. The prompt is a thin orchestrator: it sequences the
- * gates, runs this package's `upgrade` command for the deterministic slice,
- * delegates Next.js to Next's own agent workflow, and points at the migration
- * guide for the judgment work rather than restating any of it. The text is
- * project-agnostic (the agent runs it from the project root). `command` is the
- * token that re-invokes this CLI, so a local checkout points followers at the
- * local build instead of the published package. Pure: the caller prints it.
- */
+import type { PackageManager } from './types.js'
+
+import { resolveSelfCommand } from './selfCommand.js'
+
+/** Render a target-specific update or migration prompt for the detected project. */
 export function renderUpgradePrompt({
-  command = 'npx @payloadcms/codemod',
-}: { command?: string } = {}): string {
-  return `You are upgrading this project from Payload v3 to v4, Next.js 16 included.
+  command = resolveSelfCommand(),
+  currentVersion,
+  hasNext = true,
+  kind = 'migrate',
+  packageManager,
+  targetVersion,
+  yes = false,
+}: {
+  command?: string
+  currentVersion?: string
+  hasNext?: boolean
+  kind?: 'migrate' | 'update'
+  packageManager?: PackageManager
+  targetVersion?: string
+  yes?: boolean
+} = {}): string {
+  const targetFlags = `${targetVersion ? ` --tag ${targetVersion}` : ''}${yes ? ' --yes' : ''}${packageManager ? ` --package-manager ${packageManager}` : ''}`
+  if (kind === 'update') {
+    return `Update this project from Payload ${currentVersion} to ${targetVersion}, staying within the same Payload major.
+
+Run \`${command} upgrade run${targetFlags}\` from the project root. Review its package preview and resolve any compatibility blockers before continuing. Core publish-list packages use the selected Payload version; independently versioned plugins use their own compatible releases. Preserve unrelated dependencies and intentional overrides.
+
+Do not run the v3 -> v4 transforms, raise v4 toolchain floors, or run a Next.js major migration for this update. After installation, regenerate Payload types and the import map where applicable, then run the project's typecheck, tests, and build. Report any failures or unverified steps.
+`
+  }
+  const prompt = `You are upgrading this project from Payload ${currentVersion ?? 'v3'} to ${targetVersion ?? 'v4'}, Next.js 16 included.
 
 Ground rule: resolution over intent. A step is done only when it installs, builds, and boots.
 Never report a task complete because the edit looks right. Confirm it. A silent gap reads as
@@ -19,7 +37,7 @@ Never report a task complete because the edit looks right. Confirm it. A silent 
 
 ## 0. Preconditions
 - Work on a clean git tree or a fresh branch.
-- Use Node >=24.22.1 (the exact engines floor is printed by the command in step 2).
+- Use Node ^24.22.3 || >=26.13.1 (the exact engines floor is printed by the command in step 2).
 
 ## 1. Pre-upgrade migrations (do these on v3, before touching versions)
 Some migrations need the v3 tooling that v4 deletes, so they MUST run before the upgrade:
@@ -31,11 +49,11 @@ Do not proceed to step 2 until these are complete and committed.
 ## 2. Payload mechanical slice
 Run this from the project root:
 
-    ${command} upgrade run
+    ${command} upgrade run${targetFlags}
 
-By default it resolves Payload from the dist-tag this CLI was installed under (its own
-prerelease id, else \`beta\`). Add \`--tag <dist-tag>\` to pin a specific one.
-This pins the Payload packages to v4, removes conflicting overrides, writes the toolchain
+The selected target is ${targetVersion ?? 'chosen interactively by the command'}.
+This pins core publish-list packages to the chosen version and independently versioned plugins
+to their compatible releases, removes conflicting core overrides, writes the toolchain
 floors, installs, and runs the AST transforms. Read its report:
 - It prints the resolved payload version, the required Next target, and the path to the
   bundled runbook and migration guide. Use those paths below.
@@ -75,4 +93,11 @@ memory.
 Distinguish verified, cannot-confirm, and broken. Do not call the upgrade complete while any
 gate fails or any generated file is stale.
 `
+  if (hasNext) {
+    return prompt
+  }
+  return prompt
+    .replace(', Next.js 16 included.', '.')
+    .replace(/- The unmet `@payloadcms\/next` peer[\s\S]*?- Do not hand-edit/, '- Do not hand-edit')
+    .replace(/## 3\. Next.js 16[\s\S]*?## 4\./, '## 4.')
 }

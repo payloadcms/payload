@@ -2,7 +2,6 @@
 import type { RouterAdapterComponent, ServerFunctionClient } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
-import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
@@ -14,6 +13,7 @@ import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
+import { AdminTranslationProvider } from '../../providers/AdminTranslation/index.js'
 import { AuthProvider } from '../../providers/Auth/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
 import { ClientFunctionProvider } from '../../providers/ClientFunction/index.js'
@@ -22,17 +22,16 @@ import { DocumentEventsProvider } from '../../providers/DocumentEvents/index.js'
 import { EmbedProvider } from '../../providers/Embed/index.js'
 import { HierarchyProvider } from '../../providers/Hierarchy/index.js'
 import { LocaleProvider } from '../../providers/Locale/index.js'
-import { ModalAccessibility } from '../../providers/ModalAccessibility/index.js'
-import { ModalFocusProvider } from '../../providers/ModalFocus/index.js'
+import { ModalContainer, ModalProvider } from '../../providers/Modal/index.js'
 import { PreferencesProvider } from '../../providers/Preferences/index.js'
 import { RouteCache } from '../../providers/RouteCache/index.js'
 import { RouteTransitionProvider } from '../../providers/RouteTransition/index.js'
 import { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 import { ServerFunctionsProvider } from '../../providers/ServerFunctions/index.js'
-import { ThemeProvider } from '../../providers/Theme/index.js'
+import { RootThemeProvider } from '../../providers/Theme/RootThemeProvider/index.js'
 import { ToastContainer } from '../../providers/ToastContainer/index.js'
-import { TranslationProvider } from '../../providers/Translation/index.js'
 import { UploadHandlersProvider } from '../../providers/UploadHandlers/index.js'
+import { UploadSessionsProvider } from '../../providers/UploadSessions/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 
 export type RootProviderProps = {
@@ -77,7 +76,7 @@ export const RootProviders: React.FC<RootProviderProps> = ({
               >
                 <ConfigProvider config={config}>
                   <ClientFunctionProvider>
-                    <TranslationProvider
+                    <AdminTranslationProvider
                       dateFNSKey={dateFNSKey}
                       fallbackLang={fallbackLang}
                       language={languageCode}
@@ -93,28 +92,23 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                         }}
                       >
                         <ScrollInfoProvider>
-                          <ModalProvider
-                            classPrefix="payload"
-                            transTime={0}
-                            zIndex="var(--z-modal)"
-                          >
-                            <ModalFocusProvider>
-                              <DrawerStackProvider>
-                                <ModalAccessibility />
-                                <CloseModalOnRouteChange />
-                                <AuthProvider permissions={permissions} user={user}>
-                                  <PreferencesProvider>
-                                    <HierarchyProvider>
-                                      <ThemeProvider
-                                        highContrastMode={highContrastMode}
-                                        theme={theme}
-                                      >
-                                        <EmbedProvider embed={embed}>
-                                          <LocaleProvider locale={locale}>
-                                            <StepNavProvider>
-                                              <LoadingOverlayProvider>
-                                                <DocumentEventsProvider>
-                                                  <NavProvider initialIsOpen={isNavOpen}>
+                          <ModalProvider>
+                            <DrawerStackProvider>
+                              <CloseModalOnRouteChange />
+                              <AuthProvider permissions={permissions} user={user}>
+                                <PreferencesProvider>
+                                  <HierarchyProvider>
+                                    <RootThemeProvider
+                                      highContrastMode={highContrastMode}
+                                      theme={theme}
+                                    >
+                                      <EmbedProvider embed={embed}>
+                                        <LocaleProvider locale={locale}>
+                                          <StepNavProvider>
+                                            <LoadingOverlayProvider>
+                                              <DocumentEventsProvider>
+                                                <NavProvider initialIsOpen={isNavOpen}>
+                                                  <UploadSessionsProvider>
                                                     <UploadHandlersProvider>
                                                       <DndContext
                                                         collisionDetection={pointerWithin}
@@ -125,26 +119,26 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                                         {children}
                                                       </DndContext>
                                                     </UploadHandlersProvider>
-                                                  </NavProvider>
-                                                </DocumentEventsProvider>
-                                              </LoadingOverlayProvider>
-                                            </StepNavProvider>
-                                          </LocaleProvider>
-                                        </EmbedProvider>
-                                      </ThemeProvider>
-                                    </HierarchyProvider>
-                                  </PreferencesProvider>
-                                  <ModalContainer />
-                                  <StayLoggedInModal />
-                                </AuthProvider>
-                                {/* AuthProvider can unmount its children during logout; keep pending toasts alive. */}
-                                <ToastContainer config={config} />
-                              </DrawerStackProvider>
-                            </ModalFocusProvider>
+                                                  </UploadSessionsProvider>
+                                                </NavProvider>
+                                              </DocumentEventsProvider>
+                                            </LoadingOverlayProvider>
+                                          </StepNavProvider>
+                                        </LocaleProvider>
+                                      </EmbedProvider>
+                                    </RootThemeProvider>
+                                  </HierarchyProvider>
+                                </PreferencesProvider>
+                                <ModalContainer />
+                                <StayLoggedInModal />
+                              </AuthProvider>
+                              {/* AuthProvider can unmount its children during logout; keep pending toasts alive. */}
+                              <ToastContainer config={config} />
+                            </DrawerStackProvider>
                           </ModalProvider>
                         </ScrollInfoProvider>
                       </WindowInfoProvider>
-                    </TranslationProvider>
+                    </AdminTranslationProvider>
                   </ClientFunctionProvider>
                 </ConfigProvider>
               </RouteCache>

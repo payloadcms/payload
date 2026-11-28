@@ -4,7 +4,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createPayloadRequest, ValidationError } from 'payload'
+import { createPayloadRequest, initTransaction, ValidationError } from 'payload'
 import { expect, vitest } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -167,6 +167,34 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       expect((validationError as ValidationError).message).not.toContain('[en]')
     })
 
+    test.options(
+      'should validate multiple unique fields as the first operation in a transaction',
+      {
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      },
+      async ({ payload }) => {
+        const req = await createPayloadRequest({ payload })
+
+        await initTransaction(req)
+        expect(req.transactionID).toBeTruthy()
+
+        try {
+          const result = await payload.validate({
+            collection: validationUniqueCollectionSlug,
+            data: { localizedUniqueValue: 'new-localized-value', uniqueValue: 'new-value' },
+            locale: 'en',
+            overrideAccess: true,
+            req,
+          })
+
+          expect(result).toMatchObject({ valid: true })
+        } finally {
+          await payload.db.rollbackTransaction(await req.transactionID!)
+        }
+      },
+    )
+
     test('should report a configured unique field conflict', async ({ payload }) => {
       await payload.create({
         collection: validationUniqueCollectionSlug,
@@ -194,6 +222,50 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         valid: false,
       })
     })
+
+    test.options(
+      'should report an uncommitted unique field conflict in the caller transaction',
+      {
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      },
+      async ({ payload }) => {
+        const transactionID = await payload.db.beginTransaction()
+
+        expect(transactionID).toBeTruthy()
+
+        const req = await createPayloadRequest({ payload, req: { transactionID } })
+        const data = { uniqueValue: 'uncommitted' }
+
+        try {
+          await payload.create({
+            collection: validationUniqueCollectionSlug,
+            data,
+            overrideAccess: true,
+            req,
+          })
+
+          expect(
+            await payload.validate({
+              collection: validationUniqueCollectionSlug,
+              data,
+              overrideAccess: true,
+            }),
+          ).toMatchObject({ valid: true })
+          expect(
+            await payload.validate({
+              collection: validationUniqueCollectionSlug,
+              data,
+              overrideAccess: true,
+              req,
+            }),
+          ).toMatchObject({ errors: [{ path: 'uniqueValue' }], valid: false })
+          expect(req.transactionID).toBe(transactionID)
+        } finally {
+          await payload.db.rollbackTransaction(transactionID!)
+        }
+      },
+    )
 
     test('should report a localized unique field conflict', async ({ payload }) => {
       await payload.create({

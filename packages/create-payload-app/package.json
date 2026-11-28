@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.12",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
@@ -50,11 +50,12 @@
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
     "build:debug": "pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc": "pnpm prepare:upgrade && swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
+    "prepare:upgrade": "node ../../tools/upgrade/prepare.mjs create-payload-app",
     "test": "vitest --run",
-    "typecheck": "tsc"
+    "typecheck": "pnpm prepare:upgrade && tsc"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
@@ -69,6 +70,7 @@
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
     "oxfmt": "^0.73.0",
+    "semver": "^7.8.5",
     "tar": "^7.5.22",
     "terminal-link": "^2.1.1",
     "ts-morph": "^28.0.0"
@@ -76,9 +78,10 @@
   "devDependencies": {
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
-    "@types/node": "24.12.3"
+    "@types/node": "24.12.3",
+    "@types/semver": "^7.7.1"
   },
   "engines": {
-    "node": ">=24.22.1"
+    "node": "^24.22.3 || >=26.13.1"
   }
 }

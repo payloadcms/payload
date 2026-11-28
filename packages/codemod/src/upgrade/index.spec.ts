@@ -1,13 +1,14 @@
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { RegistryPackument, UpgradeDeps } from './types.js'
+import type { RegistryPackage } from '../upgrade-shared/index.js'
+import type { UpgradeDeps } from './types.js'
 
 import { runUpgrade } from './index.js'
 
-const packuments: Record<string, RegistryPackument> = {
+const packuments: Record<string, RegistryPackage> = {
   '@payloadcms/next': {
     'dist-tags': { canary: '4.0.0-canary.20' },
     versions: { '4.0.0-canary.20': { peerDependencies: { next: '>=16.2.6 <17.0.0' } } },
@@ -16,7 +17,7 @@ const packuments: Record<string, RegistryPackument> = {
   next: { versions: { '16.9.3': {} } },
   payload: {
     'dist-tags': { canary: '4.0.0-canary.20' },
-    versions: { '4.0.0-canary.20': { engines: { node: '>=24.22.1' } } },
+    versions: { '4.0.0-canary.20': { engines: { node: '^24.22.3 || >=26.13.1' } } },
   },
 }
 
@@ -28,8 +29,11 @@ const makeDeps = (overrides: Partial<UpgradeDeps> = {}): UpgradeDeps => ({
   ...overrides,
 })
 
+const projectDirs: string[] = []
+
 const makeProject = (): string => {
   const dir = mkdtempSync(join(tmpdir(), 'codemod-upgrade-'))
+  projectDirs.push(dir)
   writeFileSync(
     join(dir, 'package.json'),
     JSON.stringify({ dependencies: { payload: '^3.0.0' } }, null, 2) + '\n',
@@ -38,9 +42,20 @@ const makeProject = (): string => {
 }
 
 describe('runUpgrade', () => {
+  afterEach(() => {
+    for (const dir of projectDirs.splice(0)) {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
   it('installs before running transforms', async () => {
     const order: string[] = []
+    const dir = makeProject()
     const spawn = vi.fn().mockImplementation(() => {
+      mkdirSync(join(dir, 'node_modules', 'payload'), { recursive: true })
+      writeFileSync(
+        join(dir, 'node_modules', 'payload', 'package.json'),
+        JSON.stringify({ version: '4.0.0-canary.20' }),
+      )
       order.push('install')
       return Promise.resolve({ code: 0 })
     })
@@ -50,7 +65,7 @@ describe('runUpgrade', () => {
     })
 
     await runUpgrade(
-      { flags: { dry: false, force: true, tag: 'canary' }, path: makeProject() },
+      { flags: { dry: false, force: true, tag: 'canary' }, path: dir },
       makeDeps({ spawn }),
       { runTransforms },
     )
@@ -91,17 +106,22 @@ describe('runUpgrade', () => {
   it('succeeds when the installed tree resolves to the pinned v4 version', async () => {
     const dir = makeProject()
     const payloadPkg = join(dir, 'node_modules', 'payload', 'package.json')
-    mkdirSync(join(dir, 'node_modules', 'payload'), { recursive: true })
-    writeFileSync(payloadPkg, JSON.stringify({ version: '4.0.0-canary.20' }))
+    const spawn = vi.fn().mockImplementation(async () => {
+      mkdirSync(join(dir, 'node_modules', 'payload'), { recursive: true })
+      writeFileSync(payloadPkg, JSON.stringify({ version: '4.0.0-canary.20' }))
+      return { code: 0 }
+    })
+    const fetchRegistry = vi.fn(async (name: string) => packuments[name] ?? {})
     const runTransforms = vi.fn().mockResolvedValue({ failed: false, results: [] })
 
     const result = await runUpgrade(
       { flags: { dry: false, force: true, tag: 'canary' }, path: dir },
-      makeDeps(),
+      makeDeps({ fetchRegistry, spawn }),
       { runTransforms },
     )
 
     expect(result.failed).toBe(false)
+    expect(fetchRegistry.mock.calls.filter(([name]) => name === '@types/node')).toHaveLength(1)
   })
 
   it('dry run writes nothing, does not install or transform', async () => {

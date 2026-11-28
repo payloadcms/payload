@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/codemod",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.12",
   "description": "Codemods for migrating Payload projects across versions.",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -31,10 +31,11 @@
   "scripts": {
     "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
     "build:copy-docs": "node scripts/copy-migration-guide.mjs",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc": "pnpm prepare:upgrade && swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "prepare:upgrade": "node ../../tools/upgrade/prepare.mjs codemod",
     "test": "vitest --run",
-    "typecheck": "tsc"
+    "typecheck": "pnpm prepare:upgrade && tsc"
   },
   "dependencies": {
     "@clack/prompts": "1.2.0",
@@ -50,6 +51,6 @@
     "vitest": "5.0.1"
   },
   "engines": {
-    "node": ">=24.22.1"
+    "node": "^24.22.3 || >=26.13.1"
   }
 }

@@ -6,6 +6,7 @@ import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { sanitizeUpdateData } from '../../../utilities/sanitizeUpdateData.js'
 import { recordNewDoc } from '../../baseFields/authorship/index.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -110,6 +111,10 @@ export const beforeChange = async <T extends JsonObject>({
 
   for (const action of mergeLocaleActions) {
     await action()
+  }
+
+  if (operation === 'update') {
+    sanitizeUpdateData({ data })
   }
 
   return data

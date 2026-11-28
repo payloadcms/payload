@@ -1,5 +1,7 @@
 @layer payload-default {
-  :root {
+  :root,
+  :host,
+  [data-theme='light'] {
     /* Light mode elevations */
 
     --elevation-100-canvas: 0 0 0.5px 0 rgba(0, 0, 0, 0.3);
@@ -17,6 +19,7 @@
       0 2px 5px 0 rgba(0, 0, 0, 0.15);
   }
 
+  :host([data-theme='dark']),
   [data-theme='dark'] {
     /* Dark mode elevations */
 

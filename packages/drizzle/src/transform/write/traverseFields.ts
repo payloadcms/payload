@@ -13,7 +13,7 @@ import type {
 } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
-import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
+import { addBlockTablesToDelete } from './addBlockTablesToDelete.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'
 import { transformNumbers } from './numbers.js'
@@ -68,6 +68,7 @@ type Args = {
    */
   parentTableName: string
   path: string
+  pathPrefixesToDelete: RowToInsert['pathPrefixesToDelete']
   relationships: Record<string, unknown>[]
   relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -105,6 +106,7 @@ export const traverseFields = ({
   parentIsLocalized,
   parentTableName,
   path,
+  pathPrefixesToDelete,
   relationships,
   relationshipsToAppend,
   relationshipsToDelete,
@@ -141,7 +143,12 @@ export const traverseFields = ({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      if (fieldData === undefined) {
+        return
+      }
+
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
+      const arrayPathPrefix = `${path || ''}${field.name}.`
 
       if (isLocalized) {
         const value = data[field.name]
@@ -160,6 +167,11 @@ export const traverseFields = ({
             }
 
             if (Array.isArray(localeData)) {
+              // A `$push` only appends rows, so existing path-keyed rows must be left alone
+              if (!push && !insideArrayOrBlock) {
+                pathPrefixesToDelete.add(arrayPathPrefix)
+              }
+
               const newRows = transformArray({
                 adapter,
                 arrayTableName,
@@ -173,6 +185,7 @@ export const traverseFields = ({
                 numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
+                pathPrefixesToDelete,
                 relationships,
                 relationshipsToDelete,
                 selects,
@@ -203,6 +216,11 @@ export const traverseFields = ({
           push = true
         }
 
+        // A `$push` only appends rows, so existing path-keyed rows must be left alone
+        if (!push && !insideArrayOrBlock) {
+          pathPrefixesToDelete.add(arrayPathPrefix)
+        }
+
         const newRows = transformArray({
           adapter,
           arrayTableName,
@@ -215,6 +233,7 @@ export const traverseFields = ({
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToDelete,
           selects,
@@ -240,24 +259,21 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
-      field.blocks.forEach((block) => {
-        const matchedBlock =
-          typeof block === 'string'
-            ? adapter.payload.config.blocks.find((each) => each.slug === block)
-            : block
+      addBlockTablesToDelete({ adapter, baseTableName, blocksToDelete, field })
 
-        blocksToDelete.add(
-          resolveBlockTableName(
-            matchedBlock,
-            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
-          ),
-        )
-      })
+      // Block rows are replaced in full like array rows, so their path-keyed rows are cleared by
+      // prefix too. Only the outermost array or blocks field registers one, as it covers every
+      // nested path.
+      const blocksPathPrefix = `${path || ''}${field.name}.`
 
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
+              if (!insideArrayOrBlock) {
+                pathPrefixesToDelete.add(blocksPathPrefix)
+              }
+
               transformBlocks({
                 adapter,
                 baseTableName,
@@ -270,6 +286,7 @@ export const traverseFields = ({
                 numbersToDelete,
                 parentIsLocalized: parentIsLocalized || field.localized,
                 path,
+                pathPrefixesToDelete,
                 relationships,
                 relationshipsToDelete,
                 selects,
@@ -281,6 +298,10 @@ export const traverseFields = ({
           })
         }
       } else if (isArrayOfRows(fieldData)) {
+        if (!insideArrayOrBlock) {
+          pathPrefixesToDelete.add(blocksPathPrefix)
+        }
+
         transformBlocks({
           adapter,
           baseTableName,
@@ -292,6 +313,7 @@ export const traverseFields = ({
           numbersToDelete,
           parentIsLocalized: parentIsLocalized || field.localized,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToDelete,
           selects,
@@ -332,6 +354,7 @@ export const traverseFields = ({
               parentIsLocalized: parentIsLocalized || field.localized,
               parentTableName,
               path: `${path || ''}${field.name}.`,
+              pathPrefixesToDelete,
               relationships,
               relationshipsToAppend,
               relationshipsToDelete,
@@ -368,6 +391,7 @@ export const traverseFields = ({
             parentIsLocalized: parentIsLocalized || field.localized,
             parentTableName,
             path: `${path || ''}${field.name}.`,
+            pathPrefixesToDelete,
             relationships,
             relationshipsToAppend,
             relationshipsToDelete,
@@ -844,6 +868,7 @@ export const traverseFields = ({
           parentIsLocalized,
           parentTableName,
           path,
+          pathPrefixesToDelete,
           relationships,
           relationshipsToAppend,
           relationshipsToDelete,

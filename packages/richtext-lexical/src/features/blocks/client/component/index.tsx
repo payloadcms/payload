@@ -1,5 +1,7 @@
 'use client'
 
+import type { FormProps } from '@payloadcms/ui'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
@@ -22,6 +24,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
+  useOperation,
   useServerFunctions,
   useTranslation,
   XIcon,
@@ -49,6 +52,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
@@ -103,7 +107,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   } = useEditorConfigContext()
 
   const { fields: parentDocumentFields } = useDocumentForm()
-  const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
 
@@ -121,6 +124,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
 
   const blockType = formData.blockType
 
@@ -258,7 +262,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -273,17 +277,16 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           value: formData.blockName,
         }
 
-        const newFormStateData = getDataFromFormState(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
-        ) as BlockFields
-
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
           () => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              const newData = newFormStateData
+              const newData = mergeNodeFields({
+                currentFields: node.getFields(),
+                formState: state,
+              })
+
               newData.blockType = blockType
 
               node.setFields(newData, true)
@@ -325,6 +328,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    operation,
     parentDocumentFields,
     blockType,
     clientBlock,
@@ -336,37 +340,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const { i18n, t } = useTranslation<object, string>()
 
-  const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-      const blockData = getDataFromFormState(prevFormState, true)
-
-      const { state: newFormState } = await getFormState({
-        id,
-        collectionSlug,
-        data: blockData,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: parentDocumentFields,
-        formState: prevFormState,
-        globalSlug,
-        initialBlockData: blockData,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: submit ? true : false,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!newFormState) {
-        return prevFormState
-      }
-
+  const applyServerState = useCallback(
+    (newFormState: FormState, prevFormState: FormState) => {
       if (prevFormState.blockName) {
         newFormState.blockName = prevFormState.blockName
       }
@@ -391,49 +366,26 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           { tag: SKIP_DOM_SELECTION_TAG },
         )
       }, 0)
-
-      if (submit) {
-        if (!CustomLabelFromProps) {
-          setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
-        }
-        if (!CustomBlockFromProps) {
-          setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
-        }
-
-        let rowErrorCount = 0
-        for (const formField of Object.values(newFormState)) {
-          if (formField?.valid === false) {
-            rowErrorCount++
-          }
-        }
-        setErrorCount(rowErrorCount)
-      }
-
-      return newFormState
     },
-
-    [
-      getFormState,
-      id,
-      collectionSlug,
-      getDocPreferences,
-      globalSlug,
-      schemaFieldsPath,
-      blockType,
-      parentDocumentFields,
-      isEditable,
-      editor,
-      nodeKey,
-      CustomBlockFromProps,
-      CustomLabelFromProps,
-    ],
+    [blockType, editor, nodeKey],
   )
 
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
+  const onChange = useCallback<NonNullable<FormProps['onChange']>[number]>(
+    ({ formState, submitted }) => {
+      applyServerState(formState, formState)
+
+      if (submitted) {
+        if (!CustomLabelFromProps) {
+          setCustomLabel(formState._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(formState._components?.customComponents?.Block ?? undefined)
+        }
+        setErrorCount(Object.values(formState).filter((field) => field.valid === false).length)
+      }
+    },
+    [applyServerState, CustomLabelFromProps, CustomBlockFromProps],
+  )
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
@@ -808,12 +760,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     return (
       <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
         <Form
-          beforeSubmit={[
-            async ({ formState }) => {
-              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-              return await onChange({ formState, submit: true })
-            },
-          ]}
           el="div"
           fields={clientBlock?.fields ?? []}
           initialState={initialState}
@@ -835,6 +781,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
             )
             toggleDrawer()
           }}
+          readOnly={!isEditable}
+          schemaPath={schemaFieldsPath}
           submitted={submitted}
           uuid={formUuid}
         >
@@ -871,6 +819,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     formUuid,
     initialState,
     nodeKey,
+    schemaFieldsPath,
+    isEditable,
     onChange,
     submitted,
   ])

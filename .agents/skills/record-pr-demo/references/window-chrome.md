@@ -10,7 +10,7 @@ node .agents/skills/record-pr-demo/scripts/preview-chrome.mjs
 
 Open `http://127.0.0.1:4400`. Use `--port 4401` if needed. The server binds to loopback and serves only the preview assets. Edits appear on reload.
 
-The preview contains a sample application, not Payload Admin. Use its viewport controls and timeline to inspect resizing. Light and Dark switch the chrome and sample application together, preserving the current viewport and timeline position. Query options include `?theme=dark`, `?kind=fix`, `?kind=bug` for the red before-state pill, and `?accessibility&announcements&kind=fix`. Review real application behavior in a scenario against the relevant Payload server.
+The preview contains a sample application, not Payload Admin. Use its viewport controls and timeline to inspect resizing. Light and Dark switch the chrome and sample application together, preserving the current viewport and timeline position. Query options include `?theme=dark`, `?kind=fix`, `?kind=bug` for the before-state overview label, and `?accessibility&announcements&kind=fix`. Review real application behavior in a scenario against the relevant Payload server.
 
 ## Required scenario metadata
 
@@ -30,13 +30,13 @@ export const presentation = {
 }
 ```
 
-`--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1600×1148 for the default 1440×900 viewport, or 1600×1188 with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
+`--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1794×1086 for the default 1440×900 viewport, including with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
 
 The window header automatically displays the current application viewport dimensions and updates them during resizing.
 
 ## Step sidebar
 
-Use `annotationLayout: 'left'` when the walkthrough has a known sequence viewers may need to reference. Declare that sequence in `annotationSteps`:
+The sidebar is the only annotation layout. For a known sequence viewers may need to reference, declare `annotationSteps`:
 
 ```js
 const steps = [
@@ -49,7 +49,6 @@ const steps = [
 ]
 
 export const presentation = {
-  annotationLayout: 'left',
   annotationSteps: steps,
   change: {
     kind: 'Bug',
@@ -62,11 +61,11 @@ export const presentation = {
 await showAnnotation({ ...steps[1], index: 2, total: steps.length })
 ```
 
-Each step accepts `title`, `body`, and optional `kind: 'Bug'`. Titles remain required by `showAnnotation`; the renderer decides which fields each layout displays. Reuse the declared entry when calling `showAnnotation`: its body, one-based index, and total must match the list. Use a step's `kind` to identify a demonstrated failure, not a setup or navigation action. The scenario's `change.kind` describes the whole walkthrough: Bug for before, Fix for after, or Feature for a feature demonstration.
+Each step accepts `title`, `body`, and optional `kind: 'Bug'`. Titles remain required by `showAnnotation`; the sidebar displays body text and optional Bug markers. Reuse the declared entry when calling `showAnnotation`: its body, one-based index, and total must match the list. Use a step's `kind` to identify a demonstrated failure, not a setup or navigation action. The scenario's `change.kind` describes the whole walkthrough: Bug for before, Fix for after, or Feature for a feature demonstration.
 
 The renderer handles layout, styling, step indicators, and scrolling. Scripts should advance the current step through `showAnnotation`, rather than manipulating the sidebar DOM or scroll position. Playground step selection is an inspection control, not a scenario API.
 
-Omit `annotationLayout` or use `'top'` for the compact annotation API without a declared sequence. Accessibility mode automatically selects the compatible top presentation, including with `--a11y on`. The playground provides Left/Top layouts, Demo type, and Many steps controls for inspection.
+Without declared steps, `showAnnotation` displays the current note in the sidebar. Hiding annotations leaves the overview and enabled accessibility feedback visible. Keyboard history and announcement captions appear at the bottom of the sidebar. The playground provides Demo type and Many steps controls for inspection.
 
 ## URL bar
 
@@ -84,7 +83,7 @@ Back and Forward in the window header navigate the application's own frame histo
 - `resizeWindow({ width, height, duration = 1000 })` animates the actual iframe viewport. Await it before another resize. Dimensions must be positive integers up to 7680×4320. Use it only when responsive reflow is part of the story.
 - `page` scopes navigation, locators, and evaluation to the application iframe; input devices, context, and page events belong to the containing recording page. `page.addInitScript` installs context-wide scripts for subsequent navigations. `page.goBack()` and `page.goForward()` are unsupported because browser history is shared with the wrapper.
 
-Floating annotations and `type`, `position`, and `width` options are unsupported. Overlong change text fails at mount; an oversized step is rejected without replacing the previous note. Shorten the supplied text instead of overriding the layout. Supplied content is inserted as text, not markup.
+Floating annotations and `type`, `position`, and `width` options are unsupported. a mismatched declared step is rejected without replacing the previous note. The sidebar scrolls to keep the active step visible. Supplied content is inserted as text, not markup.
 
 The component handles progress, transitions, reduced motion, and feedback visibility. Validation and screenshot preview apply presentation updates immediately. Inspect the final MP4 for legibility and pacing; do not duplicate the renderer's visual rules in scenario instructions.
 
@@ -110,8 +109,8 @@ The **Refresh frame** button sits between Forward and the URL bar in both previe
 node --test .agents/skills/record-pr-demo/scripts/*.test.mjs
 ```
 
-Browser tests mount the actual component. They cover resizing, annotation validation and transitions, reduced motion, focus preservation, conditional dividers, keyboard history, and refresh feedback. Recorder integration checks the live iframe, encoded dimensions and pixels, video decode, and fast validation. Preview tests exercise keyboard controls and narrow host viewports.
+Browser tests mount the actual component. They cover resizing, annotation validation and transitions, reduced motion, focus preservation, keyboard history, and refresh feedback. Recorder integration checks the live iframe, encoded dimensions and pixels, video decode, and fast validation. Preview tests exercise keyboard controls and narrow host viewports.
 
 Accessibility evidence is scoped to the recording chrome and preview controls. Relevant WCAG 2.2 A/AA criteria include decorative feedback (1.1.1), structure and labels (1.3.1), non-color progress cues (1.4.1), preview reflow (1.4.10), keyboard operation (2.1.1), playback control (2.2.2), focus preservation (2.4.3, 2.4.7, 2.4.11), control semantics (4.1.2), and status updates (4.1.3). Automated evidence does not establish product or video conformance. Review contrast (1.4.3, 1.4.11), text resizing and spacing (1.4.4, 1.4.12), target sizes (2.5.8), visual focus, timing, and exact screen-reader announcements in their relevant rendered contexts.
 
-Accessibility feedback observes DOM text, not screen-reader audio. It is hidden from assistive technology, does not intercept input, and adds no application focus outline. Previous-command history is intentionally faded; do not rely on it as the sole evidence of a keyboard action. The scaled preview is not an accessible replacement for operating the application.
+Accessibility feedback observes DOM text, not screen-reader audio. It is hidden from assistive technology, does not intercept input, and adds no application focus outline. Earlier commands use quieter keycaps; do not rely on it as the sole evidence of a keyboard action. The scaled preview is not an accessible replacement for operating the application.

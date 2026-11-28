@@ -20,6 +20,7 @@ import {
   $isNodeSelection,
   $isRangeSelection,
   type ElementFormatType,
+  SKIP_DOM_SELECTION_TAG,
 } from 'lexical'
 import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
@@ -32,6 +33,7 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { mergeNodeFields } from '../../../../utilities/mergeNodeFields.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import { $isUploadNode } from '../nodes/UploadNode.js'
 import './index.css'
@@ -157,6 +159,30 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
       ?.sanitizedClientFeatureProps as BaseClientFeatureProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
+  const onExtraFieldsDrawerInitialize = useCallback(
+    ({ formState }: { formState: FormState }) => {
+      editor.update(
+        () => {
+          const node = $getNodeByKey(nodeKey)
+
+          if ($isUploadNode(node)) {
+            const data = node.getData()
+
+            node.setData({
+              ...data,
+              fields: mergeNodeFields({
+                currentFields: data.fields ?? {},
+                formState,
+              }),
+            })
+          }
+        },
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
+    },
+    [editor, nodeKey],
+  )
+
   const onExtraFieldsDrawerSubmit = useCallback(
     (_: FormState, data: JsonObject) => {
       // Update lexical node (with key nodeKey) with new data
@@ -269,6 +295,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
           featureKey="upload"
+          handleDrawerInitialize={onExtraFieldsDrawerInitialize}
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
           schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}

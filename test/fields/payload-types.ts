@@ -64,22 +64,99 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_FD47D92F".
+ * via the `definition` "UploadTransforms".
  */
-export type LexicalNodes_FD47D92F =
+export type UploadTransforms = {
+  /**
+   * Time range on the original, in milliseconds. Start inclusive, end exclusive.
+   */
+  clip?: {
+    endMs: number;
+    startMs: number;
+  };
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Encoding settings for the output format. Does not select the format.
+   */
+  encoding?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Mirror the image on one or both axes.
+   */
+  flip?: {
+    horizontal?: boolean;
+    vertical?: boolean;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  /**
+   * Keep or remove metadata embedded in the output file.
+   */
+  metadataPolicy?: {
+    mode: 'preserve' | 'strip';
+  };
+  /**
+   * One-based, inclusive page range on the original document.
+   */
+  pageRange?: {
+    endPage: number;
+    startPage: number;
+  };
+  /**
+   * Video frame to use as the poster, in milliseconds on the original.
+   */
+  posterFrame?: {
+    timestampMs: number;
+  };
+  /**
+   * Target size for visual media.
+   */
+  resize?: {
+    fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+    height?: number;
+    width?: number;
+    withoutEnlargement?: boolean;
+  };
+  /**
+   * Clockwise rotation in degrees.
+   */
+  rotate?: {
+    angle: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3FFAC674".
+ */
+export type LexicalNodes_3FFAC674 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_FD47D92F>
+  | SerializedParagraphNode<LexicalNodes_3FFAC674>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_FD47D92F>
+  | SerializedHeadingNode<LexicalNodes_3FFAC674>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_FD47D92F>
-  | SerializedListNode<LexicalNodes_FD47D92F>
-  | SerializedListItemNode<LexicalNodes_FD47D92F>
-  | SerializedAutoLinkNode<LexicalNodes_FD47D92F, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_FD47D92F, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_3FFAC674>
+  | SerializedListNode<LexicalNodes_3FFAC674>
+  | SerializedListItemNode<LexicalNodes_3FFAC674>
+  | SerializedAutoLinkNode<LexicalNodes_3FFAC674, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_3FFAC674, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -108,6 +185,10 @@ export type LexicalNodes_FD47D92F =
       | 'slug-fields'
       | 'slug-field-access'
       | 'slug-autosave'
+      | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-nested-group'
+      | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -124,17 +205,17 @@ export type LexicalNodes_FD47D92F =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_DA189A21".
+ * via the `definition` "LexicalNodes_D5246749".
  */
-export type LexicalNodes_DA189A21 =
+export type LexicalNodes_D5246749 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_DA189A21>
+  | SerializedParagraphNode<LexicalNodes_D5246749>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_DA189A21>
+  | SerializedQuoteNode<LexicalNodes_D5246749>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -163,6 +244,10 @@ export type LexicalNodes_DA189A21 =
       | 'slug-fields'
       | 'slug-field-access'
       | 'slug-autosave'
+      | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-nested-group'
+      | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -177,11 +262,23 @@ export type LexicalNodes_DA189A21 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_DA189A21, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_DA189A21, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_DA189A21>
-  | SerializedListItemNode<LexicalNodes_DA189A21>
-  | SerializedHeadingNode<LexicalNodes_DA189A21>;
+  | SerializedAutoLinkNode<LexicalNodes_D5246749, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D5246749, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D5246749>
+  | SerializedListItemNode<LexicalNodes_D5246749>
+  | SerializedHeadingNode<LexicalNodes_D5246749>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3DE324E4".
+ */
+export type LexicalNodes_3DE324E4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3DE324E4>
+  | SerializedListNode<LexicalNodes_3DE324E4>
+  | SerializedListItemNode<LexicalNodes_3DE324E4>
+  | SerializedHeadingNode<LexicalNodes_3DE324E4, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -192,6 +289,7 @@ export interface Config {
     conditionalReference: ConditionalReference;
     localizedTextReference: LocalizedTextReference;
     localizedTextReference2: LocalizedTextReference2;
+    sharedBlock: SharedBlock_DC815DED;
   };
   collections: {
     users: User;
@@ -221,6 +319,10 @@ export interface Config {
     'slug-fields': SlugField;
     'slug-field-access': SlugFieldAccess;
     'slug-autosave': SlugAutosave;
+    'slug-localized-required': SlugLocalizedRequired;
+    'slug-localized-required-siblings': SlugLocalizedRequiredSibling;
+    'slug-localized-required-nested-group': SlugLocalizedRequiredNestedGroup;
+    'slug-localized-required-nested-tab': SlugLocalizedRequiredNestedTab;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -237,6 +339,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -267,6 +370,10 @@ export interface Config {
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'slug-field-access': SlugFieldAccessSelect<false> | SlugFieldAccessSelect<true>;
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
+    'slug-localized-required': SlugLocalizedRequiredSelect<false> | SlugLocalizedRequiredSelect<true>;
+    'slug-localized-required-siblings': SlugLocalizedRequiredSiblingsSelect<false> | SlugLocalizedRequiredSiblingsSelect<true>;
+    'slug-localized-required-nested-group': SlugLocalizedRequiredNestedGroupSelect<false> | SlugLocalizedRequiredNestedGroupSelect<true>;
+    'slug-localized-required-nested-tab': SlugLocalizedRequiredNestedTabSelect<false> | SlugLocalizedRequiredNestedTabSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -283,6 +390,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -373,6 +481,18 @@ export interface LocalizedTextReference2 {
   blockType: 'localizedTextReference2';
 }
 /**
+ * Multiple blocks resolve to the `SharedBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedBlock_DC815DED".
+ */
+export interface SharedBlock_DC815DED {
+  globalText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sharedBlock';
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -402,6 +522,13 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
@@ -413,6 +540,15 @@ export interface User {
  */
 export interface SelectVersionsField {
   id: string;
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
@@ -454,7 +590,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_FD47D92F> | null;
+    richTextField?: LexicalRichText<LexicalNodes_3FFAC674> | null;
     subArray?:
       | {
           text?: string | null;
@@ -607,6 +743,7 @@ export interface BlockField {
   blockWithLabels?: Text[] | null;
   deduplicatedBlocks?: ConfigBlockTest[] | null;
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  sharedBlocks?: SharedBlock[] | null;
   configuration?: ConditionalReference[] | null;
   showConditionalFields?: boolean | null;
   conditionalGroup?: {
@@ -644,7 +781,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_DA189A21> | null;
+  richText?: LexicalRichText<LexicalNodes_D5246749> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -716,7 +853,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_DA189A21> | null;
+  richText?: LexicalRichText<LexicalNodes_D5246749> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -957,6 +1094,16 @@ export interface Text {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedBlock".
+ */
+export interface SharedBlock {
+  inlineText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sharedBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockWithGroupOne".
  */
 export interface BlockWithGroupOne {
@@ -1165,7 +1312,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_FD47D92F> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_3FFAC674> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -2088,6 +2235,92 @@ export interface SlugAutosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required".
+ */
+export interface SlugLocalizedRequired {
+  id: string;
+  title: string;
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-siblings".
+ */
+export interface SlugLocalizedRequiredSibling {
+  id: string;
+  title: string;
+  optionalTitle?: string | null;
+  body: string;
+  sharedSlug: string;
+  optionalSlug: string;
+  fallbackSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-group".
+ */
+export interface SlugLocalizedRequiredNestedGroup {
+  id: string;
+  title: string;
+  content: {
+    slug: string;
+  };
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-tab".
+ */
+export interface SlugLocalizedRequiredNestedTab {
+  id: string;
+  title: string;
+  content: {
+    slug: string;
+  };
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2".
  */
 export interface TabsFields2 {
@@ -2287,6 +2520,19 @@ export interface Upload {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -2315,6 +2561,19 @@ export interface Uploads2 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -2342,6 +2601,19 @@ export interface Uploads3 {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -2593,6 +2865,22 @@ export interface PayloadLockedDocument {
         value: string | SlugAutosave;
       } | null)
     | ({
+        relationTo: 'slug-localized-required';
+        value: string | SlugLocalizedRequired;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-siblings';
+        value: string | SlugLocalizedRequiredSibling;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-nested-group';
+        value: string | SlugLocalizedRequiredNestedGroup;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-nested-tab';
+        value: string | SlugLocalizedRequiredNestedTab;
+      } | null)
+    | ({
         relationTo: 'tabs-fields-2';
         value: string | TabsFields2;
       } | null)
@@ -2684,6 +2972,28 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -2706,6 +3016,11 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -2713,6 +3028,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "select-versions-fields_select".
  */
 export interface SelectVersionsFieldsSelect<T extends boolean = true> {
+  customJSON?: T;
   hasMany?: T;
   array?:
     | T
@@ -3053,6 +3369,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
       };
   deduplicatedBlocks?: T | {};
   deduplicatedBlocks2?: T | {};
+  sharedBlocks?:
+    | T
+    | {
+        sharedBlock?:
+          | T
+          | {
+              inlineText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   configuration?: T | {};
   showConditionalFields?: T;
   conditionalGroup?:
@@ -4100,6 +4427,68 @@ export interface SlugAutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required_select".
+ */
+export interface SlugLocalizedRequiredSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-siblings_select".
+ */
+export interface SlugLocalizedRequiredSiblingsSelect<T extends boolean = true> {
+  title?: T;
+  optionalTitle?: T;
+  body?: T;
+  sharedSlug?: T;
+  optionalSlug?: T;
+  fallbackSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-group_select".
+ */
+export interface SlugLocalizedRequiredNestedGroupSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        slug?: T;
+      };
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-nested-tab_select".
+ */
+export interface SlugLocalizedRequiredNestedTabSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        slug?: T;
+      };
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2_select".
  */
 export interface TabsFields2Select<T extends boolean = true> {
@@ -4328,6 +4717,21 @@ export interface UploadsSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -4349,6 +4753,21 @@ export interface Uploads2Select<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -4369,6 +4788,21 @@ export interface Uploads3Select<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
   focalX?: T;
   focalY?: T;
 }
@@ -4475,6 +4909,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "welcome_widget".
  */
 export interface WelcomeWidget {
@@ -4528,6 +4978,10 @@ export interface CollectionQueryWidget {
       | 'slug-fields'
       | 'slug-field-access'
       | 'slug-autosave'
+      | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-nested-group'
+      | 'slug-localized-required-nested-tab'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -4590,6 +5044,10 @@ export interface ActivityWidget {
           | 'slug-fields'
           | 'slug-field-access'
           | 'slug-autosave'
+          | 'slug-localized-required'
+          | 'slug-localized-required-siblings'
+          | 'slug-localized-required-nested-group'
+          | 'slug-localized-required-nested-tab'
           | 'tabs-fields-2'
           | 'tabs-fields'
           | 'text-fields'
@@ -4605,7 +5063,7 @@ export interface ActivityWidget {
         )[]
       | null;
   };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4668,6 +5126,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number;
   textFormat?: number;
   textStyle?: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -4680,6 +5139,7 @@ export interface SerializedTextNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -4690,11 +5150,13 @@ export interface SerializedTabNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
 export interface SerializedLineBreakNode {
   type: 'linebreak';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -4707,11 +5169,13 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
 export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
 } : never;
 export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
@@ -4728,6 +5192,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -4778,6 +5243,7 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
 export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -4794,12 +5260,14 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat;
     indent: number;
     type: 'root';
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
 }
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 

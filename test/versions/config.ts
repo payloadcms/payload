@@ -28,6 +28,7 @@ import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
 import NestedArraySelect from './collections/NestedArraySelect.js'
+import { PointVersions } from './collections/PointVersions.js'
 import Posts from './collections/Posts.js'
 import RestoreAccess from './collections/RestoreAccess.js'
 import RestoreAccessLocalized from './collections/RestoreAccessLocalized.js'
@@ -38,6 +39,7 @@ import VersionPosts from './collections/Versions.js'
 import { VersionsDisabledCollection } from './collections/VersionsDisabled.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
+import { AutosaveWithoutLocalization } from './globals/AutosaveWithoutLocalization.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
@@ -82,6 +84,7 @@ export default buildConfigWithDefaults({
       CustomIDs,
       Diff,
       TextCollection,
+      PointVersions,
       DraftsWithUpload,
       DraftsWithUploadCloudStorage,
       Media,
@@ -94,6 +97,7 @@ export default buildConfigWithDefaults({
     ],
     globals: [
       AutosaveGlobal,
+      AutosaveWithoutLocalization,
       AutosaveWithDraftButtonGlobal,
       DraftGlobal,
       DraftWithMaxGlobal,

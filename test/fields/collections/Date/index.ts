@@ -19,6 +19,15 @@ const DateFields: CollectionConfig = {
   },
   fields: [
     {
+      name: 'dateRange',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Date/components/RangePicker/index.js#RangePicker',
+        },
+      },
+    },
+    {
       name: 'default',
       type: 'date',
       required: true,
@@ -82,7 +91,14 @@ const DateFields: CollectionConfig = {
     {
       name: 'defaultWithTimezone',
       type: 'date',
-      timezone: true,
+      admin: {
+        date: {
+          overrides: { isClearable: true },
+        },
+      },
+      timezone: {
+        defaultTimezone: 'Europe/London',
+      },
     },
     {
       name: 'dayAndTimeWithTimezone',

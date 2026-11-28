@@ -23,6 +23,36 @@
     },
     "dev": {
       "cache": false
+    },
+    "create-payload-app#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tools/upgrade/**",
+        "$TURBO_ROOT$/tools/releaser/src/lib/publishList.ts",
+        "$TURBO_ROOT$/packages/*/package.json"
+      ],
+      "outputs": ["dist/**", "src/upgrade-shared/**"]
+    },
+    "create-payload-app#build:debug": {
+      "dependsOn": ["^build:debug"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tools/upgrade/**",
+        "$TURBO_ROOT$/tools/releaser/src/lib/publishList.ts",
+        "$TURBO_ROOT$/packages/*/package.json"
+      ],
+      "outputs": ["dist/**", "src/upgrade-shared/**"]
+    },
+    "@payloadcms/codemod#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tools/upgrade/**",
+        "$TURBO_ROOT$/tools/releaser/src/lib/publishList.ts",
+        "$TURBO_ROOT$/packages/*/package.json"
+      ],
+      "outputs": ["dist/**", "src/upgrade-shared/**"]
     }
   }
 }

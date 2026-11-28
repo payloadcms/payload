@@ -13,15 +13,9 @@ import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
 
-import {
-  useAllFormFields,
-  useForm,
-  useFormModified,
-  useFormSubmitted,
-} from '../../forms/Form/context.js'
+import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueue } from '../../hooks/useQueue.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -56,11 +50,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
   } = useDocumentInfo()
 
-  const { isValid, setBackgroundProcessing, submit } = useForm()
+  const { getFields, isValid, submit, submitted } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
-  const submitted = useFormSubmitted()
 
   const currentLocale = useLocale()
   const locale = currentLocale?.code
@@ -76,9 +69,16 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const debouncedFormState = useDebounce(formState, interval)
 
-  const { queueTask } = useQueue()
-
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const outstandingSubmitCountRef = useRef(0)
+  const autosaveSequenceRef = useRef(0)
+  const retryAutosaveRef = useRef<(() => Promise<void>) | null>(null)
+  const savingStartTimestampRef = useRef(0)
+  const wasSkippedWhileInvalidRef = useRef(false)
+
+  const didMount = useRef(false)
+  const previousDebouncedData = useRef(getDataFromFormState(debouncedFormState))
+  const previousUploadEdits = useRef(uploadEdits)
 
   const stopAutoSaveIndicator = useEffectEvent(() => {
     if (autosaveTimeoutRef.current) {
@@ -88,119 +88,128 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setSaving(false)
   })
 
-  const handleAutosave = useEffectEvent(() => {
-    autosaveTimeoutRef.current = undefined
-    // We need to log the time in order to figure out if we need to trigger the state off later
-    let startTimestamp = undefined
-    let endTimestamp = undefined
+  const handleAutosave = useEffectEvent(async () => {
+    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
 
-    const hideIndicator = () => {
-      // If request was faster than minimum animation time, animate the difference
-      if (endTimestamp - startTimestamp < minimumAnimationTime) {
-        autosaveTimeoutRef.current = setTimeout(
-          () => {
-            setSaving(false)
-          },
-          minimumAnimationTime - (endTimestamp - startTimestamp),
-        )
-      } else {
-        stopAutoSaveIndicator()
-      }
+    wasSkippedWhileInvalidRef.current = false
+    if (!modified) {
+      return
     }
 
-    queueTask(
-      async () => {
-        if (modified) {
-          startTimestamp = new Date().getTime()
+    if (submitted && !valid && validateOnDraft) {
+      wasSkippedWhileInvalidRef.current = true
+      return
+    }
 
-          setSaving(true)
-
-          let url: string
-          let method: string
-          let entitySlug: string
-          const params = qs.stringify(
-            {
-              autosave: true,
-              depth: 0,
-              draft: true,
-              'fallback-locale': 'null',
-              locale,
-              uploadEdits: uploadEdits || undefined,
-            },
-            {
-              addQueryPrefix: true,
-            },
-          )
-
-          if (collection && id) {
-            entitySlug = collection.slug
-            url = formatAdminURL({
-              apiRoute: api,
-              path: `/${entitySlug}/${id}${params}`,
-            })
-            method = 'PATCH'
-          }
-
-          if (globalDoc) {
-            entitySlug = globalDoc.slug
-            url = formatAdminURL({
-              apiRoute: api,
-              path: `/globals/${entitySlug}${params}`,
-            })
-            method = 'POST'
-          }
-
-          const { valid } = reduceFieldsToValuesWithValidation(formState, true)
-
-          const skipSubmission = submitted && !valid && validateOnDraft
-
-          if (!skipSubmission && modified && url) {
-            const result = await submit<any, OnSaveContext>({
-              acceptValues: {
-                overrideLocalChanges: false,
-              },
-              action: url,
-              context: {
-                getDocPermissions: false,
-                incrementVersionCount: !mostRecentVersionIsAutosaved,
-              },
-              disableFormWhileProcessing: false,
-              disableSuccessStatus: true,
-              method,
-              overrides: {
-                _status: 'draft',
-              },
-              skipValidation: !validateOnDraft,
-            })
-
-            if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
-              setMostRecentVersionIsAutosaved(true)
-              setUnpublishedVersionCount((prev) => prev + 1)
-            }
-
-            const newDate = new Date()
-
-            // We need to log the time in order to figure out if we need to trigger the state off later
-            endTimestamp = newDate.getTime()
-
-            hideIndicator()
-          }
-        }
+    let url: string
+    let method: string
+    let entitySlug: string
+    const params = qs.stringify(
+      {
+        autosave: true,
+        depth: 0,
+        draft: true,
+        'fallback-locale': 'null',
+        locale,
+        uploadEdits: uploadEdits || undefined,
       },
       {
-        afterProcess: () => {
-          setBackgroundProcessing(false)
-        },
-        beforeProcess: () => {
-          setBackgroundProcessing(true)
-        },
+        addQueryPrefix: true,
       },
     )
+
+    if (collection && id) {
+      entitySlug = collection.slug
+      url = formatAdminURL({
+        apiRoute: api,
+        path: `/${entitySlug}/${id}${params}`,
+      })
+      method = 'PATCH'
+    }
+
+    if (globalDoc) {
+      entitySlug = globalDoc.slug
+      url = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${entitySlug}${params}`,
+      })
+      method = 'POST'
+    }
+
+    if (!url) {
+      return
+    }
+
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current)
+    }
+
+    savingStartTimestampRef.current = Date.now()
+    const autosaveSequence = ++autosaveSequenceRef.current
+    outstandingSubmitCountRef.current += 1
+    setSaving(true)
+
+    try {
+      const result = await submit<any, OnSaveContext>({
+        acceptValues: true,
+        action: url,
+        context: {
+          getDocPermissions: false,
+          incrementVersionCount: !mostRecentVersionIsAutosaved,
+        },
+        disableFormWhileProcessing: false,
+        disableSuccessStatus: true,
+        method,
+        onStaleRequest: () => {
+          if (autosaveSequence === autosaveSequenceRef.current) {
+            previousDebouncedData.current = getDataFromFormState(getFields())
+            previousUploadEdits.current = uploadEdits
+            void retryAutosaveRef.current?.()
+          }
+        },
+        overrides: { _status: 'draft' },
+        skipValidation: !validateOnDraft,
+        submissionType: 'autosave',
+      })
+
+      if (result && result.res?.ok && !mostRecentVersionIsAutosaved) {
+        setMostRecentVersionIsAutosaved(true)
+        setUnpublishedVersionCount((prev) => prev + 1)
+      }
+    } catch (err) {
+      console.error('Error autosaving form:', err) // eslint-disable-line no-console
+    } finally {
+      outstandingSubmitCountRef.current -= 1
+
+      if (outstandingSubmitCountRef.current === 0) {
+        const completedSequence = autosaveSequenceRef.current
+        const hideIndicator = () => {
+          if (
+            outstandingSubmitCountRef.current === 0 &&
+            completedSequence === autosaveSequenceRef.current
+          ) {
+            stopAutoSaveIndicator()
+          }
+        }
+        const remainingAnimationTime =
+          minimumAnimationTime - (Date.now() - savingStartTimestampRef.current)
+
+        if (remainingAnimationTime > 0) {
+          autosaveTimeoutRef.current = setTimeout(hideIndicator, remainingAnimationTime)
+        } else {
+          hideIndicator()
+        }
+      }
+    }
   })
 
-  const didMount = useRef(false)
-  const previousDebouncedData = useRef(getDataFromFormState(debouncedFormState))
-  const previousUploadEdits = useRef(uploadEdits)
+  useEffect(() => {
+    retryAutosaveRef.current = handleAutosave
+
+    return () => {
+      retryAutosaveRef.current = null
+    }
+  }, [handleAutosave])
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -218,15 +227,26 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      */
     const { updatedAt: _, ...formData } = getDataFromFormState(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
+    const { updatedAt: ___, ...currentFormData } = getDataFromFormState(getFields())
+
+    // Recovery can already be saving a newer revision than the debounced snapshot.
+    if (!dequal(formData, currentFormData)) {
+      return
+    }
 
     if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
+      // Validity arrives with the form-state response after the values settle, so retry an autosave skipped while invalid.
+      if (wasSkippedWhileInvalidRef.current) {
+        void handleAutosave()
+      }
+
       return
     }
 
     previousDebouncedData.current = formData
     previousUploadEdits.current = uploadEdits
 
-    handleAutosave()
+    void handleAutosave()
   }, [debouncedFormState, uploadEdits])
 
   /**

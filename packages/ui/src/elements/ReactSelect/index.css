@@ -161,7 +161,8 @@
     }
   }
 
-  html[data-enhanced-contrast] :is(.rs__option--is-focused, .rs__option--is-selected) {
+  html[data-enhanced-contrast] :is(.rs__option--is-focused, .rs__option--is-selected),
+  :host([data-enhanced-contrast]) :is(.rs__option--is-focused, .rs__option--is-selected) {
     --color-text-secondary: var(--color-text);
   }
 }

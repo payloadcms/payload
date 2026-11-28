@@ -32,9 +32,9 @@ const runPipeline = (
     collectionSlug: 'media',
     file: new File(['original'], 'logo.png'),
     ...makeDocs(),
-    options: undefined,
+    getOptions: () => undefined,
     originalFile: new File(['original'], 'logo.png'),
-    req: {} as PayloadRequest,
+    req: { payload: { config: { upload: { transformers: [] } } } } as unknown as PayloadRequest,
     ...args,
   })
 

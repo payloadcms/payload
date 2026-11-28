@@ -7,7 +7,10 @@ import React from 'react'
 import { hasSavePermission as getHasSavePermission } from '../../utilities/hasSavePermission.js'
 import { isEditing as getIsEditing } from '../../utilities/isEditing.js'
 
-export type GetDocPermissions = (data?: Data) => Promise<void>
+export type GetDocPermissions = (
+  data?: Data,
+  isCurrentRequest?: () => boolean,
+) => Promise<SanitizedDocumentPermissions | undefined>
 
 export const useGetDocPermissions = ({
   id,
@@ -33,7 +36,7 @@ export const useGetDocPermissions = ({
   setHasSavePermission: React.Dispatch<React.SetStateAction<boolean>>
 }): GetDocPermissions =>
   React.useCallback(
-    async (data: Data) => {
+    async (data: Data, isCurrentRequest?: () => boolean) => {
       const params = {
         locale: locale || undefined,
       }
@@ -89,6 +92,10 @@ export const useGetDocPermissions = ({
             },
           ).then((res) => res.json())
 
+          if (isCurrentRequest?.() === false) {
+            return
+          }
+
           setDocPermissions(json)
 
           setHasSavePermission(
@@ -101,6 +108,8 @@ export const useGetDocPermissions = ({
           )
 
           setHasPublishPermission(publishedAccessJSON?.update)
+
+          return json
         }
       } else {
         // when creating new documents, there is no permissions saved for this document yet
@@ -108,6 +117,10 @@ export const useGetDocPermissions = ({
         const newDocPermissions = collectionSlug
           ? permissions?.collections?.[collectionSlug]
           : permissions?.globals?.[globalSlug]
+
+        if (isCurrentRequest?.() === false) {
+          return
+        }
 
         setDocPermissions(newDocPermissions)
 
@@ -119,6 +132,8 @@ export const useGetDocPermissions = ({
             isEditing: newIsEditing,
           }),
         )
+
+        return newDocPermissions
       }
     },
     [

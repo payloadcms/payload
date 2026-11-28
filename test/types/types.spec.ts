@@ -109,7 +109,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_D5E7E2D8 as GenNodeUnion,
+  LexicalNodes_F0C4E4FB as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
@@ -1962,6 +1962,7 @@ describe('Types testing', () => {
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
+        | 'payload-llm-instructions'
         | 'payload-locked-documents'
         | 'payload-migrations'
         | 'payload-preferences'
@@ -1993,6 +1994,7 @@ describe('Types testing', () => {
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
+        | 'payload-llm-instructions'
         | 'payload-locked-documents'
         | 'payload-migrations'
         | 'payload-preferences'
@@ -2022,6 +2024,17 @@ describe('Types testing', () => {
         },
       })
       expect(result).type.toBe<LocalConfig['collections']['posts']>()
+    })
+
+    test('SDK create should not require the collection field on auth collections', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      expect(_sdk.create).type.toBeCallableWith({
+        collection: 'users',
+        data: {
+          email: 'dev@payloadcms.com',
+          password: 'test',
+        },
+      })
     })
 
     test('SDK create data should be typed and reject invalid properties', () => {

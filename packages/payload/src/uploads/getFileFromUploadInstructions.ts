@@ -20,7 +20,9 @@ import { normalizeStorageKey } from './fileVersioning/naming.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
+import { holdUploadSessionObject } from './sessions/holdUploadSessionObject.js'
 import { getStagedFile } from './stagedUpload.js'
+import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 export const getFileFromUploadInstructions = async ({
   collectionSlug,
@@ -106,6 +108,10 @@ export const getFileFromUploadInstructions = async ({
       throw new APIError('Invalid upload reference.', 400)
     }
 
+    if (receipt.uploadSessionID !== undefined) {
+      await holdUploadSessionObject({ id: receipt.uploadSessionID, req })
+    }
+
     providerFilename = file.filename
     if (!allowOverwrite) {
       verifiedOriginal = {
@@ -183,6 +189,17 @@ export const getFileFromUploadInstructions = async ({
   const contentRequirement = getFileContentRequirement({
     filename: providerFilename,
     hasSizeEdits: requestHasSizeEdits(req),
+    // Only Sharp's bridge stores sizes.
+    hasVariantsBuiltOnRequest: !(req.payload.config.upload?.transformers ?? []).some(
+      (transformer) => {
+        const bridge = getUploadTransformerInternal(transformer)
+
+        return (
+          Boolean(bridge?.transformUpload) &&
+          bridge?.handlesCollection?.({ collectionSlug }) !== false
+        )
+      },
+    ),
     mimeType: file.mimeType,
     uploadConfig,
   })
@@ -346,7 +363,7 @@ const getClientData = ({
 /**
  * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
  * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
- * fallback, done in generateFileData.ts) isn't available yet at this point in the request
+ * fallback, done in generateFileData/) isn't available yet at this point in the request
  * lifecycle. Saved `_transforms` keys are not checked here: whether a stage applies them is known
  * only after planning, so generateFileData decides that download.
  */

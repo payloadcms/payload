@@ -13,30 +13,39 @@ import { runFileCreationPlan, runFileOperationPlan } from './fileOperationManage
 import {
   collectStoredFiles,
   getStoredFileIdentity,
+  isManagedUpload,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
 
-/** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
-export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) => {
-  const previousState = ['_payloadManagedCloudStorage', '_payloadManagedCloudMetadata'].map(
-    (key) => ({
-      hasProperty: Object.hasOwn(req.context ?? {}, key),
-      key,
-      value: req.context?.[key],
-    }),
-  )
+/** Request context keys that carry one upload's cloud storage state. */
+const cloudStorageStateKeys = [
+  '_payloadCloudStorage',
+  '_payloadManagedCloudMetadata',
+  '_payloadManagedCloudStorage',
+  '_payloadVerifiedProviderOriginal',
+  'skipCloudStorage',
+]
 
-  return () => {
-    req.context ??= {}
-    for (const { hasProperty, key, value } of previousState) {
-      if (hasProperty) {
-        req.context[key] = value
-      } else {
-        delete req.context[key]
-      }
-    }
+/**
+ * Removes the caller's cloud storage state from `req.context`, for a nested file operation that
+ * shares the caller's context. Returns a function that puts the caller's values back.
+ */
+export const hideCloudStorageState = ({ req }: { req: PayloadRequest }): (() => void) => {
+  const restoreCloudStorageState = captureContextKeys({ keys: cloudStorageStateKeys, req })
+
+  for (const key of cloudStorageStateKeys) {
+    delete req.context?.[key]
   }
+
+  return restoreCloudStorageState
 }
+
+/** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
+export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) =>
+  captureContextKeys({
+    keys: ['_payloadManagedCloudStorage', '_payloadManagedCloudMetadata'],
+    req,
+  })
 
 export const runCloudFileCreation = async <T>({
   collection,
@@ -153,8 +162,8 @@ export const runCloudFileUpdate = async <T>({
     write: async () => {
       if (
         collection.versions &&
-        !hasStoredOriginal({ doc: current }) &&
-        hasStoredOriginal({ doc: storedCurrent })
+        !isManagedUpload({ doc: current }) &&
+        isManagedUpload({ doc: storedCurrent })
       ) {
         await persistLegacyCloudVersions({ id, collection, current: storedCurrent, req })
       }
@@ -241,7 +250,7 @@ const persistLegacyCloudVersions = async ({
 
     for (const row of versions.docs) {
       hasVersions = true
-      if (hasStoredOriginal({ doc: row.version })) {
+      if (isManagedUpload({ doc: row.version })) {
         continue
       }
 
@@ -250,7 +259,7 @@ const persistLegacyCloudVersions = async ({
         doc: row.version,
         req,
       })
-      if (!hasStoredOriginal({ doc: version })) {
+      if (!isManagedUpload({ doc: version })) {
         continue
       }
 
@@ -275,7 +284,7 @@ const persistLegacyCloudVersions = async ({
     page += 1
   }
 
-  if (!hasVersions && hasStoredOriginal({ doc: current })) {
+  if (!hasVersions && isManagedUpload({ doc: current })) {
     await saveVersion({
       id,
       collection,
@@ -287,13 +296,6 @@ const persistLegacyCloudVersions = async ({
     })
   }
 }
-
-const hasStoredOriginal = ({ doc }: { doc: JsonObject }): boolean =>
-  Boolean(
-    doc.original &&
-    typeof doc.original === 'object' &&
-    typeof (doc.original as Record<string, unknown>).filename === 'string',
-  )
 
 const withCloudHookGuard = async <T>({
   metadata,
@@ -313,5 +315,31 @@ const withCloudHookGuard = async <T>({
     return await write()
   } finally {
     restoreCloudHookState()
+  }
+}
+
+/** Returns a function that puts back the current values of `keys` in `req.context`. */
+const captureContextKeys = ({
+  keys,
+  req,
+}: {
+  keys: string[]
+  req: PayloadRequest
+}): (() => void) => {
+  const previousState = keys.map((key) => ({
+    hasProperty: Object.hasOwn(req.context ?? {}, key),
+    key,
+    value: req.context?.[key],
+  }))
+
+  return () => {
+    req.context ??= {}
+    for (const { hasProperty, key, value } of previousState) {
+      if (hasProperty) {
+        req.context[key] = value
+      } else {
+        delete req.context[key]
+      }
+    }
   }
 }

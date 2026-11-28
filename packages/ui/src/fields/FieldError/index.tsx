@@ -14,6 +14,7 @@ const baseClass = 'field-error'
 
 export const FieldError: React.FC<GenericErrorProps> = (props) => {
   const {
+    id,
     alignCaret = 'right',
     message: messageFromProps,
     path,
@@ -36,7 +37,7 @@ export const FieldError: React.FC<GenericErrorProps> = (props) => {
         alignCaret={alignCaret}
         className={baseClass}
         delay={0}
-        id={generateFieldID(path, editDepth, uuid, 'field-error')}
+        id={id ?? generateFieldID(path, editDepth, uuid, 'field-error')}
         portal={false}
         position="top"
         role="alert"

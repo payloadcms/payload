@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import type { FetchRegistry, RegistryPackument } from './types.js'
+import type { FetchRegistry, RegistryPackage } from '../upgrade-shared/index.js'
 
-import { resolveVersions } from './resolveVersions.js'
+import { resolveVersions } from '../upgrade-shared/toolchain.js'
 
-const packuments: Record<string, RegistryPackument> = {
+const packuments: Record<string, RegistryPackage> = {
   '@payloadcms/next': {
     'dist-tags': { canary: '4.0.0-canary.20' },
     versions: {
@@ -32,7 +32,7 @@ const packuments: Record<string, RegistryPackument> = {
   payload: {
     'dist-tags': { canary: '4.0.0-canary.20' },
     versions: {
-      '4.0.0-canary.20': { engines: { node: '>=24.22.1' } },
+      '4.0.0-canary.20': { engines: { node: '^24.22.3 || >=26.13.1' } },
     },
   },
 }
@@ -50,7 +50,7 @@ describe('resolveVersions', () => {
     const resolved = await resolveVersions({ fetchRegistry, tag: 'canary' })
 
     expect(resolved).toEqual({
-      enginesNode: '>=24.22.1',
+      enginesNode: '^24.22.3 || >=26.13.1',
       nextTarget: '16.9.3', // newest within >=16.2.6 <17, excludes 17.0.0
       payloadVersion: '4.0.0-canary.20',
       typesNode: '24.12.3', // newest within major 24, excludes 25.0.0

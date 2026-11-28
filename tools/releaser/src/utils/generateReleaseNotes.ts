@@ -330,25 +330,59 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
   })
 
   if (isBreaking && includeBreakingNotes) {
-    // Parse breaking change notes from commit body
-    const [rawNotes, _] = commit.body.split('\n\n')
-    let notes =
-      `  ` +
-      rawNotes
-        ?.split('\n')
-        .map((l) => `  ${l}`) // Indent notes
-        .join('\n')
-        .trim()
-
-    // Remove random trailing quotes that sometimes appear
-    if (notes.endsWith('"')) {
-      notes = notes.slice(0, -1)
+    const notes = getBreakingChangeNotes(commit)
+    if (notes) {
+      // Indent so the notes render inside the list item
+      formatted += `\n\n${notes
+        .split('\n')
+        .map((line) => `  ${line}`)
+        .join('\n')}\n\n`
     }
-
-    formatted += `\n\n${notes}\n\n`
   }
 
   return formatted
+}
+
+const BREAKING_HEADING_PATTERN = /^##\s*breaking\b/i
+const SECTION_END_PATTERN = /^(?:#{1,2}\s|-{3,}\s*$)/
+const CODE_FENCE_PATTERN = /^\s*(?:```|~~~)/
+/** changelogen runs `git log --name-status`, which appends `M\tpath` lines to each body */
+const NAME_STATUS_PATTERN = /^[ACDMRTUXB]\d*\t/
+
+/**
+ * Returns the text under the body's `## Breaking Changes` heading, up to the next
+ * H1/H2 or horizontal rule (GitHub puts one before squash trailers). Uses the first
+ * paragraph when the heading is missing.
+ */
+function getBreakingChangeNotes(commit: GitCommit): string {
+  const lines = commit.body.split('\n')
+  const headingIndex = lines.findIndex((line) => BREAKING_HEADING_PATTERN.test(line))
+
+  if (headingIndex === -1) {
+    console.log(
+      `WARNING: Breaking commit ${commit.shortHash} has no '## Breaking Changes' section, using first paragraph`,
+    )
+    const firstParagraph = commit.body.split('\n\n')[0]?.trim() ?? ''
+    // Remove random trailing quotes that sometimes appear
+    return firstParagraph.endsWith('"') ? firstParagraph.slice(0, -1) : firstParagraph
+  }
+
+  const sectionLines: string[] = []
+  let isInCodeFence = false
+  for (const line of lines.slice(headingIndex + 1)) {
+    if (NAME_STATUS_PATTERN.test(line)) {
+      break
+    }
+    if (CODE_FENCE_PATTERN.test(line)) {
+      isInCodeFence = !isInCodeFence
+    }
+    if (!isInCodeFence && SECTION_END_PATTERN.test(line)) {
+      break
+    }
+    sectionLines.push(line)
+  }
+
+  return sectionLines.join('\n').trim()
 }
 
 // module import workaround for ejs

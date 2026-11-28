@@ -1,5 +1,6 @@
 @layer payload-default {
-  :root {
+  :root,
+  :host {
     --diff-delete-pill-bg: var(--color-bg-danger-tertiary-hover);
     --diff-delete-pill-color: var(--color-text-danger);
     --diff-delete-pill-border: var(--color-border-danger);
@@ -16,7 +17,9 @@
   }
 
   html[data-enhanced-contrast],
-  html[data-enhanced-contrast] [data-theme] {
+  html[data-enhanced-contrast] [data-theme],
+  :host([data-enhanced-contrast]),
+  :host([data-enhanced-contrast]) [data-theme] {
     --diff-create-pill-color: var(--color-text-selected);
     --diff-delete-pill-color: var(--color-text);
     --diff-delete-parent-color: var(--color-text);

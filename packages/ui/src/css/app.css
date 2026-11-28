@@ -10,14 +10,6 @@
     --app-header-height: 0px;
     --doc-controls-height: 0px;
     --doc-header-height: 0px;
-    --nav-width: 275px;
-  }
-
-  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
-  @media (max-width: 768px) {
-    :root {
-      --nav-width: 100vw;
-    }
   }
 
   /* GLOBAL STYLES */
@@ -97,26 +89,5 @@
 
   svg {
     vertical-align: middle;
-  }
-
-  dialog {
-    width: 100%;
-    border: 0;
-    padding: 0;
-    color: currentColor;
-  }
-
-  .payload__modal-item {
-    min-height: 100%;
-    background: transparent;
-  }
-
-  .payload__modal-container--enterDone {
-    overflow: auto;
-  }
-
-  .payload__modal-item--enter,
-  .payload__modal-item--enterDone {
-    z-index: var(--z-modal);
   }
 }

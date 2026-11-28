@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -12,10 +12,10 @@ import { getColumnSelectorItem } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { selectInput } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
@@ -25,14 +25,14 @@ const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
-const { beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 const londonTimezone = 'Europe/London'
 const aucklandTimezone = 'Pacific/Auckland'
 const detroitTimezone = 'America/Detroit'
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
+const browserContexts: BrowserContext[] = []
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -56,6 +56,10 @@ const getTimezoneOptionSelector = ({
 }
 
 describe('Date', () => {
+  afterEach(async () => {
+    await Promise.all(browserContexts.splice(0).map((context) => context.close()))
+  })
+
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
@@ -72,13 +76,28 @@ describe('Date', () => {
       serverURL,
     })
 
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
-
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test('should select and clear a date range', async () => {
+    await page.goto(url.create)
+    const dateInput = page.getByLabel('Date range', { exact: true })
+
+    await dateInput.click()
+    const calendar = page.locator('.react-datepicker')
+    const disabledDay = calendar.locator('.react-datepicker__day--015')
+    const disabledColor = await disabledDay.evaluate((day) => getComputedStyle(day).color)
+    const textColor = await page.locator('body').evaluate((body) => getComputedStyle(body).color)
+
+    await calendar.locator('.react-datepicker__day--010').click()
+    await expect(dateInput).toHaveValue('11/10/2026 - ')
+    await calendar.locator('.react-datepicker__day--020').hover()
+    await expect(calendar.locator('.react-datepicker__day--016')).toHaveCSS('color', textColor)
+    await expect(disabledDay).toHaveCSS('color', disabledColor)
+    await calendar.locator('.react-datepicker__day--020').click()
+    await expect(dateInput).toHaveValue('11/10/2026 - 11/20/2026')
+    await dateInput.clear()
+    await expect(dateInput).toHaveValue('')
   })
 
   test('should display formatted date in list view table cell', async () => {
@@ -125,6 +144,115 @@ describe('Date', () => {
         /^(January|February|March|April|May|June|July|August|September|October|November|December)/,
       )
     }).toPass()
+  })
+
+  test('should preserve a filtered calendar day across browser timezones', async ({ browser }) => {
+    const cases = [
+      {
+        operator: 'equals',
+        operatorLabel: 'equals',
+        timezoneId: 'America/Los_Angeles',
+      },
+      {
+        operator: 'greater_than_equal',
+        operatorLabel: 'is greater than or equal to',
+        timezoneId: 'Pacific/Auckland',
+      },
+      {
+        operator: 'greater_than',
+        operatorLabel: 'is greater than',
+        timezoneId: 'America/Los_Angeles',
+      },
+    ]
+
+    for (const { operator, operatorLabel, timezoneId } of cases) {
+      const context = await browser.newContext({ timezoneId })
+      browserContexts.push(context)
+      const { page: timezonePage } = await initPage({ context, serverURL })
+
+      await goToListView(timezonePage)
+      const { condition } = await addListFilter({
+        fieldLabel: 'Default With Timezone',
+        operatorLabel,
+        page: timezonePage,
+      })
+      const dateInput = condition.locator(
+        '.condition-value-date .date-time-picker__input-wrapper input',
+      )
+      const expectedDate = await timezonePage.evaluate(() => {
+        const date = new Date()
+
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`
+      })
+
+      await dateInput.click()
+      await timezonePage
+        .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+        .click()
+
+      if (operator === 'equals') {
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is greater than or equal to',
+        })
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .toContain(`[greater_than_equal]=${expectedDate}`)
+
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is not equal to',
+        })
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .toContain(`[not_equals]=${expectedDate}`)
+
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is in',
+        })
+        await expect(dateInput).toHaveValue('')
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .not.toContain(expectedDate)
+        continue
+      }
+
+      await expect
+        .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+        .toContain(`[${operator}]=${expectedDate}`)
+      await dateInput.clear()
+      await expect
+        .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+        .not.toContain(`[${operator}]=${expectedDate}`)
+    }
+  })
+
+  test('should preserve date-shaped values when changing operators on non-date fields', async () => {
+    await goToListView(page)
+
+    const { condition } = await addListFilter({
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      page,
+      value: '2026-03-29',
+    })
+    const valueInput = condition.locator('.condition__value input')
+
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'is not equal to',
+    })
+
+    await expect(valueInput).toHaveValue('2026-03-29')
   })
 
   test('should display formatted date in useAsTitle', async () => {
@@ -174,7 +302,7 @@ describe('Date', () => {
 
     const id = page.url().split('/').pop()
 
-    const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+    const doc = await payload.findByID({ collection: 'date-fields', id: id!, overrideAccess: true })
 
     await expect(() => {
       // Ensure that the time field does not contain milliseconds
@@ -206,7 +334,7 @@ describe('Date', () => {
 
     const id = page.url().split('/').pop()
 
-    const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+    const doc = await payload.findByID({ collection: 'date-fields', id: id!, overrideAccess: true })
 
     await expect(() => {
       // Ensure that the time with miliseconds field contains the exact miliseconds specified
@@ -250,7 +378,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+        const doc = await payload.findByID({
+          collection: 'date-fields',
+          id: id!,
+          overrideAccess: true,
+        })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
@@ -294,7 +426,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+        const doc = await payload.findByID({
+          collection: 'date-fields',
+          id: id!,
+          overrideAccess: true,
+        })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
@@ -338,7 +474,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
+        const doc = await payload.findByID({
+          collection: 'date-fields',
+          id: id!,
+          overrideAccess: true,
+        })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
@@ -768,12 +908,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       await reInitializeDB({
         serverURL,
       })
-
-      if (client) {
-        await client.logout()
-      }
-      client = new RESTClient({ defaultSlug: 'users', serverURL })
-      await client.login()
 
       await ensureCompilationIsDone({ page, serverURL })
     })

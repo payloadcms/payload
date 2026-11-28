@@ -13,6 +13,7 @@ export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
 export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'
 export type { SchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export { getNestedRelationshipReadConstraint } from '../database/nestedRelationshipReadConstraint.js'
 export { getLLMInstructions } from '../llm-instructions/getInstructions.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
@@ -28,9 +29,22 @@ export { isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName, incrementName } from '../uploads/getSafeFilename.js'
 export { isOriginalFileRequest } from '../uploads/isOriginalFileRequest.js'
+export { isRequestTimeFile } from '../uploads/isRequestTimeFile.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
+export {
+  cancelUploadSession,
+  completeUploadSession,
+  completeUploadSessionStorage,
+  createUploadSession,
+  getUploadSession,
+  getUploadSessionInstructions,
+  listUploadSessions,
+  sweepUploadSessions,
+} from '../uploads/sessions/operations.js'
+export { planSegments, shouldUseSegmentedUpload } from '../uploads/sessions/planSegments.js'
+export { uploadSessionsCollectionSlug } from '../uploads/sessions/slug.js'
 export {
   getUploadFilePath,
   getUploadTransformerInternal,
@@ -38,8 +52,8 @@ export {
   uploadTransformerInternal,
 } from '../uploads/transformers/uploadTransformerBridge.js'
 export type {
-  PreparedUploadTransformation,
   TransformerWithInternalBridge,
+  UploadTransformation,
   UploadTransformerInternal,
   UploadTransformTask,
 } from '../uploads/transformers/uploadTransformerBridge.js'

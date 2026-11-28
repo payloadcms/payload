@@ -21,6 +21,7 @@ type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
   locale?: string
+  shouldUseVersionTable?: boolean
   table: GenericTable
   where: Where
   wherePlan: PolymorphicJoinWherePlan
@@ -54,6 +55,7 @@ export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
   locale,
+  shouldUseVersionTable = false,
   table,
   where,
   wherePlan,
@@ -72,6 +74,7 @@ export const buildPolymorphicJoinWhere = ({
           adapter,
           collection,
           locale,
+          shouldUseVersionTable,
           table,
           where: nestedWhere,
           wherePlan,
@@ -90,6 +93,7 @@ export const buildPolymorphicJoinWhere = ({
       adapter,
       collection,
       schemaPath: key,
+      shouldUseVersionTable,
       table,
       wherePlan,
     })
@@ -261,6 +265,7 @@ const resolveWherePath = ({
   adapter,
   collection,
   schemaPath,
+  shouldUseVersionTable,
   table,
   wherePlan,
 }: {
@@ -279,7 +284,7 @@ const resolveWherePath = ({
   if (schemaPath === 'relationTo') {
     return {
       type: 'scalar',
-      column: sql`${collection}`,
+      column: adapter.name === 'postgres' ? sql`cast(${collection} as text)` : sql`${collection}`,
       pathPlan,
       queryValueContext: {
         type: 'scalar',
@@ -305,6 +310,7 @@ const resolveWherePath = ({
         adapter,
         collection,
         pathPlan,
+        shouldUseVersionTable,
         table,
       }),
       pathPlan,
@@ -323,13 +329,25 @@ const resolveWherePath = ({
     return { type: 'invalid', pathPlan }
   }
 
+  let column: Column | SQL = sql`null`
+
+  if (fieldContext) {
+    const columnName = shouldUseVersionTable
+      ? `version_${pathPlan.columnPath}`
+      : pathPlan.columnPath
+
+    if (fieldContext.isLocalized) {
+      column = adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][columnName]
+    } else {
+      const tableColumnName = shouldUseVersionTable && schemaPath === 'id' ? 'parent' : columnName
+
+      column = table[tableColumnName]
+    }
+  }
+
   return {
     type: 'scalar',
-    column: fieldContext
-      ? fieldContext.isLocalized
-        ? adapter.tables[`${getTableName(table)}${adapter.localesSuffix}`][pathPlan.columnPath]
-        : table[pathPlan.columnPath]
-      : sql`null`,
+    column,
     fieldContext,
     pathPlan,
     queryValueContext,
@@ -340,11 +358,13 @@ const getHasManySelectExpression = ({
   adapter,
   collection,
   pathPlan,
+  shouldUseVersionTable,
   table,
 }: {
   adapter: DrizzleAdapter
   collection: string
   pathPlan: WherePathPlan
+  shouldUseVersionTable?: boolean
   table: GenericTable
 }): string => {
   if (pathPlan.fieldsByCollection.get(collection)?.type !== 'hasManySelect') {
@@ -355,7 +375,11 @@ const getHasManySelectExpression = ({
     .split('.')
     .map((pathSegment) => toSnakeCase(pathSegment))
     .join('_')
-  const valuesTableName = adapter.tableNameMap.get(`${toSnakeCase(collection)}_${selectTablePath}`)
+  const valuesTableName = adapter.tableNameMap.get(
+    shouldUseVersionTable
+      ? `${getTableName(table)}_version_${selectTablePath}`
+      : `${toSnakeCase(collection)}_${selectTablePath}`,
+  )
 
   if (!valuesTableName) {
     throw new Error(

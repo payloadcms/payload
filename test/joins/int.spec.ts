@@ -2043,64 +2043,62 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       expect(parent.children?.totalDocs).toBe(1)
     })
 
-    test.options(
-      'should join across multiple collections on a hasMany relationship',
-      { db: 'mongo' },
-      async ({ payload }) => {
-        const parent = await payload.create({
-          collection: 'multiple-collections-has-many-parents',
-          data: {},
-          depth: 0,
-          overrideAccess: true,
-        })
+    test('should join across multiple collections on a hasMany relationship', async ({
+      payload,
+    }) => {
+      const parent = await payload.create({
+        collection: 'multiple-collections-has-many-parents',
+        data: {},
+        depth: 0,
+        overrideAccess: true,
+      })
 
-        const otherParent = await payload.create({
-          collection: 'multiple-collections-has-many-parents',
-          data: {},
-          depth: 0,
-          overrideAccess: true,
-        })
+      const otherParent = await payload.create({
+        collection: 'multiple-collections-has-many-parents',
+        data: {},
+        depth: 0,
+        overrideAccess: true,
+      })
 
-        const child_1 = await payload.create({
-          collection: 'multiple-collections-1',
-          data: {
-            hasManyParents: [parent.id, otherParent.id],
-            title: 'doc-1',
+      const child_1 = await payload.create({
+        collection: 'multiple-collections-1',
+        data: {
+          hasManyParents: [parent.id, otherParent.id],
+          title: 'doc-1',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const child_2 = await payload.create({
+        collection: 'multiple-collections-2',
+        data: {
+          hasManyParents: [otherParent.id, parent.id],
+          title: 'doc-2',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: 'multiple-collections-has-many-parents',
+        depth: 0,
+        joins: {
+          children: {
+            count: true,
+            sort: 'title',
           },
-          depth: 0,
-          overrideAccess: true,
-        })
+        },
+        overrideAccess: true,
+      })
 
-        const child_2 = await payload.create({
-          collection: 'multiple-collections-2',
-          data: {
-            hasManyParents: [otherParent.id, parent.id],
-            title: 'doc-2',
-          },
-          depth: 0,
-          overrideAccess: true,
-        })
-
-        const result = await payload.findByID({
-          id: parent.id,
-          collection: 'multiple-collections-has-many-parents',
-          depth: 0,
-          joins: {
-            children: {
-              count: true,
-              sort: 'title',
-            },
-          },
-          overrideAccess: true,
-        })
-
-        expect(result.children?.docs?.map(({ value }) => value)).toStrictEqual([
-          child_1.id,
-          child_2.id,
-        ])
-        expect(result.children?.totalDocs).toBe(2)
-      },
-    )
+      expect(result.children?.docs?.map(({ value }) => value)).toStrictEqual([
+        child_1.id,
+        child_2.id,
+      ])
+      expect(result.children?.totalDocs).toBe(2)
+    })
 
     test('should return all docs across multiple collections with limit 0', async ({ payload }) => {
       let parent = await payload.create({
@@ -3158,10 +3156,18 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       )
     })
 
-    test('should not match flattened field names from another joined collection', async ({
-      payload,
-    }) => {
+    test('should scope nested field access to its joined collection', async ({ payload }) => {
       const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          parent: parent.id,
+          title: 'Unavailable article',
+          details: { status: 'unavailable' },
+        },
+        overrideAccess: true,
+      })
 
       const result = await payload.findByID({
         id: parent.id,
@@ -3177,15 +3183,26 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         user,
       })
 
-      expect(result.children.docs).toHaveLength(1)
-      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
-      expect(result.children.totalDocs).toBe(1)
+      expect(result.children.docs).toHaveLength(4)
+      expect(
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinArticlesSlug),
+      ).toEqual([
+        expect.objectContaining({ value: expect.objectContaining({ id: allowedChild.id }) }),
+      ])
+      expect(
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toHaveLength(3)
+      expect(result.children.totalDocs).toBe(4)
     })
 
-    test('should not match nested fields to top-level paths from another joined collection', async ({
-      payload,
-    }) => {
+    test('should scope top-level field access to its joined collection', async ({ payload }) => {
       const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await payload.create({
+        collection: accessJoinNotesSlug,
+        data: { parent: parent.id, title: 'Unavailable note', details_status: 'unavailable' },
+        overrideAccess: true,
+      })
 
       const result = await payload.findByID({
         id: parent.id,
@@ -3201,11 +3218,14 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
         user,
       })
 
-      expect(result.children.docs).toHaveLength(3)
+      expect(result.children.docs).toHaveLength(4)
       expect(
-        result.children.docs.every(({ relationTo }) => relationTo === accessJoinNotesSlug),
-      ).toBe(true)
-      expect(result.children.totalDocs).toBe(3)
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toHaveLength(3)
+      expect(
+        result.children.docs.filter(({ relationTo }) => relationTo === accessJoinArticlesSlug),
+      ).toHaveLength(1)
+      expect(result.children.totalDocs).toBe(4)
     })
 
     test('should reject distinct schema paths that share a flattened field name', async ({

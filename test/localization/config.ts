@@ -20,6 +20,10 @@ import {
 } from './collections/LocaleValidation/index.js'
 import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
+import {
+  LocalizedQueryReferences,
+  LocalizedQueryTargets,
+} from './collections/LocalizedQueryAccess/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
@@ -102,6 +106,8 @@ export default buildConfigWithDefaults({
       NestedArray,
       NestedFields,
       LocalizedDrafts,
+      LocalizedQueryTargets,
+      LocalizedQueryReferences,
       LocalizedDateFields,
       AllFieldsLocalized,
       LocaleValidation,

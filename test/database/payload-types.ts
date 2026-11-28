@@ -62,29 +62,31 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_B1AC347C".
+ * via the `definition` "LexicalNodes_46EF4972".
  */
-export type LexicalNodes_B1AC347C =
+export type LexicalNodes_46EF4972 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_B1AC347C>
+  | SerializedParagraphNode<LexicalNodes_46EF4972>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_B1AC347C>
+  | SerializedHeadingNode<LexicalNodes_46EF4972>
   | {
       type: 'upload';
       /**
+       * @deprecated
        * Lexical's internal serialization version for this node type.
        */
-      version: number;
+      version?: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_B1AC347C>
-  | SerializedListNode<LexicalNodes_B1AC347C>
-  | SerializedListItemNode<LexicalNodes_B1AC347C>
-  | SerializedAutoLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_46EF4972>
+  | SerializedListNode<LexicalNodes_46EF4972>
+  | SerializedListItemNode<LexicalNodes_46EF4972>
+  | SerializedAutoLinkNode<LexicalNodes_46EF4972, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_46EF4972, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
+      | 'write-input'
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
@@ -118,6 +120,18 @@ export type LexicalNodes_B1AC347C =
       | 'payload-preferences'
       | 'payload-migrations'
     >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3DE324E4".
+ */
+export type LexicalNodes_3DE324E4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3DE324E4>
+  | SerializedListNode<LexicalNodes_3DE324E4>
+  | SerializedListItemNode<LexicalNodes_3DE324E4>
+  | SerializedHeadingNode<LexicalNodes_3DE324E4, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
@@ -125,6 +139,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'write-input': WriteInput;
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
@@ -157,6 +172,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {
     'virtual-linked-projects': {
@@ -164,6 +180,7 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'write-input': WriteInputSelect<false> | WriteInputSelect<true>;
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
@@ -196,6 +213,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -217,6 +235,7 @@ export interface Config {
   };
   locale: 'en' | 'es' | 'uk';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -247,11 +266,12 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "noTimeStamps".
+ * via the `definition` "write-input".
  */
-export interface NoTimeStamp {
+export interface WriteInput {
   id: string;
   title?: string | null;
+  layout?: Content[] | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -260,6 +280,28 @@ export interface NoTimeStamp {
     relationTo: 'users';
     value: string | User;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  items?:
+    | {
+        settings?: {
+          label?: string | null;
+        };
+        translations?: {
+          label?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -290,10 +332,33 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?: {
+          [k: string]: unknown;
+        } | null;
       }[]
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "noTimeStamps".
+ */
+export interface NoTimeStamp {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -466,10 +531,20 @@ export interface CategoriesCustomId {
  * via the `definition` "BlockThird".
  */
 export interface BlockThird {
+  virtualBlocks?: VirtualBlock[] | null;
   nested?: BlockFourth[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'block-third';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VirtualBlock".
+ */
+export interface VirtualBlock {
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'virtual-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -616,7 +691,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_B1AC347C> | null;
+  richText?: LexicalRichText<LexicalNodes_46EF4972> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -636,7 +711,7 @@ export interface RelationB {
   id: string;
   title?: string | null;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_B1AC347C> | null;
+  richText?: LexicalRichText<LexicalNodes_46EF4972> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1109,6 +1184,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'write-input';
+        value: string | WriteInput;
+      } | null)
+    | ({
         relationTo: 'noTimeStamps';
         value: string | NoTimeStamp;
       } | null)
@@ -1264,6 +1343,64 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_3DE324E4> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "write-input_select".
+ */
+export interface WriteInputSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    settings?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    translations?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "noTimeStamps_select".
  */
 export interface NoTimeStampsSelect<T extends boolean = true> {
@@ -1393,6 +1530,16 @@ export interface PostsSelect<T extends boolean = true> {
         'block-third'?:
           | T
           | {
+              virtualBlocks?:
+                | T
+                | {
+                    'virtual-block'?:
+                      | T
+                      | {
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
               nested?:
                 | T
                 | {
@@ -1883,6 +2030,11 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
+        label?: T;
+        type?: T;
+        metadata?: T;
       };
 }
 /**
@@ -1914,6 +2066,22 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2117,6 +2285,16 @@ export interface VirtualRelationGlobalSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -2133,6 +2311,7 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
+      | 'write-input'
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
@@ -2184,6 +2363,7 @@ export interface ActivityWidget {
   data?: {
     excludedCollections?:
       | (
+          | 'write-input'
           | 'noTimeStamps'
           | 'categories'
           | 'simple'
@@ -2215,7 +2395,7 @@ export interface ActivityWidget {
         )[]
       | null;
   };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2268,6 +2448,7 @@ export interface SerializedLexicalElementBase<TChildren> {
   indent: number;
   textFormat?: number;
   textStyle?: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2280,6 +2461,7 @@ export interface SerializedTextNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2290,11 +2472,13 @@ export interface SerializedTabNode {
   mode: LexicalTextMode;
   style: string;
   text: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
 export interface SerializedLineBreakNode {
   type: 'linebreak';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 }
 
@@ -2307,11 +2491,13 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
 export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
 } : never;
 export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
@@ -2328,6 +2514,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
   fields: TFields;
 } & {
@@ -2378,6 +2565,7 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
 export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
+  /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
   version: number;
 } & {
   [TSlug in TSlugs]: {
@@ -2394,6 +2582,7 @@ export interface LexicalRichText<TNode> {
     format: LexicalElementFormat;
     indent: number;
     type: 'root';
+    /** @deprecated Ignored when loading. Typed as required only to match Lexical's types: rich text sent through the API, CLI or MCP may not contain it. */
     version: number;
   };
 }

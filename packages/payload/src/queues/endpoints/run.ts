@@ -2,6 +2,7 @@ import type { Endpoint } from '../../config/types.js'
 import type { SanitizedJobsConfig } from '../config/types/index.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { stripUserOnCrossSiteNavigation } from '../../auth/stripUserOnCrossSiteNavigation.js'
 import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
 
 /**
@@ -21,6 +22,8 @@ export const runJobsEndpoint: Endpoint = {
         { status: 200 },
       )
     }
+
+    stripUserOnCrossSiteNavigation(req)
 
     const accessFn = jobsConfig.access?.run ?? defaultAccess
 

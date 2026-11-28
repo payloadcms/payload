@@ -36,5 +36,22 @@ export const sessionsFieldConfig: ArrayField = {
       name: 'refreshedAt',
       type: 'date',
     },
+    {
+      name: 'label',
+      type: 'text',
+    },
+    {
+      name: 'type',
+      type: 'text',
+    },
+    {
+      name: 'metadata',
+      type: 'json',
+      jsonSchema: {
+        fileMatch: ['payload://session-metadata'],
+        schema: { type: ['object', 'null'], additionalProperties: true },
+        uri: 'payload://session-metadata',
+      },
+    },
   ],
 }

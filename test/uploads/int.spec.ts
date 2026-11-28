@@ -60,8 +60,12 @@ const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
 test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: false }, () => {
+  let token: string
+
   test.beforeAll(async ({ restClientInstance: restClient }) => {
-    await restClient.login({ slug: usersSlug })
+    const result = await restClient.login({ slug: usersSlug })
+
+    token = result.token
   })
 
   test('should inspect temp-file SVG without whole-file reads', async () => {
@@ -272,6 +276,45 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       }
       createdIDs.length = 0
       fs.rmSync(staticDir, { force: true, recursive: true })
+    })
+
+    test('should mark a size as stored when a new file stores it, after an earlier owner built it at request time', async ({
+      payload,
+    }) => {
+      const getImage = async (name: string) => {
+        const file = await getFileByPath(path.resolve(dirname, './image.png'))
+        file!.name = `${name}-${randomUUID()}.png`
+        return file
+      }
+      const data = { prefix: 'public', visibility: 'public' }
+      const doc = await payload.create({
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data,
+        file: await getImage('owner-change'),
+        overrideAccess: true,
+      })
+      createdIDs.push(doc.id)
+      await payload.db.updateOne({
+        id: doc.id,
+        collection: fileAccessMediaSlug,
+        data: { variants: { thumbnail: { _stored: false } } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: fileAccessMediaSlug as CollectionSlug,
+        data,
+        file: await getImage('replacement'),
+        overrideAccess: true,
+      })
+
+      const saved = await payload.db.findOne<{
+        variants?: { thumbnail?: { _stored?: boolean | null } }
+      }>({
+        collection: fileAccessMediaSlug,
+        where: { id: { equals: doc.id } },
+      })
+      expect(saved?.variants?.thumbnail?._stored).not.toBe(false)
     })
 
     test('should keep generated file data bound to its upload document', async ({
@@ -4006,6 +4049,51 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
   })
 
   test.describe('paste-url endpoint', () => {
+    test('should accept cookie auth from a same-origin request', async ({ restClient }) => {
+      const sourceServer = createServer((_req, res) => res.end('file contents'))
+
+      await new Promise<void>((resolve) => sourceServer.listen(0, '127.0.0.1', resolve))
+
+      try {
+        const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+          auth: false,
+          headers: {
+            Cookie: `payload-token=${token}`,
+            'Sec-Fetch-Site': 'same-origin',
+          },
+          query: {
+            src: `http://127.0.0.1:${(sourceServer.address() as AddressInfo).port}/file.txt`,
+          },
+        })
+
+        expect(response.status).toBe(200)
+        expect(await response.text()).toBe('file contents')
+      } finally {
+        await new Promise<void>((resolve, reject) => {
+          sourceServer.close((error) => (error ? reject(error) : resolve()))
+        })
+      }
+    })
+
+    for (const destination of ['document', 'iframe']) {
+      test(`should reject cookie auth from a cross-site ${destination} navigation`, async ({
+        restClient,
+      }) => {
+        const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+          auth: false,
+          headers: {
+            Cookie: `payload-token=${token}`,
+            'Sec-Fetch-Dest': destination,
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+          },
+          query: { src: 'http://other.example.com/file.png' },
+        })
+
+        expect(response.status).toBe(403)
+      })
+    }
+
     test('should return 400 when pasteURL is not configured', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/paste-url`, {
         query: { src: 'http://example.com/file.png' },

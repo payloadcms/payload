@@ -9,7 +9,9 @@ import type {
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
+import { getNestedRelationshipReadConstraint } from 'payload/internal'
 import {
+  getDateOnlyComparison,
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
   validOperatorSet,
@@ -146,6 +148,30 @@ export async function buildSearchParam({
       (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry))))
   ) {
     throw new APIError(`Invalid value for "${operator}" on path "${path}": expected a string.`, 400)
+  }
+
+  const dateOnlyComparison =
+    paths.length === 1
+      ? getDateOnlyComparison({
+          config: payload.config,
+          field,
+          operator,
+          value: val,
+        })
+      : undefined
+
+  if (dateOnlyComparison && path) {
+    const range = Object.fromEntries(
+      dateOnlyComparison.constraints.map((constraint) => [
+        operatorMap[constraint.operator],
+        constraint.value,
+      ]),
+    )
+
+    return {
+      path,
+      value: dateOnlyComparison.isNegated ? { $not: range } : range,
+    }
   }
 
   if (path) {
@@ -537,9 +563,27 @@ async function buildHasManyRelationshipSearchParam({
         }
       }
 
+      const readConstraint = getNestedRelationshipReadConstraint(nestedWhere)
+
+      // Related documents the caller cannot read must not affect the result, so they count as
+      // matching. Only the read constraint is inverted; the caller's query is never inverted.
+      const readableRelatedDocumentsQuery = readConstraint
+        ? await RelatedModel.buildQuery({
+            locale: pathLocale ?? locale,
+            payload,
+            where: readConstraint,
+          })
+        : undefined
+
       // MongoDB rejects `$near` and `$text` when they are inverted with `$nor`. Check the parent
       // instead: none of its IDs may fall outside the matching IDs.
-      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(matchingRelatedDocumentsQuery)
+      const matchingRelatedDocumentIDs = await findRelatedDocumentIDs(
+        readableRelatedDocumentsQuery
+          ? {
+              $or: [matchingRelatedDocumentsQuery, { $nor: [readableRelatedDocumentsQuery] }],
+            }
+          : matchingRelatedDocumentsQuery,
+      )
 
       return {
         path,

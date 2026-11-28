@@ -85,6 +85,7 @@ export const buildJoinAggregation = async ({
       where: whereJoin = {},
     } = joins?.[join.joinPath] || {}
 
+    const pageEnd = (page || 1) * limitJoin
     const aggregatedFields: FlattenedField[] = []
     for (const collectionSlug of join.field.collection) {
       const { collectionConfig } = getCollection({ adapter, collectionSlug })
@@ -151,13 +152,14 @@ export const buildJoinAggregation = async ({
             {
               $sort: {
                 [sortProperty]: sortDirection,
+                ...(sortProperty === '_id' ? {} : { _id: 1 }),
               },
             },
             ...(limitJoin > 0
               ? [
                   {
                     // Unfortunately, we can't use $skip here because we can lose data, instead we do $slice then
-                    $limit: page ? page * limitJoin : limitJoin,
+                    $limit: pageEnd + 1,
                   },
                 ]
               : []),
@@ -224,6 +226,8 @@ export const buildJoinAggregation = async ({
             input: `$${as}.docs`,
             sortBy: {
               [sortProperty]: sortDirection,
+              ...(sortProperty === 'relationTo' ? {} : { relationTo: 1 }),
+              ...(sortProperty === '_id' ? {} : { _id: 1 }),
             },
           },
         },
@@ -234,9 +238,12 @@ export const buildJoinAggregation = async ({
 
     aggregate.push({
       $addFields: {
-        [`${as}.hasNextPage`]: {
-          $gt: [{ $size: `$${as}.docs` }, limitJoin || Number.MAX_VALUE],
-        },
+        [`${as}.hasNextPage`]:
+          limitJoin > 0
+            ? {
+                $gt: [{ $size: `$${as}.docs` }, pageEnd],
+              }
+            : false,
       },
     })
 

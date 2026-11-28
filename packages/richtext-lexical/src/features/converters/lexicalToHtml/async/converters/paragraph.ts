@@ -2,15 +2,15 @@ import type { SerializedParagraphNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
 export const ParagraphHTMLConverterAsync: HTMLConvertersAsync<SerializedParagraphNode> = {
-  paragraph: async ({ node, nodesToHTML, providedStyleTag }) => {
+  paragraph: async ({ node, nodesToHTML, providedDirAttribute, providedStyleTag }) => {
     const children = await nodesToHTML({
       nodes: node.children,
     })
 
     if (!children?.length) {
-      return `<p${providedStyleTag}><br /></p>`
+      return `<p${providedDirAttribute}${providedStyleTag}><br /></p>`
     }
 
-    return `<p${providedStyleTag}>${children.join('')}</p>`
+    return `<p${providedDirAttribute}${providedStyleTag}>${children.join('')}</p>`
   },
 }

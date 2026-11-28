@@ -37,6 +37,7 @@ export const errorOnUnpublishSlug = 'error-on-unpublish'
 export const disablePublishGlobalSlug = 'disable-publish-global'
 
 export const textCollectionSlug = 'text'
+export const pointVersionsCollectionSlug = 'point-versions'
 export const usersCollectionSlug = 'users'
 
 export const versionsDisabledCollectionSlug = 'versions-disabled-collection'
@@ -57,6 +58,8 @@ export const collectionSlugs = [
 ]
 
 export const autoSaveGlobalSlug = 'autosave-global'
+
+export const autosaveWithoutLocalizationGlobalSlug = 'autosave-without-localization-global'
 
 export const autosaveWithDraftButtonGlobal = 'autosave-with-draft-button-global'
 
@@ -80,6 +83,7 @@ export const restoreAccessLocalizedCollectionSlug = 'restore-access-localized'
 
 export const globalSlugs = [
   autoSaveGlobalSlug,
+  autosaveWithoutLocalizationGlobalSlug,
   draftGlobalSlug,
   simpleDraftGlobalSlug,
   draftUnlimitedGlobalSlug,

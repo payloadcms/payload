@@ -3,7 +3,8 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AutosavePostsCollection } from './collections/Autosave/index.js'
+import { AutosavePostsCollection, DraftPostsCollection } from './collections/Autosave/index.js'
+import { AutosaveReorderCorruption } from './collections/AutosaveReorderCorruption/index.js'
 import { ConditionsCollection } from './collections/Conditions/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 
@@ -14,11 +15,25 @@ export default buildConfigWithDefaults({
   suite: 'form-state',
   config: {
     admin: {
+      components: {
+        views: {
+          ClientValidation: {
+            Component: './components/ClientValidationView/index.js#ClientValidationView',
+            path: '/client-validation',
+          },
+        },
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [PostsCollection, AutosavePostsCollection, ConditionsCollection],
+    collections: [
+      AutosaveReorderCorruption,
+      PostsCollection,
+      AutosavePostsCollection,
+      ConditionsCollection,
+      DraftPostsCollection,
+    ],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

@@ -6,6 +6,12 @@ import { Modal as FacelessModal, useModal } from '@faceless-ui/modal'
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 
 import { useModalFocus } from '../../providers/ModalFocus/index.js'
+import {
+  getDeepestActiveElement,
+  getRootNode,
+  isWithinInertTree,
+} from '../../utilities/shadowDom.js'
+import './index.css'
 
 export { useModal } from '@faceless-ui/modal'
 
@@ -19,7 +25,7 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
     trapFocus = true,
   } = props
   const modalID = id || slug
-  const { modalState } = useModal()
+  const { containerRef, modalState } = useModal()
   const isOpen = Boolean(modalState[slug]?.isOpen)
   const popupFocusTargetsRef = useRef<readonly HTMLElement[]>([])
   const { getReturnFocusTargets } = useModalFocus()
@@ -34,7 +40,7 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
     () => ({
       escapeDeactivates: false,
       initialFocus: () => {
-        const modal = document.getElementById(modalID)
+        const modal = getRootNode({ element: containerRef.current }).getElementById(modalID)
         const heading = modal?.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6')
 
         if (heading) {
@@ -48,14 +54,14 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
             element?.isConnected &&
             element !== document.body &&
             element !== document.documentElement &&
-            !element.closest('[inert]') &&
+            !isWithinInertTree({ element }) &&
             !element.matches(':disabled') &&
             element.getClientRects().length > 0 &&
             getComputedStyle(element).visibility !== 'hidden',
         ) ?? false,
       ...focusTrapOptions,
     }),
-    [modalID, focusTrapOptions],
+    [containerRef, modalID, focusTrapOptions],
   )
 
   useEffect(() => {
@@ -64,9 +70,10 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
     }
 
     let hasFocusedTitle = false
+    const root = getRootNode({ element: containerRef.current })
 
     const updateTitle = () => {
-      const modal = document.getElementById(modalID)
+      const modal = root.getElementById(modalID)
       const heading = modal?.querySelector<HTMLElement>('h1, h2, h3, h4, h5, h6')
 
       if (modal && heading) {
@@ -79,21 +86,34 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
           !hasFocusedTitle &&
           trapFocus &&
           focusTrapOptions?.initialFocus === undefined &&
-          !modal.closest('[inert]') &&
-          (document.activeElement === modal || document.activeElement === document.body)
+          !isWithinInertTree({ element: modal }) &&
+          (getDeepestActiveElement({ root }) === modal ||
+            getDeepestActiveElement({ root }) === modal.ownerDocument.body)
         ) {
           heading.tabIndex = -1
           heading.focus({ preventScroll: true })
-          hasFocusedTitle = document.activeElement === heading
+          hasFocusedTitle = getDeepestActiveElement({ root }) === heading
         }
       }
     }
 
     updateTitle()
     const observer = new MutationObserver(updateTitle)
-    observer.observe(document.body, { childList: true, subtree: true })
+    observer.observe(root instanceof Document ? root.body : root, {
+      childList: true,
+      subtree: true,
+    })
     return () => observer.disconnect()
-  }, [isOpen, modalID, slug, ariaLabel, ariaLabelledBy, trapFocus, focusTrapOptions?.initialFocus])
+  }, [
+    containerRef,
+    isOpen,
+    modalID,
+    slug,
+    ariaLabel,
+    ariaLabelledBy,
+    trapFocus,
+    focusTrapOptions?.initialFocus,
+  ])
 
   return (
     <FacelessModal

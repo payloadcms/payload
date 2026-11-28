@@ -78,6 +78,7 @@ export default defineConfig({
       vitestImports: [
         '../__helpers/int/vitest.js',
         '../../__helpers/int/vitest.js',
+        '../../../__helpers/int/vitest.js',
         '../__helpers/memory/vitest.js',
         '../int/vitest.js',
         './helpers/mcpFixtures.js',
@@ -93,6 +94,34 @@ export default defineConfig({
       files: ['packages/ui/**/*.{ts,tsx}'],
       rules: {
         'no-console': 'error',
+      },
+    },
+    {
+      files: ['packages/ui/src/fields/**/[Ii]nput.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                allowTypeImports: true,
+                group: [
+                  '**/forms/Form',
+                  '**/forms/Form/context*',
+                  '**/forms/Form/index*',
+                  '**/forms/Form/useForm*',
+                  '**/forms/useField',
+                  '**/forms/useField/index*',
+                  '**/forms/RenderFields/context*',
+                  '**/forms/RowLabel/Context/**',
+                  '**/providers/EditDepth/**',
+                ],
+                message:
+                  'Keep extracted Inputs independent of Payload Form. Read form state and edit depth in the Field component and pass the required values and IDs as props.',
+              },
+            ],
+          },
+        ],
       },
     },
     {

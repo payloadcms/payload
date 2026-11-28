@@ -3,7 +3,7 @@
 import type { FormState, PayloadRequest } from 'payload'
 
 import { email, formatAdminURL, text } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
 
@@ -143,56 +143,66 @@ export const ForgotPasswordForm: React.FC = () => {
       })
   }
 
-  const validateUsername = (value: null | string | undefined) =>
-    text(value, {
-      name: 'username',
-      type: 'text',
-      blockData: {},
-      data: {},
-      event: 'onChange',
-      path: ['username'],
-      preferences: { fields: {} },
-      req: {
-        payload: {
-          config,
-        },
-        t,
-      } as unknown as PayloadRequest,
-      required: true,
-      siblingData: {},
-    })
+  const validateUsername = useCallback(
+    (value: null | string | undefined) =>
+      text(value, {
+        name: 'username',
+        type: 'text',
+        blockData: {},
+        data: {},
+        event: 'onChange',
+        path: ['username'],
+        preferences: { fields: {} },
+        req: {
+          payload: {
+            config,
+          },
+          t,
+        } as unknown as PayloadRequest,
+        required: true,
+        siblingData: {},
+      }),
+    [config, t],
+  )
 
-  const validateEmail = (value: null | string | undefined) =>
-    email(value, {
-      name: 'email',
-      type: 'email',
-      blockData: {},
-      data: {},
-      event: 'onChange',
-      path: ['email'],
-      preferences: { fields: {} },
-      req: { payload: { config }, t } as unknown as PayloadRequest,
-      required: true,
-      siblingData: {},
-    })
+  const validateEmail = useCallback(
+    (value: null | string | undefined) =>
+      email(value, {
+        name: 'email',
+        type: 'email',
+        blockData: {},
+        data: {},
+        event: 'onChange',
+        path: ['email'],
+        preferences: { fields: {} },
+        req: { payload: { config }, t } as unknown as PayloadRequest,
+        required: true,
+        siblingData: {},
+      }),
+    [config, t],
+  )
 
-  const initialState: FormState = loginWithUsername
-    ? {
-        username: {
-          initialValue: storedRequest?.identifier ?? '',
-          valid: true,
-          validate: validateUsername,
-          value: storedRequest?.identifier ?? '',
-        },
-      }
-    : {
-        email: {
-          initialValue: storedRequest?.identifier ?? '',
-          valid: true,
-          validate: validateEmail,
-          value: storedRequest?.identifier ?? '',
-        },
-      }
+  const initialState = useMemo<FormState>(
+    () =>
+      loginWithUsername
+        ? {
+            username: {
+              initialValue: storedRequest?.identifier ?? '',
+              valid: true,
+              validate: validateUsername,
+              value: storedRequest?.identifier ?? '',
+            },
+          }
+        : {
+            email: {
+              initialValue: storedRequest?.identifier ?? '',
+              valid: true,
+              validate: validateEmail,
+              value: storedRequest?.identifier ?? '',
+            },
+          },
+    [loginWithUsername, storedRequest?.identifier, validateEmail, validateUsername],
+  )
 
   return (
     <Form

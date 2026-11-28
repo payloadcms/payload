@@ -6,7 +6,6 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
-import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 import type { Config } from '../../payload-types.js'
 
 import {
@@ -21,9 +20,9 @@ import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/e2e/initPage.js'
+import { devUser } from '../../../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textFieldsSlug } from '../../slugs.js'
 import { textDoc } from './shared.js'
@@ -35,7 +34,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -57,12 +55,6 @@ describe('Text', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -155,10 +147,16 @@ describe('Text', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    await upsertPreferences<Config, GeneratedTypes<any>>({
+    const { user } = await payload.login({
+      collection: 'users',
+      data: { email: devUser.email, password: devUser.password },
+      overrideAccess: true,
+    })
+
+    await upsertPreferences({
       key: 'text-fields-list',
       payload,
-      user: client.user,
+      user,
       value: {
         columns: [
           {
@@ -179,7 +177,7 @@ describe('Text', () => {
     await expect(page.locator('table .row-1 .cell-disableListColumnText')).toBeHidden()
   })
 
-  test('should display i18n label in cells when missing field data', async () => {
+  test('should display an empty placeholder for a field with an i18n label', async () => {
     await page.goto(url.list)
     await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
 
@@ -191,7 +189,8 @@ describe('Text', () => {
 
     const textCell = page.locator('.row-1 .cell-i18nText')
 
-    await expect(textCell).toHaveText('<No Text en>')
+    await expect(page.locator('#heading-i18nText')).toContainText('Text en')
+    await expect(textCell).toHaveAccessibleName('No Text en')
   })
 
   test('should show i18n label', async () => {

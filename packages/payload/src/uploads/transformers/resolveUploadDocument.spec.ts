@@ -38,6 +38,51 @@ describe('getRequestedFile', () => {
     ],
     ['an unmatched filename', 'unknown.png', { filename: 'logo.png', mimeType: 'image/png' }],
   ])('should resolve the requested file for %s', (_, filename, expected) => {
-    expect(getRequestedFile({ document, filename })).toEqual(expected)
+    expect(getRequestedFile({ document, filename })).toMatchObject(expected)
+  })
+
+  const documentWithOriginal = {
+    _stored: false,
+    id: '1',
+    filename: 'logo.webp',
+    mimeType: 'image/webp',
+    original: { filename: 'logo-original.png', mimeType: 'image/png' },
+    variants: {
+      card: { _stored: false, filename: 'logo-card.webp', mimeType: null },
+    },
+  }
+
+  it.each([
+    [
+      'the original filename',
+      documentWithOriginal,
+      'logo-original.png',
+      { filename: 'logo-original.png', isBuiltAtRequest: false, mimeType: 'image/png' },
+    ],
+    [
+      'an original filename when the original has no MIME type',
+      { ...documentWithOriginal, original: { filename: 'logo-original.png', mimeType: null } },
+      'logo-original.png',
+      { filename: 'logo.webp', isBuiltAtRequest: true, mimeType: 'image/webp' },
+    ],
+    [
+      'a size built at request time with no MIME type',
+      documentWithOriginal,
+      'logo-card.webp',
+      {
+        filename: 'logo-card.webp',
+        isBuiltAtRequest: true,
+        mimeType: 'image/png',
+        variantName: 'card',
+      },
+    ],
+    [
+      'a main file built at request time',
+      documentWithOriginal,
+      'logo.webp',
+      { filename: 'logo.webp', isBuiltAtRequest: true, mimeType: 'image/webp' },
+    ],
+  ])('should resolve the requested file for %s', (_, doc, filename, expected) => {
+    expect(getRequestedFile({ document: doc, filename })).toEqual(expected)
   })
 })

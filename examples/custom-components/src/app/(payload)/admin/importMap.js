@@ -1,3 +1,6 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+
 import { CustomArrayFieldLabelServer as CustomArrayFieldLabelServer_f8d063e9b7f25c350451c1865199c947 } from '@/collections/Fields/array/components/server/Label'
 import { CustomArrayFieldServer as CustomArrayFieldServer_4c3c139a9b1a198103c8a2ec2869c837 } from '@/collections/Fields/array/components/server/Field'
 import { CustomArrayFieldLabelClient as CustomArrayFieldLabelClient_c07dc2c547c47aca8e9f471795279e9d } from '@/collections/Fields/array/components/client/Label'

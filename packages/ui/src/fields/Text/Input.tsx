@@ -12,10 +12,7 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useForm } from '../../forms/Form/context.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -28,6 +25,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     Description,
     description,
     Error,
+    errorID: errorIDFromProps,
     hasMany,
     htmlAttributes,
     inputRef,
@@ -49,12 +47,12 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     valueToRender,
   } = props
 
-  const { uuid } = useForm()
-  const editDepth = useEditDepth()
   const { i18n, t } = useTranslation()
 
-  const inputID = idFromProps ?? generateFieldID(path, editDepth, uuid)
-  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+  const inputID = idFromProps ?? `field-${path.replace(/\./g, '__')}`
+  const errorID = showError
+    ? (errorIDFromProps ?? `field-error-${path.replace(/\./g, '__')}`)
+    : undefined
 
   const editableProps: ReactSelectAdapterProps['customProps']['editableProps'] = (
     data,
@@ -137,7 +135,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
+          Fallback={<FieldError id={errorID} path={path} showError={showError} />}
         />
         {BeforeInput}
         {hasMany ? (

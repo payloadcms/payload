@@ -597,6 +597,15 @@
     .react-datepicker__year-text--in-range
   ) {
     background-color: var(--color-bg-selected);
+
+    &:not(
+      .react-datepicker__day--disabled,
+      .react-datepicker__month-text--disabled,
+      .react-datepicker__quarter-text--disabled,
+      .react-datepicker__year-text--disabled
+    ) {
+      color: var(--color-text);
+    }
   }
 
   /* Disabled days */
@@ -956,6 +965,8 @@
   }
 
   html[data-enhanced-contrast]
+    .react-datepicker__day--today:not(.react-datepicker__day--selected)::after,
+  :host([data-enhanced-contrast])
     .react-datepicker__day--today:not(.react-datepicker__day--selected)::after {
     background-color: var(--color-icon-brand);
   }

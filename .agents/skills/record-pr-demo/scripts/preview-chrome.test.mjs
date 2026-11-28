@@ -4,16 +4,15 @@ import { chromium, expect } from '@playwright/test'
 import { startChromePreview } from './preview-chrome.mjs'
 
 // This tests the same component and controls shipped to the user, not a mock preview.
-test('should scrub real responsive content without changing the title or footer geometry', async () => {
+test('should scrub real responsive content without changing the sidebar geometry', async () => {
   const { server, url } = await startChromePreview({ port: 0 })
   const browser = await chromium.launch({ headless: true })
   try {
     const page = await browser.newPage({ viewport: { width: 1120, height: 1000 } })
     await page.goto(url)
-    await page.getByLabel('Annotation layout').selectOption('top')
     await page.frameLocator('iframe').getByRole('heading', { name: 'Posts', exact: true }).waitFor()
-    const footer = page.locator('#chrome [data-footer]')
-    const initial = await footer.boundingBox()
+    const sidebar = page.locator('#chrome .sidebar-shell')
+    const initial = await sidebar.boundingBox()
     const slider = page.getByRole('slider')
     for (const milliseconds of [1600, 2000, 2800]) {
       await slider.evaluate((element, value) => {
@@ -27,8 +26,8 @@ test('should scrub real responsive content without changing the title or footer 
           .evaluate(() => innerWidth),
         768,
       )
-      assert.deepEqual(await footer.boundingBox(), initial)
-      assert.equal(await page.locator('[data-step-count]').textContent(), 'Step 2 of 3')
+      assert.deepEqual(await sidebar.boundingBox(), initial)
+      assert.equal(await page.locator('.sidebar-step').nth(1).getAttribute('aria-current'), 'step')
     }
     for (const [milliseconds, step] of [
       [1300, 1],
@@ -39,11 +38,17 @@ test('should scrub real responsive content without changing the title or footer 
         element.value = String(value)
         element.dispatchEvent(new Event('input', { bubbles: true }))
       }, milliseconds)
-      assert.equal(await page.locator('[data-step-count]').textContent(), `Step ${step} of 3`)
+      assert.equal(
+        await page
+          .locator('.sidebar-step')
+          .nth(step - 1)
+          .getAttribute('aria-current'),
+        'step',
+      )
     }
     await slider.focus()
     await page.keyboard.press('End')
-    assert.equal(await page.locator('#chrome [data-pagination]').textContent(), 'Step 3 of 3')
+    assert.equal(await page.locator('.sidebar-step').nth(2).getAttribute('aria-current'), 'step')
     assert.equal(
       await page
         .frameLocator('iframe')
@@ -51,10 +56,10 @@ test('should scrub real responsive content without changing the title or footer 
         .evaluate(() => innerWidth),
       390,
     )
-    assert.deepEqual(await footer.boundingBox(), initial)
+    assert.deepEqual(await sidebar.boundingBox(), initial)
     await page.getByLabel('Annotation', { exact: true }).uncheck()
-    assert.equal(await page.locator('#chrome [data-title]').isVisible(), true)
-    assert.equal(await page.locator('#chrome [data-note]').isVisible(), false)
+    assert.equal(await page.locator('#chrome .sidebar-intro').isVisible(), true)
+    assert.equal(await page.locator('#chrome .sidebar-steps').isVisible(), false)
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.getByRole('button', { name: 'Desktop', exact: true }).click()
     await page.getByRole('button', { name: 'Play resize', exact: true }).click()

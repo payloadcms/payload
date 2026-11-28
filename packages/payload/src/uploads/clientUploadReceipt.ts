@@ -14,12 +14,14 @@ type ClientUploadReceipt = {
   filename: string
   filePrefix: string
   storageFilePath: string
+  /** The upload session that stored the file. A save keeps the session's object while it runs. */
+  uploadSessionID?: number | string
   userCollection: null | string
   userID: null | number | string
 }
 
 // Longer than the longest provider upload URL (GCS: five hours).
-const LIFETIME_MS = 6 * 60 * 60 * 1000
+export const CLIENT_UPLOAD_RECEIPT_LIFETIME_MS = 6 * 60 * 60 * 1000
 // Separates these signatures from any future receipt format.
 const DOMAIN = 'payload-client-upload-receipt-v1'
 
@@ -32,6 +34,7 @@ export const createClientUploadReceipt = ({
   filePrefix,
   req,
   storageFilePath,
+  uploadSessionID,
 }: {
   _objectKey?: string
   adapterData?: Record<string, unknown>
@@ -41,16 +44,18 @@ export const createClientUploadReceipt = ({
   filePrefix: string
   req: PayloadRequest
   storageFilePath: string
+  uploadSessionID?: number | string
 }): `${string}.${string}` => {
   const data: ClientUploadReceipt = {
     ...(_objectKey !== undefined && { _objectKey }),
     ...(adapterData !== undefined && { adapterData }),
     ...(allowOverwrite && { allowOverwrite: true }),
     collectionSlug,
-    expiresAt: Date.now() + LIFETIME_MS,
+    expiresAt: Date.now() + CLIENT_UPLOAD_RECEIPT_LIFETIME_MS,
     filename,
     filePrefix,
     storageFilePath,
+    ...(uploadSessionID !== undefined && { uploadSessionID }),
     ...getUser(req),
   }
 
@@ -175,6 +180,9 @@ const isReceipt = (value: unknown): value is ClientUploadReceipt => {
     typeof data.storageFilePath === 'string' &&
     typeof data.filePrefix === 'string' &&
     typeof data.filename === 'string' &&
+    (data.uploadSessionID === undefined ||
+      typeof data.uploadSessionID === 'string' ||
+      (typeof data.uploadSessionID === 'number' && Number.isFinite(data.uploadSessionID))) &&
     (data.userCollection === null || typeof data.userCollection === 'string') &&
     (data.userID === null ||
       typeof data.userID === 'string' ||

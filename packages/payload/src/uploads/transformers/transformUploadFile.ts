@@ -6,16 +6,16 @@ import type { UploadTransformer } from './types.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { getChangedTransformKeys } from '../transformState/getChangedTransformKeys.js'
-import { getNonJSONValueError } from '../transformState/resolveUploadEdits.js'
+import { getNonJSONValueError } from '../transformState/transformStateInput.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
 import { createFileSource } from './createFileSource.js'
 
 /**
  * Runs one file through every eligible `transformFile` stage in declaration
- * order. Used both for the ordinary top-level upload call (`options: undefined`)
- * and, via the private v4 bridge's `transform` callback, once per legacy task
- * (the main file, crop output, or a named image size) with that task's own
- * `options`. Retains only the current file — never a history array —
+ * order. Used both for the ordinary top-level upload call (each stage's own
+ * `canTransform` options) and, via the private v4 bridge's `transform` callback,
+ * once per legacy task (the main file, crop output, or a named image size) with
+ * that task's own `options`. Retains only the current file — never a history array —
  * so passing the same `File` through unchanged never copies its buffer.
  *
  * Each stage gets the same `doc` and changes it in place, so later stages and the caller see
@@ -28,7 +28,7 @@ export async function transformUploadFile({
   collectionSlug,
   doc,
   file,
-  options,
+  getOptions,
   originalDoc,
   originalFile,
   pipeline,
@@ -39,7 +39,8 @@ export async function transformUploadFile({
   collectionSlug: string
   doc: Document
   file: File
-  options: unknown
+  /** The `options` a stage gets. */
+  getOptions: (transformer: UploadTransformer) => unknown
   originalDoc: Readonly<Document>
   originalFile: File
   pipeline: UploadTransformer[]
@@ -59,7 +60,7 @@ export async function transformUploadFile({
       collectionSlug,
       doc,
       file: currentFile,
-      options,
+      options: getOptions(transformer),
       originalDoc,
       originalSource,
       req,
@@ -73,9 +74,10 @@ export async function transformUploadFile({
       previous: transformsBeforeStage,
       transformer,
     })
-    await assertValidTransformsChange({
+    assertValidTransformsChange({
       next: doc._transforms,
       previous: transformsBeforeStage,
+      transformers: req.payload.config.upload?.transformers ?? [],
       transformerSlug: transformer.slug,
     })
 
@@ -149,25 +151,28 @@ function assertNoChangeToOtherClaims({
  * the stages. So a value that a stage writes is checked here. Values the stage did not change were
  * already checked, and an error for them must not name the stage.
  */
-async function assertValidTransformsChange({
+function assertValidTransformsChange({
   next,
   previous,
+  transformers,
   transformerSlug,
 }: {
   next: unknown
   previous: unknown
+  /** Every configured transformer, for the declared keys in the schema. */
+  transformers: readonly UploadTransformer[]
   transformerSlug: string
-}): Promise<void> {
+}): void {
   if (isDeepStrictEqual(next, previous)) {
     return
   }
 
   const error =
-    getNonJSONValueError({ value: next }) ?? (await getTransformStateError({ value: next }))
+    getNonJSONValueError({ value: next }) ?? getTransformStateError({ transformers, value: next })
 
   if (error) {
     throw new TransformerContractError(
-      `The "${transformerSlug}" transformer wrote an invalid _transforms value. ${error}`,
+      `The "${transformerSlug}" transformer wrote an invalid _transforms value. ${error.message}`,
     )
   }
 }

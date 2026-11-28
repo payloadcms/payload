@@ -93,6 +93,16 @@ export function ModularDashboardClient({
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const [activeControlsWidgetID, setActiveControlsWidgetID] = useState<null | string>(null)
   const sensors = useDashboardSensors()
+
+  useEffect(() => {
+    if (activeDragId !== null) {
+      document.body.classList.add('is-dragging')
+      return () => {
+        document.body.classList.remove('is-dragging')
+      }
+    }
+  }, [activeDragId])
+
   const announcements = useMemo<Announcements>(() => {
     const describeWidget = ({ id, index }: { id: UniqueIdentifier; index?: number }) => {
       const widgetID = String(id).replace(/-(?:before|after)$/, '')

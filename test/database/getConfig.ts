@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { WriteInput } from './collections/WriteInput/index.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
@@ -36,6 +37,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   },
   collections: [
+    WriteInput,
     {
       slug: 'noTimeStamps',
       fields: [
@@ -50,6 +52,20 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'categories',
       fields: [
+        {
+          name: '_status',
+          type: 'select',
+          options: [
+            {
+              label: 'Draft',
+              value: 'draft',
+            },
+            {
+              label: 'Published',
+              value: 'published',
+            },
+          ],
+        },
         {
           name: 'title',
           type: 'text',
@@ -267,6 +283,12 @@ export const getConfig: () => Partial<Config> = () => ({
             {
               slug: 'block-third',
               fields: [
+                {
+                  name: 'virtualBlocks',
+                  type: 'blocks',
+                  blocks: [{ slug: 'virtual-block', fields: [] }],
+                  virtual: true,
+                },
                 {
                   name: 'nested',
                   type: 'blocks',

@@ -20,7 +20,7 @@ test('parseArgs applies recording defaults and derives a safe output path', () =
     baseURL: 'http://localhost:3000',
     interactionPauseMs: 300,
     label: 'feature-demo',
-    mouseMoveMs: 300,
+    mouseMoveMs: 450,
     output: '/tmp/payload-pr-demo-feature-demo.mkv',
     scenario: '/tmp/demo-scenario.mjs',
     viewport: { height: 900, width: 1440 },
@@ -130,13 +130,13 @@ test('should expose annotation helpers to recording scenarios', async () => {
         await page.goto('data:text/html,<main>Annotation demo</main>')
         const stage = page.context().pages()[0]
         await showAnnotation({title:'What changed',body:'The feature works.'})
-        await expect(stage.locator('[data-note-body]')).toHaveText('The feature works.')
+        await expect(stage.locator('.sidebar-step p')).toHaveText('The feature works.')
         await showAnnotation({title:'Result',body:'The second note replaces the first.'})
-        await expect(stage.locator('[data-note]')).toHaveCount(1)
-        await expect(stage.locator('[data-note-body]')).toHaveText('The second note replaces the first.')
+        await expect(stage.locator('.sidebar-steps')).toHaveCount(1)
+        await expect(stage.locator('.sidebar-step p')).toHaveText('The second note replaces the first.')
         await expect(page.locator('[data-pr-demo-annotation]')).toHaveCount(0)
         await hideAnnotation()
-        await expect(stage.locator('[data-note]')).toBeHidden()
+        await expect(stage.locator('.sidebar-steps')).toBeHidden()
       }`,
     )
 
@@ -278,6 +278,7 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
   const rawVideo = path.join(directory, 'demo.webm')
   const convertedVideo = path.join(directory, 'demo.mp4')
   let trimStart
+  let annotationBounds
   const { chromium } = await import('@playwright/test')
   const launch = chromium.launch.bind(chromium)
   mock.method(chromium, 'launch', async (options) => {
@@ -300,10 +301,11 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
   try {
     await writeFile(
       scenario,
-      `${presentationExport}export default async function scenario({ page, ready, showAnnotation }) {
+      `${presentationExport}export default async function scenario({ page, ready, showAnnotation, fixture }) {
         await page.goto('data:text/html,<body style="margin:0;background:white"><script>setTimeout(() => { document.body.style.background = "rgb(0, 200, 0)"; document.body.id = "ready" }, 1400)</script></body>')
         await page.locator('#ready').waitFor()
         await showAnnotation({title:'Opening annotation', body:'Visible from the first frame.'})
+        fixture.recordBounds(await page.context().pages()[0].locator('.sidebar-step').boundingBox())
         await ready()
       }`,
     )
@@ -311,6 +313,11 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
     await recorder.recordDemo({
       baseURL: 'http://localhost:3000',
       label: 'opening-test',
+      fixture: {
+        recordBounds: (bounds) => {
+          annotationBounds = bounds
+        },
+      },
       onOpeningReady: (seconds) => {
         trimStart = seconds
       },
@@ -356,7 +363,7 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
       '-i',
       convertedVideo,
       '-vf',
-      'crop=900:44:174:80',
+      `crop=${Math.floor(annotationBounds.width)}:${Math.floor(annotationBounds.height)}:${Math.round(annotationBounds.x)}:${Math.round(annotationBounds.y)}`,
       '-frames:v',
       '1',
       '-f',
@@ -652,7 +659,7 @@ test('should click scaled targets, type with keys, and require wheel input to re
     await writeFile(
       scenario,
       `${presentationExport}
-      export default async function({page,click,typeText,expect,scroll}) {
+      export default async function({page,click,typeText,pressKey,expect,scroll}) {
         await page.goto('data:text/html,'+encodeURIComponent('<style>body{margin:0}button,input{display:block;margin:30px}#scroller{height:180px;overflow:auto}#spacer{height:800px}</style><input aria-label="Title" value="Old title" onkeydown="this.dataset.key=event.key" oninput="this.dataset.trusted=event.isTrusted"><button onclick="this.textContent=String.fromCharCode(67,108,105,99,107,101,100)">Click target</button><div id="scroller"><div id="spacer"></div><button>Offscreen</button></div>'))
         await click(page.getByRole('button',{name:'Click target',exact:true}))
         await expect(page.getByRole('button',{name:'Clicked',exact:true})).toBeVisible()
@@ -660,6 +667,8 @@ test('should click scaled targets, type with keys, and require wheel input to re
         await expect(page.getByRole('textbox',{name:'Title'})).toHaveValue('New title')
         await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','e')
         await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-trusted','true')
+        await pressKey({key:'Home',settleMs:0})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','Home')
         let rejected=false
         try { await click(page.getByRole('button',{name:'Offscreen',exact:true})) } catch(error) { rejected=/wheel|visible/.test(error.message) }
         if(!rejected)throw new Error('Offscreen click silently scrolled')
@@ -704,7 +713,9 @@ for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
             },30),{once:true})
           },mode)
           if(mode==='moving'||mode==='covered'||mode==='explicit') {
-            let rejected=false
+            await pressKey({key:'Home',settleMs:0})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','Home')
+        let rejected=false
             try { await click(target,{duration:0,before:250,after:0,...(mode==='explicit'?{position:{x:120,y:40}}:{})}) }
             catch(error) { rejected=/visible|unobstructed/.test(error.message) }
             if(!rejected)throw new Error('Unsafe click returned success')

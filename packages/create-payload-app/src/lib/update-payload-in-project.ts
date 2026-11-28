@@ -1,14 +1,28 @@
+import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import semver from 'semver'
+import { Project } from 'ts-morph'
 
-import type { NextAppDetails, TanStackAppDetails } from '../types.js'
+import type { CliArgs, NextAppDetails, TanStackAppDetails } from '../types.js'
+import type { UpgradePlan } from '../upgrade-shared/index.js'
 
+import {
+  applyUpgradePlan,
+  assertInstalledVersionsUnchanged,
+  createRegistryClient,
+  createUpgradePlan,
+  readInstalledVersion,
+  readProject,
+  resolveTargets,
+} from '../upgrade-shared/index.js'
+import { payloadPackageNames } from '../upgrade-shared/payload-package-names.js'
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { info } from '../utils/log.js'
-import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
+import { DEFAULT_PAYLOAD_VERSION_TAG } from '../utils/resolvePackageVersion.js'
+import { getAdminRoute } from './get-admin-route.js'
 import { getPackageManager } from './get-package-manager.js'
-import { installPackages } from './install-packages.js'
 import { TANSTACK_TEMPLATE_FILES } from './tanstack/template-files.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -16,25 +30,37 @@ const dirname = path.dirname(filename)
 
 type UpdateResult = { message: string; success: boolean }
 
-type PackageUpdateResult = { isUpdated: boolean } & UpdateResult
+type PackageUpdateResult = { isUpdated: boolean; targetVersion: string } & UpdateResult
 
 export async function updatePayloadPackages({
+  cliArgs,
+  plan,
   projectDir,
   versionOrTag,
 }: {
+  cliArgs?: CliArgs
+  plan?: UpgradePlan
   projectDir: string
   versionOrTag?: string
 }): Promise<UpdateResult> {
-  const result = await performPayloadPackageUpdate({ projectDir, versionOrTag })
+  const result = await performPayloadPackageUpdate({ cliArgs, plan, projectDir, versionOrTag })
 
   return { message: result.message, success: result.success }
 }
 
+/**
+ * Upgrade Payload packages and refresh Next.js wrappers at the configured admin route.
+ * Validate the route only when an upgrade is needed, before installing packages.
+ */
 export async function updatePayloadInNextProject({
   appDetails,
+  cliArgs,
+  plan,
   versionOrTag,
 }: {
   appDetails: NextAppDetails
+  cliArgs?: CliArgs
+  plan?: UpgradePlan
   versionOrTag?: string
 }): Promise<UpdateResult> {
   if (!appDetails.nextConfigPath) {
@@ -42,9 +68,23 @@ export async function updatePayloadInNextProject({
   }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
-  const packageUpdate = await performPayloadPackageUpdate({ projectDir, versionOrTag })
+  let adminRoute = '/admin'
+  const packageUpdate = await performPayloadPackageUpdate({
+    beforeInstall: () => {
+      if (appDetails.isSupportedNextVersion === false) {
+        throw new Error(
+          `Next.js ${appDetails.nextVersion} is unsupported. Update Next.js before applying a same-major Payload update.`,
+        )
+      }
+      adminRoute = getAdminRoute({ projectDir })
+    },
+    cliArgs,
+    plan,
+    projectDir,
+    versionOrTag,
+  })
 
-  if (!packageUpdate.isUpdated) {
+  if (!packageUpdate.isUpdated || !canRefreshWrappers({ version: packageUpdate.targetVersion })) {
     return { message: packageUpdate.message, success: packageUpdate.success }
   }
 
@@ -72,26 +112,50 @@ export async function updatePayloadInNextProject({
     )
   }
 
-  copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+  if (adminRoute === '/admin') {
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+  } else {
+    // Next.js uses %5F for routable segments that begin with an underscore.
+    const adminFolder = adminRoute
+      .slice(1)
+      .split('/')
+      .map((segment) => segment.replace(/^_/, '%5F'))
+      .join('/')
+
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$', '^admin$'])
+    copyRecursiveSync(path.join(templateSrcDir, 'admin'), path.join(payloadDirPath, adminFolder))
+
+    const layout = new Project().addSourceFileAtPath(path.join(payloadDirPath, 'layout.tsx'))
+    const importMapPath = adminFolder ? `./${adminFolder}/importMap.js` : './importMap.js'
+
+    layout.getImportDeclaration('./admin/importMap.js')?.setModuleSpecifier(importMapPath)
+    layout.saveSync()
+  }
 
   return { message: packageUpdate.message, success: packageUpdate.success }
 }
 
 export async function updatePayloadInTanStackProject({
   appDetails,
+  cliArgs,
+  plan,
   templateRoot = resolveTanStackTemplateRoot(),
   versionOrTag,
 }: {
   appDetails: TanStackAppDetails
+  cliArgs?: CliArgs
+  plan?: UpgradePlan
   templateRoot?: string
   versionOrTag?: string
 }): Promise<UpdateResult> {
   const packageUpdate = await performPayloadPackageUpdate({
+    cliArgs,
+    plan,
     projectDir: appDetails.projectDir,
     versionOrTag,
   })
 
-  if (!packageUpdate.isUpdated) {
+  if (!packageUpdate.isUpdated || !canRefreshWrappers({ version: packageUpdate.targetVersion })) {
     return { message: packageUpdate.message, success: packageUpdate.success }
   }
 
@@ -131,72 +195,135 @@ export async function updatePayloadInProject(
   return updatePayloadInNextProject({ appDetails, versionOrTag })
 }
 
+/** Apply a reviewed same-major plan without changing dependency groups. */
 async function performPayloadPackageUpdate({
+  beforeInstall,
+  cliArgs,
+  plan: preparedPlan,
   projectDir,
   versionOrTag,
 }: {
+  beforeInstall?: () => void
+  cliArgs?: CliArgs
+  plan?: UpgradePlan
   projectDir: string
   versionOrTag?: string
 }): Promise<PackageUpdateResult> {
-  const packageObj = (await fse.readJson(path.resolve(projectDir, 'package.json'))) as {
-    dependencies?: Record<string, string>
-    devDependencies?: Record<string, string>
+  const project = preparedPlan?.project ?? readProject({ projectDir })
+  if (project.projectDir !== path.resolve(projectDir)) {
+    throw new Error('The upgrade plan belongs to a different project.')
   }
-  if (!packageObj.dependencies && !packageObj.devDependencies) {
-    throw new Error('No package.json found in this project')
+  const fetchRegistry = createRegistryClient({ projectDir })
+  const packageManager = await getPackageManager({ cliArgs, projectDir })
+  const target =
+    preparedPlan?.targetVersion ??
+    (
+      await resolveTargets({
+        defaultTag: DEFAULT_PAYLOAD_VERSION_TAG,
+        explicitTarget: versionOrTag,
+        fetchRegistry,
+        project,
+      })
+    )[0]?.version
+  if (!target) {
+    throw new Error('No Payload update target found.')
   }
-
-  const dependencyGroups = [packageObj.dependencies, packageObj.devDependencies].filter(
-    (dependencies): dependencies is Record<string, string> => Boolean(dependencies),
-  )
-  const payloadPackageEntries = dependencyGroups.flatMap((dependencies) =>
-    Object.entries(dependencies).filter(
-      ([packageName]) => packageName === 'payload' || packageName.startsWith('@payloadcms/'),
-    ),
-  )
-  const payloadVersion = payloadPackageEntries.find(
-    ([packageName]) => packageName === 'payload',
-  )?.[1]
-  if (!payloadVersion) {
-    throw new Error('Payload is not installed in this project')
+  const plan =
+    preparedPlan ??
+    (await createUpgradePlan({
+      corePackageNames: payloadPackageNames,
+      fetchRegistry,
+      packageManager,
+      project,
+      targetVersion: target,
+    }))
+  if (plan.blockers.length) {
+    throw new Error(plan.blockers.join('\n'))
   }
-
-  const packageManager = await getPackageManager({ projectDir })
-  const latestPayloadVersion = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
-
-  if (payloadPackageEntries.every(([, version]) => version === latestPayloadVersion)) {
+  if (plan.kind === 'migrate') {
+    throw new Error(
+      'Major upgrades require the migration workflow. Run create-payload-app interactively, or @payloadcms/codemod upgrade.',
+    )
+  }
+  if (!plan.changes.length && !plan.overridesRemoved.length) {
     return {
       isUpdated: false,
-      message: `Payload v${payloadVersion} is already up to date.`,
+      message: `Payload v${project.currentVersion} is already up to date.`,
       success: true,
+      targetVersion: target,
+    }
+  }
+  if (cliArgs?.['--dry-run']) {
+    return {
+      isUpdated: false,
+      message: 'Dry run: no files changed.',
+      success: true,
+      targetVersion: target,
     }
   }
 
-  const payloadPackages = payloadPackageEntries
-    .map(([packageName]) => packageName)
-    .filter((packageName) => packageName.startsWith('@payloadcms/'))
-  const packageNames = ['payload', ...new Set(payloadPackages)]
-  const packagesToUpdate = packageNames.map(
-    (packageName) => `${packageName}@${latestPayloadVersion}`,
-  )
-
-  info(`Using ${packageManager}.\n`)
-  info(
-    `Updating ${packagesToUpdate.length} Payload packages to v${latestPayloadVersion}...\n\n${packageNames.map((packageName) => `  - ${packageName}`).join('\n')}`,
-  )
-
-  const { success: updateSuccess } = await installPackages({
-    packageManager,
-    packagesToInstall: packagesToUpdate,
-    projectDir,
-  })
-
-  if (!updateSuccess) {
-    throw new Error('Failed to update Payload packages')
+  // Bundled v4 wrappers cannot replace wrappers in a project staying on v3.
+  if (canRefreshWrappers({ version: target })) {
+    beforeInstall?.()
   }
-  info('Payload packages updated successfully.')
+  if (fse.readFileSync(project.packageJsonPath, 'utf8') !== project.originalText) {
+    throw new Error('package.json changed after planning. Run the upgrade again.')
+  }
+  assertInstalledVersionsUnchanged({ project })
+  const data = applyUpgradePlan({ plan })
+  const indent = project.originalText.match(/\n([\t ]+)"/)?.[1] ?? '  '
+  const nextText = JSON.stringify(data, null, indent) + '\n'
+  fse.writeFileSync(project.packageJsonPath, nextText)
+  if (cliArgs?.['--no-deps']) {
+    return {
+      isUpdated: true,
+      message: 'Updated project files. Install dependencies before continuing.',
+      success: true,
+      targetVersion: target,
+    }
+  }
+  info(`Installing Payload v${target} with ${packageManager}...`)
+  try {
+    const { exitCode } = await execa(packageManager, ['install'], {
+      cwd: projectDir,
+      env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' },
+      reject: false,
+      stdio: 'inherit',
+    })
+    if (exitCode !== 0) {
+      throw new Error('Dependency installation failed.')
+    }
+    for (const change of plan.changes) {
+      const installedVersion = readInstalledVersion({ name: change.name, projectDir })
+      if (installedVersion !== change.to) {
+        throw new Error(
+          `${change.name} resolved to ${installedVersion ?? 'missing'}, expected ${change.to}.`,
+        )
+      }
+    }
+  } catch (error) {
+    const canRestore = fse.readFileSync(project.packageJsonPath, 'utf8') === nextText
+    if (canRestore) {
+      fse.writeFileSync(project.packageJsonPath, project.originalText)
+    }
+    const recovery = canRestore
+      ? 'Reinstall the original dependencies before retrying.'
+      : 'Restore the original dependency entries while preserving your other edits, then reinstall before retrying.'
+    throw new Error(
+      `${error instanceof Error ? error.message : String(error)} Dependencies or the lockfile may be partially changed. ${recovery}`,
+    )
+  }
+  return {
+    isUpdated: true,
+    message: 'Payload updated successfully.',
+    success: true,
+    targetVersion: target,
+  }
+}
 
-  return { isUpdated: true, message: 'Payload updated successfully.', success: true }
+function canRefreshWrappers({ version }: { version: string }): boolean {
+  const ownVersion = fse.readJsonSync(path.resolve(dirname, '../../package.json')).version as string
+  return semver.major(version) === semver.major(ownVersion)
 }
 
 function resolveTanStackTemplateRoot(): string {

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { Block, CollectionConfig } from 'payload'
 
 export const postsSlug = 'posts'
 
@@ -162,6 +162,35 @@ export const PostsCollection: CollectionConfig = {
         return (options as string[]).filter((option) => option !== 'excluded')
       },
       options: ['allowed', 'excluded'],
+    },
+    {
+      name: 'sortedBlocks',
+      type: 'blocks',
+      blocks: ['one', 'two', 'three'].map<Block>((slug) => ({
+        slug,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            admin: {
+              condition: (_, siblingData) => siblingData.order !== -1,
+              components: {
+                Field: './collections/Posts/PathBoundTextField/index.js#PathBoundTextField',
+              },
+            },
+          },
+          { name: 'order', type: 'number' },
+          slug === 'one'
+            ? { name: 'content', type: 'group', fields: [{ name: 'text', type: 'text' }] }
+            : { name: 'content', type: 'text' },
+        ],
+      })),
+      hooks: {
+        beforeChange: [
+          ({ value }: { value?: { order: number }[] }) =>
+            value?.slice().sort((a, b) => b.order - a.order),
+        ],
+      },
     },
   ],
   versions: false,

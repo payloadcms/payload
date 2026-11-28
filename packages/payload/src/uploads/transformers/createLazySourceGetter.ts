@@ -13,8 +13,11 @@ export type LazySourceGetter = {
  * since the underlying body is normally a single-use stream.
  */
 export function createLazySourceGetter({
+  getterName = 'getSourceFile',
   retrieve,
 }: {
+  /** The getter's name in the error for a second call. */
+  getterName?: 'getOriginalFile' | 'getSourceFile'
   retrieve: () => Promise<Response>
 }): LazySourceGetter {
   let wasCalled = false
@@ -23,7 +26,7 @@ export function createLazySourceGetter({
     get: async () => {
       if (wasCalled) {
         throw new TransformerContractError(
-          'A transformer stage attempted to call getSourceFile more than once.',
+          `A transformer stage attempted to call ${getterName} more than once.`,
         )
       }
 
