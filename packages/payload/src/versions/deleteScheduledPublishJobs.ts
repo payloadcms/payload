@@ -35,7 +35,7 @@ export const deleteScheduledPublishJobs = async ({
           },
           {
             'input.doc.value': {
-              equals: id,
+              in: [id, String(id)],
             },
           },
           {
