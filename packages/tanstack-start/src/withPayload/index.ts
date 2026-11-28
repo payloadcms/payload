@@ -22,6 +22,7 @@ import {
   onImportProtectionViolation,
   serverOnlyClientSpecifiers,
 } from './importProtection.js'
+import { payloadWarmAdmin } from './warmAdmin.js'
 import { clientModuleResolution } from './workarounds/clientModuleResolution.js'
 import { payloadDevTransforms } from './workarounds/devTransforms.js'
 import { reactDomServerInRsc } from './workarounds/reactDomServerInRsc.js'
@@ -101,6 +102,20 @@ export type WithPayloadOptions = {
   srcDirectory?: string
   /** Extra Vite config deep-merged over the Payload defaults. Ignored in `build` mode. */
   vite?: UserConfig
+  /**
+   * Compile the admin panel when the dev server starts rather than on the first
+   * request to it, so the work overlaps switching to the browser. Defaults to
+   * `true`. Dev only — the production build is unaffected.
+   *
+   * Set to `false` to keep it on-demand: warming spends the CPU (and opens a
+   * database connection) on every dev boot even if you never open the admin.
+   */
+  warmAdmin?: boolean
+  /**
+   * Admin path warmed when {@link WithPayloadOptions.warmAdmin} is enabled. Set
+   * this when the Payload config overrides `routes.admin`. Defaults to `'/admin'`.
+   */
+  warmAdminPath?: string
 }
 
 /** The `nitro()` options Payload's server build requires. Typed structurally — `nitro` is the host's dependency, not Payload's. */
@@ -172,6 +187,8 @@ export function withPayload(
     silenceDependencyWarnings = true,
     srcDirectory = 'src',
     vite,
+    warmAdmin = true,
+    warmAdminPath = '/admin',
   } = options
 
   return (env) => {
@@ -251,6 +268,7 @@ export function withPayload(
         stubPrettierInClient(),
         payloadDevTransforms(),
         payloadDevConfigReload({ payloadConfigPath }),
+        warmAdmin && payloadWarmAdmin({ adminPath: warmAdminPath }),
       ],
       resolve: {
         alias: [{ find: '@payload-config', replacement: path.resolve(payloadConfigPath) }],
