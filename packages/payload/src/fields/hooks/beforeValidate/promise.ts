@@ -49,6 +49,7 @@ type Args<T> = {
    */
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
+  skipHooks?: boolean
 }
 
 // This function is responsible for the following actions, in order:
@@ -80,6 +81,7 @@ export const promise = async <T>({
   siblingData,
   siblingDoc,
   siblingFields,
+  skipHooks,
 }: Args<T>): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -297,7 +299,7 @@ export const promise = async <T>({
     }
 
     // Execute hooks
-    if ('hooks' in field && field.hooks?.beforeValidate) {
+    if (!skipHooks && 'hooks' in field && field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
         const hookedValue = await hook({
           blockData,
@@ -411,6 +413,7 @@ export const promise = async <T>({
               req,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+              skipHooks,
             }),
           )
         })
@@ -487,6 +490,7 @@ export const promise = async <T>({
                 req,
                 siblingData: row,
                 siblingDoc: rowSiblingDoc,
+                skipHooks,
               }),
             )
           }
@@ -519,6 +523,7 @@ export const promise = async <T>({
         req,
         siblingData,
         siblingDoc,
+        skipHooks,
       })
 
       break
@@ -562,6 +567,7 @@ export const promise = async <T>({
         req,
         siblingData: groupSiblingData,
         siblingDoc: groupSiblingDoc,
+        skipHooks,
       })
 
       break
@@ -578,7 +584,7 @@ export const promise = async <T>({
 
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.hooks?.beforeValidate?.length) {
+      if (!skipHooks && editor?.hooks?.beforeValidate?.length) {
         for (const hook of editor.hooks.beforeValidate) {
           const hookedValue = await hook({
             collection,
@@ -649,6 +655,7 @@ export const promise = async <T>({
         req,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
+        skipHooks,
       })
 
       break
@@ -674,6 +681,7 @@ export const promise = async <T>({
         req,
         siblingData,
         siblingDoc,
+        skipHooks,
       })
 
       break
