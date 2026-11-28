@@ -360,6 +360,32 @@ describe('General', () => {
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
+
+      test('should render the full meta config from collection config', async () => {
+        await page.goto(customViewsURL.list)
+
+        const head = page.locator('head')
+        const expectMeta = (selector: string, content: RegExp | string) =>
+          expect(head.locator(selector)).toHaveAttribute('content', content)
+        const expectLink = (selector: string, href: RegExp) =>
+          expect(head.locator(selector)).toHaveAttribute('href', href)
+
+        await expectMeta('meta[name="robots"]', 'noindex, follow')
+        await expectMeta('meta[name="googlebot"]', 'noindex, nofollow')
+        await expectMeta('meta[name="application-name"]', 'Custom Views App')
+        await expectMeta('meta[name="custom-views-meta"]', 'custom other meta')
+        await expectMeta('meta[property="og:type"]', 'website')
+        await expectMeta('meta[property="og:locale"]', 'en_US')
+        await expectMeta('meta[property="og:url"]', /^https?:\/\/[^/]+\/custom-views$/)
+        await expectMeta('meta[name="twitter:card"]', 'summary')
+        await expectMeta('meta[name="twitter:site"]', '@payloadcms_site')
+        await expectMeta('meta[name="twitter:creator"]', '@payloadcms')
+        await expectLink('link[rel="canonical"]', /^https?:\/\/[^/]+\/custom-views-canonical$/)
+        await expectLink('link[rel="alternate"][hreflang="es"]', /\/es\/custom-views$/)
+        await expectLink('link[rel="manifest"]', /\/custom-views\.webmanifest$/)
+        await expectLink('link[rel="icon"]', /\/custom-views-favicon\.png$/)
+        await expectLink('link[rel="apple-touch-icon"]', /\/custom-apple-touch-icon\.png$/)
+      })
     })
   })
 

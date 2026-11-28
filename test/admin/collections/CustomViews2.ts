@@ -20,7 +20,18 @@ export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
   admin: {
     meta: {
+      alternates: {
+        canonical: '/custom-views-canonical',
+        languages: { es: '/es/custom-views' },
+      },
+      applicationName: 'Custom Views App',
+      icons: { apple: '/custom-apple-touch-icon.png', icon: '/custom-views-favicon.png' },
+      manifest: '/custom-views.webmanifest',
+      openGraph: { locale: 'en_US', type: 'website', url: '/custom-views' },
+      other: { 'custom-views-meta': 'custom other meta' },
+      robots: { follow: true, googleBot: { follow: false, index: false }, index: false },
       title: customCollectionMetaTitle,
+      twitter: { card: 'summary', creator: '@payloadcms', site: '@payloadcms_site' },
     },
     components: {
       views: {
