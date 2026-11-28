@@ -323,6 +323,96 @@ describe('Array', () => {
         assertGroupText3,
       )
     })
+
+    test('should clear all rows at once', async () => {
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+
+      const rows = page.locator('#field-potentiallyEmptyArray .array-field__row')
+      await expect(rows).toHaveCount(3)
+
+      await page
+        .locator('#field-potentiallyEmptyArray .array-field__header-actions')
+        .first()
+        .getByRole('button', { name: 'Clear', exact: true })
+        .click()
+
+      await expect(rows).toHaveCount(0)
+
+      // The empty state persists after saving
+      await saveDocAndAssert(page)
+      await expect(rows).toHaveCount(0)
+    })
+
+    test('should clear rows including their nested arrays', async () => {
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray__0__array' })
+      await page.locator('#field-potentiallyEmptyArray__0__array__0__text').fill('nested')
+
+      await page
+        .locator('#field-potentiallyEmptyArray .array-field__header-actions')
+        .first()
+        .getByRole('button', { name: 'Clear', exact: true })
+        .click()
+
+      await expect(page.locator('#field-potentiallyEmptyArray .array-field__row')).toHaveCount(0)
+      await expect(page.locator('#field-potentiallyEmptyArray__0__array__0__text')).toBeHidden()
+
+      await saveDocAndAssert(page)
+      await expect(page.locator('#field-potentiallyEmptyArray .array-field__row')).toHaveCount(0)
+    })
+
+    test('should not show the clear button when there are no rows', async () => {
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      // potentiallyEmptyArray starts with no rows
+      await expect(
+        page
+          .locator('#field-potentiallyEmptyArray .array-field__header-actions')
+          .getByRole('button', { name: 'Clear', exact: true }),
+      ).toHaveCount(0)
+    })
+
+    test('should not show the clear button on a read-only array', async () => {
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      // readOnly has default rows but is not editable
+      await expect(
+        page
+          .locator('#field-readOnly .array-field__header-actions')
+          .getByRole('button', { name: 'Clear', exact: true }),
+      ).toHaveCount(0)
+    })
+
+    test('should restore cleared rows on reload without saving', async () => {
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      // `items` has a default value of two rows
+      const rows = page.locator('#field-items .array-field__row')
+      await expect(rows).toHaveCount(2)
+
+      await page
+        .locator('#field-items .array-field__header-actions')
+        .first()
+        .getByRole('button', { name: 'Clear', exact: true })
+        .click()
+
+      await expect(rows).toHaveCount(0)
+
+      // Reloading without saving discards the change and restores the default rows
+      await page.reload()
+      await expect(page.locator('#field-items .array-field__row')).toHaveCount(2)
+    })
   })
 
   // TODO: re-enable this test
