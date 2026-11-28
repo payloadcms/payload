@@ -40,10 +40,13 @@ export function $convertUploadElement(
     domNode.hasAttribute('data-lexical-upload-relation-to') &&
     domNode.hasAttribute('data-lexical-upload-id')
   ) {
-    const id = domNode.getAttribute('data-lexical-upload-id')
+    let id: null | number | string = domNode.getAttribute('data-lexical-upload-id')
     const relationTo = domNode.getAttribute('data-lexical-upload-relation-to')
 
     if (id != null && relationTo != null) {
+      if (String(Number(id)) === id) {
+        id = Number(id)
+      }
       const node = $createNode({
         data: {
           fields: {},
