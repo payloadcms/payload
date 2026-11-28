@@ -54,6 +54,51 @@ import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePu
 import { resolveLocalizedStatus } from '../../../versions/resolveLocalizedStatus.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 
+function omitDeniedValue(
+  value: unknown,
+  deniedPaths: Set<string>,
+  currentPath: string,
+): unknown {
+  if (Array.isArray(value)) {
+    const isRowArray = value.some(
+      (item) => item != null && typeof item === 'object' && !Array.isArray(item),
+    )
+    const rows = isRowArray
+      ? value.filter(
+          (item): item is Record<string, unknown> =>
+            item != null && typeof item === 'object' && !Array.isArray(item),
+        )
+      : value
+
+    return rows.map((item, index) =>
+      omitDeniedValue(item, deniedPaths, `${currentPath}.${index}`),
+    )
+  }
+  if (value && typeof value === 'object' && !(value instanceof Date) && !(value instanceof RegExp)) {
+    return omitDeniedFields(value as Record<string, unknown>, deniedPaths, currentPath)
+  }
+  return value
+}
+
+export function omitDeniedFields(
+  data: Record<string, unknown>,
+  deniedPaths: Set<string>,
+  parentPath = '',
+): Record<string, unknown> {
+  if (deniedPaths.size === 0) {
+    return data
+  }
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data)) {
+    const currentPath = parentPath ? `${parentPath}.${key}` : key
+    if (deniedPaths.has(currentPath)) {
+      continue
+    }
+    result[key] = omitDeniedValue(value, deniedPaths, currentPath)
+  }
+  return result
+}
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -116,6 +161,7 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const incomingData = deepCopyObjectSimple(data)
   const nextFileData =
     collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
       ? deepCopyObjectSimple(data)
@@ -141,6 +187,13 @@ export const updateDocument = async <
     publishAllLocales,
     unpublishAllLocales,
   })
+  const isExplicitPublish =
+    data?._status === 'published' ||
+    Boolean(publishAllLocalesArg) ||
+    (typeof data?._status === 'object' &&
+      data?._status !== null &&
+      Object.values(data._status).some((s) => s === 'published'))
+
   const isSavingDraft =
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
@@ -209,6 +262,7 @@ export const updateDocument = async <
   // beforeValidate - Fields
   // /////////////////////////////////////
 
+  const deniedFieldPaths = new Set<string>()
   let statusFieldAccess = false
   const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
     doc: originalDoc,
@@ -227,6 +281,9 @@ export const updateDocument = async <
     onFieldAccess: ({ accessResult, path }) => {
       if (path === '_status') {
         statusFieldAccess = accessResult
+      }
+      if (!accessResult) {
+        deniedFieldPaths.add(path)
       }
     },
     operation: 'update',
@@ -516,14 +573,24 @@ export const updateDocument = async <
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
+      const draftData =
+        incomingData && typeof incomingData === 'object'
+          ? (omitDeniedFields(
+              incomingData as Record<string, unknown>,
+              deniedFieldPaths,
+            ) as JsonObject)
+          : undefined
+
       resultWithLocales = await saveVersion({
         id,
         autosave,
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
         draft: isSavingDraft,
+        draftData,
         operation: 'update',
         payload,
+        publish: isExplicitPublish,
         req,
         unpublish: shouldUnpublishAllLocales,
       })

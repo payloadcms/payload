@@ -33,6 +33,10 @@ const AutosaveGlobal: GlobalConfig = {
       localized: true,
       required: true,
     },
+    {
+      name: 'description',
+      type: 'text',
+    },
   ],
   label: 'Autosave Global',
   versions: {

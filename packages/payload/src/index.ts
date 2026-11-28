@@ -2195,7 +2195,7 @@ export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryK
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 
-export { saveVersion } from './versions/saveVersion.js'
+export { mergeDraftData, saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'

@@ -37,7 +37,7 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -252,15 +252,46 @@ export const updateByIDOperation = async <
       where: fullWhere,
     }
 
-    let docWithLocales = await getLatestCollectionVersion<
-      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
-    >({
-      id,
-      config: collectionConfig,
-      payload,
-      query: findOneArgs,
-      req,
-    })
+    let docWithLocales: (RequiredDataFromCollectionSlug<TSlug> & TypeWithID) | undefined
+
+    const isExplicitPublish =
+      data?._status === 'published' ||
+      Boolean(publishAllLocales) ||
+      (typeof data?._status === 'object' &&
+        data?._status !== null &&
+        Object.values(data._status).some((s) => s === 'published'))
+
+    const isNonDraftUpdate = !draftArg && !isExplicitPublish && hasDraftsEnabled(collectionConfig)
+
+    if (isNonDraftUpdate) {
+      const mainDoc = await payload.db.findOne<RequiredDataFromCollectionSlug<TSlug> & TypeWithID>({
+        ...findOneArgs,
+        req,
+      })
+
+      const isMainDocPublished =
+        typeof mainDoc?._status === 'string'
+          ? mainDoc._status === 'published'
+          : typeof mainDoc?._status === 'object' && mainDoc?._status !== null
+            ? Object.values(mainDoc._status).some((s) => s === 'published')
+            : false
+
+      if (isMainDocPublished) {
+        docWithLocales = mainDoc!
+      }
+    }
+
+    if (!docWithLocales) {
+      docWithLocales = await getLatestCollectionVersion<
+        RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+      >({
+        id,
+        config: collectionConfig,
+        payload,
+        query: findOneArgs,
+        req,
+      })
+    }
 
     if (!docWithLocales && !hasWherePolicy) {
       throw new NotFound(req.t)

@@ -2792,6 +2792,7 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 export interface AutosaveGlobal {
   id: string;
   title: string;
+  description?: string | null;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -2879,6 +2880,7 @@ export interface AutosaveWithDraftButtonGlobal {
 export interface DraftGlobal {
   id: string;
   title: string;
+  description?: string | null;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -2908,6 +2910,7 @@ export interface DraftGlobal {
 export interface DraftWithMaxGlobal {
   id: string;
   title: string;
+  description?: string | null;
   createdBy?:
     | ({
         relationTo: 'users';
@@ -3185,6 +3188,7 @@ export interface PayloadJobsStat {
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
   title?: T;
+  description?: T;
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
@@ -3224,6 +3228,7 @@ export interface AutosaveWithDraftButtonGlobalSelect<T extends boolean = true> {
  */
 export interface DraftGlobalSelect<T extends boolean = true> {
   title?: T;
+  description?: T;
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
@@ -3237,6 +3242,7 @@ export interface DraftGlobalSelect<T extends boolean = true> {
  */
 export interface DraftWithMaxGlobalSelect<T extends boolean = true> {
   title?: T;
+  description?: T;
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
