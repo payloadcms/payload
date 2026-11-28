@@ -4603,6 +4603,33 @@ describe('database', () => {
     expect(found?.createdAt).toBeTruthy()
   })
 
+  it(
+    'should keep raw update operators when upsert matches a document',
+    { db: 'mongo' },
+    async () => {
+      const upsertTitle = `upsert-raw-operators-${randomUUID()}`
+
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { number: 1, title: upsertTitle },
+      })
+
+      for (const returning of [false, true]) {
+        await payload.db.upsert({
+          collection: postsSlug,
+          data: { $inc: { number: 1 } },
+          req: {},
+          returning,
+          where: { title: { equals: upsertTitle } },
+        })
+      }
+
+      const found = await payload.findByID({ id: post.id, collection: postsSlug })
+
+      expect(found.number).toBe(3)
+    },
+  )
+
   it('should apply default values on upsert insert but not on update', async () => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {

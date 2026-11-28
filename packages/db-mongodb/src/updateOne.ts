@@ -80,7 +80,22 @@ export const updateOne: UpdateOne = async function updateOne(
     updateOps.$setOnInsert = { createdAt: new Date().toISOString() }
   }
   if (Object.keys(updateOps).length) {
-    updateOps.$set = updateData
+    // Raw operators passed in data (e.g. `$inc`, `$unset`) must stay at the top level,
+    // Mongoose drops them when they're nested in `$set`
+    const $set: Record<string, unknown> = {}
+
+    for (const [key, value] of Object.entries(updateData)) {
+      if (key.startsWith('$')) {
+        updateOps[key] = { ...updateOps[key], ...value }
+      } else {
+        $set[key] = value
+      }
+    }
+
+    if (Object.keys($set).length) {
+      updateOps.$set = { ...updateOps.$set, ...$set }
+    }
+
     updateData = updateOps
   }
 
