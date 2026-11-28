@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, Payload } from '../../index.js'
+import type { CollectionAfterChangeHook, Payload, PayloadRequest } from '../../index.js'
 
 import { extractID } from '../../utilities/extractID.js'
 
@@ -8,6 +8,7 @@ type Args = {
   folderID: number | string
   parentIDToFind: number | string
   payload: Payload
+  req: PayloadRequest
 }
 
 /**
@@ -20,10 +21,12 @@ async function isChildOfFolder({
   folderID,
   parentIDToFind,
   payload,
+  req,
 }: Args): Promise<boolean> {
   const parentFolder = await payload.findByID({
     id: folderID,
     collection: folderCollectionSlug,
+    req,
   })
 
   const parentFolderID = parentFolder[folderFieldName]
@@ -46,6 +49,7 @@ async function isChildOfFolder({
     folderID: parentFolderID,
     parentIDToFind,
     payload,
+    req,
   })
 }
 
@@ -87,6 +91,7 @@ export const reparentChildFolder = ({
             folderID: newParentFolderID,
             parentIDToFind: doc.id,
             payload: req.payload,
+            req,
           })
         : false
 
