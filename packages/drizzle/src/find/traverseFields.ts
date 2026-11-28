@@ -340,7 +340,13 @@ export const traverseFields = ({
       case 'tab': {
         const fieldSelect = select?.[field.name]
 
-        if (fieldSelect === false) {
+        if (
+          fieldSelect === false ||
+          (select &&
+            selectMode === 'include' &&
+            typeof fieldSelect === 'undefined' &&
+            !selectAllOnCurrentLevel)
+        ) {
           break
         }
 
