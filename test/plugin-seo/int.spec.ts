@@ -25,7 +25,7 @@ const generationEndpoints = [
   {
     body: { slug: 'example-page' },
     endpoint: '/plugin-seo/generate-url',
-    expectedResult: 'https://yoursite.com/example-page',
+    expectedResult: '/en/example-page',
   },
   {
     body: { title: 'Example page' },

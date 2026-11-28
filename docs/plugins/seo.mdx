@@ -194,7 +194,14 @@ For a full list of arguments, see the [`generateTitle`](#generatetitle) function
 
 ##### `generateURL`
 
-A function called by the search preview component to display the actual URL of your page.
+The search preview shows the URL of your page. By default, it's your `serverURL` plus the path returned by the [`generateFrontendPath`](../configuration/collections#frontend-path) of the collection or global, so you usually don't need this option.
+
+<Banner type="warning">
+  `generateURL` is deprecated and will be removed in v5. Use
+  `generateFrontendPath` on your collections and globals instead.
+</Banner>
+
+If you pass it, it overrides the default:
 
 ```ts
 // payload.config.ts

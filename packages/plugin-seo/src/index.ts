@@ -28,40 +28,46 @@ import { translations } from './translations/index.js'
 export const seoPlugin = definePlugin<SEOPluginConfig>({
   slug: '@payloadcms/plugin-seo',
   plugin: ({ config, options: pluginConfig }) => {
-    const defaultFields: Field[] = [
-      OverviewField({}),
-      MetaTitleField({
-        hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
-      }),
-      MetaDescriptionField({
-        hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
-      }),
-      ...(pluginConfig?.uploadsCollection
-        ? [
-            MetaImageField({
-              hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
-              relationTo: pluginConfig.uploadsCollection as string,
-            }),
-          ]
-        : []),
-      PreviewField({
-        hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
-      }),
-    ]
+    const getSEOFields = ({
+      hasGenerateFrontendPath,
+    }: {
+      hasGenerateFrontendPath: boolean
+    }): GroupField[] => {
+      const defaultFields: Field[] = [
+        OverviewField({}),
+        MetaTitleField({
+          hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
+        }),
+        MetaDescriptionField({
+          hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
+        }),
+        ...(pluginConfig?.uploadsCollection
+          ? [
+              MetaImageField({
+                hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
+                relationTo: pluginConfig.uploadsCollection as string,
+              }),
+            ]
+          : []),
+        PreviewField({
+          hasGenerateFn: typeof pluginConfig?.generateURL === 'function' || hasGenerateFrontendPath,
+        }),
+      ]
 
-    const seoFields: GroupField[] = [
-      {
-        name: 'meta',
-        type: 'group',
-        fields: [
-          ...(pluginConfig?.fields && typeof pluginConfig.fields === 'function'
-            ? pluginConfig.fields({ defaultFields })
-            : defaultFields),
-        ],
-        interfaceName: pluginConfig.interfaceName,
-        label: 'SEO',
-      },
-    ]
+      return [
+        {
+          name: 'meta',
+          type: 'group',
+          fields: [
+            ...(pluginConfig?.fields && typeof pluginConfig.fields === 'function'
+              ? pluginConfig.fields({ defaultFields })
+              : defaultFields),
+          ],
+          interfaceName: pluginConfig.interfaceName,
+          label: 'SEO',
+        },
+      ]
+    }
 
     const collectionConfigBySlug = new Map<string, NonNullable<Config['collections']>[number]>()
     const collectionGenerationTargetSlugs = new Set(pluginConfig.collections ?? [])
@@ -194,6 +200,10 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
           const isEnabled = pluginConfig?.collections?.includes(slug)
 
           if (isEnabled) {
+            const seoFields = getSEOFields({
+              hasGenerateFrontendPath: typeof collection.generateFrontendPath === 'function',
+            })
+
             if (pluginConfig?.tabbedUI) {
               // prevent issues with auth enabled collections having an email field that shouldn't be moved to the SEO tab
               const emailField =
@@ -334,14 +344,27 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
               req,
             })
 
-            const result = pluginConfig.generateURL
-              ? await pluginConfig.generateURL({
-                  ...data,
-                  collectionConfig,
-                  globalConfig,
-                  req,
-                } satisfies Parameters<GenerateURL>[0])
-              : ''
+            let result = ''
+
+            if (pluginConfig.generateURL) {
+              result = await pluginConfig.generateURL({
+                ...data,
+                collectionConfig,
+                globalConfig,
+                req,
+              } satisfies Parameters<GenerateURL>[0])
+            } else if (collectionConfig || globalConfig) {
+              const frontendPath = await req.payload.generateFrontendPath({
+                ...(collectionConfig
+                  ? { collection: collectionConfig.slug }
+                  : { global: globalConfig!.slug }),
+                doc: data.doc,
+                req,
+              })
+
+              result = frontendPath === null ? '' : `${req.payload.config.serverURL}${frontendPath}`
+            }
+
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -382,6 +405,10 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
           const isEnabled = pluginConfig?.globals?.includes(slug)
 
           if (isEnabled) {
+            const seoFields = getSEOFields({
+              hasGenerateFrontendPath: typeof global.generateFrontendPath === 'function',
+            })
+
             if (pluginConfig?.tabbedUI) {
               const seoTabs: TabsField[] = [
                 {

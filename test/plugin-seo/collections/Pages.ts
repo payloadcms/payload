@@ -36,6 +36,7 @@ export const Pages: CollectionConfig = {
   versions: {
     drafts: true,
   },
+  generateFrontendPath: ({ doc, req }) => `/${req.locale}/${doc.slug ?? ''}`,
   fields: [
     {
       type: 'tabs',
@@ -53,18 +54,6 @@ export const Pages: CollectionConfig = {
               name: 'excerpt',
               label: 'Excerpt',
               type: 'text',
-            },
-            {
-              name: 'slug',
-              type: 'text',
-              required: true,
-              // NOTE: in order for position: 'sidebar' to work here,
-              // the first field of this config must be of type `tabs`,
-              // and this field must be a sibling of it
-              // See `./Posts` or the `../../README.md` for more info
-              admin: {
-                position: 'sidebar',
-              },
             },
             {
               name: 'featuredMedia',
@@ -89,6 +78,14 @@ export const Pages: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
 }

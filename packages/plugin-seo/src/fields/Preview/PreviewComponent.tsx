@@ -7,8 +7,10 @@ import type { UIField } from 'payload'
 import {
   useAllFormFields,
   useConfig,
+  useDebounce,
   useDocumentInfo,
   useDocumentTitle,
+  useEffectEvent,
   useForm,
   useLocale,
   useTranslation,
@@ -55,46 +57,60 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
 
   const [href, setHref] = useState<string>()
 
-  useEffect(() => {
+  const debouncedFields = useDebounce(fields, 300)
+
+  const generateHref = useEffectEvent(async (): Promise<string> => {
     const endpoint = formatAdminURL({
       apiRoute: api,
-      path: '/plugin-seo/generate-url',
+      path: `/plugin-seo/generate-url${locale?.code ? `?${new URLSearchParams({ locale: locale.code })}` : ''}`,
     })
 
-    const getHref = async () => {
-      const genURLResponse = await fetch(endpoint, {
-        body: JSON.stringify({
-          id: docInfo.id,
-          collectionSlug: docInfo.collectionSlug,
-          doc: getData(),
-          docPermissions: docInfo.docPermissions,
-          globalSlug: docInfo.globalSlug,
-          hasPublishPermission: docInfo.hasPublishPermission,
-          hasSavePermission: docInfo.hasSavePermission,
-          initialData: docInfo.initialData,
-          initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-          locale: locale?.code,
-          title,
-        } satisfies Omit<
-          Parameters<GenerateURL>[0],
-          'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
-        >),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      })
+    const genURLResponse = await fetch(endpoint, {
+      body: JSON.stringify({
+        id: docInfo.id,
+        collectionSlug: docInfo.collectionSlug,
+        doc: getData(),
+        docPermissions: docInfo.docPermissions,
+        globalSlug: docInfo.globalSlug,
+        hasPublishPermission: docInfo.hasPublishPermission,
+        hasSavePermission: docInfo.hasSavePermission,
+        initialData: docInfo.initialData,
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
+        locale: locale?.code,
+        title,
+      } satisfies Omit<
+        Parameters<GenerateURL>[0],
+        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+      >),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
 
-      const { result: newHref } = await genURLResponse.json()
+    const { result } = await genURLResponse.json()
 
-      setHref(newHref)
+    return result
+  })
+
+  useEffect(() => {
+    if (!hasGenerateURLFn) {
+      return
     }
 
-    if (hasGenerateURLFn && !href) {
-      void getHref()
+    let isStale = false
+
+    void generateHref().then((newHref) => {
+      if (!isStale) {
+        setHref(newHref)
+      }
+    })
+
+    return () => {
+      isStale = true
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, api, title])
+  }, [debouncedFields, hasGenerateURLFn, locale?.code])
 
   return (
     <div

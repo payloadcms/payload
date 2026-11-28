@@ -82,7 +82,10 @@ export type SEOPluginConfig = {
   generateImage?: GenerateImage
   generateTitle?: GenerateTitle
   /**
+   * Generates the URL shown in the search preview. Defaults to `serverURL` plus the
+   * `generateFrontendPath` of the collection or global.
    *
+   * @deprecated Add `generateFrontendPath` to your collections and globals instead. Will be removed in v5.
    */
   generateURL?: GenerateURL
   /**

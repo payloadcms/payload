@@ -6,7 +6,6 @@ import type {
   GenerateDescription,
   GenerateImage,
   GenerateTitle,
-  GenerateURL,
 } from '@payloadcms/plugin-seo/types'
 import type { Field } from 'payload'
 
@@ -48,10 +47,6 @@ const generateDescription: GenerateDescription<Page> = ({ doc }) => {
 
 const generateImage: GenerateImage<Page> = () => {
   return 'generated-image'
-}
-
-const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
-  return `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug || ''}`
 }
 
 export default buildConfigWithDefaults({
@@ -115,7 +110,6 @@ export default buildConfigWithDefaults({
         generateDescription,
         generateImage,
         generateTitle,
-        generateURL,
         globals: [siteSettingsSlug],
         tabbedUI: true,
         uploadsCollection: 'media',

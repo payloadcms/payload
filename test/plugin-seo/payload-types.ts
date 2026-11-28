@@ -139,21 +139,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_EFCC9EC0".
+ * via the `definition` "LexicalNodes_6BE34F1B".
  */
-export type LexicalNodes_EFCC9EC0 =
+export type LexicalNodes_6BE34F1B =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_EFCC9EC0>
+  | SerializedParagraphNode<LexicalNodes_6BE34F1B>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_EFCC9EC0>
+  | SerializedHeadingNode<LexicalNodes_6BE34F1B>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_EFCC9EC0>
-  | SerializedListNode<LexicalNodes_EFCC9EC0>
-  | SerializedListItemNode<LexicalNodes_EFCC9EC0>
-  | SerializedAutoLinkNode<LexicalNodes_EFCC9EC0, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_EFCC9EC0, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_6BE34F1B>
+  | SerializedListNode<LexicalNodes_6BE34F1B>
+  | SerializedListItemNode<LexicalNodes_6BE34F1B>
+  | SerializedAutoLinkNode<LexicalNodes_6BE34F1B, LexicalLinkFields_1B436A2C>
+  | SerializedLinkNode<LexicalNodes_6BE34F1B, LexicalLinkFields_1B436A2C>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -295,7 +295,6 @@ export interface Page {
   id: string;
   title: string;
   excerpt?: string | null;
-  slug: string;
   featuredMedia?: (string | null) | Media;
   meta: {
     title: string;
@@ -306,6 +305,7 @@ export interface Page {
     image?: (string | null) | Media;
     ogTitle?: string | null;
   };
+  slug: string;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -326,7 +326,7 @@ export interface Page {
 export interface Media {
   id: string;
   media?: (string | null) | Media;
-  richText?: LexicalRichText<LexicalNodes_EFCC9EC0> | null;
+  richText?: LexicalRichText<LexicalNodes_6BE34F1B> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -534,7 +534,6 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
-  slug?: T;
   featuredMedia?: T;
   meta?:
     | T
@@ -544,6 +543,7 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         ogTitle?: T;
       };
+  slug?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -803,12 +803,13 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ * via the `definition` "LexicalLinkFields_1B436A2C".
  */
-export interface LexicalLinkFields_0A7E9EC0 {
+export interface LexicalLinkFields_1B436A2C {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
+    frontendPath?: string | null;
     relationTo: string;
     value:
       | string
@@ -937,6 +938,7 @@ export interface SerializedListItemNode<TChildren> extends SerializedLexicalElem
 export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
+    frontendPath?: null | string;
     relationTo: string;
     value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
   } | null;

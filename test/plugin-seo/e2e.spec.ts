@@ -142,9 +142,22 @@ describe('SEO Plugin', () => {
       await metaDescription.fill('My new amazing SEO description')
 
       const preview = page.locator(previewClass)
-      await expect(preview).toContainText('https://yoursite.com/en/')
+      await expect(preview).toContainText('/en/')
       await expect(preview).toContainText('This is a test meta title')
       await expect(preview).toContainText('My new amazing SEO description')
+    })
+
+    test('should update the search result preview URL when the slug changes', async () => {
+      await page.goto(url.edit(id))
+      await waitForFormReady(page)
+      const previewClass = '#field-meta > div > div.render-fields > div:nth-child(5)'
+
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
+      await expect(page.locator(previewClass)).toContainText('/en/test-page')
+
+      await page.locator('#field-slug').fill('updated-slug')
+
+      await expect(page.locator(previewClass)).toContainText('/en/updated-slug')
     })
   })
 
