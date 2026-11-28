@@ -23,7 +23,7 @@ import {
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
-export const enum__locales = pgEnum('enum__locales', ['en', 'de'])
+export const enum__locales = pgEnum('_locales', ['en', 'de'])
 export const enum_movie_reviews_visibility = pgEnum('enum_movie_reviews_visibility', [
   'followers',
   'public',
