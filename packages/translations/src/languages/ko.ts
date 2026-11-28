@@ -593,6 +593,8 @@ export const koTranslations: DefaultTranslationsObject = {
     draft: '초안',
     draftHasPublishedVersion: '발행된 버전이 있는 초안',
     draftSavedSuccessfully: '초안이 저장되었습니다.',
+    duplicateScheduledEvent:
+      '이 이벤트는 이미 이 시간에 예약되어 있습니다. 다른 시간을 선택하거나 기존 이벤트를 삭제하세요.',
     lastSavedAgo: '마지막으로 저장한지 {{distance}} 전',
     modifiedOnly: '수정된 것만',
     moreVersions: '더 많은 버전...',

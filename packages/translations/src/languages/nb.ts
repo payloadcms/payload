@@ -604,6 +604,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     draft: 'Utkast',
     draftHasPublishedVersion: 'Utkast (har publisert versjon)',
     draftSavedSuccessfully: 'Utkast lagret.',
+    duplicateScheduledEvent:
+      'Denne hendelsen er allerede planlagt på dette tidspunktet. Velg et annet tidspunkt, eller slett den eksisterende hendelsen.',
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     modifiedOnly: 'Kun endret',
     moreVersions: 'Flere versjoner...',

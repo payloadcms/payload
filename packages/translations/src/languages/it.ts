@@ -608,6 +608,8 @@ export const itTranslations: DefaultTranslationsObject = {
     draft: 'Bozza',
     draftHasPublishedVersion: 'Bozza (ha una versione pubblicata)',
     draftSavedSuccessfully: 'Bozza salvata con successo.',
+    duplicateScheduledEvent:
+      'Questo evento è già programmato per questo orario. Scegli un altro orario o elimina l’evento esistente.',
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     modifiedOnly: 'Modificato solo',
     moreVersions: 'Altre versioni...',

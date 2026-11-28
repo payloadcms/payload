@@ -597,6 +597,8 @@ export const viTranslations: DefaultTranslationsObject = {
     draft: 'Bản nháp',
     draftHasPublishedVersion: 'Bản nháp (có phiên bản đã xuất bản)',
     draftSavedSuccessfully: 'Bản nháp đã được lưu thành công.',
+    duplicateScheduledEvent:
+      'Sự kiện này đã được lên lịch vào thời điểm này. Hãy chọn thời điểm khác hoặc xóa sự kiện hiện có.',
     lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
     modifiedOnly: 'Chỉ được sửa đổi',
     moreVersions: 'Thêm phiên bản...',

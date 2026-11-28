@@ -117,6 +117,31 @@ describe('@payloadcms/sdk', () => {
     )
   })
 
+  it('should execute findByID with fallbackLocale: false', async () => {
+    const localizedPost = await payload.create({
+      collection: 'posts',
+      data: { localizedText: 'english' },
+      locale: 'en',
+    })
+
+    const withFallback = await sdk.findByID({
+      collection: 'posts',
+      id: localizedPost.id,
+      locale: 'es',
+    })
+    const withoutFallback = await sdk.findByID({
+      collection: 'posts',
+      fallbackLocale: false,
+      id: localizedPost.id,
+      locale: 'es',
+    })
+
+    await payload.delete({ collection: 'posts', id: localizedPost.id })
+
+    expect(withFallback.localizedText).toBe('english')
+    expect(withoutFallback.localizedText).toBeUndefined()
+  })
+
   it('should execute findByID with disableErrors: true', async () => {
     const result = await sdk.findByID({
       disableErrors: true,

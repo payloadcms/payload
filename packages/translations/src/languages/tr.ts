@@ -605,6 +605,8 @@ export const trTranslations: DefaultTranslationsObject = {
     draft: 'Taslak',
     draftHasPublishedVersion: 'Taslak (yayınlanmış versiyonu var)',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
+    duplicateScheduledEvent:
+      'Bu etkinlik zaten bu saat için planlanmış. Farklı bir saat seçin veya mevcut etkinliği silin.',
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     modifiedOnly: 'Yalnızca değiştirilmiş',
     moreVersions: 'Daha fazla versiyon...',

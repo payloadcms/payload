@@ -6,7 +6,7 @@ import type { Column, SchedulePublish } from 'payload'
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { endOfToday, isToday, startOfDay } from 'date-fns'
+import { endOfDay, isSameDay, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -63,6 +63,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   const { getUpcomingScheduledPublish, schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
+  const [now, setNow] = React.useState(() => new Date())
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
@@ -151,7 +152,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
     }
 
     try {
-      await schedulePublish({
+      const result = await schedulePublish({
         type,
         date,
         doc: collectionSlug
@@ -165,15 +166,26 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         timezone,
       })
 
+      if (
+        typeof result === 'object' &&
+        result !== null &&
+        'error' in result &&
+        typeof result.error === 'string'
+      ) {
+        toast.error(result.error)
+        return
+      }
+
       setDate(undefined)
+      setNow(new Date())
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
     } catch (err) {
       console.error(err)
       toast.error(err.message)
+    } finally {
+      setProcessing(false)
     }
-
-    setProcessing(false)
   }, [
     date,
     locale,
@@ -210,6 +222,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
 
   const onChangeDate = useCallback(
     (incomingDate: Date) => {
+      setNow(new Date())
       if (timezone && incomingDate) {
         // Create TZDate instances for the selected timezone
         const tzDateWithUTC = TZDate.tz(timezone)
@@ -238,13 +251,19 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
     }
   }, [upcoming, fetchUpcoming])
 
+  // The picker displays selected-zone wall times in the browser's timezone.
+  const displayedNow = useMemo(
+    () => (timezone ? transpose(new TZDate(now, timezone), TZDate.tz(userTimezone)) : now),
+    [now, timezone, userTimezone],
+  )
+
   const minTime = useMemo(() => {
-    if (date && isToday(date)) {
-      return new Date()
+    if (!displayedValue || isSameDay(displayedValue, displayedNow)) {
+      return displayedNow
     }
 
-    return startOfDay(new Date())
-  }, [date])
+    return startOfDay(displayedNow)
+  }, [displayedValue, displayedNow])
 
   return (
     <Drawer
@@ -286,10 +305,11 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         <FieldLabel label={t('general:time')} path={'time'} required />
         <DatePickerField
           id="time"
-          maxTime={endOfToday()}
-          minDate={new Date()}
+          maxTime={endOfDay(displayedNow)}
+          minDate={displayedNow}
           minTime={minTime}
           onChange={(e) => onChangeDate(e)}
+          overrides={{ openToDate: displayedValue ? undefined : displayedNow }}
           pickerAppearance="dayAndTime"
           readOnly={processing}
           timeFormat={schedulePublishConfig?.timeFormat}
@@ -299,7 +319,10 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         {supportedTimezones.length > 0 && (
           <TimezonePicker
             id={`timezone-picker`}
-            onChange={setTimezone}
+            onChange={(newTimezone) => {
+              setTimezone(newTimezone)
+              setNow(new Date())
+            }}
             options={supportedTimezones}
             selectedTimezone={timezone}
           />

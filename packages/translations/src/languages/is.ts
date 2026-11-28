@@ -598,6 +598,8 @@ export const isTranslations: DefaultTranslationsObject = {
     draft: 'Drög',
     draftHasPublishedVersion: 'Drög (hafa birt útgáfu)',
     draftSavedSuccessfully: 'Drög vistuð með góðum árangri.',
+    duplicateScheduledEvent:
+      'Þessi viðburður er þegar áætlaður á þessum tíma. Veldu annan tíma eða eyddu núverandi viðburði.',
     lastSavedAgo: 'Síðast vistað {{distance}} síðan',
     modifiedOnly: 'Aðeins breytt',
     moreVersions: 'Fleiri útgáfur...',

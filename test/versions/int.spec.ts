@@ -4811,6 +4811,250 @@ describe('Versions', () => {
         })
       })
 
+      it.each(['collection', 'global'] as const)(
+        'should only load pending scheduled events for the requested %s',
+        async (target) => {
+          const req = await createLocalReq({ user }, payload)
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            ...(target === 'collection'
+              ? { doc: { relationTo: draftCollectionSlug, value: draftDoc.id } }
+              : { global: draftGlobalSlug }),
+            req,
+          }
+
+          await schedulePublishHandler(args)
+          await payload.jobs.queue({
+            overrideAccess: true,
+            task: 'schedulePublish',
+            waitUntil: date,
+            input: {
+              type: 'publish',
+              doc: { relationTo: draftCollectionSlug, value: 'unrelated' },
+            },
+          })
+          await payload.jobs.queue({
+            overrideAccess: true,
+            task: 'schedulePublish',
+            waitUntil: date,
+            input:
+              target === 'collection'
+                ? { type: 'publish', global: draftGlobalSlug }
+                : {
+                    type: 'publish',
+                    doc: { relationTo: draftCollectionSlug, value: String(draftDoc.id) },
+                  },
+          })
+          const find = vi.spyOn(payload.db, 'find')
+
+          try {
+            await expect(schedulePublishHandler(args)).resolves.toHaveProperty(
+              'error',
+              req.i18n.t('version:duplicateScheduledEvent'),
+            )
+            const index = find.mock.calls.findIndex(([args]) => args.collection === 'payload-jobs')
+            const result = await find.mock.results[index].value
+
+            expect(result.docs).toHaveLength(1)
+            expect(result.docs[0]).not.toHaveProperty('waitUntil', date.toISOString())
+          } finally {
+            find.mockRestore()
+          }
+        },
+      )
+
+      it('should return a translated error when scheduling fails', async () => {
+        const req = await createLocalReq({ user }, payload)
+        const queue = vi
+          .spyOn(payload.jobs, 'queue')
+          .mockRejectedValueOnce(new Error('queue unavailable'))
+
+        try {
+          await expect(
+            schedulePublishHandler({
+              type: 'publish',
+              date: new Date(Date.now() + 60_000),
+              doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+              req,
+            }),
+          ).resolves.toHaveProperty('error', req.i18n.t('error:unspecific'))
+        } finally {
+          queue.mockRestore()
+        }
+      })
+
+      it.each(['collection', 'global'] as const)(
+        'should reject duplicate scheduled events for a %s',
+        async (target) => {
+          const req = await createLocalReq({ user }, payload)
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            ...(target === 'collection'
+              ? { doc: { relationTo: draftCollectionSlug, value: draftDoc.id } }
+              : { global: draftGlobalSlug }),
+            req,
+          }
+
+          await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+          const result = await schedulePublishHandler({ ...args, timezone: 'Europe/London' })
+
+          expect(result).toHaveProperty('error', req.i18n.t('version:duplicateScheduledEvent'))
+          const jobs = await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+
+          expect(jobs.totalDocs).toBe(1)
+        },
+      )
+
+      it.each(['time', 'action', 'locale', 'document', 'global'] as const)(
+        'should allow scheduled events with a different %s',
+        async (difference) => {
+          const req = await createLocalReq({ user }, payload)
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+            req,
+          }
+          const otherDoc =
+            difference === 'document'
+              ? await payload.create({
+                  collection: draftCollectionSlug,
+                  data: { title: 'another scheduled document', description: 'another document' },
+                  overrideAccess: true,
+                })
+              : undefined
+
+          await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+          await expect(
+            schedulePublishHandler({
+              ...args,
+              ...(difference === 'time' ? { date: new Date(date.getTime() + 60_000) } : {}),
+              ...(difference === 'action' ? { type: 'unpublish' as const } : {}),
+              ...(difference === 'locale' ? { localeToPublish: 'en' } : {}),
+              ...(difference === 'document'
+                ? { doc: { relationTo: draftCollectionSlug, value: otherDoc!.id } }
+                : {}),
+              ...(difference === 'global' ? { doc: undefined, global: draftGlobalSlug } : {}),
+            }),
+          ).resolves.not.toHaveProperty('error')
+          const jobs = await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+
+          expect(jobs.totalDocs).toBe(2)
+        },
+      )
+
+      it.each(['completed', 'failed'] as const)(
+        'should allow rescheduling after a previous event has %s',
+        async (state) => {
+          const req = await createLocalReq({ user }, payload)
+          const date = new Date(Date.now() + 60_000)
+          const args = {
+            type: 'publish' as const,
+            date,
+            doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+            req,
+          }
+
+          await schedulePublishHandler(args)
+          await payload.update({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            data:
+              state === 'completed'
+                ? { completedAt: new Date().toISOString() }
+                : { hasError: true },
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+          await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+          const jobs = await payload.find({
+            collection: 'payload-jobs',
+            overrideAccess: true,
+            where: { taskSlug: { equals: 'schedulePublish' } },
+          })
+
+          expect(jobs.totalDocs).toBe(2)
+        },
+      )
+
+      it('should recognize default publish and all-locales events as duplicates', async () => {
+        const req = await createLocalReq({ user }, payload)
+        const date = new Date(Date.now() + 60_000)
+
+        await payload.db.create({
+          collection: 'payload-jobs',
+          data: {
+            taskSlug: 'schedulePublish',
+            waitUntil: date.toISOString(),
+            input: {
+              doc: { relationTo: draftCollectionSlug, value: String(draftDoc.id) },
+              locale: 'all',
+            },
+          },
+        })
+        const result = await schedulePublishHandler({
+          type: 'publish',
+          date,
+          doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+          req,
+        })
+
+        expect(result).toHaveProperty('error', req.i18n.t('version:duplicateScheduledEvent'))
+      })
+
+      it('should compare scheduled input values without SQL JSON query restrictions', async () => {
+        const req = await createLocalReq({ user }, payload)
+        const args = {
+          type: 'publish' as const,
+          date: new Date(Date.now() + 60_000),
+          doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+          localeToPublish: 'café',
+          req,
+        }
+
+        await expect(schedulePublishHandler(args)).resolves.not.toHaveProperty('error')
+        await expect(schedulePublishHandler(args)).resolves.toHaveProperty(
+          'error',
+          req.i18n.t('version:duplicateScheduledEvent'),
+        )
+      })
+
+      it.each([false, true])(
+        'should require publish permission before checking an existing schedule (%s)',
+        async (hasPending) => {
+          const req = await createLocalReq({ user }, payload)
+          const args = {
+            type: 'publish' as const,
+            date: new Date(Date.now() + 60_000),
+            doc: { relationTo: draftCollectionSlug, value: draftDoc.id },
+            req,
+          }
+
+          if (hasPending) {
+            await schedulePublishHandler(args)
+          }
+          await payload.update({
+            id: draftDoc.id,
+            collection: draftCollectionSlug,
+            data: { restrictedToUpdate: true },
+          })
+
+          await expect(schedulePublishHandler(args)).rejects.toMatchObject({ status: 403 })
+        },
+      )
+
       it('should create using schedule-publish', async () => {
         const currentDate = new Date()
 

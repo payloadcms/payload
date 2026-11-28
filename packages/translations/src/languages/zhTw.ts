@@ -570,6 +570,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     draft: '草稿',
     draftHasPublishedVersion: '草稿（有已發佈版本）',
     draftSavedSuccessfully: '草稿已成功儲存。',
+    duplicateScheduledEvent: '此事件已排程於此時間。請選擇其他時間或刪除現有事件。',
     lastSavedAgo: '上次儲存時間：{{distance}} 前',
     modifiedOnly: '僅顯示已變更的內容',
     moreVersions: '更多版本…',
