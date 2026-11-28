@@ -40,7 +40,7 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
       return (
         <Pill
           alignIcon="left"
-          aria-checked={pill.selected}
+          aria-pressed={pill.selected}
           className={[`${baseClass}__pill`, pill.selected && `${baseClass}__pill--selected`]
             .filter(Boolean)
             .join(' ')}
