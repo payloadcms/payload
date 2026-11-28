@@ -57,6 +57,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Hivatkozás',
     loadingWithEllipsis: 'Betöltés...',
   },
+  id: {
+    label: 'Tautan',
+    loadingWithEllipsis: 'Memuat...',
+  },
   is: {
     label: 'Hlekkur',
     loadingWithEllipsis: 'Hleð...',

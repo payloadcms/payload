@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Címsor {{headingLevel}}',
   },
+  id: {
+    label: 'Judul {{headingLevel}}',
+  },
   is: {
     label: 'Fyrirsögn {{headingLevel}}',
   },

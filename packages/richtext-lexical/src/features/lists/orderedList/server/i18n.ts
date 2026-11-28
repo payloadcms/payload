@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Rendelt lista',
   },
+  id: {
+    label: 'Daftar Bernomor',
+  },
   is: {
     label: 'Raðaður listi',
   },

@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Kapcsolat',
   },
+  id: {
+    label: 'Hubungan',
+  },
   is: {
     label: 'Tengingar',
   },

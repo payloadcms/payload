@@ -15,6 +15,7 @@ export const i18n: Partial<GenericLanguages> = {
   he: { defaultStyle: 'סגנון ברירת מחדל' },
   hr: { defaultStyle: 'Zadani stil' },
   hu: { defaultStyle: 'Alapértelmezett stílus' },
+  id: { defaultStyle: 'Gaya bawaan' },
   is: { defaultStyle: 'Sjálfgefinn stíll' },
   it: { defaultStyle: 'Stile predefinito' },
   ja: { defaultStyle: 'デフォルトスタイル' },

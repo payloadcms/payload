@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Ellenőrzőlista',
   },
+  id: {
+    label: 'Daftar Periksa',
+  },
   is: {
     label: 'Gátlisti',
   },

@@ -79,6 +79,12 @@ export const i18n: Partial<GenericLanguages> = {
     keyboardHint:
       'A fókusz szerkesztőn kívülre helyezéséhez nyomja meg az Escape, majd a Tab vagy Shift+Tab billentyűt.',
   },
+  id: {
+    decreaseLabel: 'Kurangi Indentasi',
+    increaseLabel: 'Tambah Indentasi',
+    keyboardHint:
+      'Tekan Escape, lalu Tab atau Shift+Tab untuk memindahkan fokus keluar dari editor.',
+  },
   is: {
     decreaseLabel: 'Minnka inndrátt',
     increaseLabel: 'Auka inndrátt',
