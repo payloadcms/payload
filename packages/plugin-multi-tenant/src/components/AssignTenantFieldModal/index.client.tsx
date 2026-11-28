@@ -5,16 +5,17 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
+  drawerZBase,
   Modal,
   Pill,
   PopupList,
   useConfig,
   useDocumentInfo,
   useDocumentTitle,
+  useDrawerDepth,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
-import { drawerZBase, useDrawerDepth } from '@payloadcms/ui/elements/Drawer'
 import React from 'react'
 
 import type {
