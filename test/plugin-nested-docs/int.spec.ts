@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { failingResaveSlug } from './shared.js'
 
 test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
   test.describe('seed', () => {
@@ -37,6 +38,9 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
       expect(query.docs[0].breadcrumbs[0].url).toStrictEqual('/parent-page')
       expect(query.docs[0].breadcrumbs[1].url).toStrictEqual('/parent-page/child-page')
       expect(query.docs[0].breadcrumbs[2].url).toStrictEqual(
+        '/parent-page/child-page/grandchild-page',
+      )
+      expect(query.docs[0].breadcrumbs[2].path).toStrictEqual(
         '/parent-page/child-page/grandchild-page',
       )
     })
@@ -286,6 +290,43 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
 
       expect(draftChild).toBeDefined()
       expect(draftChild.title).toBe('Version Child Draft Edit')
+    })
+
+    test('should not swallow errors thrown while resaving children', async ({ payload }) => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Failing Parent',
+          slug: 'failing-parent',
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+      createdPageIDs.push(parentDoc.id)
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Failing Child',
+          slug: failingResaveSlug,
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+      createdPageIDs.push(child.id)
+
+      await expect(
+        payload.update({
+          id: parentDoc.id,
+          collection: 'pages',
+          data: {
+            title: 'Failing Parent Updated',
+            _status: 'published',
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Failed to resave child')
     })
 
     test('should update breadcrumbs for draft-only children when parent is saved', async ({

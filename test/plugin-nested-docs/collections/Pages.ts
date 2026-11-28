@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { failingResaveSlug } from '../shared.js'
 import { populateFullTitle } from './populateFullTitle.js'
 
 export const Pages: CollectionConfig = {
@@ -11,6 +12,7 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'fullTitle',
   },
+  generateFrontendPath: ({ doc }) => doc.breadcrumbs?.at(-1)?.path ?? null,
   versions: {
     drafts: {
       schedulePublish: true,
@@ -18,6 +20,17 @@ export const Pages: CollectionConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    beforeChange: [
+      ({ data, operation, originalDoc }) => {
+        if (operation === 'update' && originalDoc?.slug === failingResaveSlug) {
+          throw new Error('Failed to resave child')
+        }
+
+        return data
+      },
+    ],
   },
   fields: [
     {

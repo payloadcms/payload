@@ -3,6 +3,8 @@ import type { CollectionSlug, PayloadRequest, SanitizedCollectionConfig } from '
 export type Breadcrumb = {
   doc: string
   label: string
+  /** The slugs of the doc and its parents joined with `/`, such as `/parent/child`. */
+  path?: string
   url?: string
 }
 
@@ -30,9 +32,20 @@ export type NestedDocsPluginConfig = {
    */
   collections: CollectionSlug[]
   generateLabel?: GenerateLabel
+  /**
+   * Generates the `url` of each breadcrumb. Defaults to the `generateFrontendPath` of the collection,
+   * which receives the doc with its computed breadcrumbs, so it can return `doc.breadcrumbs.at(-1).path`.
+   *
+   * @deprecated Add `generateFrontendPath` to your collections instead. Will be removed in v5.
+   */
   generateURL?: GenerateURL
   /**
    * Should be supplied if using an alternative field name for the 'parent' field in collections
    */
   parentFieldSlug?: string
+  /**
+   * The field whose values are joined to build the `path` of each breadcrumb
+   * @default 'slug'
+   */
+  slugFieldSlug?: string
 }

@@ -13,6 +13,7 @@ type Args = {
   generateLabel?: GenerateLabel
   generateURL?: GenerateURL
   req: PayloadRequest
+  slugFieldName: string
 }
 
 export const formatBreadcrumb = ({
@@ -22,6 +23,7 @@ export const formatBreadcrumb = ({
   generateLabel,
   generateURL,
   req,
+  slugFieldName,
 }: Args): Breadcrumb => {
   let url: string | undefined = undefined
   let label: string
@@ -40,10 +42,16 @@ export const formatBreadcrumb = ({
     label = typeof title === 'string' || typeof title === 'number' ? String(title) : ''
   }
 
+  const slugs = docs.map((doc) => doc[slugFieldName])
+  const path = slugs.every((slug) => typeof slug === 'string' && slug)
+    ? `/${slugs.join('/')}`
+    : undefined
+
   return {
     ...(breadcrumb || {}),
     doc: lastDoc.id as string,
     label,
+    path,
     url,
   }
 }

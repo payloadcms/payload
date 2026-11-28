@@ -29,15 +29,22 @@ export const createBreadcrumbsField = (
           name: 'url',
           type: 'text',
           admin: {
-            width: '50%',
+            width: '33%',
           },
           label: 'URL',
+        },
+        {
+          name: 'path',
+          type: 'text',
+          admin: {
+            width: '33%',
+          },
         },
         {
           name: 'label',
           type: 'text',
           admin: {
-            width: '50%',
+            width: '33%',
           },
         },
       ],

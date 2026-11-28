@@ -74,12 +74,14 @@ export const resaveChildren =
             id: child.id,
             collection: collection.slug,
             data: await populateBreadcrumbs({
+              breadcrumbsFieldName: pluginConfig.breadcrumbsFieldSlug,
               collection,
               data: child,
               generateLabel: pluginConfig.generateLabel,
               generateURL: pluginConfig.generateURL,
               parentFieldName: pluginConfig.parentFieldSlug,
               req,
+              slugFieldName: pluginConfig.slugFieldSlug,
             }),
             depth: 0,
             draft: isDraft,
@@ -100,6 +102,8 @@ export const resaveChildren =
             400,
           )
         }
+
+        throw err
       }
     }
 

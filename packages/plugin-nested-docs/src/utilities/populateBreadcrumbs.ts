@@ -14,6 +14,7 @@ type Args = {
   originalDoc?: Document
   parentFieldName?: string
   req: PayloadRequest
+  slugFieldName?: string
 }
 export const populateBreadcrumbs = async ({
   breadcrumbsFieldName = 'breadcrumbs',
@@ -24,6 +25,7 @@ export const populateBreadcrumbs = async ({
   originalDoc,
   parentFieldName,
   req,
+  slugFieldName = 'slug',
 }: Args): Promise<Data> => {
   const newData = data
 
@@ -54,8 +56,26 @@ export const populateBreadcrumbs = async ({
       generateLabel,
       generateURL,
       req,
+      slugFieldName,
     }),
   )
+
+  if (!generateURL && collection.generateFrontendPath) {
+    await Promise.all(
+      breadcrumbs.map(async (breadcrumb, i) => {
+        const frontendPath = await req.payload.generateFrontendPath({
+          collection: collection.slug,
+          doc: {
+            ...allParentDocuments[i],
+            [breadcrumbsFieldName]: breadcrumbs.slice(0, i + 1),
+          },
+          req,
+        })
+
+        breadcrumb.url = frontendPath ?? undefined
+      }),
+    )
+  }
 
   newData[breadcrumbsFieldName] = breadcrumbs
 
