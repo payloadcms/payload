@@ -103,6 +103,23 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  if (field.type === 'select' && operator !== 'exists') {
+    const validValues = (field.options ?? []).map((opt) =>
+      typeof opt === 'string' ? opt : opt.value,
+    )
+
+    if (Array.isArray(formattedValue)) {
+      formattedValue = formattedValue.filter((v) => validValues.includes(String(v)))
+      if (formattedValue.length === 0) {
+        return null
+      }
+    } else if (formattedValue !== null && formattedValue !== undefined) {
+      if (!validValues.includes(String(formattedValue))) {
+        return null
+      }
+    }
+  }
+
   if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val)
 
