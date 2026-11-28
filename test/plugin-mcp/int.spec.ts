@@ -3151,6 +3151,59 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(doc.arrayField[0].item).toBe('Updated item A')
         expect(doc.arrayField[2].itemNumber).toBe(30)
       })
+
+      it('should keep array row ids when updating document with array field', async () => {
+        const created = await (payload as any).create({
+          collection: 'field-types',
+          data: {
+            textField: 'Array row id update test',
+            arrayField: [
+              { item: 'Original item A', itemNumber: 1 },
+              { item: 'Original item B', itemNumber: 2 },
+            ],
+          },
+        })
+        createdFieldTypeIds.push(created.id)
+
+        const [rowA, rowB] = created.arrayField
+
+        const apiKey = await getFieldTypesApiKey(true, false)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'updateFieldTypes',
+              arguments: {
+                id: created.id,
+                arrayField: [
+                  { id: rowB.id, item: 'Updated item B', itemNumber: 20 },
+                  { id: rowA.id, item: 'Updated item A', itemNumber: 10 },
+                ],
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.arrayField).toHaveLength(2)
+        expect(doc.arrayField[0].id).toBe(rowB.id)
+        expect(doc.arrayField[0].item).toBe('Updated item B')
+        expect(doc.arrayField[1].id).toBe(rowA.id)
+        expect(doc.arrayField[1].item).toBe('Updated item A')
+      })
     })
 
     describe('Display field safety', () => {
