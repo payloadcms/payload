@@ -338,6 +338,15 @@ export default buildConfigWithDefaults({
           {
             name: 'text',
             type: 'text',
+            // A sentinel value that fails custom validation, so bulk-update
+            // tests can check that the field's own message survives.
+            validate: (value) => {
+              if (value === 'fails-validation') {
+                return 'Text failed custom validation'
+              }
+
+              return true
+            },
           },
           {
             name: 'errorBeforeChange',
