@@ -661,6 +661,7 @@ export const svTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Dra och släpp en fil',
     dragAndDropHere: 'eller dra och släpp en fil här',
     editImage: 'Redigera bild',
+    file: 'Fil',
     fileName: 'Filnamn',
     fileSize: 'Filstorlek',
     filesToUpload: 'Filer att ladda upp',

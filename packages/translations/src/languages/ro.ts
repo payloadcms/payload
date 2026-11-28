@@ -666,6 +666,7 @@ export const roTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Trageți și plasați un fișier',
     dragAndDropHere: 'sau trageți și plasați un fișier aici',
     editImage: 'Editează imaginea',
+    file: 'Fișier',
     fileName: 'Numele fișierului',
     fileSize: 'Dimensiunea fișierului',
     filesToUpload: 'Fișiere de încărcat',

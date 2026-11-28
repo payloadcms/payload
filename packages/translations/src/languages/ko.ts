@@ -655,6 +655,7 @@ export const koTranslations: DefaultTranslationsObject = {
     dragAndDrop: '파일을 끌어다 놓으세요',
     dragAndDropHere: '또는 여기로 파일을 끌어다 놓으세요',
     editImage: '이미지 수정',
+    file: '파일',
     fileName: '파일 이름',
     fileSize: '파일 크기',
     filesToUpload: '업로드할 파일들',

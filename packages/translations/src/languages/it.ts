@@ -667,6 +667,7 @@ export const itTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Trascina e rilascia un file',
     dragAndDropHere: 'oppure trascina e rilascia un file qui',
     editImage: 'Modifica immagine',
+    file: 'File',
     fileName: 'Nome File',
     fileSize: 'Dimensione File',
     filesToUpload: 'File da caricare',

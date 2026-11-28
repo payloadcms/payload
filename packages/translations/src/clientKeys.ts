@@ -590,6 +590,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:sizesFor',
   'upload:sizes',
   'upload:width',
+  'upload:file',
   'upload:fileName',
   'upload:fileSize',
   'upload:noFile',

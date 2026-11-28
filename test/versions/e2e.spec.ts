@@ -1795,6 +1795,112 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
+    describe('file comparison', () => {
+      const fileComparison = '.version-file-comparison'
+
+      async function createDocWithTwoVersions({ newFilePath }: { newFilePath?: string }) {
+        const publishedDoc = await payload.create({
+          collection: draftWithUploadCollectionSlug,
+          data: { _status: 'published', alt: 'Original image' },
+          filePath: path.resolve(dirname, './image.jpg'),
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: publishedDoc.id,
+          collection: draftWithUploadCollectionSlug,
+          data: { alt: 'Updated image' },
+          draft: true,
+          filePath: newFilePath,
+          overrideAccess: true,
+        })
+
+        const { docs: versions } = await payload.findVersions({
+          collection: draftWithUploadCollectionSlug,
+          depth: 0,
+          limit: 2,
+          overrideAccess: true,
+          sort: '-updatedAt',
+          where: { parent: { equals: publishedDoc.id } },
+        })
+
+        return {
+          newVersion: versions[0]!,
+          oldVersion: versions[1]!,
+          publishedDoc,
+        }
+      }
+
+      test('should show the previous and current file above the field diffs', async ({}, testInfo) => {
+        const { newVersion, oldVersion, publishedDoc } = await createDocWithTwoVersions({
+          newFilePath: path.resolve(dirname, './image.png'),
+        })
+
+        // File versioning stores each version's file under its own name, so read the names from
+        // the versions rather than from the document.
+        const oldFilename = oldVersion.version.filename!
+        const newFilename = newVersion.version.filename!
+
+        expect(oldFilename).not.toBe(newFilename)
+
+        await _navigateToDiffVersionView({
+          adminRoute,
+          collectionSlug: draftWithUploadCollectionSlug,
+          docID: publishedDoc.id,
+          page,
+          serverURL,
+          versionID: newVersion.id,
+        })
+
+        const comparison = page.locator(fileComparison)
+        const fileFrom = comparison.locator('.version-file-comparison__side--from')
+        const fileTo = comparison.locator('.version-file-comparison__side--to')
+
+        await expect(page.locator('.view-version__diff-wrap > :first-child')).toHaveClass(
+          /version-file-comparison/,
+        )
+        await expect(fileFrom.locator('.file-meta__url a')).toHaveText(oldFilename)
+        await expect(fileTo.locator('.file-meta__url a')).toHaveText(newFilename)
+        await expect(fileFrom.locator('img')).toHaveAttribute(
+          'src',
+          new RegExp(`version=${oldVersion.id}`),
+        )
+        await expect(fileTo.locator('img')).toHaveAttribute(
+          'src',
+          new RegExp(`version=${newVersion.id}`),
+        )
+        await expect
+          .poll(() => fileFrom.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth))
+          .toBeGreaterThan(0)
+        await expect
+          .poll(() => fileTo.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth))
+          .toBeGreaterThan(0)
+
+        const scanResults = await runAxeScan({ include: [fileComparison], page, testInfo })
+
+        expect(scanResults.violations.length).toBe(0)
+      })
+
+      test('should hide the file comparison when the file did not change and only modified fields are shown', async () => {
+        const { newVersion, publishedDoc } = await createDocWithTwoVersions({})
+
+        await _navigateToDiffVersionView({
+          adminRoute,
+          collectionSlug: draftWithUploadCollectionSlug,
+          docID: publishedDoc.id,
+          page,
+          serverURL,
+          versionID: newVersion.id,
+        })
+
+        await expect(page.locator(fileComparison)).toHaveCount(0)
+
+        await page.locator('#modifiedOnly').uncheck()
+
+        await expect(page.locator(fileComparison)).toBeVisible()
+      })
+    })
+
     test('should create a draft when duplicating a published upload document', async () => {
       const publishedDoc = await payload.create({
         collection: draftWithUploadCollectionSlug,

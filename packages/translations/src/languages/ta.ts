@@ -652,6 +652,7 @@ export const taTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'கோப்பை இழுத்து விடுக',
     dragAndDropHere: 'அல்லது கோப்பை இங்கே இழுத்து விடுக',
     editImage: 'படத்தை திருத்துக',
+    file: 'கோப்பு',
     fileName: 'கோப்புப் பெயர்',
     fileSize: 'கோப்பின் அளவு',
     filesToUpload: 'பதிவேற்ற வேண்டிய கோப்புகள்',

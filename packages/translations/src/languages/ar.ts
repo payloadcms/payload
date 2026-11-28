@@ -646,6 +646,7 @@ export const arTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'قم بسحب وإسقاط ملفّ',
     dragAndDropHere: 'أو اسحب الملفّ وأفلته هنا',
     editImage: 'تعديل الصورة',
+    file: 'ملفّ',
     fileName: 'اسم الملفّ',
     fileSize: 'حجم الملفّ',
     filesToUpload: 'ملفات للتحميل',

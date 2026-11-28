@@ -629,6 +629,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     dragAndDrop: '拖放一个文件',
     dragAndDropHere: '或在这里拖放一个文件',
     editImage: '编辑图像',
+    file: '文件',
     fileName: '文件名',
     fileSize: '文件大小',
     filesToUpload: '要上传的文件',

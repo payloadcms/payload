@@ -674,6 +674,7 @@ export const frTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Glisser-déposer un fichier',
     dragAndDropHere: 'ou glissez-déposez un fichier ici',
     editImage: 'Modifier l’image',
+    file: 'Fichier',
     fileName: 'Nom du fichier',
     fileSize: 'Taille du fichier',
     filesToUpload: 'Fichiers à télécharger',

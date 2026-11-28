@@ -640,6 +640,7 @@ export const heTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'גרור ושחרר קובץ',
     dragAndDropHere: 'או גרור ושחרר קובץ לכאן',
     editImage: 'ערוך תמונה',
+    file: 'קובץ',
     fileName: 'שם קובץ',
     fileSize: 'גודל קובץ',
     filesToUpload: 'קבצים להעלאה',

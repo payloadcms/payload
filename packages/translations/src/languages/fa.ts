@@ -652,6 +652,7 @@ export const faTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'یک فایل را اینجا بکشید و رها کنید',
     dragAndDropHere: 'یا یک فایل را اینجا بکشید و رها کنید',
     editImage: 'ویرایش تصویر',
+    file: 'فایل',
     fileName: 'نام فایل',
     fileSize: 'حجم فایل',
     filesToUpload: 'فایل‌ها برای آپلود',

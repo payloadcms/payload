@@ -655,6 +655,7 @@ export const etTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Lohista ja aseta fail',
     dragAndDropHere: 'või lohista ja aseta fail siia',
     editImage: 'Muuda pilti',
+    file: 'Fail',
     fileName: 'Failinimi',
     fileSize: 'Failisuurus',
     filesToUpload: 'Üleslaetavad failid',

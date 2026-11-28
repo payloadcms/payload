@@ -37,6 +37,14 @@ export type BuildVersionFieldsArgs = {
   fields: Field[]
   fieldsPermissions: SanitizedFieldsPermissions
   i18n: I18nClient
+  /**
+   * When true, only fields whose value differs between the two versions are rendered.
+   * Fields with equal values are skipped, and so are layout fields (tabs, rows, collapsibles)
+   * that have no changed fields left inside them.
+   *
+   * Comes from the "Modified only" toggle in the version comparison view, which is on by default
+   * and is stored in the `modifiedOnly` URL search param.
+   */
   modifiedOnly: boolean
   nestingLevel?: number
   parentIndexPath: string

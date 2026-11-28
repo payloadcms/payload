@@ -656,6 +656,7 @@ export const skTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Potiahnite a pusťte súbor',
     dragAndDropHere: 'alebo sem potiahnite a pusťte súbor',
     editImage: 'Upraviť obrázok',
+    file: 'Súbor',
     fileName: 'Názov súboru',
     fileSize: 'Veľkosť súboru',
     filesToUpload: 'Súbory na nahranie',

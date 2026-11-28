@@ -1,0 +1,79 @@
+@layer payload-default {
+  /*
+   * The selectors below are more specific than the shared `.field-diff-content` rules, which
+   * give each column its own background on small screens. Here the file card has the background.
+   */
+  .version-file-comparison.field-diff-container .field-diff-content {
+    padding: 0;
+    gap: var(--spacer-2);
+    background: transparent;
+  }
+
+  .version-file-comparison .field-diff-content > .version-file-comparison__side {
+    padding: 0;
+    min-height: unset;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .version-file-comparison__file {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2-5);
+    padding: var(--spacer-2);
+    border-radius: var(--radius-medium);
+    background-color: var(--color-bg-secondary);
+  }
+
+  .version-file-comparison__thumbnail.thumbnail {
+    height: calc(var(--spacer-6) * 3.5);
+    border-radius: var(--radius-medium);
+    background-color: var(--color-bg);
+  }
+
+  /* Show the whole file so that crops and other changes to its edges stay visible. */
+  .version-file-comparison__thumbnail.thumbnail:not(.thumbnail--size-none) img {
+    object-fit: contain;
+  }
+
+  .version-file-comparison__file .file-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .version-file-comparison__file .file-meta__url {
+    align-items: center;
+  }
+
+  /*
+   * Only the background is tinted. The diff text colors do not reach the 4.5:1 contrast that the
+   * small file details need on these backgrounds, so the text keeps the default theme colors.
+   */
+  .version-file-comparison__side--from .version-file-comparison__file--changed {
+    background-color: var(--diff-delete-parent-bg);
+  }
+
+  .version-file-comparison__side--from .version-file-comparison__file--changed .file-meta__url a {
+    text-decoration-line: line-through;
+  }
+
+  .version-file-comparison__side--to .version-file-comparison__file--changed {
+    background-color: var(--diff-create-parent-bg);
+  }
+
+  @media (min-width: 768px) {
+    .version-file-comparison.field-diff-container .field-diff-content {
+      gap: 0;
+    }
+
+    /* Keep each card clear of the centre line that separates the two versions. */
+    .version-file-comparison .field-diff-content > .version-file-comparison__side--from {
+      padding-inline-end: var(--spacer-2-5);
+    }
+
+    .version-file-comparison .field-diff-content > .version-file-comparison__side--to {
+      padding-inline-start: var(--spacer-2-5);
+    }
+  }
+}

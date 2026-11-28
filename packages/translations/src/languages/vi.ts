@@ -660,6 +660,7 @@ export const viTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Kéo và thả một tập tin',
     dragAndDropHere: 'hoặc kéo và thả file vào đây',
     editImage: 'Chỉnh sửa hình ảnh',
+    file: 'File',
     fileName: 'Tên file',
     fileSize: 'Dung lượng file',
     filesToUpload: 'Tệp để Tải lên',

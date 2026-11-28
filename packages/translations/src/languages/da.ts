@@ -659,6 +659,7 @@ export const daTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Træk og slip en fil',
     dragAndDropHere: 'Eller træk og slip en fil her',
     editImage: 'Rediger billede',
+    file: 'Fil',
     fileName: 'Filnavn',
     fileSize: 'Filstørrelse',
     filesToUpload: 'Filer til upload',

@@ -664,6 +664,7 @@ export const caTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Arrossega i deixa anar un fitxer',
     dragAndDropHere: 'o arrossega i deixa anar un fitxer aquí',
     editImage: 'Editar imatge',
+    file: 'Fitxer',
     fileName: 'Nom del fitxer',
     fileSize: 'Mida del fitxer',
     filesToUpload: 'Fitxers a carregar',

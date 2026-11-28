@@ -656,6 +656,7 @@ export const csTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Přetáhněte soubor',
     dragAndDropHere: 'nebo sem přetáhněte soubor',
     editImage: 'Upravit obrázek',
+    file: 'Soubor',
     fileName: 'Název souboru',
     fileSize: 'Velikost souboru',
     filesToUpload: 'Soubory k nahrání',

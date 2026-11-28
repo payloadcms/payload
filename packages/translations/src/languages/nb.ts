@@ -662,6 +662,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Dra og slipp en fil',
     dragAndDropHere: 'eller dra og slipp en fil her',
     editImage: 'Rediger bilde',
+    file: 'Fil',
     fileName: 'Filnavn',
     fileSize: 'Filstørrelse',
     filesToUpload: 'Filer til opplasting',

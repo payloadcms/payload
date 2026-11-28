@@ -659,6 +659,7 @@ export const plTranslations: DefaultTranslationsObject = {
     dragAndDrop: 'Przeciągnij i upuść plik',
     dragAndDropHere: 'lub złap i upuść plik tutaj',
     editImage: 'Edytuj obraz',
+    file: 'Plik',
     fileName: 'Nazwa pliku',
     fileSize: 'Rozmiar pliku',
     filesToUpload: 'Pliki do przesłania',
