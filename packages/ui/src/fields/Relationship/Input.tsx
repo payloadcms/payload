@@ -62,6 +62,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     formatOptionLabel,
     hasMany,
     initialValue,
+    inputId,
     isSortable = true,
     label,
     Label,
@@ -817,7 +818,13 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={inputId}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -855,6 +862,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                     ? `${option.relationTo}_${option.value}`
                     : (option.value as string)
                 }}
+                inputId={inputId}
                 isLoading={appearance === 'select' && isLoading}
                 isMulti={hasMany}
                 isSearchable={appearance === 'select'}
