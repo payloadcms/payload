@@ -34,6 +34,16 @@ export type JobStats = {
 export const getJobStatsGlobal: () => GlobalConfig = () => {
   return {
     slug: jobStatsGlobalSlug,
+    /**
+     * Internal bookkeeping for scheduled jobs: Payload reads and writes it
+     * through the database adapter, so nothing needs access to it. Without
+     * this, sanitizeGlobal falls back to defaultAccess and the global's REST
+     * and GraphQL endpoints are open to every authenticated user.
+     */
+    access: {
+      read: () => false,
+      update: () => false,
+    },
     admin: {
       group: 'System',
       hidden: true,
