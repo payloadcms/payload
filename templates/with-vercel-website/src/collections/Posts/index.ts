@@ -49,22 +49,13 @@ export const Posts: CollectionConfig = {
       description: true,
     },
   },
+  generateFrontendPath: ({ doc }) => (doc.slug ? `/posts/${encodeURIComponent(doc.slug)}` : null),
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) =>
-        generatePreviewPath({
-          slug: data?.slug,
-          collection: 'posts',
-          req,
-        }),
+      url: ({ frontendPath }) => generatePreviewPath({ path: frontendPath }),
     },
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        slug: data?.slug as string,
-        collection: 'posts',
-        req,
-      }),
+    preview: (_doc, { frontendPath }) => generatePreviewPath({ path: frontendPath }),
     useAsTitle: 'title',
   },
   fields: [

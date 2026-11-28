@@ -4,38 +4,51 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 
 import type { Page } from '../../../payload-types'
 
-export const revalidatePage: CollectionAfterChangeHook<Page> = ({
+export const revalidatePage: CollectionAfterChangeHook<Page> = async ({
   doc,
   previousDoc,
-  req: { payload, context },
+  req,
 }) => {
+  const { context, payload } = req
+
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
-      const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
+      const path = await payload.generateFrontendPath({ collection: 'pages', doc, req })
 
-      payload.logger.info(`Revalidating page at path: ${path}`)
+      if (path) {
+        payload.logger.info(`Revalidating page at path: ${path}`)
 
-      revalidatePath(path)
+        revalidatePath(path)
+      }
       revalidateTag('pages-sitemap', 'max')
     }
 
     // If the page was previously published, we need to revalidate the old path
     if (previousDoc?._status === 'published' && doc._status !== 'published') {
-      const oldPath = previousDoc.slug === 'home' ? '/' : `/${previousDoc.slug}`
+      const oldPath = await payload.generateFrontendPath({
+        collection: 'pages',
+        doc: previousDoc,
+        req,
+      })
 
-      payload.logger.info(`Revalidating old page at path: ${oldPath}`)
+      if (oldPath) {
+        payload.logger.info(`Revalidating old page at path: ${oldPath}`)
 
-      revalidatePath(oldPath)
+        revalidatePath(oldPath)
+      }
       revalidateTag('pages-sitemap', 'max')
     }
   }
   return doc
 }
 
-export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { context } }) => {
-  if (!context.disableRevalidate) {
-    const path = doc?.slug === 'home' ? '/' : `/${doc?.slug}`
-    revalidatePath(path)
+export const revalidateDelete: CollectionAfterDeleteHook<Page> = async ({ doc, req }) => {
+  if (!req.context.disableRevalidate) {
+    const path = await req.payload.generateFrontendPath({ collection: 'pages', doc, req })
+
+    if (path) {
+      revalidatePath(path)
+    }
     revalidateTag('pages-sitemap', 'max')
   }
 
