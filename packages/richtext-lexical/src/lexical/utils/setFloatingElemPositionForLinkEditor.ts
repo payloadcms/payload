@@ -12,8 +12,10 @@ export function setFloatingElemPositionForLinkEditor(
   const scrollerElem = anchorElem.parentElement
 
   if (targetRect === null || scrollerElem == null) {
+    // Not translated off-screen: in an RTL document that overflow widens the page by 10000px
     floatingElem.style.opacity = '0'
-    floatingElem.style.transform = 'translate(-10000px, -10000px)'
+    floatingElem.style.pointerEvents = 'none'
+    floatingElem.style.transform = 'none'
     return
   }
 
@@ -72,5 +74,7 @@ export function setFloatingElemPositionForLinkEditor(
   left -= anchorElementRect.left
 
   floatingElem.style.opacity = '1'
+
+  floatingElem.style.pointerEvents = ''
   floatingElem.style.transform = `translate(${left}px, ${top}px)`
 }
