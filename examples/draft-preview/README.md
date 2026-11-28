@@ -57,7 +57,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 ### Preview Mode
 
-To preview draft documents, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/admin/collections#preview) routes them to your front-end with a `secret` along with their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header. See [Pages](#pages) for more details.
+To preview draft documents, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/admin/preview) routes them to your front-end with a `secret` along with their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header. See [Pages](#pages) for more details.
 
 > "Preview mode" can vary between frameworks. In the Next.js App Router, [Draft Mode](https://nextjs.org/docs/pages/building-your-application/configuring/draft-mode) enables you to work with previewable content. It provides methods to set cookies in your browser, ensuring content is displayed as a draft, but this behavior might differ in other frameworks.
 
