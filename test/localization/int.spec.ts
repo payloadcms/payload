@@ -2228,6 +2228,97 @@ describe('Localization', () => {
         expect(allLocales?.title?.es).toBe(spanishTitle)
         expect(allLocales?.description).toBe('keep me')
       })
+
+      it('should duplicate select locales when a required localized field is unselected', async () => {
+        const doc = await payload.create({
+          collection: withRequiredLocalizedFields,
+          data: {
+            nav: {
+              layout: [{ blockType: 'text', text: 'english text' }],
+            },
+            title: 'hello',
+          },
+          locale: defaultLocale,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: withRequiredLocalizedFields,
+          data: {
+            nav: {
+              layout: [{ blockType: 'text', text: 'texto espanol' }],
+            },
+            title: 'hola',
+          },
+          locale: spanishLocale,
+        })
+
+        const duplicated = await payload.duplicate({
+          id: doc.id,
+          collection: withRequiredLocalizedFields,
+          locale: spanishLocale,
+          selectedLocales: [defaultLocale],
+        })
+
+        const allLocales: any = await payload.findByID({
+          id: duplicated.id,
+          collection: withRequiredLocalizedFields,
+          locale: 'all',
+        })
+
+        expect(allLocales.title.en).toBe('hello')
+        expect(allLocales.title.es).toBeUndefined()
+        expect(allLocales.nav.layout.en[0].text).toBe('english text')
+        expect(allLocales.nav.layout.es ?? null).toBeNull()
+      })
+
+      it('should still validate non-localized fields when duplicating without the active locale', async () => {
+        const doc = await payload.create({
+          collection: withRequiredLocalizedFields,
+          data: {
+            nav: {
+              layout: [{ blockType: 'text', text: 'english text' }],
+            },
+            title: 'hello',
+          },
+          locale: defaultLocale,
+        })
+
+        await expect(
+          payload.duplicate({
+            id: doc.id,
+            collection: withRequiredLocalizedFields,
+            data: { sharedCode: 'invalid' },
+            locale: spanishLocale,
+            selectedLocales: [defaultLocale],
+          }),
+        ).rejects.toMatchObject({
+          name: 'ValidationError',
+          data: { errors: [{ path: 'sharedCode' }] },
+        })
+      })
+
+      it('should still validate localized fields when duplicating select locales with locale all', async () => {
+        const translations = { en: 'English text', es: 'Spanish text' }
+        const doc = await payload.create({
+          collection: localeValidationSlug,
+          data: { confirmation: translations, matchingText: translations } as any,
+          // @ts-expect-error locale all writes are supported at runtime
+          locale: 'all',
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.duplicate({
+            id: doc.id,
+            collection: localeValidationSlug,
+            data: { matchingText: { en: 'Different' } } as any,
+            // @ts-expect-error locale all writes are supported at runtime
+            locale: 'all',
+            selectedLocales: [defaultLocale],
+          }),
+        ).rejects.toThrow('Matching Text (en)')
+      })
     })
 
     describe('Localized group and tabs', () => {

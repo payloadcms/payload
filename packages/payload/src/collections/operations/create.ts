@@ -35,6 +35,7 @@ import {
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { filterDataToSelectedLocales } from '../../utilities/filterDataToSelectedLocales.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -336,7 +337,22 @@ export const createOperation = async <
       ? { ...duplicatedFromDocWithLocales, _status: {} }
       : duplicatedFromDocWithLocales
 
-    const resultWithLocales = await beforeChange<JsonObject>({
+    // When duplicating into a subset of locales that excludes the active one,
+    // `duplicatedFromDoc` is empty at `req.locale` by design: nothing is written
+    // there. `beforeChange` validates that one locale, so required localized fields
+    // would always fail. The selected locales travel in `docWithLocales`, which
+    // validation never reads. Non-localized fields are the same in every locale and
+    // are still validated. With `locale: 'all'` the duplicate carries every selected
+    // locale, so it is validated as usual.
+    const isDuplicatingWithoutActiveLocale = Boolean(
+      isDuplicating &&
+        selectedLocales?.length &&
+        locale &&
+        locale !== 'all' &&
+        !selectedLocales.includes(locale),
+    )
+
+    let resultWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
@@ -349,8 +365,24 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess,
       req,
+      skipLocalizedFieldValidation: isDuplicatingWithoutActiveLocale,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (isDuplicatingWithoutActiveLocale && selectedLocales) {
+      // `beforeChange` merged that empty `req.locale` data back in as a locale entry.
+      // Drop it so no locale outside the selection is written: SQL adapters would
+      // otherwise insert a row of nulls into the NOT NULL columns of required fields.
+      resultWithLocales = {
+        ...resultWithLocales,
+        ...filterDataToSelectedLocales({
+          configBlockReferences: config.blocks,
+          docWithLocales: resultWithLocales,
+          fields: collectionConfig.fields,
+          selectedLocales,
+        }),
+      }
+    }
 
     const shouldApplyAllLocalesStatusChange = canApplyAllLocalesStatusChange({
       canUpdateStatus: statusFieldAccess,
