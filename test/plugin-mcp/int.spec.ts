@@ -3409,6 +3409,37 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(deniedUpdateSchema.properties?.title).toBeDefined()
         expect(deniedUpdateSchema.required).toContain('title')
       })
+      it('getCollectionSchema: should list writable fields when update access returns a query', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        const pagesConfig = payload.collections.pages.config
+        const originalUpdateAccess = pagesConfig.access.update
+        // Row-level access, such as a multi-tenant rule: update is allowed on some documents only.
+        pagesConfig.access.update = () => ({ title: { exists: true } })
+        onTestFinished(() => {
+          pagesConfig.access.update = originalUpdateAccess
+        })
+        const apiKey = await getApiKey({
+          collections: {
+            pages: {
+              create: false,
+            },
+          },
+        })
+        const client = await mcp.connect(apiKey)
+        const response = await client.callTool({
+          arguments: {
+            slug: 'pages',
+          },
+          name: 'getCollectionSchema',
+        })
+        expect(response.isError).not.toBe(true)
+        const schema = getToolDoc<JsonSchemaType>(response)
+        expect(schema.properties?.title).toBeDefined()
+        expect(schema).toHaveProperty('properties.layout.items.oneOf.0.properties.heading')
+      })
       it('getCollectionSchema: should reject when Payload access denies all write operations', async ({
         mcp,
         getApiKey,
@@ -4597,7 +4628,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
     test('should sign MCP clients in through the admin login', async ({ payload, restClient }) => {
       enableOAuth(payload, { type: 'builtin' })
-      let authorizationURL: URL | undefined
+      let authorizationURL: undefined | URL
       let clientInformation: Awaited<ReturnType<OAuthClientProvider['clientInformation']>>
       let codeVerifier = ''
       let tokens: Awaited<ReturnType<OAuthClientProvider['tokens']>>
