@@ -13,6 +13,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { formatBulkErrorDescription } from '../../utilities/bulkErrorMessages.js'
 import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
@@ -225,7 +226,7 @@ export function DeleteMany({
 
           if (json?.errors.length > 0) {
             toast.error(json.message, {
-              description: json.errors.map((error) => error.message).join('\n'),
+              description: formatBulkErrorDescription({ errors: json.errors }),
             })
           }
 

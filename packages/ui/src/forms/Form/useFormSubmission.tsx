@@ -38,6 +38,10 @@ import {
   useOptionalUploadSessions,
 } from '../../providers/UploadSessions/index.js'
 import { requests } from '../../utilities/api.js'
+import {
+  formatBulkErrorDescription,
+  readBulkErrorToast,
+} from '../../utilities/bulkErrorMessages.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
@@ -287,12 +291,22 @@ export const useFormSubmission = ({
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
+        errorToast = (data) => {
+          const bulkError = readBulkErrorToast(data)
+
+          if (bulkError) {
+            toast.error(bulkError.message, {
+              description: bulkError.description,
+            })
+            return
+          }
+
+          toast.error(data)
+        }
       } else {
         const promiseToast = toast.promise(promise, {
-          error: (data) => {
-            return data as string
-          },
+          description: (data) => readBulkErrorToast(data)?.description,
+          error: (data) => readBulkErrorToast(data)?.message ?? (data as string),
           loading: t('general:submitting'),
           success: (data) => {
             return data as string
@@ -704,7 +718,16 @@ export const useFormSubmission = ({
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
 
           if (json.message) {
-            errorToast(json.message)
+            const description = formatBulkErrorDescription({ errors: json.errors })
+
+            errorToast(
+              description
+                ? {
+                    description,
+                    message: json.message,
+                  }
+                : json.message,
+            )
             return
           }
 

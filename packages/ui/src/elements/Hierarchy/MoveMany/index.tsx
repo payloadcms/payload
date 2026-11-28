@@ -14,6 +14,7 @@ import { useDocumentSelection } from '../../../providers/DocumentSelection/index
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
+import { formatBulkErrorDescription } from '../../../utilities/bulkErrorMessages.js'
 import {
   getEffectiveHierarchyCollections,
   getHierarchyCollectionRestrictions,
@@ -207,9 +208,7 @@ export function MoveMany({
 
             if (json?.errors?.length > 0) {
               toast.error(json.message || t('error:unknown'), {
-                description: json.errors
-                  .map((error: { message: string }) => error.message)
-                  .join('\n'),
+                description: formatBulkErrorDescription({ errors: json.errors }),
               })
             } else {
               toast.error(json?.message || t('error:unknown'))
@@ -224,9 +223,7 @@ export function MoveMany({
           if (json?.errors?.length > 0) {
             hasErrors = true
             toast.error(json.message, {
-              description: json.errors
-                .map((error: { message: string }) => error.message)
-                .join('\n'),
+              description: formatBulkErrorDescription({ errors: json.errors }),
             })
           }
         }
