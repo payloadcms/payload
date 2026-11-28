@@ -2,6 +2,7 @@
 import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { resolveFieldPermissions } from 'payload/shared'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
@@ -99,7 +100,8 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   if (permissions === true) {
     blockPermissions = true
   } else {
-    const permissionsBlockSpecific = permissions?.blocks?.[block.slug] || permissions?.blocks
+    const permissionsBlockSpecific =
+      resolveFieldPermissions(permissions?.blocks, block.slug) || permissions?.blocks
     if (permissionsBlockSpecific === true) {
       blockPermissions = true
     } else if (permissionsBlockSpecific?.fields) {

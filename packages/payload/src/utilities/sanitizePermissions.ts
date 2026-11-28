@@ -13,6 +13,7 @@ import type {
 } from '../auth/types.js'
 
 import { deepCopyObject } from './deepCopyObject.js'
+import { INHERITED_PERMISSIONS_KEY, isSparseFieldPermissions } from './getFieldPermissions.js'
 
 // A period cannot occur in a schema field name. Retain this false value through
 // sanitization, then remove it after cleanup so a repeated block keeps `fields: {}`.
@@ -132,7 +133,17 @@ function checkAndSanitizePermissions(
    * Check nested Fields permissions
    */
   let fieldsPermissions = true
-  if (data.fields) {
+  if (isSparseFieldPermissions(data.fields)) {
+    // A sparse level is already minimal: it collapses to `true` only when nothing overrides
+    // the inherited results and those allow every operation.
+    fieldsPermissions =
+      Object.keys(data.fields).length === 1 &&
+      Object.values(data.fields[INHERITED_PERMISSIONS_KEY]).every(Boolean)
+
+    if (fieldsPermissions) {
+      ;(data.fields as unknown as SanitizedFieldsPermissions) = true
+    }
+  } else if (data.fields) {
     if (!checkAndSanitizeFieldsPermssions(data.fields)) {
       fieldsPermissions = false
     } else {

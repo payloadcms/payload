@@ -28,6 +28,7 @@ import {
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsLocalized,
+  resolveFieldPermissions,
   tabHasName,
 } from 'payload/shared'
 
@@ -209,7 +210,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldPermissions =
       parentPermissions === true
         ? parentPermissions
-        : deepCopyObjectSimple(parentPermissions?.[field.name])
+        : deepCopyObjectSimple(resolveFieldPermissions(parentPermissions, field.name))
 
     let hasPermission: boolean =
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
@@ -584,9 +585,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   permissions:
                     fieldPermissions === true
                       ? fieldPermissions
-                      : parentPermissions?.[field.name]?.blocks?.[block.slug] === true
+                      : resolveFieldPermissions(fieldPermissions?.blocks, block.slug) === true
                         ? true
-                        : parentPermissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
+                        : resolveFieldPermissions(fieldPermissions?.blocks, block.slug)?.fields ||
+                          {},
                   preferences,
                   previousFormState,
                   readOnly,
@@ -924,7 +926,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       if (parentPermissions === true) {
         childPermissions = true
       } else {
-        const tabPermissions = parentPermissions?.[field.name]
+        const tabPermissions = resolveFieldPermissions(parentPermissions, field.name)
         childPermissions = tabPermissions === true ? true : tabPermissions?.fields
       }
 
