@@ -12,7 +12,6 @@ import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
 import { attemptKeyboardReorder, moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
@@ -25,7 +24,6 @@ const { beforeAll, describe } = test
 let page: Page
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let serverURL: string
 let context: BrowserContext
 
@@ -36,13 +34,6 @@ describe('Sort functionality', () => {
 
     context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
-
-    // Wait for the server to be ready before the node-side REST login: on the
-    // slower TanStack prod cold-start, `client.login()` (a direct fetch, no retry)
-    // can hit the server before it accepts connections → `TypeError: fetch failed`.
-
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
   })
 
   test.beforeEach(async () => {

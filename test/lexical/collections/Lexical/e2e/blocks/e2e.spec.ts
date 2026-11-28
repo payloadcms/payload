@@ -32,7 +32,6 @@ import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { initPage } from '../../../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import {
@@ -56,7 +55,6 @@ const formStateUrl =
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let context: BrowserContext
 let serverURL: string
@@ -78,12 +76,6 @@ describe('lexicalBlocks', () => {
     await reInitializeDB({
       serverURL,
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'rich-text-fields', serverURL })
-    await client.login()
   })
 
   test('should retain server validation errors for newly accessible block fields', async () => {

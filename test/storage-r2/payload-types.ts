@@ -159,6 +159,7 @@ export interface Config {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
     'media-client': MediaClient;
+    'media-container': MediaContainer;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -171,6 +172,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-client': MediaClientSelect<false> | MediaClientSelect<true>;
+    'media-container': MediaContainerSelect<false> | MediaContainerSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -432,6 +434,24 @@ export interface MediaClient {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-container".
+ */
+export interface MediaContainer {
+  id: string;
+  files?: (string | MediaClient)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -465,6 +485,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-client';
         value: string | MediaClient;
+      } | null)
+    | ({
+        relationTo: 'media-container';
+        value: string | MediaContainer;
       } | null)
     | ({
         relationTo: 'users';
@@ -706,6 +730,17 @@ export interface MediaClientSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-container_select".
+ */
+export interface MediaContainerSelect<T extends boolean = true> {
+  files?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -817,7 +852,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'media' | 'media-with-prefix' | 'media-client' | 'users';
+    relatedCollection: 'media' | 'media-with-prefix' | 'media-client' | 'media-container' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -839,7 +874,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('media' | 'media-with-prefix' | 'media-client' | 'users')[] | null;
+    excludedCollections?: ('media' | 'media-with-prefix' | 'media-client' | 'media-container' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

@@ -3585,6 +3585,7 @@ describe('Versions', () => {
       await payload.delete({
         collection: 'draft-posts',
         overrideAccess: true,
+        where: { id: { exists: true } },
       })
 
       await navigateToDiffVersionView()
@@ -3606,6 +3607,7 @@ describe('Versions', () => {
       await payload.delete({
         collection: 'media',
         overrideAccess: true,
+        where: { id: { exists: true } },
       })
 
       await navigateToDiffVersionView()
