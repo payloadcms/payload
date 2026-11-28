@@ -2,6 +2,8 @@ import type { GenericLanguages } from '@payloadcms/translations'
 
 export const i18n: Partial<GenericLanguages> = {
   id: {
+    alignment: 'Perataan',
+    insert: 'Sisipkan',
     insertParagraph: 'Sisipkan Paragraf',
     placeholder: "Mulai mengetik, atau tekan '/' untuk perintah...",
     slashMenuBasicGroupLabel: 'Dasar',
@@ -10,6 +12,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktif',
   },
   ar: {
+    alignment: 'محاذاة',
+    insert: 'إدراج',
     insertParagraph: 'إدراج فقرة',
     placeholder: "ابدأ بالكتابة، أو اضغط على '/' للأوامر ...",
     slashMenuBasicGroupLabel: 'أساسي',
@@ -18,6 +22,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} نشط',
   },
   az: {
+    alignment: 'Düzləndirmə',
+    insert: 'Əlavə et',
     insertParagraph: 'Paraqraf əlavə edin',
     placeholder: "Yazmağa başlayın və ya əmrlər üçün '/' düyməsini basın...",
     slashMenuBasicGroupLabel: 'Əsas',
@@ -26,6 +32,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktiv',
   },
   bg: {
+    alignment: 'Подравняване',
+    insert: 'Вмъкване',
     insertParagraph: 'Вмъкнете параграф',
     placeholder: "Започнете да пишете или натиснете '/' за команди...",
     slashMenuBasicGroupLabel: 'Основен',
@@ -34,6 +42,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} активни',
   },
   'bn-BD': {
+    alignment: 'সারিবদ্ধকরণ',
+    insert: 'সন্নিবেশ করুন',
     insertParagraph: 'অনুচ্ছেদ সংযুক্ত করুন',
     placeholder: "টাইপ করা শুরু করুন, অথবা কমান্ডের জন্য '/' চাপুন...",
     slashMenuBasicGroupLabel: 'মৌলিক',
@@ -42,6 +52,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} সক্রিয়',
   },
   'bn-IN': {
+    alignment: 'সারিবদ্ধকরণ',
+    insert: 'সন্নিবেশ করুন',
     insertParagraph: 'অনুচ্ছেদ সন্নিবেশ করুন',
     placeholder: 'টাইপ করতে শুরু করুন, অথবা কমান্ডের জন্য ‘/’ চাপুন...',
     slashMenuBasicGroupLabel: 'মৌলিক',
@@ -50,6 +62,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} সক্রিয়',
   },
   ca: {
+    alignment: 'Alineació',
+    insert: 'Insereix',
     insertParagraph: 'Insereix paràgraf',
     placeholder: "Comença a escriure o prem '/' per a comandes...",
     slashMenuBasicGroupLabel: 'Bàsic',
@@ -58,6 +72,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} actiu',
   },
   cs: {
+    alignment: 'Zarovnání',
+    insert: 'Vložit',
     insertParagraph: 'Vložit odstavec',
     placeholder: "Začněte psát nebo stiskněte '/' pro příkazy...",
     slashMenuBasicGroupLabel: 'Základní',
@@ -66,6 +82,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktivní',
   },
   da: {
+    alignment: 'Justering',
+    insert: 'Indsæt',
     insertParagraph: 'Indsæt afsnit',
     placeholder: "Begynd at skrive, eller tryk på '/' for kommandoer...",
     slashMenuBasicGroupLabel: 'Grundlæggende',
@@ -74,6 +92,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktive',
   },
   de: {
+    alignment: 'Ausrichtung',
+    insert: 'Einfügen',
     insertParagraph: 'Absatz einfügen',
     placeholder: "Beginne zu tippen oder drücke '/' für Befehle...",
     slashMenuBasicGroupLabel: 'Basis',
@@ -82,6 +102,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktiv',
   },
   en: {
+    alignment: 'Alignment',
+    insert: 'Insert',
     insertParagraph: 'Insert Paragraph',
     placeholder: "Start typing, or press '/' for commands...",
     slashMenuBasicGroupLabel: 'Basic',
@@ -90,6 +112,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} active',
   },
   es: {
+    alignment: 'Alineación',
+    insert: 'Insertar',
     insertParagraph: 'Insertar párrafo',
     placeholder: "Comience a escribir, o presione '/' para comandos...",
     slashMenuBasicGroupLabel: 'Básico',
@@ -98,6 +122,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} activo',
   },
   et: {
+    alignment: 'Joondus',
+    insert: 'Lisa',
     insertParagraph: 'Lisa lõik',
     placeholder: "Alusta kirjutamist või vajuta '/' käskude jaoks...",
     slashMenuBasicGroupLabel: 'Põhiline',
@@ -106,6 +132,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktiivne',
   },
   fa: {
+    alignment: 'تراز',
+    insert: 'درج',
     insertParagraph: 'درج پاراگراف',
     placeholder: "شروع به تایپ کنید، یا برای دستورات '/' را فشار دهید ...",
     slashMenuBasicGroupLabel: 'پایه',
@@ -114,6 +142,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} فعال',
   },
   fr: {
+    alignment: 'Alignement',
+    insert: 'Insérer',
     insertParagraph: 'Insérer un paragraphe',
     placeholder: "Commencez à taper, ou appuyez sur '/' pour les commandes...",
     slashMenuBasicGroupLabel: 'De base',
@@ -122,6 +152,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} actif',
   },
   he: {
+    alignment: 'יישור',
+    insert: 'הוספה',
     insertParagraph: 'הוסף פסקה',
     placeholder: "התחיל להקליד, או לחץ על '/' עבור פקודות ...",
     slashMenuBasicGroupLabel: 'בסיסי',
@@ -130,6 +162,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} פעיל',
   },
   hr: {
+    alignment: 'Poravnanje',
+    insert: 'Umetni',
     insertParagraph: 'Umetni odlomak',
     placeholder: "Počnite tipkati, ili pritisnite '/' za naredbe...",
     slashMenuBasicGroupLabel: 'Osnovno',
@@ -138,6 +172,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktivno',
   },
   hu: {
+    alignment: 'Igazítás',
+    insert: 'Beszúrás',
     insertParagraph: 'Bekezdés beszúrása',
     placeholder: "Kezdje el gépelni, vagy nyomja meg a '/' billentyűt a parancsokhoz...",
     slashMenuBasicGroupLabel: 'Alapvető',
@@ -146,6 +182,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktív',
   },
   hy: {
+    alignment: 'Հավասարեցում',
+    insert: 'Տեղադրել',
     insertParagraph: 'Ավելացնել հատված',
     placeholder: "Սկսեք գրել կամ սեղմեք '/' հրամանների համար...",
     slashMenuBasicGroupLabel: 'Հիմնական',
@@ -154,6 +192,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} ակտիվ',
   },
   is: {
+    alignment: 'Jöfnun',
+    insert: 'Setja inn',
     insertParagraph: 'Bæta við efnisgrein',
     placeholder: "Byrjaðu að skrifa eða sláðu inn '/' fyrir skipanir...",
     slashMenuBasicGroupLabel: 'Grunnur',
@@ -162,6 +202,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} virk',
   },
   it: {
+    alignment: 'Allineamento',
+    insert: 'Inserisci',
     insertParagraph: 'Inserisci paragrafo',
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
     slashMenuBasicGroupLabel: 'Base',
@@ -170,6 +212,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} attivo',
   },
   ja: {
+    alignment: '配置',
+    insert: '挿入',
     insertParagraph: '段落を挿入',
     placeholder: "入力を開始するか、コマンドのために'/'を押してください…",
     slashMenuBasicGroupLabel: '基本的な',
@@ -178,6 +222,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} アクティブ',
   },
   ko: {
+    alignment: '정렬',
+    insert: '삽입',
     insertParagraph: '단락 삽입',
     placeholder: "타이핑을 시작하거나, 명령어를 입력하려면 '/'를 누르세요...",
     slashMenuBasicGroupLabel: '기본적인',
@@ -186,6 +232,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} 활성화된',
   },
   lt: {
+    alignment: 'Lygiuotė',
+    insert: 'Įterpti',
     insertParagraph: 'Įterpti pastraipą',
     placeholder: "Pradėkite rašyti arba paspauskite '/' komandoms...",
     slashMenuBasicGroupLabel: 'Pagrindinis',
@@ -194,6 +242,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktyvus',
   },
   lv: {
+    alignment: 'Līdzināšana',
+    insert: 'Ievietot',
     insertParagraph: 'Ievietot rindkopu',
     placeholder: "Sāciet rakstīt vai nospiediet '/' komandu ievadīšanai...",
     slashMenuBasicGroupLabel: 'Pamata',
@@ -202,6 +252,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktīvs',
   },
   my: {
+    alignment: 'ညှိခြင်း',
+    insert: 'ထည့်သွင်းရန်',
     insertParagraph: 'စာပိုဒ် ထည့်သွင်းပါ',
     placeholder: "Mula menaip, atau tekan '/' untuk arahan...",
     slashMenuBasicGroupLabel: 'အခြေခံ',
@@ -210,6 +262,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktif',
   },
   nb: {
+    alignment: 'Justering',
+    insert: 'Sett inn',
     insertParagraph: 'Sett inn avsnitt',
     placeholder: "Begynn å skrive, eller trykk '/' for kommandoer...",
     slashMenuBasicGroupLabel: 'Grunnleggende',
@@ -218,6 +272,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktiv',
   },
   nl: {
+    alignment: 'Uitlijning',
+    insert: 'Invoegen',
     insertParagraph: 'Paragraaf invoegen',
     placeholder: "Begin met typen, of druk op '/' voor opdrachten...",
     slashMenuBasicGroupLabel: 'Basis',
@@ -226,6 +282,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} actief',
   },
   pl: {
+    alignment: 'Wyrównanie',
+    insert: 'Wstaw',
     insertParagraph: 'Wstaw akapit',
     placeholder: "Rozpocznij pisanie lub naciśnij '/' dla poleceń...",
     slashMenuBasicGroupLabel: 'Podstawowy',
@@ -234,6 +292,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktywny',
   },
   pt: {
+    alignment: 'Alinhamento',
+    insert: 'Inserir',
     insertParagraph: 'Inserir Parágrafo',
     placeholder: "Comece a digitar, ou pressione '/' para comandos...",
     slashMenuBasicGroupLabel: 'Básico',
@@ -242,6 +302,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} ativo',
   },
   ro: {
+    alignment: 'Aliniere',
+    insert: 'Inserează',
     insertParagraph: 'Introduceți paragraf',
     placeholder: "Începeți să tastați sau apăsați '/' pentru comenzi...",
     slashMenuBasicGroupLabel: 'De bază',
@@ -250,6 +312,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} activ',
   },
   rs: {
+    alignment: 'Поравнање',
+    insert: 'Уметни',
     insertParagraph: 'Ubaci pasus',
     placeholder: "Почните да куцате, или притисните '/' за команде...",
     slashMenuBasicGroupLabel: 'Основно',
@@ -258,6 +322,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} активно',
   },
   'rs-latin': {
+    alignment: 'Poravnanje',
+    insert: 'Umetni',
     insertParagraph: 'Ubaci pasus',
     placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
     slashMenuBasicGroupLabel: 'Osnovno',
@@ -266,6 +332,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktivan',
   },
   ru: {
+    alignment: 'Выравнивание',
+    insert: 'Вставить',
     insertParagraph: 'Вставить абзац',
     placeholder: "Начните печатать или нажмите '/' для команд...",
     slashMenuBasicGroupLabel: 'Базовый',
@@ -274,6 +342,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} активных',
   },
   sk: {
+    alignment: 'Zarovnanie',
+    insert: 'Vložiť',
     insertParagraph: 'Vložiť odsek',
     placeholder: "Začnite písať alebo stlačte '/' pre príkazy...",
     slashMenuBasicGroupLabel: 'Základný',
@@ -282,6 +352,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktívne',
   },
   sl: {
+    alignment: 'Poravnava',
+    insert: 'Vstavi',
     insertParagraph: 'Vstavi odstavek',
     placeholder: 'Začnite tipkati ali pritisnite "/" za ukaze...',
     slashMenuBasicGroupLabel: 'Osnovno',
@@ -290,6 +362,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktivno',
   },
   sv: {
+    alignment: 'Justering',
+    insert: 'Infoga',
     insertParagraph: 'Infoga stycke',
     placeholder: "Börja skriva, eller tryck på '/' för kommandon...",
     slashMenuBasicGroupLabel: 'Grundläggande',
@@ -298,6 +372,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktiv',
   },
   ta: {
+    alignment: 'சீரமைப்பு',
+    insert: 'செருகு',
     insertParagraph: 'பத்தியை சேர்க்கவும்',
     placeholder: "எழுதத் தொடங்கவும், அல்லது கட்டளைகளுக்கு '/' அழுத்தவும்...",
     slashMenuBasicGroupLabel: 'அடிப்படை',
@@ -306,6 +382,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} செயலில் உள்ளது',
   },
   th: {
+    alignment: 'การจัดแนว',
+    insert: 'แทรก',
     insertParagraph: 'แทรกย่อหน้า',
     placeholder: "เริ่มพิมพ์หรือกด '/' สำหรับคำสั่ง...",
     slashMenuBasicGroupLabel: 'พื้นฐาน',
@@ -314,6 +392,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} ที่ใช้งานอยู่',
   },
   tr: {
+    alignment: 'Hizalama',
+    insert: 'Ekle',
     insertParagraph: 'Paragraf Ekle',
     placeholder: "Yazmaya başlayın veya komutlar için '/' tuşuna basın...",
     slashMenuBasicGroupLabel: 'Temel',
@@ -322,6 +402,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktif',
   },
   uk: {
+    alignment: 'Вирівнювання',
+    insert: 'Вставити',
     insertParagraph: 'Вставити абзац',
     placeholder: "Почніть друкувати, або натисніть '/' для команд...",
     slashMenuBasicGroupLabel: 'Базовий',
@@ -330,6 +412,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} активний',
   },
   vi: {
+    alignment: 'Căn chỉnh',
+    insert: 'Chèn',
     insertParagraph: 'Chèn đoạn văn',
     placeholder: "Bắt đầu gõ, hoặc nhấn '/' để gọi lệnh...",
     slashMenuBasicGroupLabel: 'Cơ bản',
@@ -338,6 +422,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} đang hoạt động',
   },
   zh: {
+    alignment: '对齐',
+    insert: '插入',
     insertParagraph: '插入段落',
     placeholder: "开始输入，或按'/'进行命令...",
     slashMenuBasicGroupLabel: '基础',
@@ -346,6 +432,8 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} 活跃',
   },
   'zh-TW': {
+    alignment: '對齊',
+    insert: '插入',
     insertParagraph: '插入段落',
     placeholder: "開始輸入，或按'/'以使用命令...",
     slashMenuBasicGroupLabel: '基本的',
