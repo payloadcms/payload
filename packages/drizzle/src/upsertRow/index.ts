@@ -229,7 +229,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const hasMainRowData =
         rowKeys.length > 0 && !rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt')
 
-      if (hasMainRowData) {
+      // Without an id nothing matched (e.g. an upsert), so the parent row must be inserted even
+      // when the data has no main row fields
+      if (hasMainRowData || !id) {
         if (id) {
           rowToInsert.row.id = id
           ;[insertedRow] = await adapter.insert({

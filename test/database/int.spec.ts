@@ -4558,6 +4558,37 @@ describe('database', () => {
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 
+  it(
+    'should create a document when upserting empty data and nothing matches',
+    { db: 'drizzle' },
+    async () => {
+      await payload.delete({ collection: simpleSlug, overrideAccess: true, where: {} })
+
+      try {
+        const created = await payload.db.upsert({
+          collection: simpleSlug,
+          data: {},
+          req: {},
+          where: {
+            text: {
+              equals: 'upsert-empty-data',
+            },
+          },
+        })
+
+        expect(created?.id).toBeTruthy()
+        expect(created.createdAt).toBeTruthy()
+        expect(created.updatedAt).toBeTruthy()
+
+        const { totalDocs } = await payload.count({ collection: simpleSlug, overrideAccess: true })
+
+        expect(totalDocs).toBe(1)
+      } finally {
+        await payload.delete({ collection: simpleSlug, overrideAccess: true, where: {} })
+      }
+    },
+  )
+
   it('should apply default values on upsert insert but not on update', async () => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {
