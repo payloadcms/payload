@@ -211,6 +211,40 @@ describe('Uploads', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test('should retain a server error for the submitted file', async () => {
+    const saveURL = `**/api/${mediaSlug}?**`
+
+    await page.goto(mediaURL.create)
+    await waitForFormReady(page)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.route(saveURL, async (route) => {
+      if (route.request().method() !== 'POST') {
+        return route.fallback()
+      }
+
+      await route.fulfill({
+        status: 400,
+        json: {
+          errors: [
+            {
+              message: 'The following field is invalid: File',
+              data: { errors: [{ path: 'file', message: 'File rejected by the server' }] },
+            },
+          ],
+        },
+      })
+    })
+
+    try {
+      await page.locator('#action-save').click()
+      await expect(
+        page.locator('.field-error', { hasText: 'File rejected by the server' }),
+      ).toBeVisible()
+    } finally {
+      await page.unroute(saveURL)
+    }
+  })
+
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
     const audioUpload = page.locator('tbody .cell-filename', {

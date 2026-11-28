@@ -13,6 +13,7 @@ import React, { use, useCallback, useEffect, useMemo, useRef, useState } from 'r
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState.js'
+import type { SubmissionErrors } from './submissionErrors.js'
 import type { FieldAction, Context as FormContextType, FormProps } from './types.js'
 
 import { useQueue } from '../../hooks/useQueue.js'
@@ -30,6 +31,7 @@ import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { requestPriority } from './requestPriority.js'
 import { clearRenderPathsForChangedRows } from './rowHelpers.js'
+import { getMatchingFieldErrors } from './submissionErrors.js'
 
 type FormStateRequestArgs = Omit<BuildFormStateArgs, 'req'>
 
@@ -88,7 +90,7 @@ export type UseFormStateResult = {
   setIsValid: FormContextType['setIsValid']
   setModified: FormContextType['setModified']
   setModifiedWithoutTracking: FormContextType['setModified']
-  submissionErrorsRef: RefObject<{ fields: FormState; isCurrent: () => boolean } | undefined>
+  submissionErrorsRef: RefObject<SubmissionErrors | undefined>
   /** Checks the form before submission and returns its fields, data, and whether it's valid. */
   validateForm: (args?: ValidateArgs) => Promise<FormValidationResult>
 }
@@ -196,9 +198,7 @@ export const useFormState = ({
     },
     [formSequenceRef],
   )
-  const submissionErrorsRef = useRef<{ fields: FormState; isCurrent: () => boolean } | undefined>(
-    undefined,
-  )
+  const submissionErrorsRef = useRef<SubmissionErrors | undefined>(undefined)
   const lastRefreshSequenceRef = useRef(-1)
 
   const { user } = useAuth()
@@ -549,20 +549,17 @@ export const useFormState = ({
           })
 
           // Refresh validation cannot reproduce submit-time errors such as uniqueness failures.
-          if (submissionErrorsRef.current?.isCurrent()) {
-            dispatchFieldsWithoutIncrementingFormSequence({
-              type: 'ADD_SERVER_ERRORS',
-              errors: Object.entries(submissionErrorsRef.current.fields).flatMap(([path, field]) =>
-                field.valid === false
-                  ? [
-                      {
-                        message: field.errorMessage || current.t('error:correctInvalidFields'),
-                        path,
-                      },
-                    ]
-                  : [],
-              ),
+          const submissionErrors = submissionErrorsRef.current
+
+          if (submissionErrors?.isActive()) {
+            const errors = getMatchingFieldErrors({
+              currentFields: contextRef.current.fields,
+              errors: submissionErrors.errors,
+              submittedFields: submissionErrors.fields,
             })
+
+            submissionErrors.errors = errors
+            dispatchFieldsWithoutIncrementingFormSequence({ type: 'ADD_SERVER_ERRORS', errors })
           }
         }
 

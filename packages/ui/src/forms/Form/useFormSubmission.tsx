@@ -1,12 +1,10 @@
 'use client'
 
-import type { FormState, ValidationFieldError } from 'payload'
-import type { Dispatch, RefObject } from 'react'
+import type { Data, FormState, ValidationFieldError } from 'payload'
+import type { Dispatch, FormEvent, RefObject } from 'react'
 
-import { dequal } from 'dequal/lite'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
-  getDataByPath,
   hasDraftValidationEnabled,
   parseErrorResponse,
   wait,
@@ -41,6 +39,7 @@ import { requests } from '../../utilities/api.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { requestPriority } from './requestPriority.js'
+import { getMatchingFieldErrors } from './submissionErrors.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
@@ -59,6 +58,20 @@ type Args = {
   submissionErrorsRef: UseFormStateResult['submissionErrorsRef']
   validateForm: UseFormStateResult['validateForm']
 }
+
+type SubmissionOutcome =
+  | { error: unknown; type: 'failure' }
+  | {
+      errors: ValidationFieldError[]
+      fields: FormState
+      message?: string
+      replaceState?: boolean
+      type: 'validation'
+    }
+  | { json?: Data; res: Response; type: 'response' }
+  | { type: 'background' }
+  | { type: 'local' }
+  | { type: 'superseded' }
 
 /**
  * Supplies Form's `submit` method and tracks submission status, processing, and disabling during a save.
@@ -269,36 +282,56 @@ export const useFormSubmission = ({
       } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
-
-      // create new toast promise which will resolve manually later
-      let errorToast, successToast
-      let promiseToastID: number | string | undefined
-      let preservePromiseToast = false
-
-      const promise = new Promise((resolve, reject) => {
-        successToast = resolve
-        errorToast = reject
-      })
-
+      const isExplicitSubmit = submissionType !== 'autosave'
+      const isActive = () => !requestContext.isQueueReset()
+      const shouldReport = () => isActive() && (isExplicitSubmit || requestContext.isCurrent())
+      const didCloseSavedForm = ({
+        formSequence,
+        resetSequence,
+      }: {
+        formSequence: number
+        resetSequence: number
+      }) =>
+        !isMountedRef.current &&
+        getFormSequence() === formSequence &&
+        resetSequenceRef.current === resetSequence + 1
       const hasFormSubmitAction =
         actionArg || typeof action === 'string' || typeof action === 'function'
 
-      if (redirect || disableToast || !hasFormSubmitAction) {
-        // Do not show submitting toast, as the promise toast may never disappear under these conditions.
-        // Instead, make successToast() or errorToast() throw toast.success / toast.error
-        successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
-      } else {
-        const promiseToast = toast.promise(promise, {
-          error: (data) => {
-            return data as string
-          },
-          loading: t('general:submitting'),
-          success: (data) => {
-            return data as string
-          },
-        })
+      let didRefreshFormState = false
+      let submittedFields: FormState = {}
+      let didSettleToast = false
+      let allowDetachedToast = false
+      let promiseToastID: number | string | undefined
+      let resolveToast: (value: string) => void
+      let rejectToast: (value: unknown) => void
 
+      const successToast = (message: string) => {
+        if (isActive() || allowDetachedToast) {
+          didSettleToast = true
+          resolveToast(message)
+        }
+      }
+      const errorToast = (message: unknown) => {
+        if (isActive()) {
+          didSettleToast = true
+          rejectToast(message)
+        }
+      }
+
+      if (redirect || disableToast || !hasFormSubmitAction) {
+        resolveToast = (message) => toast.success(message)
+        rejectToast = (message) => toast.error(message as string)
+      } else {
+        const promise = new Promise<string>((resolve, reject) => {
+          resolveToast = resolve
+          rejectToast = reject
+        })
+        const promiseToast = toast.promise(promise, {
+          error: (message) => message as string,
+          loading: t('general:submitting'),
+          success: (message) => message,
+        })
         const toastID = promiseToast.valueOf()
 
         if (typeof toastID === 'number' || typeof toastID === 'string') {
@@ -306,15 +339,27 @@ export const useFormSubmission = ({
         }
       }
 
-      try {
-        if (options?.submissionType === 'autosave') {
-          setIsBackgroundProcessing(true)
-        }
+      const recordFieldErrors = ({
+        errors,
+        fields,
+      }: {
+        errors: ValidationFieldError[]
+        fields: FormState
+      }) => {
+        const applicableErrors = getMatchingFieldErrors({
+          currentFields: contextRef.current.fields,
+          errors,
+          submittedFields: fields,
+        })
 
+        applyFieldErrors({ errors: applicableErrors })
+        submissionErrorsRef.current = { errors: applicableErrors, fields, isActive }
+      }
+
+      const prepareSubmission = async (): Promise<SubmissionOutcome> => {
         if (waitForAutocomplete) {
           await wait(100)
 
-          // Autocomplete updates happen before the data snapshot and belong to this submission.
           const dispatchedSequence = getFormSequence()
           const { isQueueReset } = requestContext
 
@@ -325,468 +370,447 @@ export const useFormSubmission = ({
         }
 
         if (!requestContext.isCurrent()) {
-          return
+          return { type: 'superseded' }
         }
 
-        const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
-          contextRef.current.fields,
-          {
+        if (Array.isArray(beforeSubmit)) {
+          const formState = deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields, {
             excludeFiles: true,
-          },
-        )
-
-        let didRefreshFormState = false
-        let res
-        let rejectedFields: FormState | undefined
-        let serverValidationErrors: ValidationFieldError[] = []
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let json: Record<string, any> = {}
-
-        try {
-          // Execute server side validations
-          if (Array.isArray(beforeSubmit)) {
-            let revalidatedFormState: FormState
-
-            await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
-              await priorOnChange
-
-              const result = await beforeSubmitFn({
-                formState: serializableFormState,
-              })
-
-              revalidatedFormState = result
-            }, Promise.resolve())
-
-            if (!requestContext.isCurrent()) {
-              return
-            }
-
-            const isValid = Object.entries(revalidatedFormState).every(
-              ([, field]) => field.valid !== false,
-            )
-
-            setIsValid(isValid)
-
-            if (!isValid) {
-              rejectedFields = revalidatedFormState
-
-              if (hasFormSubmitAction) {
-                prevFormStateRef.current = revalidatedFormState
-              }
-
-              setIsSubmitted(true)
-              return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
-            }
-          }
-
-          const validation = await validateForm({
-            isCurrent: requestContext.isCurrent,
-            isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
-            skipValidation,
           })
+          let revalidatedFormState = formState
 
-          didRefreshFormState = validation.didRefreshFormState
-          if (didRefreshFormState) {
-            onRefresh()
+          for (const beforeSubmitFn of beforeSubmit) {
+            revalidatedFormState = await beforeSubmitFn({ formState })
           }
-
-          const { data, fields, isValid } = validation
 
           if (!requestContext.isCurrent()) {
-            return
+            return { type: 'superseded' }
           }
 
-          if (hasFormSubmitAction) {
-            // Submission completion refreshes this state; validation updates must not queue another refresh.
-            prevFormStateRef.current = fields
-          }
-
-          if (!isValid) {
-            rejectedFields = fields
-            errorToast(t('error:correctInvalidFields'))
-            setIsSubmitted(true)
-            return
-          }
-
-          let overrides = {}
-
-          if (typeof overridesFromArgs === 'function') {
-            overrides = overridesFromArgs(fields)
-          } else if (typeof overridesFromArgs === 'object') {
-            overrides = overridesFromArgs
-          }
-
-          // Document forms leave validation to the server, which would only answer after a large
-          // upload finishes. Ask it now so field errors show immediately while the upload continues.
-          const isWaitingOnUpload =
-            data?.file instanceof File &&
-            Boolean(
-              uploadSessions?.willSaveWaitForUpload({
-                docPrefix: typeof data.prefix === 'string' ? data.prefix : undefined,
-                file: data.file,
-              }),
-            )
-
-          if (isWaitingOnUpload && !skipValidation) {
-            const serverValidation = await getServerValidationErrors({
-              // Validates what the save submits, such as the `_status` that Publish adds.
-              formState: applyOverridesToFormState({ formState: serializableFormState, overrides }),
-            })
-
-            if (!requestContext.isCurrent()) {
-              return
-            }
-
-            // The save stops so the user can retry; the upload keeps going meanwhile.
-            if ('unavailableMessage' in serverValidation) {
-              errorToast(serverValidation.unavailableMessage)
-              setIsSubmitted(true)
-              return
-            }
-
-            if (serverValidation.errors.length) {
-              // Applied after the refresh below, so the refresh cannot erase them.
-              serverValidationErrors = serverValidation.errors
-              setIsValid(false)
-              errorToast(t('error:correctInvalidFields'))
-              setIsSubmitted(true)
-              return
-            }
-          }
-
-          // If submit handler comes through via props, run that
-          if (onSubmit) {
-            for (const [key, value] of Object.entries(overrides)) {
-              data[key] = value
-            }
-
-            onSubmit(fields, data)
-          }
-
-          if (!hasFormSubmitAction) {
-            setIsSubmitted(true)
-            return
-          }
-
-          const formData = await contextRef.current.createFormData(overrides, {
-            action: typeof actionArg === 'string' ? actionArg : undefined,
-            data,
-            mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
-          })
-
-          if (!requestContext.isCurrent()) {
-            return
-          }
-
-          if (typeof actionArg === 'string') {
-            res = await requests[methodToUse.toLowerCase()](actionArg, {
-              body: formData,
-              headers: {
-                'Accept-Language': i18n.language,
-              },
-            })
-          } else if (typeof action === 'function') {
-            res = await action(formData)
-          }
-
-          onResponse({ res })
-
-          if (typeof handleResponse !== 'function') {
-            const contentType = res.headers.get('content-type')
-            const isJSON = contentType && contentType.indexOf('application/json') !== -1
-
-            if (isJSON) {
-              json = await res.json()
-            }
-          }
-
-          if (
-            res.status < 400 &&
-            (requestContext.isCurrent() ||
-              (isDocumentForm &&
-                collectionSlug &&
-                operation === 'create' &&
-                (json?.doc ?? json?.result)?.id != null))
-          ) {
-            setSuccessfulSubmitCount((count) => count + 1)
-          }
-        } finally {
-          const isSuccessfulResponse = res?.status < 400
-
-          if (isSuccessfulResponse && requestContext.isCurrent()) {
-            submissionErrorsRef.current = undefined
-          }
-
-          if (requestContext.isCurrent() && (hasFormSubmitAction || !didRefreshFormState)) {
-            try {
-              // Refresh before applying save errors so the refresh cannot erase them.
-              const refreshedFields = await refreshFormState(
-                isSuccessfulResponse && typeof handleResponse !== 'function'
-                  ? {
-                      type: 'afterSave',
-                      acceptValues,
-                      isCurrent: requestContext.isCurrent,
-                      refreshPermissions: context?.getDocPermissions !== false,
-                      savedDocument: json?.doc ?? json?.result,
-                    }
-                  : { type: 'refresh', isCurrent: requestContext.isCurrent },
-              )
-              if (refreshedFields) {
-                onRefresh()
-              }
-            } catch (err) {
-              if (isSuccessfulResponse) {
-                // Persistence succeeded; a refresh failure must not turn this into a failed save.
-                if (requestContext.isCurrent()) {
-                  toast.error(err instanceof Error ? err.message : t('error:unknown'))
-                }
-              } else {
-                console.error('Error refreshing form state', err) // eslint-disable-line no-console
-              }
-            }
-          }
-
-          if (rejectedFields && requestContext.isCurrent()) {
-            const rejectedState = rejectedFields
-
-            applyFieldErrors({
-              errors: Object.entries(rejectedState).flatMap(([path, field]) => {
-                const currentField = contextRef.current.fields[path]
-
-                if (
-                  field.valid !== false ||
-                  !currentField ||
-                  currentField.passesCondition === false
-                ) {
-                  return []
-                }
-
-                const rejectedValue = Array.isArray(field.rows)
-                  ? getDataByPath(rejectedState, path)
-                  : field.value
-                const currentValue = Array.isArray(currentField.rows)
-                  ? contextRef.current.getDataByPath(path)
-                  : currentField.value
-
-                return dequal(rejectedValue, currentValue)
-                  ? [{ message: field.errorMessage ?? '', path }]
-                  : []
-              }),
-            })
-            submissionErrorsRef.current = {
-              fields: contextRef.current.fields,
-              isCurrent: requestContext.isCurrent,
-            }
-          }
-
-          if (serverValidationErrors.length && requestContext.isCurrent()) {
-            applyFieldErrors({ errors: serverValidationErrors })
-            submissionErrorsRef.current = {
-              fields: contextRef.current.fields,
-              isCurrent: requestContext.isCurrent,
-            }
-          }
-        }
-
-        if (res.status >= 400 && !requestContext.isCurrent()) {
-          return
-        }
-
-        if (typeof handleResponse === 'function') {
-          if (!requestContext.isCurrent()) {
-            if (res.status < 400) {
-              preservePromiseToast = true
-
-              if (!disableToast) {
-                successToast(t('general:submissionSuccessful'))
-              }
-            }
-
-            return
-          }
-
-          preservePromiseToast = true
-
-          if (res.status < 400) {
-            setIsModified(false)
-          }
-
-          await handleResponse(res, successToast, errorToast)
-
-          return
-        }
-
-        if (res.status < 400) {
-          const hasCreatedDocument = Boolean(
-            isDocumentForm &&
-            collectionSlug &&
-            operation === 'create' &&
-            (json?.doc || json?.result)?.id != null,
+          const isValid = Object.values(revalidatedFormState).every(
+            (field) => field.valid !== false,
           )
 
-          const shouldHandleStaleSuccess =
-            hasCreatedDocument || (isDocumentForm && submissionType !== 'autosave')
+          setIsValid(isValid)
 
-          // Document forms still record explicit saves when newer edits make the response values stale.
-          if (
-            !requestContext.isCurrent() &&
-            (!shouldHandleStaleSuccess || requestContext.isQueueReset())
-          ) {
-            // Completed explicit saves still count when newer edits prevent merging their values.
-            // Autosaves reconcile stale submissions through onStaleRequest instead.
-            return submissionType !== 'autosave' && !requestContext.isQueueReset()
-              ? { res }
-              : undefined
+          if (!isValid) {
+            return {
+              type: 'validation',
+              errors: getFieldErrors({ fields: revalidatedFormState }),
+              fields: revalidatedFormState,
+              replaceState: true,
+            }
+          }
+        }
+
+        const validation = await validateForm({
+          isCurrent: requestContext.isCurrent,
+          isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
+          skipValidation,
+        })
+
+        didRefreshFormState = validation.didRefreshFormState
+        if (didRefreshFormState) {
+          onRefresh()
+        }
+
+        if (!requestContext.isCurrent()) {
+          return { type: 'superseded' }
+        }
+
+        const { data, fields, isValid } = validation
+
+        submittedFields = deepCopyObjectSimpleWithoutReactComponents(fields)
+
+        if (hasFormSubmitAction) {
+          prevFormStateRef.current = fields
+        }
+
+        if (!isValid) {
+          return {
+            type: 'validation',
+            errors: getFieldErrors({ fields }),
+            fields: submittedFields,
+            message: t('error:correctInvalidFields'),
+          }
+        }
+
+        let overrides = {}
+
+        if (typeof overridesFromArgs === 'function') {
+          overrides = overridesFromArgs(fields)
+        } else if (typeof overridesFromArgs === 'object') {
+          overrides = overridesFromArgs
+        }
+
+        const isWaitingOnUpload =
+          data?.file instanceof File &&
+          Boolean(
+            uploadSessions?.willSaveWaitForUpload({
+              docPrefix: typeof data.prefix === 'string' ? data.prefix : undefined,
+              file: data.file,
+            }),
+          )
+
+        if (isWaitingOnUpload && !skipValidation) {
+          const serverValidation = await getServerValidationErrors({
+            formState: applyOverridesToFormState({
+              formState: deepCopyObjectSimpleWithoutReactComponents(submittedFields, {
+                excludeFiles: true,
+              }),
+              overrides,
+            }),
+          })
+
+          if (!requestContext.isCurrent()) {
+            return { type: 'superseded' }
+          }
+
+          if ('unavailableMessage' in serverValidation) {
+            return {
+              type: 'validation',
+              errors: [],
+              fields: submittedFields,
+              message: serverValidation.unavailableMessage,
+            }
+          }
+
+          if (serverValidation.errors.length) {
+            return {
+              type: 'validation',
+              errors: serverValidation.errors,
+              fields: submittedFields,
+              message: t('error:correctInvalidFields'),
+            }
+          }
+        }
+
+        if (onSubmit) {
+          for (const [key, value] of Object.entries(overrides)) {
+            data[key] = value
+          }
+
+          onSubmit(fields, data)
+        }
+
+        if (!hasFormSubmitAction) {
+          return { type: 'local' }
+        }
+
+        const formData = await contextRef.current.createFormData(overrides, {
+          action: typeof actionArg === 'string' ? actionArg : undefined,
+          data,
+          mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+        })
+
+        if (!requestContext.isCurrent()) {
+          return { type: 'superseded' }
+        }
+
+        let res: Response
+
+        if (typeof actionArg === 'string') {
+          res = await requests[methodToUse.toLowerCase()](actionArg, {
+            body: formData,
+            headers: { 'Accept-Language': i18n.language },
+          })
+        } else if (typeof actionArg === 'function') {
+          res = (await actionArg(formData)) as unknown as Response
+        } else {
+          return { type: 'local' }
+        }
+
+        onResponse({ res })
+
+        return {
+          type: 'response',
+          json: typeof handleResponse === 'function' ? undefined : await readResponseJSON({ res }),
+          res,
+        }
+      }
+
+      const reconcileFormState = async (outcome: SubmissionOutcome) => {
+        if (!requestContext.isCurrent() || (!hasFormSubmitAction && didRefreshFormState)) {
+          return
+        }
+
+        const isSuccess = outcome.type === 'response' && outcome.res.status < 400
+
+        try {
+          const refreshedFields = await refreshFormState(
+            isSuccess && typeof handleResponse !== 'function'
+              ? {
+                  type: 'afterSave',
+                  acceptValues,
+                  isCurrent: requestContext.isCurrent,
+                  refreshPermissions: context?.getDocPermissions !== false,
+                  savedDocument: outcome.json?.doc ?? outcome.json?.result,
+                }
+              : { type: 'refresh', isCurrent: requestContext.isCurrent },
+          )
+
+          if (refreshedFields) {
+            onRefresh()
+          }
+        } catch (error) {
+          if (isSuccess && shouldReport()) {
+            toast.error(error instanceof Error ? error.message : t('error:unknown'))
+          } else {
+            console.error('Error refreshing form state', error) // eslint-disable-line no-console
+          }
+        }
+      }
+
+      const reportFailure = (error: unknown) => {
+        if (shouldReport()) {
+          setIsSubmitted(true)
+          errorToast(error instanceof Error ? error.message : t('error:unknown'))
+        }
+      }
+
+      try {
+        if (!isExplicitSubmit) {
+          setIsBackgroundProcessing(true)
+        }
+
+        let outcome: SubmissionOutcome
+
+        try {
+          outcome = await prepareSubmission()
+        } catch (error) {
+          outcome =
+            error instanceof UploadContinuesInBackgroundError
+              ? { type: 'background' }
+              : { type: 'failure', error }
+        }
+
+        if (outcome.type === 'superseded') {
+          return
+        }
+
+        if (outcome.type === 'background') {
+          allowDetachedToast = true
+          successToast(t('upload:savingInBackground'))
+          return
+        }
+
+        if (outcome.type === 'failure') {
+          reportFailure(outcome.error)
+          await reconcileFormState(outcome)
+          return
+        }
+
+        if (outcome.type === 'local') {
+          if (shouldReport()) {
+            setIsSubmitted(true)
+          }
+          await reconcileFormState(outcome)
+          return
+        }
+
+        if (outcome.type === 'validation') {
+          if (shouldReport()) {
+            if (outcome.replaceState && requestContext.isCurrent()) {
+              if (hasFormSubmitAction) {
+                prevFormStateRef.current = outcome.fields
+              }
+              dispatchFields({ type: 'REPLACE_STATE', state: outcome.fields })
+            }
+
+            setIsSubmitted(true)
+            if (outcome.errors.length) {
+              setIsValid(false)
+              recordFieldErrors(outcome)
+            }
+            if (outcome.message) {
+              errorToast(outcome.message)
+            }
+          }
+          await reconcileFormState(outcome)
+          return
+        }
+
+        const { res } = outcome
+        const isSuccess = res.status < 400
+        const hasCreatedDocument = Boolean(
+          isDocumentForm &&
+          collectionSlug &&
+          operation === 'create' &&
+          (outcome.json?.doc ?? outcome.json?.result)?.id != null,
+        )
+
+        if (isSuccess && (requestContext.isCurrent() || hasCreatedDocument)) {
+          setSuccessfulSubmitCount((count) => count + 1)
+        }
+        if (isSuccess && isActive()) {
+          const retainedErrors = submissionErrorsRef.current
+
+          if (requestContext.isCurrent()) {
+            submissionErrorsRef.current = undefined
+          } else if (retainedErrors?.isActive()) {
+            const resolvedErrors = new Set(
+              getMatchingFieldErrors({
+                currentFields: submittedFields,
+                errors: retainedErrors.errors,
+                submittedFields: retainedErrors.fields,
+              }),
+            )
+
+            retainedErrors.errors = retainedErrors.errors.filter(
+              (error) => !resolvedErrors.has(error),
+            )
+            if (!retainedErrors.errors.length) {
+              submissionErrorsRef.current = undefined
+            }
+          }
+        }
+
+        // Custom handlers can replace form state, so only delegate while their values are current.
+        if (typeof handleResponse === 'function' && requestContext.isCurrent()) {
+          await reconcileFormState(outcome)
+          if (!isActive()) {
+            return
+          }
+          if (requestContext.isCurrent()) {
+            if (isSuccess) {
+              setIsModified(false)
+            }
+            const formSequence = getFormSequence()
+            const resetSequence = resetSequenceRef.current
+
+            await handleResponse(
+              res,
+              (message) => {
+                allowDetachedToast = didCloseSavedForm({ formSequence, resetSequence })
+                successToast(message)
+              },
+              errorToast,
+            )
+            return
+          }
+        }
+
+        if (!isActive()) {
+          return
+        }
+
+        if (!outcome.json) {
+          outcome.json = await readResponseJSON({ res })
+        }
+        const json = outcome.json
+
+        if (isSuccess) {
+          await reconcileFormState(outcome)
+
+          const shouldHandleSuccess =
+            requestContext.isCurrent() || hasCreatedDocument || (isDocumentForm && isExplicitSubmit)
+
+          if (!isActive() || (!shouldHandleSuccess && !shouldReport())) {
+            return
           }
 
           const successSequence = getFormSequence()
           const successResetSequence = resetSequenceRef.current
 
-          if (typeof onSuccess === 'function') {
+          if (shouldHandleSuccess && typeof onSuccess === 'function') {
             try {
               await onSuccess(json, {
                 context,
-                formState: serializableFormState,
+                formState: deepCopyObjectSimpleWithoutReactComponents(submittedFields, {
+                  excludeFiles: true,
+                }),
                 isCurrent: requestContext.isCurrent,
                 isQueueReset: requestContext.isQueueReset,
               })
-            } catch (err) {
-              if (requestContext.isCurrent()) {
-                toast.error(err instanceof Error ? err.message : t('error:unknown'))
+            } catch (error) {
+              if (shouldReport()) {
+                toast.error(error instanceof Error ? error.message : t('error:unknown'))
               }
             }
           }
 
-          if (!requestContext.isCurrent()) {
-            // A successful drawer callback can unmount the form before its toast resolves.
-            if (
-              !isMountedRef.current &&
-              getFormSequence() === successSequence &&
-              resetSequenceRef.current === successResetSequence + 1
-            ) {
-              preservePromiseToast = true
-              if (!redirect && !disableToast) {
-                successToast(json.message || t('general:submissionSuccessful'))
-              }
-              return { res }
-            }
-            return submissionType !== 'autosave' && !requestContext.isQueueReset()
-              ? { res }
-              : undefined
+          // Closing a saved drawer unmounts its form before the success notification settles.
+          allowDetachedToast = didCloseSavedForm({
+            formSequence: successSequence,
+            resetSequence: successResetSequence,
+          })
+
+          if (!shouldReport() && !allowDetachedToast) {
+            return isExplicitSubmit && isActive() ? { res } : undefined
           }
 
-          preservePromiseToast = true
+          if (requestContext.isCurrent()) {
+            setIsModified(false)
+            setIsSubmitted(false)
+          }
 
-          setIsModified(false)
-          setIsSubmitted(false)
-
-          if (redirect) {
-            if (requestContext.isCurrent()) {
-              void startRouteTransition(() => router.push(redirect))
-            }
+          if (redirect && requestContext.isCurrent()) {
+            void startRouteTransition(() => router.push(redirect))
           } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
-        } else {
-          setIsSubmitted(true)
 
-          // When there was an error submitting a draft,
-          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-          // Also keep the form as modified so the save button remains enabled for retry.
-          if (overridesFromArgs['_status'] === 'draft') {
-            setIsModified(true)
-
-            if (!validateDrafts) {
-              setIsSubmitted(false)
-            }
+          return {
+            ...(requestContext.isCurrent() ? { formState: contextRef.current.fields } : {}),
+            res,
           }
+        }
 
-          contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
+        if (!shouldReport()) {
+          return
+        }
 
-          if (json.message) {
-            errorToast(json.message)
-            return
+        setIsSubmitted(true)
+        if (overridesFromArgs['_status'] === 'draft') {
+          setIsModified(true)
+          if (!validateDrafts) {
+            setIsSubmitted(false)
           }
+        }
 
-          if (Array.isArray(json.errors)) {
-            const { fieldErrors, nonFieldErrors } = parseErrorResponse({ body: json })
+        if (json.message) {
+          errorToast(json.message)
+        } else if (Array.isArray(json.errors)) {
+          const { fieldErrors, nonFieldErrors } = parseErrorResponse({ body: json })
 
-            setIsValid(false)
-
-            applyFieldErrors({ errors: fieldErrors })
-            submissionErrorsRef.current = {
-              fields: contextRef.current.fields,
-              isCurrent: requestContext.isCurrent,
+          setIsValid(false)
+          recordFieldErrors({ errors: fieldErrors, fields: submittedFields })
+          nonFieldErrors.forEach((error) => {
+            const err = {
+              ...error,
+              message: typeof error.message === 'string' ? error.message : t('error:unknown'),
             }
 
-            nonFieldErrors.forEach((error) => {
-              const err = {
-                ...error,
-                message: typeof error.message === 'string' ? error.message : t('error:unknown'),
-              }
-
-              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
-              if (
-                onNonFieldError?.(
-                  err,
-                  () => void contextRef.current.submit({ overrides: overridesFromArgs }),
-                )
-              ) {
-                return
-              }
-
+            if (
+              !onNonFieldError?.(
+                err,
+                () => void contextRef.current.submit({ overrides: overridesFromArgs }),
+              )
+            ) {
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
-            })
-
-            return
-          }
-
-          const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
-
-          errorToast(message)
+            }
+          })
+        } else {
+          errorToast(errorMessages?.[res.status] || res.statusText || t('error:unknown'))
         }
 
-        return {
-          ...(requestContext.isCurrent() ? { formState: contextRef.current.fields } : {}),
-          res,
-        }
-      } catch (err) {
-        // The form unmounted during a large upload; the upload coordinator finishes the save.
-        if (err instanceof UploadContinuesInBackgroundError) {
-          preservePromiseToast = true
-          successToast(t('upload:savingInBackground'))
-          return
-        }
-
-        const isCurrentRequest = requestContext.isCurrent()
-
-        if (!preservePromiseToast && !isCurrentRequest) {
-          return
-        }
-
-        console.error('Error submitting form', err) // eslint-disable-line no-console
-
-        if (isCurrentRequest) {
-          setIsSubmitted(true)
-        }
-
-        errorToast(err instanceof Error ? err.message : t('error:unknown'))
+        await reconcileFormState(outcome)
+      } catch (error) {
+        reportFailure(error)
       } finally {
-        if (!requestContext.isQueueReset()) {
-          // Only put back what this submission took: an autosave must not release a queued save's disable.
+        if (isActive()) {
           if (disableFormWhileProcessing) {
             setIsProcessing(false)
             setDisabledBySubmission(false)
           }
-
-          if (options?.submissionType === 'autosave') {
+          if (!isExplicitSubmit) {
             setIsBackgroundProcessing(false)
             if (!requestContext.isCurrent()) {
               onStaleRequest?.()
             }
           }
         }
-        if (!requestContext.isCurrent() && !preservePromiseToast && promiseToastID !== undefined) {
+        if (!didSettleToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
       }
@@ -831,7 +855,10 @@ export const useFormSubmission = ({
   )
 
   const submit = useCallback<Submit>(
-    async (options, event) => {
+    async <T extends Response, C extends Record<string, unknown>>(
+      options?: SubmitOptions<C>,
+      event?: FormEvent<HTMLFormElement>,
+    ) => {
       event?.stopPropagation()
       event?.preventDefault()
 
@@ -928,7 +955,9 @@ export const useFormSubmission = ({
         }
       }
 
-      return result.status === 'completed' ? result.value : undefined
+      return result.status === 'completed'
+        ? (result.value as { formState?: FormState; res: T } | undefined)
+        : undefined
     },
     [
       contextRef,
@@ -978,3 +1007,11 @@ const applyOverridesToFormState = ({
 
   return formStateWithOverrides
 }
+
+const getFieldErrors = ({ fields }: { fields: FormState }): ValidationFieldError[] =>
+  Object.entries(fields).flatMap(([path, field]) =>
+    field.valid === false ? [{ message: field.errorMessage ?? '', path }] : [],
+  )
+
+const readResponseJSON = async ({ res }: { res: Response }): Promise<Data> =>
+  res.headers.get('content-type')?.includes('application/json') ? res.json() : {}

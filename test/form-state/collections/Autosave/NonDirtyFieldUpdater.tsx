@@ -21,6 +21,15 @@ export const NonDirtyFieldUpdater = () => {
       >
         Set programmatic value
       </button>
+      <button
+        id="set-programmatic-content"
+        onClick={() =>
+          dispatchFields({ type: 'UPDATE', path: 'content', value: 'Updated content' })
+        }
+        type="button"
+      >
+        Set content
+      </button>
       <button id="reset-form-state" onClick={() => replaceState(getFields())} type="button">
         Reset form state
       </button>

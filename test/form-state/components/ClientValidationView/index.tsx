@@ -4,6 +4,8 @@ import type { FormState, TextFieldClientProps } from 'payload'
 
 import { DocumentInfoProvider, Form, OperationProvider, TextField, useAuth } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
+import { useState } from 'react'
+import { flushSync } from 'react-dom'
 
 import { conditionsSlug } from '../../collections/Conditions/index.js'
 import { SubmissionButton } from './SubmissionButton/index.js'
@@ -30,6 +32,9 @@ const field: TextFieldClientProps['field'] = {
 
 export const ClientValidationView = () => {
   const { user } = useAuth()
+  const [handledResponses, setHandledResponses] = useState(0)
+  const [shouldCloseOnSuccess, setShouldCloseOnSuccess] = useState(false)
+  const [isCustomFormVisible, setIsCustomFormVisible] = useState(true)
 
   if (!user) {
     return null
@@ -67,6 +72,41 @@ export const ClientValidationView = () => {
             <SubmissionButton submissionType={submissionType} />
           </Form>
         ))}
+        <label>
+          <input
+            checked={shouldCloseOnSuccess}
+            onChange={(event) => setShouldCloseOnSuccess(event.target.checked)}
+            type="checkbox"
+          />
+          Close after custom response
+        </label>
+        {isCustomFormVisible && (
+          <Form
+            action={formatAdminURL({ apiRoute: '/api', path: `/${conditionsSlug}` })}
+            className="custom-response-form"
+            handleResponse={async (res, successToast, errorToast) => {
+              const json = await res.json()
+
+              setHandledResponses((count) => count + 1)
+              const notify = res.ok ? successToast : errorToast
+
+              if (res.ok && shouldCloseOnSuccess) {
+                // eslint-disable-next-line @eslint-react/dom/no-flush-sync -- Exercise handlers that close the form before notifying.
+                flushSync(() => setIsCustomFormVisible(false))
+              }
+
+              notify(`Custom handler: ${json.message}`)
+            }}
+            initialState={initialState}
+            method="POST"
+            schemaPath={conditionsSlug}
+            uuid="custom-response"
+          >
+            <TextField field={field} path="clientValidatedValue" validate={validate} />
+            <SubmissionButton disableSuccessStatus={false} submissionType="submit" />
+            <output data-testid="handled-responses">{handledResponses}</output>
+          </Form>
+        )}
       </OperationProvider>
     </DocumentInfoProvider>
   )
