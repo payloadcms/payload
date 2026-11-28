@@ -598,6 +598,28 @@ export default buildConfigWithDefaults({
           drafts: {},
         },
       },
+      {
+        slug: 'localized-unpublish-validation',
+        fields: [
+          {
+            name: 'items',
+            type: 'array',
+            fields: [
+              {
+                name: 'label',
+                type: 'text',
+                localized: true,
+                required: true,
+              },
+            ],
+          },
+        ],
+        versions: {
+          drafts: {
+            localizeStatus: true,
+          },
+        },
+      },
     ],
     globals: [
       {
