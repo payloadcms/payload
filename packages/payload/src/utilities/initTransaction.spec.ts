@@ -2,7 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { initTransaction } from './initTransaction.js'
+import { getTransactionSnapshot, initTransaction, isTransactionActive } from './initTransaction.js'
 
 describe('initTransaction', () => {
   it('should remove an unavailable transaction from the request', async () => {
@@ -69,5 +69,28 @@ describe('initTransaction', () => {
 
     expect(req.transactionID).toBe('replacement-transaction')
     expect(rollbackTransaction).toHaveBeenCalledWith('new-transaction')
+  })
+
+  it('tracks whether a captured transaction snapshot remains active', async () => {
+    const sessions: Record<string, unknown> = { 'tx-1': { db: {} } }
+    const req = {
+      payload: {
+        db: { sessions },
+      },
+      transactionID: 'tx-1',
+    } as unknown as PayloadRequest
+
+    const snapshot = await getTransactionSnapshot(req)
+    expect(snapshot).toEqual({ hadSession: true, transactionID: 'tx-1' })
+    await expect(isTransactionActive({ ...snapshot, req })).resolves.toBe(true)
+
+    // Direct adapter rollback removes the session even if req.transactionID was not cleared
+    delete sessions['tx-1']
+    await expect(isTransactionActive({ ...snapshot, req })).resolves.toBe(false)
+
+    // Restoring session checks req.transactionID changes / deletion
+    sessions['tx-1'] = { db: {} }
+    delete req.transactionID
+    await expect(isTransactionActive({ ...snapshot, req })).resolves.toBe(false)
   })
 })

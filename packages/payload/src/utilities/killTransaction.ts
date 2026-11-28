@@ -20,11 +20,60 @@ export async function killTransaction(
   const { payload, transactionID } = req
   if (transactionID && !(transactionID instanceof Promise)) {
     try {
-      await payload.db.rollbackTransaction(req.transactionID!)
+      await payload.db.rollbackTransaction(transactionID)
+      delete req.transactionID
       await rollbackFileOperations({ req: req as PayloadRequest })
     } catch (ignore) {
       // swallow any errors while attempting to rollback
+    } finally {
+      if (req.transactionID === transactionID) {
+        delete req.transactionID
+      }
+    }
+  }
+}
+
+export async function killOwnedTransaction({
+  hadSession,
+  req,
+  transactionID,
+}: {
+  hadSession?: boolean
+  req: MarkRequired<Partial<PayloadRequest>, 'payload'>
+  transactionID: number | string | undefined
+}): Promise<void> {
+  if (transactionID === undefined) {
+    return
+  }
+
+  if (req.transactionID === transactionID) {
+    await killTransaction(req)
+    return
+  }
+
+  const { payload } = req
+  const sessionStillActive = hadSession
+    ? Boolean(
+        payload.db.sessions &&
+        Object.prototype.hasOwnProperty.call(payload.db.sessions, String(transactionID)),
+      )
+    : req.transactionID !== undefined
+
+  const currentTransactionID = req.transactionID
+
+  try {
+    if (sessionStillActive) {
+      await payload.db.rollbackTransaction(transactionID)
     }
     delete req.transactionID
+    try {
+      await rollbackFileOperations({ req: req as PayloadRequest })
+    } finally {
+      if (currentTransactionID !== undefined) {
+        req.transactionID = currentTransactionID
+      }
+    }
+  } catch (ignore) {
+    // swallow any errors while attempting to rollback
   }
 }

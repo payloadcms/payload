@@ -43,6 +43,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { getTransactionSnapshot, isTransactionActive } from '../../../utilities/initTransaction.js'
 import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
 import {
   buildAllLocalesPublicationHookDoc,
@@ -116,6 +117,7 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  const transactionSnapshot = await getTransactionSnapshot(req)
   const nextFileData =
     collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
       ? deepCopyObjectSimple(data)
@@ -428,6 +430,11 @@ export const updateDocument = async <
         req.t,
       )
     }
+  }
+
+  // Abort before file mutations or DB writes if a hook rolled back the active transaction.
+  if (!(await isTransactionActive({ ...transactionSnapshot, req }))) {
+    throw new Error(`Transaction ${transactionSnapshot.transactionID} is no longer active.`)
   }
 
   // File deletion and writes must occur after the final publish validation. Validation failures

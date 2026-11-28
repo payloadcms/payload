@@ -38,9 +38,13 @@ import {
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
-import { initTransaction } from '../../utilities/initTransaction.js'
+import {
+  getTransactionSnapshot,
+  initTransaction,
+  isTransactionActive,
+} from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
+import { killOwnedTransaction, killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
@@ -68,6 +72,19 @@ export const deleteOperation = async <
   incomingArgs: Arguments,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+  let operationTransactionID: number | string | undefined =
+    typeof args.req.transactionID === 'number' ||
+    (typeof args.req.transactionID === 'string' && args.req.transactionID !== '')
+      ? args.req.transactionID
+      : undefined
+  let operationTransactionHadSession = Boolean(
+    operationTransactionID !== undefined &&
+    args.req.payload.db.sessions &&
+    Object.prototype.hasOwnProperty.call(
+      args.req.payload.db.sessions,
+      String(operationTransactionID),
+    ),
+  )
 
   assertNoValidationWrite(args.req)
 
@@ -88,6 +105,23 @@ export const deleteOperation = async <
       !args.disableTransaction &&
       !args.req.payload.db.bulkOperationsSingleTransaction &&
       (await initTransaction(args.req))
+    const operationTransactionSnapshot = await getTransactionSnapshot(args.req)
+    operationTransactionID = operationTransactionSnapshot.transactionID
+    operationTransactionHadSession = operationTransactionSnapshot.hadSession
+    const transactionSnapshot = !args.req.payload.db.bulkOperationsSingleTransaction
+      ? operationTransactionSnapshot
+      : { hadSession: false, transactionID: undefined }
+    const hasSharedTransaction = transactionSnapshot.transactionID !== undefined
+    const isSharedTransactionLost = async (targetReq: PayloadRequest): Promise<boolean> =>
+      hasSharedTransaction &&
+      !(await isTransactionActive({ ...transactionSnapshot, req: targetReq }))
+    const assertSharedTransactionActive = async (targetReq: PayloadRequest): Promise<void> => {
+      if (await isSharedTransactionLost(targetReq)) {
+        throw new Error(
+          `Transaction ${transactionSnapshot.transactionID} was rolled back before the bulk delete completed.`,
+        )
+      }
+    }
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -211,6 +245,8 @@ export const deleteOperation = async <
           })
         }
       }
+
+      await assertSharedTransactionActive(req)
 
       if (collectionConfig.upload) {
         deletedFilesByID.set(doc.id, [
@@ -416,16 +452,36 @@ export const deleteOperation = async <
 
       const deletable: { doc: Doc; index: number }[] = []
 
-      await Promise.all(
-        unlocked.map(async (entry) => {
+      await assertSharedTransactionActive(req)
+
+      if (hasSharedTransaction) {
+        for (const entry of unlocked) {
+          await assertSharedTransactionActive(req)
+
           try {
             await runBeforeDeleteWork(entry.doc)
+            await assertSharedTransactionActive(req)
             deletable.push(entry)
           } catch (error) {
+            if (await isSharedTransactionLost(req)) {
+              throw error
+            }
+
             pushError(entry.doc.id, error)
           }
-        }),
-      )
+        }
+      } else {
+        await Promise.all(
+          unlocked.map(async (entry) => {
+            try {
+              await runBeforeDeleteWork(entry.doc)
+              deletable.push(entry)
+            } catch (error) {
+              pushError(entry.doc.id, error)
+            }
+          }),
+        )
+      }
 
       if (!deletable.length) {
         return results
@@ -502,15 +558,32 @@ export const deleteOperation = async <
         })
       }
 
-      await Promise.all(
-        deletable.map(async (entry) => {
+      if (hasSharedTransaction) {
+        for (const entry of deletable) {
+          await assertSharedTransactionActive(req)
+
           try {
             results[entry.index] = await runAfterDeleteWork(entry.doc)
+            await assertSharedTransactionActive(req)
           } catch (error) {
+            if (await isSharedTransactionLost(req)) {
+              throw error
+            }
+
             pushError(entry.doc.id, error)
           }
-        }),
-      )
+        }
+      } else {
+        await Promise.all(
+          deletable.map(async (entry) => {
+            try {
+              results[entry.index] = await runAfterDeleteWork(entry.doc)
+            } catch (error) {
+              pushError(entry.doc.id, error)
+            }
+          }),
+        )
+      }
 
       return results
     }
@@ -533,6 +606,8 @@ export const deleteOperation = async <
     // /////////////////////////////////////
 
     if (!didBatchDeleteFail) {
+      await assertSharedTransactionActive(req)
+
       await deleteUserPreferences({
         collectionConfig,
         ids: docs.map(({ id }) => id),
@@ -558,6 +633,10 @@ export const deleteOperation = async <
       result,
     })
 
+    if (!didBatchDeleteFail) {
+      await assertSharedTransactionActive(req)
+    }
+
     if (shouldCommit && !didBatchDeleteFail) {
       await commitTransaction(req)
     }
@@ -568,7 +647,11 @@ export const deleteOperation = async <
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killOwnedTransaction({
+      hadSession: operationTransactionHadSession,
+      req: args.req,
+      transactionID: operationTransactionID,
+    })
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })
     }

@@ -2020,6 +2020,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
             data: {
               alt: observationValue,
             },
+            disableTransaction: true,
             overrideAccess: true,
             req: {
               query: {
