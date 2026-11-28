@@ -126,7 +126,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     async ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
       const existingCondition = conditions[orIndex].and[andIndex]
 
-      if (typeof existingCondition === 'object' && field.value) {
+      // `field` is undefined when a where query in the URL references a path that is not among
+      // the filterable fields, e.g. a renamed field or one the user cannot read. Nothing to update.
+      if (typeof existingCondition === 'object' && field?.value) {
         const { validOperator } = getValidFieldOperators({
           field: field.field,
           operator: incomingOperator,
