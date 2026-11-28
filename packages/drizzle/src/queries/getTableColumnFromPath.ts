@@ -44,6 +44,8 @@ type TableColumn = {
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
+  /** For a query on the `relationTo` of a polymorphic relationship: each collection's ID column. */
+  relationToColumns?: Map<string, string>
   table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
 }
 
@@ -838,13 +840,7 @@ export const getTableColumnFromPath = ({
             return {
               constraints,
               field,
-              getNotNullColumnByValue: (val) => {
-                const matchedRelation = relationTo.find((relation) => relation === val)
-                if (matchedRelation) {
-                  return `${matchedRelation}ID`
-                }
-                return undefined
-              },
+              relationToColumns: new Map(relationTo.map((relation) => [relation, `${relation}ID`])),
               table: aliasRelationshipTable,
             }
           } else if (isPolymorphicRelationship(value)) {

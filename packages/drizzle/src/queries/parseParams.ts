@@ -42,6 +42,7 @@ import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol, isRawConstraint } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildOperatorConstraint } from './buildOperatorConstraint.js'
+import { buildRelationToConstraint } from './buildRelationToConstraint.js'
 import { getTableAlias } from './getTableAlias.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { resolveRelationshipPath } from './resolveRelationshipPath.js'
@@ -192,6 +193,7 @@ export function parseParams({
                   getNotNullColumnByValue,
                   pathSegments,
                   rawColumn,
+                  relationToColumns,
                   table,
                 } = getTableColumnFromPath({
                   adapter,
@@ -312,6 +314,19 @@ export function parseParams({
 
                   constraints.push(sql.raw(rawSQLQuery))
 
+                  break
+                }
+
+                if (relationToColumns) {
+                  constraints.push(
+                    buildRelationToConstraint({
+                      columns: relationToColumns,
+                      operator,
+                      path: relationOrPath,
+                      table,
+                      value: val,
+                    }),
+                  )
                   break
                 }
 
