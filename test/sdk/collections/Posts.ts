@@ -27,6 +27,11 @@ export const PostsCollection: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'shortText',
+      type: 'text',
+      maxLength: 5,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

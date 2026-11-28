@@ -127,7 +127,8 @@ test.describe('Tags', () => {
     for (const id of createdPostIds) {
       await payload.delete({ id, collection: postsSlug, overrideAccess: true })
     }
-    for (const id of createdTagIds) {
+    // Children first, since deleting a tag also deletes its descendants.
+    for (const id of [...createdTagIds].reverse()) {
       await payload.delete({ id, collection: tagsSlug, overrideAccess: true })
     }
   })
