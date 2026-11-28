@@ -3135,6 +3135,57 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
             overrideAccess: true,
           })
 
+                    expect(result.id).toStrictEqual(created.id)
+
+          await payload.delete({
+            id: created.id,
+            collection,
+            overrideAccess: true,
+          })
+        })
+        test('should not roll back the caller transaction when a nested create fails', async ({
+          payload,
+        }) => {
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const created = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            overrideAccess: true,
+            req,
+          })
+
+          // A failing create must not discard the caller's transaction: create
+          // only owns the transaction when its own initTransaction began one.
+          await expect(() =>
+            payload.create({
+              collection,
+              data: {
+                // @ts-expect-error
+                title: undefined,
+              },
+              overrideAccess: true,
+              req,
+            }),
+          ).rejects.toThrow('The following field is invalid: Title')
+
+          expect(req.transactionID).toBeTruthy()
+
+          await commitTransaction(req)
+
+          const result = await payload.findByID({
+            id: created.id,
+            collection,
+            overrideAccess: true,
+          })
+
           expect(result.id).toStrictEqual(created.id)
 
           await payload.delete({
