@@ -34,6 +34,12 @@ An email adapter will require at least the following fields:
 | Nodemailer | [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) | Use any [Nodemailer transport](https://nodemailer.com/transports), including SMTP, Resend, SendGrid, and more. This was provided by default in Payload 2.x. This is the easiest migration path. |
 | Resend     | [@payloadcms/email-resend](https://www.npmjs.com/package/@payloadcms/email-resend)         | Resend email via their REST API. This is preferred for serverless platforms such as Vercel because it is much more lightweight than the nodemailer adapter.                                     |
 
+### Community Email Adapters
+
+| Name    | Package                                                                              | Description                                                                                              |
+| ------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Keplars | [@keplars-hq/payload-email](https://www.npmjs.com/package/@keplars-hq/payload-email) | Send email via [Keplars](https://keplars.com) priority-queue API (instant, high, async, bulk delivery). |
+
 ## Nodemailer Configuration
 
 | Option                 | Description                                                                                                                                                                            |
